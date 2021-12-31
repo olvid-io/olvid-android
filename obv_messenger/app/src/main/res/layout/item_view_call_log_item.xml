@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/almostWhite"
+    android:foreground="?attr/selectableItemBackground"
+    android:theme="@style/GreyRipple"
+    android:clickable="true"
+    android:focusable="true">
+
+    <io.olvid.messenger.customClasses.InitialView
+        android:id="@+id/initial_view"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/contact_name_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/primary700"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/call_timestamp_text_view"
+        app:layout_constraintEnd_toStartOf="@+id/call_image_view"
+        app:layout_constraintStart_toEndOf="@+id/initial_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_goneMarginEnd="16dp"
+        tools:text="Contact Name" />
+
+    <ImageView
+        android:id="@+id/call_type_image_view"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@+id/initial_view"
+        app:layout_constraintTop_toTopOf="@id/call_timestamp_text_view"
+        tools:srcCompat="@drawable/ic_phone_busy_out" />
+
+    <TextView
+        android:id="@+id/call_timestamp_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="2dp"
+        android:maxLines="2"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/call_image_view"
+        app:layout_constraintStart_toEndOf="@+id/call_type_image_view"
+        app:layout_constraintTop_toBottomOf="@id/contact_name_text_view"
+        app:layout_goneMarginEnd="16dp"
+        tools:text="11:43 (lasted 05min 12sec)" />
+
+
+    <ImageView
+        android:id="@+id/call_image_view"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:theme="@style/AccentRipple"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_phone_grey" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

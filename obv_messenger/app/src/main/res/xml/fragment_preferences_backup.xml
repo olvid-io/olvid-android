@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+        <Preference
+            android:key="pref_key_reload_backup_configuration"
+            android:title="@string/pref_reload_backup_configuration_title"
+            android:icon="@drawable/ic_pref_reload"
+            app:isPreferenceVisible="false"
+            tools:isPreferenceVisible="true"
+            android:order="1"
+            />
+
+        <Preference
+            android:key="pref_key_generate_new_backup_key"
+            android:title="@string/pref_generate_new_backup_key_title"
+            android:icon="@drawable/ic_pref_generate_new_backup_key"
+            android:order="10"
+            />
+        <Preference
+            android:key="pref_key_manual_backup"
+            android:title="@string/pref_manual_backup_title"
+            android:summary="@string/pref_manual_backup_summary"
+            android:icon="@drawable/ic_pref_manual_backup"
+            android:order="20"
+            android:enabled="false"
+            />
+        <io.olvid.messenger.customClasses.NoClickSwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_enable_automatic_backup"
+            android:title="@string/pref_enable_automatic_backup_title"
+            android:summary="@string/pref_enable_automatic_backup_summary"
+            android:icon="@drawable/ic_pref_enable_automatic_backup"
+            android:order="30"
+            android:enabled="false"
+            />
+</PreferenceScreen>

@@ -1,0 +1,161 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="colorPrimary">@color/olvid_gradient_dark</item>
+        <item name="colorPrimaryDark">@color/olvid_gradient_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:navigationBarColor">@color/navigationBar</item>
+        <item name="android:windowBackground">@color/lightGrey</item>
+        <item name="android:textColorHint">@color/grey</item>
+    </style>
+
+    <style name="CustomAlertDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="android:windowTitleStyle">@style/CustomAlertDialog.Title</item>
+        <item name="android:textColorPrimary">@color/greyTint</item>
+        <item name="android:background">@color/dialogBackground</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
+   <style name="CustomAlertDialog.Title" parent="RobotoMedium">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/primary700</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar.LightBlueStatusBar">
+        <item name="android:windowBackground">@color/almostWhite</item>
+        <item name="android:statusBarColor">@color/olvid_gradient_light</item>
+    </style>
+
+    <!-- Discussion activity -->
+    <style name="AppTheme.NoActionBar.ActionModeOverlay">
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeBackground">@color/olvid_gradient_dark</item>
+        <item name="android:windowBackground">@color/almostWhite</item>
+    </style>
+
+    <!-- QR Code only -->
+    <style name="AppTheme.NoActionBar.FullScreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@color/almostWhite</item>
+    </style>
+
+    <!-- Camera activity + Select Details Photo Activity-->
+    <style name="AppTheme.NoActionBar.FullScreen.Black">
+        <item name="android:windowBackground">@color/black</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">never</item>
+    </style>
+
+    <!-- Obv Link Activity -->
+    <style name="AppTheme.NoActionBar.FullScreen.Transparent">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Share + Shortcut activity -->
+    <style name="AppTheme.NoActionBar.Transparent">
+        <item name="android:colorPrimary">@color/transparent</item>
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- AppDialogShowActivity -->
+    <style name="AppTheme.NoActionBar.DimmedWithStatusTransparent">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- DiscussionSettingsActivity and SettingsActivity -->
+    <style name="AppTheme.WhiteBackground">
+        <item name="android:windowBackground">@color/almostWhite</item>
+    </style>
+
+    <!-- Custom color for license -->
+    <style name="AppTheme.WhiteBackground.Licenses">
+        <item name="colorAccent">@color/olvid_gradient_dark</item>
+        <item name="android:textColorPrimary">@color/grey</item>
+        <item name="android:textColorLink">@color/primary700</item>
+        <item name="titleTextColor">@color/alwaysWhite</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
+    </style>
+
+    <!-- AppBar style to use for "blue" AppBar to force light icons -->
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.Splashscreen" parent="AppTheme.NoActionBar"/>
+
+    <style name="FadeInAndOutPopupAnimation">
+        <item name="android:windowEnterAnimation">@anim/fade_in</item>
+        <item name="android:windowExitAnimation">@anim/fade_out</item>
+    </style>
+
+    <!-- OnClick item-->
+    <style name="GreyRipple" parent="AppTheme">
+        <item name="colorControlHighlight">@color/greyOverlay</item>
+    </style>
+
+    <!-- OnClick small element (upload file, ....)-->
+    <style name="SubtleGreyRipple" parent="AppTheme">
+        <item name="colorControlHighlight">@color/greySubtleOverlay</item>
+    </style>
+
+    <style name="SubtleBlueRipple" parent="AppTheme">
+        <item name="colorControlHighlight">@color/blueOverlay</item>
+    </style>
+
+
+    <!-- OnClick card view or icon (selected color for discussion or in lockscreen activity -->
+    <style name="WhiteRipple" parent="AppTheme">
+        <item name="colorControlHighlight">@color/whiteOverlay</item>
+    </style>
+
+    <style name="AlwaysWhiteSubtleRipple" parent="AppTheme">
+        <item name="colorControlHighlight">@color/alwaysWhiteSubtleOverlay</item>
+    </style>
+
+    <style name="AlwaysWhiteRipple" parent="AppTheme">
+        <item name="colorControlHighlight">@color/alwaysWhiteOverlay</item>
+    </style>
+
+    <!-- OnClick use only in discussion activity for send message-->
+    <style name="AccentRipple" parent="AppTheme">
+        <item name="colorControlHighlight">@color/accentOverlay</item>
+    </style>
+
+    <style name="BlueOrWhiteRipple" parent="AppTheme">
+        <item name="colorControlHighlight">@color/blueOrWhiteOverlay</item>
+    </style>
+
+    <style name="RobotoMedium">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="AppTheme.BlueAccent">
+        <item name="colorAccent">@color/olvid_gradient_light</item>
+    </style>
+    <style name="AppTheme.GreyAccent">
+        <item name="colorAccent">@color/greyOverlay</item>
+    </style>
+
+    <!--  bottom sheet with transparent background  -->
+    <style name="TransparentBottomSheetDialogTheme" parent="Theme.Design.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/TransparentBottomSheetStyle</item>
+    </style>
+    <style name="TransparentBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+</resources>

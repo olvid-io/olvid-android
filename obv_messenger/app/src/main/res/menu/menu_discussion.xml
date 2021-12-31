@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="80"
+        android:title="@string/menu_action_discussion_settings"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_delete_discussion"
+        android:orderInCategory="200"
+        android:title="@string/menu_action_delete_discussion"
+        app:showAsAction="never"/>
+</menu>

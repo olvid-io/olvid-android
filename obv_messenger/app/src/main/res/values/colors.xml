@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="olvid_gradient_light">#2f65f5</color>
+    <color name="olvid_gradient_dark">#0044c9</color>
+    <color name="olvid_gradient_contrasted">#0044c9</color>
+
+    <color name="primary700">#154271</color>
+    <color name="primary400_90">#e54b6b93</color>
+    <color name="primary100">#e0edf9</color>
+    <color name="accent">#70959E</color>
+    <color name="almostWhite">#ffffff</color>
+    <color name="almostBlack">#303030</color>
+    <color name="red">#ff3b30</color>
+    <color name="green">#67AE55</color>
+    <color name="orange">#ff9800</color>
+    <color name="golden">#ffd700</color>
+    <color name="black">#000000</color>
+    <color name="navigationBar">#000000</color>
+    <color name="blueOrWhite">#2f65f5</color>
+    <color name="blueOrWhiteOverlay">#662f65f5</color>
+    <color name="blueOverlay">#332f65f5</color>
+
+
+    <color name="grey">#bf535353</color>
+    <color name="greyTint">#7d7d7d</color>
+    <color name="mediumGrey">#9c9c9c</color>
+    <color name="lightGrey">#e6e6e6</color>
+    <color name="lighterGrey">#f5f5f5</color>
+    <color name="lighterGrey_75">#bff1f1f1</color>
+    <color name="darkerLightGrey">#BFBEBE</color>
+    <color name="darkGrey">#757575</color>
+
+    <color name="accentOverlay">#6670959E</color>
+    <color name="greyOverlay">#66808080</color>
+    <color name="greySubtleOverlay">#22808080</color>
+    <color name="whiteOverlay">#bbffffff</color>
+    <color name="blackOverlay">#66000000</color>
+    <color name="blackDarkOverlay">#bb000000</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="attachmentBorder">#33000000</color>
+
+
+    <!-- New color -->
+    <color name="dialogBackground">#ffffff</color>
+    <color name="inboundMessageBody">#0C2643</color>
+    <color name="alwaysWhite">#ffffff</color>
+    <color name="alwaysWhiteOverlay">#bbffffff</color>
+    <color name="alwaysWhiteSubtleOverlay">#33ffffff</color>
+</resources>

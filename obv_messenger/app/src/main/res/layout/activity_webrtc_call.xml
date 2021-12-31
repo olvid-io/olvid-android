@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/background_gradient_olvid"
+    tools:context=".webrtc.WebrtcCallActivity">
+
+    <ImageView
+        android:id="@+id/toggle_speakerphone_dropdown"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginBottom="40dp"
+        android:src="@drawable/ic_dropdown"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/toggle_speakerphone_button"
+        app:layout_constraintStart_toStartOf="@+id/toggle_speakerphone_button"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/call_status_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:maxLines="1"
+        android:textAlignment="center"
+        android:textColor="@color/alwaysWhite"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barrier"
+        app:layout_constraintVertical_chainStyle="spread"
+        tools:text="00:43" />
+
+    <ImageView
+        android:id="@+id/toggle_speakerphone_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:srcCompat="@drawable/button_speaker"
+        android:contentDescription="@string/content_description_toggle_audio_output_button"
+        android:foreground="@drawable/background_circular_ripple"
+        android:theme="@style/AlwaysWhiteRipple"
+        app:layout_constraintBottom_toBottomOf="@+id/end_call_button"
+        app:layout_constraintEnd_toStartOf="@+id/add_participant_button"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/toggle_mute_microphone_button"/>
+
+    <ImageView
+        android:id="@+id/toggle_mute_microphone_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:foreground="@drawable/background_circular_ripple"
+        android:theme="@style/AlwaysWhiteRipple"
+        app:srcCompat="@drawable/button_no_micro"
+        android:contentDescription="@string/content_description_toggle_mute_microphone_button"
+        app:layout_constraintBottom_toBottomOf="@+id/end_call_button"
+        app:layout_constraintEnd_toStartOf="@+id/toggle_speakerphone_button"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent">
+    </ImageView>
+
+    <ImageView
+        android:id="@+id/add_participant_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/button_add_participant"
+        android:foreground="@drawable/background_circular_ripple"
+        android:contentDescription="@string/content_description_add_participants_button"
+        android:theme="@style/AlwaysWhiteRipple"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/end_call_button"
+        app:layout_constraintEnd_toStartOf="@+id/end_call_button"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@id/toggle_speakerphone_button"
+        tools:visibility="visible" />
+
+
+    <ImageView
+        android:id="@+id/end_call_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/button_end_call"
+        android:foreground="@drawable/background_circular_ripple"
+        android:contentDescription="@string/content_description_hang_up_button"
+        android:theme="@style/AlwaysWhiteRipple"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/add_participant_button"/>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="single_contact_group, multiple_contacts_recycler_view" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/single_contact_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/peer_is_muted_image_view"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="42dp"
+            android:layout_marginTop="42dp"
+            android:elevation="1dp"
+            android:contentDescription="@string/content_description_peer_muted_indicator"
+            android:src="@drawable/button_no_micro_red_circle"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@+id/contact_initial_view"
+            app:layout_constraintTop_toTopOf="@+id/contact_initial_view"
+            tools:visibility="visible" />
+
+
+        <TextView
+            android:id="@+id/contact_name_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:maxLines="2"
+            android:textAppearance="@style/RobotoMedium"
+            android:textColor="@color/alwaysWhite"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toTopOf="@id/peer_status_text_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/contact_initial_view"
+            app:layout_constraintTop_toTopOf="@+id/contact_initial_view"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="John Doe" />
+
+        <TextView
+            android:id="@+id/peer_status_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textColor="@color/alwaysWhite"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/contact_initial_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/contact_initial_view"
+            app:layout_constraintTop_toBottomOf="@+id/contact_name_text_view"
+            tools:text="Calling..." />
+
+        <io.olvid.messenger.customClasses.InitialView
+            android:id="@+id/contact_initial_view"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <io.olvid.messenger.customClasses.EmptyRecyclerView
+        android:id="@+id/multiple_contacts_recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="104dp"
+        android:nestedScrollingEnabled="false"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+    </io.olvid.messenger.customClasses.EmptyRecyclerView>
+</androidx.constraintlayout.widget.ConstraintLayout>

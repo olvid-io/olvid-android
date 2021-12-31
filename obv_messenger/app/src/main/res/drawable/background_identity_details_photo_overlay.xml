@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <stroke android:color="@color/whiteOverlay"
+                android:width="5dp"
+                android:dashWidth="15dp"
+                android:dashGap="15dp"/>
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:color="@color/almostWhite"
+                android:width="2dp"/>
+        </shape>
+    </item>
+</layer-list>

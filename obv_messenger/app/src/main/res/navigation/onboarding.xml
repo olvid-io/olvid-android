@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/welcome_screen">
+
+    <fragment
+        android:id="@+id/welcome_screen"
+        android:name="io.olvid.messenger.onboarding.WelcomeScreenFragment"
+        tools:layout="@layout/fragment_onboarding_welcome_screen">
+        <action
+            android:id="@+id/action_identity_creation"
+            app:destination="@id/identity_creation"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_scan_configuration"
+            app:destination="@id/scan_fragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_restore"
+            app:destination="@id/restore_choose_file"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_skip_to_configuration_scanned"
+            app:destination="@id/identity_creation_options" />
+        <action
+            android:id="@+id/action_skip_to_keycloak_selection"
+            app:destination="@id/keycloak_selection" />
+    </fragment>
+    <fragment android:id="@+id/restore_choose_file"
+        android:name="io.olvid.messenger.onboarding.RestoreChooseFileFragment"
+        tools:layout="@layout/fragment_onboarding_restore_choose_file">
+        <action
+            android:id="@+id/action_proceed_to_enter_key"
+            app:destination="@id/restore_enter_key"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment android:id="@+id/restore_enter_key"
+        android:name="io.olvid.messenger.onboarding.RestoreEnterKeyFragment"
+        tools:layout="@layout/fragment_onboarding_restore_enter_key" />
+
+    <fragment android:id="@+id/identity_creation"
+        android:name="io.olvid.messenger.onboarding.IdentityCreationFragment"
+        tools:layout="@layout/fragment_onboarding_identity_creation"/>
+
+    <fragment
+        android:id="@+id/scan_fragment"
+        android:name="io.olvid.messenger.onboarding.ScanFragment"
+        tools:layout="@layout/fragment_onboarding_scan">
+        <action
+            android:id="@+id/action_configuration_scanned"
+            app:destination="@id/identity_creation_options"
+            app:popUpTo="@id/scan_fragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_keycloak_scanned"
+            app:popUpTo="@id/scan_fragment"
+            app:popUpToInclusive="true"
+            app:destination="@id/keycloak_selection"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment android:id="@+id/identity_creation_options"
+        android:name="io.olvid.messenger.onboarding.IdentityCreationOptionsFragment"
+        tools:layout="@layout/fragment_onboarding_identity_creation_options">
+        <action
+            android:id="@+id/action_identity_creation"
+            app:destination="@id/identity_creation"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"  />
+    </fragment>
+    <fragment
+        android:id="@+id/keycloak_selection"
+        android:name="io.olvid.messenger.onboarding.KeycloakSelectionFragment"
+        tools:layout="@layout/fragment_onboarding_keycloak_selection">
+        <action
+            android:id="@+id/action_identity_creation"
+            app:destination="@id/identity_creation"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"  />
+        <action
+            android:id="@+id/action_mdm_restore"
+            app:destination="@id/restore_choose_file"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"  />
+    </fragment>
+    <fragment
+        android:id="@+id/new_profile"
+        android:name="io.olvid.messenger.onboarding.NewProfileFragment"
+        tools:layout="@layout/fragment_onboarding_new_profile">
+        <action
+            android:id="@+id/action_identity_creation"
+            app:destination="@id/identity_creation"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_scan_configuration"
+            app:destination="@id/scan_fragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_new_profile_skip_to_configuration_scanned"
+            app:destination="@id/identity_creation_options" />
+        <action
+            android:id="@+id/action_new_profile_skip_to_keycloak_selection"
+            app:destination="@id/keycloak_selection" />
+    </fragment>
+</navigation>

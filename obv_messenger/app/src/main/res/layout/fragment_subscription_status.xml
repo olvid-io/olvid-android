@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <TextView
+        android:id="@+id/api_key_status_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/almostBlack"
+        android:textSize="16sp"
+        tools:text="@string/text_subscription_expired" />
+
+    <TextView
+        android:id="@+id/api_key_expiration_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        tools:text="@string/text_expired_since" />
+
+    <Button
+        android:id="@+id/subscribe_button"
+        style="@style/Base.Widget.AppCompat.Button.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:paddingVertical="16dp"
+        android:text="@string/button_label_see_subscription_options"
+        android:stateListAnimator="@null"
+        android:textColor="@color/alwaysWhite"
+        android:drawableStart="@drawable/ic_subscribe"
+        android:drawableEnd="@drawable/empty"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:theme="@style/AppTheme.BlueAccent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fix_payment_method_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:visibility="visible">
+        <View
+            android:id="@+id/separator"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/lightGrey"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp" />
+
+        <Button
+            android:id="@+id/fix_payment_method_button"
+            style="@style/Base.Widget.AppCompat.Button.Colored"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:paddingVertical="16dp"
+            android:layout_marginTop="4dp"
+            android:text="@string/button_label_update"
+            android:stateListAnimator="@null"
+            android:textColor="@color/alwaysWhite"
+            android:theme="@style/AppTheme.BlueAccent"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/separator"/>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:textSize="12sp"
+            android:text="@string/label_fix_payment_method_explanation"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/fix_payment_method_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/label_fix_payment_method"
+            android:textColor="@color/almostBlack"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintBottom_toTopOf="@+id/textView2"
+            app:layout_constraintEnd_toStartOf="@+id/fix_payment_method_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/separator"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintVertical_chainStyle="packed" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+        android:id="@+id/subscription_purchase_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/free_features_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lightGrey"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        />
+
+        <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/almostBlack"
+        android:text="@string/text_free_features"
+        android:textSize="16sp"
+        app:drawableEndCompat="@drawable/ic_activated_green"
+        android:gravity="center_vertical"
+        android:drawablePadding="8dp"
+        android:layout_marginBottom="4dp"/>
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/almostBlack"
+                android:text="@string/text_feature_send_receive_messages"
+                app:drawableStartCompat="@drawable/ic_message"
+                app:drawableTint="@color/orange"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/almostBlack"
+                android:text="@string/text_feature_create_groups"
+                app:drawableStartCompat="@drawable/ic_group"
+                app:drawableTint="@color/olvid_gradient_light"
+                android:layout_marginBottom="4dp"/>
+
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/almostBlack"
+                android:text="@string/text_feature_receive_secure_calls"
+                app:drawableStartCompat="@drawable/ic_phone_failed_in"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/lightGrey" />
+
+    <TextView
+        android:id="@+id/premium_features_title_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/RobotoMedium"
+            android:textColor="@color/almostBlack"
+            android:text="@string/text_premium_features"
+            android:textSize="16sp"
+            app:drawableEndCompat="@drawable/ic_deactivated_grey"
+            android:gravity="center_vertical"
+            android:drawablePadding="8dp"
+            android:layout_marginBottom="4dp"/>
+
+    <TextView
+        android:id="@+id/permission_call_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical"
+        android:text="@string/text_feature_initiate_secure_calls"
+        app:drawableStartCompat="@drawable/ic_phone_failed_out" />
+</LinearLayout>

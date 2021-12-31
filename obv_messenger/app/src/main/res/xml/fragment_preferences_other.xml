@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+        <Preference
+            android:key="pref_key_reset_dialogs"
+            android:summary="@string/pref_reset_dialogs_summary"
+            android:title="@string/pref_reset_dialogs_title"
+            android:icon="@drawable/ic_pref_reset"
+            android:order="10" />
+        <SwitchPreference
+            android:key="pref_key_share_app_version"
+            android:defaultValue="true"
+            android:summary="@string/pref_share_app_version_summary"
+            android:title="@string/pref_share_app_version_title"
+            android:icon="@drawable/ic_pref_share"
+            android:order="20" />
+        <SwitchPreference
+            android:key="pref_key_notify_certificate_change"
+            android:defaultValue="false"
+            android:summary="@string/pref_notify_certificate_change_summary"
+            android:title="@string/pref_notify_certificate_change_title"
+            android:icon="@drawable/ic_pref_certificate"
+            android:order="25" />
+        <SwitchPreference
+            android:key="pref_key_send_with_hardware_enter"
+            android:defaultValue="false"
+            android:title="@string/pref_send_with_hardware_enter"
+            android:summary="@string/pref_send_with_hardware_enter_summary"
+            android:icon="@drawable/ic_pref_send"
+            android:order="27" />
+        <DropDownPreference
+            android:defaultValue="null"
+            android:key="pref_key_ping_connectivity_indicator"
+            android:title="@string/pref_ping_connectivity_indicator_title"
+            app:useSimpleSummaryProvider="true"
+            android:entries="@array/ping_connectivity_indicator"
+            android:entryValues="@array/ping_connectivity_indicator_value"
+            app:isPreferenceVisible="false"
+            tools:isPreferenceVisible="true"
+            android:icon="@drawable/ic_pref_ping_indicator"
+            android:order="29" />
+        <DropDownPreference
+            android:defaultValue="M"
+            android:entries="@array/QR_correction_levels"
+            android:entryValues="@array/QR_correction_levels_values"
+            android:key="pref_key_qr_correction_level"
+            android:title="@string/pref_qr_correction_level_title"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_pref_qr"
+            android:order="30" />
+        <DropDownPreference
+            android:defaultValue="null"
+            app:singleLineTitle="false"
+            android:entries="@array/regional_turn_servers"
+            android:entryValues="@array/regional_turn_servers_values"
+            app:isPreferenceVisible="false"
+            tools:isPreferenceVisible="true"
+            android:key="pref_key_scaled_turn_region"
+            android:title="@string/pref_scaled_turn_title"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_pref_language"
+            android:order="35" />
+        <SwitchPreference
+            android:key="pref_key_low_bandwidth_calls"
+            android:title="@string/pref_low_bandwidth_calls_title"
+            android:summary="@string/pref_low_bandwidth_calls_summary"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_pref_low_bandwidth"
+            android:order="36"
+            />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_debug_log_level"
+            android:summary="@string/pref_debug_log_level_summary"
+            android:title="@string/pref_debug_log_level_title"
+            android:icon="@drawable/ic_pref_debug_log"
+            android:order="40" />
+        <Preference
+            app:isPreferenceVisible="false"
+            tools:isPreferenceVisible="true"
+            android:key="pref_key_export_app_databases"
+            android:summary="@string/pref_export_app_databases_summary"
+            android:title="@string/pref_export_app_databases_title"
+            android:icon="@drawable/ic_pref_database"
+            android:order="50" />
+        <Preference
+            app:isPreferenceVisible="false"
+            tools:isPreferenceVisible="true"
+            android:key="pref_key_storage_explorer"
+            android:title="@string/pref_storage_explorer_title"
+            android:summary="@string/pref_storage_explorer_summary"
+            android:icon="@drawable/ic_pref_explorer"
+            android:order="60" />
+</PreferenceScreen>

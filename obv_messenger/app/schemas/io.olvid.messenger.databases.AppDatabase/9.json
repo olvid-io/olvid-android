@@ -1,0 +1,1004 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 9,
+    "identityHash": "af852ab7838c7667b42ecfc4e47f05f9",
+    "entities": [
+      {
+        "tableName": "contact_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bytes_contact_identity` BLOB NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `display_name` TEXT NOT NULL, `device_count` INTEGER NOT NULL, `established_channel_count` INTEGER NOT NULL, PRIMARY KEY(`bytes_owned_identity`, `bytes_contact_identity`), FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "bytesContactIdentity",
+            "columnName": "bytes_contact_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesOwnedIdentity",
+            "columnName": "bytes_owned_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "display_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceCount",
+            "columnName": "device_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "establishedChannelCount",
+            "columnName": "established_channel_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "bytes_owned_identity",
+            "bytes_contact_identity"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_contact_table_bytes_owned_identity",
+            "unique": false,
+            "columnNames": [
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE  INDEX `index_contact_table_bytes_owned_identity` ON `${TABLE_NAME}` (`bytes_owned_identity`)"
+          },
+          {
+            "name": "index_contact_table_display_name",
+            "unique": false,
+            "columnNames": [
+              "display_name"
+            ],
+            "createSql": "CREATE  INDEX `index_contact_table_display_name` ON `${TABLE_NAME}` (`display_name`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "identity_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "bytes_owned_identity"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "group_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`group_id` BLOB NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `name` TEXT NOT NULL, `bytes_group_owner_identity` BLOB, PRIMARY KEY(`group_id`, `bytes_owned_identity`), FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`bytes_group_owner_identity`, `bytes_owned_identity`) REFERENCES `contact_table`(`bytes_contact_identity`, `bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "groupId",
+            "columnName": "group_id",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesOwnedIdentity",
+            "columnName": "bytes_owned_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesGroupOwnerIdentity",
+            "columnName": "bytes_group_owner_identity",
+            "affinity": "BLOB",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "group_id",
+            "bytes_owned_identity"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_group_table_name",
+            "unique": false,
+            "columnNames": [
+              "name"
+            ],
+            "createSql": "CREATE  INDEX `index_group_table_name` ON `${TABLE_NAME}` (`name`)"
+          },
+          {
+            "name": "index_group_table_bytes_owned_identity",
+            "unique": false,
+            "columnNames": [
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE  INDEX `index_group_table_bytes_owned_identity` ON `${TABLE_NAME}` (`bytes_owned_identity`)"
+          },
+          {
+            "name": "index_group_table_bytes_group_owner_identity_bytes_owned_identity",
+            "unique": false,
+            "columnNames": [
+              "bytes_group_owner_identity",
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE  INDEX `index_group_table_bytes_group_owner_identity_bytes_owned_identity` ON `${TABLE_NAME}` (`bytes_group_owner_identity`, `bytes_owned_identity`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "identity_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "bytes_owned_identity"
+            ]
+          },
+          {
+            "table": "contact_table",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bytes_group_owner_identity",
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "bytes_contact_identity",
+              "bytes_owned_identity"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "contact_group_join",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`group_id` BLOB NOT NULL, `bytes_contact_identity` BLOB NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `timestamp` INTEGER NOT NULL, PRIMARY KEY(`group_id`, `bytes_owned_identity`, `bytes_contact_identity`), FOREIGN KEY(`group_id`, `bytes_owned_identity`) REFERENCES `group_table`(`group_id`, `bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`bytes_contact_identity`, `bytes_owned_identity`) REFERENCES `contact_table`(`bytes_contact_identity`, `bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "groupId",
+            "columnName": "group_id",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesContactIdentity",
+            "columnName": "bytes_contact_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesOwnedIdentity",
+            "columnName": "bytes_owned_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "group_id",
+            "bytes_owned_identity",
+            "bytes_contact_identity"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_contact_group_join_group_id_bytes_owned_identity",
+            "unique": false,
+            "columnNames": [
+              "group_id",
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE  INDEX `index_contact_group_join_group_id_bytes_owned_identity` ON `${TABLE_NAME}` (`group_id`, `bytes_owned_identity`)"
+          },
+          {
+            "name": "index_contact_group_join_bytes_contact_identity_bytes_owned_identity",
+            "unique": false,
+            "columnNames": [
+              "bytes_contact_identity",
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE  INDEX `index_contact_group_join_bytes_contact_identity_bytes_owned_identity` ON `${TABLE_NAME}` (`bytes_contact_identity`, `bytes_owned_identity`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "group_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "group_id",
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "group_id",
+              "bytes_owned_identity"
+            ]
+          },
+          {
+            "table": "contact_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bytes_contact_identity",
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "bytes_contact_identity",
+              "bytes_owned_identity"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "pending_group_member_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bytes_identity` BLOB NOT NULL, `display_name` TEXT NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `group_id` BLOB NOT NULL, PRIMARY KEY(`bytes_identity`, `bytes_owned_identity`, `group_id`), FOREIGN KEY(`group_id`, `bytes_owned_identity`) REFERENCES `group_table`(`group_id`, `bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "bytesIdentity",
+            "columnName": "bytes_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "display_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesOwnedIdentity",
+            "columnName": "bytes_owned_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "groupId",
+            "columnName": "group_id",
+            "affinity": "BLOB",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "bytes_identity",
+            "bytes_owned_identity",
+            "group_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_pending_group_member_table_group_id_bytes_owned_identity",
+            "unique": false,
+            "columnNames": [
+              "group_id",
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE  INDEX `index_pending_group_member_table_group_id_bytes_owned_identity` ON `${TABLE_NAME}` (`group_id`, `bytes_owned_identity`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "group_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "group_id",
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "group_id",
+              "bytes_owned_identity"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "discussion_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `bytes_owned_identity` BLOB NOT NULL, `sender_thread_identifier` TEXT NOT NULL, `last_outbound_message_sequence_number` INTEGER NOT NULL, `group_id` BLOB, `bytes_contact_identity` BLOB, FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`bytes_contact_identity`, `bytes_owned_identity`) REFERENCES `contact_table`(`bytes_contact_identity`, `bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE SET NULL , FOREIGN KEY(`group_id`, `bytes_owned_identity`) REFERENCES `group_table`(`group_id`, `bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bytesOwnedIdentity",
+            "columnName": "bytes_owned_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderThreadIdentifier",
+            "columnName": "sender_thread_identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastOutboundMessageSequenceNumber",
+            "columnName": "last_outbound_message_sequence_number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "groupId",
+            "columnName": "group_id",
+            "affinity": "BLOB",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bytesContactIdentity",
+            "columnName": "bytes_contact_identity",
+            "affinity": "BLOB",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_discussion_table_bytes_owned_identity",
+            "unique": false,
+            "columnNames": [
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE  INDEX `index_discussion_table_bytes_owned_identity` ON `${TABLE_NAME}` (`bytes_owned_identity`)"
+          },
+          {
+            "name": "index_discussion_table_bytes_contact_identity_bytes_owned_identity",
+            "unique": true,
+            "columnNames": [
+              "bytes_contact_identity",
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE UNIQUE INDEX `index_discussion_table_bytes_contact_identity_bytes_owned_identity` ON `${TABLE_NAME}` (`bytes_contact_identity`, `bytes_owned_identity`)"
+          },
+          {
+            "name": "index_discussion_table_group_id_bytes_owned_identity",
+            "unique": true,
+            "columnNames": [
+              "group_id",
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE UNIQUE INDEX `index_discussion_table_group_id_bytes_owned_identity` ON `${TABLE_NAME}` (`group_id`, `bytes_owned_identity`)"
+          },
+          {
+            "name": "index_discussion_table_title",
+            "unique": false,
+            "columnNames": [
+              "title"
+            ],
+            "createSql": "CREATE  INDEX `index_discussion_table_title` ON `${TABLE_NAME}` (`title`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "identity_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "bytes_owned_identity"
+            ]
+          },
+          {
+            "table": "contact_table",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bytes_contact_identity",
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "bytes_contact_identity",
+              "bytes_owned_identity"
+            ]
+          },
+          {
+            "table": "group_table",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "group_id",
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "group_id",
+              "bytes_owned_identity"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "fyle_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `permanent_file_path` TEXT, `sha256` BLOB NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filePath",
+            "columnName": "permanent_file_path",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sha256",
+            "columnName": "sha256",
+            "affinity": "BLOB",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_fyle_table_sha256",
+            "unique": true,
+            "columnNames": [
+              "sha256"
+            ],
+            "createSql": "CREATE UNIQUE INDEX `index_fyle_table_sha256` ON `${TABLE_NAME}` (`sha256`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "fyle_message_join_with_status",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fyle_id` INTEGER NOT NULL, `message_id` INTEGER NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `file_path` TEXT NOT NULL, `file_name` TEXT NOT NULL, `file_type` TEXT, `status` INTEGER NOT NULL, `size` INTEGER NOT NULL, `progress` REAL NOT NULL, `engine_message_identifier` BLOB, `engine_number` INTEGER, PRIMARY KEY(`fyle_id`, `message_id`), FOREIGN KEY(`fyle_id`) REFERENCES `fyle_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`message_id`) REFERENCES `message_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "fyleId",
+            "columnName": "fyle_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "messageId",
+            "columnName": "message_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesOwnedIdentity",
+            "columnName": "bytes_owned_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filePath",
+            "columnName": "file_path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileName",
+            "columnName": "file_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mimeType",
+            "columnName": "file_type",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "size",
+            "columnName": "size",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progress",
+            "columnName": "progress",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "engineMessageIdentifier",
+            "columnName": "engine_message_identifier",
+            "affinity": "BLOB",
+            "notNull": false
+          },
+          {
+            "fieldPath": "engineNumber",
+            "columnName": "engine_number",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "fyle_id",
+            "message_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_fyle_message_join_with_status_fyle_id",
+            "unique": false,
+            "columnNames": [
+              "fyle_id"
+            ],
+            "createSql": "CREATE  INDEX `index_fyle_message_join_with_status_fyle_id` ON `${TABLE_NAME}` (`fyle_id`)"
+          },
+          {
+            "name": "index_fyle_message_join_with_status_message_id",
+            "unique": false,
+            "columnNames": [
+              "message_id"
+            ],
+            "createSql": "CREATE  INDEX `index_fyle_message_join_with_status_message_id` ON `${TABLE_NAME}` (`message_id`)"
+          },
+          {
+            "name": "index_fyle_message_join_with_status_engine_message_identifier_engine_number",
+            "unique": false,
+            "columnNames": [
+              "engine_message_identifier",
+              "engine_number"
+            ],
+            "createSql": "CREATE  INDEX `index_fyle_message_join_with_status_engine_message_identifier_engine_number` ON `${TABLE_NAME}` (`engine_message_identifier`, `engine_number`)"
+          },
+          {
+            "name": "index_fyle_message_join_with_status_bytes_owned_identity",
+            "unique": false,
+            "columnNames": [
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE  INDEX `index_fyle_message_join_with_status_bytes_owned_identity` ON `${TABLE_NAME}` (`bytes_owned_identity`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "fyle_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "fyle_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "message_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "message_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "identity_table",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "bytes_owned_identity"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "invitation_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`dialog_uuid` TEXT NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `associated_dialog` BLOB NOT NULL, `contact_identity` BLOB, `progress` INTEGER NOT NULL, `invitation_timestamp` INTEGER NOT NULL, PRIMARY KEY(`dialog_uuid`), FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "dialogUuid",
+            "columnName": "dialog_uuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesOwnedIdentity",
+            "columnName": "bytes_owned_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "associatedDialog",
+            "columnName": "associated_dialog",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contactIdentity",
+            "columnName": "contact_identity",
+            "affinity": "BLOB",
+            "notNull": false
+          },
+          {
+            "fieldPath": "progress",
+            "columnName": "progress",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "invitationTimestamp",
+            "columnName": "invitation_timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "dialog_uuid"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_invitation_table_bytes_owned_identity",
+            "unique": false,
+            "columnNames": [
+              "bytes_owned_identity"
+            ],
+            "createSql": "CREATE  INDEX `index_invitation_table_bytes_owned_identity` ON `${TABLE_NAME}` (`bytes_owned_identity`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "identity_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "bytes_owned_identity"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "message_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sender_sequence_number` INTEGER NOT NULL, `content_body` TEXT, `json_reply` TEXT, `sort_index` REAL NOT NULL, `timestamp` INTEGER NOT NULL, `status` INTEGER NOT NULL, `message_type` INTEGER NOT NULL, `discussion_id` INTEGER NOT NULL, `engine_message_identifier` BLOB, `sender_identifier` BLOB NOT NULL, `sender_thread_identifier` TEXT NOT NULL, `has_attachments` INTEGER NOT NULL, FOREIGN KEY(`discussion_id`) REFERENCES `discussion_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderSequenceNumber",
+            "columnName": "sender_sequence_number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentBody",
+            "columnName": "content_body",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "jsonReply",
+            "columnName": "json_reply",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sortIndex",
+            "columnName": "sort_index",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "messageType",
+            "columnName": "message_type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionId",
+            "columnName": "discussion_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "engineMessageIdentifier",
+            "columnName": "engine_message_identifier",
+            "affinity": "BLOB",
+            "notNull": false
+          },
+          {
+            "fieldPath": "senderIdentifier",
+            "columnName": "sender_identifier",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderThreadIdentifier",
+            "columnName": "sender_thread_identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hasAttachments",
+            "columnName": "has_attachments",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_message_table_discussion_id",
+            "unique": false,
+            "columnNames": [
+              "discussion_id"
+            ],
+            "createSql": "CREATE  INDEX `index_message_table_discussion_id` ON `${TABLE_NAME}` (`discussion_id`)"
+          },
+          {
+            "name": "index_message_table_engine_message_identifier",
+            "unique": false,
+            "columnNames": [
+              "engine_message_identifier"
+            ],
+            "createSql": "CREATE  INDEX `index_message_table_engine_message_identifier` ON `${TABLE_NAME}` (`engine_message_identifier`)"
+          },
+          {
+            "name": "index_message_table_sort_index",
+            "unique": false,
+            "columnNames": [
+              "sort_index"
+            ],
+            "createSql": "CREATE  INDEX `index_message_table_sort_index` ON `${TABLE_NAME}` (`sort_index`)"
+          },
+          {
+            "name": "index_message_table_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "createSql": "CREATE  INDEX `index_message_table_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          },
+          {
+            "name": "index_message_table_message_type_status",
+            "unique": false,
+            "columnNames": [
+              "message_type",
+              "status"
+            ],
+            "createSql": "CREATE  INDEX `index_message_table_message_type_status` ON `${TABLE_NAME}` (`message_type`, `status`)"
+          },
+          {
+            "name": "index_message_table_discussion_id_status",
+            "unique": false,
+            "columnNames": [
+              "discussion_id",
+              "status"
+            ],
+            "createSql": "CREATE  INDEX `index_message_table_discussion_id_status` ON `${TABLE_NAME}` (`discussion_id`, `status`)"
+          },
+          {
+            "name": "index_message_table_sender_sequence_number_sender_thread_identifier_sender_identifier_discussion_id",
+            "unique": false,
+            "columnNames": [
+              "sender_sequence_number",
+              "sender_thread_identifier",
+              "sender_identifier",
+              "discussion_id"
+            ],
+            "createSql": "CREATE  INDEX `index_message_table_sender_sequence_number_sender_thread_identifier_sender_identifier_discussion_id` ON `${TABLE_NAME}` (`sender_sequence_number`, `sender_thread_identifier`, `sender_identifier`, `discussion_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "discussion_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "discussion_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "identity_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bytes_owned_identity` BLOB NOT NULL, `display_name` TEXT NOT NULL, `api_key_status` INTEGER NOT NULL, PRIMARY KEY(`bytes_owned_identity`))",
+        "fields": [
+          {
+            "fieldPath": "bytesOwnedIdentity",
+            "columnName": "bytes_owned_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "display_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apiKeyStatus",
+            "columnName": "api_key_status",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "bytes_owned_identity"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "anonymizer_for_owned_identity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bytes_owned_identity` BLOB NOT NULL, `pseudo` TEXT NOT NULL, PRIMARY KEY(`bytes_owned_identity`), FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "bytesOwnedIdentity",
+            "columnName": "bytes_owned_identity",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pseudo",
+            "columnName": "pseudo",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "bytes_owned_identity"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "identity_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bytes_owned_identity"
+            ],
+            "referencedColumns": [
+              "bytes_owned_identity"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "anonymous_usage_log",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pseudo` TEXT NOT NULL, `api_key` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `type` INTEGER NOT NULL, `extra_count` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pseudo",
+            "columnName": "pseudo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apiKey",
+            "columnName": "api_key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "extraCount",
+            "columnName": "extra_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"af852ab7838c7667b42ecfc4e47f05f9\")"
+    ]
+  }
+}

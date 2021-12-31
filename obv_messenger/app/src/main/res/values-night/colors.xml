@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="olvid_gradient_light">#2a5ada</color>
+    <color name="olvid_gradient_dark">#003baf</color>
+    <color name="olvid_gradient_contrasted">#2f65f5</color>
+
+    <color name="primary700">#a9bddc</color>
+    <color name="primary400_90">#e58099ba</color>
+    <color name="primary100">#081623</color>
+    <color name="almostWhite">#000000</color>
+    <color name="almostBlack">#F4F4F4</color>
+    <color name="red">#df342a</color>
+    <color name="green">#589549</color>
+    <color name="orange">#da8200</color>
+    <color name="golden">#dab700</color>
+    <color name="blueOrWhite">#ffffff</color>
+    <color name="blueOrWhiteOverlay">#66ffffff</color>
+    <color name="blueOverlay">#662a5ada</color>
+
+
+    <color name="grey">#bfacacac</color>
+    <color name="greyTint">#828282</color>
+    <color name="mediumGrey">#626262</color>
+    <color name="lightGrey">#272727</color>
+    <color name="lighterGrey">#171717</color>
+    <color name="lighterGrey_75">#bf1d1d1d</color>
+    <color name="darkerLightGrey">#474747</color>
+    <color name="darkGrey">#c7c7c7</color>
+
+    <color name="accentOverlay">#8870959E</color>
+    <color name="whiteOverlay">#bb000000</color>
+
+    <color name="attachmentBorder">#33ffffff</color>
+
+    <!-- New color -->
+    <color name="dialogBackground">#303030</color>
+    <color name="inboundMessageBody">#c3d9e6</color>
+</resources>

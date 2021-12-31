@@ -1,0 +1,7 @@
+<vector android:height="32dp"
+    android:viewportHeight="24" android:viewportWidth="24"
+    android:width="32dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="@color/preference_icon_tint_list" android:pathData="M19,3L5,3c-1.1,0 -2,0.9 -2,2v14c0,1.1 0.9,2 2,2h14c1.1,0 2,-0.9 2,-2L21,5c0,-1.1 -0.9,-2 -2,-2z
+    M18,9h-4v2h2c1.1,0 2,0.89 2,2v2c0,1.11 -0.9,2 -2,2L12,17v-2h4v-2L12,13L12,7h6v2z
+    M10,17h-2L8,9h-2L6,7h4v10z"/>
+</vector>

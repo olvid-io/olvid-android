@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="?attr/selectableItemBackground"
+    android:background="@color/almostWhite">
+
+    <io.olvid.messenger.customClasses.InitialView
+        android:id="@+id/pending_group_member_initial_view"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+
+    <TextView
+        android:id="@+id/pending_group_member_name_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:singleLine="false"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/primary700"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/pending_group_member_initial_view"
+        app:layout_constraintEnd_toStartOf="@+id/invitation_declined_textview"
+        app:layout_constraintStart_toEndOf="@+id/pending_group_member_initial_view"
+        app:layout_constraintTop_toTopOf="@+id/pending_group_member_initial_view"
+        app:layout_goneMarginEnd="16dp"
+        tools:text="Contact Name"/>
+
+    <TextView
+        android:id="@+id/invitation_declined_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:lineSpacingExtra="4dp"
+        android:text="@string/label_invitation_declined"
+        android:textColor="@color/grey"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textSize="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SpUsage"
+        tools:visibility="visible"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

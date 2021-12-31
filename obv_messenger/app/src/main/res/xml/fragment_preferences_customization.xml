@@ -1,0 +1,62 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:key="pref_key_dark_mode"
+        android:defaultValue="false"
+        android:title="@string/pref_dark_mode_title"
+        android:summary="@string/pref_dark_mode_summary"
+        android:icon="@drawable/ic_pref_dark_mode"
+        android:order="10" />
+    <ListPreference
+        android:key="pref_key_dark_mode_api29"
+        android:defaultValue="Auto"
+        android:title="@string/pref_dark_mode_title"
+        android:summary="@string/pref_dark_mode_summary"
+        android:entries="@array/dark_mode_choice"
+        android:entryValues="@array/dark_mode_choice_values"
+        android:icon="@drawable/ic_pref_dark_mode"
+        android:order="10" />
+
+    <DropDownPreference
+        android:key="pref_key_font_scale"
+        android:title="@string/pref_font_scale"
+        android:defaultValue="1.0"
+        android:summary="%1$s"
+        android:entries="@array/font_scale_choice"
+        android:entryValues="@array/font_scale_choice_values"
+        android:icon="@drawable/ic_pref_font_scale"
+        android:order="12"/>
+
+    <SwitchPreference
+        android:key="pref_key_use_internal_image_viewer"
+        android:defaultValue="true"
+        android:title="@string/pref_use_internal_image_viewer_title"
+        android:summary="@string/pref_use_internal_image_viewer_summary"
+        android:icon="@drawable/ic_pref_image"
+        android:order="15" />
+
+    <ListPreference
+        android:key="pref_key_contact_display_name_format"
+        android:defaultValue="%f %l"
+        android:title="@string/pref_contact_display_name_format_title"
+        android:summary="%1$s"
+        android:entries="@array/display_name_format_choice"
+        android:entryValues="@array/display_name_format_choice_values"
+        android:icon="@drawable/ic_pref_names"
+        android:order="20" />
+
+    <SwitchPreference
+        android:key="pref_key_sort_contacts_by_last_name"
+        android:defaultValue="false"
+        android:title="@string/pref_sort_contacts_by_last_name_title"
+        android:summary="@string/pref_sort_contacts_by_last_name_summary"
+        android:icon="@drawable/ic_pref_sort"
+        android:order="30" />
+
+    <SwitchPreference
+        android:key="pref_key_uppercase_last_name"
+        android:defaultValue="false"
+        android:title="@string/pref_uppercase_last_name_title"
+        android:icon="@drawable/ic_pref_uppercase"
+        android:order="40" />
+
+</PreferenceScreen>

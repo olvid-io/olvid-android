@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/background_rounded_dialog"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <View
+            android:id="@+id/focus_hugger"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/activity_share_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:singleLine="true"
+            android:text="@string/dialog_title_share_with"
+            android:textAppearance="@style/RobotoMedium"
+            android:textColor="@color/primary700"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/current_owned_identity_group"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/separator"
+            app:layout_constraintTop_toBottomOf="@id/activity_share_title">
+
+            <io.olvid.messenger.customClasses.InitialView
+                android:id="@+id/current_identity_initial_view"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/current_identity_muted_marker_image_view"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="22dp"
+                android:layout_marginTop="22dp"
+                android:contentDescription="@string/content_description_message_status"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@+id/current_identity_initial_view"
+                app:layout_constraintStart_toStartOf="@+id/current_identity_initial_view"
+                app:srcCompat="@drawable/ic_notification_muted_circle_dialog"
+                tools:visibility="visible" />
+
+
+            <TextView
+                android:id="@+id/current_identity_name_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/RobotoMedium"
+                android:textColor="@color/primary700"
+                android:textSize="16dp"
+                app:layout_constraintBottom_toTopOf="@id/current_identity_name_second_line_text_view"
+                app:layout_constraintEnd_toStartOf="@id/button_switch_profile"
+                app:layout_constraintStart_toEndOf="@+id/current_identity_initial_view"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                tools:text="Leslie Hyatt"
+                tools:ignore="SpUsage" />
+
+            <TextView
+                android:id="@+id/current_identity_name_second_line_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/greyTint"
+                android:textSize="12dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toStartOf="@id/button_switch_profile"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/current_identity_initial_view"
+                app:layout_constraintTop_toBottomOf="@id/current_identity_name_text_view"
+                tools:text="Boss @ ACME"
+                tools:visibility="visible"
+                tools:ignore="SpUsage" />
+
+            <TextView
+                android:id="@+id/button_switch_profile"
+                android:textColor="@color/blueOrWhite"
+                android:textAllCaps="true"
+                android:paddingVertical="6dp"
+                android:paddingHorizontal="12dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:textSize="12sp"
+                android:background="@drawable/background_rounded_button"
+                android:theme="@style/BlueOrWhiteRipple"
+                android:text="@string/button_label_switch_profile"
+                app:layout_constraintTop_toTopOf="@id/current_identity_initial_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/current_identity_initial_view" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="4dp"
+            android:background="@color/lightGrey"
+            app:layout_constraintBottom_toTopOf="@id/discussion_filter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/current_owned_identity_group" />
+
+        <EditText
+            android:id="@+id/discussion_filter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/greyTint"
+            android:drawableEnd="@drawable/ic_search"
+            android:ems="10"
+            android:autofillHints="name"
+            android:hint="@string/hint_contact_or_group_name"
+            android:imeOptions="actionDone"
+            android:inputType="textNoSuggestions|textFilter"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/separator" />
+
+        <FrameLayout
+            android:id="@+id/filtered_discussion_list_placeholder"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/discussion_filter"/>
+
+        <TextView
+            android:id="@+id/button_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/background_rounded_button_grey_dialog_background"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:text="@string/button_label_cancel"
+            android:textAllCaps="true"
+            android:textColor="@color/greyTint"
+            android:textSize="12sp"
+            android:theme="@style/GreyRipple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

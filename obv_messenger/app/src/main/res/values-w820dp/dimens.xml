@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="single_line_emoji_size">64sp</dimen>
+    <dimen name="single_line_emoji_reply_size">56sp</dimen>
+</resources>

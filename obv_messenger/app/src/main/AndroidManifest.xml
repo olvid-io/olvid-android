@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="io.olvid.messenger">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-feature
+        android:name="android.hardware.camera.flash"
+        android:required="false" />
+
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE_SECURE" />
+        </intent>
+        <intent>
+            <action android:name="android.media.action.VIDEO_CAPTURE" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".App"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <meta-data android:name="android.content.APP_RESTRICTIONS"
+            android:resource="@xml/app_restrictions" />
+
+        <meta-data
+            android:name="firebase_analytics_collection_deactivated"
+            android:value="true" />
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+        <activity
+            android:name=".main.MainActivity"
+            android:theme="@style/AppTheme.Splashscreen"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity>
+        <activity
+            android:name=".activities.ObvLinkActivity"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:noHistory="true"
+            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar.FullScreen.Transparent">
+            <intent-filter android:label="@string/link_label_invitation_url" android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="olvid"
+                    android:host="invitation.olvid.io" />
+            </intent-filter>
+            <intent-filter android:label="@string/link_label_configuration_url" android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="olvid"
+                    android:host="configuration.olvid.io" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="olvid"
+                    android:host="web.olvid.io" />
+            </intent-filter>
+            <intent-filter android:label="@string/link_label_invitation_url" android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="invitation.olvid.io" />
+            </intent-filter>
+            <intent-filter android:label="@string/link_label_configuration_url" android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="configuration.olvid.io" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="web.olvid.io" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".discussion.DiscussionActivity"
+            android:theme="@style/AppTheme.NoActionBar.ActionModeOverlay"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"/>
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:label="@string/activity_title_settings"
+            android:theme="@style/AppTheme.WhiteBackground" />
+        <activity
+            android:name=".activities.OwnedIdentityDetailsActivity"
+            android:label="@string/activity_title_my_details" />
+        <activity
+            android:name=".activities.ContactDetailsActivity"
+            android:label="@string/activity_title_contact_details" />
+        <activity
+            android:name=".activities.GroupDetailsActivity"
+            android:label="@string/activity_title_group_details" />
+        <activity android:name=".activities.GroupCreationActivity" />
+        <activity android:name=".gallery.GalleryActivity"
+            android:configChanges="orientation|screenSize|screenLayout"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activities.ShareActivity"
+            android:taskAffinity=""
+            android:alwaysRetainTaskState="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:stateNotNeeded="true"
+            android:theme="@style/AppTheme.NoActionBar.Transparent"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="*/*" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.chooser.chooser_target_service"
+                android:value="androidx.sharetarget.ChooserTargetServiceCompat" />
+        </activity>
+        <activity
+            android:name=".activities.ShortcutActivity"
+            android:alwaysRetainTaskState="false"
+            android:excludeFromRecents="true"
+            android:icon="@drawable/icon_olvid_round"
+            android:label="@string/app_name"
+            android:noHistory="true"
+            android:stateNotNeeded="true"
+            android:theme="@style/AppTheme.NoActionBar.Transparent"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.DummyActivity"
+            android:allowTaskReparenting="true"
+            android:alwaysRetainTaskState="false"
+            android:clearTaskOnLaunch="true"
+            android:enabled="true"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:noHistory="true"
+            android:stateNotNeeded="true"
+            android:theme="@android:style/Theme.NoDisplay" />
+         <activity
+             android:name="net.openid.appauth.RedirectUriReceiverActivity"
+             android:exported="true"
+             tools:node="replace">
+             <intent-filter android:autoVerify="true">
+                 <action android:name="android.intent.action.VIEW"/>
+                 <category android:name="android.intent.category.DEFAULT"/>
+                 <category android:name="android.intent.category.BROWSABLE"/>
+                 <data android:scheme="https" android:host="openid-redirect.olvid.io" />
+                 <data android:scheme="olvid.openid" android:host="openid-redirect.olvid.io"/>
+             </intent-filter>
+         </activity>
+        <activity
+            android:name=".activities.MessageDetailsActivity"
+            android:label="@string/activity_title_message_details" />
+        <activity
+            android:name=".activities.DiscussionSettingsActivity"
+            android:label="@string/activity_title_discussion_settings"
+            android:theme="@style/AppTheme.WhiteBackground" />
+        <activity
+            android:name=".activities.LockScreenActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar"
+            android:windowSoftInputMode="stateAlwaysVisible" />
+        <activity
+            android:name=".onboarding.OnboardingActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar" />
+        <activity
+            android:name=".appdialogs.AppDialogShowActivity"
+            android:configChanges="orientation|screenSize|screenLayout|uiMode"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar.DimmedWithStatusTransparent" />
+        <activity
+            android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
+            android:label="@string/oss_license_title"
+            android:theme="@style/AppTheme.WhiteBackground.Licenses" />
+        <activity
+            android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
+            android:theme="@style/AppTheme.WhiteBackground.Licenses" />
+        <activity
+            android:name=".owneddetails.SelectDetailsPhotoActivity"
+            android:theme="@style/AppTheme.NoActionBar.FullScreen.Black" />
+        <activity
+            android:name=".webrtc.WebrtcCallActivity"
+            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar"
+            android:label="@string/activity_title_webrtc_call"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            tools:targetApi="o_mr1" />
+        <activity
+            android:name=".webrtc.WebrtcIncomingCallActivity"
+            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar"
+            android:label="@string/activity_title_webrtc_incoming_call"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            tools:targetApi="o_mr1" />
+        <activity
+            android:name=".activities.CallLogActivity"
+            android:label="@string/activity_title_call_log" />
+        <activity
+            android:name=".plus_button.PlusButtonActivity"
+            android:label="@string/activity_title_add_contact"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity android:name=".notifications.MuteDiscussionDialogActivity"
+            android:alwaysRetainTaskState="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:stateNotNeeded="true"
+            android:theme="@style/AppTheme.NoActionBar.Transparent" />
+        <activity android:name=".openid.KeycloakAuthenticationActivity"
+            android:configChanges="orientation|screenSize|screenLayout|uiMode"
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme.NoActionBar.Transparent" />
+        <activity android:name=".settings.StorageExplorer"
+            android:label="@string/activity_title_storage_explorer"/>
+
+        <service
+            android:name=".services.ObvFirebaseMessagingService"
+            android:exported="true"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".notifications.NotificationActionService"
+            android:exported="false"/>
+        <service
+            android:name=".services.UnifiedForegroundService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".webrtc.WebrtcCallService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="phoneCall"/>
+        <service android:name=".services.MediaPlayerService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"/>
+
+        <receiver android:name=".services.MessageExpirationService"
+            android:exported="false"/>
+        <receiver android:name=".services.NetworkStateMonitorReceiver"
+            android:exported="false"/>
+        <receiver android:name=".services.BootBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".services.AlarmPermissionStateChangeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name=".services.FyleContentProvider"
+            android:authorities="${applicationId}.PROVIDER"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.PICTURE_FILES_PROVIDER"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/picture_provider_paths" />
+        </provider>
+    </application>
+
+</manifest>

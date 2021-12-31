@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="qr_code_margin">@dimen/plus_button_card_margins</dimen>
+</resources>

@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_unmute"
+        android:orderInCategory="1"
+        android:icon="@drawable/ic_notification_muted"
+        android:title="@string/menu_action_unmute_notifications"
+        app:showAsAction="always"/>
+</menu>

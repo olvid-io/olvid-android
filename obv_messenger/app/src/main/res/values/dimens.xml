@@ -1,0 +1,32 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="attachment_small_preview_size">72dp</dimen>
+    <dimen name="attachment_corner_radius">6dp</dimen>
+    <dimen name="single_line_emoji_size">48sp</dimen>
+    <dimen name="single_line_emoji_reply_size">40sp</dimen>
+    <dimen name="attach_stuff_margin_top">52dp</dimen>
+    <dimen name="notification_icon_size">64dp</dimen>
+    <dimen name="shortcut_icon_size">108dp</dimen>
+    <dimen name="inner_shortcut_icon_size">72dp</dimen>
+    <dimen name="main_activity_page_margin">8dp</dimen>
+
+    <!--<dimen name="design_fab_image_size" tools:override="true">24dp</dimen>-->
+    <dimen name="identity_details_margin">4dp</dimen>
+    <dimen name="new_message_scroll_offset">64dp</dimen>
+    <dimen name="qr_code_margin">0dp</dimen>
+    <dimen name="plus_button_card_half_margins">4dp</dimen>
+    <dimen name="plus_button_card_margins">8dp</dimen>
+    <dimen name="plus_button_qr_code_overlay_olvid_size">24dp</dimen>
+    <dimen name="plus_button_initial_view_size">48dp</dimen>
+
+    <dimen name="title_font_size">20dp</dimen>
+    <dimen name="subtitle_font_size">16dp</dimen>
+
+    <dimen name="tab_bar_size">56dp</dimen>
+    <dimen name="minus_tab_bar_size">-56dp</dimen>
+    <dimen name="half_tab_bar_size">28dp</dimen>
+
+    <dimen name="owned_identity_list_popup_y_offset">8dp</dimen>
+    <dimen name="ping_dot_offset">70dp</dimen>
+    <dimen name="main_logo_width">82dp</dimen>
+</resources>

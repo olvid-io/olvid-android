@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="30dp"
+              android:gravity="center_horizontal|top"
+              android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/message_timestamp_top_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:background="@drawable/background_top_timestamp"
+        android:paddingBottom="4dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:paddingTop="4dp"
+        android:textColor="@color/alwaysWhite"
+        android:textSize="14dp"
+        tools:ignore="SpUsage"
+        tools:text="@string/text_yesterday"/>
+</LinearLayout>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".plus_button.ScanFragment">
+
+
+    <View
+        android:id="@+id/top_bar"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/tab_bar_size"
+        android:background="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/back_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="8dp"
+        app:srcCompat="@drawable/ic_arrow_back"
+        android:background="@drawable/background_circular_ripple"
+        android:theme="@style/AlwaysWhiteSubtleRipple"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/top_bar"
+        app:layout_constraintStart_toStartOf="@+id/top_bar"
+        app:layout_constraintTop_toTopOf="@id/top_bar" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:text="@string/activity_title_scan_configuration"
+        android:textAppearance="@style/RobotoMedium"
+        android:textSize="@dimen/title_font_size"
+        android:textColor="@color/alwaysWhite"
+        app:layout_constraintBottom_toBottomOf="@+id/top_bar"
+        app:layout_constraintStart_toEndOf="@+id/back_button"
+        app:layout_constraintTop_toTopOf="@+id/top_bar"
+        tools:ignore="SpUsage" />
+
+    <ImageView
+        android:id="@+id/more_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="2dp"
+        android:background="@drawable/background_circular_ripple"
+        android:padding="8dp"
+        app:srcCompat="@drawable/ic_three_dots_always_white"
+        android:theme="@style/AlwaysWhiteSubtleRipple"
+        app:layout_constraintBottom_toBottomOf="@+id/top_bar"
+        app:layout_constraintEnd_toEndOf="@+id/top_bar"
+        app:layout_constraintTop_toTopOf="@+id/top_bar" />
+
+
+    <FrameLayout
+        android:id="@+id/scanner_fragment_placeholder"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/top_bar" />
+
+    <View
+        android:id="@+id/mask_start"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/blackDarkOverlay"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/trou"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_bar" />
+
+    <View
+        android:id="@+id/mask_end"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/blackDarkOverlay"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/trou"
+        app:layout_constraintTop_toBottomOf="@+id/top_bar" />
+
+    <View
+        android:id="@+id/viseur"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginBottom="36dp"
+        android:layout_marginTop="36dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="@+id/scanner_fragment_placeholder"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/top_bar" />
+
+    <View
+        android:id="@+id/trou"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="12dp"
+        android:background="@drawable/background_scanner_center"
+        app:layout_constraintBottom_toBottomOf="@+id/viseur"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="@+id/viseur"
+        app:layout_constraintStart_toStartOf="@+id/viseur"
+        app:layout_constraintTop_toTopOf="@+id/viseur" />
+
+    <ImageView
+        android:layout_width="@dimen/plus_button_qr_code_overlay_olvid_size"
+        android:layout_height="@dimen/plus_button_qr_code_overlay_olvid_size"
+        android:alpha=".5"
+        app:srcCompat="@drawable/olvid_icon_qr_overlay"
+        app:layout_constraintBottom_toBottomOf="@+id/trou"
+        app:layout_constraintEnd_toStartOf="@+id/trou"
+        app:layout_constraintStart_toEndOf="@+id/trou"
+        app:layout_constraintTop_toTopOf="@+id/trou" />
+
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/blackDarkOverlay"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/mask_end"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/mask_start"
+        app:layout_constraintTop_toBottomOf="@+id/trou"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/blackDarkOverlay"
+        app:layout_constraintBottom_toTopOf="@+id/trou"
+        app:layout_constraintEnd_toStartOf="@+id/mask_end"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/mask_start"
+        app:layout_constraintTop_toBottomOf="@+id/top_bar"
+        app:layout_constraintVertical_bias="0.0" />
+
+
+    <View
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/background_scanner_crosshair_bottom_left"
+        app:layout_constraintBottom_toBottomOf="@id/viseur"
+        app:layout_constraintStart_toStartOf="@id/viseur" />
+
+    <View
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/background_scanner_crosshair_bottom_right"
+        app:layout_constraintBottom_toBottomOf="@id/viseur"
+        app:layout_constraintEnd_toEndOf="@id/viseur" />
+
+    <View
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/background_scanner_crosshair_top_left"
+        app:layout_constraintTop_toTopOf="@id/viseur"
+        app:layout_constraintStart_toStartOf="@id/viseur" />
+
+    <View
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/background_scanner_crosshair_top_right"
+        app:layout_constraintTop_toTopOf="@id/viseur"
+        app:layout_constraintEnd_toEndOf="@id/viseur" />
+
+    <ImageButton
+        android:id="@+id/switch_camera_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:theme="@style/AlwaysWhiteRipple"
+        android:background="@drawable/background_circular_ripple"
+        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_camera_switch"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/mask_end" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

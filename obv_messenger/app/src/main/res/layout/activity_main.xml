@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_coordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".main.MainActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/tab_bar_size"
+            android:layout_weight="1"
+            app:popupTheme="@style/AppTheme"
+            android:background="@color/olvid_gradient_dark">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start" >
+                <io.olvid.messenger.customClasses.InitialView
+                    android:id="@+id/owned_identity_initial_view"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginEnd="2dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+                <ImageView
+                    android:id="@+id/owned_identity_unread_marker_image_view"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_dot_blue_bordered"
+                    tools:visibility="visible" />
+                <ImageView
+                    android:id="@+id/owned_identity_muted_marker_image_view"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:srcCompat="@drawable/ic_notification_muted_circle_blue"
+                    tools:visibility="visible" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="48dp">
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="@dimen/main_logo_width"
+                    android:layout_height="24dp"
+                    android:layout_gravity="start"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    app:srcCompat="@drawable/olvid"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+                <ImageView
+                    android:id="@+id/ping_indicator_dot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginStart="@dimen/ping_dot_offset"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:src="@drawable/dot_mask_blue"
+                    tools:background="@color/green"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.appcompat.widget.Toolbar>
+        <View
+            android:id="@+id/ping_indicator_line"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:visibility="gone"
+            />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ping_indicator_full"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/red"
+            android:visibility="gone"
+            tools:visibility="visible"
+            >
+
+            <TextView
+                android:id="@+id/ping_indicator_full_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:layout_marginEnd="4dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/alwaysWhite"
+                android:textSize="12sp"
+                style="@style/RobotoMedium"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/ping_indicator_full_ping_text_view"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Connectivity: POOR" />
+            <TextView
+                android:id="@+id/ping_indicator_full_ping_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="@color/alwaysWhite"
+                tools:text="PING: 765ms"
+                android:maxLines="1"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/view_pager_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <View
+        android:id="@+id/focus_hugger"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:focusable="true"
+        android:layout_gravity="bottom|start"
+        android:focusableInTouchMode="true"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:layout_dodgeInsetEdges="bottom">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/bottom_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/tab_bar_size"
+            android:background="@drawable/background_main_activity_buttons"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageView
+                android:id="@+id/tab_discussions_button"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/content_description_discussions_tab"
+                android:paddingStart="4dp"
+                android:paddingTop="13dp"
+                android:paddingEnd="4dp"
+                android:paddingBottom="11dp"
+                app:srcCompat="@drawable/tab_discussions"
+                android:theme="@style/GreyRipple"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tab_contacts_button"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/tab_discussions_notification_dot"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_marginStart="22dp"
+                android:layout_marginBottom="18dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tab_discussions_button"
+                app:layout_constraintEnd_toEndOf="@+id/tab_discussions_button"
+                app:layout_constraintStart_toStartOf="@+id/tab_discussions_button"
+                app:layout_constraintTop_toTopOf="@+id/tab_discussions_button"
+                app:srcCompat="@drawable/ic_dot_white_bordered"
+                android:contentDescription="@string/content_description_notification_dot" />
+
+            <ImageView
+                android:id="@+id/tab_contacts_button"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/content_description_contacts_tab"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:paddingEnd="4dp"
+                android:paddingStart="4dp"
+                app:srcCompat="@drawable/tab_contacts"
+                android:theme="@style/GreyRipple"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/spacer"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tab_discussions_button"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/tab_contacts_notification_dot"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_marginStart="13dp"
+                android:layout_marginBottom="18dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tab_contacts_button"
+                app:layout_constraintEnd_toEndOf="@+id/tab_contacts_button"
+                app:layout_constraintStart_toStartOf="@+id/tab_contacts_button"
+                app:layout_constraintTop_toTopOf="@+id/tab_contacts_button"
+                app:srcCompat="@drawable/ic_dot_white_bordered"
+                android:contentDescription="@string/content_description_notification_dot" />
+            <View
+                android:id="@+id/spacer"
+                android:layout_width="72dp"
+                android:layout_height="0dp"
+                android:layout_weight="0"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tab_groups_button"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tab_contacts_button"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/tab_groups_button"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/content_description_groups_tab"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:paddingEnd="4dp"
+                android:paddingStart="4dp"
+                app:srcCompat="@drawable/tab_groups"
+                android:theme="@style/GreyRipple"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tab_invitations_button"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/spacer"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/tab_groups_notification_dot"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="18dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tab_groups_button"
+                app:layout_constraintEnd_toEndOf="@+id/tab_groups_button"
+                app:layout_constraintStart_toStartOf="@+id/tab_groups_button"
+                app:layout_constraintTop_toTopOf="@+id/tab_groups_button"
+                app:srcCompat="@drawable/ic_dot_white_bordered"
+                android:contentDescription="@string/content_description_notification_dot" />
+
+            <ImageView
+                android:id="@+id/tab_invitations_button"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/content_description_invitations_tab"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:paddingEnd="4dp"
+                android:paddingStart="4dp"
+                app:srcCompat="@drawable/tab_invitations"
+                android:theme="@style/GreyRipple"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tab_groups_button"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/tab_invitations_notification_dot"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_marginStart="22dp"
+                android:layout_marginBottom="18dp"
+                app:layout_constraintBottom_toBottomOf="@+id/tab_invitations_button"
+                app:layout_constraintEnd_toEndOf="@+id/tab_invitations_button"
+                app:layout_constraintStart_toStartOf="@+id/tab_invitations_button"
+                app:layout_constraintTop_toTopOf="@+id/tab_invitations_button"
+                app:srcCompat="@drawable/ic_dot_white_bordered"
+                android:contentDescription="@string/content_description_notification_dot" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/transparent"
+            app:cardCornerRadius="@dimen/half_tab_bar_size"
+            app:cardElevation="4dp"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_buttons"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/bottom_buttons">
+
+            <ImageView
+                android:id="@+id/tab_plus_button"
+                android:layout_width="@dimen/tab_bar_size"
+                android:layout_height="@dimen/tab_bar_size"
+                android:contentDescription="@string/content_description_add_contact_button"
+                android:foreground="?attr/selectableItemBackground"
+                app:srcCompat="@drawable/tab_add_contact_button_big"
+                android:theme="@style/WhiteRipple" />
+
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

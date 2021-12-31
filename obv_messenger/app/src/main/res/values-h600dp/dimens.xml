@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="plus_button_card_half_margins">8dp</dimen>
+    <dimen name="plus_button_card_margins">16dp</dimen>
+    <dimen name="plus_button_initial_view_size">64dp</dimen>
+    <dimen name="plus_button_qr_code_overlay_olvid_size">36dp</dimen>
+</resources>

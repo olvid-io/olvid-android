@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="io.olvid.messenger.main.MainActivity">
+    <item
+        android:id="@+id/action_call_log"
+        android:icon="@drawable/ic_phone_log"
+        android:title="@string/menu_action_call_log"
+        android:orderInCategory="10"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_white"
+        android:title="@string/menu_action_search"
+        android:orderInCategory="20"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+</menu>

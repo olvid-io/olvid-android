@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    tools:ignore="NewApi">
+    <aapt:attr name="android:drawable">
+        <vector android:width="30dp"
+                android:height="10dp"
+                android:viewportWidth="30.0"
+                android:viewportHeight="10.0">
+            <group android:name="firstDot"
+                android:pivotX="5"
+                android:pivotY="5">
+                <path android:fillColor="@color/greyTint" android:pathData="M5,3a2,2, 0 0,0 0,4a2,2, 0 0,0 0,-4z"/>
+            </group>
+            <group android:name="secondDot"
+                android:pivotX="15"
+                android:pivotY="5">
+                <path android:fillColor="@color/greyTint" android:pathData="M15,3a2,2, 0 0,0 0,4a2,2, 0 0,0 0,-4z"/>
+            </group>
+            <group android:name="thirdDot"
+                android:pivotX="25"
+                android:pivotY="5">
+                <path android:fillColor="@color/greyTint" android:pathData="M25,3a2,2, 0 0,0 0,4a2,2, 0 0,0 0,-4z"/>
+            </group>
+        </vector>
+    </aapt:attr>
+
+    <target android:name="firstDot">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:duration="300"
+                    android:propertyName="scaleX"
+                    android:valueFrom="1"
+                    android:valueTo="2"
+                    android:repeatMode="reverse"
+                    android:repeatCount="1"
+                    android:valueType="floatType"/>
+                <objectAnimator
+                    android:startOffset="50"
+                    android:duration="300"
+                    android:propertyName="scaleY"
+                    android:valueFrom="1"
+                    android:valueTo="2"
+                    android:repeatMode="reverse"
+                    android:repeatCount="1"
+                    android:valueType="floatType"/>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="secondDot">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:startOffset="200"
+                    android:duration="300"
+                    android:propertyName="scaleX"
+                    android:valueFrom="1"
+                    android:valueTo="2"
+                    android:repeatMode="reverse"
+                    android:repeatCount="1"
+                    android:valueType="floatType"/>
+                <objectAnimator
+                    android:startOffset="250"
+                    android:duration="300"
+                    android:propertyName="scaleY"
+                    android:valueFrom="1"
+                    android:valueTo="2"
+                    android:repeatMode="reverse"
+                    android:repeatCount="1"
+                    android:valueType="floatType"/>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="thirdDot">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:startOffset="400"
+                    android:duration="300"
+                    android:propertyName="scaleX"
+                    android:valueFrom="1"
+                    android:valueTo="2"
+                    android:repeatMode="reverse"
+                    android:repeatCount="1"
+                    android:valueType="floatType"/>
+                <objectAnimator
+                    android:startOffset="450"
+                    android:duration="300"
+                    android:propertyName="scaleY"
+                    android:valueFrom="1"
+                    android:valueTo="2"
+                    android:repeatMode="reverse"
+                    android:repeatCount="1"
+                    android:valueType="floatType"/>
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

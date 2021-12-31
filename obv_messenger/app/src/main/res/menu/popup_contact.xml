@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/popup_action_rename_contact"
+        android:title="@string/menu_action_rename_contact"/>
+    <item
+        android:id="@+id/popup_action_delete_contact"
+        android:title="@string/menu_action_delete_contact"/>
+    <item
+        android:id="@+id/popup_action_call_contact"
+        android:title="@string/menu_action_call_contact"/>
+</menu>

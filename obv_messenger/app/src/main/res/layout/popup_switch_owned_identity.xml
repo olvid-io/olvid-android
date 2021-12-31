@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <io.olvid.messenger.customClasses.EmptyRecyclerView
+        android:id="@+id/owned_identity_list_recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_goneMarginBottom="4dp"
+        app:layout_constraintHeight_max="264dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/empty_view"
+        tools:itemCount="2"
+        tools:listitem="@layout/item_view_owned_identity_with_unread_messages"/>
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:paddingVertical="4dp"
+        android:text="@string/text_no_other_profile_to_switch_to"
+        android:textAlignment="center"
+        android:textColor="@color/greyTint"
+        android:textStyle="italic"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/owned_identity_list_recycler_view"
+        tools:visibility="visible" />
+</androidx.constraintlayout.widget.ConstraintLayout>

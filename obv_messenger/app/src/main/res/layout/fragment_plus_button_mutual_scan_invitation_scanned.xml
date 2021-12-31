@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    tools:context=".plus_button.InvitationScannedFragment">
+
+    <View
+        android:id="@+id/top_bar"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/tab_bar_size"
+        android:background="@drawable/background_fragment_top_bar_white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/back_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/background_circular_ripple"
+        android:padding="8dp"
+        android:theme="@style/GreyRipple"
+        app:layout_constraintBottom_toBottomOf="@+id/top_bar"
+        app:layout_constraintStart_toStartOf="@+id/top_bar"
+        app:layout_constraintTop_toTopOf="@id/top_bar"
+        app:srcCompat="@drawable/ic_arrow_back_blue_or_white" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:text="@string/activity_title_add_contact"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/blueOrWhite"
+        android:textSize="@dimen/title_font_size"
+        app:layout_constraintBottom_toBottomOf="@+id/top_bar"
+        app:layout_constraintStart_toEndOf="@+id/back_button"
+        app:layout_constraintTop_toTopOf="@+id/top_bar"
+        tools:ignore="SpUsage" />
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/top_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingBottom="88dp"
+        android:clipToPadding="false">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/plus_button_card_margins"
+        android:layout_marginTop="@dimen/plus_button_card_margins"
+        android:layout_marginEnd="@dimen/plus_button_card_margins"
+        android:layout_marginBottom="@dimen/plus_button_card_margins"
+        app:cardBackgroundColor="@color/almostWhite"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/contact_identity_linear_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <io.olvid.messenger.customClasses.InitialView
+                    android:id="@+id/contact_initial_view"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginStart="@dimen/plus_button_card_margins"
+                    android:layout_marginTop="@dimen/plus_button_card_margins"
+                    android:layout_weight="0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/contact_name_text_view"
+                    style="@style/RobotoMedium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/plus_button_card_margins"
+                    android:layout_marginTop="@dimen/plus_button_card_margins"
+                    android:layout_marginEnd="@dimen/plus_button_card_margins"
+                    android:layout_weight="1"
+                    android:maxLines="3"
+                    android:textColor="@color/olvid_gradient_light"
+                    android:textSize="18sp"
+                    tools:text="Boby Leblond (Software engineer @ ACME)" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/mutual_scan_explanation_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/plus_button_card_margins"
+                android:layout_marginTop="@dimen/plus_button_card_half_margins"
+                android:layout_marginEnd="@dimen/plus_button_card_margins"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@id/mutual_scan_warning_text_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/contact_identity_linear_layout"
+                app:layout_constraintVertical_chainStyle="packed"
+                tools:text="@string/text_explanation_mutual_scan_add_contact" />
+
+            <TextView
+                android:id="@+id/mutual_scan_warning_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/plus_button_card_margins"
+                android:layout_marginTop="@dimen/plus_button_card_half_margins"
+                android:layout_marginEnd="@dimen/plus_button_card_margins"
+                android:background="@drawable/background_warning_message"
+                android:drawablePadding="4dp"
+                android:orientation="horizontal"
+                android:padding="4dp"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:layout_goneMarginBottom="@dimen/plus_button_card_margins"
+                app:drawableStartCompat="@drawable/ic_warning_outline"
+                app:layout_constraintBottom_toTopOf="@id/add_contact_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mutual_scan_explanation_text_view"
+                tools:text="@string/text_explanation_warning_mutual_scan_direct"
+                tools:visibility="visible" />
+
+            <Button
+                android:id="@+id/add_contact_button"
+                style="@style/Base.Widget.AppCompat.Button.Colored"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/plus_button_card_margins"
+                android:layout_marginTop="@dimen/plus_button_card_half_margins"
+                android:layout_marginEnd="@dimen/plus_button_card_margins"
+                android:layout_marginBottom="@dimen/plus_button_card_margins"
+                android:paddingVertical="16dp"
+                android:stateListAnimator="@null"
+                android:text="@string/button_label_add_contact"
+                android:textColor="@color/alwaysWhite"
+                android:theme="@style/AppTheme.BlueAccent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mutual_scan_warning_text_view" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/mutual_scan_success_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/plus_button_card_margins"
+        android:layout_marginTop="@dimen/plus_button_card_margins"
+        android:layout_marginEnd="@dimen/plus_button_card_margins"
+        android:layout_marginBottom="@dimen/plus_button_card_margins"
+        app:cardBackgroundColor="@color/almostWhite"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardView"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/mutual_scan_success_explanation_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/plus_button_card_margins"
+                android:layout_marginTop="@dimen/plus_button_card_half_margins"
+                android:layout_marginEnd="@dimen/plus_button_card_margins"
+                android:textSize="16sp"
+                tools:text="@string/text_explanation_mutual_scan_success" />
+
+            <Button
+                android:id="@+id/success_button"
+                style="@style/Base.Widget.AppCompat.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/plus_button_card_margins"
+                android:layout_marginTop="@dimen/plus_button_card_half_margins"
+                android:layout_marginEnd="@dimen/plus_button_card_margins"
+                android:layout_marginBottom="@dimen/plus_button_card_margins"
+                android:paddingVertical="16dp"
+                android:stateListAnimator="@null"
+                android:text="@string/button_label_ok"
+                android:textColor="@color/alwaysWhite"
+                android:theme="@style/AppTheme.BlueAccent" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/cancel_button"
+        style="@style/Base.Widget.AppCompat.Button.Colored"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/plus_button_card_margins"
+        android:layout_marginEnd="@dimen/plus_button_card_margins"
+        android:layout_marginBottom="@dimen/plus_button_card_margins"
+        android:paddingVertical="16dp"
+        android:stateListAnimator="@null"
+        android:text="@string/button_label_cancel"
+        android:textColor="@color/alwaysWhite"
+        android:theme="@style/AppTheme.GreyAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

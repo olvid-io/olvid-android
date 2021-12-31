@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ListPreference
+        android:order="5"
+        android:key="pref_key_autodownload_size"
+        android:defaultValue="10000000"
+        android:entries="@array/autodownload_sizes"
+        android:entryValues="@array/autodownload_sizes_values"
+        android:title="@string/pref_autodownload_size_title"
+        app:useSimpleSummaryProvider="true"
+        android:icon="@drawable/ic_pref_download" />
+
+    <SwitchPreference
+        android:order="10"
+        android:key="pref_key_auto_open_limited_visibility_inbound"
+        android:title="@string/pref_auto_open_limited_visibility_inbound_title"
+        android:summary="@string/pref_auto_open_limited_visibility_inbound_summary"
+        android:icon="@drawable/ic_pref_auto_open"
+        android:defaultValue="false" />
+
+    <SwitchPreference
+        android:order="20"
+        android:key="pref_key_retain_wiped_outbound_messages"
+        android:title="@string/pref_retain_wiped_outbound_messages_title"
+        android:summary="@string/pref_retain_wiped_outbound_messages_summary"
+        android:icon="@drawable/ic_pref_retain_wiped"
+        android:defaultValue="false" />
+
+    <io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory
+        android:order="30"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_category_default_retention_policy_title"
+        android:summary="@string/pref_category_default_retention_policy_summary">
+        <EditTextPreference
+            android:order="1"
+            android:defaultValue=""
+            android:icon="@drawable/ic_pref_count"
+            android:key="pref_key_default_discussion_retention_count"
+            android:title="@string/pref_discussion_retention_count_title"
+            tools:summary="@string/pref_discussion_retention_count_summary_null"
+            android:dialogMessage="@string/pref_discussion_default_retention_count_dialog_message" />
+        <ListPreference
+            android:order="2"
+            android:defaultValue="null"
+            android:icon="@drawable/ic_pref_date"
+            android:key="pref_key_default_discussion_retention_duration"
+            android:title="@string/pref_discussion_retention_duration_title"
+            tools:summary="@string/pref_discussion_retention_duration_summary"
+            android:entries="@array/default_discussion_retention_duration"
+            android:entryValues="@array/default_discussion_retention_duration_values"/>
+    </io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory>
+
+    <io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory
+        android:order="40"
+        android:key="pref_key_category_default_ephemeral_settings"
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_category_default_ephemeral_settings_title"
+        android:summary="@string/pref_category_default_ephemeral_settings_summary">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_default_read_once"
+            android:title="@string/pref_discussion_read_once_title"
+            android:summary="@string/pref_discussion_read_once_summary"
+            android:icon="@drawable/ic_pref_read_once"
+            android:order="10"/>
+        <ListPreference
+            android:defaultValue="null"
+            android:key="pref_key_default_visibility_duration"
+            android:icon="@drawable/ic_pref_visibility"
+            android:title="@string/pref_discussion_visibility_duration_title"
+            tools:summary="@string/pref_discussion_visibility_duration_summary_null"
+            android:entries="@array/discussion_ephemeral_duration"
+            android:entryValues="@array/discussion_ephemeral_duration_values"
+            android:order="20"/>
+        <ListPreference
+            android:defaultValue="null"
+            android:key="pref_key_default_existence_duration"
+            android:icon="@drawable/ic_pref_existence"
+            android:title="@string/pref_discussion_existence_duration_title"
+            tools:summary="@string/pref_discussion_existence_duration_summary_null"
+            android:entries="@array/discussion_ephemeral_duration"
+            android:entryValues="@array/discussion_ephemeral_duration_values"
+            android:order="30"/>
+    </io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory>
+</PreferenceScreen>

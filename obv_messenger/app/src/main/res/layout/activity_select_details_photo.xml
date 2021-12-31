@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/photo_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="matrix"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/mask_start"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/blackOverlay"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/overlay_image_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/mask_end"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/blackOverlay"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/overlay_image_view"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/blackOverlay"
+        app:layout_constraintBottom_toTopOf="@+id/overlay_image_view"
+        app:layout_constraintEnd_toStartOf="@+id/mask_end"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/mask_start"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/blackOverlay"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/mask_end"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/mask_start"
+        app:layout_constraintTop_toBottomOf="@+id/overlay_image_view"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <ImageView
+        android:id="@+id/overlay_image_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/background_identity_details_photo_overlay"
+        app:layout_constraintBottom_toTopOf="@+id/saturation_seekbar"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_reset" />
+
+    <ImageView
+        android:id="@+id/button_back"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:padding="4dp"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_arrow_back"
+        android:background="@drawable/background_circular_ripple"
+        android:theme="@style/AlwaysWhiteRipple"
+        android:focusable="true" />
+
+    <ImageView
+        android:id="@+id/button_rotate"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/background_circular_ripple"
+        android:theme="@style/AlwaysWhiteRipple"
+        app:srcCompat="@drawable/ic_rotate_image" />
+
+    <ImageView
+        android:id="@+id/button_reset"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/background_circular_ripple"
+        android:theme="@style/AlwaysWhiteRipple"
+        app:srcCompat="@drawable/ic_reset_image" />
+
+    <ImageView
+        android:id="@+id/button_accept"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:padding="4dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/background_circular_ripple"
+        android:theme="@style/AlwaysWhiteRipple"
+        app:srcCompat="@drawable/ic_ok_white" />
+
+
+    <ImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ic_saturation"
+        app:layout_constraintBottom_toBottomOf="@+id/saturation_seekbar"
+        app:layout_constraintEnd_toStartOf="@+id/saturation_seekbar"
+        app:layout_constraintTop_toTopOf="@+id/saturation_seekbar" />
+
+    <SeekBar
+        android:id="@+id/saturation_seekbar"
+        android:layout_width="0dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="8dp"
+        android:thumb="@drawable/dot"
+        android:max="510"
+        android:progress="255"
+        android:progressTint="@color/almostWhite"
+        app:layout_constraintBottom_toTopOf="@+id/temperature_seekbar"
+        app:layout_constraintEnd_toStartOf="@+id/button_accept"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ic_temperature"
+        app:layout_constraintBottom_toBottomOf="@+id/temperature_seekbar"
+        app:layout_constraintEnd_toStartOf="@+id/temperature_seekbar"
+        app:layout_constraintTop_toTopOf="@+id/temperature_seekbar" />
+
+    <SeekBar
+        android:id="@+id/temperature_seekbar"
+        android:layout_width="0dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="8dp"
+        android:thumb="@drawable/dot"
+        android:max="510"
+        android:progress="255"
+        android:progressTint="@color/almostWhite"
+        app:layout_constraintBottom_toTopOf="@+id/brightness_seekbar"
+        app:layout_constraintEnd_toStartOf="@+id/button_accept"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ic_brightness"
+        app:layout_constraintBottom_toBottomOf="@+id/brightness_seekbar"
+        app:layout_constraintEnd_toStartOf="@+id/brightness_seekbar"
+        app:layout_constraintTop_toTopOf="@+id/brightness_seekbar" />
+
+    <SeekBar
+        android:id="@+id/brightness_seekbar"
+        android:layout_width="0dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="8dp"
+        android:thumb="@drawable/dot"
+        android:max="510"
+        android:progress="255"
+        android:progressTint="@color/almostWhite"
+        app:layout_constraintBottom_toTopOf="@+id/contrast_seekbar"
+        app:layout_constraintEnd_toStartOf="@+id/button_accept"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ic_contrast"
+        app:layout_constraintBottom_toBottomOf="@+id/contrast_seekbar"
+        app:layout_constraintEnd_toStartOf="@+id/contrast_seekbar"
+        app:layout_constraintTop_toTopOf="@+id/contrast_seekbar" />
+
+    <SeekBar
+        android:id="@+id/contrast_seekbar"
+        android:layout_width="0dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="8dp"
+        android:max="510"
+        android:progress="255"
+        android:progressTint="@color/almostWhite"
+        android:thumb="@drawable/dot"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_accept"
+        app:layout_constraintStart_toStartOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

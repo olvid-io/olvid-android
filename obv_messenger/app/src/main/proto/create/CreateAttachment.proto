@@ -1,0 +1,48 @@
+/*
+ *  Olvid for Android
+ *  Copyright © 2019-2021 Olvid SAS
+ *
+ *  This file is part of Olvid for Android.
+ *
+ *  Olvid is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License, version 3,
+ *  as published by the Free Software Foundation.
+ *
+ *  Olvid is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+syntax = "proto3";
+
+package olvid;
+
+option java_package = "io.olvid.messenger.webclient.protobuf.create";
+
+//id is the same for the same attachment : send multiple attachments simultaneuously\
+//id isn't absolute : only used while sending, can be reused
+
+message SendAttachmentNotice {
+    int64 localId = 1;
+    bytes sha256 = 2;
+    int64 size = 3;
+    int64 numberChunks = 4; //number of chunks going to be sent 
+    string type = 5; //image or file
+    string fileName = 6;
+    int64 discussionId = 7;
+}
+
+message SendAttachmentChunk {
+    int64 localId = 1;
+    int64 offset = 2;
+    int64 chunkNumber = 3;
+    bytes chunk = 4;
+}
+
+message SendAttachmentDone {
+    int64 localId = 1;
+}

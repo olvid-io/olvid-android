@@ -1,0 +1,3 @@
+include ':app', ':engine', ':libwebrtc'
+
+project(':engine').projectDir = new File("../obv_engine/engine")

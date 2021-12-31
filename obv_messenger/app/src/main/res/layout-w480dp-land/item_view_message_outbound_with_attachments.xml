@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/message_root_constraint_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:paddingBottom="2dp"
+    android:paddingTop="2dp"
+    android:theme="@style/SubtleGreyRipple">
+
+
+    <io.olvid.messenger.customClasses.SizeAwareCardView
+        android:id="@+id/message_content_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:theme="@style/SubtleGreyRipple"
+        app:cardBackgroundColor="@color/primary100"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/message_cell_barrier"
+        app:layout_constraintTop_toTopOf="parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/view_message_outbound_header" />
+            <include layout="@layout/view_message_attachment_card"/>
+        </LinearLayout>
+    </io.olvid.messenger.customClasses.SizeAwareCardView>
+
+    <CheckBox
+        android:id="@+id/message_selection_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="2dp"
+        android:clickable="false"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/message_content_card"
+        tools:visibility="visible"/>
+
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/reactions_constraint_layout"
+        android:layout_marginTop="-4dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/message_content_card"
+        app:layout_constraintEnd_toEndOf="@+id/message_content_card"
+        app:layout_constraintStart_toStartOf="@id/message_cell_barrier" >
+        <io.olvid.messenger.customClasses.DynamicFlow
+            android:id="@+id/reactions_dynamic_flow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:flow_horizontalBias="1"
+            app:flow_horizontalGap="4dp"
+            app:flow_horizontalStyle="packed"
+            app:flow_verticalBias="0"
+            app:flow_verticalGap="2dp"
+            android:background="@drawable/background_reaction"
+            app:flow_wrapMode="chain" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/message_timer_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:drawableTopCompat="@drawable/ic_timer_small"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="4dp"
+        android:gravity="center"
+        app:layout_constraintEnd_toStartOf="@+id/message_content_card"
+        app:layout_constraintTop_toTopOf="@+id/message_content_card"
+        android:textSize="12sp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="35d" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_60p"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".4" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_400"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="408dp" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/message_cell_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="guideline_60p, guideline_400"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

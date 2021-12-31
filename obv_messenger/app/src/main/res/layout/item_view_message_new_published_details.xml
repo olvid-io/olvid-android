@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/message_root_constraint_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:theme="@style/SubtleGreyRipple">
+
+    <View
+        android:id="@+id/message_info_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="2dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:theme="@style/SubtleGreyRipple"
+        android:foreground="?attr/selectableItemBackground"
+        android:background="@drawable/background_info_message"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/message_selection_checkbox"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/message_info_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constrainedWidth="true"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/primary700"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="8dp"
+        app:layout_goneMarginEnd="16dp"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toStartOf="@+id/new_published_details_icon"
+        app:layout_constraintStart_toEndOf="@id/message_selection_checkbox"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/message_timestamp_bottom_text_view"
+        tools:text="@string/text_contact_details_updated" />
+
+
+    <TextView
+        android:id="@+id/message_timestamp_bottom_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintHorizontal_bias="1"
+        android:textAlignment="textEnd"
+        android:textColor="#CC7D7D7D"
+        android:textSize="12sp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        app:layout_goneMarginEnd="16dp"
+        android:layout_marginBottom="6dp"
+        app:layout_constraintStart_toEndOf="@id/message_selection_checkbox"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/new_published_details_icon"
+        app:layout_constraintTop_toBottomOf="@+id/message_info_text_view"
+        tools:text="11:25" />
+
+    <ImageView
+        android:id="@+id/new_published_details_icon"
+        android:layout_width="24dp"
+        android:layout_height="18dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:srcCompat="@drawable/ic_olvid_card" />
+
+    <ImageView
+        android:id="@+id/new_published_details_red_dot"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginBottom="11dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/new_published_details_icon"
+        app:layout_constraintStart_toStartOf="@+id/new_published_details_icon"
+        app:srcCompat="@drawable/ic_dot_white_bordered" />
+
+    <CheckBox
+        android:id="@+id/message_selection_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:clickable="false"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

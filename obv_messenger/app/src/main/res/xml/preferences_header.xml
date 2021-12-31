@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:title="@string/pref_category_notifications_title"
+        android:fragment="io.olvid.messenger.settings.NotificationPreferenceFragment"
+        android:icon="@drawable/ic_pref_vibrator"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_category_customization_title"
+        android:fragment="io.olvid.messenger.settings.CustomizationPreferenceFragment"
+        android:icon="@drawable/ic_pref_customization"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_category_privacy_title"
+        android:key="pref_header_key_privacy"
+        android:fragment="io.olvid.messenger.settings.PrivacyPreferenceFragment"
+        android:icon="@drawable/ic_pref_hide_notification_contents"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_category_lock_title"
+        android:key="pref_header_key_lock_screen"
+        android:fragment="io.olvid.messenger.settings.LockPreferenceFragment"
+        android:icon="@drawable/ic_pref_use_lock_screen"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_category_send_receive_messages"
+        android:key="pref_header_key_send_receive_messages"
+        android:fragment="io.olvid.messenger.settings.SendReceiveMessagesPreferenceFragment"
+        android:icon="@drawable/ic_pref_send"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_category_camera_title"
+        android:fragment="io.olvid.messenger.settings.CameraPreferenceFragment"
+        android:icon="@drawable/ic_pref_camera"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_category_backup_title"
+        android:key="pref_header_key_backup"
+        android:fragment="io.olvid.messenger.settings.BackupPreferenceFragment"
+        android:icon="@drawable/ic_pref_enable_automatic_backup"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_category_webclient"
+        android:fragment="io.olvid.messenger.settings.WebClientPreferenceFragment"
+        android:icon="@drawable/ic_pref_webclient"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_category_other_title"
+        android:fragment="io.olvid.messenger.settings.OtherPreferenceFragment"
+        android:icon="@drawable/ic_pref_settings"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+</PreferenceScreen>

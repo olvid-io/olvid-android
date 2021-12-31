@@ -1,0 +1,44 @@
+/*
+ *  Olvid for Android
+ *  Copyright © 2019-2021 Olvid SAS
+ *
+ *  This file is part of Olvid for Android.
+ *
+ *  Olvid is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License, version 3,
+ *  as published by the Free Software Foundation.
+ *
+ *  Olvid is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public license
+ *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+syntax = "proto3";
+
+package olvid;
+
+option java_package = "io.olvid.messenger.webclient.protobuf";
+
+import "connection/ConnectionAppDecommitment.proto";
+import "connection/ConnectionAppIdentifierPkKemCommitSeed.proto";
+import "connection/ConnectionBrowserKemSeed.proto";
+
+enum ConnectionColissimoType {
+  CONNECTION_COLISSIMO_TYPE_DEFAULT = 0;
+
+  CONNECTION_APP_IDENTIFIER_PK_KEM_COMMIT_SEED = 1;
+  CONNECTION_BROWSER_KEM_SEED = 2;
+  CONNECTION_APP_DECOMMITMENT = 3;
+}
+
+message ConnectionColissimo {
+  ConnectionColissimoType type = 1;
+
+  ConnectionAppIdentifierPkKemCommitSeed connectionAppIdentifierPkKemCommitSeed = 2;
+  ConnectionBrowserKemSeed ConnectionBrowserKemSeed = 3;
+  ConnectionAppDecommitment ConnectionAppDecommitment = 4;
+}

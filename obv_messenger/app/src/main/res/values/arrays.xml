@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="QR_correction_levels">
+        <item>@string/pref_text_QR_correction_low</item>
+        <item>@string/pref_text_QR_correction_medium</item>
+        <item>@string/pref_text_QR_correction_high</item>
+        <item>@string/pref_text_QR_correction_veryhigh</item>
+    </string-array>
+    <string-array name="QR_correction_levels_values" translatable="false">
+        <item>L</item>
+        <item>M</item>
+        <item>Q</item>
+        <item>H</item>
+    </string-array>
+
+    <string-array name="lock_grace_times">
+        <item>@string/pref_text_lock_grace_time_instant</item>
+        <item>@string/pref_text_lock_grace_time_10s</item>
+        <item>@string/pref_text_lock_grace_time_30s</item>
+        <item>@string/pref_text_lock_grace_time_1m</item>
+        <item>@string/pref_text_lock_grace_time_2m</item>
+        <item>@string/pref_text_lock_grace_time_5m</item>
+        <item>@string/pref_text_lock_grace_time_infinity</item>
+    </string-array>
+    <string-array name="lock_grace_times_values">
+        <item>0</item>
+        <item>10</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+        <item>300</item>
+        <item>-1</item>
+    </string-array>
+
+    <string-array name="camera_resolution">
+        <item>@string/pref_text_resolution_SD</item>
+        <item>@string/pref_text_resolution_HD</item>
+        <item>@string/pref_text_resolution_FHQ</item>
+        <item>@string/pref_text_resolution_QHD</item>
+        <item>@string/pref_text_resolution_UHD</item>
+        <item>@string/pref_text_resolution_native</item>
+    </string-array>
+    <string-array name="camera_resolution_values">
+        <item>360</item>
+        <item>720</item>
+        <item>1080</item>
+        <item>1440</item>
+        <item>2160</item>
+        <item>-1</item>
+    </string-array>
+
+    <string-array name="autodownload_sizes">
+        <item>@string/pref_text_autodownload_size_disabled</item>
+        <item>@string/pref_text_autodownload_size_1M</item>
+        <item>@string/pref_text_autodownload_size_3M</item>
+        <item>@string/pref_text_autodownload_size_5M</item>
+        <item>@string/pref_text_autodownload_size_10M</item>
+        <item>@string/pref_text_autodownload_size_20M</item>
+        <item>@string/pref_text_autodownload_size_50M</item>
+        <item>@string/pref_text_autodownload_size_unlimited</item>
+    </string-array>
+    <string-array name="autodownload_sizes_values">
+        <item>0</item>
+        <item>1000000</item>
+        <item>3000000</item>
+        <item>5000000</item>
+        <item>10000000</item>
+        <item>20000000</item>
+        <item>50000000</item>
+        <item>-1</item>
+    </string-array>
+
+    <string-array name="discussion_read_receipt">
+        <item>@string/pref_text_app_default</item>
+        <item>@string/pref_text_discussion_read_receipt_off</item>
+        <item>@string/pref_text_discussion_read_receipt_on</item>
+    </string-array>
+    <string-array name="discussion_read_receipt_values">
+        <item>null</item>
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="discussion_auto_open_limited_visibility_inbound">
+        <item>@string/pref_text_app_default</item>
+        <item>@string/pref_text_discussion_auto_open_limited_visibility_inbound_off</item>
+        <item>@string/pref_text_discussion_auto_open_limited_visibility_inbound_on</item>
+    </string-array>
+    <string-array name="discussion_auto_open_limited_visibility_inbound_values">
+        <item>null</item>
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="discussion_retain_wiped_outbound">
+        <item>@string/pref_text_app_default</item>
+        <item>@string/pref_text_discussion_retain_wiped_outbound_off</item>
+        <item>@string/pref_text_discussion_retain_wiped_outbound_on</item>
+    </string-array>
+    <string-array name="discussion_retain_wiped_outbound_values">
+        <item>null</item>
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="dark_mode_choice">
+        <item>@string/pref_text_dark_mode_on</item>
+        <item>@string/pref_text_dark_mode_off</item>
+        <item>@string/pref_text_dark_mode_auto</item>
+    </string-array>
+    <string-array name="dark_mode_choice_values">
+        <item>Dark</item>
+        <item>Light</item>
+        <item>Auto</item>
+    </string-array>
+
+    <string-array name="vibration_patterns">
+        <item>@string/pref_text_vibration_pattern_none</item>
+        <item>@string/pref_text_vibration_pattern_one</item>
+        <item>@string/pref_text_vibration_pattern_two</item>
+        <item>@string/pref_text_vibration_pattern_three</item>
+        <item>@string/pref_text_vibration_pattern_one_long</item>
+        <item>@string/pref_text_vibration_pattern_two_long</item>
+        <item>@string/pref_text_vibration_pattern_three_long</item>
+    </string-array>
+    <string-array name="vibration_patterns_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+    </string-array>
+
+    <string-array name="discussion_ephemeral_duration">
+        <item>@string/pref_text_duration_null</item>
+        <item>@string/pref_text_duration_5s</item>
+        <item>@string/pref_text_duration_10s</item>
+        <item>@string/pref_text_duration_30s</item>
+        <item>@string/pref_text_duration_1m</item>
+        <item>@string/pref_text_duration_5m</item>
+        <item>@string/pref_text_duration_30m</item>
+        <item>@string/pref_text_duration_1h</item>
+        <item>@string/pref_text_duration_6h</item>
+        <item>@string/pref_text_duration_12h</item>
+        <item>@string/pref_text_duration_1d</item>
+        <item>@string/pref_text_duration_7d</item>
+        <item>@string/pref_text_duration_30d</item>
+        <item>@string/pref_text_duration_90d</item>
+        <item>@string/pref_text_duration_180d</item>
+        <item>@string/pref_text_duration_1y</item>
+        <item>@string/pref_text_duration_3y</item>
+        <item>@string/pref_text_duration_5y</item>
+    </string-array>
+    <string-array name="discussion_ephemeral_duration_values">
+        <item>null</item>
+        <item>5</item>
+        <item>10</item>
+        <item>30</item>
+        <item>60</item>
+        <item>300</item>
+        <item>1800</item>
+        <item>3600</item>
+        <item>21600</item>
+        <item>43200</item>
+        <item>86400</item>
+        <item>604800</item>
+        <item>2592000</item>
+        <item>7776000</item>
+        <item>15552000</item>
+        <item>31536000</item>
+        <item>94608000</item>
+        <item>157680000</item>
+    </string-array>
+
+    <string-array name="language_picker_webclient">
+        <item>English</item>
+        <item>Français</item>
+        <item>@string/pref_text_app_default</item>
+        <item>@string/pref_text_webclient_language_browser_default</item>
+    </string-array>
+    <string-array name="language_picker_webclient_values">
+        <item>en</item>
+        <item>fr</item>
+        <item>AppDefault</item>
+        <item>BrowserDefault</item>
+    </string-array>
+
+    <string-array name="theme_webclient">
+        <item>@string/pref_text_dark_mode_on</item>
+        <item>@string/pref_text_dark_mode_off</item>
+        <item>@string/pref_webclient_theme_app_default</item>
+        <item>@string/pref_webclient_theme_browser_default</item>
+    </string-array>
+    <string-array name="theme_webclient_values">
+        <item>dark</item>
+        <item>light</item>
+        <item>AppDefault</item>
+        <item>BrowserDefault</item>
+    </string-array>
+
+    <string-array name="default_discussion_retention_duration">
+        <item>@string/pref_text_duration_null</item>
+        <item>@string/pref_text_duration_6h</item>
+        <item>@string/pref_text_duration_12h</item>
+        <item>@string/pref_text_duration_1d</item>
+        <item>@string/pref_text_duration_2d</item>
+        <item>@string/pref_text_duration_7d</item>
+        <item>@string/pref_text_duration_15d</item>
+        <item>@string/pref_text_duration_30d</item>
+        <item>@string/pref_text_duration_90d</item>
+        <item>@string/pref_text_duration_180d</item>
+        <item>@string/pref_text_duration_1y</item>
+        <item>@string/pref_text_duration_3y</item>
+        <item>@string/pref_text_duration_5y</item>
+    </string-array>
+    <string-array name="default_discussion_retention_duration_values">
+        <item>null</item>
+        <item>21600</item>
+        <item>43200</item>
+        <item>86400</item>
+        <item>172800</item>
+        <item>604800</item>
+        <item>1296000</item>
+        <item>2592000</item>
+        <item>7776000</item>
+        <item>15552000</item>
+        <item>31536000</item>
+        <item>94608000</item>
+        <item>157680000</item>
+    </string-array>
+
+    <string-array name="discussion_retention_duration">
+        <item>@string/pref_text_app_default</item>
+        <item>@string/pref_text_duration_null</item>
+        <item>@string/pref_text_duration_6h</item>
+        <item>@string/pref_text_duration_12h</item>
+        <item>@string/pref_text_duration_1d</item>
+        <item>@string/pref_text_duration_2d</item>
+        <item>@string/pref_text_duration_7d</item>
+        <item>@string/pref_text_duration_15d</item>
+        <item>@string/pref_text_duration_30d</item>
+        <item>@string/pref_text_duration_90d</item>
+        <item>@string/pref_text_duration_180d</item>
+        <item>@string/pref_text_duration_1y</item>
+        <item>@string/pref_text_duration_3y</item>
+        <item>@string/pref_text_duration_5y</item>
+    </string-array>
+    <string-array name="discussion_retention_duration_values">
+        <item>null</item>
+        <item>0</item>
+        <item>21600</item>
+        <item>43200</item>
+        <item>86400</item>
+        <item>172800</item>
+        <item>604800</item>
+        <item>1296000</item>
+        <item>2592000</item>
+        <item>7776000</item>
+        <item>15552000</item>
+        <item>31536000</item>
+        <item>94608000</item>
+        <item>157680000</item>
+    </string-array>
+
+    <string-array name="display_name_format_choice">
+        <item>@string/pref_text_display_name_format_first_last</item>
+        <item>@string/pref_text_display_name_format_first_last_company</item>
+        <item>@string/pref_text_display_name_format_first_last_position_company</item>
+        <item>@string/pref_text_display_name_format_last_first</item>
+        <item>@string/pref_text_display_name_format_last_first_company</item>
+        <item>@string/pref_text_display_name_format_last_first_position_company</item>
+    </string-array>
+    <string-array name="display_name_format_choice_values">
+        <item>%f %l</item>
+        <item>%f %l (%c)</item>
+        <item>%f %l (%p @ %c)</item>
+        <item>%l %f</item>
+        <item>%l %f (%c)</item>
+        <item>%l %f (%p @ %c)</item>
+    </string-array>
+
+    <string-array name="regional_turn_servers">
+        <item>@string/pref_text_regional_turn_server_none</item>
+        <item>@string/pref_text_regional_turn_server_global</item>
+        <item>@string/pref_text_regional_turn_server_paris</item>
+        <item>@string/pref_text_regional_turn_server_new_york</item>
+        <item>@string/pref_text_regional_turn_server_singapore</item>
+    </string-array>
+    <string-array name="regional_turn_servers_values">
+        <item>null</item>
+        <item>global</item>
+        <item>par</item>
+        <item>nyc</item>
+        <item>sng</item>
+    </string-array>
+
+    <string-array name="font_scale_choice">
+        <item>@string/pref_text_font_scale_0_75</item>
+        <item>@string/pref_text_font_scale_0_9</item>
+        <item>@string/pref_text_font_scale_1_0</item>
+        <item>@string/pref_text_font_scale_1_1</item>
+        <item>@string/pref_text_font_scale_1_25</item>
+        <item>@string/pref_text_font_scale_1_5</item>
+    </string-array>
+    <string-array name="font_scale_choice_values">
+        <item>0.75</item>
+        <item>0.9</item>
+        <item>1.0</item>
+        <item>1.1</item>
+        <item>1.25</item>
+        <item>1.5</item>
+    </string-array>
+
+    <string-array name="ping_connectivity_indicator">
+        <item>@string/pref_text_ping_connectivity_indicator_none</item>
+        <item>@string/pref_text_ping_connectivity_indicator_dot</item>
+        <item>@string/pref_text_ping_connectivity_indicator_line</item>
+        <item>@string/pref_text_ping_connectivity_indicator_full</item>
+    </string-array>
+    <string-array name="ping_connectivity_indicator_value">
+        <item>null</item>
+        <item>dot</item>
+        <item>line</item>
+        <item>full</item>
+    </string-array>
+</resources>

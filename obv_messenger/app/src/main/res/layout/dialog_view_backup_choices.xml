@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/dialogBackground">
+
+    <TextView
+        android:id="@+id/explanation_textview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/explanation_backup_key_generated_choose_how_to_backup"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button_file"
+        android:layout_width="128dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/olvid_gradient_light"
+        android:drawableTop="@drawable/ic_save_64dp"
+        android:text="@string/button_label_to_file"
+        android:textColor="@color/alwaysWhite"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toStartOf="@+id/button_cloud"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/explanation_textview" />
+
+    <Button
+        android:id="@+id/button_cloud"
+        android:layout_width="128dp"
+        android:layout_height="0dp"
+        android:backgroundTint="@color/olvid_gradient_light"
+        android:drawableTop="@drawable/ic_cloud_upload"
+        android:text="@string/button_label_to_cloud"
+        android:textColor="@color/alwaysWhite"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/button_file"
+        app:layout_constraintTop_toTopOf="@+id/button_file"
+        app:layout_goneMarginBottom="16dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

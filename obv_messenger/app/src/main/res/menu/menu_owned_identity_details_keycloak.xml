@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_unbind_from_keycloak"
+        android:orderInCategory="200"
+        android:title="@string/menu_action_unbind_from_keycloak"
+        app:showAsAction="never"/>
+</menu>

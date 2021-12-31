@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/almostWhite">
+
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
+        android:background="@color/lighterGrey_75"
+        app:layout_constraintBottom_toBottomOf="@+id/attachment_image_view"
+        app:layout_constraintEnd_toEndOf="@+id/attachment_image_view"
+        app:layout_constraintStart_toStartOf="@+id/attachment_image_view"
+        app:layout_constraintTop_toTopOf="@+id/attachment_image_view" />
+
+    <ImageView
+        android:id="@+id/attachment_image_view"
+        android:layout_width="@dimen/attachment_small_preview_size"
+        android:layout_height="@dimen/attachment_small_preview_size"
+        android:foreground="?attr/selectableItemBackground"
+        android:scaleType="fitCenter"
+        android:theme="@style/GreyRipple"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_play"/>
+
+    <TextView
+        android:id="@+id/audio_attachment_unplayed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_new"
+        android:textColor="@color/alwaysWhite"
+        android:textAllCaps="true"
+        android:textSize="10dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        app:layout_constraintEnd_toEndOf="@id/attachment_image_view"
+        app:layout_constraintTop_toTopOf="@id/attachment_image_view"
+        android:layout_marginEnd="-4dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/background_green_badge"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:ignore="SpUsage" />
+
+    <ProgressBar
+        android:id="@+id/attachment_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:indeterminate="false"
+        android:progressDrawable="@drawable/file_progress_circular_24dp"
+        android:secondaryProgress="100"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/attachment_image_view"
+        tools:progress="70" />
+
+    <ImageView
+        android:id="@+id/attachment_status_icon_image_view"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/attachment_image_view"
+        app:srcCompat="@drawable/ic_file_download"
+        tools:visibility="visible" />
+
+
+    <TextView
+        android:id="@+id/attachment_progress_label"
+        android:layout_width="0dp"
+        android:layout_height="16dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:background="@color/primary400_90"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textAllCaps="true"
+        android:textColor="@color/almostWhite"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SmallSp,SpUsage"
+        tools:text="@string/label_download" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/attachment_hidden_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_width="match_parent"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/attachment_hidden_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="2dp"
+            android:drawablePadding="4dp"
+            android:gravity="top"
+            android:maxLines="1"
+            android:textColor="@color/orange"
+            android:textSize="12sp"
+            app:drawableStartCompat="@drawable/ic_eye"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/text_visible_once" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/attachment_file_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/primary700"
+        android:textSize="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/attachment_mime_type"
+        app:layout_constraintEnd_toStartOf="@id/speaker_output_image_view"
+        app:layout_constraintStart_toEndOf="@+id/attachment_image_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="fileName"
+        tools:ignore="SpUsage" />
+
+    <ImageView
+        android:id="@+id/speaker_output_image_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/attachment_file_name"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintDimensionRatio="1"
+        android:background="@drawable/background_circular_ripple"
+        style="@style/GreyRipple"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="2dp"
+        android:layout_marginBottom="2dp"
+        android:padding="4dp"
+        android:src="@drawable/ic_speaker_light_grey"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/attachment_mime_type"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:textColor="@color/greyTint"
+        android:textSize="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/attachment_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/attachment_file_name"
+        app:layout_constraintTop_toBottomOf="@+id/attachment_file_name"
+        tools:text="image/png"
+        tools:visibility="invisible"
+        tools:ignore="SpUsage" />
+
+
+    <TextView
+        android:id="@+id/attachment_size"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:maxWidth="100dp"
+        android:singleLine="true"
+        android:textColor="@color/greyTint"
+        android:textSize="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/attachment_file_name"
+        app:layout_constraintTop_toBottomOf="@+id/attachment_mime_type"
+        tools:text="125kB"
+        android:visibility="invisible"
+        tools:ignore="SpUsage" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/audio_player_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/attachment_file_name">
+
+        <SeekBar
+            android:id="@+id/seek_bar"
+            android:layout_width="0dp"
+            android:layout_height="18dp"
+            android:layout_marginBottom="2dp"
+            android:max="1000"
+            android:thumb="@drawable/dot"
+            android:progress="250"
+            android:theme="@style/AppTheme.BlueAccent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/total_time_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/greyTint"
+            android:textSize="12dp"
+            app:layout_constraintBottom_toTopOf="@+id/seek_bar"
+            app:layout_constraintEnd_toEndOf="@+id/seek_bar"
+            tools:text="3:44"
+            tools:ignore="SpUsage" />
+
+        <TextView
+            android:id="@+id/current_time_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/greyTint"
+            android:textSize="12dp"
+            app:layout_constraintBottom_toTopOf="@+id/seek_bar"
+            app:layout_constraintStart_toStartOf="@+id/seek_bar"
+            tools:text="0:56"
+            tools:ignore="SpUsage" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+

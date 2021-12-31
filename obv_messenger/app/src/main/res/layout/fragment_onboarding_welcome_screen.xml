@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient_olvid"
+    tools:context=".onboarding.OnboardingActivity">
+
+    <ImageView
+        android:id="@+id/olvid_logo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.32999998"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintWidth_percent=".6"
+        app:layout_constraintBottom_toTopOf="@+id/explanation_textview"
+        app:srcCompat="@drawable/olvid" />
+
+    <TextView
+        android:id="@+id/explanation_textview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constrainedHeight="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:scrollbars="vertical"
+        android:text="@string/explanation_onboarding_welcome_screen"
+        android:textColor="@color/alwaysWhite"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/button_group"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/olvid_logo" />
+
+
+    <LinearLayout
+        android:id="@+id/button_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/button_continue"
+        android:layout_marginHorizontal="16dp"
+        android:gravity="fill_vertical">
+    <Button
+        android:id="@+id/button_restore_backup"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:theme="@style/AppTheme.BlueAccent"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:textSize="12sp"
+        android:stateListAnimator="@null"
+        android:text="@string/button_label_restore_backup"
+        android:textColor="@color/alwaysWhite"
+        android:drawableStart="@drawable/ic_save"
+        android:drawablePadding="4dp"/>
+
+    <Button
+        android:id="@+id/button_scan_configuration"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:theme="@style/AppTheme.BlueAccent"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:textSize="12sp"
+        android:stateListAnimator="@null"
+        android:text="@string/button_label_scan_qr_code"
+        android:textColor="@color/alwaysWhite"
+        android:drawableStart="@drawable/ic_camera"
+        android:drawablePadding="4dp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button_continue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:elevation="0dp"
+        android:stateListAnimator="@null"
+        android:backgroundTint="@color/alwaysWhite"
+        android:textColor="@color/olvid_gradient_dark"
+        android:text="@string/button_label_continue_as_new_user"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

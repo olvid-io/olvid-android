@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <io.olvid.messenger.customClasses.InitialView
+        android:id="@+id/initial_view"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/contact_name_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/alwaysWhite"
+        android:textSize="24sp"
+        app:layout_goneMarginEnd="16dp"
+        app:layout_constraintBottom_toTopOf="@id/peer_status_text_view"
+        app:layout_constraintEnd_toStartOf="@+id/kick_peer_button"
+        app:layout_constraintStart_toEndOf="@+id/initial_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Contact Name" />
+
+    <ImageView
+        android:id="@+id/peer_is_muted_image_view"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="42dp"
+        android:layout_marginTop="42dp"
+        android:contentDescription="@string/content_description_peer_muted_indicator"
+        android:src="@drawable/button_no_micro_red_circle"
+        app:layout_constraintStart_toStartOf="@+id/initial_view"
+        app:layout_constraintTop_toTopOf="@+id/initial_view" />
+
+    <TextView
+        android:id="@+id/peer_status_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        android:maxLines="2"
+        android:textColor="@color/alwaysWhite"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/kick_peer_button"
+        app:layout_constraintStart_toStartOf="@id/contact_name_text_view"
+        app:layout_constraintTop_toBottomOf="@id/contact_name_text_view"
+        app:layout_goneMarginEnd="16dp"
+        tools:text="@string/webrtc_status_connecting_to_peer" />
+
+    <ImageView
+        android:id="@+id/kick_peer_button"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:theme="@style/AlwaysWhiteRipple"
+        app:layout_constraintBottom_toBottomOf="@+id/initial_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/initial_view"
+        app:srcCompat="@drawable/ic_remove_user"
+        android:contentDescription="@string/content_description_remove_contact_button"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

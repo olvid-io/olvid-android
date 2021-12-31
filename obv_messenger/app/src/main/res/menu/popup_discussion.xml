@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/popup_action_discussion_settings"
+        android:title="@string/menu_action_discussion_settings"/>
+    <item
+        android:id="@+id/popup_action_delete_discussion"
+        android:title="@string/menu_action_delete_discussion"/>
+</menu>

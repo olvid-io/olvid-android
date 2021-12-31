@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/popup_action_open_attachment"
+        android:orderInCategory="10"
+        android:title="@string/menu_action_open" />
+    <item
+        android:id="@+id/popup_action_save_attachment"
+        android:orderInCategory="20"
+        android:title="@string/menu_action_save"/>
+    <item
+        android:id="@+id/popup_action_share_attachment"
+        android:orderInCategory="40"
+        android:title="@string/menu_action_share"/>
+</menu>

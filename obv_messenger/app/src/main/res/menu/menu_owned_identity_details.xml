@@ -1,0 +1,24 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_rename"
+        android:icon="@drawable/ic_pencil"
+        android:orderInCategory="50"
+        android:title="@string/menu_action_edit_my_details"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_mute"
+        android:orderInCategory="80"
+        android:title="@string/menu_action_mute_profile_notifications"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_refresh_subscription_status"
+        android:orderInCategory="100"
+        android:title="@string/menu_action_refresh_subscription_status"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_delete_owned_identity"
+        android:orderInCategory="300"
+        android:title="@string/menu_action_delete_profile"
+        app:showAsAction="never"/>
+</menu>

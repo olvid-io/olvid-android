@@ -1,0 +1,79 @@
+/*
+ *  Olvid for Android
+ *  Copyright © 2019-2021 Olvid SAS
+ *
+ *  This file is part of Olvid for Android.
+ *
+ *  Olvid is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License, version 3,
+ *  as published by the Free Software Foundation.
+ *
+ *  Olvid is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+syntax = "proto3";
+
+package olvid;
+
+option java_package = "io.olvid.messenger.webclient.protobuf.datatypes";
+
+enum MessageStatus {
+	STATUS_DEFAULT = 0;
+	STATUS_PROCESSING = 1;
+	STATUS_SENT = 2;
+	STATUS_UNREAD = 3;
+	STATUS_READ = 4;
+	STATUS_DRAFT = 5;
+	STATUS_DELIVERED = 6;
+	STATUS_DELIVERED_AND_READ = 7;
+}
+
+enum MessageType {
+	TYPE_DEFAULT = 0;
+	INBOUND_MESSAGE = 1;
+    OUTBOUND_MESSAGE = 2;
+	GROUP_MEMBER_JOINED = 3;
+    GROUP_MEMBER_LEFT = 4;
+    LEFT_GROUP = 5;
+    CONTACT_DELETED = 6;
+    TYPE_INBOUND_EPHEMERAL_MESSAGE = 7;
+    TYPE_DISCUSSION_SETTINGS_UPDATE = 8;
+    TYPE_DISCUSSION_REMOTELY_DELETED = 9;
+}
+
+// fields marked with "// discussion" are filled when Message is used as lastMessage in Discussion.proto
+// fields marked with "// ephemeral" are filled when MessageType is TYPE_INBOUND_EPHEMERAL_MESSAGE
+message Message {
+	int64 id = 1;
+    int64 discussionId = 2;
+    double sortIndex = 3;
+    MessageStatus status = 4;
+    MessageType type = 5; // discussion
+    string contentBody = 6; // discussion
+    int64 timestamp = 7; // discussion
+    int32 totalAttachmentCount = 8; // discussion
+    int32 imageCount = 9;
+    bytes senderIdentifier = 10;
+    string senderName = 11;
+    int64 replyMessageId = 12;
+    int64 replyMessageAttachmentCount = 13;
+    bytes replySenderIdentifier = 14;
+    string replyAuthor = 15;
+    string replyBody = 16;
+    bool readOnce = 17; //ephemeral
+    string visibilityDuration = 18; // ephemeral
+    string existenceDuration = 19; // ephemeral
+    bool wiped = 20; // ephemeral
+    bool remotelyDeleted = 21;
+    bool wipeOnRead = 22;
+    int64 edited = 23;
+    // senderIsSelf is used for a very specific and strange case
+    bool senderIsSelf = 24;
+    string reactions = 25;
+}

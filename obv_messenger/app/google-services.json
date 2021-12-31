@@ -1,0 +1,24 @@
+{
+  "project_info": {
+    "project_number": "1084854001073",
+    "firebase_url": "https://olvid-messenger.firebaseio.com",
+    "project_id": "olvid-messenger",
+    "storage_bucket": "olvid-messenger.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1084854001073:android:5870a17a95c269c7",
+        "android_client_info": {
+          "package_name": "io.olvid.messenger"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ]
+    }
+  ],
+  "configuration_version": "1"
+}
