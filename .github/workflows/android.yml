@@ -1,0 +1,75 @@
+name: Build & Publish Release APK
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+
+jobs:
+  build:
+    name: Build/Test APK
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: setup jdk
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 11
+
+      - name: Run Tests
+        run: cd obv_messenger/ && ./gradlew test --stacktrace
+
+      - name: Build Release APK
+        run: cd obv_messenger/ && ./gradlew assembleRelease --stacktrace
+
+      - name: Rename APK
+        run: mv obv_messenger/app/build/outputs/apk/prod/release/app-prod-release-unsigned.apk Olvid.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: apk
+          path: Olvid.apk
+
+  release:
+    name: Sign/Release APK
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Download APK from build
+        uses: actions/download-artifact@v2
+        with:
+          name: apk
+
+      - name: setup jdk
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 11
+
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: .
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "32.0.0"
+
+      - name: Upload Release APK
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Olvid.apk
+            ${{steps.sign_app.outputs.signedReleaseFile}}
