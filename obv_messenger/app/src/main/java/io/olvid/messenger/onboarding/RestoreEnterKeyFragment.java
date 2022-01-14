@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -52,6 +52,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import io.olvid.engine.engine.types.ObvBackupKeyVerificationOutput;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.TextChangeListener;
 
 
 public class RestoreEnterKeyFragment extends Fragment {
@@ -117,11 +118,7 @@ public class RestoreEnterKeyFragment extends Fragment {
             return false;
         });
 
-        backupKeyEdittext.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+        backupKeyEdittext.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 CharSequence text = backupKeyEdittext.getText();

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,6 +22,7 @@ package io.olvid.messenger.activities;
 import android.animation.LayoutTransition;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -491,7 +492,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
     }
 
     private TextView getTextView() {
-        TextView tv = new TextView(this);
+        TextView tv = new AppCompatTextView(this);
         tv.setTextColor(primary700);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         tv.setMaxLines(4);

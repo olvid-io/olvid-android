@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -52,15 +52,7 @@ public abstract class OpenHiddenProfileDialog {
     public OpenHiddenProfileDialog(@NonNull FragmentActivity activity) {
         View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_view_open_hidden_profile, null);
         TextInputEditText passwordEditText = dialogView.findViewById(R.id.password_text_view);
-        passwordEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        passwordEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s != null) {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -195,36 +195,40 @@ public abstract class DiscussionDao {
             " ORDER BY maxTimestamp DESC")
     public abstract LiveData<List<Discussion>> getLatestDiscussionsInWhichYouWrote();
 
-
-
-    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            "group_concat(CASE WHEN group_contact." + Contact.CUSTOM_DISPLAY_NAME + " IS NULL THEN group_contact." + Contact.DISPLAY_NAME + " ELSE group_contact." + Contact.CUSTOM_DISPLAY_NAME + " END, :joiner) AS groupContactDisplayNames, contact.*, CASE WHEN disc.bytes_contact_identity IS NULL THEN 1 ELSE 0 END AS is_group  FROM " + Discussion.TABLE_NAME + " AS disc " +
+            "group_concat(CASE WHEN group_contact." + Contact.CUSTOM_DISPLAY_NAME + " IS NULL THEN group_contact." + Contact.DISPLAY_NAME + " ELSE group_contact." + Contact.CUSTOM_DISPLAY_NAME + " END, :joiner) AS groupContactDisplayNames FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + ContactGroupJoin.TABLE_NAME + " AS group_join " +
             " ON disc." + Discussion.BYTES_GROUP_OWNER_AND_UID + " = group_join." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
             " LEFT JOIN " + Contact.TABLE_NAME + " AS group_contact " +
             " ON group_contact." + Contact.BYTES_CONTACT_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_CONTACT_IDENTITY +
             " AND group_contact." + Contact.BYTES_OWNED_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
-            " LEFT JOIN "  + Contact.TABLE_NAME + " AS contact " +
-            " ON contact." + Contact.BYTES_CONTACT_IDENTITY + " = disc." + Discussion.BYTES_CONTACT_IDENTITY +
-            " AND contact." + Contact.BYTES_OWNED_IDENTITY + " = disc." + Discussion.BYTES_OWNED_IDENTITY +
+            " WHERE disc.id = :discussionId ")
+    public abstract LiveData<DiscussionAndContactDisplayNames> getWithContactNames(long discussionId, String joiner);
+
+
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
+    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
+            "group_concat(CASE WHEN group_contact." + Contact.CUSTOM_DISPLAY_NAME + " IS NULL THEN group_contact." + Contact.DISPLAY_NAME + " ELSE group_contact." + Contact.CUSTOM_DISPLAY_NAME + " END, :joiner) AS groupContactDisplayNames, CASE WHEN disc.bytes_contact_identity IS NULL THEN 1 ELSE 0 END AS is_group  FROM " + Discussion.TABLE_NAME + " AS disc " +
+            " LEFT JOIN " + ContactGroupJoin.TABLE_NAME + " AS group_join " +
+            " ON disc." + Discussion.BYTES_GROUP_OWNER_AND_UID + " = group_join." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
+            " LEFT JOIN " + Contact.TABLE_NAME + " AS group_contact " +
+            " ON group_contact." + Contact.BYTES_CONTACT_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_CONTACT_IDENTITY +
+            " AND group_contact." + Contact.BYTES_OWNED_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " GROUP BY disc.id" +
             " ORDER BY is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndContactDisplayNames>> getAllWithContactNames(byte[] ownedIdentityBytes, String joiner);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            "group_concat(CASE WHEN group_contact." + Contact.CUSTOM_DISPLAY_NAME + " IS NULL THEN group_contact." + Contact.DISPLAY_NAME + " ELSE group_contact." + Contact.CUSTOM_DISPLAY_NAME + " END, :joiner) AS groupContactDisplayNames, contact.* FROM " + Discussion.TABLE_NAME + " AS disc " +
+            "group_concat(CASE WHEN group_contact." + Contact.CUSTOM_DISPLAY_NAME + " IS NULL THEN group_contact." + Contact.DISPLAY_NAME + " ELSE group_contact." + Contact.CUSTOM_DISPLAY_NAME + " END, :joiner) AS groupContactDisplayNames FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + ContactGroupJoin.TABLE_NAME + " AS group_join " +
             " ON disc." + Discussion.BYTES_GROUP_OWNER_AND_UID + " = group_join." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
             " LEFT JOIN " + Contact.TABLE_NAME + " AS group_contact " +
             " ON group_contact." + Contact.BYTES_CONTACT_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_CONTACT_IDENTITY +
             " AND group_contact." + Contact.BYTES_OWNED_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
-            " LEFT JOIN "  + Contact.TABLE_NAME + " AS contact " +
-            " ON contact." + Contact.BYTES_CONTACT_IDENTITY + " = disc." + Discussion.BYTES_CONTACT_IDENTITY +
-            " AND contact." + Contact.BYTES_OWNED_IDENTITY + " = disc." + Discussion.BYTES_OWNED_IDENTITY +
             " LEFT JOIN ( SELECT " + Message.DISCUSSION_ID + ", MAX(" + Message.TIMESTAMP + ") AS maxTimestamp FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " != " + Message.STATUS_DRAFT + " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE + " GROUP BY " + Message.DISCUSSION_ID + ") AS message " +
             " ON disc.id = message." + Message.DISCUSSION_ID +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
@@ -235,22 +239,7 @@ public abstract class DiscussionDao {
     public abstract LiveData<List<DiscussionAndContactDisplayNames>> getAllActiveWithContactNamesOrderedByActivity(byte[] ownedIdentityBytes, String joiner);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " group_concat(CASE WHEN contact." + Contact.CUSTOM_DISPLAY_NAME + " IS NULL THEN contact." + Contact.DISPLAY_NAME + " ELSE contact." + Contact.CUSTOM_DISPLAY_NAME + " END, :joiner) AS groupContactDisplayNames, " +
-            " NULL AS " + Contact.BYTES_CONTACT_IDENTITY + ", NULL AS " + Contact.BYTES_OWNED_IDENTITY + ", " +
-            " NULL AS " + Contact.CUSTOM_DISPLAY_NAME + ", " +
-            " NULL AS " + Contact.DISPLAY_NAME + ", " +
-            " NULL AS " + Contact.SORT_DISPLAY_NAME + ", " +
-            " NULL AS " + Contact.FULL_SEARCH_DISPLAY_NAME + ", " +
-            " NULL AS " + Contact.IDENTITY_DETAILS + ", " +
-            " 0 AS " + Contact.NEW_PUBLISHED_DETAILS + ", " +
-            " 0 AS " + Contact.DEVICE_COUNT + ", " +
-            " 0 AS " + Contact.ESTABLISHED_CHANNEL_COUNT + ", " +
-            " NULL AS " + Contact.PHOTO_URL + ", " +
-            " NULL AS " + Contact.CUSTOM_PHOTO_URL + ", " +
-            " 0 AS " + Contact.KEYCLOAK_MANAGED + ", " +
-            " NULL AS " + Contact.CUSTOM_NAME_HUE + ", " +
-            " NULL AS " + Contact.PERSONAL_NOTE + ", " +
-            " 0 AS " + Contact.ACTIVE +
+            " group_concat(CASE WHEN contact." + Contact.CUSTOM_DISPLAY_NAME + " IS NULL THEN contact." + Contact.DISPLAY_NAME + " ELSE contact." + Contact.CUSTOM_DISPLAY_NAME + " END, :joiner) AS groupContactDisplayNames " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " INNER JOIN ( SELECT * FROM " + ContactGroupJoin.TABLE_NAME + " WHERE " + ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity AND " + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ) AS groop_one " +
             " ON disc." + Discussion.BYTES_GROUP_OWNER_AND_UID + " = groop_one." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID +
@@ -308,9 +297,6 @@ public abstract class DiscussionDao {
         public Discussion discussion;
 
         public String groupContactDisplayNames;
-
-        @Embedded
-        public Contact oneToOneContact;
     }
 
     public static class DiscussionAndCustomization {

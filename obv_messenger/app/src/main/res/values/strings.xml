@@ -265,7 +265,7 @@
     <string name="toast_message_invalid_clipboard_data">Invalid clipboard data</string>
     <string name="toast_message_invite_sent">Invitation sent</string>
     <string name="toast_message_leaving_group">You left the group</string>
-    <string name="toast_message_message_copied_to_clipboard">Message text copied to clipboard</string>
+    <string name="toast_message_message_text_copied_to_clipboard">Message text copied to clipboard</string>
     <string name="toast_message_no_channel_message_delayed">Your message is on hold and will be sent as soon as possible</string>
     <string name="toast_message_sharing_failed">Unable to share selected content</string>
     <string name="toast_message_shortcut_creation_failed">Shortcut creation failed</string>
@@ -1226,7 +1226,34 @@
     <string name="label_ping_connectivity_not_good">Connectivity: NOT GOOD</string>
     <string name="label_ping_connectivity_poor">Connectivity: POOR</string>
     <string name="label_ping_delay">ping: %1$dms</string>
-
+    <string name="menu_action_copy_message_text">Copy message text</string>
+    <string name="menu_action_copy_text_and_attachments">Copy message and attachments</string>
+    <string name="label_message_copied_from_olvid">Message copied from Olvid</string>
+    <string name="toast_message_complete_message_copied_to_clipboard">Complete message copied to clipboard</string>
+    <string name="widget_action_shortcut_description">Action shortcut to send a predefined message to a contact or group in one click</string>
+    <string name="label_action_shortcut_preview_text">Hey!</string>
+    <string name="label_discussion_shortcut">Shortcut to an Olvid discussion</string>
+    <string name="label_action_shortcut_invalid_text">Invalid widget configuration</string>
+    <string name="dialog_title_configure_widget">Configure widget…</string>
+    <string name="label_widget_appearance">Widget appearance</string>
+    <string name="label_widget_tap_action">Widget tap action</string>
+    <string name="label_discussion">Discussion</string>
+    <string name="label_message">Message</string>
+    <string name="hint_predefined_message_to_send">Predefined message to send</string>
+    <string name="label_confirm_before_sending">Confirm before sending</string>
+    <string name="label_vibrate_after_sending">Vibrate after sending</string>
+    <string name="label_icon">Icon</string>
+    <string name="label_color">Color</string>
+    <string name="hint_widget_label">Widget label</string>
+    <string name="label_show_olvid_badge">Show Olvid badge</string>
+    <string name="label_tap_to_choose_discussion">Tap to choose a discussion</string>
+    <string name="dialog_title_send_predefined_message">Send predefined message?</string>
+    <string name="pref_title_widgets">Widgets</string>
+    <string name="explanation_no_widget">You have not created any widget yet</string>
+    <string name="dialog_title_delete_widget_configuration">Delete this widget configuration?</string>
+    <string name="dialog_message_delete_widget_configuration">If you continue, this widget configuration will be deleted. You will still need to manually remove the widget from your home screen if this was not done already.</string>
+    <string name="label_unable_to_read_widget_configuration">Unable to read widget configuration</string>
+    <string name="label_no_label">No label</string>
 
     <plurals name="text_app_uptime_days">
         <item quantity="one">%1$d\u00a0day,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>

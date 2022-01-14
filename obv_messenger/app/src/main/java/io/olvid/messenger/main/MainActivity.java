@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,6 +20,7 @@
 package io.olvid.messenger.main;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.SearchView;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
@@ -27,6 +28,7 @@ import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -35,6 +37,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -389,6 +392,8 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
 
         if (savedInstanceState != null && savedInstanceState.getBoolean(ALREADY_CREATED_BUNDLE_EXTRA, false)) {
             setIntent(null);
+        } else {
+            finishAndRemoveExtraTasks();
         }
 
         handleIntent(getIntent());
@@ -784,6 +789,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     @Override
     protected void onResume() {
         super.onResume();
+
         mainActivityPageChangeListener.onPageSelected(viewPager.getCurrentItem());
         if (SettingsActivity.getPingConnectivityIndicator() != SettingsActivity.PingConnectivityIndicator.NONE) {
             showPingIndicator();
@@ -799,6 +805,24 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     public void onBackPressed() {
         if(!moveTaskToBack(true)) {
             finishAndRemoveTask();
+        }
+    }
+
+    private void finishAndRemoveExtraTasks() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            if (activityManager != null) {
+                List<ActivityManager.AppTask> appTasks = activityManager.getAppTasks();
+                if (appTasks != null && appTasks.size() > 1) {
+                    for (ActivityManager.AppTask appTask : appTasks) {
+                        ActivityManager.RecentTaskInfo taskInfo = appTask.getTaskInfo();
+                        if (!taskInfo.isRunning) {
+                            Logger.d("Removing empty task");
+                            appTask.finishAndRemoveTask();
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -822,7 +846,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                     searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
                 }
                 searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    final EditText editText = new EditText(searchView.getContext());
+                    final EditText editText = new AppCompatEditText(searchView.getContext());
 
                     {
                         if (contactListFragment != null) {

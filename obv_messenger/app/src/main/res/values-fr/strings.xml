@@ -261,7 +261,7 @@
     <string name="toast_message_invalid_clipboard_data">Données de presse-papier invalides</string>
     <string name="toast_message_invite_sent">Invitation envoyée</string>
     <string name="toast_message_leaving_group">Vous avez quitté le groupe</string>
-    <string name="toast_message_message_copied_to_clipboard">Le texte du message a été copié dans le presse-papier</string>
+    <string name="toast_message_message_text_copied_to_clipboard">Le texte du message a été copié dans le presse-papier</string>
     <string name="toast_message_no_channel_message_delayed">Votre message est en attente et sera envoyé dès que possible</string>
     <string name="toast_message_sharing_failed">Impossible de partager le contenu sélectionné</string>
     <string name="toast_message_shortcut_creation_failed">Erreur lors de la création de raccourci</string>
@@ -974,7 +974,7 @@
     <string name="dialog_message_disable_push_confirmation">Si vous désactivez les notifications push de Google, vous ne serez plus notifié instantanément des nouveaux messages.\n\nVous pouvez à la place activer une connexion WebSocket permanente aux serveurs d\'Olvid qui pourra jouer le même rôle (mais risque de vider votre batterie plus vite).</string>
     <string name="pref_category_other_notifications_title">Autres notifications</string>
     <string name="pref_permanent_foreground_service_title">Utiliser un service d\'avant-plan</string>
-    <string name="pref_permanent_foreground_service_summary">Utiliser un service d\'avant plan évite à Olvid de se faire arrêter par le système. Une petite icone est affichée dans la zone de notifications et peut être cachée via les paramètres du systèmes.</string>
+    <string name="pref_permanent_foreground_service_summary">Utiliser un service d\'avant plan évite à Olvid de se faire arrêter par le système. Une petite icone est affichée dans la zone de notifications et peut être cachée via les paramètres du système.</string>
     <string name="pref_share_app_version_title">Partager les version de l\'app et de l\'OS avec Olvid</string>
     <string name="pref_share_app_version_summary">Quand cette option est activée, l\'application partage sa version et la version de votre OS (et rien de plus) avec les serveurs d\'Olvid. Ces données sont une aide précieuse lors du déploiement de nouvelles fonctionnalités.</string>
     <string name="text_app_uptime_hours">%1$dh\u00a0%2$02dm\u00a0%3$02ds</string>
@@ -1217,7 +1217,34 @@
     <string name="label_ping_connectivity_not_good">Réseau\u00a0: MOYEN</string>
     <string name="label_ping_connectivity_poor">Réseau\u00a0: MAUVAIS</string>
     <string name="label_ping_delay">ping\u00a0: %1$dms</string>
-
+    <string name="menu_action_copy_message_text">Copier le texte du message</string>
+    <string name="menu_action_copy_text_and_attachments">Copier texte et pièces jointes</string>
+    <string name="label_message_copied_from_olvid">Message copié depuis Olvid</string>
+    <string name="toast_message_complete_message_copied_to_clipboard">Le message complet a été copié dans le presse-papier</string>
+    <string name="widget_action_shortcut_description">Raccourci pour envoyer un message prédéfini à un contact ou un groupe en un click</string>
+    <string name="label_action_shortcut_preview_text">Salut\u00a0!</string>
+    <string name="label_discussion_shortcut">Raccourci vers une discussion Olvid</string>
+    <string name="label_action_shortcut_invalid_text">Configuration de widget invalide</string>
+    <string name="dialog_title_configure_widget">Configurer le widget…</string>
+    <string name="label_widget_appearance">Apparence du widget</string>
+    <string name="label_widget_tap_action">Action en appuyant le widget</string>
+    <string name="label_discussion">Discussion</string>
+    <string name="label_message">Message</string>
+    <string name="hint_predefined_message_to_send">Message prédéfini à envoyer</string>
+    <string name="label_confirm_before_sending">Confirmation avant l\'envoi</string>
+    <string name="label_vibrate_after_sending">Vibrer après l\'envoi</string>
+    <string name="label_icon">Icône</string>
+    <string name="label_color">Couleur</string>
+    <string name="hint_widget_label">Intitulé du widget</string>
+    <string name="label_show_olvid_badge">Afficher le badge Olvid</string>
+    <string name="label_tap_to_choose_discussion">Appuyez pour choisir une discussion</string>
+    <string name="dialog_title_send_predefined_message">Evoyer le message prédéfini\u00a0?</string>
+    <string name="pref_title_widgets">Widgets</string>
+    <string name="explanation_no_widget">Vous n\'avez pas encore créé de widget</string>
+    <string name="dialog_title_delete_widget_configuration">Supprimer cette configuration de widget\u00a0?</string>
+    <string name="dialog_message_delete_widget_configuration">Si vous poursuivez, cette configuration de widget sera supprimée. Il vous faudra manuellement retirer le widget de votre écran d\'accueil si ce n\'est pas déjà fait.</string>
+    <string name="label_unable_to_read_widget_configuration">Impossible de lire la configuration du widget</string>
+    <string name="label_no_label">Pas d\'intitulé</string>
 
 
 

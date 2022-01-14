@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -43,6 +43,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
@@ -78,6 +80,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
+import androidx.emoji2.bundled.BundledEmojiCompatConfig;
+import androidx.emoji2.text.EmojiCompat;
+import androidx.emoji2.text.EmojiSpan;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -132,6 +137,7 @@ public class App extends Application implements DefaultLifecycleObserver {
     private static final LinkedHashMap<String, HashMap<String, Object>> dialogsToShow = new LinkedHashMap<>();
     private static final HashMap<BytesKey, LinkedHashMap<String, HashMap<String, Object>>> dialogsToShowForOwnedIdentity = new HashMap<>();
     private static final Lock dialogsToShowLock = new ReentrantLock();
+    private static boolean blockAppDialogs = false;
 
     private static Application application;
     public static long appStartTimestamp = 0;
@@ -151,23 +157,6 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     public static boolean isVisible() { return isVisible; }
 
-    public static void releaseAppDialogShowing() {
-        dialogsToShowLock.lock();
-        isAppDialogShowing = false;
-        dialogsToShowLock.unlock();
-        showAppDialogs();
-    }
-
-    public static boolean requestAppDialogShowing() {
-        dialogsToShowLock.lock();
-        if (isAppDialogShowing) {
-            dialogsToShowLock.unlock();
-            return false;
-        }
-        isAppDialogShowing = true;
-        dialogsToShowLock.unlock();
-        return true;
-    }
 
     public static void doNotKillActivitiesOnLockOrCloseHiddenProfileOnBackground() {
         killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
@@ -620,7 +609,28 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     // region App-wide dialogs
 
+    public static void releaseAppDialogShowing() {
+        dialogsToShowLock.lock();
+        isAppDialogShowing = false;
+        dialogsToShowLock.unlock();
+        showAppDialogs();
+    }
+
+    public static boolean requestAppDialogShowing() {
+        dialogsToShowLock.lock();
+        if (isAppDialogShowing) {
+            dialogsToShowLock.unlock();
+            return false;
+        }
+        isAppDialogShowing = true;
+        dialogsToShowLock.unlock();
+        return true;
+    }
+
     public static void showAppDialogs() {
+        if (blockAppDialogs) {
+            return;
+        }
         dialogsToShowLock.lock();
         if (!dialogsToShow.isEmpty()) {
             openAppDialogShower();
@@ -635,6 +645,9 @@ public class App extends Application implements DefaultLifecycleObserver {
     }
 
     public static void showAppDialogsForSelectedIdentity(@NonNull byte[] bytesOwnedIdentity) {
+        if (blockAppDialogs) {
+            return;
+        }
         dialogsToShowLock.lock();
         BytesKey bytesKey = new BytesKey(bytesOwnedIdentity);
         LinkedHashMap<String, HashMap<String, Object>> map = dialogsToShowForOwnedIdentity.get(bytesKey);
@@ -642,6 +655,15 @@ public class App extends Application implements DefaultLifecycleObserver {
             openAppDialogShower();
         }
         dialogsToShowLock.unlock();
+    }
+
+    public static void setAppDialogsBlocked(boolean blocked) {
+        if (blocked) {
+            blockAppDialogs = true;
+        } else {
+            blockAppDialogs = false;
+            showAppDialogs();
+        }
     }
 
     public static void openAppDialogIdentityDeactivated(OwnedIdentity ownedIdentity) {
@@ -868,6 +890,23 @@ public class App extends Application implements DefaultLifecycleObserver {
     }
 
     public static boolean isShortEmojiString(String text, int maxLength) {
+        // Alternate method based on EmojiCompat library --> we use the legacy method for now, it still works well :)
+//        CharSequence emojiSequence = EmojiCompat.get().process(text, 0, text.length(), maxLength);
+//        if (emojiSequence instanceof Spanned) {
+//            Spanned spannable = (Spanned) emojiSequence;
+//            int regionEnd;
+//            for (int regionStart = 0; regionStart < spannable.length(); regionStart = regionEnd) {
+//                regionEnd = spannable.nextSpanTransition(regionStart, spannable.length(), EmojiSpan.class);
+//
+//                EmojiSpan[] spans = spannable.getSpans(regionStart, regionEnd, EmojiSpan.class);
+//                if (spans.length == 0) {
+//                    return false;
+//                }
+//            }
+//            return true;
+//        }
+//        return false;
+
         if (text == null || text.length() == 0) {
             return false;
         }
@@ -1007,6 +1046,13 @@ public class App extends Application implements DefaultLifecycleObserver {
 
         @Override
         public void run() {
+            //////////////////////////
+            // initialize emoji2
+            //////////////////////////
+            EmojiCompat.Config emojiConfig = new BundledEmojiCompatConfig(getContext());
+            emojiConfig.setReplaceAll(true);
+            EmojiCompat.init(emojiConfig);
+
             //////////////////////////
             // start monitoring network status
             //////////////////////////

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -29,7 +29,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.BackgroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,6 +59,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
@@ -63,9 +68,11 @@ import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.fragments.FilteredContactListFragment;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 
@@ -73,6 +80,7 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
     private AppCompatActivity activity;
     private PlusButtonViewModel viewModel;
 
+    private SearchResultAdapter searchResultAdapter;
     private EditText keycloakSearchEditText;
     private TextView explanationTextView;
     private View spinner;
@@ -119,7 +127,6 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
         view.findViewById(R.id.back_button).setOnClickListener(this);
 
         OwnedIdentity ownedIdentity = viewModel.getCurrentIdentity();
-        SearchResultAdapter searchResultAdapter;
         if (ownedIdentity == null) {
             searchResultAdapter = new SearchResultAdapter(null, this::onUserClick);
         } else {
@@ -137,13 +144,7 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
             startSearch();
             return true;
         });
-        keycloakSearchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
+        keycloakSearchEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setKeycloakSearchString(s.toString());
@@ -174,6 +175,7 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
                 }
             }
         });
+        startSearch();
     }
 
     private void startSearch() {
@@ -186,6 +188,9 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
         if (ownedIdentity != null) {
             viewModel.setKeycloakSearchStatus(PlusButtonViewModel.SEARCH_STATUS.SEARCHING);
             viewModel.setKeycloakSearchResult(null);
+
+
+            searchResultAdapter.setFilter(viewModel.getKeycloakSearchString());
 
             KeycloakManager.getInstance().search(ownedIdentity.bytesOwnedIdentity, viewModel.getKeycloakSearchString(), new KeycloakManager.KeycloakCallback<Pair<List<JsonKeycloakUserDetails>, Integer>>() {
                 @Override
@@ -265,6 +270,8 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
         private int missingResults;
         @Nullable private final byte[] bytesOwnedIdentity;
         @NonNull private final ClickListener clickListener;
+        private final BackgroundColorSpan[] highlightedSpans;
+        private final List<Pattern> patterns;
 
         public static final int VIEW_TYPE_NORMAL = 0;
         public static final int VIEW_TYPE_MISSING_RESULTS = 1;
@@ -272,6 +279,11 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
         public SearchResultAdapter(@Nullable byte[] bytesOwnedIdentity, @NonNull ClickListener clickListener) {
             this.bytesOwnedIdentity = bytesOwnedIdentity;
             this.clickListener = clickListener;
+            this.patterns = new ArrayList<>();
+            highlightedSpans = new BackgroundColorSpan[10];
+            for (int i=0; i<highlightedSpans.length; i++) {
+                highlightedSpans[i] = new BackgroundColorSpan(ContextCompat.getColor(App.getContext(), R.color.accentOverlay));
+            }
         }
 
         @Override
@@ -312,7 +324,7 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
                     }
                     name += userDetails.getLastName();
                 }
-                holder.keycloakUserNameTextView.setText(name);
+                matchAndHighlight(name, holder.keycloakUserNameTextView);
                 holder.initialView.setInitial(userDetails.getIdentity() == null ? new byte[0] : userDetails.getIdentity(), App.getInitial(name));
 
                 String company = "";
@@ -326,8 +338,8 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
                     company += userDetails.getCompany();
                 }
                 if (company.length() > 0) {
-                    holder.keycloakUserPositionTextView.setText(company);
                     holder.keycloakUserPositionTextView.setVisibility(View.VISIBLE);
+                    matchAndHighlight(company, holder.keycloakUserPositionTextView);
                 } else {
                     holder.keycloakUserPositionTextView.setVisibility(View.GONE);
                 }
@@ -355,6 +367,24 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
                 holder.missingCountTextView.setText(App.getContext().getResources().getQuantityString(R.plurals.text_keycloak_missing_search_result, missingResults, missingResults));
             }
         }
+
+        private void matchAndHighlight(String text, TextView textView) {
+            int i = 0;
+            String unAccented = App.unAccent(text);
+            Spannable highlightedString = new SpannableString(text);
+            for (Pattern pattern : patterns) {
+                if (i == highlightedSpans.length) {
+                    break;
+                }
+                Matcher matcher = pattern.matcher(unAccented);
+                if (matcher.find()) {
+                    highlightedString.setSpan(highlightedSpans[i], matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    i++;
+                }
+            }
+            textView.setText(highlightedString);
+        }
+
 
         @Override
         public int getItemCount() {
@@ -389,6 +419,16 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
                 this.missingResults = missingResults;
             }
             notifyDataSetChanged();
+        }
+
+        public void setFilter(String keycloakSearchString) {
+            patterns.clear();
+            if (keycloakSearchString == null) {
+                return;
+            }
+            for (String part: keycloakSearchString.trim().split("\\s+")) {
+                patterns.add(Pattern.compile(Pattern.quote(App.unAccent(part))));
+            }
         }
 
         static class SearchResultViewHolder extends RecyclerView.ViewHolder {

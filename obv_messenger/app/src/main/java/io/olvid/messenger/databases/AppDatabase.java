@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -27,6 +27,7 @@ import androidx.room.TypeConverters;
 import androidx.annotation.NonNull;
 
 import io.olvid.messenger.App;
+import io.olvid.messenger.databases.dao.ActionShortcutConfigurationDao;
 import io.olvid.messenger.databases.dao.CallLogItemDao;
 import io.olvid.messenger.databases.dao.ContactDao;
 import io.olvid.messenger.databases.dao.ContactGroupJoinDao;
@@ -48,6 +49,7 @@ import io.olvid.messenger.databases.dao.RawDao;
 import io.olvid.messenger.databases.dao.ReactionDao;
 import io.olvid.messenger.databases.dao.ReactionRequestDao;
 import io.olvid.messenger.databases.dao.RemoteDeleteAndEditRequestDao;
+import io.olvid.messenger.databases.entity.ActionShortcutConfiguration;
 import io.olvid.messenger.databases.entity.CallLogItem;
 import io.olvid.messenger.databases.entity.CallLogItemContactJoin;
 import io.olvid.messenger.databases.entity.Contact;
@@ -93,12 +95,13 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
                 KnownCertificate.class,
                 LatestDiscussionSenderSequenceNumber.class,
                 ReactionRequest.class,
+                ActionShortcutConfiguration.class,
         },
         version = AppDatabase.DB_SCHEMA_VERSION
 )
 @TypeConverters({ObvTypeConverters.class})
 public abstract class AppDatabase extends RoomDatabase {
-    public static final int DB_SCHEMA_VERSION = 49;
+    public static final int DB_SCHEMA_VERSION = 50;
     public static final String DB_FILE_NAME = "app_database";
 
     public abstract ContactDao contactDao();
@@ -122,6 +125,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract KnownCertificateDao knownCertificateDao();
     public abstract LatestDiscussionSenderSequenceNumberDao latestDiscussionSenderSequenceNumberDao();
     public abstract ReactionRequestDao reactionRequestDao();
+    public abstract ActionShortcutConfigurationDao actionShortcutConfigurationDao();
 
     private static final RoomDatabase.Callback roomDatabaseOpenCallback = new RoomDatabase.Callback(){
         @Override

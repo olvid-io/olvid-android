@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -64,6 +64,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.fragments.dialog.HiddenProfilePasswordCreationDialogFragment;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.customClasses.InitialView;
@@ -206,13 +207,7 @@ public class OwnedIdentityDetailsFragment extends Fragment {
         if (viewModel.getDetailsLocked() && (viewModel.getFirstName() == null || viewModel.getFirstName().length() == 0)) {
             firstNameEditText.setText(" ");
         }
-        firstNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        firstNameEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setFirstName(s.toString());
@@ -223,13 +218,7 @@ public class OwnedIdentityDetailsFragment extends Fragment {
         if (viewModel.getDetailsLocked() && (viewModel.getLastName() == null || viewModel.getLastName().length() == 0)) {
             lastNameEditText.setText(" ");
         }
-        lastNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        lastNameEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setLastName(s.toString());
@@ -240,13 +229,7 @@ public class OwnedIdentityDetailsFragment extends Fragment {
         if (viewModel.getDetailsLocked() && (viewModel.getCompany() == null || viewModel.getCompany().length() == 0)) {
             companyEditText.setText(" ");
         }
-        companyEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        companyEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setCompany(s.toString());
@@ -257,13 +240,7 @@ public class OwnedIdentityDetailsFragment extends Fragment {
         if (viewModel.getDetailsLocked() && (viewModel.getPosition() == null || viewModel.getPosition().length() == 0)) {
             positionEditText.setText(" ");
         }
-        positionEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        positionEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setPosition(s.toString());
@@ -271,13 +248,7 @@ public class OwnedIdentityDetailsFragment extends Fragment {
         });
 
         nicknameEditText.setText(viewModel.getNickname());
-        nicknameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        nicknameEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setNickname(s.toString());

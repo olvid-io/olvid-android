@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="16dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_rounded_dialog"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <View
+            android:id="@+id/focus_hugger"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/activity_action_shortcut_configuration_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:singleLine="true"
+            android:text="@string/dialog_title_configure_widget"
+            android:textAppearance="@style/RobotoMedium"
+            android:textColor="@color/primary700"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/current_owned_identity_group"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/separator"
+            app:layout_constraintTop_toBottomOf="@id/activity_action_shortcut_configuration_title">
+
+            <io.olvid.messenger.customClasses.InitialView
+                android:id="@+id/current_identity_initial_view"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/current_identity_muted_marker_image_view"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="22dp"
+                android:layout_marginTop="22dp"
+                android:contentDescription="@string/content_description_message_status"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@+id/current_identity_initial_view"
+                app:layout_constraintStart_toStartOf="@+id/current_identity_initial_view"
+                app:srcCompat="@drawable/ic_notification_muted_circle_dialog"
+                tools:visibility="visible" />
+
+
+            <TextView
+                android:id="@+id/current_identity_name_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/RobotoMedium"
+                android:textColor="@color/primary700"
+                android:textSize="16dp"
+                app:layout_constraintBottom_toTopOf="@id/current_identity_name_second_line_text_view"
+                app:layout_constraintEnd_toStartOf="@id/button_switch_profile"
+                app:layout_constraintStart_toEndOf="@+id/current_identity_initial_view"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                tools:text="Leslie Hyatt"
+                tools:ignore="SpUsage" />
+
+            <TextView
+                android:id="@+id/current_identity_name_second_line_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/greyTint"
+                android:textSize="12dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toStartOf="@id/button_switch_profile"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/current_identity_initial_view"
+                app:layout_constraintTop_toBottomOf="@id/current_identity_name_text_view"
+                tools:text="Boss @ ACME"
+                tools:visibility="visible"
+                tools:ignore="SpUsage" />
+
+            <TextView
+                android:id="@+id/button_switch_profile"
+                android:textColor="@color/blueOrWhite"
+                android:textAllCaps="true"
+                android:paddingVertical="6dp"
+                android:paddingHorizontal="12dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:textSize="12sp"
+                android:background="@drawable/background_rounded_button"
+                android:theme="@style/BlueOrWhiteRipple"
+                android:text="@string/button_label_switch_profile"
+                app:layout_constraintTop_toTopOf="@id/current_identity_initial_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/current_identity_initial_view" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="4dp"
+            android:background="@color/lightGrey"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/current_owned_identity_group" />
+
+        <ScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constrainedHeight="true"
+            app:layout_constraintTop_toBottomOf="@id/separator"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clipToPadding="false"
+            android:paddingBottom="56dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/label_widget_appearance"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:textAppearance="@style/RobotoMedium"
+                    android:textColor="@color/primary700"
+                    android:textSize="16sp"
+                    android:text="@string/label_widget_appearance"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/widget_preview"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+
+                <RelativeLayout
+                    android:id="@+id/widget_preview"
+                    android:layout_width="60dp"
+                    android:layout_height="90dp"
+                    android:background="@drawable/background_widget_preview"
+                    android:padding="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/label_widget_appearance">
+
+                    <ImageView
+                        android:id="@+id/widget_icon"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_above="@id/widget_label"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginBottom="4dp"
+                        tools:src="@drawable/ic_send" />
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_above="@id/widget_label"
+                        android:layout_alignParentEnd="true"
+                        android:gravity="bottom">
+
+                        <FrameLayout
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="2" />
+
+                        <ImageView
+                            android:id="@+id/widget_branding"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/olvid_icon_qr_overlay"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/widget_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:ellipsize="end"
+                        android:maxLines="2"
+                        android:lines="2"
+                        android:padding="1dp"
+                        android:shadowColor="@color/black"
+                        android:shadowRadius="2"
+                        android:gravity="center"
+                        android:textAlignment="center"
+                        android:textColor="@color/alwaysWhite"
+                        android:textSize="13sp"
+                        tools:text="@string/label_action_shortcut_preview_text" />
+                </RelativeLayout>
+
+                <EditText
+                    android:id="@+id/widget_label_edit_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textSize="14sp"
+                    android:imeOptions="flagNoPersonalizedLearning"
+                    android:inputType="textCapWords"
+                    android:hint="@string/hint_widget_label"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toEndOf="@id/widget_preview"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/widget_preview" />
+
+                <LinearLayout
+                    android:id="@+id/buttons"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/widget_preview"
+                    app:layout_constraintTop_toBottomOf="@id/widget_label_edit_text">
+
+                    <Button
+                        android:id="@+id/change_widget_icon_button"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/label_icon"
+                        android:textColor="@color/black"
+                        android:stateListAnimator="@null"
+                        android:drawablePadding="8dp"
+                        android:drawableEnd="@drawable/ic_send"
+                        />
+
+                    <Button
+                        android:id="@+id/change_widget_tint_button"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/label_color"
+                        android:textColor="@color/black"
+                        android:stateListAnimator="@null"
+                        android:drawablePadding="8dp"
+                        android:drawableEnd="@drawable/ic_color_none"
+                        app:layout_constraintStart_toEndOf="@id/change_widget_icon_button"
+                        app:layout_constraintTop_toTopOf="@id/widget_preview"
+                        app:layout_constraintEnd_toEndOf="parent" />
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/checkbox_show_badge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/greyTint"
+                    android:text="@string/label_show_olvid_badge"
+                    android:checked="true"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toEndOf="@id/widget_preview"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/buttons"/>
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/barrier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="bottom"
+                    app:constraint_referenced_ids="widget_preview, checkbox_show_badge"
+                    />
+
+
+                <View
+                    android:id="@+id/separator2"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/barrier" />
+
+                <TextView
+                    android:id="@+id/label_on_click_action"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:textAppearance="@style/RobotoMedium"
+                    android:textColor="@color/primary700"
+                    android:textSize="16sp"
+                    android:text="@string/label_widget_tap_action"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/separator2"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <TextView
+                    android:id="@+id/label_discussion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_discussion"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/label_on_click_action" />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintTop_toTopOf="@id/label_discussion"
+                    app:layout_constraintBottom_toBottomOf="@id/label_discussion"
+                    app:layout_constraintStart_toEndOf="@id/label_discussion"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="3sp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="64dp"/>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/discussion_frame"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintHeight_min="48dp"
+                    android:layout_marginTop="4dp"
+                    android:background="?attr/selectableItemBackground"
+                    app:layout_constraintTop_toBottomOf="@id/label_discussion"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <TextView
+                        android:id="@+id/discussion_empty_text_view"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_tap_to_choose_discussion"
+                        android:textStyle="italic"
+                        android:textColor="@color/greyTint"
+                        android:gravity="center"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:visibility="gone"/>
+
+                    <io.olvid.messenger.customClasses.InitialView
+                        android:id="@+id/discussion_initial_view"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/discussion_title_text_view"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textAppearance="@style/RobotoMedium"
+                        android:textColor="@color/primary700"
+                        android:textSize="16sp"
+                        app:layout_constraintBottom_toTopOf="@+id/discussion_group_members_text_view"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/discussion_initial_view"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_chainStyle="packed"
+                        tools:text="Discussion title" />
+
+                    <TextView
+                        android:id="@+id/discussion_group_members_text_view"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="@color/grey"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/discussion_title_text_view"
+                        app:layout_constraintTop_toBottomOf="@+id/discussion_title_text_view"
+                        app:layout_constraintVertical_bias="0.0"
+                        tools:text="Bob, Alice" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/label_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_message"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/discussion_frame" />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintTop_toTopOf="@id/label_message"
+                    app:layout_constraintBottom_toBottomOf="@id/label_message"
+                    app:layout_constraintStart_toEndOf="@id/label_message"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="3sp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="64dp"/>
+
+                <EditText
+                    android:id="@+id/message_edit_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="3"
+                    android:scrollbars="vertical"
+                    android:textSize="14sp"
+                    android:hint="@string/hint_predefined_message_to_send"
+                    android:imeOptions="flagNoPersonalizedLearning"
+                    android:inputType="textCapSentences|textLongMessage"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/label_message"
+                    android:importantForAutofill="no" />
+
+                <CheckBox
+                    android:id="@+id/checkbox_confirm_send"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/greyTint"
+                    android:text="@string/label_confirm_before_sending"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/message_edit_text"/>
+<!--                <CheckBox-->
+<!--                    android:id="@+id/checkbox_vibrate_on_send"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:textColor="@color/greyTint"-->
+<!--                    android:text="@string/label_vibrate_after_sending"-->
+<!--                    android:layout_marginStart="16dp"-->
+<!--                    android:layout_marginEnd="16dp"-->
+<!--                    android:checked="true"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintTop_toBottomOf="@id/checkbox_confirm_send"/>-->
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+
+
+        <TextView
+            android:id="@+id/button_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/background_rounded_button_grey_dialog_background"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:text="@string/button_label_cancel"
+            android:textAllCaps="true"
+            android:textColor="@color/greyTint"
+            android:textSize="12sp"
+            android:theme="@style/GreyRipple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/button_save"/>
+
+        <TextView
+            android:id="@+id/button_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/background_rounded_button_dialog_background_state_list"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:text="@string/button_label_save"
+            android:textAllCaps="true"
+            android:textColor="@color/blue_or_white_tint_list"
+            android:textSize="12sp"
+            android:theme="@style/BlueOrWhiteRipple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -72,6 +72,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.openid.KeycloakAuthenticationStartFragment;
 import io.olvid.messenger.openid.KeycloakBrowserChooserDialog;
 import io.olvid.messenger.openid.KeycloakManager;
@@ -191,15 +192,7 @@ public class KeycloakSelectionFragment extends Fragment implements View.OnClickL
         keycloakClientIdEditText = view.findViewById(R.id.keycloak_client_id_edit_text);
         keycloakClientSecretEditText = view.findViewById(R.id.keycloak_client_secret_edit_text);
 
-        keycloakServerEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        keycloakServerEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (started) {
@@ -208,15 +201,7 @@ public class KeycloakSelectionFragment extends Fragment implements View.OnClickL
             }
         });
 
-        keycloakClientIdEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        keycloakClientIdEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (started) {
@@ -226,15 +211,7 @@ public class KeycloakSelectionFragment extends Fragment implements View.OnClickL
             }
         });
 
-        keycloakClientSecretEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        keycloakClientSecretEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (started) {

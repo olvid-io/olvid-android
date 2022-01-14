@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -49,6 +49,7 @@ import androidx.lifecycle.ViewModelProvider;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
@@ -164,13 +165,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
         visibilityDropdown = dialogView.findViewById(R.id.visible_setting_type_dropdown);
         visibilityDropdown.setOnClickListener(this);
         visibilityEditText = dialogView.findViewById(R.id.visible_setting_count_edit_text);
-        visibilityEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
+        visibilityEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 recompute(VISEX.VISIBILITY);
@@ -180,13 +175,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
         existenceDropdown = dialogView.findViewById(R.id.existence_setting_type_dropdown);
         existenceDropdown.setOnClickListener(this);
         existenceEditText = dialogView.findViewById(R.id.existence_setting_count_edit_text);
-        existenceEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
+        existenceEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 recompute(VISEX.EXISTENCE);

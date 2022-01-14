@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -68,6 +68,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -108,6 +109,7 @@ import io.olvid.messenger.customClasses.JpegUtils;
 import io.olvid.messenger.customClasses.MessageAttachmentAdapter;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
@@ -290,17 +292,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         if (SettingsActivity.useKeyboardIncognitoMode()) {
             newMessageEditText.setImeOptions(newMessageEditText.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
         }
-        newMessageEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                // nothing to do
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                // nothing to do
-            }
-
+        newMessageEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable editable) {
                 composeMessageViewModel.setNewMessageText(editable);
@@ -323,15 +315,14 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         newMessageEditText.requestFocus();
         activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        newMessageEditText.setImeContentCommittedHandler((contentUri, fileName, mimeType, callMeWhenDone) -> App.runThread(() -> {
+        newMessageEditText.setImeContentCommittedHandler((contentUri, fileName, mimeType, callMeWhenDone) -> {
             new SaveDraftTask(discussionViewModel.getDiscussionId(), composeMessageViewModel.getTrimmedNewMessageText(), composeMessageViewModel.getDraftMessage().getValue()).run();
             new AddFyleToDraftFromUriTask(contentUri, fileName, mimeType, discussionViewModel.getDiscussionId()).run();
             if (callMeWhenDone != null) {
                 callMeWhenDone.run();
             }
-        }));
+        });
         newMessageEditText.setOnEditorActionListener((v, actionId, event) -> {
-            Logger.e("actionid " + actionId);
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 sendMessage();
                 if (imm != null) {
@@ -1229,7 +1220,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             activity.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, backgroundDrawable, true);
 
             for (int icon : iconsOverflow) {
-                TextView textView = new TextView(new ContextThemeWrapper(activity, R.style.SubtleBlueRipple));
+                TextView textView = new AppCompatTextView(new ContextThemeWrapper(activity, R.style.SubtleBlueRipple));
                 textView.setId(getViewIdForIcon(icon));
                 textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 textView.setCompoundDrawablesRelativeWithIntrinsicBounds(getImageResourceForIcon(icon), 0, 0, 0);

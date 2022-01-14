@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -55,6 +55,7 @@ import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.fragments.SubscriptionStatusFragment;
 
 public class IdentityCreationOptionsFragment extends Fragment implements View.OnClickListener, EngineNotificationListener {
@@ -126,15 +127,7 @@ public class IdentityCreationOptionsFragment extends Fragment implements View.On
         serverEditText = view.findViewById(R.id.server_edit_text);
         apiKeyEditText = view.findViewById(R.id.api_key_edit_text);
 
-        serverEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        serverEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (started) {
@@ -142,15 +135,7 @@ public class IdentityCreationOptionsFragment extends Fragment implements View.On
                 }
             }
         });
-        apiKeyEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        apiKeyEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (started) {

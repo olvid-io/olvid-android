@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:minWidth="20dp"
+    android:minHeight="20dp"
+    android:resizeMode="none"
+    android:updatePeriodMillis="86400000"
+    android:description="@string/widget_action_shortcut_description"
+    android:initialLayout="@layout/widget_action_shortcut"
+    android:previewImage="@mipmap/widget_action_shortcut_preview"
+    android:configure="io.olvid.messenger.widget.ActionShortcutConfigurationActivity"
+    android:widgetCategory="home_screen"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:previewLayout="@layout/widget_action_shortcut_preview"
+    android:widgetFeatures="reconfigurable"
+    tools:targetApi="s" />

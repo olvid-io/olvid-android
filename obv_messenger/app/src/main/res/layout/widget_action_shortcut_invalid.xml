@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:layout_height="80dp"
+    tools:layout_width="60dp"
+    android:id="@+id/widget_root">
+
+    <TextView
+        android:id="@+id/widget_label"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:ellipsize="end"
+        android:padding="2dp"
+        android:shadowColor="@color/black"
+        android:shadowRadius="2"
+        android:gravity="center"
+        android:textColor="@color/alwaysWhite"
+        android:background="@drawable/background_gradient_olvid"
+        android:textSize="10sp"
+        android:text="@string/label_action_shortcut_invalid_text" />
+
+</RelativeLayout>

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -55,6 +55,8 @@ public class OnboardingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        App.setAppDialogsBlocked(true);
 
         Window window = getWindow();
         if (window != null) {
@@ -172,6 +174,13 @@ public class OnboardingActivity extends AppCompatActivity {
                 navHostFragment.getNavController().navigate(R.id.new_profile);
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        App.setAppDialogsBlocked(false);
     }
 
     @Override

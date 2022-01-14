@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,23 +20,23 @@
 package io.olvid.messenger.customClasses;
 
 import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.OpenableColumns;
+import android.text.Editable;
 import android.util.AttributeSet;
 import android.util.Pair;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.core.view.ContentInfoCompat;
 import androidx.core.view.OnReceiveContentListener;
 import androidx.core.view.ViewCompat;
 
-import io.olvid.engine.Logger;
+import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 
 
@@ -84,24 +84,61 @@ public class DiscussionInputEditText extends AppCompatEditText {
 
     private final OnReceiveContentListener receiver = (View view, ContentInfoCompat contentInfo) -> {
         if (imeContentCommittedHandler != null) {
-            Pair<ContentInfoCompat, ContentInfoCompat> split = contentInfo.partition(item -> item.getUri() != null);
-            ContentInfoCompat uriContent = split.first;
+            Pair<ContentInfoCompat, ContentInfoCompat> split = contentInfo.partition((ClipData.Item item) -> item.getUri() != null || item.getText() != null);
+            ContentInfoCompat pastableContent = split.first;
             ContentInfoCompat remaining = split.second;
-            if (uriContent != null) {
-                ClipData clip = uriContent.getClip();
-                String fileName = null;
+            if (pastableContent != null) {
+                ContentResolver contentResolver = App.getContext().getContentResolver();
+
+                ClipData clip = pastableContent.getClip();
+                String clipName = null;
                 try {
-                    fileName = clip.getDescription().getLabel().toString();
+                    clipName = clip.getDescription().getLabel().toString();
                 } catch (Exception ignored) {}
+                String fallbackFileName = clipName;
 
                 for (int i = 0; i < clip.getItemCount(); i++) {
-                    Uri uri = clip.getItemAt(i).getUri();
-                    String mimeType = null;
-                    try {
-                        mimeType = clip.getDescription().getMimeType(i);
-                    } catch (Exception ignored) {
+                    ClipData.Item item = clip.getItemAt(i);
+                    if (item.getText() != null) {
+                        int start = getSelectionStart();
+                        int end = getSelectionEnd();
+                        if (start != -1 && end != -1) {
+                            Editable text = getText();
+                            if (text == null) {
+                                setText(item.getText());
+                                setSelection(item.getText().length());
+                            } else {
+                                text.replace(start, end, item.getText());
+                                setSelection(start + item.getText().length());
+                            }
+                        } else {
+                            Editable text = getText();
+                            if (text == null) {
+                                setText(item.getText());
+                                setSelection(item.getText().length());
+                            } else {
+                                text.append(item.getText());
+                                setSelection(text.length() + item.getText().length());
+                            }
+                        }
+                    } else if (item.getUri() != null) {
+                        Uri uri = item.getUri();
+                        String mimeType = clip.getDescription().getMimeTypeCount() > i ? clip.getDescription().getMimeType(i) : null;
+                        App.runThread(() -> {
+                            String fileName = fallbackFileName;
+                            String[] projection = {OpenableColumns.DISPLAY_NAME};
+                            try (Cursor cursor = contentResolver.query(uri, projection, null, null, null)) {
+                                if ((cursor != null) && cursor.moveToFirst()) {
+                                    int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                                    if (nameIndex >= 0) {
+                                        fileName = cursor.getString(nameIndex);
+                                    }
+                                }
+                            }
+
+                            imeContentCommittedHandler.handler(uri, fileName, mimeType, null);
+                        });
                     }
-                    imeContentCommittedHandler.handler(uri, fileName, mimeType, null);
                 }
             }
             return remaining;
@@ -110,6 +147,7 @@ public class DiscussionInputEditText extends AppCompatEditText {
     };
 
     public interface ImeContentCommittedHandler {
+        // this handler should always be called from a background thread
         void handler(Uri contentUri, String fileName, String mimeType, Runnable callMeWhenDone);
     }
 }

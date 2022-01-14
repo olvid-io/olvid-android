@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -325,7 +325,7 @@ public class EdwardCurvesUnitTest {
                 BigInteger n = new BigInteger(vec.n);
                 EdwardCurvePoint P = new EdwardCurvePoint(new BigInteger(vec.x), new BigInteger(vec.y), mdc);
                 EdwardCurvePoint Q = new EdwardCurvePoint(new BigInteger(vec.x2), new BigInteger(vec.y2), mdc);
-                EdwardCurvePoint Q2 = mdc.scalarMutliplicationWithX(n, P);
+                EdwardCurvePoint Q2 = mdc.scalarMultiplicationWithX(n, P);
                 assertEquals(Q, Q2);
             }
         }
@@ -341,7 +341,7 @@ public class EdwardCurvesUnitTest {
                 BigInteger n = new BigInteger(vec.n);
                 EdwardCurvePoint P = new EdwardCurvePoint(new BigInteger(vec.x), new BigInteger(vec.y), curve25519);
                 EdwardCurvePoint Q = new EdwardCurvePoint(new BigInteger(vec.x2), new BigInteger(vec.y2), curve25519);
-                EdwardCurvePoint Q2 = curve25519.scalarMutliplicationWithX(n, P);
+                EdwardCurvePoint Q2 = curve25519.scalarMultiplicationWithX(n, P);
                 assertEquals(Q, Q2);
             }
         }

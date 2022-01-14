@@ -1,4 +1,17 @@
+# Build 152 (0.11.0)
+2022-01-14
+
+- [security] fix a potential timing attack on the implementation of scalar multiplication on EC (many thanks to Ryad Benadjila for pointing it out to us!)
+- use emoji2 to support modern amojis on older android
+- you can now create predefined messages to send in one click
+- workaround for the presence of multiple Olvid tasks in recente tasks
+- copy message can now copy complete message with attachments
+- update to libWebRTC 4664
+- update to AppAuth 0.11.1
+
+
 # Build 151 (0.10.1.2)
+2021-12-27
 
 - Hotfix for attaching file with instant screen lock
 
@@ -63,7 +76,7 @@
 
 - contact introduction always asks for user confirmation
 - check that the keycloak signature key is the same for added contacts/for the green shield
-- do not insert a "discussion deleted" message for remote deletion of an empty discussion 
+- do not insert a "discussion deleted" message for remote deletion of an empty discussion
 - backup reminder snackbar
 - multicalls no longer in beta
 - possible to "Save all" attachments in message
@@ -298,6 +311,3 @@
 - Dark mode support
 - Complete rework of settings
 - Compatibility with Android 11
-
-
-

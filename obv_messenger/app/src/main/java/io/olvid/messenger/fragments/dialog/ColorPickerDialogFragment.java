@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -137,14 +138,8 @@ public class ColorPickerDialogFragment extends DialogFragment implements View.On
         ((TextView) dialogView.findViewById(R.id.dialog_title)).setText(R.string.dialog_title_pick_discussion_color);
 
         colorEditText = dialogView.findViewById(R.id.color_input);
-        colorEditText.addTextChangedListener(new TextWatcher() {
+        colorEditText.addTextChangedListener(new TextChangeListener() {
             final Pattern pattern = Pattern.compile("^(#?)([0-9a-fA-F]{6}$)");
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -164,13 +159,7 @@ public class ColorPickerDialogFragment extends DialogFragment implements View.On
             }
         });
         alphaEditText = dialogView.findViewById(R.id.alpha_input);
-        alphaEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
+        alphaEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 try {

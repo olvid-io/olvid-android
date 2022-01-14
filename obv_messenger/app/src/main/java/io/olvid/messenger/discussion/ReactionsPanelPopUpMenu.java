@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -32,6 +32,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -50,7 +51,6 @@ public class ReactionsPanelPopUpMenu {
     private final int clickY;
     private final long messageId;
     private final Vibrator vibrator;
-    private final LayoutInflater inflater;
     private final DisplayMetrics metrics;
     String previousReaction = null;
 
@@ -61,7 +61,6 @@ public class ReactionsPanelPopUpMenu {
         this.clickX = clickX;
         this.clickY = clickY;
         this.vibrator = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
-        this.inflater = LayoutInflater.from(activity);
         this.metrics = activity.getResources().getDisplayMetrics();
 
         App.runThread(() -> {
@@ -108,7 +107,7 @@ public class ReactionsPanelPopUpMenu {
         int panelHeightPx = (int) ((reactionFontSizeDp + 4) * metrics.density);
 
         for (String reaction : reactions) {
-            TextView child = new TextView(activity);
+            TextView child = new AppCompatTextView(activity);
             child.setTextColor(ContextCompat.getColor(activity, R.color.greyTint));
             child.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             child.setPadding(twoDpInPx, twoDpInPx, twoDpInPx, twoDpInPx);

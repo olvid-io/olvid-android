@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -43,6 +43,7 @@ import java.util.Calendar;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.tasks.UpdateMessageBodyTask;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -98,16 +99,8 @@ public class Utils {
 
                 editMessageTextView.requestFocus();
 
-                editMessageTextView.addTextChangedListener(new TextWatcher() {
+                editMessageTextView.addTextChangedListener(new TextChangeListener() {
                     final String oldBody = message.contentBody;
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    }
 
                     @Override
                     public void afterTextChanged(Editable s) {

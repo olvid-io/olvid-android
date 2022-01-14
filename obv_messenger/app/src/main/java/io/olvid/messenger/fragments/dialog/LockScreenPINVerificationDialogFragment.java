@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -37,6 +37,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.settings.SettingsActivity;
 
 
@@ -86,13 +87,7 @@ public class LockScreenPINVerificationDialogFragment extends DialogFragment impl
         cancelButton.setOnClickListener(this);
 
         pinInput = dialogView.findViewById(R.id.pin_input);
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
+        TextWatcher textWatcher = new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 validatePIN();

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -30,6 +30,7 @@ import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
+import org.webrtc.Logging;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
 import org.webrtc.PeerConnection;
@@ -83,7 +84,7 @@ class WebrtcPeerConnectionHolder {
             "turn:ap.turn-scaled.olvid.io:443?transport=tcp",
             "turns:ap.turn-scaled.olvid.io:443?transport=tcp");
 
-    private static final Set<String> AUDIO_CODECS = new HashSet<>(Arrays.asList("opus", "PCMU", "PCMA", "telephone-event"));
+    private static final Set<String> AUDIO_CODECS = new HashSet<>(Arrays.asList("opus", "PCMU", "PCMA", "telephone-event", "red"));
     private static final String ADDITIONAL_OPUS_OPTIONS = ";cbr=1"; // by default send and receive are mono, no need to add "stereo=0;sprop-stereo=0"
 
     static EglBase eglBase;
@@ -134,6 +135,9 @@ class WebrtcPeerConnectionHolder {
 
         PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(App.getContext())
                 .createInitializationOptions());
+
+//        Logging.enableLogToDebugOutput(Logging.Severity.LS_INFO);
+
 
         peerConnectionFactory = PeerConnectionFactory.builder()
                 .setOptions(options)
@@ -262,7 +266,6 @@ class WebrtcPeerConnectionHolder {
     void createOffer() {
         createAudioTrack(new MediaConstraints());
         createDataChannel();
-
         peerConnection.createOffer(sessionDescriptionObserver, new MediaConstraints());
     }
 
@@ -474,32 +477,19 @@ class WebrtcPeerConnectionHolder {
             }
             sb.append("\n");
         }
+
         // filter subsequent lines
+        Pattern rtpmapOrOptionPattern = Pattern.compile("^a=(rtpmap|fmtp|rtcp-fb):([0-9]+)\\s+");
         for (int i=1; i<audioLines.size(); i++) {
             String line = audioLines.get(i);
-            Matcher m = rtpmapPattern.matcher(line);
+            Matcher m = rtpmapOrOptionPattern.matcher(line);
             if (!m.find()) {
                 sb.append(line); sb.append("\n");
             } else {
-                String fmt = m.group(1);
+                String lineType = m.group(1);
+                String fmt = m.group(2);
                 if (formatsToKeep.contains(fmt)) {
-                    sb.append(line); sb.append("\n");
-                    if (opusFormat != null && opusFormat.equals(fmt)) {
-                        i++;
-                        line = audioLines.get(i);
-                        Matcher fb = Pattern.compile("^a=rtcp-fb:" + opusFormat + "\\s+").matcher(line);
-                        if (!fb.find()) {
-                            i--;
-                            continue;
-                        }
-                        sb.append(line); sb.append("\n");
-                        i++;
-                        line = audioLines.get(i);
-                        Matcher fmtp = Pattern.compile("^a=fmtp:" + opusFormat + "\\s+").matcher(line);
-                        if (!fmtp.find()) {
-                            i--;
-                            continue;
-                        }
+                    if (opusFormat != null && opusFormat.equals(fmt) && "ftmp".equals(lineType)) {
                         sb.append(line);
                         sb.append(ADDITIONAL_OPUS_OPTIONS);
                         if (SettingsActivity.useLowBandwidthInCalls()) {
@@ -507,6 +497,9 @@ class WebrtcPeerConnectionHolder {
                         } else {
                             sb.append(";maxaveragebitrate=32000");
                         }
+                        sb.append("\n");
+                    } else {
+                        sb.append(line);
                         sb.append("\n");
                     }
                 }
@@ -678,8 +671,9 @@ class WebrtcPeerConnectionHolder {
                 // --> we don't set anything
                 return;
             }
-
+            Logger.d("☎️ ON CREATE success. Filtering codecs.");
             String filteredSdpDescription = filterSdpDescriptionCodec(sdp.description);
+            Logger.d("☎️ Setting filtered local description:\n" + filteredSdpDescription);
             peerConnection.setLocalDescription(this, new SessionDescription(sdp.type, filteredSdpDescription));
 
             peerConnectionObserver.resetGatheringState();

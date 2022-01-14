@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -42,6 +42,7 @@ import java.util.List;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.OwnedIdentityDao;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -107,13 +108,7 @@ public class HiddenProfilePasswordCreationDialogFragment extends DialogFragment 
 
         passwordFirstInput = dialogView.findViewById(R.id.password_first_input);
         passwordSecondInput = dialogView.findViewById(R.id.password_second_input);
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
+        TextWatcher textWatcher = new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 validatePINs();

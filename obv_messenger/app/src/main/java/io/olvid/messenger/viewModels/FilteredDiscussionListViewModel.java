@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -135,9 +135,9 @@ public class FilteredDiscussionListViewModel extends ViewModel {
             if (discussionAndContactDisplayNames.discussion.bytesGroupOwnerAndUid != null) {
                 this.isGroupDiscussion = true;
                 this.byteIdentifier = discussionAndContactDisplayNames.discussion.bytesGroupOwnerAndUid;
-            } else if (discussionAndContactDisplayNames.oneToOneContact != null) {
+            } else if (discussionAndContactDisplayNames.discussion.bytesContactIdentity != null) {
                 this.isGroupDiscussion = false;
-                this.byteIdentifier = discussionAndContactDisplayNames.oneToOneContact.bytesContactIdentity;
+                this.byteIdentifier = discussionAndContactDisplayNames.discussion.bytesContactIdentity;
             } else {
                 this.isGroupDiscussion = false;
                 this.byteIdentifier = new byte[0];

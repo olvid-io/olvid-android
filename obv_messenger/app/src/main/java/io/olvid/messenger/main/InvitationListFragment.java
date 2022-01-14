@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -68,6 +68,7 @@ import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.customClasses.LoadAwareAdapter;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
@@ -777,14 +778,10 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                             }
                             return false;
                         });
-                        theirSasEditText.addTextChangedListener(new TextWatcher() {
+                        theirSasEditText.addTextChangedListener(new TextChangeListener() {
                             @Override
-                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
-                            @Override
-                            public void afterTextChanged(Editable editable) { }
-                            @Override
-                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                                validateSasButton.setEnabled((charSequence != null) && (charSequence.length() == Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS));
+                            public void afterTextChanged(Editable editable) {
+                                validateSasButton.setEnabled((editable != null) && (editable.length() == Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS));
                             }
                         });
                         break;

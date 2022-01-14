@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -69,6 +69,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
     private FilteredDiscussionListOnClickDelegate onClickDelegate;
     private LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> unfilteredDiscussions = null;
     private EmptyRecyclerView recyclerView;
+    private boolean useDialogBackground = false;
     private boolean removeBottomPadding = false;
     private View emptyView;
 
@@ -208,6 +209,9 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
         removeBottomPadding = true;
     }
 
+    public void setUseDialogBackground(boolean useDialogBackground) {
+        this.useDialogBackground = useDialogBackground;
+    }
 
     @Override
     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
@@ -348,6 +352,11 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                         }
                     }
                 }
+                if (useDialogBackground) {
+                    holder.rootView.setBackgroundColor(ContextCompat.getColor(holder.rootView.getContext(), R.color.dialogBackground));
+                } else {
+                    holder.rootView.setBackgroundColor(ContextCompat.getColor(holder.rootView.getContext(), R.color.almostWhite));
+                }
                 if (discussion.isGroupDiscussion) {
                     holder.initialView.setKeycloakCertified(discussion.keycloakManaged);
                     holder.initialView.setInactive(!discussion.active);
@@ -385,12 +394,14 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
         }
 
         class DiscussionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            final View rootView;
             final TextView discussionTitleTextView;
             final TextView discussionGroupMembersTextView;
             final InitialView initialView;
 
             DiscussionViewHolder(View itemView, int viewType) {
                 super(itemView);
+                rootView = itemView;
                 itemView.setOnClickListener(this);
                 discussionTitleTextView = itemView.findViewById(R.id.discussion_title_text_view);
                 discussionGroupMembersTextView = itemView.findViewById(R.id.discussion_group_members_text_view);

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -39,6 +39,16 @@ import io.olvid.messenger.App;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[] {
+            new Migration(49, 50) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 49 TO 50");
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS `action_shortcut_configuration_table` (`app_widget_id` INTEGER NOT NULL, `discussion_id` INTEGER NOT NULL, `serialized_configuration` TEXT NOT NULL, PRIMARY KEY(`app_widget_id`), FOREIGN KEY(`discussion_id`) REFERENCES `discussion_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_action_shortcut_configuration_table_discussion_id` ON `action_shortcut_configuration_table` (`discussion_id`)");
+                }
+            },
+
             new Migration(48, 49) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

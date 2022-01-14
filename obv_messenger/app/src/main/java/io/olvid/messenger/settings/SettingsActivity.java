@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -62,6 +62,7 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
+import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.fragments.dialog.LedColorPickerDialogFragment;
 
 public class SettingsActivity extends LockableActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, LedColorPickerDialogFragment.OnLedColorSelectedListener {
@@ -382,37 +383,55 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             setPreferencesFromResource(R.xml.preferences_header, rootKey);
 
             final FragmentActivity activity = requireActivity();
-            final BillingClient billingClient = BillingClient.newBuilder(activity)
-                    .enablePendingPurchases()
-                    .setListener((billingResult, list) -> Logger.d("Purchase updated " + list))
-                    .build();
 
-            billingClient.startConnection(new BillingClientStateListener() {
-                @Override
-                public void onBillingSetupFinished(@NonNull BillingResult setupBillingResult) {
-                    billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS, (BillingResult queryBillingResult, List<Purchase> list) -> {
-                        if (list.size() > 0) {
-                            // there are some subscriptions, add a link
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                Preference subscriptionPref = new Preference(activity);
-                                subscriptionPref.setIcon(R.drawable.ic_pref_subscription);
-                                subscriptionPref.setTitle(R.string.pref_title_subscription);
-                                subscriptionPref.setOnPreferenceClickListener((preference) -> {
-                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/subscriptions?sku=premium_2020_monthly&package=io.olvid.messenger")));
-                                    return true;
+            {
+                final BillingClient billingClient = BillingClient.newBuilder(activity)
+                        .enablePendingPurchases()
+                        .setListener((billingResult, list) -> Logger.d("Purchase updated " + list))
+                        .build();
+
+                billingClient.startConnection(new BillingClientStateListener() {
+                    @Override
+                    public void onBillingSetupFinished(@NonNull BillingResult setupBillingResult) {
+                        billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS, (BillingResult queryBillingResult, List<Purchase> list) -> {
+                            if (list.size() > 0) {
+                                // there are some subscriptions, add a link
+                                new Handler(Looper.getMainLooper()).post(() -> {
+                                    Preference subscriptionPref = new Preference(activity);
+                                    subscriptionPref.setIcon(R.drawable.ic_pref_subscription);
+                                    subscriptionPref.setTitle(R.string.pref_title_subscription);
+                                    subscriptionPref.setOnPreferenceClickListener((preference) -> {
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/subscriptions?sku=premium_2020_monthly&package=io.olvid.messenger")));
+                                        return true;
+                                    });
+                                    getPreferenceScreen().addPreference(subscriptionPref);
                                 });
-                                getPreferenceScreen().addPreference(subscriptionPref);
-                            });
-                        }
-                        billingClient.endConnection();
-                    });
-                }
+                            }
+                            billingClient.endConnection();
+                        });
+                    }
 
-                @Override
-                public void onBillingServiceDisconnected() {
-                    // nothing to do
-                }
-            });
+                    @Override
+                    public void onBillingServiceDisconnected() {
+                        // nothing to do
+                    }
+                });
+            }
+
+            {
+                App.runThread(() -> {
+                    if (AppDatabase.getInstance().actionShortcutConfigurationDao().countAll() > 0) {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            Preference actionShortcutPreference = new Preference(activity);
+                            actionShortcutPreference.setWidgetLayoutResource(R.layout.preference_widget_header_chevron);
+                            actionShortcutPreference.setIcon(R.drawable.ic_pref_widget);
+                            actionShortcutPreference.setTitle(R.string.pref_title_widgets);
+                            actionShortcutPreference.setFragment(WidgetListFragment.class.getName());
+                            getPreferenceScreen().addPreference(actionShortcutPreference);
+                        });
+                    }
+                });
+            }
         }
     }
 

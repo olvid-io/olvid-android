@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -32,6 +32,7 @@ public abstract class EdwardCurve {
     public BigInteger p = null;
     public BigInteger q = null;
     public BigInteger d = null;
+    public BigInteger cardinality = null;
     public BigInteger nu = null;
     public EdwardCurvePoint G = null;
     public BigInteger tonelliNonQR = null;
@@ -87,7 +88,9 @@ public abstract class EdwardCurve {
         BigInteger uR = uP;
         BigInteger wR = wP;
 
-        for (int i=n.bitLength()-1; i>=0; i--) {
+        // reduce n mod cardinality so we can loop on cardinality.bitLength()
+        n = n.mod(cardinality);
+        for (int i=cardinality.bitLength()-1; i>=0; i--) {
             BigInteger t1 = uQ.subtract(wQ).multiply(uR.add(wR)).mod(p);
             BigInteger t2 = uQ.add(wQ).multiply(uR.subtract(wR)).mod(p);
             BigInteger uQplusR = wP.multiply(t1.add(t2).modPow(TWO, p)).mod(p);
@@ -128,7 +131,7 @@ public abstract class EdwardCurve {
     }
 
 
-    public EdwardCurvePoint scalarMutliplicationWithX(BigInteger n, EdwardCurvePoint P) {
+    public EdwardCurvePoint scalarMultiplicationWithX(BigInteger n, EdwardCurvePoint P) {
         if (n.equals(BigInteger.ZERO) || P.getY().equals(BigInteger.ONE)) {
             return EdwardCurvePoint.noCheckFactory(BigInteger.ZERO, BigInteger.ONE, this);
         }
@@ -141,7 +144,10 @@ public abstract class EdwardCurve {
         }
         EdwardCurvePoint Q = EdwardCurvePoint.noCheckFactory(P.getX(), P.getY(), this);
         EdwardCurvePoint R = EdwardCurvePoint.noCheckFactory(BigInteger.ZERO, BigInteger.ONE, this);
-        for (int i=n.bitLength()-1; i>=0; i--) {
+
+        // reduce n mod cardinality so we can loop on cardinality.bitLength()
+        n = n.mod(cardinality);
+        for (int i=cardinality.bitLength()-1; i>=0; i--) {
             if (n.testBit(i)) {
                 R = pointAddition(R, Q);
                 Q = pointAddition(Q, Q);
@@ -155,10 +161,10 @@ public abstract class EdwardCurve {
 
 
     public EdwardCurvePoint[] mulAdd(BigInteger a, EdwardCurvePoint P1, BigInteger b, EdwardCurvePoint P2) {
-        EdwardCurvePoint P3 = scalarMutliplicationWithX(a, P1);
+        EdwardCurvePoint P3 = scalarMultiplicationWithX(a, P1);
         ArrayList<EdwardCurvePoint> list = new ArrayList<>();
         if (P2.getX() != null) {
-            EdwardCurvePoint P4 = scalarMutliplicationWithX(b, P2);
+            EdwardCurvePoint P4 = scalarMultiplicationWithX(b, P2);
             list.add(pointAddition(P3, P4));
         } else {
             BigInteger Y4 = scalarMultiplication(b, P2.getY());
@@ -176,7 +182,7 @@ public abstract class EdwardCurve {
         do {
             a = prng.bigInt(q);
         } while (a.equals(BigInteger.ONE) || a.equals(BigInteger.ZERO));
-        EdwardCurvePoint aG = scalarMutliplicationWithX(a, G);
+        EdwardCurvePoint aG = scalarMultiplicationWithX(a, G);
         return new ScalarAndPoint(a, aG);
     }
 
@@ -215,6 +221,7 @@ class MDC extends EdwardCurve {
         q = new BigInteger(1, new byte[]{(byte) 0x3c, (byte) 0x4e, (byte) 0xda, (byte) 0x2e, (byte) 0x75, (byte) 0x15, (byte) 0xab, (byte) 0xed, (byte) 0x14, (byte) 0xcb, (byte) 0xe4, (byte) 0xbf, (byte) 0x75, (byte) 0xe9, (byte) 0x7f, (byte) 0x53, (byte) 0x4f, (byte) 0xb3, (byte) 0x89, (byte) 0x75, (byte) 0xfa, (byte) 0xf9, (byte) 0x74, (byte) 0xbb, (byte) 0x58, (byte) 0x85, (byte) 0x52, (byte) 0xf4, (byte) 0x21, (byte) 0xb0, (byte) 0xf7, (byte) 0xfb});
         d = new BigInteger(1, new byte[]{(byte) 0x57, (byte) 0x13, (byte) 0x04, (byte) 0x52, (byte) 0x19, (byte) 0x65, (byte) 0xb6, (byte) 0x8a, (byte) 0x7c, (byte) 0xdf, (byte) 0xbf, (byte) 0xcc, (byte) 0xfb, (byte) 0x0c, (byte) 0xb9, (byte) 0x62, (byte) 0x5f, (byte) 0x12, (byte) 0x70, (byte) 0xf6, (byte) 0x3f, (byte) 0x21, (byte) 0xf0, (byte) 0x41, (byte) 0xee, (byte) 0x93, (byte) 0x09, (byte) 0x25, (byte) 0x03, (byte) 0x00, (byte) 0xcf, (byte) 0x89});
         nu = BigInteger.valueOf(4);
+        cardinality = q.multiply(nu);
         tonelliNonQR = BigInteger.valueOf(2);
         tonelliT = p.shiftRight(1);
         tonelliS = 1;
@@ -239,6 +246,7 @@ class Curve25519 extends EdwardCurve {
         q = new BigInteger(1, new byte[]{(byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x14, (byte) 0xde, (byte) 0xf9, (byte) 0xde, (byte) 0xa2, (byte) 0xf7, (byte) 0x9c, (byte) 0xd6, (byte) 0x58, (byte) 0x12, (byte) 0x63, (byte) 0x1a, (byte) 0x5c, (byte) 0xf5, (byte) 0xd3, (byte) 0xed});
         d = new BigInteger(1, new byte[]{(byte) 0x2d, (byte) 0xfc, (byte) 0x93, (byte) 0x11, (byte) 0xd4, (byte) 0x90, (byte) 0x01, (byte) 0x8c, (byte) 0x73, (byte) 0x38, (byte) 0xbf, (byte) 0x86, (byte) 0x88, (byte) 0x86, (byte) 0x17, (byte) 0x67, (byte) 0xff, (byte) 0x8f, (byte) 0xf5, (byte) 0xb2, (byte) 0xbe, (byte) 0xbe, (byte) 0x27, (byte) 0x54, (byte) 0x8a, (byte) 0x14, (byte) 0xb2, (byte) 0x35, (byte) 0xec, (byte) 0xa6, (byte) 0x87, (byte) 0x4a});
         nu = BigInteger.valueOf(8);
+        cardinality = q.multiply(nu);
         tonelliNonQR = BigInteger.valueOf(2);
         tonelliT = p.shiftRight(2);
         tonelliS = 2;

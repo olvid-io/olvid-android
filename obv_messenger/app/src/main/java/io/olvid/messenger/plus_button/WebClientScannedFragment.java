@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -62,6 +62,7 @@ import androidx.navigation.Navigation;
 
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.webclient.WebClientManager;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -144,15 +145,7 @@ public class WebClientScannedFragment extends Fragment implements View.OnClickLi
         this.protocolSuccess = view.findViewById(R.id.protocol_finished_successfully);
         this.sasCodeError = view.findViewById(R.id.error_sas_incorrect);
 
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        TextWatcher textWatcher = new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 validateSasCode();

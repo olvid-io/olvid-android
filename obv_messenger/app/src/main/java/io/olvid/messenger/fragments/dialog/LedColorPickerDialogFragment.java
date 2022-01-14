@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -45,6 +45,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.settings.SettingsActivity;
 
 
@@ -124,14 +125,8 @@ public class LedColorPickerDialogFragment extends DialogFragment implements View
         ((TextView) dialogView.findViewById(R.id.dialog_title)).setText(R.string.dialog_title_pick_discussion_color);
 
         colorEditText = dialogView.findViewById(R.id.color_input);
-        colorEditText.addTextChangedListener(new TextWatcher() {
+        colorEditText.addTextChangedListener(new TextChangeListener() {
             final Pattern pattern = Pattern.compile("^(#?)([0-9a-fA-F]{6}$)");
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -52,7 +52,7 @@ public class EncryptionEciesMDCKeyPair extends KeyPair {
         do {
             a = prng.bigInt(mdc.q);
         } while (a.equals(BigInteger.ONE) || a.equals(BigInteger.ZERO));
-        EdwardCurvePoint A = mdc.scalarMutliplicationWithX(a, mdc.G);
+        EdwardCurvePoint A = mdc.scalarMultiplicationWithX(a, mdc.G);
         HashMap<DictionaryKey, Encoded> publicKeyDictionary = new HashMap<>();
         HashMap<DictionaryKey, Encoded> privateKeyDictionary = new HashMap<>();
         try {

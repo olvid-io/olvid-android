@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -57,6 +57,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -94,13 +95,7 @@ public class LockScreenActivity extends AppCompatActivity {
         ImageView okButton = findViewById(R.id.button_ok);
         biometryDisabledTextview = findViewById(R.id.biometry_disabled_textview);
 
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
+        TextWatcher textWatcher = new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 validatePIN();

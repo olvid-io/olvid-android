@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -114,7 +114,7 @@ public class ContactListFragment extends FilteredContactListFragment implements 
         rootView = super.onCreateView(inflater, container, savedInstanceState);
         recyclerView.setPadding(0,0,0,(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 155, getResources().getDisplayMetrics()));
         if (rootView != null) {
-            emptyViewTextView = rootView.findViewById(R.id.filtered_contact_list_empty_view_text_view);
+            emptyViewTextView = rootView.findViewById(R.id.widget_list_empty_view_text_view);
             if (filteredContactListViewModel.getUnfilteredContacts() != null) {
                 setEmptyTextViewText(filteredContactListViewModel.getUnfilteredContacts().size() == 0);
             }

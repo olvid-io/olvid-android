@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -2905,6 +2905,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             private int replyIconHeight;
 
             private Long currentlySwipingMessageId;
+            private boolean currentlySwipingMessageHasAttachments;
+            private boolean currentlySwipingMessageHasTextContent;
             private boolean swiping;
             private int currentlySwipingAdapterPosition;
             private Bitmap replyIcon;
@@ -3004,10 +3006,18 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     }
 
                     currentlySwipingMessageId = messageViewHolder.messageId;
+                    currentlySwipingMessageHasAttachments = messageViewHolder.viewType == ViewType.INBOUND_WITH_ATTACHMENT ||
+                            messageViewHolder.viewType == ViewType.OUTBOUND_WITH_ATTACHMENT ||
+                            messageViewHolder.viewType == ViewType.OUTBOUND_EPHEMERAL_WITH_ATTACHMENT ||
+                            messageViewHolder.viewType == ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT;
                     swiping = true;
                     currentlySwipingAdapterPosition = messageViewHolder.getBindingAdapterPosition();
                     if (currentlySwipingAdapterPosition != RecyclerView.NO_POSITION) {
-                        addBitmapToCache(messages.get(currentlySwipingAdapterPosition - 1), viewHolder.itemView);
+                        Message message = messages.get(currentlySwipingAdapterPosition - 1);
+                        addBitmapToCache(message, viewHolder.itemView);
+                        currentlySwipingMessageHasTextContent = message.contentBody != null && message.contentBody.length() != 0;
+                    } else {
+                        currentlySwipingMessageHasTextContent = false;
                     }
                     loadReplyIcon();
                 } else if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
@@ -3024,6 +3034,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 MessageViewHolder messageViewHolder = (MessageViewHolder) vh;
 
                 currentlySwipingMessageId = messageViewHolder.messageId;
+                // do not set the currentlySwipingMessageHasAttachments and currentlySwipingMessageHasTextContent booleans --> they were set by the last call to onSelectedChanged
                 if (direction == ItemTouchHelper.RIGHT) {
                     App.runThread(new SetDraftReplyTask(discussionViewModel.getDiscussionId(), messageViewHolder.messageId, composeMessageViewModel.getRawNewMessageText().toString()));
                     if (composeMessageDelegate != null) {
@@ -3075,8 +3086,53 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                 break;
                             }
                             case COPY: {
-                                App.runThread(new CopySelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId));
-                                closeMenu();
+                                if (currentlySwipingMessageHasAttachments && currentlySwipingMessageHasTextContent) {
+                                    View anchorView;
+                                    if (swipedView instanceof ConstraintLayout) {
+                                        anchorView = new View(swipedView.getContext());
+                                        ((ViewGroup) swipedView).addView(anchorView);
+                                        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(messageRecyclerView.getWidth()/ bitmapAndSizesAndButtons.buttons.size(), bitmapAndSizesAndButtons.bitmap.getHeight());
+                                        layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
+                                        layoutParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
+                                        layoutParams.topMargin = (int) ((adjustedBottom - adjustedTop - bitmapAndSizesAndButtons.bitmap.getHeight()) / 2f);
+                                        if (swipedView.getTop() < toolBar.getBottom()) {
+                                            layoutParams.topMargin += toolBar.getBottom() - swipedView.getTop();
+                                        }
+                                        if (layoutParams.topMargin + bitmapAndSizesAndButtons.bitmap.getHeight() > swipedView.getHeight()) {
+                                            layoutParams.height -= layoutParams.topMargin + bitmapAndSizesAndButtons.bitmap.getHeight() - swipedView.getHeight();
+                                        }
+                                        layoutParams.leftMargin = messageRecyclerView.getWidth() + buttonNumber * messageRecyclerView.getWidth()/ bitmapAndSizesAndButtons.buttons.size();
+                                        anchorView.setLayoutParams(layoutParams);
+                                    } else {
+                                        anchorView = null;
+                                    }
+                                    PopupMenu popup = new PopupMenu(DiscussionActivity.this, anchorView != null ? anchorView : swipedView);
+                                    popup.inflate(R.menu.popup_copy_message_text_and_attachments);
+                                    popup.setOnDismissListener(menu -> {
+                                        if (anchorView != null) {
+                                            ((ViewGroup) swipedView).removeView(anchorView);
+                                        }
+                                    });
+                                    popup.setOnMenuItemClickListener((MenuItem item) -> {
+                                        if (item.getItemId() == R.id.popup_action_copy_message_text) {
+                                            App.runThread(new CopySelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId, false));
+                                            closeMenu();
+                                            return true;
+                                        } else if (item.getItemId() == R.id.popup_action_copy_text_and_attachments) {
+                                            App.runThread(new CopySelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId, true));
+                                            closeMenu();
+                                            return true;
+                                        }
+                                        return false;
+                                    });
+                                    popup.show();
+                                } else if (currentlySwipingMessageHasAttachments) {
+                                    App.runThread(new CopySelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId, true));
+                                    closeMenu();
+                                } else {
+                                    App.runThread(new CopySelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId, false));
+                                    closeMenu();
+                                }
                                 break;
                             }
                             case DETAILS: {
@@ -3205,27 +3261,21 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     case Message.TYPE_CONTACT_INACTIVE_REASON:
                         canBeDeletedEverywhere = false;
                         menuView.findViewById(R.id.swipe_menu_share).setVisibility(View.GONE);
+                        menuView.findViewById(R.id.swipe_menu_copy).setVisibility(View.GONE);
                         break;
                     case Message.TYPE_INBOUND_EPHEMERAL_MESSAGE:
                         menuView.findViewById(R.id.swipe_menu_share).setVisibility(View.GONE);
+                        menuView.findViewById(R.id.swipe_menu_copy).setVisibility(View.GONE);
                         break;
                     default:
                         if (message.wipeStatus == Message.WIPE_STATUS_NONE) {
                             buttons.add(MenuButtonType.SHARE);
+                            buttons.add(MenuButtonType.COPY);
                         } else {
                             menuView.findViewById(R.id.swipe_menu_share).setVisibility(View.GONE);
+                            menuView.findViewById(R.id.swipe_menu_copy).setVisibility(View.GONE);
                         }
                         break;
-                }
-                if (message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE
-                        || message.messageType == Message.TYPE_DISCUSSION_SETTINGS_UPDATE
-                        || message.messageType == Message.TYPE_PHONE_CALL
-                        || message.wipeStatus != Message.WIPE_STATUS_NONE
-                        || message.contentBody == null
-                        || message.contentBody.length() == 0) {
-                    menuView.findViewById(R.id.swipe_menu_copy).setVisibility(View.GONE);
-                } else {
-                    buttons.add(MenuButtonType.COPY);
                 }
                 if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
                         || message.messageType == Message.TYPE_INBOUND_MESSAGE
@@ -3234,13 +3284,13 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 } else {
                     menuView.findViewById(R.id.swipe_menu_details).setVisibility(View.GONE);
                 }
-                if (!locked
-                        && message.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                        && message.wipeStatus != Message.WIPE_STATUS_WIPED
-                        && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED) {
-                    buttons.add(MenuButtonType.EDIT);
-                } else {
+                if (locked
+                        || message.messageType != Message.TYPE_OUTBOUND_MESSAGE
+                        || message.wipeStatus == Message.WIPE_STATUS_WIPED
+                        || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
                     menuView.findViewById(R.id.swipe_menu_edit).setVisibility(View.GONE);
+                } else {
+                    buttons.add(MenuButtonType.EDIT);
                 }
                 buttons.add(MenuButtonType.DELETE);
 

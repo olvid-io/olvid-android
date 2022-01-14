@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -73,6 +73,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group;
@@ -200,13 +201,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
         initialView.setOnClickListener(this);
 
         nameEditText = dialogView.findViewById(R.id.edit_name_text_view);
-        nameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
+        nameEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setNickname(s.toString());
@@ -235,13 +230,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
         customNameHueSeekbar.setOnSeekBarChangeListener(this);
 
         EditText personalNoteEditText = dialogView.findViewById(R.id.personal_note_edit_text);
-        personalNoteEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
-
+        personalNoteEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setPersonalNote(s.toString());

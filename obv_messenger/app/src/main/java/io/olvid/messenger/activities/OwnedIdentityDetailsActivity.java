@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -54,6 +54,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -68,6 +69,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.MuteNotificationDialog;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.customClasses.InitialView;
@@ -280,14 +282,8 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
         Button deleteButton = dialogView.findViewById(R.id.delete_button);
         deleteButton.setEnabled(false);
         EditText typeDeleteEditText = dialogView.findViewById(R.id.type_delete_edit_text);
-        typeDeleteEditText.addTextChangedListener(new TextWatcher() {
+        typeDeleteEditText.addTextChangedListener(new TextChangeListener() {
             final String target = getString(R.string.text_delete_capitalized);
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -495,7 +491,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
     }
 
     private TextView makeTextView() {
-        TextView tv = new TextView(this);
+        TextView tv = new AppCompatTextView(this);
         tv.setTextColor(primary700);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         tv.setMaxLines(4);

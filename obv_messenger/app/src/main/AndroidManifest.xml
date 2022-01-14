@@ -177,7 +177,7 @@
             android:excludeFromRecents="true"
             android:noHistory="true"
             android:stateNotNeeded="true"
-            android:theme="@style/AppTheme.NoActionBar.Transparent"
+            android:theme="@style/AppTheme.NoActionBar.Transparent.Dimmed"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -197,16 +197,15 @@
             android:name=".activities.ShortcutActivity"
             android:alwaysRetainTaskState="false"
             android:excludeFromRecents="true"
-            android:icon="@drawable/icon_olvid_round"
-            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/label_discussion_shortcut"
             android:noHistory="true"
             android:stateNotNeeded="true"
-            android:theme="@style/AppTheme.NoActionBar.Transparent"
+            android:theme="@style/AppTheme.NoActionBar.Transparent.Dimmed"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -296,13 +295,29 @@
             android:excludeFromRecents="true"
             android:noHistory="true"
             android:stateNotNeeded="true"
-            android:theme="@style/AppTheme.NoActionBar.Transparent" />
+            android:theme="@style/AppTheme.NoActionBar.Transparent.Dimmed" />
         <activity android:name=".openid.KeycloakAuthenticationActivity"
             android:configChanges="orientation|screenSize|screenLayout|uiMode"
             android:launchMode="singleInstance"
             android:theme="@style/AppTheme.NoActionBar.Transparent" />
         <activity android:name=".settings.StorageExplorer"
             android:label="@string/activity_title_storage_explorer"/>
+        <activity android:name=".widget.ActionShortcutConfigurationActivity"
+            android:theme="@style/AppTheme.NoActionBar.Transparent.Dimmed"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".widget.ActionShortcutSendMessageActivity"
+            android:theme="@style/AppTheme.NoActionBar.Transparent"
+            android:alwaysRetainTaskState="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:stateNotNeeded="true" />
+
+
 
         <service
             android:name=".services.ObvFirebaseMessagingService"
@@ -343,6 +358,14 @@
             <intent-filter>
                 <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
             </intent-filter>
+        </receiver>
+        <receiver android:name=".widget.ActionShortcutWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/action_shortcut_widget_provider_info" />
         </receiver>
 
         <provider

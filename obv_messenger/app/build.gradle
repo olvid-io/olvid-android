@@ -12,8 +12,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 151
-        versionName "0.10.1.2"
+        versionCode 152
+        versionName "0.11.0"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
 
@@ -84,6 +84,9 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.13.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
 
+    implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation 'androidx.emoji2:emoji2:1.0.1'
+    implementation 'androidx.emoji2:emoji2-bundled:1.0.1'
     implementation 'androidx.activity:activity:1.4.0'
     implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.camera:camera-camera2:1.0.2'
@@ -113,11 +116,11 @@ dependencies {
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
 
     // connection to google drive
-    implementation 'com.google.android.gms:play-services-auth:20.0.0'
-    implementation('com.google.http-client:google-http-client-gson:1.40.1') {
+    implementation 'com.google.android.gms:play-services-auth:20.0.1'
+    implementation('com.google.http-client:google-http-client-gson:1.41.0') {
         exclude group: 'org.apache.httpcomponents'
     }
-    implementation('com.google.api-client:google-api-client-android:1.32.2') {
+    implementation('com.google.api-client:google-api-client-android:1.33.0') {
         exclude group: 'org.apache.httpcomponents'
     }
     // for latest version, see: https://github.com/googleapis/google-api-java-client-services/tree/master/clients/google-api-services-drive/v3
@@ -130,7 +133,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-lite:3.0.1'
 
     // openID
-    implementation 'net.openid:appauth:0.10.0'
+    implementation 'net.openid:appauth:0.11.1'
     implementation 'org.bitbucket.b_c:jose4j:0.7.9'
 }
 

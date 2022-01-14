@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -154,10 +154,6 @@ public abstract class LockableActivity extends AppCompatActivity {
                     break;
                 }
                 case SettingsActivity.FONT_SCALE_CHANGED_BROADCAST_ACTION: {
-//                    Resources res = getResources();
-//                    Configuration configuration = res.getConfiguration();
-//                    configuration.fontScale /= intent.getFloatExtra(SettingsActivity.FONT_SCALE_CHANGED_PREVIOUS_SCALE_INTENT_EXTRA, 1.0f);
-//                    res.updateConfiguration(configuration, res.getDisplayMetrics());
                     recreate();
                     break;
                 }

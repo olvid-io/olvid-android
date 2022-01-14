@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,6 +20,7 @@
 package io.olvid.messenger.activities;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.lifecycle.Transformations;
@@ -209,7 +210,7 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
                 }
                 searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_FILTER);
                 searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    final EditText editText = new EditText(searchView.getContext());
+                    final EditText editText = new AppCompatEditText(searchView.getContext());
                     {
                         contactsSelectionFragment.setContactFilterEditText(editText);
                     }

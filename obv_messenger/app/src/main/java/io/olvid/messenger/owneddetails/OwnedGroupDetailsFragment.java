@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2021 Olvid SAS
+ *  Copyright © 2019-2022 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -57,6 +57,7 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.customClasses.InitialView;
 
@@ -122,13 +123,7 @@ public class OwnedGroupDetailsFragment extends Fragment {
         });
 
         groupNameEditText.setText(viewModel.getGroupName());
-        groupNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        groupNameEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setGroupName(s.toString());
@@ -136,13 +131,7 @@ public class OwnedGroupDetailsFragment extends Fragment {
         });
 
         groupDescriptionEditText.setText(viewModel.getGroupDescription());
-        groupDescriptionEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+        groupDescriptionEditText.addTextChangedListener(new TextChangeListener() {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setGroupDescription(s.toString());

@@ -38,7 +38,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/filtered_contact_list_empty_view_text_view"
+            android:id="@+id/widget_list_empty_view_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
