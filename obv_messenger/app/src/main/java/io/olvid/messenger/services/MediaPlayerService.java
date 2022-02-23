@@ -80,7 +80,7 @@ public class MediaPlayerService extends Service {
 
     private final Timer timer = new Timer("MediaPlayerService-Timer");
 
-    final NoExceptionSingleThreadExecutor executor = new NoExceptionSingleThreadExecutor("MediaPlayerService-Executor");
+    private final NoExceptionSingleThreadExecutor executor = new NoExceptionSingleThreadExecutor("MediaPlayerService-Executor");
     private final WiredHeadsetReceiver wiredHeadsetReceiver = new WiredHeadsetReceiver();
     private ConnectedDevicesCallback connectedDevicesCallback = null;
 
@@ -465,18 +465,20 @@ public class MediaPlayerService extends Service {
     }
 
     public void addPlaybackListener(@NonNull PlaybackListener playbackListener) {
-        this.playbackListeners.add(playbackListener);
+        executor.execute(() -> {
+            this.playbackListeners.add(playbackListener);
 
-        updateAudioOutputs();
-        if (loadedMedia != null) {
-            playbackListener.onMediaChanged(new BytesKey(loadedMedia.fyle.sha256));
-            if (mediaPlaying) {
-                playbackListener.onPlay();
-            } else {
-                playbackListener.onPause();
+            updateAudioOutputs();
+            if (loadedMedia != null) {
+                playbackListener.onMediaChanged(new BytesKey(loadedMedia.fyle.sha256));
+                if (mediaPlaying) {
+                    playbackListener.onPlay();
+                } else {
+                    playbackListener.onPause();
+                }
+                playbackListener.onProgress(mediaTimeMs);
             }
-            playbackListener.onProgress(mediaTimeMs);
-        }
+        });
     }
 
     public void removePlaybackListener(@NonNull PlaybackListener playbackListener) {
@@ -606,13 +608,15 @@ public class MediaPlayerService extends Service {
 
 
     public void toggleAudioOutput() {
-        // if a wired/bluetooth headset is connected, toggling the output has no effect
-        if (!wiredHeadsetConnected && !bluetoothHeadsetConnected) {
-            SettingsActivity.setUseSpeakerOutputForMediaPlayer(!useSpeakerOutput);
-            for (PlaybackListener playbackListener : playbackListeners) {
-                playbackListener.onSpeakerOutputChange(!useSpeakerOutput ? AudioOutput.LOUDSPEAKER : AudioOutput.PHONE);
+        executor.execute(() -> {
+            // if a wired/bluetooth headset is connected, toggling the output has no effect
+            if (!wiredHeadsetConnected && !bluetoothHeadsetConnected) {
+                SettingsActivity.setUseSpeakerOutputForMediaPlayer(!useSpeakerOutput);
+                for (PlaybackListener playbackListener : playbackListeners) {
+                    playbackListener.onSpeakerOutputChange(!useSpeakerOutput ? AudioOutput.LOUDSPEAKER : AudioOutput.PHONE);
+                }
+                setUseSpeakerOutput(!useSpeakerOutput);
             }
-            setUseSpeakerOutput(!useSpeakerOutput);
-        }
+        });
     }
 }

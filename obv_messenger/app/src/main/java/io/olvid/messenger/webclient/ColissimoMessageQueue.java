@@ -308,7 +308,7 @@ public class ColissimoMessageQueue {
                         // mark all messages as read in database
                         NotificationActionService.markAllDiscussionMessagesRead(discussionId);
                         // delete android notifications for current discussion
-                        AndroidNotificationManager.clearReceivedMessageNotification(discussionId);
+                        AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId);
                         break;
                     }
                     case REQUEST_SAVE_DRAFT_MESSAGE: {

@@ -31,7 +31,6 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextWatcher;
 import android.text.style.BackgroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -72,7 +71,6 @@ import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.fragments.FilteredContactListFragment;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 

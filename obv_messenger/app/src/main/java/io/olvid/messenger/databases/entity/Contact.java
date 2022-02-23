@@ -73,6 +73,8 @@ public class Contact {
     public static final String CUSTOM_NAME_HUE = "custom_name_hue";
     public static final String PERSONAL_NOTE = "personal_note";
     public static final String ACTIVE = "active";
+    public static final String CAPABILITY_WEBRTC_CONTINUOUS_ICE = "capability_webrtc_continuous_ice";
+    public static final String CAPABILITY_GROUPS_V2 = "capability_groups_v2";
 
     public static final int PUBLISHED_DETAILS_NOTHING_NEW = 0;
     public static final int PUBLISHED_DETAILS_NEW_UNSEEN = 1;
@@ -141,8 +143,15 @@ public class Contact {
     @ColumnInfo(name = ACTIVE)
     public boolean active;
 
+    @ColumnInfo(name = CAPABILITY_WEBRTC_CONTINUOUS_ICE)
+    public boolean capabilityWebrtcContinuousIce;
+
+    @ColumnInfo(name = CAPABILITY_GROUPS_V2)
+    public boolean capabilityGroupsV2;
+
+
     // Constructor required by Room
-    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @Nullable String customDisplayName, @NonNull String displayName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, int newPublishedDetails, int deviceCount, int establishedChannelCount, @Nullable String photoUrl, @Nullable String customPhotoUrl, boolean keycloakManaged, @Nullable Integer customNameHue, @Nullable String personalNote, boolean active) {
+    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @Nullable String customDisplayName, @NonNull String displayName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, int newPublishedDetails, int deviceCount, int establishedChannelCount, @Nullable String photoUrl, @Nullable String customPhotoUrl, boolean keycloakManaged, @Nullable Integer customNameHue, @Nullable String personalNote, boolean active, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2) {
         this.bytesContactIdentity = bytesContactIdentity;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customDisplayName = customDisplayName;
@@ -159,7 +168,10 @@ public class Contact {
         this.customNameHue = customNameHue;
         this.personalNote = personalNote;
         this.active = active;
+        this.capabilityWebrtcContinuousIce = capabilityWebrtcContinuousIce;
+        this.capabilityGroupsV2 = capabilityGroupsV2;
     }
+
 
 
     // Constructor used when inserting a new contact
@@ -182,6 +194,8 @@ public class Contact {
         this.customNameHue = null;
         this.personalNote = null;
         this.active = active;
+        this.capabilityWebrtcContinuousIce = false;
+        this.capabilityGroupsV2 = false;
     }
 
     @NonNull

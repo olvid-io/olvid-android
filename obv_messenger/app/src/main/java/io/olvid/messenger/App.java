@@ -43,8 +43,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
@@ -82,7 +80,6 @@ import java.util.regex.Pattern;
 
 import androidx.emoji2.bundled.BundledEmojiCompatConfig;
 import androidx.emoji2.text.EmojiCompat;
-import androidx.emoji2.text.EmojiSpan;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -296,9 +293,12 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, long messageId, long fyleId) {
+    public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
+        if (sortOrder != null) {
+            intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA, sortOrder);
+        }
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
         activityContext.startActivity(intent);
@@ -404,7 +404,9 @@ public class App extends Application implements DefaultLifecycleObserver {
         intent.putExtra(WebrtcCallService.MESSAGE_TYPE_INTENT_EXTRA, messageType);
         intent.putExtra(WebrtcCallService.SERIALIZED_MESSAGE_PAYLOAD_INTENT_EXTRA, jsonWebrtcMessage.getSerializedMessagePayload());
 
-        if (messageType == WebrtcCallService.START_CALL_MESSAGE_TYPE) {
+        if (messageType == WebrtcCallService.START_CALL_MESSAGE_TYPE
+                || messageType == WebrtcCallService.NEW_ICE_CANDIDATE_MESSAGE_TYPE
+                || messageType == WebrtcCallService.REMOVE_ICE_CANDIDATES_MESSAGE_TYPE) {
             getContext().startService(intent);
         } else {
             LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
@@ -938,16 +940,7 @@ public class App extends Application implements DefaultLifecycleObserver {
     }
 
     private static boolean isEmojiCodepoint(int codePoint) {
-        if (codePoint >= 0x1f900 && codePoint <= 0x1faff) {
-            return true;
-        }
-        if (codePoint >= 0x1f680 && codePoint <= 0x1f6ff) {
-            return true;
-        }
-        if (codePoint >= 0x1f300 && codePoint <= 0x1f64f) {
-            return true;
-        }
-        if (codePoint >= 0x1f1e6 && codePoint <= 0x1f1ff) {
+        if (codePoint >= 0x1f000 && codePoint <= 0x1faff) {
             return true;
         }
         if (codePoint >= 0xe0020 && codePoint <= 0xe007f) {
@@ -1050,7 +1043,9 @@ public class App extends Application implements DefaultLifecycleObserver {
             // initialize emoji2
             //////////////////////////
             EmojiCompat.Config emojiConfig = new BundledEmojiCompatConfig(getContext());
-            emojiConfig.setReplaceAll(true);
+            if (!SettingsActivity.useSystemEmojis()) {
+                emojiConfig.setReplaceAll(true);
+            }
             EmojiCompat.init(emojiConfig);
 
             //////////////////////////

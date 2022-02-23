@@ -84,6 +84,7 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakRevocation;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
@@ -259,6 +260,24 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // check if device capabilities changed for any current owned device
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            for (OwnedIdentity ownedIdentity : OwnedIdentity.getAll(identityManagerSession)) {
+                OwnedDevice ownedDevice = OwnedDevice.getCurrentDeviceOfOwnedIdentity(identityManagerSession, ownedIdentity.getOwnedIdentity());
+
+                HashSet<ObvCapability> currentCapabilities = new HashSet<>(ObvCapability.currentCapabilities);
+                HashSet<ObvCapability> publishedCapabilities = new HashSet<>(ownedDevice.getDeviceCapabilities());
+
+                if (!currentCapabilities.equals(publishedCapabilities)) {
+                    protocolStarterDelegate.updateCurrentDeviceCapabilitiesForOwnedIdentity(identityManagerSession.session, ownedIdentity.getOwnedIdentity(), ObvCapability.currentCapabilities);
+                }
+            }
+            // commit the session, in case a protocol was indeed started
+            identityManagerSession.session.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setDelegate(CreateSessionDelegate createSessionDelegate) {
@@ -413,6 +432,13 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         OwnedIdentity ownedIdentity = OwnedIdentity.create(wrapSession(session), server, null, null, jsonIdentityDetails, apiKey, prng);
         if (ownedIdentity == null) {
             return null;
+        }
+
+        try {
+            protocolStarterDelegate.updateCurrentDeviceCapabilitiesForOwnedIdentity(session, ownedIdentity.getOwnedIdentity(), ObvCapability.currentCapabilities);
+        } catch (Exception e) {
+            Logger.w("Failed to update generated identity capabilities");
+            e.printStackTrace();
         }
 
         if (keycloakState != null) {
@@ -1060,7 +1086,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     public Identity getOwnedIdentityForDeviceUid(Session session, UID currentDeviceUid) throws SQLException {
         OwnedDevice ownedDevice = OwnedDevice.get(wrapSession(session), currentDeviceUid);
         if (ownedDevice != null) {
-            return ownedDevice.getIdentity();
+            return ownedDevice.getOwnedIdentity();
         }
         return null;
     }
@@ -1434,6 +1460,104 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             contactDeviceUids.add(contactDevice.getUid());
         }
         return output;
+    }
+
+    @Override
+    public List<ObvCapability> getContactCapabilities(Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+        // for now, we compute the intersection of all device capabilities. This may change in the future depending on capabilities we will add
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            ContactDevice[] contactDevices = ContactDevice.getAll(identityManagerSession, contactIdentity, ownedIdentity);
+            HashSet<ObvCapability> contactCapabilities = null;
+            for (ContactDevice contactDevice : contactDevices) {
+                List<ObvCapability> deviceCapabilities = contactDevice.getDeviceCapabilities();
+                if (deviceCapabilities == null || deviceCapabilities.size() == 0) {
+                    return new ArrayList<>();
+                }
+                if (contactCapabilities == null) {
+                    contactCapabilities = new HashSet<>(deviceCapabilities);
+                } else {
+                    contactCapabilities.retainAll(deviceCapabilities);
+                    if (contactCapabilities.isEmpty()) {
+                        return new ArrayList<>();
+                    }
+                }
+            }
+            if (contactCapabilities == null) {
+                return new ArrayList<>();
+            }
+            return new ArrayList<>(contactCapabilities);
+        }
+    }
+
+    @Override
+    public String[] getContactDeviceCapabilities(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws SQLException{
+        ContactDevice contactDevice = ContactDevice.get(wrapSession(session), contactDeviceUid, contactIdentity, ownedIdentity);
+        if (contactDevice != null) {
+            return contactDevice.getRawDeviceCapabilities();
+        }
+        return new String[0];
+    }
+
+    @Override
+    public void setContactDeviceCapabilities(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid, String[] rawDeviceCapabilities) throws Exception {
+        ContactDevice contactDevice = ContactDevice.get(wrapSession(session), contactDeviceUid, contactIdentity, ownedIdentity);
+        if (contactDevice == null) {
+            throw new Exception();
+        }
+        contactDevice.setRawDeviceCapabilities(rawDeviceCapabilities);
+    }
+
+    @Override
+    public List<ObvCapability> getOwnCapabilities(Identity ownedIdentity) throws SQLException {
+        // for now, we compute the intersection of all device capabilities. This may change in the future depending on capabilities we will add
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            // initialize with current capabilities
+            HashSet<ObvCapability> ownCapabilities = new HashSet<>(ObvCapability.currentCapabilities);
+
+            // update with other devices
+            OwnedDevice[] ownedDevices = OwnedDevice.getOtherDevicesOfOwnedIdentity(identityManagerSession, ownedIdentity);
+            for (OwnedDevice ownedDevice : ownedDevices) {
+                List<ObvCapability> deviceCapabilities = ownedDevice.getDeviceCapabilities();
+                if (deviceCapabilities == null || deviceCapabilities.size() == 0) {
+                    return new ArrayList<>();
+                }
+                ownCapabilities.retainAll(deviceCapabilities);
+                if (ownCapabilities.isEmpty()) {
+                    return new ArrayList<>();
+                }
+            }
+            return new ArrayList<>(ownCapabilities);
+        }
+    }
+
+    @Override
+    public List<ObvCapability> getCurrentDevicePublishedCapabilities(Session session, Identity ownedIdentity) throws Exception {
+        OwnedDevice ownedDevice = OwnedDevice.getCurrentDeviceOfOwnedIdentity(wrapSession(session), ownedIdentity);
+        return ownedDevice.getDeviceCapabilities();
+    }
+
+    @Override
+    public void setCurrentDevicePublishedCapabilities(Session session, Identity ownedIdentity, List<ObvCapability> capabilities) throws Exception {
+        OwnedDevice ownedDevice = OwnedDevice.getCurrentDeviceOfOwnedIdentity(wrapSession(session), ownedIdentity);
+        ownedDevice.setRawDeviceCapabilities(ObvCapability.capabilityListToStringArray(capabilities));
+    }
+
+    @Override
+    public String[] getOtherOwnedDeviceCapabilities(Session session, Identity ownedIdentity, UID otherDeviceUid) throws Exception {
+        OwnedDevice ownedDevice = OwnedDevice.get(wrapSession(session), otherDeviceUid);
+        if (ownedDevice == null || !ownedDevice.getOwnedIdentity().equals(ownedIdentity)) {
+            throw new Exception();
+        }
+        return ownedDevice.getRawDeviceCapabilities();
+    }
+
+    @Override
+    public void setOtherOwnedDeviceCapabilities(Session session, Identity ownedIdentity, UID otherOwnedDeviceUID, String[] rawDeviceCapabilities) throws Exception {
+        OwnedDevice ownedDevice = OwnedDevice.get(wrapSession(session), otherOwnedDeviceUID);
+        if (ownedDevice == null || !ownedDevice.getOwnedIdentity().equals(ownedIdentity)) {
+            throw new Exception();
+        }
+        ownedDevice.setRawDeviceCapabilities(rawDeviceCapabilities);
     }
 
     @Override
@@ -2084,7 +2208,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             if (ownedDevice == null || !ownedDevice.isCurrentDevice()) {
                 return;
             }
-            Identity ownedIdentity = ownedDevice.getIdentity();
+            Identity ownedIdentity = ownedDevice.getOwnedIdentity();
             byte[][] groupOwnerAndUids = ContactGroup.getGroupOwnerAndUidsOfGroupsOwnedByContact(identityManagerSession, ownedIdentity, groupOwner);
             for (byte[] groupOwnerAndUid: groupOwnerAndUids) {
                 try {
@@ -2105,7 +2229,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             if (ownedDevice == null || !ownedDevice.isCurrentDevice()) {
                 return;
             }
-            Identity ownedIdentity = ownedDevice.getIdentity();
+            Identity ownedIdentity = ownedDevice.getOwnedIdentity();
             {
                 byte[][] groupOwnerAndUids = ContactGroup.getGroupOwnerAndUidsOfOwnedGroupsWithContact(identityManagerSession, ownedIdentity, contactIdentity);
                 for (byte[] groupOwnerAndUid : groupOwnerAndUids) {

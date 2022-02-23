@@ -50,11 +50,14 @@ public class NotificationActionService extends IntentService {
     public static final String ACTION_DISCUSSION_MARK_AS_READ = "mark_as_read";
     public static final String ACTION_GROUP_CLEAR = "group_clear";
     public static final String ACTION_MISSED_CALL_MESSAGE = "discussion_missed_call_message";
+    public static final String ACTION_MESSAGE_REACTION_CLEAR = "message_reaction_clear";
 
     public static final String EXTRA_INVITATION_DIALOG_UUID = "dialog_uuid";
     public static final String EXTRA_DISCUSSION_ID = "discussion_id";
+    public static final String EXTRA_MESSAGE_ID = "message_id";
 
     public static final String KEY_TEXT_REPLY = "text_reply";
+
 
     public NotificationActionService() {
         super("NotificationActionService");
@@ -121,7 +124,14 @@ public class NotificationActionService extends IntentService {
             case ACTION_DISCUSSION_CLEAR: {
                 final long discussionId = intent.getLongExtra(EXTRA_DISCUSSION_ID, -1);
                 if (discussionId != -1) {
-                    AndroidNotificationManager.clearReceivedMessageNotification(discussionId);
+                    AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId);
+                }
+                break;
+            }
+            case ACTION_MESSAGE_REACTION_CLEAR: {
+                final long messageId = intent.getLongExtra(EXTRA_MESSAGE_ID, -1);
+                if (messageId != -1) {
+                    AndroidNotificationManager.clearMessageReactionsNotification(messageId);
                 }
                 break;
             }
@@ -135,7 +145,7 @@ public class NotificationActionService extends IntentService {
             case ACTION_DISCUSSION_MARK_AS_READ: {
                 final long discussionId = intent.getLongExtra(EXTRA_DISCUSSION_ID, -1);
                 if (discussionId != -1) {
-                    AndroidNotificationManager.clearReceivedMessageNotification(discussionId);
+                    AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId);
                     markAllDiscussionMessagesRead(discussionId);
                 }
                 break;
@@ -198,7 +208,7 @@ public class NotificationActionService extends IntentService {
                             }
                         }
                     }
-                    AndroidNotificationManager.clearReceivedMessageNotification(discussionId);
+                    AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId);
                 }
                 break;
             }

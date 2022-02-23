@@ -136,7 +136,7 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
                     int count = webrtcCallService.getIncomingParticipantCount() - 1;
                     if (count > 0) {
                         othersCountTextView.setVisibility(View.VISIBLE);
-                        othersCountTextView.setText(getResources().getQuantityString(R.plurals.notification_text_incoming_call_participant_count, count, count));
+                        othersCountTextView.setText(getResources().getQuantityString(R.plurals.text_and_x_other, count, count));
                         bigCountTextView.setVisibility(View.VISIBLE);
                         bigCountTextView.setText(getString(R.string.plus_count, count));
                     } else {

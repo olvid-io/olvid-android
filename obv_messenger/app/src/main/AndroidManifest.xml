@@ -55,7 +55,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:manageSpaceActivity="io.olvid.messenger.activities.storage_manager.StorageManagerActivity">
 
         <meta-data android:name="android.content.APP_RESTRICTIONS"
             android:resource="@xml/app_restrictions" />
@@ -228,8 +229,8 @@
                  <action android:name="android.intent.action.VIEW"/>
                  <category android:name="android.intent.category.DEFAULT"/>
                  <category android:name="android.intent.category.BROWSABLE"/>
-                 <data android:scheme="https" android:host="openid-redirect.olvid.io" />
-                 <data android:scheme="olvid.openid" android:host="openid-redirect.olvid.io"/>
+                 <data android:scheme="https" android:host="${KEYCLOAK_REDIRECT_HOST}" />
+                 <data android:scheme="olvid.openid" android:host="${KEYCLOAK_REDIRECT_HOST}"/>
              </intent-filter>
          </activity>
         <activity
@@ -316,7 +317,8 @@
             android:excludeFromRecents="true"
             android:noHistory="true"
             android:stateNotNeeded="true" />
-
+        <activity android:name=".activities.storage_manager.StorageManagerActivity"
+            android:theme="@style/AppTheme.NoActionBar.ActionModeOverlayStorage" />
 
 
         <service

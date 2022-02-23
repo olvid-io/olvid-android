@@ -24,10 +24,14 @@ import android.content.Context;
 import android.net.Uri;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.FileInputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
@@ -37,12 +41,21 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 public class SaveMultipleAttachmentsTask implements Runnable {
     private final Context context;
     private final Uri folderUri;
-    private final long messageId;
+    @Nullable private final Long messageId;
+    @Nullable private final ArrayList<FyleMessageJoinWithStatusDao.FyleAndStatus> selectedFyleAndStatuses;
 
     public SaveMultipleAttachmentsTask(Context context, Uri folderUri, long messageId) {
         this.context = context;
         this.folderUri = folderUri;
         this.messageId = messageId;
+        this.selectedFyleAndStatuses = null;
+    }
+
+    public SaveMultipleAttachmentsTask(Context context, Uri folderUri, @NonNull ArrayList<FyleMessageJoinWithStatusDao.FyleAndStatus> selectedFyleAndStatuses) {
+        this.context = context;
+        this.folderUri = folderUri;
+        this.messageId = null;
+        this.selectedFyleAndStatuses = selectedFyleAndStatuses;
     }
 
     @Override
@@ -51,9 +64,19 @@ public class SaveMultipleAttachmentsTask implements Runnable {
         int filesToSave = 0;
         int incompleteFiles = 0;
 
+        final List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatusesToSave;
+        if (messageId != null) {
+            fyleAndStatusesToSave = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(messageId);
+        } else if (selectedFyleAndStatuses != null) {
+            fyleAndStatusesToSave = selectedFyleAndStatuses;
+        } else {
+            return;
+        }
+
         DocumentFile folder = DocumentFile.fromTreeUri(context, folderUri);
+
         if (folder != null) {
-            for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleMessageJoinWithStatus : AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(messageId)) {
+            for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleMessageJoinWithStatus : fyleAndStatusesToSave) {
                 if (!fyleMessageJoinWithStatus.fyle.isComplete()) {
                     incompleteFiles++;
                     continue;

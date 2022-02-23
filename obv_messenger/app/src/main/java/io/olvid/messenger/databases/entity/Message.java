@@ -620,7 +620,7 @@ public class Message {
                     new ObvOutboundAttachment[0],
                     byteContactIdentities,
                     discussion.bytesOwnedIdentity,
-                    false,
+                    true,
                     false
             );
 

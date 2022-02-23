@@ -59,7 +59,7 @@ public class MuteDiscussionDialogActivity extends AppCompatActivity {
             if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
             }
-            AndroidNotificationManager.clearReceivedMessageNotification(discussionId);
+            AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId);
             MuteNotificationDialog muteNotificationDialog = new MuteNotificationDialog(this, (Long muteExpirationTimestamp, boolean muteWholeProfile) -> App.runThread(() -> {
                 if (muteWholeProfile) {
                     Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);

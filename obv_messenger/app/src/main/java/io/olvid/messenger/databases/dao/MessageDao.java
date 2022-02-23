@@ -37,6 +37,29 @@ import io.olvid.messenger.databases.entity.Message;
 
 @Dao
 public interface MessageDao {
+    String PREFIX_MESSAGE_COLUMNS = "mess.id AS mess_id, " +
+            "mess." + Message.SENDER_SEQUENCE_NUMBER + " AS mess_" + Message.SENDER_SEQUENCE_NUMBER + ", " +
+            "mess." + Message.CONTENT_BODY + " AS mess_" + Message.CONTENT_BODY + ", " +
+            "mess." + Message.JSON_REPLY + " AS mess_" + Message.JSON_REPLY + ", " +
+            "mess." + Message.JSON_EXPIRATION + " AS mess_" + Message.JSON_EXPIRATION + ", " +
+            "mess." + Message.JSON_RETURN_RECEIPT + " AS mess_" + Message.JSON_RETURN_RECEIPT + ", " +
+            "mess." + Message.SORT_INDEX + " AS mess_" + Message.SORT_INDEX + ", " +
+            "mess." + Message.TIMESTAMP + " AS mess_" + Message.TIMESTAMP + ", " +
+            "mess." + Message.STATUS + " AS mess_" + Message.STATUS + ", " +
+            "mess." + Message.WIPE_STATUS + " AS mess_" + Message.WIPE_STATUS + ", " +
+            "mess." + Message.MESSAGE_TYPE + " AS mess_" + Message.MESSAGE_TYPE + ", " +
+            "mess." + Message.DISCUSSION_ID + " AS mess_" + Message.DISCUSSION_ID + ", " +
+            "mess." + Message.ENGINE_MESSAGE_IDENTIFIER + " AS mess_" + Message.ENGINE_MESSAGE_IDENTIFIER + ", " +
+            "mess." + Message.SENDER_IDENTIFIER + " AS mess_" + Message.SENDER_IDENTIFIER + ", " +
+            "mess." + Message.SENDER_THREAD_IDENTIFIER + " AS mess_" + Message.SENDER_THREAD_IDENTIFIER + ", " +
+            "mess." + Message.TOTAL_ATTACHMENT_COUNT + " AS mess_" + Message.TOTAL_ATTACHMENT_COUNT + ", " +
+            "mess." + Message.IMAGE_COUNT + " AS mess_" + Message.IMAGE_COUNT + ", " +
+            "mess." + Message.WIPED_ATTACHMENT_COUNT + " AS mess_" + Message.WIPED_ATTACHMENT_COUNT + ", " +
+            "mess." + Message.EDITED + " AS mess_" + Message.EDITED + ", " +
+            "mess." + Message.REACTIONS + " AS mess_" + Message.REACTIONS + ", " +
+            "mess." + Message.IMAGE_RESOLUTIONS + " AS mess_" + Message.IMAGE_RESOLUTIONS + ", " +
+            "mess." + Message.MISSED_MESSAGE_COUNT + " AS mess_" + Message.MISSED_MESSAGE_COUNT;
+
     @Insert
     long insert(Message message);
 

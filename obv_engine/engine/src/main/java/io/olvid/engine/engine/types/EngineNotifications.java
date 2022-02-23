@@ -292,4 +292,16 @@ public abstract class EngineNotifications {
 
     public static final String PING_RECEIVED = "engine_notification_ping_received";
     public static final String PING_RECEIVED_DELAY_KEY = "delay"; // long (in milliseconds)
+
+    public static final String WEBSOCKET_CONNECTION_STATE_CHANGED = "engine_notification_websocket_connection_state_changed";
+    public static final String WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY = "state"; // int
+
+    public static final String CONTACT_CAPABILITIES_UPDATED = "engine_notification_contact_capabilities_updated"; // List<ObvCapabilities>
+    public static final String CONTACT_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String CONTACT_CAPABILITIES_UPDATED_BYTES_CONTACT_IDENTITY_KEY = "bytes_contact_identity"; // byte[]
+    public static final String CONTACT_CAPABILITIES_UPDATED_CAPABILITIES = "capabilities"; // List<ObvCapabilities>
+
+    public static final String OWN_CAPABILITIES_UPDATED = "engine_notification_own_capabilities_updated"; // List<ObvCapabilities>
+    public static final String OWN_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String OWN_CAPABILITIES_UPDATED_CAPABILITIES = "capabilities"; // List<ObvCapabilities>
 }

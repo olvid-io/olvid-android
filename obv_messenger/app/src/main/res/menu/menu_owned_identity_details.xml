@@ -17,6 +17,11 @@
         android:title="@string/menu_action_refresh_subscription_status"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_debug_information"
+        android:orderInCategory="290"
+        android:title="@string/menu_action_debug_information"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_delete_owned_identity"
         android:orderInCategory="300"
         android:title="@string/menu_action_delete_profile"

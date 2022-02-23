@@ -26,6 +26,8 @@ import android.os.Handler;
 import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.emoji2.bundled.BundledEmojiCompatConfig;
+import androidx.emoji2.text.EmojiCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.DropDownPreference;
 import androidx.preference.ListPreference;
@@ -110,6 +112,22 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
                     scaleChangedIntent.setPackage(App.getContext().getPackageName());
                     // we delay sending this intent so we are sure the setting is updated when activities are recreated
                     new Handler(Looper.getMainLooper()).postDelayed(() -> LocalBroadcastManager.getInstance(App.getContext()).sendBroadcast(scaleChangedIntent), 200);
+                    return true;
+                });
+            }
+        }
+
+        {
+            final SwitchPreference useSystemEmojisPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_SYSTEM_EMOJIS);
+            if (useSystemEmojisPreference != null) {
+                useSystemEmojisPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
+                    if (newValue instanceof Boolean) {
+                        EmojiCompat.Config emojiConfig = new BundledEmojiCompatConfig(App.getContext());
+                        if (!(Boolean) newValue) {
+                            emojiConfig.setReplaceAll(true);
+                        }
+                        EmojiCompat.reset(emojiConfig);
+                    }
                     return true;
                 });
             }

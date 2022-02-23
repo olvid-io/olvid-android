@@ -1,3 +1,27 @@
+# Build 156 (0.11.1)
+
+- Bugfix for continuous ICE gathering
+
+# ~~Build 155 (0.11.1)~~
+2022-01-25
+
+- Bugfix for storage management
+
+# ~~Build 154 (0.11.1)~~
+2022-01-24
+
+- Added a storage management activity to see all attachments
+
+
+# ~~Build 153 (0.11.1)~~
+2022-01-20
+
+- Added an internal emoji keyboard
+- Receive notifications for reactions to your own messages
+- Possiblity to use custom reactions
+- Olvid devices can now negociate "capabilities" with one another
+- Implemented continuous gathering in WebRTC to improve connection time: will be used with capable devices
+
 # Build 152 (0.11.0)
 2022-01-14
 
@@ -8,7 +32,6 @@
 - copy message can now copy complete message with attachments
 - update to libWebRTC 4664
 - update to AppAuth 0.11.1
-
 
 # Build 151 (0.10.1.2)
 2021-12-27

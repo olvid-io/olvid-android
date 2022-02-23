@@ -591,6 +591,12 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             existingWebsockets.put(server, this);
             thisWebsocketDidConnect = true;
             Logger.d("Websocket connected to " + uri.toString());
+            if (notificationPostingDelegate != null) {
+                HashMap<String, Object> userInfo = new HashMap<>();
+                userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 1);
+                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
+            }
+
             List<IdentityAndUid> identityAndUids = ownedIdentityAndUidsByServer.get(server);
             if (identityAndUids != null) {
                 for (IdentityAndUid identityAndUid: identityAndUids) {
@@ -604,6 +610,12 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         public void onMessage(String message) {
             // we received a message, so the connection is functioning properly, we can reset the connection failed count
             scheduler.clearFailedCount(server);
+
+            if (notificationPostingDelegate != null) {
+                HashMap<String, Object> userInfo = new HashMap<>();
+                userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 2);
+                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
+            }
 
             Logger.d("Websocket received message " + message);
             Map<String, Object> receivedMessage;
@@ -736,7 +748,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             long counter = pingCounter.incrementAndGet();
             long timestamp = System.currentTimeMillis();
             if (lastPingCounter != -1) {
-                if (timestamp - lastPingTimestamp > 10_000) {
+                if (timestamp - lastPingTimestamp > 10_000 && notificationPostingDelegate != null) {
                     notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PING_LOST, new HashMap<>());
                 }
             }
@@ -764,19 +776,27 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             } catch (Exception ignored) {
                 // this is treated after
             }
-            if (counter == lastPingCounter && timestamp != -1) {
-                lastPingCounter = -1;
-                long delay = System.currentTimeMillis() - timestamp;
+            if (notificationPostingDelegate != null) {
+                if (counter == lastPingCounter && timestamp != -1) {
+                    lastPingCounter = -1;
+                    long delay = System.currentTimeMillis() - timestamp;
+                    HashMap<String, Object> userInfo = new HashMap<>();
+                    userInfo.put(DownloadNotifications.NOTIFICATION_PING_RECEIVED_DELAY_KEY, delay);
+                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PING_RECEIVED, userInfo);
+                }
                 HashMap<String, Object> userInfo = new HashMap<>();
-                userInfo.put(DownloadNotifications.NOTIFICATION_PING_RECEIVED_DELAY_KEY, delay);
-                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PING_RECEIVED, userInfo);
-            } else {
-                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PING_LOST, new HashMap<>());
+                userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 2);
+                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
             }
         }
 
         @Override
         public void onClose(int code, String reason, boolean remote) {
+            if (notificationPostingDelegate != null) {
+                HashMap<String, Object> userInfo = new HashMap<>();
+                userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 0);
+                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
+            }
             existingWebsockets.remove(server);
             if (thisWebsocketDidConnect) {
                 if (remote) {

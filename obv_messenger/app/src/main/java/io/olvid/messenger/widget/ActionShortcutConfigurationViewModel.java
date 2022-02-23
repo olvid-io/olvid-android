@@ -27,7 +27,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import java.util.Arrays;
 import java.util.List;
 
 import io.olvid.messenger.App;

@@ -97,6 +97,9 @@ public abstract class DownloadNotifications {
     public static final String NOTIFICATION_PING_RECEIVED = "network_fetch_notification_ping_received";
     public static final String NOTIFICATION_PING_RECEIVED_DELAY_KEY = "delay"; // long
 
+    public static final String NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED = "network_fetch_notification_websocket_connection_state_changed";
+    public static final String NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY = "state"; // int
+
     public enum TurnCredentialsFailedReason {
         PERMISSION_DENIED,
         BAD_SERVER_SESSION,

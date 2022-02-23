@@ -52,8 +52,8 @@
     <string name="dialog_message_background_restricted">L\'exécution en arrière-plan semble avoir été limitée pour Olvid. L\'application ne pourra fonctionner normalement tant qu\'elle fait partie de la liste des applications dont l\'accès est limité.\n\nVous pouvez modifier ce réglage depuis :\nParamètres\u00a0d\'Olvid\u00a0> Options\u00a0avancées\u00a0> Batterie\u00a0> Restriction\u00a0de\u00a0l\'activité\u00a0en\u00a0arrière-plan</string>
     <string name="dialog_message_contact_introduction">Souhaitez-vous présenter %1$s à %2$s\u00a0?</string>
     <string name="dialog_message_contact_introduction_multiple">Souhaitez-vous présenter %1$s aux %2$d contacts suivants\u00a0?\n\n%3$s</string>
-    <string name="dialog_message_delete_attachment">Souhaitez-vous supprimer définitivement la pièce jointe  %1$s de ce message\u00a0? Cette action est irréversible.</string>
-    <string name="dialog_message_delete_attachment_gallery">Souhaitez-vous supprimer définitivement la pièce jointe  %1$s\u00a0? Cette action est irréversible.</string>
+    <string name="dialog_message_delete_attachment">Souhaitez-vous supprimer définitivement la pièce jointe  %1$s de ce message\u00a0?\nCette action est irréversible.</string>
+    <string name="dialog_message_delete_attachment_gallery">Souhaitez-vous supprimer définitivement la pièce jointe  %1$s\u00a0?\nCette action est irréversible.</string>
     <string name="dialog_message_delete_discussion">Souhaitez-vous supprimer définitivement la discussion %1$s et tous les messages qu\'elle contient\u00a0? Cette action est irréversible.</string>
     <string name="dialog_message_disband_group">Souhaitez-vous dissoudre le groupe %1$s\u00a0?\nIl ne sera plus possible d\'envoyer de messages à ce groupe. Les messages de groupe existants ne seront pas affecté.</string>
     <string name="dialog_message_disband_non_empty_group_confirmation">Vous êtes sur le point de dissoudre le groupe %1$s.\nCeci va supprimer tous les membres et tous les membres du groupe en attente. Il y a actuellement\u00a0:\n- %2$d membres\n- %3$d membres en attente\n\nSouhaitez-vous effectivement dissoudre le groupe\u00a0?</string>
@@ -63,13 +63,13 @@
     <string name="dialog_message_leave_group">Vous êtes sur le point de quitter le groupe %1$s. Les autres membres du groupe seront notifiés et vous cesserez de recevoir les messages envoyés à ce groupe.\n\nSouhaitez-vous effectivement quitter ce groupe\u00a0?</string>
     <string name="dialog_message_recreate_channels">Les canaux sécurisés entre vous et votre contact peuvent se désynchroniser. Si vous constatez que vos messages ne sont plus reçus par votre contact, recréer les canaux sécurisés peut corriger cela.\n\nSouhaitez-vous lancer la recréation des canaux sécurisés\u00a0?</string>
     <string name="dialog_message_restart_channel_establishment">Souhaitez-vous réellement redémarrer le protocole d\'établissement de canal de discussion sécurisé en cours ?</string>
-    <string name="dialog_title_abort_invitation">Interrompre l\'invitation ?</string>
+    <string name="dialog_title_abort_invitation">Interrompre l\'invitation\u00a0?</string>
     <string name="dialog_title_about_olvid">À propos d\'Olvid</string>
     <string name="dialog_title_background_restricted">Restriction de l\'activité en arrière plan</string>
     <string name="dialog_title_contact_introduction">Présentation de contacts</string>
     <string name="dialog_title_delete_attachment">Supprimer la pièce jointe</string>
     <string name="dialog_title_delete_discussion">Supprimer la discussion</string>
-    <string name="dialog_title_delete_messages">Confirmer la suppression ?</string>
+    <string name="dialog_title_confirm_deletion">Confirmer la suppression\u00a0?</string>
     <string name="dialog_title_disband_group">Dissoudre le groupe\u00a0?</string>
     <string name="dialog_title_discussion_search">Rechercher une discussion…</string>
     <string name="dialog_title_edit_group_details">Modifier les détails du groupe</string>
@@ -85,7 +85,7 @@
     <string name="dialog_title_rename_contact">Renommer le contact</string>
     <string name="dialog_title_rename_discussion">Renommer la discussion</string>
     <string name="dialog_title_rename_group">Renommer le groupe</string>
-    <string name="dialog_title_restart_channel_establishment">Redémarrer la création de canal ?</string>
+    <string name="dialog_title_restart_channel_establishment">Redémarrer la création de canal\u00a0?</string>
     <string name="dialog_title_share_with">Partager avec…</string>
     <string name="dialog_title_shortcut_to">Créer un raccourci vers…</string>
     <string name="explanation_choose_display_name">Choisissez un nom qui sera affiché chez vos contacts. Ces informations ne seront jamais envoyées aux serveurs d\'Olvid.</string>
@@ -1210,13 +1210,11 @@
     <string name="pref_text_ping_connectivity_indicator_dot">Point coloré sur le «\u00a0i\u00a0» du logo Olvid</string>
     <string name="pref_text_ping_connectivity_indicator_line">Ligne discrète en haut de la liste de discussions</string>
     <string name="pref_text_ping_connectivity_indicator_full">Status de connexion complet en haut de la liste de discussions</string>
-    <string name="label_ping_connectivity_checking">Réseau\u00a0: VÉRIFICATION</string>
-    <string name="label_ping_connectivity_none">Réseau\u00a0: NONE</string>
-    <string name="label_ping_connectivity_excellent">Réseau\u00a0: EXCELLENT</string>
-    <string name="label_ping_connectivity_good">Réseau\u00a0: BON</string>
-    <string name="label_ping_connectivity_not_good">Réseau\u00a0: MOYEN</string>
-    <string name="label_ping_connectivity_poor">Réseau\u00a0: MAUVAIS</string>
+    <string name="label_ping_connectivity_none">Réseau\u00a0: AUCUN</string>
+    <string name="label_ping_connectivity_connecting">Réseau\u00a0: CONNEXION…</string>
+    <string name="label_ping_connectivity_connected">Réseau\u00a0: CONNECTÉ</string>
     <string name="label_ping_delay">ping\u00a0: %1$dms</string>
+    <string name="label_over_max_ping_delay">ping\u00a0: >%1$ds</string>
     <string name="menu_action_copy_message_text">Copier le texte du message</string>
     <string name="menu_action_copy_text_and_attachments">Copier texte et pièces jointes</string>
     <string name="label_message_copied_from_olvid">Message copié depuis Olvid</string>
@@ -1245,9 +1243,62 @@
     <string name="dialog_message_delete_widget_configuration">Si vous poursuivez, cette configuration de widget sera supprimée. Il vous faudra manuellement retirer le widget de votre écran d\'accueil si ce n\'est pas déjà fait.</string>
     <string name="label_unable_to_read_widget_configuration">Impossible de lire la configuration du widget</string>
     <string name="label_no_label">Pas d\'intitulé</string>
+    <string name="notification_public_title_new_reaction">Nouvelle réaction à votre message</string>
+    <string name="notification_text_reacted_to">A réagi %1$s à\u00a0: %2$s.</string>
+    <string name="your_message">votre message</string>
+    <string name="x_reactions_to">%1$d réactions à\u00a0: %2$s</string>
+    <string name="notification_text_xx_reacted">%1$s a réagi %2$s</string>
+    <string name="label_attach_emoji">Insérer un emoji</string>
+    <string name="label_long_press_for_favorite">Appui long pour ajouter/retirer des favorits</string>
+    <string name="menu_action_debug_information">Informations de debug</string>
+    <string name="debug_label_number_of_channels_and_devices">Nombre de canaux/appareils\u00a0:</string>
+    <string name="debug_label_identity_link">Lien d\'ID\u00a0:</string>
+    <string name="debug_label_capabilities">Aptitudes\u00a0:</string>
+    <string name="debug_label_capability_continuous_gathering">Gathering ICE continu dans WebRTC\u00a0: %1$s</string>
+    <string name="debug_label_capability_groups_v2">Groupes v2\u00a0: %1$s</string>
+    <string name="bullet">\u2022</string>
+    <string name="pref_use_system_emojis_title">Utiliser la police emoji du système (si disponible)</string>
+    <string name="pref_use_system_emojis_summary">Activez cette option pour utiliser la police de caractères système pour les emoji qu\'elle gère. Sinon, la police embarquée sera utilisée.</string>
+    <string name="label_profile_storage_usage">Espace de stockage du profil</string>
+    <string name="label_photos">Photos</string>
+    <string name="label_videos">Vidéos</string>
+    <string name="label_audio">Audio</string>
+    <string name="label_other">Autres</string>
+    <string name="label_all">Tout</string>
+    <string name="menu_action_storage_management">Gestion du stockage</string>
+    <string name="explanation_no_files">Aucune pièce jointe à afficher</string>
+    <string name="menu_action_sort_order">Ordre de tri</string>
+    <string name="menu_action_sort_date">Trier par date (récents en premier)</string>
+    <string name="menu_action_sort_size">Trier par taille (plus gros en premier)</string>
+    <string name="menu_action_sort_name">Trier par nom (alphabétique)</string>
+    <string name="menu_action_sort_date_alt">Trier par date (anciens en premier)</string>
+    <string name="menu_action_sort_size_alt">Trier par taille (plus petits en premier)</string>
+    <string name="menu_action_sort_name_alt">Trier par nom (inversé)</string>
+    <string name="text_sent_by_xx">Envoyé par %1$s</string>
+    <string name="text_unknown_sender">Expéditeur inconnu</string>
+    <string name="text_send_by_you">Envoyé par vous</string>
+    <string name="text_sent_to_xx">Envoyé à %1$s</string>
+    <string name="text_draft_for_xx">Brouillon pour %1$s</string>
+    <string name="label_loading_attachments">Chargement des pièces jointes…</string>
+    <string name="dialog_message_delete_attachment_for_many_messages">La pièce jointe %2$s est attachée à %1$d messages differents. Souhaitez-vous supprimer celle-ci uniquement, ou la supprimer de ces %1$d messages\u00a0?\nCette action est irréversible.</string>
+    <string name="button_label_delete_one">Supprimer une</string>
+    <string name="button_label_delete_all">Supprimer les %1$d</string>
+    <string name="dialog_title_save_selected_attachments">Enregistrer les pièces jointes sélectionnées</string>
 
 
 
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Dans l\'écran suivant, choisissez le répertoire dans lequel enregistrer la pièce jointe sélectionnée.\nNotez que l\'accès à certains répertoires peut être restreint.</item>
+        <item quantity="other">Dans l\'écran suivant, choisissez le répertoire dans lequel enregistrer les %1$d pièces jointes sélectionnées.\nNotez que l\'accès à certains répertoires peut être restreint.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d sélectionnée</item>
+        <item quantity="other">%1$d sélectionnées</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Souhaitez-vous supprimer la pièce jointe sélectionnée\u00a0?</item>
+        <item quantity="other">Souhaitez-vous supprimer les %1$d pièces jointes sélectionnées\u00a0?</item>
+    </plurals>
     <plurals name="text_app_uptime_days">
         <item quantity="one">%1$d\u00a0jour,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
         <item quantity="other">%1$d\u00a0jours,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
@@ -1272,13 +1323,13 @@
         <item quantity="one">Appel de groupe de %2$s et un autre</item>
         <item quantity="other">Appel de groupe de %2$s et %1$d autres</item>
     </plurals>
-    <plurals name="action_mode_title">
+    <plurals name="action_mode_title_discussion">
         <item quantity="one">%1$d sélectionné</item>
         <item quantity="other">%1$d sélectionnés</item>
     </plurals>
     <plurals name="dialog_message_delete_messages">
-        <item quantity="one" tools:ignore="ImpliedQuantity">Souhaitez-vous supprimer le message sélectionné ?</item>
-        <item quantity="other">Souhaitez-vous supprimer les %1$d messages sélectionnés ?</item>
+        <item quantity="one" tools:ignore="ImpliedQuantity">Souhaitez-vous supprimer le message sélectionné\u00a0?</item>
+        <item quantity="other">Souhaitez-vous supprimer les %1$d messages sélectionnés\u00a0?</item>
     </plurals>
     <plurals name="notification_title_new_messages">
         <item quantity="one">%1$d nouveau message de %2$s</item>
@@ -1316,7 +1367,7 @@
         <item quantity="one">%1$d pièce jointe</item>
         <item quantity="other">%1$d pièces jointes</item>
     </plurals>
-    <plurals name="notification_text_incoming_call_participant_count">
+    <plurals name="text_and_x_other">
         <item quantity="one">Et %1$d autre</item>
         <item quantity="other">Et %1$d autres</item>
     </plurals>

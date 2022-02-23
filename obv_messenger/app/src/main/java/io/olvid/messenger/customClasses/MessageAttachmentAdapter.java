@@ -1079,7 +1079,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                 }
             }
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P || !fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().matches("image/.+")) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P || !fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().startsWith("image/")) {
                 showBitmapPreview();
             } else {
                 showDrawablePreview();

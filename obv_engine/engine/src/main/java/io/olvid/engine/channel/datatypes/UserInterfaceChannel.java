@@ -25,7 +25,6 @@ import java.util.HashMap;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
-import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelDialogMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;

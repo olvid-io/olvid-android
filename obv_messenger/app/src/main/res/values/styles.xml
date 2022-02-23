@@ -40,6 +40,12 @@
         <item name="android:windowBackground">@color/almostWhite</item>
     </style>
 
+    <style name="AppTheme.NoActionBar.ActionModeOverlayStorage">
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeBackground">@color/orange</item>
+        <item name="android:windowBackground">@color/almostWhite</item>
+    </style>
+
     <!-- QR Code only -->
     <style name="AppTheme.NoActionBar.FullScreen">
         <item name="android:windowFullscreen">true</item>
@@ -148,6 +154,9 @@
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
+    <style name="AppTheme.OrangeAccent">
+        <item name="colorAccent">@color/orange</item>
+    </style>
     <style name="AppTheme.BlueAccent">
         <item name="colorAccent">@color/olvid_gradient_light</item>
     </style>

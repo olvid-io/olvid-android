@@ -1158,6 +1158,21 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 }
             }
 
+
+            // send this device capabilities to contact
+            {
+                UID childProtocolInstanceUid = new UID(getPrng());
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                        SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
+                        childProtocolInstanceUid,
+                        false
+                );
+                ChannelMessageToSend messageToSend = new DeviceCapabilitiesDiscoveryProtocol.InitialSingleContactDeviceMessage(coreProtocolMessage, startState.contactIdentity, startState.contactDeviceUid, false).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            }
+
+
             // Delete the ChannelCreationProtocolInstance
             try {
                 ChannelCreationProtocolInstance channelCreationProtocolInstance = ChannelCreationProtocolInstance.get(protocolManagerSession, startState.contactDeviceUid, startState.contactIdentity, getOwnedIdentity());
@@ -1233,6 +1248,21 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                     e.printStackTrace();
                 }
             }
+
+
+            // send this device capabilities to contact
+            {
+                UID childProtocolInstanceUid = new UID(getPrng());
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                        SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
+                        childProtocolInstanceUid,
+                        false
+                );
+                ChannelMessageToSend messageToSend = new DeviceCapabilitiesDiscoveryProtocol.InitialSingleContactDeviceMessage(coreProtocolMessage, startState.contactIdentity, startState.contactDeviceUid, false).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            }
+
 
             // Delete the ChannelCreationProtocolInstance
             try {

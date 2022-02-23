@@ -19,21 +19,16 @@
 
 package io.olvid.messenger.discussion;
 
-import android.net.Uri;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.dao.MessageDao;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;

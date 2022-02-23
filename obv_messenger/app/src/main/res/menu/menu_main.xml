@@ -13,6 +13,11 @@
         android:title="@string/menu_action_backup_settings"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_storage_management"
+        android:orderInCategory="200"
+        android:title="@string/menu_action_storage_management"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_check_update"
         android:orderInCategory="400"
         android:title="@string/menu_check_update"

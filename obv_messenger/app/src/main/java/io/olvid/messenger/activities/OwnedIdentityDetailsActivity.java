@@ -28,10 +28,11 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.text.util.Linkify;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -61,8 +62,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.identities.ObvUrlIdentity;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
@@ -267,6 +270,31 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                 runOnUiThread(() -> builder.create().show());
             });
             return true;
+        } else if (itemId == R.id.action_debug_information) {
+            OwnedIdentity ownedIdentity = AppSingleton.getCurrentIdentityLiveData().getValue();
+            if (ownedIdentity != null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(getString(R.string.debug_label_identity_link)).append("\n");
+                sb.append(new ObvUrlIdentity(ownedIdentity.bytesOwnedIdentity, ownedIdentity.displayName).getUrlRepresentation()).append("\n\n");
+                sb.append(getString(R.string.debug_label_capabilities)).append("\n");
+                sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_continuous_gathering, ownedIdentity.capabilityWebrtcContinuousIce)).append("\n");
+                sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_groups_v2, ownedIdentity.capabilityGroupsV2)).append("\n");
+
+                TextView textView = new TextView(this);
+                int sixteenDp = (int) (16 * getResources().getDisplayMetrics().density);
+                textView.setPadding(sixteenDp, sixteenDp, sixteenDp, sixteenDp);
+                textView.setTextIsSelectable(true);
+                textView.setAutoLinkMask(Linkify.ALL);
+                textView.setMovementMethod(LinkMovementMethod.getInstance());
+                textView.setText(sb);
+
+                final AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                        .setTitle(R.string.menu_action_debug_information)
+                        .setView(textView)
+                        .setPositiveButton(R.string.button_label_ok, null);
+                builder.create().show();
+            }
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -352,6 +380,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             finish();
             return;
         }
+
         keycloakManaged = ownedIdentity.keycloakManaged;
         invalidateOptionsMenu();
 

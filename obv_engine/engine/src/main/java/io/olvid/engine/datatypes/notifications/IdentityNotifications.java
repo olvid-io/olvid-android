@@ -145,4 +145,11 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_SERVER_USER_DATA_CAN_BE_DELETED = "identity_manager_notification_server_user_data_can_be_deleted";
     public static final String NOTIFICATION_SERVER_USER_DATA_CAN_BE_DELETED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
     public static final String NOTIFICATION_SERVER_USER_DATA_CAN_BE_DELETED_LABEL_KEY = "label"; // UID
+
+    public static final String NOTIFICATION_CONTACT_CAPABILITIES_UPDATED = "identity_manager_notification_contact_capabilities_updated";
+    public static final String NOTIFICATION_CONTACT_CAPABILITIES_UPDATED_CONTACT_IDENTITY_KEY = "contact_identity"; // Identity
+    public static final String NOTIFICATION_CONTACT_CAPABILITIES_UPDATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+
+    public static final String NOTIFICATION_OWN_CAPABILITIES_UPDATED = "identity_manager_notification_own_capabilities_updated";
+    public static final String NOTIFICATION_OWN_CAPABILITIES_UPDATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
 }

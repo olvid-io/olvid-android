@@ -47,8 +47,6 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.DummyActivity;
-import io.olvid.messenger.activities.ShareActivity;
-import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.PreviewUtils;
@@ -59,7 +57,6 @@ import io.olvid.messenger.webclient.datatypes.Constants;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass;
 import io.olvid.messenger.webrtc.WebrtcCallActivity;
 import io.olvid.messenger.webrtc.WebrtcIncomingCallActivity;
-import io.olvid.messenger.widget.ActionShortcutConfigurationActivity;
 
 public class UnifiedForegroundService extends Service {
     public static final int SERVICE_ID = 8957;

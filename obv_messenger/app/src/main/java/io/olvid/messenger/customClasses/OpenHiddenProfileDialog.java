@@ -21,7 +21,6 @@ package io.olvid.messenger.customClasses;
 
 
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;

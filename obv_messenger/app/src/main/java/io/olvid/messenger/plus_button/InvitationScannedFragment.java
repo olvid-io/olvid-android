@@ -200,7 +200,7 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
             inviteWarningTextView.setVisibility(View.VISIBLE);
             inviteWarningTextView.setBackgroundResource(R.drawable.background_ok_message);
             inviteWarningTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_ok_outline, 0, 0, 0);
-            inviteWarningTextView.setText(getString(R.string.text_explanation_warning_contact_already_known, contactUrlIdentity.displayName));
+            inviteWarningTextView.setText(activity.getString(R.string.text_explanation_warning_contact_already_known, contactUrlIdentity.displayName));
 
         } else {
             contactInitialView.setInitial(contactUrlIdentity.getBytesIdentity(), App.getInitial(contactUrlIdentity.displayName));
@@ -212,7 +212,7 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
             mutualScanGroup.setVisibility(View.VISIBLE);
             if (contact == null) {
                 mutualScanExplanationTextView.setVisibility(View.VISIBLE);
-                mutualScanExplanationTextView.setText(getString(R.string.text_explanation_mutual_scan, contactUrlIdentity.displayName));
+                mutualScanExplanationTextView.setText(activity.getString(R.string.text_explanation_mutual_scan, contactUrlIdentity.displayName));
             } else {
                 mutualScanExplanationTextView.setVisibility(View.GONE);
             }
@@ -225,7 +225,7 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
             inviteExplanationTextView.setVisibility(View.GONE);
         } else {
             inviteExplanationTextView.setVisibility(View.VISIBLE);
-            inviteExplanationTextView.setText(getString(R.string.text_explanation_invite_add_contact, contactUrlIdentity.displayName));
+            inviteExplanationTextView.setText(activity.getString(R.string.text_explanation_invite_add_contact, contactUrlIdentity.displayName));
         }
 
         remoteInviteCardView.setVisibility(View.VISIBLE);

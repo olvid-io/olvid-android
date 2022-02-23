@@ -14,8 +14,11 @@
         android:id="@+id/emoji"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:maxWidth="40dp"
+        android:maxLines="1"
         android:textColor="@color/greyTint"
         android:textSize="14dp"
+        android:gravity="center"
         tools:text="😃"
         tools:ignore="SpUsage" />
     <TextView

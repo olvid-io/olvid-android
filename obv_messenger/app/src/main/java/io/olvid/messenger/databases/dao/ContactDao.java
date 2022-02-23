@@ -99,6 +99,22 @@ public interface ContactDao {
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
     void updateCounts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, int deviceCount, int establishedChannelCount);
 
+    @Query("UPDATE " + Contact.TABLE_NAME +
+            " SET " + Contact.CAPABILITY_WEBRTC_CONTINUOUS_ICE + " = :capable " +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
+    void updateCapabilityWebrtcContinuousIce(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean capable);
+
+    @Query("UPDATE " + Contact.TABLE_NAME +
+            " SET " + Contact.CAPABILITY_GROUPS_V2 + " = :capable " +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
+    void updateCapabilityGroupsV2(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean capable);
+
+
+
+
+
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")

@@ -100,6 +100,16 @@ public interface OwnedIdentityDao {
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
     void updateShowNeutralNotificationWhenHidden(byte[] bytesOwnedIdentity, boolean prefShowNeutralNotificationWhenHidden);
 
+    @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
+            " SET " + OwnedIdentity.CAPABILITY_WEBRTC_CONTINUOUS_ICE + " = :capable " +
+            " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
+    void updateCapabilityWebrtcContinuousIce(byte[] bytesOwnedIdentity, boolean capable);
+
+    @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
+            " SET " + OwnedIdentity.CAPABILITY_GROUPS_V2 + " = :capable " +
+            " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
+    void updateCapabilityGroupsV2(byte[] bytesOwnedIdentity, boolean capable);
+
 
 
     @Query("SELECT oi.*, unread.count AS unreadMessageCount, unreadinv.count AS unreadInvitationCount FROM " + OwnedIdentity.TABLE_NAME + " AS oi " +

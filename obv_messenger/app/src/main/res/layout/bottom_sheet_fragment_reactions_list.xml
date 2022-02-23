@@ -14,7 +14,7 @@
 
     <View
         android:layout_width="64dp"
-        android:layout_height="1dp"
+        android:layout_height="2dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

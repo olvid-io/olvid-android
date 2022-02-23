@@ -27,6 +27,15 @@
         android:order="12"/>
 
     <SwitchPreference
+        android:key="pref_key_use_system_emojis"
+        android:defaultValue="false"
+        android:title="@string/pref_use_system_emojis_title"
+        android:summary="@string/pref_use_system_emojis_summary"
+        android:icon="@drawable/ic_pref_emoji"
+        android:order="13"
+        />
+
+    <SwitchPreference
         android:key="pref_key_use_internal_image_viewer"
         android:defaultValue="true"
         android:title="@string/pref_use_internal_image_viewer_title"

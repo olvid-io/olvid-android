@@ -50,6 +50,7 @@ import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
@@ -135,6 +136,14 @@ public interface IdentityDelegate {
     void removeAllDevicesForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     UID[] getDeviceUidsOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     Map<Identity, Map<Identity, Set<UID>>> getAllDeviceUidsOfAllContactsOfAllOwnedIdentities(Session session) throws SQLException;
+    List<ObvCapability> getContactCapabilities(Identity ownedIdentity, Identity contactIdentity) throws SQLException;
+    String[] getContactDeviceCapabilities(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws SQLException;
+    void setContactDeviceCapabilities(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid, String[] rawDeviceCapabilities) throws Exception;
+    List<ObvCapability> getOwnCapabilities(Identity ownedIdentity) throws SQLException;
+    List<ObvCapability> getCurrentDevicePublishedCapabilities(Session session, Identity ownedIdentity) throws Exception;
+    void setCurrentDevicePublishedCapabilities(Session session, Identity ownedIdentity, List<ObvCapability> capabilities) throws Exception;
+    String[] getOtherOwnedDeviceCapabilities(Session session, Identity ownedIdentity, UID otherDeviceUid) throws Exception;
+    void setOtherOwnedDeviceCapabilities(Session session, Identity ownedIdentity, UID otherOwnedDeviceUID, String[] rawDeviceCapabilities) throws Exception;
 
     Seed getDeterministicSeedForOwnedIdentity(Identity ownedIdentity, byte[] diversificationTag) throws Exception;
 

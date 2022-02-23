@@ -21,7 +21,7 @@ package io.olvid.engine.datatypes;
 
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 26;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 27;
     public static final int SERVER_API_VERSION = 13;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 

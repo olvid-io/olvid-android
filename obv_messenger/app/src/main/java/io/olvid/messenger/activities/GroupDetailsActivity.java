@@ -44,6 +44,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -646,9 +649,21 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
     @Override
     public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         if (groupIsOwned) {
-            getMenuInflater().inflate(R.menu.menu_owned_group_details, menu);
+            getMenuInflater().inflate(R.menu.menu_group_details_owned, menu);
+            MenuItem deleteItem = menu.findItem(R.id.action_disband);
+            if (deleteItem != null) {
+                SpannableString spannableString = new SpannableString(deleteItem.getTitle());
+                spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.red)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                deleteItem.setTitle(spannableString);
+            }
         } else {
-            getMenuInflater().inflate(R.menu.menu_group_details, menu);
+            getMenuInflater().inflate(R.menu.menu_group_details_joined, menu);
+            MenuItem deleteItem = menu.findItem(R.id.action_leave_group);
+            if (deleteItem != null) {
+                SpannableString spannableString = new SpannableString(deleteItem.getTitle());
+                spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.red)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                deleteItem.setTitle(spannableString);
+            }
         }
         if (showEditDetails) {
             showEditDetails = false;

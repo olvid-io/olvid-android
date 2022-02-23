@@ -39,6 +39,19 @@ import io.olvid.messenger.App;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[] {
+            new Migration(50, 51) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 50 TO 51");
+
+                    database.execSQL("ALTER TABLE `contact_table` ADD COLUMN `capability_webrtc_continuous_ice` INTEGER NOT NULL DEFAULT 0");
+                    database.execSQL("ALTER TABLE `contact_table` ADD COLUMN `capability_groups_v2` INTEGER NOT NULL DEFAULT 0");
+
+                    database.execSQL("ALTER TABLE `identity_table` ADD COLUMN `capability_webrtc_continuous_ice` INTEGER NOT NULL DEFAULT 0");
+                    database.execSQL("ALTER TABLE `identity_table` ADD COLUMN `capability_groups_v2` INTEGER NOT NULL DEFAULT 0");
+                }
+            },
+
             new Migration(49, 50) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

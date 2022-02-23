@@ -23,8 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Window;
@@ -34,7 +32,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.activities.LockScreenActivity;
 import io.olvid.messenger.services.UnifiedForegroundService;

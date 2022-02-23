@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/emoji_text_view"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:textSize="25dp"
+    android:gravity="center"
+    android:textColor="@color/black"
+    android:theme="@style/SubtleBlueRipple"
+    android:background="@drawable/background_circular_ripple"
+    tools:text="🧞"
+    tools:ignore="SpUsage" />

@@ -49,7 +49,9 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.text.util.Linkify;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -244,6 +246,12 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                     getMenuInflater().inflate(R.menu.menu_contact_details_call, menu);
                 }
             }
+        }
+        MenuItem deleteItem = menu.findItem(R.id.action_delete_contact);
+        if (deleteItem != null) {
+            SpannableString spannableString = new SpannableString(deleteItem.getTitle());
+            spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.red)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            deleteItem.setTitle(spannableString);
         }
         return true;
     }
@@ -837,6 +845,32 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 App.runThread(new PromptToDeleteContactTask(this, contact.bytesOwnedIdentity, contact.bytesContactIdentity, this::onBackPressed));
             }
             return true;
+        } else if (itemId == R.id.action_debug_information) {
+            Contact contact = contactDetailsViewModel.getContact().getValue();
+            if (contact != null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(getString(R.string.debug_label_number_of_channels_and_devices)).append("\n");
+                sb.append(contact.establishedChannelCount).append("/").append(contact.deviceCount).append("\n\n");
+                sb.append(getString(R.string.debug_label_identity_link)).append("\n");
+                sb.append(new ObvUrlIdentity(contact.bytesContactIdentity, contact.displayName).getUrlRepresentation()).append("\n\n");
+                sb.append(getString(R.string.debug_label_capabilities)).append("\n");
+                sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_continuous_gathering, contact.capabilityWebrtcContinuousIce)).append("\n");
+                sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_groups_v2, contact.capabilityGroupsV2)).append("\n");
+
+                TextView textView = new TextView(this);
+                int sixteenDp = (int) (16 * getResources().getDisplayMetrics().density);
+                textView.setPadding(sixteenDp, sixteenDp, sixteenDp, sixteenDp);
+                textView.setTextIsSelectable(true);
+                textView.setAutoLinkMask(Linkify.ALL);
+                textView.setMovementMethod(LinkMovementMethod.getInstance());
+                textView.setText(sb);
+
+                final AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                        .setTitle(R.string.menu_action_debug_information)
+                        .setView(textView)
+                        .setPositiveButton(R.string.button_label_ok, null);
+                builder.create().show();
+            }
         }
         return super.onOptionsItemSelected(item);
     }

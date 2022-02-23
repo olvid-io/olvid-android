@@ -33,6 +33,7 @@ import io.olvid.engine.protocol.databases.ProtocolInstance;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
 import io.olvid.engine.protocol.protocols.ChannelCreationWithContactDeviceProtocol;
+import io.olvid.engine.protocol.protocols.DeviceCapabilitiesDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.ContactMutualIntroductionProtocol;
 import io.olvid.engine.protocol.protocols.DeviceDiscoveryChildProtocol;
 import io.olvid.engine.protocol.protocols.DeviceDiscoveryProtocol;
@@ -55,7 +56,7 @@ public abstract class ConcreteProtocol {
 
 
     public static final int DEVICE_DISCOVERY_PROTOCOL_ID = 0;
-    public static final int TRUST_ESTABLISHMENT_PROTOCOL_ID = 1;
+    public static final int TRUST_ESTABLISHMENT_PROTOCOL_ID = 1; // legacy protocol (superseded by 11), may be removed in the future
     public static final int CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID = 2;
     public static final int DEVICE_DISCOVERY_CHILD_PROTOCOL_ID = 3;
     public static final int CONTACT_MUTUAL_INTRODUCTION_PROTOCOL_ID = 4;
@@ -69,9 +70,12 @@ public abstract class ConcreteProtocol {
     public static final int TRUST_ESTABLISHMENT_WITH_MUTUAL_SCAN_PROTOCOL_ID = 12;
     public static final int FULL_RATCHET_PROTOCOL_ID = 13;
     public static final int DOWNLOAD_GROUP_PHOTO_CHILD_PROTOCOL_ID = 14;
-    public static final int KEYCLOAK_CONTACT_ADDITION_PROTOCOL = 15;
-    public static final int KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL = 16;
-    public static final int OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL = 17;
+    public static final int KEYCLOAK_CONTACT_ADDITION_PROTOCOL_ID = 15;
+    public static final int DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID = 16;
+
+    // internal protocols, Android only
+    public static final int KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID = 1000;
+    public static final int OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID = 1001;
 
 
     protected final ProtocolManagerSession protocolManagerSession;
@@ -180,11 +184,13 @@ public abstract class ConcreteProtocol {
                 return new FullRatchetProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case DOWNLOAD_GROUP_PHOTO_CHILD_PROTOCOL_ID:
                 return new DownloadGroupPhotoChildProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
-            case KEYCLOAK_CONTACT_ADDITION_PROTOCOL:
+            case KEYCLOAK_CONTACT_ADDITION_PROTOCOL_ID:
                 return new KeycloakContactAdditionProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
-            case KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL:
+            case DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID:
+                return new DeviceCapabilitiesDiscoveryProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID:
                 return new KeycloakBindingAndUnbindingProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
-            case OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL:
+            case OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID:
                 return new OwnedIdentityDeletionWithContactNotificationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             default:
                 Logger.w("Unknown protocol id: " + protocolId);

@@ -42,7 +42,7 @@ public class ObvFirebaseMessagingService extends FirebaseMessagingService {
         String identityString = data.get("identity");
         String topic = data.get("topic");
         if (identityString != null) {
-            Logger.d("For identity mast: " + identityString);
+            Logger.d("For identity mask: " + identityString);
             AppSingleton.getEngine().processAndroidPushNotification(identityString);
         } else if (topic != null) {
             Logger.d("For push topic: " + topic);

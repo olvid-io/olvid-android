@@ -94,6 +94,8 @@ public interface EngineAPI {
     String serverForIdentity(byte[] bytesIdentity);
     byte[] getServerAuthenticationToken(byte[] bytesOwnedIdentity);
 
+    List<ObvCapability> getOwnCapabilities(byte[] bytesOwnedIdentity); // returns null in case of error, empty list if there are no capabilities
+
     // ObvContactIdentity
     ObvIdentity[] getContactsOfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception;
     EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
@@ -107,6 +109,8 @@ public interface EngineAPI {
     void trustPublishedContactDetails(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
     ObvTrustOrigin[] getContactTrustOrigins(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     boolean doesContactHaveAutoAcceptTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
+    List<ObvCapability> getContactCapabilities(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity); // returns null in case of error, empty list if there are no capabilities
+
 
     // ObvGroup
     ObvGroup[] getGroupsOfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception;

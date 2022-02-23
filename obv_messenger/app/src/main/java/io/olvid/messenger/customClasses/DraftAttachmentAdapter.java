@@ -117,40 +117,19 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
         final FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = attachmentFyles.get(position);
         final String mimeType = fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType();
         holder.fyleAndStatus = fyleAndStatus;
-        if (mimeType != null) {
-            if (PreviewUtils.canGetPreview(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus)) {
-                if (mimeType.startsWith("image/")) {
-                    holder.attachmentFileName.setVisibility(View.GONE);
-                    holder.attachmentMimeType.setVisibility(View.GONE);
-                    holder.attachmentSize.setVisibility(View.GONE);
-                    holder.audioPlayTime.setVisibility(View.GONE);
-                    holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                } else {
-                    holder.attachmentFileName.setVisibility(View.VISIBLE);
-                    holder.attachmentMimeType.setVisibility(View.VISIBLE);
-                    holder.attachmentSize.setVisibility(View.VISIBLE);
-                    holder.audioPlayTime.setVisibility(View.GONE);
-                    if (fyleAndStatus.fyleMessageJoinWithStatus.status != FyleMessageJoinWithStatus.STATUS_DRAFT) {
-                        holder.attachmentFileName.setMaxLines(1);
-                    } else {
-                        holder.attachmentFileName.setMaxLines(2);
-                    }
-                    holder.attachmentFileName.setText(fyleAndStatus.fyleMessageJoinWithStatus.fileName);
-                    holder.attachmentMimeType.setText(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
-                    holder.attachmentSize.setText(Formatter.formatShortFileSize(App.getContext(), fyleAndStatus.fyleMessageJoinWithStatus.size));
-                    if (mimeType.startsWith("video/")) {
-                        holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    } else {
-                        holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                    }
-                }
 
-                App.runThread(new ShowPreviewTask(fyleAndStatus, holder, previewPixelSize));
+        if (PreviewUtils.canGetPreview(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus)) {
+            if (mimeType.startsWith("image/")) {
+                holder.attachmentFileName.setVisibility(View.GONE);
+                holder.attachmentMimeType.setVisibility(View.GONE);
+                holder.attachmentSize.setVisibility(View.GONE);
+                holder.audioPlayTime.setVisibility(View.GONE);
+                holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             } else {
                 holder.attachmentFileName.setVisibility(View.VISIBLE);
                 holder.attachmentMimeType.setVisibility(View.VISIBLE);
                 holder.attachmentSize.setVisibility(View.VISIBLE);
-                holder.audioPlayTime.setVisibility(View.INVISIBLE);
+                holder.audioPlayTime.setVisibility(View.GONE);
                 if (fyleAndStatus.fyleMessageJoinWithStatus.status != FyleMessageJoinWithStatus.STATUS_DRAFT) {
                     holder.attachmentFileName.setMaxLines(1);
                 } else {
@@ -159,30 +138,42 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
                 holder.attachmentFileName.setText(fyleAndStatus.fyleMessageJoinWithStatus.fileName);
                 holder.attachmentMimeType.setText(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
                 holder.attachmentSize.setText(Formatter.formatShortFileSize(App.getContext(), fyleAndStatus.fyleMessageJoinWithStatus.size));
-                holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                if (mimeType.startsWith("audio/")) {
-                    if (holder.musicFailed) {
-                        holder.attachmentImageView.setImageResource(R.drawable.mime_type_icon_audio_failed);
-                    } else {
-                        audioAttachmentServiceBinding.loadAudioAttachment(fyleAndStatus, holder);
-                    }
+                if (mimeType.startsWith("video/")) {
+                    holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 } else {
-                    holder.attachmentImageView.setImageResource(MessageAttachmentAdapter.getDrawableResourceForMimeType(mimeType));
+                    holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                 }
             }
+
+            App.runThread(new ShowPreviewTask(fyleAndStatus, holder, previewPixelSize));
         } else {
             holder.attachmentFileName.setVisibility(View.VISIBLE);
-            holder.attachmentMimeType.setVisibility(View.GONE);
+            holder.attachmentMimeType.setVisibility(View.VISIBLE);
             holder.attachmentSize.setVisibility(View.VISIBLE);
-            holder.audioPlayTime.setVisibility(View.GONE);
+            holder.audioPlayTime.setVisibility(View.INVISIBLE);
+            if (fyleAndStatus.fyleMessageJoinWithStatus.status != FyleMessageJoinWithStatus.STATUS_DRAFT) {
+                holder.attachmentFileName.setMaxLines(1);
+            } else {
+                holder.attachmentFileName.setMaxLines(2);
+            }
             holder.attachmentFileName.setText(fyleAndStatus.fyleMessageJoinWithStatus.fileName);
+            holder.attachmentMimeType.setText(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
             holder.attachmentSize.setText(Formatter.formatShortFileSize(App.getContext(), fyleAndStatus.fyleMessageJoinWithStatus.size));
-            holder.attachmentImageView.setImageResource(R.drawable.mime_type_icon_file);
+            holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            if (mimeType.startsWith("audio/")) {
+                if (holder.musicFailed) {
+                    holder.attachmentImageView.setImageResource(R.drawable.mime_type_icon_audio_failed);
+                } else {
+                    audioAttachmentServiceBinding.loadAudioAttachment(fyleAndStatus, holder);
+                }
+            } else {
+                holder.attachmentImageView.setImageResource(MessageAttachmentAdapter.getDrawableResourceForMimeType(mimeType));
+            }
         }
         switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
             case FyleMessageJoinWithStatus.STATUS_COPYING:
                 holder.attachmentProgress.setVisibility(View.VISIBLE);
-                holder.attachmentProgress.setProgress((int) (fyleAndStatus.fyleMessageJoinWithStatus.progress*100));
+                holder.attachmentProgress.setProgress((int) (fyleAndStatus.fyleMessageJoinWithStatus.progress * 100));
                 holder.attachmentProgressLabel.setVisibility(View.VISIBLE);
                 holder.attachmentProgressLabel.setText(R.string.label_copy);
                 if (fyleAndStatus.fyleMessageJoinWithStatus.progress < .01f) {

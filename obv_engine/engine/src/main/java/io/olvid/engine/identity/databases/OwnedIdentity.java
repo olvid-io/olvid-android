@@ -61,6 +61,7 @@ import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
@@ -852,7 +853,12 @@ public class OwnedIdentity implements ObvDatabase {
             }
         }
 
-        OwnedDevice.createCurrentDevice(identityManagerSession, ownedIdentity, prng);
+        OwnedDevice currentOwnedDevice = OwnedDevice.createCurrentDevice(identityManagerSession, ownedIdentity, prng);
+        // when restoring a backup, directly set all currentDevices to the most up to data capabilities
+        // rationale: all channels will be recreated and contact devices will be notified properly.
+        currentOwnedDevice.setRawDeviceCapabilities(ObvCapability.capabilityListToStringArray(ObvCapability.currentCapabilities));
+
+
         // The ObvIdentity returned here contains the active status of the OwnedIdentity when it was backup
         // --> this will let the app determine if push notification registration is required
         return new ObvIdentity(ownedIdentity, published_details.getJsonIdentityDetails(), ownedIdentityObject.isKeycloakManaged(), pojo.active == null || pojo.active);

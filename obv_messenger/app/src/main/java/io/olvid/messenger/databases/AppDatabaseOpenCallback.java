@@ -28,6 +28,7 @@ import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvGroup;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.App;
@@ -253,7 +254,32 @@ public class AppDatabaseOpenCallback implements Runnable {
                         db.ownedIdentityDao().updateIdentityDetailsAndDisplayName(dbOwnedIdentity.bytesOwnedIdentity, dbOwnedIdentity.identityDetails, dbOwnedIdentity.displayName);
                     }
                 }
+                {
+                    // update own capabilities
+                    List<ObvCapability> ownCapabilities = engine.getOwnCapabilities(dbOwnedIdentity.bytesOwnedIdentity);
+                    if (ownCapabilities != null) {
+                        for (ObvCapability obvCapability : ObvCapability.values()) {
+                            boolean capable = ownCapabilities.contains(obvCapability);
+
+                            switch (obvCapability) {
+                                case WEBRTC_CONTINUOUS_ICE:
+                                    if (capable != dbOwnedIdentity.capabilityWebrtcContinuousIce) {
+                                        Logger.i("Engine -> App sync: Update own capability WEBRTC_CONTINUOUS_ICE");
+                                        db.ownedIdentityDao().updateCapabilityWebrtcContinuousIce(dbOwnedIdentity.bytesOwnedIdentity, capable);
+                                    }
+                                    break;
+                                case GROUPS_V2:
+                                    if (capable != dbOwnedIdentity.capabilityGroupsV2) {
+                                        Logger.i("Engine -> App sync: Update own capability GROUPS_V2");
+                                        db.ownedIdentityDao().updateCapabilityGroupsV2(dbOwnedIdentity.bytesOwnedIdentity, capable);
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
                 identitiesHashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
+
 
                 // synchronize Contacts for this OwnedIdentity
                 {
@@ -337,6 +363,30 @@ public class AppDatabaseOpenCallback implements Runnable {
                                 ShortcutActivity.updateShortcut(discussion);
                             } catch (Exception e) {
                                 // do nothing
+                            }
+                        }
+                        {
+                            // update contact capabilities
+                            List<ObvCapability> contactCapabilities = engine.getContactCapabilities(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                            if (contactCapabilities != null) {
+                                for (ObvCapability obvCapability : ObvCapability.values()) {
+                                    boolean capable = contactCapabilities.contains(obvCapability);
+
+                                    switch (obvCapability) {
+                                        case WEBRTC_CONTINUOUS_ICE:
+                                            if (capable != contact.capabilityWebrtcContinuousIce) {
+                                                Logger.i("Engine -> App sync: Update contact capability WEBRTC_CONTINUOUS_ICE");
+                                                db.contactDao().updateCapabilityWebrtcContinuousIce(contact.bytesOwnedIdentity, contact.bytesContactIdentity, capable);
+                                            }
+                                            break;
+                                        case GROUPS_V2:
+                                            if (capable != contact.capabilityGroupsV2) {
+                                                Logger.i("Engine -> App sync: Update contact capability GROUPS_V2");
+                                                db.contactDao().updateCapabilityGroupsV2(contact.bytesOwnedIdentity, contact.bytesContactIdentity, capable);
+                                            }
+                                            break;
+                                    }
+                                }
                             }
                         }
                     }

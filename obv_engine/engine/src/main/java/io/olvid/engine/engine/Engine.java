@@ -85,6 +85,7 @@ import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.ObvAttachment;
 import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvBackupKeyVerificationOutput;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
@@ -279,7 +280,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
 
 
     public void removeNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener) {
-        if (engineNotificationListener != null) {
+        if (engineNotificationListener != null && engineNotificationListener.hasEngineNotificationListenerRegistrationNumber()) {
             removeNotificationListener(notificationName, engineNotificationListener.getEngineNotificationListenerRegistrationNumber());
         }
     }
@@ -409,6 +410,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_FAILED,
                 DownloadNotifications.NOTIFICATION_PING_LOST,
                 DownloadNotifications.NOTIFICATION_PING_RECEIVED,
+                DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED,
                 IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_LIST_UPDATED,
                 IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_PUBLISHED_DETAILS_UPDATED,
                 IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY,
@@ -433,6 +435,8 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 IdentityNotifications.NOTIFICATION_CONTACT_REVOKED,
                 IdentityNotifications.NOTIFICATION_LATEST_OWNED_IDENTITY_DETAILS_UPDATED,
                 IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS,
+                IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED,
+                IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED,
                 UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS,
                 UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_FINISHED,
                 UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_CANCELLED,
@@ -862,7 +866,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 break;
             }
             case DownloadNotifications.NOTIFICATION_PING_RECEIVED: {
-                Long delay = (Long) userInfo.get(EngineNotifications.PING_RECEIVED_DELAY_KEY);
+                Long delay = (Long) userInfo.get(DownloadNotifications.NOTIFICATION_PING_RECEIVED_DELAY_KEY);
                 if (delay == null) {
                     break;
                 }
@@ -870,6 +874,17 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 engineInfo.put(EngineNotifications.PING_RECEIVED_DELAY_KEY, delay);
 
                 postEngineNotification(EngineNotifications.PING_RECEIVED, engineInfo);
+                break;
+            }
+            case DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED: {
+                Integer state = (Integer) userInfo.get(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY);
+                if (state == null) {
+                    break;
+                }
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, state);
+
+                postEngineNotification(EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED, engineInfo);
                 break;
             }
             case IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY: {
@@ -1330,6 +1345,44 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 engineInfo.put(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED_ACTIVE_KEY, active);
 
                 postEngineNotification(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED, engineInfo);
+                break;
+            }
+            case IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED: {
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED_OWNED_IDENTITY_KEY);
+                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED_CONTACT_IDENTITY_KEY);
+                if (ownedIdentity == null || contactIdentity == null) {
+                    break;
+                }
+                try {
+                    List<ObvCapability> capabilities = identityManager.getContactCapabilities(ownedIdentity, contactIdentity);
+
+                    HashMap<String, Object> engineInfo = new HashMap<>();
+                    engineInfo.put(EngineNotifications.CONTACT_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                    engineInfo.put(EngineNotifications.CONTACT_CAPABILITIES_UPDATED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
+                    engineInfo.put(EngineNotifications.CONTACT_CAPABILITIES_UPDATED_CAPABILITIES, capabilities);
+
+                    postEngineNotification(EngineNotifications.CONTACT_CAPABILITIES_UPDATED, engineInfo);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+            case IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED: {
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED_OWNED_IDENTITY_KEY);
+                if (ownedIdentity == null) {
+                    break;
+                }
+                try {
+                    List<ObvCapability> capabilities = identityManager.getOwnCapabilities(ownedIdentity);
+
+                    HashMap<String, Object> engineInfo = new HashMap<>();
+                    engineInfo.put(EngineNotifications.OWN_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                    engineInfo.put(EngineNotifications.OWN_CAPABILITIES_UPDATED_CAPABILITIES, capabilities);
+
+                    postEngineNotification(EngineNotifications.OWN_CAPABILITIES_UPDATED, engineInfo);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
             }
             case UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS: {
@@ -2027,6 +2080,18 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
         }
     }
 
+    // returns null in case of error, empty list if there are no capabilities
+    @Override
+    public List<ObvCapability> getOwnCapabilities(byte[] bytesOwnedIdentity) {
+        try {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            return identityManager.getOwnCapabilities(ownedIdentity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     // endregion
 
     // region Managing Contact Identities
@@ -2157,6 +2222,20 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
             return (identityManager.getContactIdentityTrustLevel(engineSession.session, ownedIdentity, contactIdentity).compareTo(Constants.AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD)) >= 0;
         }
     }
+
+    // returns null in case of error, empty list if there are no capabilities
+    @Override
+    public List<ObvCapability> getContactCapabilities(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) {
+        try {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            Identity contactIdentity = Identity.of(bytesContactIdentity);
+            return identityManager.getContactCapabilities(ownedIdentity, contactIdentity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     // endregion
     // region ObvGroup

@@ -22,6 +22,8 @@ package io.olvid.messenger.databases.tasks.backup;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.List;
+
 import io.olvid.messenger.App;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
@@ -38,6 +40,7 @@ class SettingsPojo_0 {
     public Boolean permanent_foreground_service;
 
     public Boolean dark_mode;
+    public Boolean system_emojis;
     public Boolean internal_viewer;
     public Boolean contact_sort_last_name;
     public Boolean contact_uppercase_last_name;
@@ -71,6 +74,7 @@ class SettingsPojo_0 {
     public Boolean low_bandwidth_calls;
     public Boolean debug_log_level;
 
+    public List<String> preferred_reactions;
 
     @JsonIgnore
     static SettingsPojo_0 build() {
@@ -85,6 +89,7 @@ class SettingsPojo_0 {
         settingsPojo.permanent_foreground_service = SettingsActivity.usePermanentForegroundService();
 
         settingsPojo.dark_mode = SettingsActivity.getForcedDarkMode();
+        settingsPojo.system_emojis = SettingsActivity.useSystemEmojis();
         settingsPojo.internal_viewer = SettingsActivity.useInternalImageViewer();
         settingsPojo.contact_sort_last_name = SettingsActivity.getSortContactsByLastName();
         settingsPojo.contact_uppercase_last_name = SettingsActivity.getUppercaseLastName();
@@ -120,6 +125,7 @@ class SettingsPojo_0 {
         settingsPojo.low_bandwidth_calls = SettingsActivity.useLowBandwidthInCalls();
         settingsPojo.debug_log_level = SettingsActivity.useDebugLogLevel();
 
+        settingsPojo.preferred_reactions = SettingsActivity.getPreferredReactions();
         return settingsPojo;
     }
 
@@ -134,6 +140,7 @@ class SettingsPojo_0 {
         if (permanent_foreground_service != null) { SettingsActivity.setUsePermanentForegroundService(permanent_foreground_service); }
 
         if (dark_mode != null) { SettingsActivity.setForcedDarkMode(dark_mode); }
+        if (system_emojis != null) { SettingsActivity.setUseSystemEmojis(system_emojis); }
         if (internal_viewer != null) { SettingsActivity.setUseInternalImageViewer(internal_viewer); }
         if (contact_sort_last_name != null) { SettingsActivity.setSortContactsByLastName(contact_sort_last_name); }
         if (contact_uppercase_last_name != null) { SettingsActivity.setUppercaseLastName(contact_uppercase_last_name); }
@@ -167,6 +174,8 @@ class SettingsPojo_0 {
         if (qr_correction_level != null) { SettingsActivity.setQrCorrectionLevel(qr_correction_level); }
         if (low_bandwidth_calls != null) { SettingsActivity.setUseLowBandwidthInCalls(low_bandwidth_calls); }
         if (debug_log_level != null) { SettingsActivity.setUseDebugLogLevel(debug_log_level); }
+
+        if (preferred_reactions != null) { SettingsActivity.setPreferredReactions(preferred_reactions); }
 
         // run hooks for notification channel and discussion name
         App.runThread(new ContactDisplayNameFormatChangedTask());

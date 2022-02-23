@@ -378,6 +378,12 @@ public class Utils {
                     }
                 }
             }, 0, 10_000);
+        } else {
+            // even if a ping is already schedule, immediately ping
+            byte[] bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
+            if (bytesOwnedIdentity != null) {
+                AppSingleton.getEngine().pingWebsocket(bytesOwnedIdentity);
+            }
         }
     }
 

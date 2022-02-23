@@ -87,7 +87,7 @@ public abstract class DiscussionDao {
     public abstract void updateDiscussionUnreadStatus(long discussionId, boolean unread);
 
 
-    private static final String PREFIX_DISCUSSION_COLUMNS = "disc.id AS disc_id, " +
+    static final String PREFIX_DISCUSSION_COLUMNS = "disc.id AS disc_id, " +
             " disc." + Discussion.TITLE + " AS disc_" + Discussion.TITLE + ", " +
             " disc." + Discussion.BYTES_OWNED_IDENTITY + " AS disc_" + Discussion.BYTES_OWNED_IDENTITY + ", " +
             " disc." + Discussion.SENDER_THREAD_IDENTIFIER + " AS disc_" + Discussion.SENDER_THREAD_IDENTIFIER + ", " +

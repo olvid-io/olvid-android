@@ -610,7 +610,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
         int messagesToDelete = db.messageDao().countMessagesInDiscussion(discussion.id);
 
         new DeleteMessagesTask(discussion.bytesOwnedIdentity, discussion.id, false, true).run();
-        AndroidNotificationManager.clearReceivedMessageNotification(discussion.id);
+        AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussion.id);
         // reload the discussion
         discussion = db.discussionDao().getById(discussion.id);
         if (messagesToDelete > 0) {
@@ -731,6 +731,10 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 return;
             }
 
+            if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(contact.bytesOwnedIdentity);
+                AndroidNotificationManager.displayReactionNotification(ownedIdentity, discussion, message, jsonReaction.getReaction(), contact);
+            }
             new UpdateReactionsTask(message.id, jsonReaction.getReaction(), contact.bytesContactIdentity, serverTimestamp).run();
         } else {
             ReactionRequest reactionRequest = db.reactionRequestDao().getBySenderSequenceNumberAndReacter(jsonReaction.getMessageReference().getSenderSequenceNumber(), jsonReaction.getMessageReference().getSenderThreadIdentifier(), jsonReaction.getMessageReference().getSenderIdentifier(), discussion.id, contact.bytesContactIdentity);

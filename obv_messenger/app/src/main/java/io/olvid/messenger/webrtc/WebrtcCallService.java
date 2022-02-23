@@ -213,6 +213,11 @@ public class WebrtcCallService extends Service {
         BLUETOOTH
     }
 
+    public enum GatheringPolicy {
+        GATHER_ONCE,
+        GATHER_CONTINUOUSLY,
+    }
+
     public static final int START_CALL_MESSAGE_TYPE = 0;
     public static final int ANSWER_CALL_MESSAGE_TYPE = 1;
     public static final int REJECT_CALL_MESSAGE_TYPE = 2;
@@ -223,6 +228,8 @@ public class WebrtcCallService extends Service {
     public static final int NEW_PARTICIPANT_OFFER_MESSAGE_TYPE = 7;
     public static final int NEW_PARTICIPANT_ANSWER_MESSAGE_TYPE = 8;
     public static final int KICK_MESSAGE_TYPE = 9;
+    public static final int NEW_ICE_CANDIDATE_MESSAGE_TYPE = 10;
+    public static final int REMOVE_ICE_CANDIDATES_MESSAGE_TYPE = 11;
 
     public static final int MUTED_DATA_MESSAGE_TYPE = 0;
     public static final int UPDATE_PARTICIPANTS_DATA_MESSAGE_TYPE = 1;
@@ -234,6 +241,10 @@ public class WebrtcCallService extends Service {
     public static final long RINGING_TIMEOUT_MILLIS = 60_000;
     public static final long CALL_CONNECTION_TIMEOUT_MILLIS = 10_000;
     public static final long PEER_CALL_ENDED_WAIT_MILLIS = 3_000;
+
+    // HashMap containing ICE candidates received while outside a call: callIdentifier -> (bytesContactIdentity -> candidate)
+    // with continuous gathering, we may send/receive candidates before actually sending/receiving the startCall message
+    private static final HashMap<UUID, HashMap<BytesKey, HashSet<JsonIceCandidate>>> uncalledReceivedIceCandidates = new HashMap<>();
 
     private final WebrtcCallServiceBinder webrtcCallServiceBinder = new WebrtcCallServiceBinder();
     private final NetworkMonitorObserver networkMonitorObserver = new NetworkMonitorObserver();
@@ -336,7 +347,9 @@ public class WebrtcCallService extends Service {
                         break;
                     }
                     int messageType = intent.getIntExtra(MESSAGE_TYPE_INTENT_EXTRA, -1);
-                    if (messageType != START_CALL_MESSAGE_TYPE) {
+                    if (messageType != START_CALL_MESSAGE_TYPE
+                            && messageType != NEW_ICE_CANDIDATE_MESSAGE_TYPE
+                            && messageType != REMOVE_ICE_CANDIDATES_MESSAGE_TYPE) {
                         break;
                     }
                     byte[] bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA);
@@ -347,11 +360,30 @@ public class WebrtcCallService extends Service {
                         break;
                     }
                     try {
-                        JsonStartCallMessage startCallMessage = objectMapper.readValue(serializedMessagePayload, JsonStartCallMessage.class);
+                        switch (messageType) {
+                            case START_CALL_MESSAGE_TYPE: {
+                                JsonStartCallMessage startCallMessage = objectMapper.readValue(serializedMessagePayload, JsonStartCallMessage.class);
 
-                        recipientReceiveCall(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, startCallMessage.sessionDescriptionType, startCallMessage.gzippedSessionDescription, startCallMessage.turnUserName, startCallMessage.turnPassword, startCallMessage.turnServers, startCallMessage.participantCount, startCallMessage.getBytesGroupOwnerAndUid());
+                                recipientReceiveCall(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, startCallMessage.sessionDescriptionType, startCallMessage.gzippedSessionDescription, startCallMessage.turnUserName, startCallMessage.turnPassword, startCallMessage.turnServers, startCallMessage.participantCount, startCallMessage.getBytesGroupOwnerAndUid(), startCallMessage.getGatheringPolicy());
 
-                        return START_NOT_STICKY;
+                                return START_NOT_STICKY;
+                            }
+                            case NEW_ICE_CANDIDATE_MESSAGE_TYPE: {
+                                if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
+                                    JsonNewIceCandidateMessage jsonNewIceCandidateMessage = objectMapper.readValue(serializedMessagePayload, JsonNewIceCandidateMessage.class);
+
+                                    handleNewIceCandidateMessage(callIdentifier, bytesOwnedIdentity, bytesContactIdentity, new JsonIceCandidate(jsonNewIceCandidateMessage.sdp, jsonNewIceCandidateMessage.sdpMLineIndex, jsonNewIceCandidateMessage.sdpMid));
+                                }
+                                return START_NOT_STICKY;
+                            }
+                            case REMOVE_ICE_CANDIDATES_MESSAGE_TYPE: {
+                                if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
+                                    JsonRemoveIceCandidatesMessage jsonRemoveIceCandidatesMessage = objectMapper.readValue(serializedMessagePayload, JsonRemoveIceCandidatesMessage.class);
+                                    handleRemoveIceCandidatesMessage(callIdentifier, bytesOwnedIdentity, bytesContactIdentity, jsonRemoveIceCandidatesMessage.candidates);
+                                }
+                                return START_NOT_STICKY;
+                            }
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -469,7 +501,7 @@ public class WebrtcCallService extends Service {
                         // put the message in queue as we might simply receive the update call participant message later
                         receivedOfferMessages.put(new BytesKey(bytesContactIdentity), newParticipantOfferMessage);
                     } else {
-                        handleNewParticipantOfferMessage(callParticipant, newParticipantOfferMessage.getSessionDescriptionType(), newParticipantOfferMessage.getGzippedSessionDescription());
+                        handleNewParticipantOfferMessage(callParticipant, newParticipantOfferMessage.getSessionDescriptionType(), newParticipantOfferMessage.getGzippedSessionDescription(), newParticipantOfferMessage.getGatheringPolicy());
                     }
                     break;
                 }
@@ -488,6 +520,17 @@ public class WebrtcCallService extends Service {
                     }
                     break;
                 }
+                case NEW_ICE_CANDIDATE_MESSAGE_TYPE: {
+                    JsonNewIceCandidateMessage jsonNewIceCandidateMessage = objectMapper.readValue(serializedMessagePayload, JsonNewIceCandidateMessage.class);
+                    handleNewIceCandidateMessage(callIdentifier, bytesOwnedIdentity, bytesContactIdentity, new JsonIceCandidate(jsonNewIceCandidateMessage.sdp, jsonNewIceCandidateMessage.sdpMLineIndex, jsonNewIceCandidateMessage.sdpMid));
+                    break;
+                }
+                case REMOVE_ICE_CANDIDATES_MESSAGE_TYPE: {
+                    JsonRemoveIceCandidatesMessage jsonRemoveIceCandidatesMessage = objectMapper.readValue(serializedMessagePayload, JsonRemoveIceCandidatesMessage.class);
+                    handleRemoveIceCandidatesMessage(callIdentifier, bytesOwnedIdentity, bytesContactIdentity, jsonRemoveIceCandidatesMessage.candidates);
+                    break;
+                }
+
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -495,7 +538,10 @@ public class WebrtcCallService extends Service {
     }
 
     private void stopThisService() {
-        executor.shutdownNow();
+        if (callIdentifier != null) {
+            executor.execute(() -> uncalledReceivedIceCandidates.remove(callIdentifier));
+        }
+
         stopForeground(true);
         new Handler(Looper.getMainLooper()).postDelayed(this::stopSelf, 300);
     }
@@ -567,14 +613,21 @@ public class WebrtcCallService extends Service {
             }
 
             UUID callIdentifier = UUID.randomUUID();
-            boolean allContactsFound = setContactAndRole(bytesOwnedIdentity, bytesContactIdentities, callIdentifier, true);
+
+            List<Contact> contacts = new ArrayList<>(bytesContactIdentities.size());
+            for (byte[] bytesContactIdentity : bytesContactIdentities) {
+                Contact contact = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                if (contact == null) {
+                    setFailReason(FailReason.CONTACT_NOT_FOUND);
+                    setState(State.FAILED);
+                    return;
+                }
+                contacts.add(contact);
+            }
+
+            setContactsAndRole(bytesOwnedIdentity, contacts, callIdentifier, true);
             this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
 
-            if (!allContactsFound) {
-                setFailReason(FailReason.CONTACT_NOT_FOUND);
-                setState(State.FAILED);
-                return;
-            }
 
             // show notification
             showOngoingForeground();
@@ -591,14 +644,20 @@ public class WebrtcCallService extends Service {
             }
 
             UUID callIdentifier = UUID.randomUUID();
-            boolean allContactsFound = setContactAndRole(bytesOwnedIdentity, bytesContactIdentities, callIdentifier, true);
-            this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
 
-            if (!allContactsFound) {
-                setFailReason(FailReason.CONTACT_NOT_FOUND);
-                setState(State.FAILED);
-                return;
+            List<Contact> contacts = new ArrayList<>(bytesContactIdentities.size());
+            for (byte[] bytesContactIdentity : bytesContactIdentities) {
+                Contact contact = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                if (contact == null) {
+                    setFailReason(FailReason.CONTACT_NOT_FOUND);
+                    setState(State.FAILED);
+                    return;
+                }
+                contacts.add(contact);
             }
+
+            setContactsAndRole(bytesOwnedIdentity, contacts, callIdentifier, true);
+            this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
 
             setState(State.WAITING_FOR_AUDIO_PERMISSION);
         });
@@ -866,9 +925,15 @@ public class WebrtcCallService extends Service {
     }
 
 
-    void recipientReceiveCall(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, UUID callIdentifier, String peerSdpType, byte[] gzippedPeerSdpDescription, String turnUsername, String turnPassword, @Nullable List<String> turnServers, int participantCount, @Nullable byte[] bytesGroupOwnerAndUid) {
-         executor.execute(() -> {
+    void recipientReceiveCall(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, UUID callIdentifier, String peerSdpType, byte[] gzippedPeerSdpDescription, String turnUsername, String turnPassword, @Nullable List<String> turnServers, int participantCount, @Nullable byte[] bytesGroupOwnerAndUid, @NonNull GatheringPolicy gatheringPolicy) {
+        executor.execute(() -> {
             if (state != State.INITIAL && !callIdentifier.equals(this.callIdentifier)) {
+                sendBusyMessage(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, bytesGroupOwnerAndUid);
+                return;
+            }
+
+            if (callIdentifier.equals(this.callIdentifier) && !Arrays.equals(bytesOwnedIdentity, this.bytesOwnedIdentity)) {
+                // receiving a call from another profile on same device...
                 sendBusyMessage(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, bytesGroupOwnerAndUid);
                 return;
             }
@@ -883,19 +948,27 @@ public class WebrtcCallService extends Service {
                 return;
             }
 
-            setContactAndRole(bytesOwnedIdentity, Collections.singletonList(bytesContactIdentity), callIdentifier, false);
-            CallParticipant callParticipant = getCallParticipant(bytesContactIdentity);
-
-            if (callParticipant == null || callParticipant.contact == null) {
+            Contact contact = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+            if (contact == null) {
                 setFailReason(FailReason.CONTACT_NOT_FOUND);
                 setState(State.FAILED);
                 return;
             }
 
+            setContactsAndRole(bytesOwnedIdentity, Collections.singletonList(contact), callIdentifier, false);
+            CallParticipant callParticipant = getCallParticipant(bytesContactIdentity);
+            if (callParticipant == null) {
+                setFailReason(FailReason.CONTACT_NOT_FOUND);
+                setState(State.FAILED);
+                return;
+            }
+
+
             this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
             this.turnUserName = turnUsername;
             this.turnPassword = turnPassword;
             this.incomingParticipantCount = participantCount;
+            callParticipant.peerConnectionHolder.setGatheringPolicy(gatheringPolicy);
             callParticipant.peerConnectionHolder.setPeerSessionDescription(peerSdpType, peerSdpDescription);
             callParticipant.peerConnectionHolder.setTurnCredentials(turnUsername, turnPassword, turnServers);
 
@@ -1037,7 +1110,9 @@ public class WebrtcCallService extends Service {
             callParticipant.setPeerState(PeerState.RECONNECTING);
             updateStateFromPeerStates();
 
-            callParticipant.peerConnectionHolder.createRestartOffer();
+            if (callParticipant.getGatheringPolicy() != GatheringPolicy.GATHER_CONTINUOUSLY) {
+                callParticipant.peerConnectionHolder.createRestartOffer();
+            }
         });
     }
 
@@ -1184,7 +1259,7 @@ public class WebrtcCallService extends Service {
         });
     }
 
-    private void handleNewParticipantOfferMessage(CallParticipant callParticipant, String sessionDescriptionType, byte[] gzippedPeerSdpDescription) {
+    private void handleNewParticipantOfferMessage(CallParticipant callParticipant, String sessionDescriptionType, byte[] gzippedPeerSdpDescription, @NonNull GatheringPolicy gatheringPolicy) {
         executor.execute(() -> {
             if (callParticipant.role != Role.RECIPIENT || shouldISendTheOfferToCallParticipant(callParticipant)) {
                 return;
@@ -1197,6 +1272,7 @@ public class WebrtcCallService extends Service {
                 e.printStackTrace();
                 return;
             }
+            callParticipant.peerConnectionHolder.setGatheringPolicy(gatheringPolicy);
             callParticipant.peerConnectionHolder.setPeerSessionDescription(sessionDescriptionType, peerSdpDescription);
             callParticipant.peerConnectionHolder.setTurnCredentials(turnUserName, turnPassword, turnServers);
 
@@ -1243,6 +1319,63 @@ public class WebrtcCallService extends Service {
         });
     }
 
+    private void handleNewIceCandidateMessage(@NonNull UUID callIdentifier, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @NonNull JsonIceCandidate jsonIceCandidate) {
+        executor.execute(() -> {
+            Logger.w("☎️ received new ICE candidate");
+            if (Arrays.equals(bytesOwnedIdentity, this.bytesOwnedIdentity) &&
+                    callIdentifier.equals(this.callIdentifier)) {
+                // we are in the right call, handle the message directly (if the participant is in the call)
+                CallParticipant callParticipant = getCallParticipant(bytesContactIdentity);
+                if (callParticipant != null) {
+                    Logger.w("☎️ passing candidate to peerConnectionHolder");
+                    callParticipant.peerConnectionHolder.addIceCandidates(Collections.singletonList(jsonIceCandidate));
+                    return;
+                }
+            }
+
+
+            // this is not the right call, store the candidate on the side
+            HashMap<BytesKey, HashSet<JsonIceCandidate>> callerCandidatesMap = uncalledReceivedIceCandidates.get(callIdentifier);
+            if (callerCandidatesMap == null) {
+                callerCandidatesMap = new HashMap<>();
+                uncalledReceivedIceCandidates.put(callIdentifier, callerCandidatesMap);
+            }
+            HashSet<JsonIceCandidate> candidates = callerCandidatesMap.get(new BytesKey(bytesContactIdentity));
+            if (candidates == null) {
+                candidates = new HashSet<>();
+                callerCandidatesMap.put(new BytesKey(bytesContactIdentity), candidates);
+            }
+            candidates.add(jsonIceCandidate);
+        });
+    }
+
+    private void handleRemoveIceCandidatesMessage(@NonNull UUID callIdentifier, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @NonNull JsonIceCandidate[] jsonIceCandidates) {
+        executor.execute(() -> {
+            if (Arrays.equals(bytesOwnedIdentity, this.bytesOwnedIdentity) &&
+                    callIdentifier.equals(this.callIdentifier)) {
+                // we are in the right call, handle the message directly
+                CallParticipant callParticipant = getCallParticipant(bytesContactIdentity);
+                if (callParticipant != null) {
+                    callParticipant.peerConnectionHolder.removeIceCandidates(jsonIceCandidates);
+                }
+            } else {
+                // this is not the right call, remove the candidate from the side
+                HashMap<BytesKey, HashSet<JsonIceCandidate>> callerCandidatesMap = uncalledReceivedIceCandidates.get(callIdentifier);
+                if (callerCandidatesMap != null) {
+                    HashSet<JsonIceCandidate> candidates = callerCandidatesMap.get(new BytesKey(bytesContactIdentity));
+                    if (candidates != null) {
+                        candidates.removeAll(Arrays.asList(jsonIceCandidates));
+                        if (candidates.isEmpty()) {
+                            callerCandidatesMap.remove(new BytesKey(bytesContactIdentity));
+                            if (callerCandidatesMap.isEmpty()) {
+                                uncalledReceivedIceCandidates.remove(callIdentifier);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     void handleNetworkConnectionChange() {
         executor.execute(() -> {
@@ -1274,7 +1407,7 @@ public class WebrtcCallService extends Service {
                     participantsToRemove.remove(bytesKey);
                 } else {
                     // call participant not already in the call --> we add him
-                    CallParticipant callParticipant = new CallParticipant(bytesOwnedIdentity, jsonContactBytesAndName.bytesContactIdentity, jsonContactBytesAndName.displayName, Role.RECIPIENT);
+                    CallParticipant callParticipant = new CallParticipant(bytesOwnedIdentity, jsonContactBytesAndName.bytesContactIdentity, jsonContactBytesAndName.displayName, jsonContactBytesAndName.getGatheringPolicy());
                     if (callParticipant.contact == null) {
                         // contact not found --> we use the name pushed by the caller
                         callParticipant.displayName = jsonContactBytesAndName.displayName;
@@ -1297,7 +1430,7 @@ public class WebrtcCallService extends Service {
                         // check if we already received the offer the CallParticipant is supposed to send us
                         JsonNewParticipantOfferMessage newParticipantOfferMessage = receivedOfferMessages.remove(new BytesKey(callParticipant.bytesContactIdentity));
                         if (newParticipantOfferMessage != null) {
-                            handleNewParticipantOfferMessage(callParticipant, newParticipantOfferMessage.sessionDescriptionType, newParticipantOfferMessage.gzippedSessionDescription);
+                            handleNewParticipantOfferMessage(callParticipant, newParticipantOfferMessage.sessionDescriptionType, newParticipantOfferMessage.gzippedSessionDescription, newParticipantOfferMessage.getGatheringPolicy());
                         }
                     }
                 }
@@ -1375,23 +1508,20 @@ public class WebrtcCallService extends Service {
         return failReason;
     }
 
-    public boolean setContactAndRole(@NonNull byte[] bytesOwnedIdentity, @NonNull List<byte[]> bytesContactIdentities, @NonNull UUID callIdentifier, boolean isCaller) {
+    public void setContactsAndRole(@NonNull byte[] bytesOwnedIdentity, @NonNull List<Contact> contacts, @NonNull UUID callIdentifier, boolean iAmTheCaller) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.callIdentifier = callIdentifier;
-        role = isCaller ? Role.CALLER : Role.RECIPIENT;
+        this.role = iAmTheCaller ? Role.CALLER : Role.RECIPIENT;
 
-        boolean allContactsFound = true;
-        for (byte[] bytesContactIdentity: bytesContactIdentities) {
-            CallParticipant callParticipant = new CallParticipant(bytesOwnedIdentity, bytesContactIdentity, null, isCaller ? Role.RECIPIENT : Role.CALLER);
-            allContactsFound &= callParticipant.contact != null;
+        for (Contact contact : contacts) {
+            final CallParticipant callParticipant = new CallParticipant(contact, iAmTheCaller ? Role.RECIPIENT : Role.CALLER);
 
-            callParticipantIndexes.put(new BytesKey(bytesContactIdentity), callParticipantIndex);
+            callParticipantIndexes.put(new BytesKey(contact.bytesContactIdentity), callParticipantIndex);
             callParticipants.put(callParticipantIndex, callParticipant);
             callParticipantIndex++;
         }
 
         notifyCallParticipantsChanged();
-        return allContactsFound;
     }
 
     public LiveData<List<CallParticipantPojo>> getCallParticipantsLiveData() {
@@ -1882,7 +2012,7 @@ public class WebrtcCallService extends Service {
                     .setIsVideo(false);
 
             if (participantCount > 1) {
-                callStyle.setVerificationText(getResources().getQuantityString(R.plurals.notification_text_incoming_call_participant_count, participantCount - 1, participantCount - 1));
+                callStyle.setVerificationText(getResources().getQuantityString(R.plurals.text_and_x_other, participantCount - 1, participantCount - 1));
             }
 
             Notification.Builder publicBuilder = new Notification.Builder(this, AndroidNotificationManager.WEBRTC_CALL_SERVICE_NOTIFICATION_CHANNEL_ID)
@@ -1928,7 +2058,7 @@ public class WebrtcCallService extends Service {
                     .setFullScreenIntent(fullScreenPendingIntent, true);
 
             if (participantCount > 1) {
-                builder.setContentText(getResources().getQuantityString(R.plurals.notification_text_incoming_call_participant_count, participantCount - 1, participantCount - 1));
+                builder.setContentText(getResources().getQuantityString(R.plurals.text_and_x_other, participantCount - 1, participantCount - 1));
             }
 
             builder.setLargeIcon(largeIcon);
@@ -1997,6 +2127,8 @@ public class WebrtcCallService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        executor.shutdownNow();
 
         if (callLogItem != null && callLogItem.callStatus == CallLogItem.STATUS_SUCCESSFUL && callDuration.getValue() != null) {
             callLogItem.duration = callDuration.getValue();
@@ -2268,13 +2400,58 @@ public class WebrtcCallService extends Service {
     public boolean sendStartCallMessage(CallParticipant callParticipant, String sessionDescriptionType, String sessionDescription, String turnUserName, String turnPassword, List<String> turnServers) throws IOException {
         final JsonStartCallMessage startCallMessage;
         if (bytesGroupOwnerAndUid != null && AppDatabase.getInstance().contactGroupJoinDao().isGroupMember(bytesOwnedIdentity, callParticipant.bytesContactIdentity, bytesGroupOwnerAndUid)) {
-            startCallMessage = new JsonStartCallMessage(sessionDescriptionType, gzip(sessionDescription), turnUserName, turnPassword, turnServers, callParticipants.size(), bytesGroupOwnerAndUid);
+            startCallMessage = new JsonStartCallMessage(sessionDescriptionType, gzip(sessionDescription), turnUserName, turnPassword, turnServers, callParticipants.size(), bytesGroupOwnerAndUid, callParticipant.gatheringPolicy);
         } else {
-            startCallMessage = new JsonStartCallMessage(sessionDescriptionType, gzip(sessionDescription), turnUserName, turnPassword, turnServers, callParticipants.size(), null);
+            startCallMessage = new JsonStartCallMessage(sessionDescriptionType, gzip(sessionDescription), turnUserName, turnPassword, turnServers, callParticipants.size(), null, callParticipant.gatheringPolicy);
         }
         return postMessage(Collections.singletonList(callParticipant), startCallMessage);
     }
 
+
+    void sendAddIceCandidateMessage(CallParticipant callParticipant, JsonIceCandidate jsonIceCandidate) {
+        executor.execute(() -> {
+            if (!callParticipantIndexes.containsKey(new BytesKey(callParticipant.bytesContactIdentity))) {
+                return;
+            }
+
+            try {
+                JsonNewIceCandidateMessage jsonNewIceCandidateMessage = new JsonNewIceCandidateMessage(jsonIceCandidate.sdp, jsonIceCandidate.sdpMLineIndex, jsonIceCandidate.sdpMid);
+                Logger.w("☎ sending peer an ice candidate for call " + callIdentifier + "\n" + jsonIceCandidate.sdpMLineIndex + " -> " + jsonIceCandidate.sdp);
+                if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
+                    postMessage(Collections.singletonList(callParticipant), jsonNewIceCandidateMessage);
+                } else {
+                    CallParticipant caller = getCallerCallParticipant();
+                    if (caller != null) {
+                        sendDataChannelMessage(caller, new JsonRelayInnerMessage(callParticipant.bytesContactIdentity, jsonNewIceCandidateMessage.getMessageType(), objectMapper.writeValueAsString(jsonNewIceCandidateMessage)));
+                    }
+                }
+            } catch (IOException ignored) {
+                // failed to serialize inner message
+            }
+        });
+    }
+
+    void sendRemoveIceCandidatesMessage(CallParticipant callParticipant, JsonIceCandidate[] jsonIceCandidates) {
+        executor.execute(() -> {
+            if (!callParticipantIndexes.containsKey(new BytesKey(callParticipant.bytesContactIdentity))) {
+                return;
+            }
+
+            try {
+                JsonRemoveIceCandidatesMessage jsonRemoveIceCandidatesMessage = new JsonRemoveIceCandidatesMessage(jsonIceCandidates);
+                if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
+                    postMessage(Collections.singletonList(callParticipant), jsonRemoveIceCandidatesMessage);
+                } else {
+                    CallParticipant caller = getCallerCallParticipant();
+                    if (caller != null) {
+                        sendDataChannelMessage(caller, new JsonRelayInnerMessage(callParticipant.bytesContactIdentity, jsonRemoveIceCandidatesMessage.getMessageType(), objectMapper.writeValueAsString(jsonRemoveIceCandidatesMessage)));
+                    }
+                }
+            } catch (IOException ignored) {
+                // failed to serialize inner message
+            }
+        });
+    }
 
     public void sendAnswerCallMessage(CallParticipant callParticipant, String sessionDescriptionType, String sessionDescription) throws IOException {
         JsonAnswerCallMessage answerCallMessage = new JsonAnswerCallMessage(sessionDescriptionType, gzip(sessionDescription));
@@ -2351,7 +2528,7 @@ public class WebrtcCallService extends Service {
     }
 
     public void sendNewParticipantOfferMessage(CallParticipant callParticipant, String sessionDescriptionType, String sessionDescription) throws IOException {
-        JsonNewParticipantOfferMessage newParticipantOfferMessage = new JsonNewParticipantOfferMessage(sessionDescriptionType, gzip(sessionDescription));
+        JsonNewParticipantOfferMessage newParticipantOfferMessage = new JsonNewParticipantOfferMessage(sessionDescriptionType, gzip(sessionDescription), callParticipant.gatheringPolicy);
         if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
             postMessage(Collections.singletonList(callParticipant), newParticipantOfferMessage);
         } else {
@@ -2574,7 +2751,7 @@ public class WebrtcCallService extends Service {
                         callParticipant.peerState == PeerState.RECONNECTING) {
                     // only add participants that are indeed part of the call
                     //noinspection ConstantConditions --> we know callParticipant.contact is non null as this message can only be sent by the caller
-                    this.callParticipants.add(new JsonContactBytesAndName(callParticipant.bytesContactIdentity, callParticipant.contact.displayName));
+                    this.callParticipants.add(new JsonContactBytesAndName(callParticipant.bytesContactIdentity, callParticipant.contact.displayName, callParticipant.gatheringPolicy));
                 }
             }
         }
@@ -2600,13 +2777,24 @@ public class WebrtcCallService extends Service {
         private static final class JsonContactBytesAndName {
             byte[] bytesContactIdentity;
             String displayName;
+            // th rawGatheringPolicy value is nullable at it was not present in the first call implementation
+            Integer rawGatheringPolicy;
 
             public JsonContactBytesAndName() {
             }
 
-            public JsonContactBytesAndName(byte[] bytesContactIdentity, String displayName) {
+            @JsonIgnore
+            public JsonContactBytesAndName(byte[] bytesContactIdentity, String displayName, @NonNull GatheringPolicy gatheringPolicy) {
                 this.bytesContactIdentity = bytesContactIdentity;
                 this.displayName = displayName;
+                switch (gatheringPolicy) {
+                    case GATHER_ONCE:
+                        this.rawGatheringPolicy = 1;
+                        break;
+                    case GATHER_CONTINUOUSLY:
+                        this.rawGatheringPolicy = 2;
+                        break;
+                }
             }
 
             @JsonProperty("id")
@@ -2627,6 +2815,25 @@ public class WebrtcCallService extends Service {
             @JsonProperty("name")
             public void setDisplayName(String displayName) {
                 this.displayName = displayName;
+            }
+
+            @JsonProperty("gp")
+            public Integer getRawGatheringPolicy() {
+                return rawGatheringPolicy;
+            }
+
+            @JsonProperty("gp")
+            public void setRawGatheringPolicy(Integer rawGatheringPolicy) {
+                this.rawGatheringPolicy = rawGatheringPolicy;
+            }
+
+            @JsonIgnore
+            @NonNull
+            public GatheringPolicy getGatheringPolicy() {
+                if (rawGatheringPolicy != null && rawGatheringPolicy == 2) {
+                    return GatheringPolicy.GATHER_CONTINUOUSLY;
+                }
+                return GatheringPolicy.GATHER_ONCE;
             }
         }
     }
@@ -2763,12 +2970,15 @@ public class WebrtcCallService extends Service {
         int participantCount;
         byte[] bytesGroupOwner;
         byte[] groupId;
+        Integer rawGatheringPolicy;
+
 
         @SuppressWarnings("unused")
         public JsonStartCallMessage() {
         }
 
-        public JsonStartCallMessage(String sessionDescriptionType, byte[] gzippedSessionDescription, String turnUserName, String turnPassword, List<String> turnServers, int participantCount, byte[] bytesGroupOwnerAndUid) {
+        @JsonIgnore
+        public JsonStartCallMessage(String sessionDescriptionType, byte[] gzippedSessionDescription, String turnUserName, String turnPassword, List<String> turnServers, int participantCount, byte[] bytesGroupOwnerAndUid, @NonNull GatheringPolicy gatheringPolicy) {
             this.sessionDescriptionType = sessionDescriptionType;
             this.gzippedSessionDescription = gzippedSessionDescription;
             this.turnUserName = turnUserName;
@@ -2776,6 +2986,14 @@ public class WebrtcCallService extends Service {
             this.turnServers = turnServers;
             this.participantCount = participantCount;
             this.setBytesGroupOwnerAndUid(bytesGroupOwnerAndUid);
+            switch (gatheringPolicy) {
+                case GATHER_ONCE:
+                    this.rawGatheringPolicy = 1;
+                    break;
+                case GATHER_CONTINUOUSLY:
+                    this.rawGatheringPolicy = 2;
+                    break;
+            }
         }
 
         @JsonProperty("sdt")
@@ -2858,6 +3076,16 @@ public class WebrtcCallService extends Service {
             this.groupId = groupId;
         }
 
+        @JsonProperty("gp")
+        public Integer getRawGatheringPolicy() {
+            return rawGatheringPolicy;
+        }
+
+        @JsonProperty("gp")
+        public void setRawGatheringPolicy(Integer rawGatheringPolicy) {
+            this.rawGatheringPolicy = rawGatheringPolicy;
+        }
+
         @JsonIgnore
         public byte[] getBytesGroupOwnerAndUid() {
             if (this.bytesGroupOwner == null || this.groupId == null) {
@@ -2878,6 +3106,15 @@ public class WebrtcCallService extends Service {
                 this.bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
                 this.groupId = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
             }
+        }
+
+        @JsonIgnore
+        @NonNull
+        public GatheringPolicy getGatheringPolicy() {
+            if (rawGatheringPolicy != null && rawGatheringPolicy == 2) {
+                return GatheringPolicy.GATHER_CONTINUOUSLY;
+            }
+            return GatheringPolicy.GATHER_ONCE;
         }
 
         @Override
@@ -3031,27 +3268,29 @@ public class WebrtcCallService extends Service {
         }
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private static final class JsonKickMessage extends JsonWebrtcProtocolMessage {
-        @Override
-        @JsonIgnore
-        int getMessageType() {
-            return KICK_MESSAGE_TYPE;
-        }
-    }
-
     @SuppressWarnings("unused")
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class JsonNewParticipantOfferMessage extends JsonWebrtcProtocolMessage {
         String sessionDescriptionType;
         byte[] gzippedSessionDescription;
+        Integer rawGatheringPolicy;
+
 
         public JsonNewParticipantOfferMessage() {
         }
 
-        public JsonNewParticipantOfferMessage(String sessionDescriptionType, byte[] gzippedSessionDescription) {
+        @JsonIgnore
+        public JsonNewParticipantOfferMessage(String sessionDescriptionType, byte[] gzippedSessionDescription, @NonNull GatheringPolicy gatheringPolicy) {
             this.sessionDescriptionType = sessionDescriptionType;
             this.gzippedSessionDescription = gzippedSessionDescription;
+            switch (gatheringPolicy) {
+                case GATHER_ONCE:
+                    this.rawGatheringPolicy = 1;
+                    break;
+                case GATHER_CONTINUOUSLY:
+                    this.rawGatheringPolicy = 2;
+                    break;
+            }
         }
 
         @JsonProperty("sdt")
@@ -3073,6 +3312,26 @@ public class WebrtcCallService extends Service {
         public void setGzippedSessionDescription(byte[] gzippedSessionDescription) {
             this.gzippedSessionDescription = gzippedSessionDescription;
         }
+
+        @JsonProperty("gp")
+        public Integer getRawGatheringPolicy() {
+            return rawGatheringPolicy;
+        }
+
+        @JsonProperty("gp")
+        public void setRawGatheringPolicy(Integer rawGatheringPolicy) {
+            this.rawGatheringPolicy = rawGatheringPolicy;
+        }
+
+        @JsonIgnore
+        @NonNull
+        public GatheringPolicy getGatheringPolicy() {
+            if (rawGatheringPolicy != null && rawGatheringPolicy == 2) {
+                return GatheringPolicy.GATHER_CONTINUOUSLY;
+            }
+            return GatheringPolicy.GATHER_ONCE;
+        }
+
 
         @Override
         @JsonIgnore
@@ -3124,6 +3383,151 @@ public class WebrtcCallService extends Service {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static final class JsonKickMessage extends JsonWebrtcProtocolMessage {
+        @Override
+        @JsonIgnore
+        int getMessageType() {
+            return KICK_MESSAGE_TYPE;
+        }
+    }
+
+
+    @SuppressWarnings("unused")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static final class JsonNewIceCandidateMessage extends JsonWebrtcProtocolMessage {
+        String sdp;
+        int sdpMLineIndex;
+        @Nullable String sdpMid;
+
+        @SuppressWarnings("unused")
+        public JsonNewIceCandidateMessage() {
+        }
+
+        public JsonNewIceCandidateMessage(String sdp, int sdpMLineIndex, @Nullable String sdpMid) {
+            this.sdp = sdp;
+            this.sdpMLineIndex = sdpMLineIndex;
+            this.sdpMid = sdpMid;
+        }
+
+        @JsonProperty("sdp")
+        public String getSdp() {
+            return sdp;
+        }
+
+        @JsonProperty("sdp")
+        public void setSdp(String sdp) {
+            this.sdp = sdp;
+        }
+
+        @JsonProperty("li")
+        public int getSdpMLineIndex() {
+            return sdpMLineIndex;
+        }
+
+        @JsonProperty("li")
+        public void setSdpMLineIndex(int sdpMLineIndex) {
+            this.sdpMLineIndex = sdpMLineIndex;
+        }
+
+        @Nullable
+        @JsonProperty("id")
+        public String getSdpMid() {
+            return sdpMid;
+        }
+
+        @JsonProperty("id")
+        public void setSdpMid(@Nullable String sdpMid) {
+            this.sdpMid = sdpMid;
+        }
+
+        @Override
+        @JsonIgnore
+        int getMessageType() {
+            return NEW_ICE_CANDIDATE_MESSAGE_TYPE;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static final class JsonRemoveIceCandidatesMessage extends JsonWebrtcProtocolMessage {
+        JsonIceCandidate[] candidates;
+
+        @SuppressWarnings("unused")
+        public JsonRemoveIceCandidatesMessage() {
+        }
+
+        public JsonRemoveIceCandidatesMessage(JsonIceCandidate[] candidates) {
+            this.candidates = candidates;
+        }
+
+        @JsonProperty("cs")
+        public JsonIceCandidate[] getCandidates() {
+            return candidates;
+        }
+
+        @JsonProperty("cs")
+        public void setCandidates(JsonIceCandidate[] candidates) {
+            this.candidates = candidates;
+        }
+
+        @Override
+        @JsonIgnore
+        int getMessageType() {
+            return REMOVE_ICE_CANDIDATES_MESSAGE_TYPE;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static final class JsonIceCandidate {
+        String sdp;
+        int sdpMLineIndex;
+        @Nullable String sdpMid;
+
+        @SuppressWarnings("unused")
+        public JsonIceCandidate() {
+        }
+
+        public JsonIceCandidate(String sdp, int sdpMLineIndex, @Nullable String sdpMid) {
+            this.sdp = sdp;
+            this.sdpMLineIndex = sdpMLineIndex;
+            this.sdpMid = sdpMid;
+        }
+
+        @JsonProperty("sdp")
+        public String getSdp() {
+            return sdp;
+        }
+
+        @JsonProperty("sdp")
+        public void setSdp(String sdp) {
+            this.sdp = sdp;
+        }
+
+        @JsonProperty("li")
+        public int getSdpMLineIndex() {
+            return sdpMLineIndex;
+        }
+
+        @JsonProperty("li")
+        public void setSdpMLineIndex(int sdpMLineIndex) {
+            this.sdpMLineIndex = sdpMLineIndex;
+        }
+
+        @Nullable
+        @JsonProperty("id")
+        public String getSdpMid() {
+            return sdpMid;
+        }
+
+        @JsonProperty("id")
+        public void setSdpMid(@Nullable String sdpMid) {
+            this.sdpMid = sdpMid;
+        }
+
+    }
+
 
     // endregion
 
@@ -3131,16 +3535,19 @@ public class WebrtcCallService extends Service {
         private final Role role;
         private final byte[] bytesContactIdentity;
         @Nullable private final Contact contact;
+        // this gathering policy corresponds to what we have in Db. For received multi-calls, this is what the caller sends us.
+        // only used when sending an offer, when receiving the offer, we use the value in the offer message
+        private final GatheringPolicy gatheringPolicy;
         private String displayName;
-        private final WebrtcPeerConnectionHolder peerConnectionHolder;
+        @NonNull private final WebrtcPeerConnectionHolder peerConnectionHolder;
         private final WebrtcPeerConnectionHolder.DataChannelMessageListener dataChannelMessageListener;
         private boolean peerIsMuted;
         private PeerState peerState;
         private boolean markedForRemoval;
         private TimerTask timeoutTask;
 
-        private CallParticipant(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String displayName, Role role) {
-            this.role = role;
+        private CallParticipant(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, @NonNull String displayName, @NonNull GatheringPolicy gatheringPolicy) {
+            this.role = Role.RECIPIENT;
             this.bytesContactIdentity = bytesContactIdentity;
             this.contact = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
             if (contact != null) {
@@ -3148,6 +3555,7 @@ public class WebrtcCallService extends Service {
             } else {
                 this.displayName = displayName;
             }
+            this.gatheringPolicy = gatheringPolicy;
             this.peerConnectionHolder = new WebrtcPeerConnectionHolder(WebrtcCallService.this, this);
             this.dataChannelMessageListener = new DataChannelListener(this);
             this.peerConnectionHolder.setDataChannelMessageListener(this.dataChannelMessageListener);
@@ -3155,12 +3563,15 @@ public class WebrtcCallService extends Service {
             this.peerState = PeerState.INITIAL;
             this.markedForRemoval = false;
             this.timeoutTask = null;
+
+            addUncalledReceivedIceCandidates();
         }
 
-        private CallParticipant(Contact contact, Role role) {
-            this.role = role;
+        private CallParticipant(@NonNull Contact contact, @NonNull Role contactRole) {
+            this.role = contactRole;
             this.bytesContactIdentity = contact.bytesContactIdentity;
             this.contact = contact;
+            this.gatheringPolicy = contact.capabilityWebrtcContinuousIce ? GatheringPolicy.GATHER_CONTINUOUSLY : GatheringPolicy.GATHER_ONCE;
             this.displayName = contact.getCustomDisplayName();
             this.peerConnectionHolder = new WebrtcPeerConnectionHolder(WebrtcCallService.this, this);
             this.dataChannelMessageListener = new DataChannelListener(this);
@@ -3169,6 +3580,19 @@ public class WebrtcCallService extends Service {
             this.peerState = PeerState.INITIAL;
             this.markedForRemoval = false;
             this.timeoutTask = null;
+
+            addUncalledReceivedIceCandidates();
+        }
+
+        private void addUncalledReceivedIceCandidates() {
+            // handle already received ice candidate
+            HashMap<BytesKey, HashSet<JsonIceCandidate>> map = uncalledReceivedIceCandidates.get(callIdentifier);
+            if (map != null) {
+                HashSet<JsonIceCandidate> candidates = map.remove(new BytesKey(bytesContactIdentity));
+                if (candidates != null) {
+                    this.peerConnectionHolder.addIceCandidates(candidates);
+                }
+            }
         }
 
         private void setPeerState(PeerState peerState) {
@@ -3274,6 +3698,10 @@ public class WebrtcCallService extends Service {
         private void setPeerIsMuted(boolean peerIsMuted) {
             this.peerIsMuted = peerIsMuted;
             notifyCallParticipantsChanged();
+        }
+
+        public GatheringPolicy getGatheringPolicy() {
+            return gatheringPolicy;
         }
 
         @Override

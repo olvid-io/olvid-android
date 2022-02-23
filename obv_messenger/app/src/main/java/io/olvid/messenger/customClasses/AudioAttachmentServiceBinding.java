@@ -404,9 +404,9 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
     }
 
     public static class AudioInfo {
-        Long durationMs = null;
-        long seekTimeMs = 0;
-        boolean failed = false;
+        public Long durationMs = null;
+        public long seekTimeMs = 0;
+        public boolean failed = false;
     }
 
     public interface AudioServiceBindableViewHolder {

@@ -11,11 +11,11 @@
         android:id="@+id/action_rename"
         android:icon="@drawable/ic_pencil"
         android:orderInCategory="100"
-        android:title="@string/menu_action_edit_group_details"
+        android:title="@string/menu_action_rename"
         app:showAsAction="ifRoom"/>
     <item
-        android:id="@+id/action_disband"
+        android:id="@+id/action_leave_group"
         android:orderInCategory="200"
-        android:title="@string/menu_action_disband_group"
+        android:title="@string/menu_action_leave_group"
         app:showAsAction="never"/>
 </menu>

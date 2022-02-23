@@ -100,27 +100,7 @@ public class DiscussionInputEditText extends AppCompatEditText {
                 for (int i = 0; i < clip.getItemCount(); i++) {
                     ClipData.Item item = clip.getItemAt(i);
                     if (item.getText() != null) {
-                        int start = getSelectionStart();
-                        int end = getSelectionEnd();
-                        if (start != -1 && end != -1) {
-                            Editable text = getText();
-                            if (text == null) {
-                                setText(item.getText());
-                                setSelection(item.getText().length());
-                            } else {
-                                text.replace(start, end, item.getText());
-                                setSelection(start + item.getText().length());
-                            }
-                        } else {
-                            Editable text = getText();
-                            if (text == null) {
-                                setText(item.getText());
-                                setSelection(item.getText().length());
-                            } else {
-                                text.append(item.getText());
-                                setSelection(text.length() + item.getText().length());
-                            }
-                        }
+                        insertTextAtSelection(item.getText());
                     } else if (item.getUri() != null) {
                         Uri uri = item.getUri();
                         String mimeType = clip.getDescription().getMimeTypeCount() > i ? clip.getDescription().getMimeType(i) : null;
@@ -145,6 +125,30 @@ public class DiscussionInputEditText extends AppCompatEditText {
         }
         return contentInfo;
     };
+
+    public void insertTextAtSelection(CharSequence input) {
+        int start = getSelectionStart();
+        int end = getSelectionEnd();
+        if (start != -1 && end != -1) {
+            Editable text = getText();
+            if (text == null) {
+                setText(input);
+                setSelection(input.length());
+            } else {
+                text.replace(start, end, input);
+                setSelection(start + input.length());
+            }
+        } else {
+            Editable text = getText();
+            if (text == null) {
+                setText(input);
+                setSelection(input.length());
+            } else {
+                text.append(input);
+                setSelection(text.length() + input.length());
+            }
+        }
+    }
 
     public interface ImeContentCommittedHandler {
         // this handler should always be called from a background thread

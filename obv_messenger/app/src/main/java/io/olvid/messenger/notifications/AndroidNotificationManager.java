@@ -89,6 +89,8 @@ import io.olvid.messenger.webrtc.WebrtcCallActivity;
 public class AndroidNotificationManager {
     private static final String DISCUSSION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "discussion_";
     private static final String GROUP_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "group_";
+    private static final String MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "message_reaction_";
+    private static final String DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "discussion_reaction_";
     private static final String KEY_MESSAGE_NOTIFICATION_CHANNEL_VERSION = "message_channel_version";
 
     public static final String MESSAGE_NOTIFICATION_CHANNEL_ID = "message";
@@ -119,10 +121,10 @@ public class AndroidNotificationManager {
             SharedPreferences.Editor editor = sharedPreferences.edit();
 
             for (Long discussionId: hiddenIdentityNotificationDiscussionIdsToClear) {
-                notificationManager.cancel(getMessageNotificationChannelId(discussionId));
+                notificationManager.cancel(getMessageNotificationId(discussionId));
                 editor.remove(DISCUSSION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId);
 
-                notificationManager.cancel(getGroupNotificationChannelId(discussionId));
+                notificationManager.cancel(getGroupNotificationId(discussionId));
                 editor.remove(GROUP_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId);
             }
             editor.apply();
@@ -319,20 +321,20 @@ public class AndroidNotificationManager {
         }
 
 
-        int channelId = getNeutralNotificationChannelId();
+        int notificationId = getNeutralNotificationId();
 
         // CONTENT INTENT
         Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
         PendingIntent contentPendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
         builder.setContentIntent(contentPendingIntent);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-        notificationManager.notify(channelId, builder.build());
+        notificationManager.notify(notificationId, builder.build());
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             vibrate();
         }
@@ -341,7 +343,7 @@ public class AndroidNotificationManager {
     public static void clearNeutralNotification() {
         executor.execute(() -> {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            notificationManager.cancel(getNeutralNotificationChannelId());
+            notificationManager.cancel(getNeutralNotificationId());
         });
     }
 
@@ -440,7 +442,7 @@ public class AndroidNotificationManager {
             }
             builder.setContentText(sb);
 
-            int channelId = getGroupNotificationChannelId(discussionId);
+            int notificationId = getGroupNotificationId(discussionId);
 
             // CONTENT INTENT
             Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
@@ -450,9 +452,9 @@ public class AndroidNotificationManager {
             contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, group.bytesOwnedIdentity);
             PendingIntent contentPendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             } else {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             }
             builder.setContentIntent(contentPendingIntent);
 
@@ -462,9 +464,9 @@ public class AndroidNotificationManager {
             dismissIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussionId);
             PendingIntent dismissPendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                dismissPendingIntent = PendingIntent.getService(App.getContext(), channelId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             } else {
-                dismissPendingIntent = PendingIntent.getService(App.getContext(), channelId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             }
             builder.setDeleteIntent(dismissPendingIntent);
 
@@ -473,7 +475,7 @@ public class AndroidNotificationManager {
             }
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            notificationManager.notify(channelId, builder.build());
+            notificationManager.notify(notificationId, builder.build());
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 vibrate();
             }
@@ -483,7 +485,7 @@ public class AndroidNotificationManager {
     public static void clearGroupNotification(final long discussionId) {
         executor.execute(() -> {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            notificationManager.cancel(getGroupNotificationChannelId(discussionId));
+            notificationManager.cancel(getGroupNotificationId(discussionId));
             SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(GROUP_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId);
@@ -611,9 +613,9 @@ public class AndroidNotificationManager {
         contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, discussion.bytesOwnedIdentity);
         PendingIntent contentPendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationChannelId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationChannelId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
         builder.setContentIntent(contentPendingIntent);
 
@@ -628,9 +630,9 @@ public class AndroidNotificationManager {
             sendMessageIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
             PendingIntent sendMessagePendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                sendMessagePendingIntent = PendingIntent.getService(App.getContext(), getMissedCallNotificationChannelId(discussion.id), sendMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+                sendMessagePendingIntent = PendingIntent.getService(App.getContext(), getMissedCallNotificationId(discussion.id), sendMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
             } else {
-                sendMessagePendingIntent = PendingIntent.getService(App.getContext(), getMissedCallNotificationChannelId(discussion.id), sendMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                sendMessagePendingIntent = PendingIntent.getService(App.getContext(), getMissedCallNotificationId(discussion.id), sendMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
             NotificationCompat.Action sendMessageAction = new NotificationCompat.Action.Builder(R.drawable.ic_send, App.getContext().getString(R.string.notification_action_send_message), sendMessagePendingIntent)
                     .addRemoteInput(remoteInput)
@@ -650,9 +652,9 @@ public class AndroidNotificationManager {
         callBackIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent callBackPendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            callBackPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationChannelId(discussion.id), callBackIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            callBackPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), callBackIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            callBackPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationChannelId(discussion.id), callBackIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            callBackPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), callBackIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         NotificationCompat.Action callBackAction = new NotificationCompat.Action.Builder(R.drawable.ic_answer_call, App.getContext().getString(R.string.notification_action_call_back), callBackPendingIntent)
@@ -662,7 +664,7 @@ public class AndroidNotificationManager {
         builder.addAction(callBackAction);
 
 
-        int notificationId = getMissedCallNotificationChannelId(discussion.id);
+        int notificationId = getMissedCallNotificationId(discussion.id);
         if (ownedIdentityIsHidden) {
             hiddenIdentityNotificationIdsToClear.add(notificationId);
         }
@@ -678,7 +680,7 @@ public class AndroidNotificationManager {
     public static void clearMissedCallNotification(long discussionId) {
         executor.execute(() -> {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            notificationManager.cancel(getMissedCallNotificationChannelId(discussionId));
+            notificationManager.cancel(getMissedCallNotificationId(discussionId));
         });
     }
 
@@ -703,7 +705,7 @@ public class AndroidNotificationManager {
 
 
 
-    // region Message notification
+    // region Message & Reactions notification
 
     @SuppressLint("UseSparseArrays")
     private static final HashMap<Integer, Long> messageLastVibrationTimestamp = new HashMap<>();
@@ -735,7 +737,7 @@ public class AndroidNotificationManager {
                 discussionNotification = addMessageNotification(discussion, message, contact, ownedIdentity);
             }
             if (discussionNotification == null) {
-                clearReceivedMessageNotification(discussion.id);
+                clearReceivedMessageAndReactionsNotification(discussion.id);
                 return;
             }
 
@@ -747,7 +749,7 @@ public class AndroidNotificationManager {
                 hiddenIdentityNotificationDiscussionIdsToClear.add(discussion.id);
             }
 
-            int notificationId = getMessageNotificationChannelId(discussion.id);
+            int notificationId = getMessageNotificationId(discussion.id);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             notificationManager.notify(notificationId, builder.build());
@@ -772,6 +774,8 @@ public class AndroidNotificationManager {
 
     public static void remoteDeleteMessageNotification(@NonNull Discussion discussion, long messageId) {
         executor.execute(() -> {
+            clearMessageReactionsNotification(messageId);
+
             JsonPojoDiscussionNotification discussionNotification = loadDiscussionNotification(discussion.id);
             if (discussionNotification == null) {
                 return;
@@ -790,13 +794,15 @@ public class AndroidNotificationManager {
                 NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(discussion, discussionNotification, false);
                 populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-                notificationManager.notify(getMessageNotificationChannelId(discussion.id), builder.build());
+                notificationManager.notify(getMessageNotificationId(discussion.id), builder.build());
             }
         });
     }
 
     public static void expireMessageNotification(long discussionId, long messageId) {
         executor.execute(() -> {
+            clearMessageReactionsNotification(messageId);
+
             JsonPojoDiscussionNotification discussionNotification = loadDiscussionNotification(discussionId);
             if (discussionNotification == null) {
                 return;
@@ -819,7 +825,7 @@ public class AndroidNotificationManager {
                 NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(discussion, discussionNotification, false);
                 populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-                notificationManager.notify(getMessageNotificationChannelId(discussionId), builder.build());
+                notificationManager.notify(getMessageNotificationId(discussionId), builder.build());
             }
         });
     }
@@ -844,7 +850,7 @@ public class AndroidNotificationManager {
                 NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(discussion, discussionNotification, false);
                 populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-                notificationManager.notify(getMessageNotificationChannelId(discussion.id), builder.build());
+                notificationManager.notify(getMessageNotificationId(discussion.id), builder.build());
             }
         });
     }
@@ -1029,9 +1035,9 @@ public class AndroidNotificationManager {
         contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, discussion.bytesOwnedIdentity);
         PendingIntent contentPendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationChannelId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationChannelId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
         builder.setContentIntent(contentPendingIntent);
 
@@ -1041,9 +1047,9 @@ public class AndroidNotificationManager {
         dismissIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
         PendingIntent dismissPendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            dismissPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationChannelId(discussion.id), dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            dismissPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            dismissPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationChannelId(discussion.id), dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            dismissPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
         builder.setDeleteIntent(dismissPendingIntent);
 
@@ -1058,9 +1064,9 @@ public class AndroidNotificationManager {
             replyIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
             PendingIntent replyPendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                replyPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationChannelId(discussion.id), replyIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+                replyPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), replyIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
             } else {
-                replyPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationChannelId(discussion.id), replyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                replyPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), replyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
             NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(R.drawable.ic_send, App.getContext().getString(R.string.notification_action_reply), replyPendingIntent)
                     .addRemoteInput(remoteInput)
@@ -1077,9 +1083,9 @@ public class AndroidNotificationManager {
         markAsReadIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
         PendingIntent markAsReadPendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            markAsReadPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationChannelId(discussion.id), markAsReadIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            markAsReadPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), markAsReadIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            markAsReadPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationChannelId(discussion.id), markAsReadIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            markAsReadPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), markAsReadIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         NotificationCompat.Action markAsReadAction = new NotificationCompat.Action.Builder(R.drawable.ic_ok, App.getContext().getString(R.string.notification_action_mark_as_read), markAsReadPendingIntent)
@@ -1095,9 +1101,9 @@ public class AndroidNotificationManager {
         muteIntent.putExtra(MuteDiscussionDialogActivity.DISCUSSION_ID_INTENT_EXTRA, discussion.id);
         PendingIntent mutePendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            mutePendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationChannelId(discussion.id), muteIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            mutePendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), muteIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            mutePendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationChannelId(discussion.id), muteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mutePendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), muteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         NotificationCompat.Action muteAction = new NotificationCompat.Action.Builder(R.drawable.ic_notification_muted, App.getContext().getString(R.string.notification_action_mute), mutePendingIntent)
@@ -1110,13 +1116,234 @@ public class AndroidNotificationManager {
     }
 
 
-    public static void clearReceivedMessageNotification(final long discussionId) {
+    public static void displayReactionNotification(OwnedIdentity ownedIdentity, Discussion discussion, Message message, @Nullable String emoji, Contact contact) {
+        executor.execute(() -> {
+            DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
+            if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
+                return;
+            }
+            if (ownedIdentity != null && ownedIdentity.shouldMuteNotifications()) {
+                return;
+            }
+            if (SettingsActivity.isNotificationContentHidden()) {
+                return;
+            }
+
+            SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
+
+            JsonMessageReactionsNotification jsonMessageReactionsNotification = null;
+            try {
+                String previousReactionsString = sharedPreferences.getString(MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + message.id, null);
+                if (previousReactionsString != null) {
+                    jsonMessageReactionsNotification = AppSingleton.getJsonObjectMapper().readValue(previousReactionsString, JsonMessageReactionsNotification.class);
+                    if (jsonMessageReactionsNotification.reactions == null) {
+                        jsonMessageReactionsNotification.reactions = new ArrayList<>();
+                    }
+                }
+            } catch (Exception ignored) {}
+            if (jsonMessageReactionsNotification == null) {
+                jsonMessageReactionsNotification = new JsonMessageReactionsNotification();
+                jsonMessageReactionsNotification.reactions = new ArrayList<>();
+            }
+            boolean found = false;
+            for (JsonMessageReactionsNotification.JsonReaction jsonReaction : jsonMessageReactionsNotification.reactions) {
+                if (Arrays.equals(jsonReaction.bytesContactIdentity, contact.bytesContactIdentity)) {
+                    found = true;
+                    if (emoji == null) {
+                        jsonMessageReactionsNotification.reactions.remove(jsonReaction);
+                    } else {
+                        jsonReaction.emoji = emoji;
+                    }
+                    break;
+                }
+            }
+
+            if (!found) {
+                if (emoji == null) {
+                    return;
+                }
+                JsonMessageReactionsNotification.JsonReaction newJsonReaction = new JsonMessageReactionsNotification.JsonReaction();
+                newJsonReaction.bytesContactIdentity = contact.bytesContactIdentity;
+                newJsonReaction.contactDisplayName = contact.getCustomDisplayName();
+                newJsonReaction.emoji = emoji;
+                jsonMessageReactionsNotification.reactions.add(newJsonReaction);
+            }
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            if (jsonMessageReactionsNotification.reactions.isEmpty()) {
+                editor.remove(MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + message.id);
+                editor.apply();
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+                notificationManager.cancel(getReactionNotificationId(message.id));
+                return;
+            } else if (jsonMessageReactionsNotification.reactions.size() == 1 && !found) {
+                JsonDiscussionMessageReactionsNotification jsonDiscussionMessageReactionsNotification = null;
+
+                String discussionMessageIdString = sharedPreferences.getString(DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussion.id, null);
+                if (discussionMessageIdString != null) {
+                    try {
+                        jsonDiscussionMessageReactionsNotification = AppSingleton.getJsonObjectMapper().readValue(discussionMessageIdString, JsonDiscussionMessageReactionsNotification.class);
+                        if (jsonDiscussionMessageReactionsNotification.messageIds == null) {
+                            jsonDiscussionMessageReactionsNotification.messageIds = new ArrayList<>();
+                        }
+                    } catch (Exception ignored) { }
+                }
+                if (jsonDiscussionMessageReactionsNotification == null) {
+                    jsonDiscussionMessageReactionsNotification = new JsonDiscussionMessageReactionsNotification();
+                    jsonDiscussionMessageReactionsNotification.messageIds = new ArrayList<>();
+                }
+                jsonDiscussionMessageReactionsNotification.messageIds.add(message.id);
+                try {
+                    editor.putString(DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussion.id, AppSingleton.getJsonObjectMapper().writeValueAsString(jsonDiscussionMessageReactionsNotification));
+                    editor.apply();
+                } catch (Exception ignored) { }
+            }
+
+            try {
+                editor.putString(MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + message.id, AppSingleton.getJsonObjectMapper().writeValueAsString(jsonMessageReactionsNotification));
+                editor.apply();
+            } catch (Exception ignored) { }
+
+
+
+            NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
+                    .setSmallIcon(R.drawable.ic_o)
+                    .setContentTitle(App.getContext().getString(R.string.notification_public_title_new_reaction));
+
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
+                    .setSmallIcon(R.drawable.ic_o)
+                    .setColor(ContextCompat.getColor(App.getContext(), R.color.olvid_gradient_dark))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setPublicVersion(publicBuilder.build())
+                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                    .setVibrate(new long[0]);
+
+            String colorString = SettingsActivity.getMessageLedColor();
+            if (colorString != null) {
+                int color = 0xff000000 + Integer.parseInt(colorString.substring(1), 16);
+                builder.setLights(color, 500, 2000);
+            }
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                builder.setSound(SettingsActivity.getMessageRingtone());
+            }
+
+            InitialView initialView = new InitialView(App.getContext());
+            if (discussion.bytesContactIdentity != null) {
+                if (discussion.photoUrl == null) {
+                    initialView.setInitial(discussion.bytesContactIdentity, App.getInitial(discussion.title));
+                } else {
+                    initialView.setPhotoUrl(discussion.bytesContactIdentity, discussion.photoUrl);
+                }
+            } else if (discussion.bytesGroupOwnerAndUid != null) {
+                if (discussion.photoUrl == null) {
+                    initialView.setGroup(discussion.bytesGroupOwnerAndUid);
+                } else {
+                    initialView.setPhotoUrl(discussion.bytesGroupOwnerAndUid, discussion.photoUrl);
+                }
+            } else {
+                initialView.setLocked(true);
+                if (discussion.photoUrl != null) {
+                    initialView.setPhotoUrl(new byte[0], discussion.photoUrl);
+                }
+            }
+
+            int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
+            initialView.setSize(size, size);
+            Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+            initialView.drawOnCanvas(new Canvas(largeIcon));
+            builder.setLargeIcon(largeIcon);
+
+
+            String messageContent = message.getStringContent(App.getContext());
+            if (messageContent.length() == 0) {
+                messageContent = App.getContext().getString(R.string.your_message);
+            }
+            if (jsonMessageReactionsNotification.reactions.size() == 1) {
+                JsonMessageReactionsNotification.JsonReaction jsonReaction = jsonMessageReactionsNotification.reactions.get(0);
+                builder.setContentTitle(jsonReaction.contactDisplayName);
+                builder.setContentText(App.getContext().getString(R.string.notification_text_reacted_to, jsonReaction.emoji, messageContent));
+            } else {
+                builder.setContentTitle(App.getContext().getString(R.string.x_reactions_to, jsonMessageReactionsNotification.reactions.size(), messageContent));
+                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+                for (int i = Math.max(0, jsonMessageReactionsNotification.reactions.size() - 5); i < jsonMessageReactionsNotification.reactions.size(); i++) {
+                    JsonMessageReactionsNotification.JsonReaction jsonReaction = jsonMessageReactionsNotification.reactions.get(i);
+                    inboxStyle.addLine(App.getContext().getString(R.string.notification_text_xx_reacted, jsonReaction.contactDisplayName, jsonReaction.emoji));
+                }
+                builder.setStyle(inboxStyle);
+            }
+
+            int notificationId = getReactionNotificationId(message.id);
+
+            // CONTENT INTENT
+            Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
+            contentIntent.setAction(MainActivity.FORWARD_ACTION);
+            contentIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
+            contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, discussion.bytesOwnedIdentity);
+            contentIntent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussion.id);
+            contentIntent.putExtra(DiscussionActivity.MESSAGE_ID_INTENT_EXTRA, message.id);
+            PendingIntent contentPendingIntent;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            } else {
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            }
+            builder.setContentIntent(contentPendingIntent);
+
+            // DISMISS INTENT
+            Intent dismissIntent = new Intent(App.getContext(), NotificationActionService.class);
+            dismissIntent.setAction(NotificationActionService.ACTION_MESSAGE_REACTION_CLEAR);
+            dismissIntent.putExtra(NotificationActionService.EXTRA_MESSAGE_ID, message.id);
+            PendingIntent dismissPendingIntent;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            } else {
+                dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            }
+            builder.setDeleteIntent(dismissPendingIntent);
+
+            if (ownedIdentity != null && ownedIdentity.isHidden()) {
+                hiddenIdentityNotificationIdsToClear.add(notificationId);
+            }
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.notify(notificationId, builder.build());
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                vibrate();
+            }
+        });
+    }
+
+    public static void clearReceivedMessageAndReactionsNotification(final long discussionId) {
         executor.execute(() -> {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            notificationManager.cancel(getMessageNotificationChannelId(discussionId));
+            notificationManager.cancel(getMessageNotificationId(discussionId));
             SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(DISCUSSION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId);
+            editor.apply();
+            String discussionReactionMessageIds = sharedPreferences.getString(DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId, null);
+            if (discussionReactionMessageIds != null) {
+                try {
+                    JsonDiscussionMessageReactionsNotification jsonDiscussionMessageReactionsNotification = AppSingleton.getJsonObjectMapper().readValue(discussionReactionMessageIds, JsonDiscussionMessageReactionsNotification.class);
+                    if (jsonDiscussionMessageReactionsNotification.messageIds != null) {
+                        for (long messageId : jsonDiscussionMessageReactionsNotification.messageIds) {
+                            clearMessageReactionsNotification(messageId);
+                        }
+                    }
+                } catch (Exception ignored) { }
+            }
+        });
+    }
+
+    public static void clearMessageReactionsNotification(final long messageId) {
+        executor.execute(() -> {
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.cancel(getReactionNotificationId(messageId));
+            SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove(MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + messageId);
             editor.apply();
         });
     }
@@ -1145,9 +1372,9 @@ public class AndroidNotificationManager {
             intent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, invitation.bytesOwnedIdentity);
             PendingIntent pendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                pendingIntent = PendingIntent.getActivity(App.getContext(), getInvitationNotificationChannelId(invitation.dialogUuid), intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                pendingIntent = PendingIntent.getActivity(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             } else {
-                pendingIntent = PendingIntent.getActivity(App.getContext(), getInvitationNotificationChannelId(invitation.dialogUuid), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                pendingIntent = PendingIntent.getActivity(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), intent, PendingIntent.FLAG_CANCEL_CURRENT);
             }
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion());
@@ -1291,9 +1518,9 @@ public class AndroidNotificationManager {
                     acceptIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, invitation.dialogUuid.toString());
                     PendingIntent acceptPendingIntent;
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        acceptPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationChannelId(invitation.dialogUuid), acceptIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                        acceptPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), acceptIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     } else {
-                        acceptPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationChannelId(invitation.dialogUuid), acceptIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                        acceptPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), acceptIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                     }
                     builder.addAction(R.drawable.ic_ok, App.getContext().getString(R.string.notification_action_accept), acceptPendingIntent);
 
@@ -1302,9 +1529,9 @@ public class AndroidNotificationManager {
                     rejectIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, invitation.dialogUuid.toString());
                     PendingIntent rejectPendingIntent;
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationChannelId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     } else {
-                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationChannelId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                     }
                     builder.addAction(R.drawable.ic_close, App.getContext().getString(R.string.notification_action_reject), rejectPendingIntent);
             }
@@ -1317,7 +1544,7 @@ public class AndroidNotificationManager {
             builder.setPublicVersion(publicBuilder.build());
 
 
-            int notificationId = getInvitationNotificationChannelId(invitation.dialogUuid);
+            int notificationId = getInvitationNotificationId(invitation.dialogUuid);
             if (ownedIdentity.isHidden()) {
                 hiddenIdentityNotificationIdsToClear.add(notificationId);
             }
@@ -1333,7 +1560,7 @@ public class AndroidNotificationManager {
     public static void clearInvitationNotification(UUID invitationDialogUuid) {
         executor.execute(() -> {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            notificationManager.cancel(getInvitationNotificationChannelId(invitationDialogUuid));
+            notificationManager.cancel(getInvitationNotificationId(invitationDialogUuid));
         });
     }
 
@@ -1351,19 +1578,19 @@ public class AndroidNotificationManager {
                     .setContentTitle(notificationTitle)
                     .setVibrate(new long[0]);
 
-            int channelId = getNeutralNotificationChannelId();
+            int notificationId = getNeutralNotificationId();
 
             Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
             PendingIntent contentPendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             } else {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             }
             builder.setContentIntent(contentPendingIntent);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            notificationManager.notify(channelId, builder.build());
+            notificationManager.notify(notificationId, builder.build());
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 vibrate();
             }
@@ -1380,19 +1607,19 @@ public class AndroidNotificationManager {
                     .setContentTitle(notificationTitle)
                     .setVibrate(new long[0]);
 
-            int channelId = getNeutralNotificationChannelId();
+            int notificationId = getNeutralNotificationId();
 
             Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
             PendingIntent contentPendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             } else {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             }
             builder.setContentIntent(contentPendingIntent);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            notificationManager.notify(channelId, builder.build());
+            notificationManager.notify(notificationId, builder.build());
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 vibrate();
             }
@@ -1491,24 +1718,28 @@ public class AndroidNotificationManager {
     // endregion
 
 
-    private static int getMessageNotificationChannelId(long discussionId) {
+    private static int getMessageNotificationId(long discussionId) {
         return (int) (0xffffff & discussionId);
     }
 
-    private static int getInvitationNotificationChannelId(UUID invitationDialogUuid) {
+    private static int getInvitationNotificationId(UUID invitationDialogUuid) {
         return (int) (0xffffff & invitationDialogUuid.getLeastSignificantBits()) | 0x1000000;
     }
 
-    private static int getGroupNotificationChannelId(long discussionId) {
+    private static int getGroupNotificationId(long discussionId) {
         return (int) (0xffffff & discussionId) | 0x2000000;
     }
 
-    private static int getNeutralNotificationChannelId() {
+    private static int getNeutralNotificationId() {
         return 0x3000000;
     }
 
-    private static int getMissedCallNotificationChannelId(long discussionId) {
+    private static int getMissedCallNotificationId(long discussionId) {
         return (int) (0xffffff & discussionId) | 0x4000000;
+    }
+
+    private static int getReactionNotificationId(long messageId) {
+        return (int) (0xffffff & messageId) | 0x5000000;
     }
 
     private static void vibrate() {
@@ -1520,6 +1751,27 @@ public class AndroidNotificationManager {
             }
         }
     }
+
+
+
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class JsonMessageReactionsNotification {
+        public List<JsonReaction> reactions;
+
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class JsonReaction {
+            public byte[] bytesContactIdentity;
+            public String contactDisplayName;
+            public String emoji;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class JsonDiscussionMessageReactionsNotification {
+        public List<Long> messageIds;
+    }
+
 
     @SuppressWarnings("unused")
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -1629,7 +1881,7 @@ public class AndroidNotificationManager {
 
 
 
-
+        @JsonIgnoreProperties(ignoreUnknown = true)
         private static class JsonPojoMessageNotification implements Comparable<JsonPojoMessageNotification> {
             long messageId;
             long timestamp;

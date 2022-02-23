@@ -39,7 +39,6 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.method.ArrowKeyMovementMethod;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -53,6 +52,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -75,7 +75,9 @@ import androidx.core.content.FileProvider;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -127,8 +129,9 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     public static final int ICON_ATTACH_PICTURE = 3;
     public static final int ICON_TAKE_PICTURE = 4;
     public static final int ICON_TAKE_VIDEO = 5;
+    public static final int ICON_EMOJI = 6;
 
-    public static final Integer[] DEFAULT_ICON_ORDER = {ICON_EPHEMERAL_SETTINGS, ICON_ATTACH_FILE, ICON_ATTACH_PICTURE, ICON_TAKE_PICTURE, ICON_TAKE_VIDEO};
+    public static final Integer[] DEFAULT_ICON_ORDER = {ICON_EMOJI, ICON_EPHEMERAL_SETTINGS, ICON_ATTACH_FILE, ICON_ATTACH_PICTURE, ICON_TAKE_PICTURE, ICON_TAKE_VIDEO};
 
 
     private FragmentActivity activity;
@@ -159,6 +162,25 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     private TextView composeMessageReplyAttachmentCount;
 
     private DraftAttachmentAdapter newMessageAttachmentAdapter;
+
+    private final ViewModelProvider.Factory FACTORY = new ViewModelProvider.Factory() {
+        @NonNull
+        @Override
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+            if (ComposeMessageViewModel.class.isAssignableFrom(modelClass) && discussionViewModel != null) {
+                try {
+                    return modelClass.getConstructor(LiveData.class, LiveData.class).newInstance(discussionViewModel.getDiscussionIdLiveData(), discussionViewModel.getDiscussionCustomization());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                return modelClass.newInstance();
+            } catch (java.lang.InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("Cannot create an instance of " + modelClass, e);
+            }
+        }
+    };
 
     private final ActivityResultLauncher<String> requestPermissionForPictureLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
             isGranted -> {
@@ -274,8 +296,8 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = requireActivity();
-        discussionViewModel = new ViewModelProvider(activity).get(DiscussionViewModel.class);
-        composeMessageViewModel = new ViewModelProvider(activity).get(ComposeMessageViewModel.class);
+        discussionViewModel = new ViewModelProvider(activity, FACTORY).get(DiscussionViewModel.class);
+        composeMessageViewModel = new ViewModelProvider(activity, FACTORY).get(ComposeMessageViewModel.class);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -622,6 +644,8 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             } else {
                 App.toast(R.string.toast_message_device_has_no_camera, Toast.LENGTH_SHORT);
             }
+        } else if (id == R.id.attach_emoji) {
+            showEmojiKeyboard();
         } else if (id == R.id.attach_stuff_plus) {
             if (showAttachIcons || neverOverflow) {
                 InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -752,6 +776,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         void addComposeMessageHeightListener(ComposeMessageHeightListener composeMessageHeightListener);
         void removeComposeMessageHeightListener(ComposeMessageHeightListener composeMessageHeightListener);
         void setAnimateLayoutChanges(boolean animateLayoutChanges);
+        void setEmojiKeyboardAttachDelegate(EmojiKeyboardAttachDelegate emojiKeyboardAttachDelegate);
     }
 
     @NonNull
@@ -772,6 +797,9 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null && newMessageEditText != null) {
                     imm.hideSoftInputFromWindow(newMessageEditText.getWindowToken(), 0);
+                }
+                if (emojiKeyboardShowing) {
+                    hideEmojiKeyboard();
                 }
                 setShowAttachIcons(true, true);
             }
@@ -814,6 +842,11 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         @Override
         public void setAnimateLayoutChanges(boolean animateLayoutChanges) {
             ComposeMessageFragment.this.animateLayoutChanges = animateLayoutChanges;
+        }
+
+        @Override
+        public void setEmojiKeyboardAttachDelegate(EmojiKeyboardAttachDelegate emojiKeyboardAttachDelegate) {
+            ComposeMessageFragment.this.emojiKeyboardAttachDelegate = emojiKeyboardAttachDelegate;
         }
     };
 
@@ -1260,6 +1293,8 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 return R.drawable.ic_attach_camera;
             case ICON_TAKE_VIDEO:
                 return R.drawable.ic_attach_video;
+            case ICON_EMOJI:
+                return R.drawable.ic_attach_emoji;
             default:
                 return 0;
         }
@@ -1277,6 +1312,8 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 return R.id.attach_camera;
             case ICON_TAKE_VIDEO:
                 return R.id.attach_video;
+            case ICON_EMOJI:
+                return R.id.attach_emoji;
             default:
                 return 0;
         }
@@ -1294,6 +1331,8 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 return R.string.label_attach_camera;
             case ICON_TAKE_VIDEO:
                 return R.string.label_attach_video;
+            case ICON_EMOJI:
+                return R.string.label_attach_emoji;
             default:
                 return 0;
         }
@@ -1301,6 +1340,54 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
     // endregion
 
+    // region EmojiPickerFragment Keyboard
+    EmojiKeyboardFragment emojiKeyboardFragment = null;
+    boolean emojiKeyboardShowing = false;
+    private EmojiKeyboardAttachDelegate emojiKeyboardAttachDelegate = null;
+
+    interface EmojiKeyboardAttachDelegate {
+        void attachKeyboardFragment(@NonNull Fragment fragment);
+        void detachKeyboardFragment(@NonNull Fragment fragment);
+    }
+
+    private void showEmojiKeyboard() {
+        if (activity != null && emojiKeyboardAttachDelegate != null) {
+            emojiKeyboardShowing = true;
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null && newMessageEditText != null) {
+                imm.hideSoftInputFromWindow(newMessageEditText.getWindowToken(), 0);
+            }
+            setShowAttachIcons(false, true);
+            if (emojiKeyboardFragment == null) {
+                initializeEmojiKeyboard();
+            }
+            newMessageEditText.setShowSoftInputOnFocus(false);
+            InputConnection ic = newMessageEditText.onCreateInputConnection(new EditorInfo());
+            emojiKeyboardFragment.setInputConnection(ic);
+            emojiKeyboardAttachDelegate.attachKeyboardFragment(emojiKeyboardFragment);
+        }
+    }
+
+    private void hideEmojiKeyboard() {
+        if (activity != null && emojiKeyboardAttachDelegate != null) {
+            newMessageEditText.setShowSoftInputOnFocus(true);
+            if (emojiKeyboardFragment != null) {
+                emojiKeyboardFragment.setInputConnection(null);
+                emojiKeyboardAttachDelegate.detachKeyboardFragment(emojiKeyboardFragment);
+            }
+            emojiKeyboardShowing = false;
+        }
+    }
+
+    void initializeEmojiKeyboard() {
+        emojiKeyboardFragment = new EmojiKeyboardFragment();
+        emojiKeyboardFragment.setRestoreKeyboardListener(() -> {
+            hideEmojiKeyboard();
+            composeMessageDelegate.showSoftInputKeyboard();
+        });
+    }
+
+    // endregion
 
     // region ComposeMessageHeightListener
     interface ComposeMessageHeightListener {

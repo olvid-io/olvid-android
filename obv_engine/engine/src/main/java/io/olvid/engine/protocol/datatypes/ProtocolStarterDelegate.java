@@ -21,6 +21,7 @@ package io.olvid.engine.protocol.datatypes;
 
 
 import java.util.HashSet;
+import java.util.List;
 
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Session;
@@ -28,6 +29,7 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 
 public interface ProtocolStarterDelegate {
@@ -44,6 +46,7 @@ public interface ProtocolStarterDelegate {
     void deleteContact(Identity contactIdentity, Identity ownedIdentity) throws Exception;
     void addKeycloakContact(Identity ownedIdentity, Identity contactIdentity, String signedContactDetails) throws Exception;
     void startProtocolForBindingOwnedIdentityToKeycloakWithinTransaction(Session session, Identity ownedIdentity, ObvKeycloakState keycloakState, String keycloakUserId) throws Exception;
+    void updateCurrentDeviceCapabilitiesForOwnedIdentity(Session session, Identity ownedIdentity, List<ObvCapability> newOwnCapabilities) throws Exception;
     void startProtocolForUnbindingOwnedIdentityFromKeycloak(Identity ownedIdentity) throws Exception;
     void deleteOwnedIdentityAndNotifyContacts(Session session, Identity ownedIdentity) throws Exception;
 

@@ -34,7 +34,6 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 
 import io.olvid.engine.Logger;
@@ -42,7 +41,6 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.ActionShortcutConfiguration;
-import io.olvid.messenger.main.MainActivity;
 
 public class ActionShortcutWidgetProvider extends AppWidgetProvider {
 

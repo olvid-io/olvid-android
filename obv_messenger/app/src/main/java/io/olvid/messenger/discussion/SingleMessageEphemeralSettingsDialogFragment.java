@@ -22,7 +22,6 @@ package io.olvid.messenger.discussion;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;

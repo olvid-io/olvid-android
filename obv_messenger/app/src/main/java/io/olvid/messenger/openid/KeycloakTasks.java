@@ -82,7 +82,7 @@ import io.olvid.messenger.openid.jsons.MeResponseJson;
 import io.olvid.messenger.openid.jsons.SearchQueryJson;
 import io.olvid.messenger.openid.jsons.SearchResponseJson;
 
-public abstract class KeycloakTasks {
+public class KeycloakTasks {
     private static final String ME_PATH = "olvid-rest/me";
     private static final String PUT_KEY_PATH = "olvid-rest/putKey";
     private static final String GET_KEY_PATH = "olvid-rest/getKey";
@@ -110,8 +110,6 @@ public abstract class KeycloakTasks {
     public static final int ERROR_CODE_INVALID_REQUEST = 3;
     public static final int ERROR_CODE_IDENTITY_ALREADY_UPLOADED = 4;
     public static final int ERROR_CODE_IDENTITY_WAS_REVOKED = 6;
-
-    public abstract void run();
 
 
     public static void discoverKeycloakServer(@NonNull String keycloakServerUrl, @NonNull DiscoverKeycloakServerCallback callback) {

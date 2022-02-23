@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/popup_action_sort_date"
+        android:title="@string/menu_action_sort_date"/>
+    <item
+        android:id="@+id/popup_action_sort_size"
+        android:title="@string/menu_action_sort_size"/>
+    <item
+        android:id="@+id/popup_action_sort_name"
+        android:title="@string/menu_action_sort_name"/>
+
+</menu>

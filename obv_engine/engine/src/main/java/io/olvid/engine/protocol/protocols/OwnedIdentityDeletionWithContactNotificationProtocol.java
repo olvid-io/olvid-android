@@ -50,7 +50,7 @@ public class OwnedIdentityDeletionWithContactNotificationProtocol extends Concre
 
     @Override
     public int getProtocolId() {
-        return OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL;
+        return OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID;
     }
 
     // region states

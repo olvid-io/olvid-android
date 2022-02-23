@@ -59,6 +59,8 @@ public class OwnedIdentity {
     public static final String PREF_MUTE_NOTIFICATIONS = "pref_mute_notifications";
     public static final String PREF_MUTE_NOTIFICATIONS_TIMESTAMP = "pref_mute_notifications_timestamp"; // when to stop muting notifications, null if unlimited
     public static final String PREF_SHOW_NEUTRAL_NOTIFICATION_WHEN_HIDDEN = "pref_show_neutral_notification_when_hidden"; // if true, even when the profile is hidden you will get an "Olvid requires your attention" notification
+    public static final String CAPABILITY_WEBRTC_CONTINUOUS_ICE = "capability_webrtc_continuous_ice";
+    public static final String CAPABILITY_GROUPS_V2 = "capability_groups_v2";
 
     public static final int UNPUBLISHED_DETAILS_NOTHING_NEW = 0;
     public static final int UNPUBLISHED_DETAILS_EXIST = 1;
@@ -133,8 +135,14 @@ public class OwnedIdentity {
     @ColumnInfo(name = PREF_SHOW_NEUTRAL_NOTIFICATION_WHEN_HIDDEN)
     public boolean prefShowNeutralNotificationWhenHidden;
 
+    @ColumnInfo(name = CAPABILITY_WEBRTC_CONTINUOUS_ICE)
+    public boolean capabilityWebrtcContinuousIce;
+
+    @ColumnInfo(name = CAPABILITY_GROUPS_V2)
+    public boolean capabilityGroupsV2;
+
     // Constructor required by Room
-    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, String customDisplayName, byte[] unlockPassword, byte[] unlockSalt, boolean prefMuteNotifications, @Nullable Long prefMuteNotificationsTimestamp, boolean prefShowNeutralNotificationWhenHidden) {
+    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, String customDisplayName, byte[] unlockPassword, byte[] unlockSalt, boolean prefMuteNotifications, @Nullable Long prefMuteNotificationsTimestamp, boolean prefShowNeutralNotificationWhenHidden, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.displayName = displayName;
         this.identityDetails = identityDetails;
@@ -151,6 +159,8 @@ public class OwnedIdentity {
         this.prefMuteNotifications = prefMuteNotifications;
         this.prefMuteNotificationsTimestamp = prefMuteNotificationsTimestamp;
         this.prefShowNeutralNotificationWhenHidden = prefShowNeutralNotificationWhenHidden;
+        this.capabilityWebrtcContinuousIce = capabilityWebrtcContinuousIce;
+        this.capabilityGroupsV2 = capabilityGroupsV2;
     }
 
 
@@ -172,6 +182,8 @@ public class OwnedIdentity {
         this.prefMuteNotifications = false;
         this.prefMuteNotificationsTimestamp = null;
         this.prefShowNeutralNotificationWhenHidden = false;
+        this.capabilityWebrtcContinuousIce = false;
+        this.capabilityGroupsV2 = false;
     }
 
     public void setIdentityDetails(@Nullable JsonIdentityDetails jsonIdentityDetails) throws Exception {

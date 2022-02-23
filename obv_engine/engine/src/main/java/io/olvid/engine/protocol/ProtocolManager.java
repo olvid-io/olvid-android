@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
@@ -45,6 +46,7 @@ import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
@@ -75,6 +77,7 @@ import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocol;
 import io.olvid.engine.protocol.protocols.ChannelCreationWithContactDeviceProtocol;
 import io.olvid.engine.protocol.protocols.ContactMutualIntroductionProtocol;
+import io.olvid.engine.protocol.protocols.DeviceCapabilitiesDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.DeviceDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.DownloadGroupPhotoChildProtocol;
 import io.olvid.engine.protocol.protocols.DownloadIdentityPhotoChildProtocol;
@@ -905,7 +908,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
-                    ConcreteProtocol.KEYCLOAK_CONTACT_ADDITION_PROTOCOL,
+                    ConcreteProtocol.KEYCLOAK_CONTACT_ADDITION_PROTOCOL_ID,
                     protocolInstanceUid,
                     false);
 
@@ -928,11 +931,28 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
 
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
-                ConcreteProtocol.KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL,
+                ConcreteProtocol.KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID,
                 protocolInstanceUid,
                 false);
 
         ChannelMessageToSend message = new KeycloakBindingAndUnbindingProtocol.OwnedIdentityKeycloakBindingMessage(coreProtocolMessage, keycloakState, keycloakUserId).generateChannelProtocolMessageToSend();
+        channelDelegate.post(session, message, prng);
+    }
+
+    @Override
+    public void updateCurrentDeviceCapabilitiesForOwnedIdentity(Session session, Identity ownedIdentity, List<ObvCapability> newOwnCapabilities) throws Exception {
+        if (newOwnCapabilities == null) {
+            return;
+        }
+
+        UID protocolInstanceUid = new UID(prng);
+
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+
+        ChannelMessageToSend message = new DeviceCapabilitiesDiscoveryProtocol.InitialForAddingOwnCapabilitiesMessage(coreProtocolMessage, newOwnCapabilities).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
     }
 
@@ -946,7 +966,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
-                    ConcreteProtocol.KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL,
+                    ConcreteProtocol.KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID,
                     protocolInstanceUid,
                     false);
 
@@ -965,7 +985,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
 
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
-                ConcreteProtocol.OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL,
+                ConcreteProtocol.OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID,
                 protocolInstanceUid,
                 false);
 

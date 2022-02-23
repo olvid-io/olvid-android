@@ -54,7 +54,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
 
     @Override
     public int getProtocolId() {
-        return KEYCLOAK_CONTACT_ADDITION_PROTOCOL;
+        return KEYCLOAK_CONTACT_ADDITION_PROTOCOL_ID;
     }
 
     // region states

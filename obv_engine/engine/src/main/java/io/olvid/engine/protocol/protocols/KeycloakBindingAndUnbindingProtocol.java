@@ -49,7 +49,7 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
 
     @Override
     public int getProtocolId() {
-        return KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL;
+        return KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID;
     }
 
     // region states

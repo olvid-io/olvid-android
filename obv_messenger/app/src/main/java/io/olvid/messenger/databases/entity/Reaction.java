@@ -47,8 +47,6 @@ public class Reaction {
     public static final String EMOJI = "emoji";
     public static final String TIMESTAMP = "timestamp";
 
-    public static final String[] DEFAULT_REACTIONS_LIST = new String[]{"❤️", "👍", "👎", "😂", "😮", "😢", "🐭"};
-
     @PrimaryKey(autoGenerate = true)
     public long id;
 

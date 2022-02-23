@@ -38,6 +38,7 @@ import io.olvid.messenger.databases.entity.MessageExpiration;
 public class GalleryViewModel extends ViewModel {
     private final MutableLiveData<Long> discussionId;
     private final MutableLiveData<Long> messageId;
+    private final MutableLiveData<String> ownedIdentitySortOrder;
     private final MutableLiveData<byte[]> bytesOwnedIdentity;
     private final LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> imageAndVideoFyleAndStatusList;
     private final MutableLiveData<Integer> currentPagerPosition;
@@ -56,9 +57,10 @@ public class GalleryViewModel extends ViewModel {
     public GalleryViewModel() {
         discussionId = new MutableLiveData<>(null);
         messageId = new MutableLiveData<>(null);
+        ownedIdentitySortOrder = new MutableLiveData<>(null);
         bytesOwnedIdentity = new MutableLiveData<>(null);
 
-        imageAndVideoFyleAndStatusList = new TripleLiveData(discussionId, messageId, bytesOwnedIdentity);
+        imageAndVideoFyleAndStatusList = new TripleLiveData(discussionId, messageId, ownedIdentitySortOrder, bytesOwnedIdentity);
 
         currentPagerPosition = new MutableLiveData<>(null);
 
@@ -91,7 +93,8 @@ public class GalleryViewModel extends ViewModel {
         }
     }
 
-    public void setBytesOwnedIdentity(byte[] bytesOwnedIdentity) {
+    public void setBytesOwnedIdentity(byte[] bytesOwnedIdentity, @Nullable String sortOrder) {
+        this.ownedIdentitySortOrder.postValue(sortOrder);
         this.bytesOwnedIdentity.postValue(bytesOwnedIdentity);
         galleryType = GalleryType.OWNED_IDENTITY;
     }
@@ -151,11 +154,14 @@ public class GalleryViewModel extends ViewModel {
 
     public static class TripleLiveData extends MediatorLiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> {
         private final AppDatabase db;
+        private byte[] bytesOwnedIdentity = null;
+        private String sortOrder = null;
 
-        public TripleLiveData(MutableLiveData<Long> discussionId, MutableLiveData<Long> messageId, MutableLiveData<byte[]> bytesOwnedIdentity) {
+        public TripleLiveData(MutableLiveData<Long> discussionId, MutableLiveData<Long> messageId, MutableLiveData<String> ownedIdentitySortOrder, MutableLiveData<byte[]> bytesOwnedIdentity) {
             this.db = AppDatabase.getInstance();
             addSource(discussionId, this::onDiscussionChanged);
             addSource(messageId, this::onMessageChanged);
+            addSource(ownedIdentitySortOrder, this::onSortOrderChanged);
             addSource(bytesOwnedIdentity, this::onOwnedIdentityChanged);
         }
 
@@ -201,9 +207,25 @@ public class GalleryViewModel extends ViewModel {
         }
 
         public void onOwnedIdentityChanged(byte[] bytesOwnedIdentity) {
+            this.bytesOwnedIdentity = bytesOwnedIdentity;
+            updateOwnedIdentity(bytesOwnedIdentity, sortOrder);
+        }
+
+        public void onSortOrderChanged(String sortOrder) {
+            this.sortOrder = sortOrder;
+            updateOwnedIdentity(bytesOwnedIdentity, sortOrder);
+        }
+
+        private void updateOwnedIdentity(byte[] bytesOwnedIdentity, String sortOrder) {
             LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> newSource;
             if (bytesOwnedIdentity != null) {
-                newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentity(bytesOwnedIdentity);
+                if ("size".equals(sortOrder)) {
+                    newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentityBySize(bytesOwnedIdentity);
+                } else if ("name".equals(sortOrder)) {
+                    newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentityByName(bytesOwnedIdentity);
+                } else {
+                    newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentity(bytesOwnedIdentity);
+                }
             } else {
                 newSource = null;
             }

@@ -5,4 +5,5 @@
     <item name="attach_video" type="id"/>
     <item name="attach_camera" type="id"/>
     <item name="attach_timer" type="id"/>
+    <item name="attach_emoji" type="id"/>
 </resources>

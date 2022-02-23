@@ -24,6 +24,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import io.olvid.engine.crypto.PRNGService;
@@ -31,7 +33,9 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
 
 
@@ -43,34 +47,43 @@ public class OwnedDevice implements ObvDatabase {
 
     private UID uid;
     static final String UID_ = "uid";
-    private Identity identity;
-    static final String IDENTITY = "identity";
+    private Identity ownedIdentity;
+    static final String OWNED_IDENTITY = "identity";
     private boolean isCurrentDevice;
     static final String IS_CURRENT_DEVICE = "is_current_device";
+    private byte[] serializedDeviceCapabilities; // for the current device, this corresponds to the capabilities that were pushed to contacts. Actual capabilities are static in ObvCapability!
+    static final String SERIALIZED_DEVICE_CAPABILITIES = "serialized_device_capabilities";
 
     public UID getUid() {
         return uid;
     }
 
-    public Identity getIdentity() {
-        return identity;
+    public Identity getOwnedIdentity() {
+        return ownedIdentity;
     }
 
     public boolean isCurrentDevice() {
         return isCurrentDevice;
     }
 
-    public OwnedIdentity getOwnedIdentity() throws SQLException {
-        return OwnedIdentity.get(identityManagerSession, identity);
+    public OwnedIdentity getOwnedIdentityObject() throws SQLException {
+        return OwnedIdentity.get(identityManagerSession, ownedIdentity);
     }
 
+    public List<ObvCapability> getDeviceCapabilities() {
+        return ObvCapability.deserializeDeviceCapabilities(serializedDeviceCapabilities);
+    }
+
+    public String[] getRawDeviceCapabilities() {
+        return ObvCapability.deserializeRawDeviceCapabilities(serializedDeviceCapabilities);
+    }
 
     public static OwnedDevice createOtherDevice(IdentityManagerSession identityManagerSession, UID uid, Identity identity) {
         if (identity == null) {
             return null;
         }
         try {
-            OwnedDevice ownedDevice = new OwnedDevice(identityManagerSession, uid, identity, false);
+            OwnedDevice ownedDevice = new OwnedDevice(identityManagerSession, uid, identity, false, null);
             ownedDevice.insert();
             return ownedDevice;
         } catch (SQLException e) {
@@ -84,7 +97,7 @@ public class OwnedDevice implements ObvDatabase {
         }
         UID uid = new UID(prng);
         try {
-            OwnedDevice ownedDevice = new OwnedDevice(identityManagerSession, uid, identity, true);
+            OwnedDevice ownedDevice = new OwnedDevice(identityManagerSession, uid, identity, true, null);
             ownedDevice.insert();
             return ownedDevice;
         } catch (SQLException e) {
@@ -92,22 +105,24 @@ public class OwnedDevice implements ObvDatabase {
         }
     }
 
-    private OwnedDevice(IdentityManagerSession identityManagerSession, UID uid, Identity identity, boolean isCurrentDevice) {
+    private OwnedDevice(IdentityManagerSession identityManagerSession, UID uid, Identity ownedIdentity, boolean isCurrentDevice, byte[] serializedDeviceCapabilities) {
         this.identityManagerSession = identityManagerSession;
         this.uid = uid;
-        this.identity = identity;
+        this.ownedIdentity = ownedIdentity;
         this.isCurrentDevice = isCurrentDevice;
+        this.serializedDeviceCapabilities = serializedDeviceCapabilities;
     }
 
     private OwnedDevice(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
         this.identityManagerSession = identityManagerSession;
         this.uid = new UID(res.getBytes(UID_));
         try {
-            this.identity = Identity.of(res.getBytes(IDENTITY));
+            this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
         } catch (DecodingException e) {
             throw new SQLException();
         }
         this.isCurrentDevice = res.getBoolean(IS_CURRENT_DEVICE);
+        this.serializedDeviceCapabilities = res.getBytes(SERIALIZED_DEVICE_CAPABILITIES);
     }
 
 
@@ -117,21 +132,29 @@ public class OwnedDevice implements ObvDatabase {
         try (Statement statement = session.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
                     UID_ + " BLOB PRIMARY KEY, " +
-                    IDENTITY + " BLOB NOT NULL, " +
+                    OWNED_IDENTITY + " BLOB NOT NULL, " +
                     IS_CURRENT_DEVICE + " BIT NOT NULL, " +
-                    "FOREIGN KEY (" + IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + " (" + OwnedIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE);");
+                    SERIALIZED_DEVICE_CAPABILITIES + " BLOB DEFAULT NULL, " +
+                    "FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + " (" + OwnedIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE);");
         }
     }
 
     public static void upgradeTable(Session session, int oldVersion, int newVersion) throws SQLException {
+        if (oldVersion < 27 && newVersion >= 27) {
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE owned_device ADD COLUMN `serialized_device_capabilities` BLOB DEFAULT NULL");
+            }
+            oldVersion = 27;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?);")) {
             statement.setBytes(1, uid.getBytes());
-            statement.setBytes(2, identity.getBytes());
+            statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBoolean(3, isCurrentDevice);
+            statement.setBytes(4, serializedDeviceCapabilities);
             statement.executeUpdate();
         }
     }
@@ -141,14 +164,16 @@ public class OwnedDevice implements ObvDatabase {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")) {
             statement.setBytes(1, uid.getBytes());
             statement.executeUpdate();
+            commitHookBits |= HOOK_BIT_CAPABILITIES_UPDATED;
+            identityManagerSession.session.addSessionCommitListener(this);
         }
     }
 
 
-    public static OwnedDevice get(IdentityManagerSession identityManagerSession, UID currentDeviceUid) throws SQLException {
+    public static OwnedDevice get(IdentityManagerSession identityManagerSession, UID ownedDeviceUid) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
                 UID_ + " = ?;")) {
-            statement.setBytes(1, currentDeviceUid.getBytes());
+            statement.setBytes(1, ownedDeviceUid.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
                     return new OwnedDevice(identityManagerSession, res);
@@ -166,7 +191,7 @@ public class OwnedDevice implements ObvDatabase {
             return null;
         }
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
-                IDENTITY + " = ? AND " +
+                OWNED_IDENTITY + " = ? AND " +
                 IS_CURRENT_DEVICE + " = 1;")) {
             statement.setBytes(1, identity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -181,7 +206,7 @@ public class OwnedDevice implements ObvDatabase {
 
     public static OwnedDevice[] getOtherDevicesOfOwnedIdentity(IdentityManagerSession identityManagerSession, Identity identity) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
-                IDENTITY + " = ? AND " +
+                OWNED_IDENTITY + " = ? AND " +
                 IS_CURRENT_DEVICE + " = 0;")) {
             statement.setBytes(1, identity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -196,7 +221,7 @@ public class OwnedDevice implements ObvDatabase {
 
     public static OwnedDevice[] getAllDevicesOfIdentity(IdentityManagerSession identityManagerSession, Identity identity) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
-                IDENTITY + " = ?;")) {
+                OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, identity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 List<OwnedDevice> list = new ArrayList<>();
@@ -208,8 +233,39 @@ public class OwnedDevice implements ObvDatabase {
         }
     }
 
+    public void setRawDeviceCapabilities(String[] rawDeviceCapabilities) throws SQLException {
+        byte[] serializedDeviceCapabilities = ObvCapability.serializeRawDeviceCapabilities(rawDeviceCapabilities);
+        if (Arrays.equals(serializedDeviceCapabilities, this.serializedDeviceCapabilities)) {
+            // if the capabilities did not change, do not update/notify
+            return;
+        }
+
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + SERIALIZED_DEVICE_CAPABILITIES + " = ? " +
+                " WHERE " + UID_ + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            statement.setBytes(1, serializedDeviceCapabilities);
+            statement.setBytes(2, this.uid.getBytes());
+            statement.setBytes(3, this.ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.serializedDeviceCapabilities = serializedDeviceCapabilities;
+            commitHookBits |= HOOK_BIT_CAPABILITIES_UPDATED;
+            identityManagerSession.session.addSessionCommitListener(this);
+        }
+    }
+
+
+
+    private long commitHookBits = 0;
+    private static final long HOOK_BIT_CAPABILITIES_UPDATED = 0x2;
+
     @Override
     public void wasCommitted() {
-        // No notifications here
+        if ((commitHookBits & HOOK_BIT_CAPABILITIES_UPDATED) != 0) {
+            HashMap<String, Object> userInfo = new HashMap<>();
+            userInfo.put(IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED_OWNED_IDENTITY_KEY, ownedIdentity);
+            identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED, userInfo);
+        }
+        commitHookBits = 0;
     }
 }

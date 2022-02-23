@@ -38,6 +38,7 @@ import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.ObvAttachment;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
@@ -124,6 +125,9 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 EngineNotifications.BACKUP_FINISHED,
                 EngineNotifications.APP_BACKUP_REQUESTED,
                 EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS,
+                EngineNotifications.CONTACT_CAPABILITIES_UPDATED,
+                EngineNotifications.OWN_CAPABILITIES_UPDATED,
+                EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED,
         }) {
                     engine.addNotificationListener(notificationName, this);
         }
@@ -1166,6 +1170,77 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         }
                     }
                 }
+                break;
+            }
+            case EngineNotifications.CONTACT_CAPABILITIES_UPDATED: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY);
+                byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_CAPABILITIES_UPDATED_BYTES_CONTACT_IDENTITY_KEY);
+                //noinspection unchecked
+                List<ObvCapability> capabilities = (List<ObvCapability>) userInfo.get(EngineNotifications.CONTACT_CAPABILITIES_UPDATED_CAPABILITIES);
+
+                if (bytesOwnedIdentity == null || bytesContactIdentity == null || capabilities == null) {
+                    break;
+                }
+
+                Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                if (contact != null) {
+                    for (ObvCapability obvCapability : ObvCapability.values()) {
+                        boolean capable = capabilities.contains(obvCapability);
+
+                        switch (obvCapability) {
+                            case WEBRTC_CONTINUOUS_ICE:
+                                if (capable != contact.capabilityWebrtcContinuousIce) {
+                                    db.contactDao().updateCapabilityWebrtcContinuousIce(contact.bytesOwnedIdentity, contact.bytesContactIdentity, capable);
+                                }
+                                break;
+                            case GROUPS_V2:
+                                if (capable != contact.capabilityGroupsV2) {
+                                    db.contactDao().updateCapabilityGroupsV2(contact.bytesOwnedIdentity, contact.bytesContactIdentity, capable);
+                                }
+                                break;
+                        }
+                    }
+                }
+                break;
+            }
+            case EngineNotifications.OWN_CAPABILITIES_UPDATED: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.OWN_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY);
+                //noinspection unchecked
+                List<ObvCapability> capabilities = (List<ObvCapability>) userInfo.get(EngineNotifications.OWN_CAPABILITIES_UPDATED_CAPABILITIES);
+
+                if (bytesOwnedIdentity == null || capabilities == null) {
+                    break;
+                }
+
+                OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(bytesOwnedIdentity);
+                if (ownedIdentity != null) {
+                    for (ObvCapability obvCapability : ObvCapability.values()) {
+                        boolean capable = capabilities.contains(obvCapability);
+
+                        switch (obvCapability) {
+                            case WEBRTC_CONTINUOUS_ICE:
+                                if (capable != ownedIdentity.capabilityWebrtcContinuousIce) {
+                                    db.ownedIdentityDao().updateCapabilityWebrtcContinuousIce(ownedIdentity.bytesOwnedIdentity, capable);
+                                }
+                                break;
+                            case GROUPS_V2:
+                                if (capable != ownedIdentity.capabilityGroupsV2) {
+                                    db.ownedIdentityDao().updateCapabilityGroupsV2(ownedIdentity.bytesOwnedIdentity, capable);
+                                }
+                                break;
+                        }
+                    }
+                }
+                break;
+            }
+            case EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED: {
+                Integer state = (Integer) userInfo.get(EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY);
+
+                if (state == null) {
+                    break;
+                }
+
+                AppSingleton.setWebsocketConnectivityState(state);
                 break;
             }
         }

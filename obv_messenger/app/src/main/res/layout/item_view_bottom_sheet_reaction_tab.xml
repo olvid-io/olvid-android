@@ -13,7 +13,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
-        android:textSize="20sp"
+        android:textSize="20dp"
         android:layout_marginEnd="4dp"
         android:id="@+id/tab_emoji"
         android:textAppearance="@style/RobotoMedium"
@@ -24,10 +24,14 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="👍" />
+        android:gravity="center"
+        android:maxWidth="60dp"
+        android:maxLines="1"
+        tools:text="👍"
+        tools:ignore="SpUsage" />
 
     <TextView
-        android:textSize="20sp"
+        android:textSize="20dp"
         android:id="@+id/tab_count"
         android:textAppearance="@style/RobotoMedium"
         android:textColor="@color/primary700"
@@ -37,6 +41,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="10"/>
+        tools:text="10"
+        tools:ignore="SpUsage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

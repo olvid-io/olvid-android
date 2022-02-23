@@ -82,6 +82,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP = "pref_key_last_backup_reminder_timestamp";
     static final String PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER = "pref_key_compose_message_icon_preferred_order";
 
+    static final String PREF_KEY_PREFERRED_REACTIONS = "pref_key_preferred_reactions";
+    static final String[] PREF_KEY_PREFERRED_REACTIONS_DEFAULT = new String[]{"❤️", "👍", "👎", "😂", "😮", "😢"};
+
 
     // BETA
     static final String PREF_KEY_ENABLE_BETA_FEATURES = "pref_key_enable_beta_features";
@@ -132,6 +135,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_FONT_SCALE = "pref_key_font_scale";
     static final String PREF_KEY_FONT_SCALE_DEFAULT = "1.0";
+
+    static final String PREF_KEY_USE_SYSTEM_EMOJIS = "pref_key_use_system_emojis";
+    static final boolean PREF_KEY_USE_SYSTEM_EMOJIS_DEFAULT = false;
 
     static final String PREF_KEY_USE_INTERNAL_IMAGE_VIEWER = "pref_key_use_internal_image_viewer";
     static final boolean PREF_KEY_USE_INTERNAL_IMAGE_VIEWER_DEFAULT = true;
@@ -599,6 +605,18 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.putLong(PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP, timestamp);
         editor.apply();
     }
+
+
+    public static boolean useSystemEmojis() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_USE_SYSTEM_EMOJIS, PREF_KEY_USE_SYSTEM_EMOJIS_DEFAULT);
+    }
+
+    public static void setUseSystemEmojis(boolean useSystemEmojis) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_USE_SYSTEM_EMOJIS, useSystemEmojis);
+        editor.apply();
+    }
+
 
     public static boolean useInternalImageViewer() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_USE_INTERNAL_IMAGE_VIEWER, PREF_KEY_USE_INTERNAL_IMAGE_VIEWER_DEFAULT);
@@ -1393,7 +1411,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return null;
     }
 
-    public static void setComposeMessageIconPreferredOrder(List<Integer> icons) {
+    public static void setComposeMessageIconPreferredOrder(@NonNull List<Integer> icons) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         StringBuilder iconSb = new StringBuilder();
         for (Integer icon : icons) {
@@ -1403,6 +1421,34 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             iconSb.append(icon);
         }
         editor.putString(PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER, iconSb.toString());
+        editor.apply();
+    }
+
+    public static List<String> getPreferredReactions() {
+        String preferredReactions = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_PREFERRED_REACTIONS, null);
+        try {
+            if (preferredReactions != null) {
+                String[] reactions = preferredReactions.split(",");
+                return new ArrayList<>(Arrays.asList(reactions)); // build a new ArrayList to make the list mutable
+            }
+        } catch (Exception ignored) { }
+        return new ArrayList<>(Arrays.asList(PREF_KEY_PREFERRED_REACTIONS_DEFAULT));
+    }
+
+    public static void setPreferredReactions(List<String> reactions) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        if (reactions == null) {
+            editor.remove(PREF_KEY_PREFERRED_REACTIONS);
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (String reaction: reactions) {
+                if (sb.length() > 0) {
+                    sb.append(",");
+                }
+                sb.append(reaction);
+            }
+            editor.putString(PREF_KEY_PREFERRED_REACTIONS, sb.toString());
+        }
         editor.apply();
     }
 

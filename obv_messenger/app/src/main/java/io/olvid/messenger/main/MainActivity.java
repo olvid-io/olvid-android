@@ -31,10 +31,8 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
@@ -57,8 +55,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 import android.os.Bundle;
 import android.text.InputType;
@@ -92,6 +90,7 @@ import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvDialog;
+import io.olvid.messenger.activities.storage_manager.StorageManagerActivity;
 import io.olvid.messenger.activities.CallLogActivity;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.activities.ObvLinkActivity;
@@ -128,12 +127,10 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     private MainActivityPageChangeListener mainActivityPageChangeListener;
     private PingListener pingListener;
 
-    private int pingGrey;
-    private int pingBlack;
     private int pingRed;
-    private int pingOrange;
     private int pingGolden;
     private int pingGreen;
+    private int pingGrey;
 
     private ContactListFragment contactListFragment;
     private InvitationListFragment invitationListFragment;
@@ -167,10 +164,6 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
 
     private static float previousFontScale = 1.0f;
 
-    public static final long PING_EXCELLENT_MAX_MS = 100;
-    public static final long PING_GOOD_MAX_MS = 200;
-    public static final long PING_NOT_GOOD_MAX_MS = 500;
-
     @Override
     protected void attachBaseContext(Context baseContext) {
         // problem: we cannot know if the baseContext we get has already been scaled by our setting or not
@@ -180,27 +173,31 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         float customFontScale = SettingsActivity.getFontScale();
         Configuration configuration = baseContext.getResources().getConfiguration();
         Logger.d("⚖ MainActivity started, baseContext font scale: " + configuration.fontScale);
-        if (customFontScale != previousFontScale) { // this detects changes in the settings, or the first launch of the app
-            Logger.d("⚖ case 1: customFontScale != previousFontScale");
-            configuration.fontScale *= customFontScale / previousFontScale;
-            previousFontScale = customFontScale;
-            // we "mark" the font scale
-            configuration.fontScale = (Math.round(configuration.fontScale * 100) + 0.17f)/100f;
-            newContext = baseContext.createConfigurationContext(configuration);
-        } else {
-            if (Math.round(configuration.fontScale * 10000) % 100 == 17) {
-                Logger.d("⚖ case 2: fontScale already \"marked\"");
-                // fontScale is already marked --> do nothing
-                newContext = baseContext;
-            } else {
-                // fontScale not marked --> this is most probably the default system scaling
-                // - we scale it appropriately
-                // - we mark it
-                Logger.d("⚖ case 3: fontScale not \"marked\"");
-                configuration.fontScale *= customFontScale;
+        if (Math.round(configuration.fontScale * 10000) % 100 == 17) {
+            Logger.d("⚖ case 1: fontScale already \"marked\"");
+            if (customFontScale != previousFontScale) { // this detects changes in the settings
+                Logger.d("⚖ case 1.1: customFontScale != previousFontScale --> compensating");
+                configuration.fontScale *= customFontScale / previousFontScale;
+                previousFontScale = customFontScale;
+                // we re-"mark" the font scale
                 configuration.fontScale = (Math.round(configuration.fontScale * 100) + 0.17f)/100f;
                 newContext = baseContext.createConfigurationContext(configuration);
+            } else {
+                Logger.d("⚖ case 1.2: fontScale already \"marked\" with the right scale --> do nothing");
+                // fontScale is already marked --> do nothing
+                newContext = baseContext;
             }
+        } else {
+            Logger.d("⚖ case 2: fontScale not \"marked\" --> scale it");
+            // fontScale not marked --> this is most probably the default system scaling
+            // - we scale it appropriately
+            // - we mark it
+            if (customFontScale != previousFontScale) { // this detects changes in the settings, or the first launch of the app
+                previousFontScale = customFontScale;
+            }
+            configuration.fontScale *= customFontScale;
+            configuration.fontScale = (Math.round(configuration.fontScale * 100) + 0.17f)/100f;
+            newContext = baseContext.createConfigurationContext(configuration);
         }
         Logger.d("⚖ MainActivity started, font scale: " + newContext.getResources().getConfiguration().fontScale);
         super.attachBaseContext(newContext);
@@ -255,12 +252,13 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         pingConnectivityFullTextView = findViewById(R.id.ping_indicator_full_text_view);
         pingConnectivityFullPingTextView = findViewById(R.id.ping_indicator_full_ping_text_view);
 
-        pingGrey = ContextCompat.getColor(this, R.color.greyTint);
-        pingBlack = ContextCompat.getColor(this, R.color.black);
         pingRed = ContextCompat.getColor(this, R.color.red);
-        pingOrange = ContextCompat.getColor(this, R.color.orange);
         pingGolden = ContextCompat.getColor(this, R.color.golden);
         pingGreen = ContextCompat.getColor(this, R.color.green);
+        pingGrey = ContextCompat.getColor(this, R.color.greyTint);
+
+        pingListener = new PingListener();
+        AppSingleton.getWebsocketConnectivityStateLiveData().observe(this, pingListener);
 
         tabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(),
                 findViewById(R.id.tab_discussions_notification_dot),
@@ -280,7 +278,6 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         }
 
         mainActivityPageChangeListener = new MainActivityPageChangeListener(tabImageViews);
-        pingListener = new PingListener();
 
         viewPager = findViewById(R.id.view_pager_container);
         viewPager.setAdapter(tabsPagerAdapter);
@@ -714,20 +711,9 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         }
     }
 
-    private final BroadcastReceiver networkBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            runOnUiThread(() -> {
-                previousPingConnectivityIndicator = null;
-                showPingIndicator();
-            });
-        }
-    };
+    @NonNull private SettingsActivity.PingConnectivityIndicator previousPingConnectivityIndicator = SettingsActivity.PingConnectivityIndicator.NONE;
 
-    private SettingsActivity.PingConnectivityIndicator previousPingConnectivityIndicator = null;
-
-    private void showPingIndicator() {
-        SettingsActivity.PingConnectivityIndicator pingConnectivityIndicator = SettingsActivity.getPingConnectivityIndicator();
+    private void showPingIndicator(SettingsActivity.PingConnectivityIndicator pingConnectivityIndicator) {
         if (Objects.equals(pingConnectivityIndicator, previousPingConnectivityIndicator)) {
             return;
         }
@@ -742,21 +728,17 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                 pingConnectivityDot.setVisibility(View.VISIBLE);
                 pingConnectivityLine.setVisibility(View.GONE);
                 pingConnectivityFull.setVisibility(View.GONE);
-                pingConnectivityDot.setBackgroundColor(pingGrey);
                 break;
             case LINE:
                 pingConnectivityDot.setVisibility(View.GONE);
                 pingConnectivityLine.setVisibility(View.VISIBLE);
                 pingConnectivityFull.setVisibility(View.GONE);
-                pingConnectivityLine.setBackgroundColor(pingGrey);
                 break;
             case FULL:
                 pingConnectivityDot.setVisibility(View.GONE);
                 pingConnectivityLine.setVisibility(View.GONE);
                 pingConnectivityFull.setVisibility(View.VISIBLE);
-                pingConnectivityFull.setBackgroundColor(pingGrey);
                 pingConnectivityFullPingTextView.setText(null);
-                pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_checking);
                 break;
         }
     }
@@ -778,11 +760,9 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
             invitationListFragment.setInvitationsAreVisible(false);
         }
         Utils.stopPinging();
-        if (SettingsActivity.getPingConnectivityIndicator() != SettingsActivity.PingConnectivityIndicator.NONE) {
+        if (previousPingConnectivityIndicator != SettingsActivity.PingConnectivityIndicator.NONE) {
             AppSingleton.getEngine().removeNotificationListener(EngineNotifications.PING_LOST, pingListener);
             AppSingleton.getEngine().removeNotificationListener(EngineNotifications.PING_RECEIVED, pingListener);
-            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-            localBroadcastManager.unregisterReceiver(networkBroadcastReceiver);
         }
     }
 
@@ -791,13 +771,15 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         super.onResume();
 
         mainActivityPageChangeListener.onPageSelected(viewPager.getCurrentItem());
-        if (SettingsActivity.getPingConnectivityIndicator() != SettingsActivity.PingConnectivityIndicator.NONE) {
-            showPingIndicator();
-            AppSingleton.getEngine().addNotificationListener(EngineNotifications.PING_LOST, pingListener);
-            AppSingleton.getEngine().addNotificationListener(EngineNotifications.PING_RECEIVED, pingListener);
-            Utils.startPinging();
-            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-            localBroadcastManager.registerReceiver(networkBroadcastReceiver, new IntentFilter(NETWORK_CONNECTIVITY_CHANGED_BROADCAST_ACTION));
+        SettingsActivity.PingConnectivityIndicator pingSetting = SettingsActivity.getPingConnectivityIndicator();
+        if (previousPingConnectivityIndicator != SettingsActivity.PingConnectivityIndicator.NONE || pingSetting != SettingsActivity.PingConnectivityIndicator.NONE) {
+            showPingIndicator(pingSetting);
+            if (pingSetting != SettingsActivity.PingConnectivityIndicator.NONE) {
+                pingListener.refresh();
+                Utils.startPinging();
+                AppSingleton.getEngine().addNotificationListener(EngineNotifications.PING_LOST, pingListener);
+                AppSingleton.getEngine().addNotificationListener(EngineNotifications.PING_RECEIVED, pingListener);
+            }
         }
     }
 
@@ -882,6 +864,8 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             return true;
+        } else if (itemId == R.id.action_storage_management) {
+            startActivity(new Intent(this, StorageManagerActivity.class));
         } else if (itemId == R.id.action_about) {
             AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog);
             List<String> extraFeatures = new ArrayList<>();
@@ -981,80 +965,86 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         }
     }
 
-    class PingListener implements EngineNotificationListener {
+    class PingListener implements EngineNotificationListener, Observer<Integer> {
         private Long registrationNumber = null;
+        private int websocketConnectionState = 0;
+
+        public void refresh() {
+            onChanged(websocketConnectionState);
+        }
+
+        @Override
+        public void onChanged(Integer websocketConnectionState) {
+            if (websocketConnectionState == -1 && this.websocketConnectionState == 0) {
+                return;
+            }
+            this.websocketConnectionState = websocketConnectionState;
+
+            final int stateColor;
+            switch (websocketConnectionState) {
+                case 1:
+                    stateColor = pingGolden;
+                    break;
+                case 2:
+                    stateColor = pingGreen;
+                    break;
+                case -1:
+                    stateColor = pingGrey;
+                    break;
+                case 0:
+                default:
+                    stateColor = pingRed;
+                    break;
+            }
+
+            switch (previousPingConnectivityIndicator) {
+                case NONE:
+                    break;
+                case DOT:
+                    pingConnectivityDot.setBackgroundColor(stateColor);
+                    break;
+                case LINE:
+                    pingConnectivityLine.setBackgroundColor(stateColor);
+                    break;
+                case FULL:
+                    pingConnectivityFull.setBackgroundColor(stateColor);
+                    switch (websocketConnectionState) {
+                        case -1:
+                            // ping was lost --> keep previous connectivity state
+                            break;
+                        case 1:
+                            pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_connecting);
+                            break;
+                        case 2:
+                            pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_connected);
+                            break;
+                        case 0:
+                        default:
+                            pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_none);
+                            pingConnectivityFullPingTextView.setText("-");
+                            break;
+                    }
+                    break;
+            }
+        }
 
         @Override
         public void callback(String notificationName, HashMap<String, Object> userInfo) {
-            if (notificationName == null || userInfo == null) {
+            if (notificationName == null || userInfo == null || previousPingConnectivityIndicator != SettingsActivity.PingConnectivityIndicator.FULL) {
                 return;
             }
             switch (notificationName) {
                 case EngineNotifications.PING_LOST:
                     runOnUiThread(() -> {
-                        switch (SettingsActivity.getPingConnectivityIndicator()) {
-                            case NONE:
-                                break;
-                            case DOT:
-                                pingConnectivityDot.setBackgroundColor(pingBlack);
-                                break;
-                            case LINE:
-                                pingConnectivityLine.setBackgroundColor(pingBlack);
-                                break;
-                            case FULL:
-                                pingConnectivityFull.setBackgroundColor(pingBlack);
-                                pingConnectivityFullPingTextView.setText(null);
-                                pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_none);
-                                break;
-                        }
+                        pingConnectivityFullPingTextView.setText(getString(R.string.label_over_max_ping_delay, 10));
+                        onChanged(-1);
                     });
                     break;
                 case EngineNotifications.PING_RECEIVED:
                     Long delay = (Long) userInfo.get(EngineNotifications.PING_RECEIVED_DELAY_KEY);
                     if (delay != null) {
                         runOnUiThread(() -> {
-                            switch (SettingsActivity.getPingConnectivityIndicator()) {
-                                case NONE:
-                                    break;
-                                case DOT:
-                                    if (delay < PING_EXCELLENT_MAX_MS) {
-                                        pingConnectivityDot.setBackgroundColor(pingGreen);
-                                    } else if (delay < PING_GOOD_MAX_MS) {
-                                        pingConnectivityDot.setBackgroundColor(pingGolden);
-                                    } else if (delay < PING_NOT_GOOD_MAX_MS) {
-                                        pingConnectivityDot.setBackgroundColor(pingOrange);
-                                    } else {
-                                        pingConnectivityDot.setBackgroundColor(pingRed);
-                                    }
-                                    break;
-                                case LINE:
-                                    if (delay < PING_EXCELLENT_MAX_MS) {
-                                        pingConnectivityLine.setBackgroundColor(pingGreen);
-                                    } else if (delay < PING_GOOD_MAX_MS) {
-                                        pingConnectivityLine.setBackgroundColor(pingGolden);
-                                    } else if (delay < PING_NOT_GOOD_MAX_MS) {
-                                        pingConnectivityLine.setBackgroundColor(pingOrange);
-                                    } else {
-                                        pingConnectivityLine.setBackgroundColor(pingRed);
-                                    }
-                                    break;
-                                case FULL:
-                                    if (delay < PING_EXCELLENT_MAX_MS) {
-                                        pingConnectivityFull.setBackgroundColor(pingGreen);
-                                        pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_excellent);
-                                    } else if (delay < PING_GOOD_MAX_MS) {
-                                        pingConnectivityFull.setBackgroundColor(pingGolden);
-                                        pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_good);
-                                    } else if (delay < PING_NOT_GOOD_MAX_MS) {
-                                        pingConnectivityFull.setBackgroundColor(pingOrange);
-                                        pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_not_good);
-                                    } else {
-                                        pingConnectivityFull.setBackgroundColor(pingRed);
-                                        pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_poor);
-                                    }
-                                    pingConnectivityFullPingTextView.setText(getString(R.string.label_ping_delay, (long) delay));
-                                    break;
-                            }
+                            pingConnectivityFullPingTextView.setText(getString(R.string.label_ping_delay, delay));
                         });
                     }
                     break;

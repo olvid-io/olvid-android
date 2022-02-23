@@ -62,6 +62,7 @@ import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
+import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.messenger.customClasses.BytesKey;
@@ -71,6 +72,7 @@ import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
+import io.olvid.messenger.discussion.ComposeMessageFragment;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.services.PeriodicTasksScheduler;
@@ -95,6 +97,7 @@ public class AppSingleton {
     private final ObjectMapper jsonObjectMapper;
     private final AppDatabase db;
     private final Observer<List<OwnedIdentity>> firstIdentitySelector;
+    private final MutableLiveData<Integer> websocketConnectivityStateLiveData;
 
     @NonNull private final SharedPreferences sharedPreferences;
 
@@ -129,6 +132,15 @@ public class AppSingleton {
             editor.apply();
         }
 
+        if (lastBuildExecuted != 0 && lastBuildExecuted < 153) {
+            // if the user has customized attach icon order, add the emoji icon so they see it
+            List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
+            if (icons != null && !icons.contains(ComposeMessageFragment.ICON_EMOJI)) {
+                icons.add(0, ComposeMessageFragment.ICON_EMOJI);
+                SettingsActivity.setComposeMessageIconPreferredOrder(icons);
+            }
+        }
+
         {
             // generate App directories
             File fylesDirectory = new File(App.getContext().getNoBackupFilesDir(), FYLE_DIRECTORY);
@@ -154,6 +166,12 @@ public class AppSingleton {
         } else {
             this.sslSocketFactory = null;
         }
+
+        // set current App capabilities
+        ObvCapability.currentCapabilities.addAll(Arrays.asList(
+                // add App capabilities here, once we have some 😁
+                ObvCapability.WEBRTC_CONTINUOUS_ICE
+        ));
 
         // initialize Engine
         try {
@@ -186,6 +204,7 @@ public class AppSingleton {
             throw new RuntimeException(e);
         }
         this.engineNotificationProcessor = new EngineNotificationProcessor(this.engine);
+        this.websocketConnectivityStateLiveData = new MutableLiveData<>(0);
         this.engine.startSendingNotifications();
 
         db = AppDatabase.getInstance();
@@ -272,6 +291,13 @@ public class AppSingleton {
         });
     }
 
+    public static LiveData<Integer> getWebsocketConnectivityStateLiveData() {
+        return instance.websocketConnectivityStateLiveData;
+    }
+
+    public static void setWebsocketConnectivityState(int state) {
+        instance.websocketConnectivityStateLiveData.postValue(state);
+    }
 
     // region Owned identity list and current management
 

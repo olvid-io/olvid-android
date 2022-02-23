@@ -32,6 +32,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.format.Formatter;
 import android.util.Pair;
 import android.view.DisplayCutout;
@@ -79,6 +81,7 @@ import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 
 public class GalleryActivity extends LockableActivity {
     public static final String BYTES_OWNED_IDENTITY_INTENT_EXTRA = "bytes_owned_identity";
+    public static final String BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA = "sort_order";
     public static final String DISCUSSION_ID_INTENT_EXTRA = "discussion_id";
     public static final String DRAFT_INTENT_EXTRA = "draft";
     public static final String INITIAL_MESSAGE_ID_INTENT_EXTRA = "initial_message_id";
@@ -243,6 +246,7 @@ public class GalleryActivity extends LockableActivity {
 
         if (viewModel.getCurrentPagerPosition() == null) {
             byte[] bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA);
+            String sortOrder = intent.getStringExtra(BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA);
             long discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1);
             boolean draft = intent.getBooleanExtra(DRAFT_INTENT_EXTRA, false);
             long messageId = intent.getLongExtra(INITIAL_MESSAGE_ID_INTENT_EXTRA, -1);
@@ -252,7 +256,7 @@ public class GalleryActivity extends LockableActivity {
             if (discussionId != -1) {
                 viewModel.setDiscussionId(discussionId);
             } else if (bytesOwnedIdentity != null) {
-                viewModel.setBytesOwnedIdentity(bytesOwnedIdentity);
+                viewModel.setBytesOwnedIdentity(bytesOwnedIdentity, sortOrder);
             } else if (messageId != -1) {
                 viewModel.setMessageId(messageId, draft);
             } else {
@@ -273,13 +277,14 @@ public class GalleryActivity extends LockableActivity {
             window.getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
         if (window != null) {
-            window.getDecorView().setOnSystemUiVisibilityChangeListener(visibility -> {
+            // wait 1s before adding the handler, so that systemUiVisibility stabilizes
+            new Handler(Looper.getMainLooper()).postDelayed(() -> window.getDecorView().setOnSystemUiVisibilityChangeListener(visibility -> {
                 if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                     if (!controlsShown) {
                         showControlsAndUi();
                     }
                 }
-            });
+            }), 1000);
         }
 
         int DENSITY_INDEPENDENT_THRESHOLD = 200;

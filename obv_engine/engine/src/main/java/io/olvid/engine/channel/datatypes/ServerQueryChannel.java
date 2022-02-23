@@ -23,7 +23,6 @@ import java.sql.SQLException;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
-import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelServerQueryMessageToSend;

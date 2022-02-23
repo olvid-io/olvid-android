@@ -171,6 +171,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     public static final String FULL_SCREEN_IMAGE_FRAGMENT_TAG = "full_screen_image";
 
     public static final String DISCUSSION_ID_INTENT_EXTRA = "discussion_id";
+    public static final String MESSAGE_ID_INTENT_EXTRA = "message_id";
     public static final String BYTES_OWNED_IDENTITY_INTENT_EXTRA = "bytes_owned_identity";
     public static final String BYTES_CONTACT_IDENTITY_INTENT_EXTRA = "bytes_contact_identity";
     public static final String BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA = "bytes_group_uid";
@@ -327,6 +328,21 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         composeMessageDelegate = composeMessageFragment.getComposeMessageDelegate();
         composeMessageDelegate.setAnimateLayoutChanges(false);
         composeMessageDelegate.addComposeMessageHeightListener(composeMessageHeightListener);
+        composeMessageDelegate.setEmojiKeyboardAttachDelegate(new ComposeMessageFragment.EmojiKeyboardAttachDelegate() {
+            @Override
+            public void attachKeyboardFragment(@NonNull Fragment fragment) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.emoji_keyboard_placeholder, fragment);
+                transaction.commit();
+            }
+
+            @Override
+            public void detachKeyboardFragment(@NonNull Fragment fragment) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.remove(fragment);
+                transaction.commit();
+            }
+        });
         composeMessageFragment.setDiscussionDelegate(new DiscussionDelegate() {
             @Override
             public void markMessagesRead() {
@@ -450,7 +466,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         if (discussion != null) {
                             if (locked != null && !locked) {
                                 final SecureDeleteEverywhereDialogBuilder builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                        .setTitle(R.string.dialog_title_delete_messages)
+                                        .setTitle(R.string.dialog_title_confirm_deletion)
                                         .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, selectedMessageIds.size(), selectedMessageIds.size()))
                                         .setDeleteCallback(deleteEverywhere -> {
                                             App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, selectedMessageIds, deleteEverywhere));
@@ -464,7 +480,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                 builder.create().show();
                             } else {
                                 final AlertDialog.Builder builder = new SecureAlertDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                        .setTitle(R.string.dialog_title_delete_messages)
+                                        .setTitle(R.string.dialog_title_confirm_deletion)
                                         .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, selectedMessageIds.size(), selectedMessageIds.size()))
                                         .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
                                             App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, selectedMessageIds, false));
@@ -781,7 +797,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             animatorSet.play(spacerAnimator).with(recyclerAnimator);
             animatorSet.start();
         } else {
-            currentSpacerBottomMargin = (int) currentComposeMessageHeight;
+            currentSpacerBottomMargin = currentComposeMessageHeight;
             spacerLayoutParams.bottomMargin = currentSpacerBottomMargin;
             spacer.setLayoutParams(spacerLayoutParams);
 
@@ -819,6 +835,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     private void handleIntent(final Intent intent) {
         if (intent.hasExtra(DISCUSSION_ID_INTENT_EXTRA)) {
             final long discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, 0);
+            final long messageId = intent.getLongExtra(MESSAGE_ID_INTENT_EXTRA, -1);
             messageListAdapter.onChanged(null);
             App.runThread(() -> {
                 Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);
@@ -827,6 +844,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         discussionNotFound();
                     } else {
                         setDiscussionId(discussion.id, intent);
+                        if (messageId != -1) {
+                            messageListAdapter.requestScrollToMessageId(messageId, true, true);
+                        }
                     }
                 });
             });
@@ -878,7 +898,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
     private void setDiscussionId(long discussionId, Intent intent) {
         AndroidNotificationManager.setCurrentShowingDiscussionId(discussionId);
-        AndroidNotificationManager.clearReceivedMessageNotification(discussionId);
+        AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId);
         AndroidNotificationManager.clearGroupNotification(discussionId);
         AndroidNotificationManager.clearMissedCallNotification(discussionId);
         AndroidNotificationManager.clearNeutralNotification();
@@ -922,7 +942,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
         if (discussionViewModel.getDiscussionId() != null) {
             AndroidNotificationManager.setCurrentShowingDiscussionId(discussionViewModel.getDiscussionId());
-            AndroidNotificationManager.clearReceivedMessageNotification(discussionViewModel.getDiscussionId());
+            AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionViewModel.getDiscussionId());
         }
         updateTimersTimer = new Timer("DiscussionActivity-expirationTimers");
         updateTimersTimer.scheduleAtFixedRate(new TimerTask() {
@@ -1257,7 +1277,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-
             case REQUEST_CODE_SAVE_ATTACHMENT: {
                 if (resultCode == RESULT_OK && data != null) {
                     final Uri uri = data.getData();
@@ -1557,7 +1576,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 }
                 notifyDataSetChanged();
                 if ((actionMode != null) && (selectedMessageIds != null)) {
-                    actionMode.setTitle(getResources().getQuantityString(R.plurals.action_mode_title, selectedMessageIds.size(), selectedMessageIds.size()));
+                    actionMode.setTitle(getResources().getQuantityString(R.plurals.action_mode_title_discussion, selectedMessageIds.size(), selectedMessageIds.size()));
                 }
             };
             requestedScrollToMessageId = -1;
@@ -1599,13 +1618,13 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         }
                     } else {
                         messageRecyclerView.smoothScrollToPosition(position + 1);
-                        if (requestedScrollFlash) {
-                            View view = messageListLinearLayoutManager.findViewByPosition(position + 1);
-                            if (view != null) {
-                                highlightView(view);
-                            } else {
-                                highlightOnBindMessageId = requestedScrollToMessageId;
-                            }
+                    }
+                    if (requestedScrollFlash) {
+                        View view = messageListLinearLayoutManager.findViewByPosition(position + 1);
+                        if (view != null) {
+                            highlightView(view);
+                        } else {
+                            highlightOnBindMessageId = requestedScrollToMessageId;
                         }
                     }
                     break;
@@ -1620,7 +1639,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 if (foreground instanceof RippleDrawable) {
                     final RippleDrawable rippleDrawable = (RippleDrawable) foreground;
                     rippleDrawable.setState(new int[]{android.R.attr.state_pressed, android.R.attr.state_enabled});
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> rippleDrawable.setState(new int[]{}), 400);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> rippleDrawable.setState(new int[]{}), 1000);
                 }
             }
             highlightOnBindMessageId = -1;
@@ -3036,7 +3055,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 currentlySwipingMessageId = messageViewHolder.messageId;
                 // do not set the currentlySwipingMessageHasAttachments and currentlySwipingMessageHasTextContent booleans --> they were set by the last call to onSelectedChanged
                 if (direction == ItemTouchHelper.RIGHT) {
-                    App.runThread(new SetDraftReplyTask(discussionViewModel.getDiscussionId(), messageViewHolder.messageId, composeMessageViewModel.getRawNewMessageText().toString()));
+                    App.runThread(new SetDraftReplyTask(discussionViewModel.getDiscussionId(), messageViewHolder.messageId, composeMessageViewModel.getRawNewMessageText() == null ? null : composeMessageViewModel.getRawNewMessageText().toString()));
                     if (composeMessageDelegate != null) {
                         composeMessageDelegate.showSoftInputKeyboard();
                     }
@@ -3149,14 +3168,14 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                 final long messageIdToDelete = currentlySwipingMessageId;
                                 if (bitmapAndSizesAndButtons.canBeDeletedEverywhere && locked != null && !locked) {
                                     final SecureDeleteEverywhereDialogBuilder builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                            .setTitle(R.string.dialog_title_delete_messages)
+                                            .setTitle(R.string.dialog_title_confirm_deletion)
                                             .setType(SecureDeleteEverywhereDialogBuilder.TYPE.SINGLE_MESSAGE)
                                             .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, 1, 1))
                                             .setDeleteCallback(deleteEverywhere -> App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(messageIdToDelete), deleteEverywhere)));
                                     builder.create().show();
                                 } else {
                                     final AlertDialog.Builder builder = new SecureAlertDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                            .setTitle(R.string.dialog_title_delete_messages)
+                                            .setTitle(R.string.dialog_title_confirm_deletion)
                                             .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, 1, 1))
                                             .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(messageIdToDelete), false)))
                                             .setNegativeButton(R.string.button_label_cancel, null);
@@ -3463,7 +3482,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 messageReplyAttachmentCount = itemView.findViewById(R.id.message_content_reply_attachment_count);
                 if (messageReplyGroup != null) {
                     messageReplyGroup.setOnClickListener(this);
-//                    messageReplyGroup.setOnLongClickListener(this);
                 }
 
                 messageContentExpander = itemView.findViewById(R.id.message_content_expander);

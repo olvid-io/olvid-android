@@ -45,12 +45,11 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class KeycloakAuthenticationActivity extends AppCompatActivity {
-    public static final String REDIRECT_URL = "https://openid-redirect.olvid.io/";
-
     public static final String AUTHENTICATE_ACTION = "authenticate_action";
     public static final String AUTHORIZATION_COMPLETE_ACTION = "authorization_complete_action";
     public static final String AUTHORIZATION_CANCELLED_ACTION = "authorization_cancelled_action";
@@ -112,7 +111,7 @@ public class KeycloakAuthenticationActivity extends AppCompatActivity {
                             String nonce = UUID.randomUUID().toString();
 
                             AuthorizationRequest.Builder authorizationRequestBuilder;
-                            authorizationRequestBuilder = new AuthorizationRequest.Builder(authState.getAuthorizationServiceConfiguration(), clientId, ResponseTypeValues.CODE, Uri.parse(REDIRECT_URL));
+                            authorizationRequestBuilder = new AuthorizationRequest.Builder(authState.getAuthorizationServiceConfiguration(), clientId, ResponseTypeValues.CODE, Uri.parse(BuildConfig.KEYCLOAK_REDIRECT_URL));
                             authorizationRequestBuilder.setScope("openid");
                             AuthorizationRequest authorizationRequest = authorizationRequestBuilder
                                     .setPrompt("login consent")
@@ -185,7 +184,7 @@ public class KeycloakAuthenticationActivity extends AppCompatActivity {
                                     .setAuthorizationCode(authState.getLastAuthorizationResponse().authorizationCode)
                                     .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
                                     .setAdditionalParameters(additionalParameters)
-                                    .setRedirectUri(Uri.parse(REDIRECT_URL));
+                                    .setRedirectUri(Uri.parse(BuildConfig.KEYCLOAK_REDIRECT_URL));
 
                             authorizationService.performTokenRequest(tokenRequestBuilder.build(), (tokenResponse, ex) -> {
                                 if (tokenResponse != null) {
