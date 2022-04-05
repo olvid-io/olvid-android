@@ -2,7 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_sort_order"
         android:icon="@drawable/ic_sort"
         android:orderInCategory="50"
         android:title="@string/menu_action_sort_order"

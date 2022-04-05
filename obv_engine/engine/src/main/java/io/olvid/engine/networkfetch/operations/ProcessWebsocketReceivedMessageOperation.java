@@ -85,6 +85,8 @@ public class ProcessWebsocketReceivedMessageOperation extends Operation {
                 EncryptedBytes wrappedKey = parts[2].decodeEncryptedData();
                 EncryptedBytes messageContent = parts[3].decodeEncryptedData();
 
+                fetchManagerSession.session.startTransaction();
+
                 InboxMessage message = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUid);
                 if (message == null) {
                     message = InboxMessage.create(fetchManagerSession,

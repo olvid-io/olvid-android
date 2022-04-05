@@ -54,6 +54,7 @@ public class MessageMetadata {
     public static final int KIND_WIPED = 2; // use for limited visibility outbound messages, before they are fully deleted
     public static final int KIND_EDITED = 3;
     public static final int KIND_REMOTE_DELETED = 4;
+    public static final int KIND_UNDELIVERED = 5; // when we set the outbound status to undelivered
 
     @PrimaryKey(autoGenerate = true)
     public long id;

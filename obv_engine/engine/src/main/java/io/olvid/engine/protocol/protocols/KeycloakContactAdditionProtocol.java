@@ -57,7 +57,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         return KEYCLOAK_CONTACT_ADDITION_PROTOCOL_ID;
     }
 
-    // region states
+    // region States
 
     public static final int WAITING_FOR_DEVICE_DISCOVERY_STATED_ID = 1;
     public static final int WAITING_FOR_CONFIRMATION_STATE_ID = 2;
@@ -219,7 +219,12 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
     // endregion
 
 
-    // region messages
+
+
+
+
+
+    // region Messages
 
     static final int INITIAL_MESSAGE_ID = 0;
     static final int DEVICE_DISCOVERY_DONE_MESSAGE_ID = 1;
@@ -304,11 +309,10 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             return DEVICE_DISCOVERY_DONE_MESSAGE_ID;
         }
 
+        // not used for this type of message
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
-                    Encoded.of(childToParentProtocolMessageInputs.toEncodedInputs())
-            };
+            return new Encoded[0];
         }
 
         public DeviceDiscoveryChildProtocol.DeviceUidsReceivedState getDeviceUidsReceivedState() {
@@ -474,7 +478,9 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
 
 
 
-    // region steps
+
+
+    // region Steps
 
     @Override
     protected Class<?>[] getPossibleStepClasses(int stateId) {
@@ -591,16 +597,16 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             //////////
             final boolean contactCreated;
             final long trustTimestamp = System.currentTimeMillis();
-            if (!protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
+            if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
                 contactCreated = true;
-                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(trustTimestamp, startState.keycloakServerUrl));
+                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(trustTimestamp, startState.keycloakServerUrl), true);
 
                 for (UID contactDeviceUid : contactDeviceUids) {
                     protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid);
                 }
             } else {
                 contactCreated = false;
-                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(trustTimestamp, startState.keycloakServerUrl));
+                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(trustTimestamp, startState.keycloakServerUrl), true);
                 // no need to add devices, they should be in sync already
             }
 
@@ -655,14 +661,14 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            if (!protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity)) {
-                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, receivedMessage.contactIdentity, receivedMessage.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(receivedMessage.trustTimestamp, receivedMessage.keycloakServerUrl));
+            if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity)) {
+                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, receivedMessage.contactIdentity, receivedMessage.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(receivedMessage.trustTimestamp, receivedMessage.keycloakServerUrl), true);
 
                 for (UID contactDeviceUid : receivedMessage.contactDeviceUids) {
                     protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity, contactDeviceUid);
                 }
             } else {
-                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(receivedMessage.trustTimestamp, receivedMessage.keycloakServerUrl));
+                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(receivedMessage.trustTimestamp, receivedMessage.keycloakServerUrl), true);
                 // no need to add devices, they should be in sync already
             }
 
@@ -756,14 +762,14 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             //////////
             // add the contact and devices
             //////////
-            if (!protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
-                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), startState.keycloakServerUrl));
+            if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
+                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), startState.keycloakServerUrl), true);
 
                 for (UID contactDeviceUid : startState.contactDeviceUids) {
                     protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid);
                 }
             } else {
-                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), startState.keycloakServerUrl));
+                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), startState.keycloakServerUrl), true);
                 // no need to add devices, they should be in sync already
             }
 

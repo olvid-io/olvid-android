@@ -20,12 +20,25 @@
         android:textColor="@color/primary700"
         android:textSize="20sp"/>
 
+    <TextView
+        android:id="@+id/dialog_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/background_warning_message"
+        android:padding="4dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="@string/dialog_message_widget_open_hidden_profile_warning_no_lock_screen"/>
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         app:errorEnabled="false">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password_text_view"

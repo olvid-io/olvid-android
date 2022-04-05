@@ -19,7 +19,7 @@
 
 package io.olvid.messenger.appdialogs;
 
-import android.app.Activity;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -32,7 +32,6 @@ import android.os.Bundle;
 import android.os.storage.StorageManager;
 import android.view.Gravity;
 import android.view.View;
-import android.app.Dialog;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -47,12 +46,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.Scope;
-import com.google.api.services.drive.DriveScopes;
 
 import java.util.HashMap;
 
@@ -63,12 +56,15 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.KnownCertificate;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.fragments.dialog.CloudProviderSignInDialogFragment;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.openid.KeycloakTasks;
 import io.olvid.messenger.services.AvailableSpaceHelper;
+import io.olvid.messenger.services.BackupCloudProviderService;
 import io.olvid.messenger.settings.PrivacyPreferenceFragment;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -127,8 +123,7 @@ public class AppDialogShowActivity extends LockableActivity {
 
     public static final String DIALOG_AVAILABLE_SPACE_LOW = "available_space_low";
 
-    public static final String DIALOG_BACKUP_REQUIRES_DRIVE_SIGN_IN = "backup_requires_drive_sign_in";
-    public static final int DIALOG_BACKUP_REQUIRES_DRIVE_SIGN_IN_REQUEST_CODE = 726;
+    public static final String DIALOG_BACKUP_REQUIRES_SIGN_IN = "backup_requires_sign_in";
 
     public static final String DIALOG_CONFIGURE_HIDDEN_PROFILE_CLOSE_POLICY = "configure_hidden_profile_close_policy";
     public static final String DIALOG_INTRODUCING_MULTI_PROFILE = "introducing_multi_profile";
@@ -466,20 +461,32 @@ public class AppDialogShowActivity extends LockableActivity {
                 builder.create().show();
                 break;
             }
-            case DIALOG_BACKUP_REQUIRES_DRIVE_SIGN_IN: {
+            case DIALOG_BACKUP_REQUIRES_SIGN_IN: {
                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                        .setTitle(R.string.dialog_title_backup_requires_drive_sign_in)
-                        .setMessage(R.string.dialog_message_backup_requires_drive_sign_in)
-                        .setPositiveButton(R.string.button_label_sign_in, (dialog, which) -> GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .signOut().addOnCompleteListener(
-                                        task -> GoogleSignIn.requestPermissions(
-                                                this,
-                                                DIALOG_BACKUP_REQUIRES_DRIVE_SIGN_IN_REQUEST_CODE,
-                                                GoogleSignIn.getLastSignedInAccount(this),
-                                                new Scope(DriveScopes.DRIVE_APPDATA),
-                                                new Scope(Scopes.EMAIL)
-                                        )
-                        ))
+                        .setTitle(R.string.dialog_title_backup_requires_sign_in)
+                        .setMessage(R.string.dialog_message_backup_requires_sign_in)
+                        .setPositiveButton(R.string.button_label_sign_in, (dialog, which) -> {
+                            CloudProviderSignInDialogFragment cloudProviderSignInDialogFragment = CloudProviderSignInDialogFragment.newInstance();
+                            cloudProviderSignInDialogFragment.setSignInContext(CloudProviderSignInDialogFragment.SignInContext.AUTOMATIC_BACKUP_SIGN_IN_REQUIRED);
+                            cloudProviderSignInDialogFragment.setOnCloudProviderConfigurationCallback(new CloudProviderSignInDialogFragment.OnCloudProviderConfigurationCallback() {
+                                @Override
+                                public void onCloudProviderConfigurationSuccess(BackupCloudProviderService.CloudProviderConfiguration configuration) {
+                                    try {
+                                        SettingsActivity.setAutomaticBackupConfiguration(configuration);
+                                        // notify the engine that auto-backup is set to true to initiate an immediate backup/upload
+                                        AppSingleton.getEngine().setAutoBackupEnabled(true);
+                                    } catch (Exception ignored) {
+                                        onCloudProviderConfigurationFailed();
+                                    }
+                                }
+
+                                @Override
+                                public void onCloudProviderConfigurationFailed() {
+                                    App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
+                                }
+                            });
+                            cloudProviderSignInDialogFragment.show(getSupportFragmentManager(), "CloudProviderSignInDialogFragment");
+                        })
                         .setNegativeButton(R.string.button_label_cancel, null)
                         .setNeutralButton(R.string.button_label_app_settings, (DialogInterface dialog, int which) -> {
                             Intent intent = new Intent(this, SettingsActivity.class);
@@ -543,7 +550,7 @@ public class AppDialogShowActivity extends LockableActivity {
                                 ((TextView) dialogView.findViewById(R.id.new_cert_issuers_text_view)).setText(R.string.error_text_issuers);
                             }
 
-                            ((TextView) dialogView.findViewById(R.id.new_cert_expiration_text_view)).setText(App.getPreciseAbsoluteDateString(this, untrustedCertificate.expirationTimestamp, getString(R.string.text_date_time_separator)));
+                            ((TextView) dialogView.findViewById(R.id.new_cert_expiration_text_view)).setText(StringUtils.getPreciseAbsoluteDateString(this, untrustedCertificate.expirationTimestamp, getString(R.string.text_date_time_separator)));
 
                             dialogView.findViewById(R.id.new_cert_group).setClipToOutline(true);
                             dialogView.findViewById(R.id.new_cert_group).setOnClickListener((View v) -> {
@@ -585,7 +592,7 @@ public class AppDialogShowActivity extends LockableActivity {
                                     ((TextView) dialogView.findViewById(R.id.trusted_cert_issuers_text_view)).setText(R.string.error_text_issuers);
                                 }
 
-                                ((TextView) dialogView.findViewById(R.id.trusted_cert_expiration_text_view)).setText(App.getPreciseAbsoluteDateString(this, lastTrustedCertificate.expirationTimestamp, getString(R.string.text_date_time_separator)));
+                                ((TextView) dialogView.findViewById(R.id.trusted_cert_expiration_text_view)).setText(StringUtils.getPreciseAbsoluteDateString(this, lastTrustedCertificate.expirationTimestamp, getString(R.string.text_date_time_separator)));
 
                                 dialogView.findViewById(R.id.trusted_cert_group).setClipToOutline(true);
                                 dialogView.findViewById(R.id.trusted_cert_group).setOnClickListener((View v) -> {
@@ -626,22 +633,5 @@ public class AppDialogShowActivity extends LockableActivity {
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == DIALOG_BACKUP_REQUIRES_DRIVE_SIGN_IN_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-                if (account != null) {
-                    SettingsActivity.setAutomaticBackupAccount(account.getEmail());
-                    // notify the engine that auto-backup is set to true to initiate an immediate backup/upload
-                    AppSingleton.getEngine().setAutoBackupEnabled(true);
-                    return;
-                }
-            }
-            App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
-        }
     }
 }

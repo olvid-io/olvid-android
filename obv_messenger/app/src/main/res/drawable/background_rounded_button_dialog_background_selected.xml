@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/blueOrWhiteOverlay"/>
+            <stroke android:color="@color/blueOrWhite" android:width="1dp"/>
+            <corners android:radius="16sp"/>
+        </shape>
+    </item>
+    <item>
+        <ripple android:color="?attr/colorControlHighlight">
+            <item android:id="@android:id/mask" android:drawable="@drawable/background_rounded_button_mask"/>
+        </ripple>
+    </item>
+</layer-list>

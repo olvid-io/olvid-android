@@ -241,7 +241,7 @@
         tools:visibility="visible"
         android:maxLines="1"
         android:ellipsize="end"
-        android:drawableStart="@drawable/ic_keycloak_directory"
+        android:drawableStart="@drawable/ic_keycloak_directory_white"
         android:stateListAnimator="@null"
         android:text="@string/button_label_directory"
         android:textColor="@color/alwaysWhite"

@@ -133,7 +133,12 @@ public class PriorityOperationQueue {
                         executingOperations.add(op);
                         lockOnExecutingOperations.unlock();
 
-                        op.execute();
+                        try {
+                            op.execute();
+                        } catch (Exception e) {
+                            Logger.e("Exception in operation that could have killed a queue!");
+                            e.printStackTrace();
+                        }
 
                         lockOnExecutingOperations.lock();
                         executingOperations.remove(op);

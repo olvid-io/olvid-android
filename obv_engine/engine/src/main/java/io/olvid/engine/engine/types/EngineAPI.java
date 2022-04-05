@@ -23,6 +23,7 @@ import org.jose4j.jwk.JsonWebKey;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
@@ -101,14 +102,16 @@ public interface EngineAPI {
     EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
     boolean forcefullyUnblockContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
     boolean reBlockForcefullyUnblockedContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
-
+    boolean isContactOneToOne(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
+    
     int getContactDeviceCount(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     int getContactEstablishedChannelsCount(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     String getContactTrustedDetailsPhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     JsonIdentityDetailsWithVersionAndPhoto[] getContactPublishedAndTrustedDetails(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void trustPublishedContactDetails(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
     ObvTrustOrigin[] getContactTrustOrigins(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
-    boolean doesContactHaveAutoAcceptTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
+    int getContactTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
+//    boolean doesContactHaveAutoAcceptTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     List<ObvCapability> getContactCapabilities(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity); // returns null in case of error, empty list if there are no capabilities
 
 
@@ -126,6 +129,7 @@ public interface EngineAPI {
 
     // ObvDialog
     void deletePersistedDialog(UUID uuid) throws Exception;
+    Set<UUID> getAllPersistedDialogUuids() throws Exception;
     void resendAllPersistedDialogs() throws Exception;
     void respondToDialog(ObvDialog dialog) throws Exception;
     void abortProtocol(ObvDialog dialog) throws Exception;
@@ -136,7 +140,7 @@ public interface EngineAPI {
     boolean verifyMutualScanSignedNonceUrl(byte[] bytesOwnedIdentity, ObvMutualScanUrl mutualScanUrl);
     void startMutualScanTrustEstablishmentProtocol(byte[] bytesOwnedIdentity, byte[] bytesRemoteIdentity, byte[] signature) throws Exception;
     void startContactMutualIntroductionProtocol(byte[] bytesOwnedIdentity, byte[] bytesContactIdentityA, byte[][] bytesContactIdentities) throws Exception;
-    void startGroupCreationProtocol(String serializedGroupDetailsWithVersionAndPhoto, String photoUrl, byte[] bytesOwnedIdentity, byte[][] bytesRemoteIdentities) throws Exception;
+    void startGroupCreationProtocol(String serializedGroupDetailsWithVersionAndPhoto, String absolutePhotoUrl, byte[] bytesOwnedIdentity, byte[][] bytesRemoteIdentities) throws Exception;
     void restartAllOngoingChannelEstablishmentProtocols(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void recreateAllChannels(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void inviteContactsToGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, byte[][] bytesNewMemberIdentities) throws Exception;
@@ -145,6 +149,8 @@ public interface EngineAPI {
     void leaveGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid) throws Exception;
     void disbandGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid) throws Exception;
     void deleteContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
+    void downgradeOneToOneContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
+    void startOneToOneInvitationProtocol(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void deleteOwnedIdentityAndNotifyContacts(byte[] bytesOwnedIdentity) throws Exception;
     void queryGroupOwnerForLatestGroupMembers(byte[] bytesGroupOwnerAndUid, byte[] bytesOwnedIdentity) throws Exception;
     void addKeycloakContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String signedContactDetails) throws Exception;

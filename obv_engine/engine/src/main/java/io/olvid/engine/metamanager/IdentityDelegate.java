@@ -21,7 +21,6 @@ package io.olvid.engine.metamanager;
 
 
 import org.jose4j.jwk.JsonWebKey;
-import org.jose4j.jwk.JsonWebKeySet;
 
 import java.sql.SQLException;
 import java.util.EnumSet;
@@ -73,13 +72,13 @@ public interface IdentityDelegate {
     boolean isOwnedIdentityKeycloakManaged(Session session, Identity ownedIdentity) throws SQLException;
     List<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(Session session, String pushTopic) throws SQLException;
     ObvKeycloakState getOwnedIdentityKeycloakState(Session session, Identity ownedIdentity) throws SQLException;
-    JsonWebKeySet getOwnedIdentityKeycloakJwks(Session session, Identity ownedIdentity) throws SQLException;
+//    JsonWebKeySet getOwnedIdentityKeycloakJwks(Session session, Identity ownedIdentity) throws SQLException;
     JsonWebKey getOwnedIdentityKeycloakSignatureKey(Session session, Identity ownedIdentity) throws SQLException;
     void setOwnedIdentityKeycloakSignatureKey(Session session, Identity ownedIdentity, JsonWebKey signatureKey) throws SQLException;
     void setKeycloakLatestRevocationListTimestamp(Session session, Identity ownedIdentity, long latestRevocationListTimestamp) throws SQLException;
     void unCertifyExpiredSignedContactDetails(Session session, Identity ownedIdentity, long latestRevocationListTimestamp);
-    JsonWebKeySet getTrustedKeycloakJwks(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException;
-    JsonWebKey getTrustedKeycloakSignatureKey(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException;
+//    JsonWebKeySet getTrustedKeycloakJwks(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException;
+//    JsonWebKey getTrustedKeycloakSignatureKey(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException;
     List<String> getKeycloakPushTopics(Session session, Identity ownedIdentity) throws SQLException;
     void verifyAndAddRevocationList(Session session, Identity ownedIdentity, List<String> signedRevocations) throws Exception;
     JsonKeycloakUserDetails verifyKeycloakSignature(Session session, Identity ownedIdentity, String signature);
@@ -107,8 +106,8 @@ public interface IdentityDelegate {
     boolean isRemoteDeviceUidOfOwnedIdentity(Session session, UID deviceUid, Identity ownedIdentity) throws SQLException;
 
 
-    void addContactIdentity(Session session, Identity contactIdentity, String serializedDetails, Identity ownedIdentity, TrustOrigin trustOrigin) throws Exception;
-    void addTrustOriginToContact(Session session, Identity contacIdentity, Identity ownedIdentity, TrustOrigin trustOrigin) throws SQLException;
+    void addContactIdentity(Session session, Identity contactIdentity, String serializedDetails, Identity ownedIdentity, TrustOrigin trustOrigin, boolean oneToOne) throws Exception;
+    void addTrustOriginToContact(Session session, Identity contactIdentity, Identity ownedIdentity, TrustOrigin trustOrigin, boolean markContactAsOneToOne) throws SQLException;
     Identity[] getContactsOfOwnedIdentity(Session session, Identity ownedIdentity);
     void trustPublishedContactDetails(Session session, Identity contactIdentity, Identity ownedIdentity) throws SQLException;
     void setContactPublishedDetails(Session session, Identity contactIdentity, Identity ownedIdentity, JsonIdentityDetailsWithVersionAndPhoto jsonIdentityDetailsWithVersionAndPhoto, boolean allowDowngrade) throws Exception;
@@ -122,11 +121,14 @@ public interface IdentityDelegate {
     void unmarkAllCertifiedByOwnKeycloakContacts(Session session, Identity ownedIdentity) throws SQLException;
     void reCheckAllCertifiedByOwnKeycloakContacts(Session session, Identity ownedIdentity) throws SQLException;
     TrustOrigin[] getTrustOriginsOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity);
+    TrustLevel getContactTrustLevel(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
     void deleteContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, boolean failIfGroup) throws Exception;
     byte[][] getGroupOwnerAndUidsOfGroupsOwnedByContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
     boolean isIdentityAnActiveContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
-    boolean isIdentityAContactIdentityOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
-    TrustLevel getContactIdentityTrustLevel(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
+    boolean isIdentityAContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
+    boolean isIdentityAOneToOneContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
+    void setContactOneToOne(Session session, Identity ownedIdentity, Identity contactIdentity, boolean oneToOne) throws SQLException;
+//    TrustLevel getContactIdentityTrustLevel(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     boolean forcefullyUnblockContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     boolean reBlockForcefullyUnblockedContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;

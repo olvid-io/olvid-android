@@ -33,6 +33,8 @@ import java.util.UUID;
 import io.olvid.messenger.databases.entity.ContactGroupJoin;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
+import io.olvid.messenger.databases.entity.Fyle;
+import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
 
 @Dao
@@ -56,6 +58,7 @@ public interface MessageDao {
             "mess." + Message.IMAGE_COUNT + " AS mess_" + Message.IMAGE_COUNT + ", " +
             "mess." + Message.WIPED_ATTACHMENT_COUNT + " AS mess_" + Message.WIPED_ATTACHMENT_COUNT + ", " +
             "mess." + Message.EDITED + " AS mess_" + Message.EDITED + ", " +
+            "mess." + Message.FORWARDED + " AS mess_" + Message.FORWARDED + ", " +
             "mess." + Message.REACTIONS + " AS mess_" + Message.REACTIONS + ", " +
             "mess." + Message.IMAGE_RESOLUTIONS + " AS mess_" + Message.IMAGE_RESOLUTIONS + ", " +
             "mess." + Message.MISSED_MESSAGE_COUNT + " AS mess_" + Message.MISSED_MESSAGE_COUNT;
@@ -329,12 +332,19 @@ public interface MessageDao {
             " AND " + Message.DISCUSSION_ID + " = :discussionId")
     void markAllDiscussionMessagesRead(long discussionId);
 
-    @Query("SELECT COUNT(*) > 0 FROM " + Message.TABLE_NAME + " AS message " +
+    @Query("SELECT COUNT(*) > 0 FROM " +
+            " ( SELECT 1 FROM " + Message.TABLE_NAME + " AS message " +
             " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
             " ON discussion.id = " + Message.DISCUSSION_ID +
             " WHERE discussion." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND message." + Message.STATUS + " = " + Message.STATUS_UNREAD)
-    LiveData<Boolean> hasUnreadMessages(byte[] bytesOwnedIdentity);
+            " AND message." + Message.STATUS + " = " + Message.STATUS_UNREAD +
+            " " +
+            " UNION " +
+            " SELECT 1 FROM " + Discussion.TABLE_NAME +
+            " WHERE " + Discussion.UNREAD + " = 1 " +
+            " AND " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " )")
+    LiveData<Boolean> hasUnreadMessagesOrDiscussions(byte[] bytesOwnedIdentity);
 
     @Query("SELECT COUNT(*) as unread_count, id as message_id, min(" + Message.SORT_INDEX + ") as min_sort_index FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
@@ -401,6 +411,15 @@ public interface MessageDao {
             " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
             " ORDER BY " + Message.SORT_INDEX + " ASC LIMIT :number")
     List<Long> getExcessiveDiscussionMessages(long discussionId, int number);
+
+    @Query("SELECT COUNT( distinct mess.id ) FROM " + Message.TABLE_NAME + " AS mess " +
+    " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+    " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+    " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
+    " ON FMjoin." + FyleMessageJoinWithStatus.FYLE_ID + " = fyle.id " +
+    " WHERE fyle." + Fyle.FILE_PATH + " IS NULL " +
+    " AND mess.id IN ( :selectedMessageIds )")
+    int countMessagesWithIncompleteFyles(List<Long> selectedMessageIds);
 
 
     class UnreadCountAndFirstMessage {

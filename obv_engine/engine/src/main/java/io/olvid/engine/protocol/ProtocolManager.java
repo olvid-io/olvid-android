@@ -33,7 +33,6 @@ import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.Session;
-import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.Group;
@@ -67,7 +66,7 @@ import io.olvid.engine.protocol.databases.MutualScanSignatureReceived;
 import io.olvid.engine.protocol.databases.ProtocolInstance;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
 import io.olvid.engine.protocol.databases.TrustEstablishmentCommitmentReceived;
-import io.olvid.engine.protocol.databases.WaitingForTrustLevelIncreaseProtocolInstance;
+import io.olvid.engine.protocol.databases.WaitingForOneToOneContactProtocolInstance;
 import io.olvid.engine.protocol.datatypes.CoreProtocolMessage;
 import io.olvid.engine.protocol.datatypes.GenericProtocolMessageToSend;
 import io.olvid.engine.protocol.datatypes.GenericReceivedProtocolMessage;
@@ -86,7 +85,8 @@ import io.olvid.engine.protocol.protocols.GroupManagementProtocol;
 import io.olvid.engine.protocol.protocols.IdentityDetailsPublicationProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakBindingAndUnbindingProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol;
-import io.olvid.engine.protocol.protocols.ObliviousChannelManagementProtocol;
+import io.olvid.engine.protocol.protocols.ContactManagementProtocol;
+import io.olvid.engine.protocol.protocols.OneToOneContactInvitationProtocol;
 import io.olvid.engine.protocol.protocols.OwnedIdentityDeletionWithContactNotificationProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithMutualScanProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithSasProtocol;
@@ -131,15 +131,12 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     public void initialisationComplete() {
         protocolStepCoordinator.initialQueueing();
 
-        // check all contact trust levels for WaitingForTLIncreaseProtocolInstance
+        // check all contact oneToOne for WaitingForTLIncreaseProtocolInstance
         try (ProtocolManagerSession protocolManagerSession = getSession()) {
-            for (WaitingForTrustLevelIncreaseProtocolInstance waitingForTrustLevelIncreaseProtocolInstance : WaitingForTrustLevelIncreaseProtocolInstance.getAll(protocolManagerSession)) {
-                TrustLevel contactTrustLevel = identityDelegate.getContactIdentityTrustLevel(protocolManagerSession.session, waitingForTrustLevelIncreaseProtocolInstance.getOwnedIdentity(), waitingForTrustLevelIncreaseProtocolInstance.getContactIdentity());
-                if (contactTrustLevel == null) {
-                    continue;
-                }
-                if (contactTrustLevel.compareTo(waitingForTrustLevelIncreaseProtocolInstance.getTargetTrustLevel()) >= 0) {
-                    GenericProtocolMessageToSend message = waitingForTrustLevelIncreaseProtocolInstance.getGenericProtocolMessageToSendWhenTrustLevelIncreased();
+            for (WaitingForOneToOneContactProtocolInstance waitingForOneToOneContactProtocolInstance : WaitingForOneToOneContactProtocolInstance.getAll(protocolManagerSession)) {
+                boolean oneToOne = identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, waitingForOneToOneContactProtocolInstance.getOwnedIdentity(), waitingForOneToOneContactProtocolInstance.getContactIdentity());
+                if (oneToOne) {
+                    GenericProtocolMessageToSend message = waitingForOneToOneContactProtocolInstance.getGenericProtocolMessageToSendWhenTrustLevelIncreased();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message.generateChannelProtocolMessageToSend(), prng);
                 }
             }
@@ -159,7 +156,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             ProtocolInstance.createTable(protocolManagerSession.session);
             LinkBetweenProtocolInstances.createTable(protocolManagerSession.session);
             ChannelCreationProtocolInstance.createTable(protocolManagerSession.session);
-            WaitingForTrustLevelIncreaseProtocolInstance.createTable(protocolManagerSession.session);
+            WaitingForOneToOneContactProtocolInstance.createTable(protocolManagerSession.session);
             ChannelCreationPingSignatureReceived.createTable(protocolManagerSession.session);
             TrustEstablishmentCommitmentReceived.createTable(protocolManagerSession.session);
             MutualScanSignatureReceived.createTable(protocolManagerSession.session);
@@ -175,7 +172,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         ProtocolInstance.upgradeTable(session, oldVersion, newVersion);
         LinkBetweenProtocolInstances.upgradeTable(session, oldVersion, newVersion);
         ChannelCreationProtocolInstance.upgradeTable(session, oldVersion, newVersion);
-        WaitingForTrustLevelIncreaseProtocolInstance.upgradeTable(session, oldVersion, newVersion);
+        WaitingForOneToOneContactProtocolInstance.upgradeTable(session, oldVersion, newVersion);
         ChannelCreationPingSignatureReceived.upgradeTable(session, oldVersion, newVersion);
         TrustEstablishmentCommitmentReceived.upgradeTable(session, oldVersion, newVersion);
         MutualScanSignatureReceived.upgradeTable(session, oldVersion, newVersion);
@@ -197,7 +194,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         this.notificationListeningDelegate = notificationListeningDelegate;
         this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE, newContactListener);
         this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED, contactDeletedListener);
-        this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED, contactTrustLevelListener);
+        this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED, contactTrustLevelListener);
     }
 
     public void setDelegate(NotificationPostingDelegate notificationPostingDelegate) {
@@ -215,7 +212,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                         UID contactDeviceUid = (UID) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_CONTACT_DEVICE_UID_KEY);
                         Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_CONTACT_IDENTITY_KEY);
                         Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY);
-                        startChannelCreationWithContactDeviceProtocol(contactDeviceUid, contactIdentity, ownedIdentity);
+                        startChannelCreationWithContactDeviceProtocol(ownedIdentity, contactIdentity, contactDeviceUid);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -254,18 +251,20 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         @Override
         public void callback(String notificationName, HashMap<String, Object> userInfo) {
             switch (notificationName) {
-                case IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED:
+                case IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED:
                     try {
-                        Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED_CONTACT_IDENTITY_KEY);
-                        Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED_OWNED_IDENTITY_KEY);
-                        TrustLevel trustLevel = (TrustLevel) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED_TRUST_LEVEL_KEY);
-                        try (ProtocolManagerSession protocolManagerSession = getSession()) {
-                            WaitingForTrustLevelIncreaseProtocolInstance[] waitingForTrustLevelIncreaseProtocolInstances = WaitingForTrustLevelIncreaseProtocolInstance.getAllWithTargetFulfilled(protocolManagerSession, ownedIdentity, contactIdentity, trustLevel);
-                            for (WaitingForTrustLevelIncreaseProtocolInstance waitingForTrustLevelIncreaseProtocolInstance: waitingForTrustLevelIncreaseProtocolInstances) {
-                                GenericProtocolMessageToSend message = waitingForTrustLevelIncreaseProtocolInstance.getGenericProtocolMessageToSendWhenTrustLevelIncreased();
-                                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message.generateChannelProtocolMessageToSend(), prng);
+                        Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_OWNED_IDENTITY_KEY);
+                        Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_CONTACT_IDENTITY_KEY);
+                        boolean oneToOne = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY);
+                        if (oneToOne) {
+                            try (ProtocolManagerSession protocolManagerSession = getSession()) {
+                                WaitingForOneToOneContactProtocolInstance[] waitingForOneToOneContactProtocolInstances = WaitingForOneToOneContactProtocolInstance.getAllForContact(protocolManagerSession, ownedIdentity, contactIdentity);
+                                for (WaitingForOneToOneContactProtocolInstance waitingForOneToOneContactProtocolInstance : waitingForOneToOneContactProtocolInstances) {
+                                    GenericProtocolMessageToSend message = waitingForOneToOneContactProtocolInstance.getGenericProtocolMessageToSendWhenTrustLevelIncreased();
+                                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message.generateChannelProtocolMessageToSend(), prng);
+                                }
+                                protocolManagerSession.session.commit();
                             }
-                            protocolManagerSession.session.commit();
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -291,7 +290,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         // delete ChannelCreationPingSignatureReceived
         ChannelCreationPingSignatureReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete WaitingForTrustLevelIncreaseProtocolInstance
-        WaitingForTrustLevelIncreaseProtocolInstance.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
+        WaitingForOneToOneContactProtocolInstance.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
     }
 
     // region Implement ProtocolDelegate
@@ -398,7 +397,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     // region Implement ProtocolStarterDelegate
 
     @Override
-    public void startDeviceDiscoveryProtocol(Identity contactIdentity, Identity ownedIdentity) throws Exception {
+    public void startDeviceDiscoveryProtocol(Identity ownedIdentity, Identity contactIdentity) throws Exception {
         if (contactIdentity.equals(ownedIdentity)) {
             Logger.w("Cannot start a DeviceDiscovery protocol with contactIdentity == ownedIdentity");
             return;
@@ -416,7 +415,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     @Override
-    public void startDeviceDiscoveryProtocolWithinTransaction(Session session, Identity contactIdentity, Identity ownedIdentity) throws Exception {
+    public void startDeviceDiscoveryProtocolWithinTransaction(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
         if (contactIdentity.equals(ownedIdentity)) {
             Logger.w("Cannot start a DeviceDiscovery protocol with contactIdentity == ownedIdentity");
             return;
@@ -468,7 +467,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
 
     @Override
-    public void startTrustEstablishmentProtocol(Identity contactIdentity, String contactDisplayName, Identity ownedIdentity) throws Exception {
+    public void startTrustEstablishmentProtocol(Identity ownedIdentity, Identity contactIdentity, String contactDisplayName) throws Exception {
         startTrustEstablishmentWithSasProtocol(contactIdentity, contactDisplayName, ownedIdentity);
     }
 
@@ -497,7 +496,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     @Override
-    public void startMutualScanTrustEstablishmentProtocol(Identity contactIdentity, byte[] signature, Identity ownedIdentity) throws Exception {
+    public void startMutualScanTrustEstablishmentProtocol(Identity ownedIdentity, Identity contactIdentity, byte[] signature) throws Exception {
         if (contactIdentity.equals(ownedIdentity)) {
             Logger.w("Cannot start a mutual scan protocol with contactIdentity == ownedIdentity");
             return;
@@ -517,7 +516,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     @Override
-    public void startChannelCreationWithContactDeviceProtocol(UID contactDeviceUid, Identity contactIdentity, Identity ownedIdentity) throws Exception {
+    public void startChannelCreationWithContactDeviceProtocol(Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception {
         if (contactIdentity.equals(ownedIdentity)) {
             Logger.w("Cannot start a protocol with contactIdentity == ownedIdentity");
             return;
@@ -535,7 +534,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     @Override
-    public void startContactMutualIntroductionProtocol(Identity contactIdentityA, Identity[] contactIdentities, Identity ownedIdentity) throws Exception {
+    public void startContactMutualIntroductionProtocol(Identity ownedIdentity, Identity contactIdentityA, Identity[] contactIdentities) throws Exception {
         if (contactIdentityA.equals(ownedIdentity)) {
             Logger.w("Cannot start a protocol with contactIdentity == ownedIdentity");
             return;
@@ -560,7 +559,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     @Override
-    public void startGroupCreationProtocol(String serializedGroupDetailsWithVersionAndPhoto, String absolutePhotoUrl, HashSet<IdentityWithSerializedDetails> groupMemberIdentitiesAndSerializedDetails, Identity ownedIdentity) throws Exception {
+    public void startGroupCreationProtocol(Identity ownedIdentity, String serializedGroupDetailsWithVersionAndPhoto, String absolutePhotoUrl, HashSet<IdentityWithSerializedDetails> groupMemberIdentitiesAndSerializedDetails) throws Exception {
         if (serializedGroupDetailsWithVersionAndPhoto == null || ownedIdentity == null || groupMemberIdentitiesAndSerializedDetails == null) {
             throw new Exception();
         }
@@ -620,6 +619,24 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         );
         ChannelMessageToSend message = new GroupManagementProtocol.GroupMembersOrDetailsChangedTriggerMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
+    }
+
+    @Override
+    public void startOneToOneInvitationProtocol(Identity ownedIdentity, Identity contactIdentity) throws Exception {
+        if (ownedIdentity == null || contactIdentity == null) {
+            throw new Exception();
+        }
+
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = new UID(prng);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+            ChannelMessageToSend message = new OneToOneContactInvitationProtocol.InitialMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
+            channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
     }
 
     @Override
@@ -874,13 +891,13 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
 
     @Override
-    public void deleteContact(Identity contactIdentity, Identity ownedIdentity) throws Exception {
+    public void deleteContact(Identity ownedIdentity, Identity contactIdentity) throws Exception {
         if (contactIdentity == null || ownedIdentity == null) {
             throw new Exception();
         }
 
         try (ProtocolManagerSession protocolManagerSession = getSession()) {
-            if (!identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, ownedIdentity, contactIdentity)) {
+            if (!identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, ownedIdentity, contactIdentity)) {
                 Logger.e("Error in deleteContact: contact not found");
                 throw new Exception();
             }
@@ -888,11 +905,36 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
-                    ConcreteProtocol.OBLIVIOUS_CHANNEL_MANAGEMENT_PROTOCOL_ID,
+                    ConcreteProtocol.CONTACT_MANAGEMENT_PROTOCOL_ID,
                     protocolInstanceUid,
                     false);
 
-            ChannelMessageToSend message = new ObliviousChannelManagementProtocol.InitiateContactDeletionMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
+            ChannelMessageToSend message = new ContactManagementProtocol.InitiateContactDeletionMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
+    @Override
+    public void downgradeOneToOneContact(Identity ownedIdentity, Identity contactIdentity) throws Exception {
+        if (contactIdentity == null || ownedIdentity == null) {
+            throw new Exception();
+        }
+
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            if (!identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, ownedIdentity, contactIdentity)) {
+                Logger.e("Error in downgradeContact: contact not found");
+                throw new Exception();
+            }
+
+            UID protocolInstanceUid = new UID(prng);
+
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.CONTACT_MANAGEMENT_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+
+            ChannelMessageToSend message = new ContactManagementProtocol.InitiateContactDowngradeMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
             protocolManagerSession.session.commit();
         }

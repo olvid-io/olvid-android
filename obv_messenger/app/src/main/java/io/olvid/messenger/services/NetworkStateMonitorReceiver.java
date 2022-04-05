@@ -29,14 +29,14 @@ import android.net.NetworkRequest;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
-import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.openid.KeycloakManager;
 
 public class NetworkStateMonitorReceiver extends BroadcastReceiver {
+    private static long latestNetworkRestart = 0;
+
     private final static ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
         public void onAvailable(@NonNull Network network) {
@@ -56,12 +56,13 @@ public class NetworkStateMonitorReceiver extends BroadcastReceiver {
     };
 
     private static void restartNetworkJobs() {
-        AppSingleton.getEngine().retryScheduledNetworkTasks();
-        KeycloakManager.syncAllManagedIdentities();
-
-        Intent networkStateChanged = new Intent(MainActivity.NETWORK_CONNECTIVITY_CHANGED_BROADCAST_ACTION);
-        networkStateChanged.setPackage(App.getContext().getPackageName());
-        LocalBroadcastManager.getInstance(App.getContext()).sendBroadcast(networkStateChanged);
+        // do not restart within less than 5 seconds
+        if (latestNetworkRestart + 5_000 < System.currentTimeMillis()) {
+            latestNetworkRestart = System.currentTimeMillis();
+            AppSingleton.getEngine().retryScheduledNetworkTasks();
+            KeycloakManager.syncAllManagedIdentities();
+            BackupCloudProviderService.networkAvailable();
+        }
     }
 
     @Override

@@ -34,10 +34,13 @@ public class DialogType {
     public static final int ACCEPT_MEDIATOR_INVITE_DIALOG_ID = 6;
     public static final int MEDIATOR_INVITE_ACCEPTED_DIALOG_ID = 7;
     public static final int ACCEPT_GROUP_INVITE_DIALOG_ID = 8;
-    public static final int INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_ID = 9;
-    public static final int INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_ID = 10;
-    public static final int AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_ID = 11;
-    public static final int GROUP_JOINED_DIALOG_ID = 12;
+//    public static final int INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_ID = 9;
+//    public static final int INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_ID = 10;
+//    public static final int AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_ID = 11;
+//    public static final int GROUP_JOINED_DIALOG_ID = 12;
+    public static final int ONE_TO_ONE_INVITATION_SENT_DIALOG_ID = 13;
+    public static final int ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_ID = 14;
+
 
     public final int id;
     public final String contactDisplayNameOrSerializedDetails;
@@ -105,19 +108,11 @@ public class DialogType {
         return new DialogType(ACCEPT_GROUP_INVITE_DIALOG_ID, null, null, null, null, groupOwnerIdentity, serializedGroupDetails, groupUid, pendingGroupMemberIdentities, pendingGroupMemberSerializedDetails, serverTimestamp);
     }
 
-    public static DialogType createIncreaseMediatorTrustLevelDialog(String contactSerializedDetails, Identity contactIdentity, Identity mediatorIdentity, long serverTimestamp) {
-        return new DialogType(INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_ID, contactSerializedDetails, contactIdentity, null, null, mediatorIdentity, null, null, null, null, serverTimestamp);
+    public static DialogType createOneToOneInvitationSentDialog(Identity contactIdentity) {
+        return new DialogType(ONE_TO_ONE_INVITATION_SENT_DIALOG_ID, null, contactIdentity, null, null, null, null, null, null, null, null);
     }
 
-    public static DialogType createIncreaseGroupOwnerTrustLevelDialog(String serializedGroupDetails, UID groupUid, Identity groupOwnerIdentity, Identity[] pendingGroupMemberIdentities, String[]  pendingGroupMemberSerializedDetails, long serverTimestamp) {
-        return new DialogType(INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_ID, null, null, null, null, groupOwnerIdentity, serializedGroupDetails, groupUid, pendingGroupMemberIdentities, pendingGroupMemberSerializedDetails, serverTimestamp);
-    }
-
-    public static DialogType createAutoConfirmedContactIntroductionDialog(String contactSerializedDetails, Identity contactIdentity, Identity mediatorIdentity) {
-        return new DialogType(AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_ID, contactSerializedDetails, contactIdentity, null, null, mediatorIdentity, null, null, null, null, null);
-    }
-
-    public static DialogType createGroupJoinedDialog(String serializedGroupDetails, UID groupUid, Identity groupOwnerIdentity) {
-        return new DialogType(GROUP_JOINED_DIALOG_ID, null, null, null, null, groupOwnerIdentity, serializedGroupDetails, groupUid, null, null, null);
+    public static DialogType createAcceptOneToOneInvitationDialog(Identity contactIdentity, long serverTimestamp) {
+        return new DialogType(ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_ID, null, contactIdentity, null, null, null, null, null, null, null, serverTimestamp);
     }
 }

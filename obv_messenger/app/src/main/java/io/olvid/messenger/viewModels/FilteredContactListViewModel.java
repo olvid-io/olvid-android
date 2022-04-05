@@ -31,6 +31,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import io.olvid.messenger.App;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.entity.Contact;
 
 
@@ -63,7 +64,7 @@ public class FilteredContactListViewModel extends ViewModel {
             filterPatterns = new ArrayList<>(parts.length);
             for (String part: parts) {
                 if (part.length() > 0) {
-                    filterPatterns.add(Pattern.compile(Pattern.quote(App.unAccent(part))));
+                    filterPatterns.add(Pattern.compile(Pattern.quote(StringUtils.unAccent(part))));
                 }
             }
         }
@@ -89,9 +90,7 @@ public class FilteredContactListViewModel extends ViewModel {
     }
 
     public void selectContact(Contact contact) {
-        if (selectedContactsHashSet.contains(contact)) {
-            selectedContactsHashSet.remove(contact);
-        } else {
+        if (!selectedContactsHashSet.remove(contact)) {
             selectedContactsHashSet.add(contact);
         }
         selectedContacts.postValue(new ArrayList<>(selectedContactsHashSet));
@@ -132,7 +131,7 @@ public class FilteredContactListViewModel extends ViewModel {
             }
             this.filteredContacts = filteredContacts;
             this.unfilteredContacts = unfilteredContacts;
-            this.selectedContactsHashSet = selectedContactsHashSet;
+            this.selectedContactsHashSet = new HashSet<>(selectedContactsHashSet); // copy the set to avoid concurrent modification
         }
 
         @Override

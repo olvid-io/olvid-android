@@ -120,7 +120,12 @@ public class NoDuplicateOperationQueue {
                             queuedOperationUids.remove(op.getUid());
                             lockOnQueuedOperationUids.unlock();
                         }
-                        op.execute();
+                        try {
+                            op.execute();
+                        } catch (Exception e) {
+                            Logger.e("Exception in operation that could have killed a queue!");
+                            e.printStackTrace();
+                        }
                     } else {
                         operations.add(op);
                     }

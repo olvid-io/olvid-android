@@ -102,7 +102,7 @@ public class SecureDeleteEverywhereDialogBuilder extends SecureAlertDialogBuilde
     @Override
     public AlertDialog create() {
         final LayoutInflater inflater = LayoutInflater.from(getContext());
-        View dialogView = inflater.inflate(R.layout.dialog_view_delete_everywhere, null);
+        @SuppressLint("InflateParams") View dialogView = inflater.inflate(R.layout.dialog_view_delete_everywhere, null);
         TextView messageView = dialogView.findViewById(R.id.dialog_message);
         messageView.setText(this.message);
 

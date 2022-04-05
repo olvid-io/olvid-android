@@ -75,11 +75,24 @@
         android:theme="@style/AlwaysWhiteRipple"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/end_call_button"
-        app:layout_constraintEnd_toStartOf="@+id/end_call_button"
+        app:layout_constraintEnd_toStartOf="@+id/open_discussion_button"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@id/toggle_speakerphone_button"
         tools:visibility="visible" />
 
+
+    <ImageView
+        android:id="@+id/open_discussion_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/content_description_open_discussion_button"
+        android:foreground="@drawable/background_circular_ripple"
+        android:theme="@style/AlwaysWhiteRipple"
+        app:layout_constraintBottom_toBottomOf="@+id/end_call_button"
+        app:layout_constraintEnd_toStartOf="@+id/end_call_button"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@id/add_participant_button"
+        app:srcCompat="@drawable/button_discussion" />
 
     <ImageView
         android:id="@+id/end_call_button"
@@ -93,7 +106,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/add_participant_button"/>
+        app:layout_constraintStart_toEndOf="@+id/open_discussion_button"/>
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier"

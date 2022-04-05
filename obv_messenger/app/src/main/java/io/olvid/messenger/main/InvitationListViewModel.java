@@ -43,7 +43,7 @@ public class InvitationListViewModel extends ViewModel {
             if (ownedIdentity == null) {
                 return null;
             }
-            return AppDatabase.getInstance().invitationDao().getAll(ownedIdentity.bytesOwnedIdentity);
+            return AppDatabase.getInstance().invitationDao().getAllForOwnedIdentity(ownedIdentity.bytesOwnedIdentity);
         });
     }
 

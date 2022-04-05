@@ -353,6 +353,9 @@ public class ColissimoMessageQueue {
                         long fyleID = colissimo.getRequestDeleteDraftAttachment().getFyleId();
                         long messageId = colissimo.getRequestDeleteDraftAttachment().getMessageId();
                         FyleMessageJoinWithStatusDao.FyleAndStatus draftFyle = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getFyleAndStatus(messageId, fyleID);
+                        if (draftFyle == null || draftFyle.fyleMessageJoinWithStatus == null) {
+                            break;
+                        }
                         if (draftFyle.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_DRAFT) {
                             if (draftFyle.fyleMessageJoinWithStatus.fyleId == fyleID) {
                                 App.runThread(new DeleteAttachmentTask(draftFyle));
@@ -381,7 +384,7 @@ public class ColissimoMessageQueue {
                     case REQUEST_ADD_REACTION_TO_MESSAGE:
                         String reaction = colissimo.getRequestAddReactionToMessage().getReaction();
                         long messageId = colissimo.getRequestAddReactionToMessage().getMessageId();
-                        App.runThread(new UpdateReactionsTask(messageId, reaction, null, 0));
+                        App.runThread(new UpdateReactionsTask(messageId, "".equals(reaction) ? null : reaction, null, 0));
                         break;
                     case NOTIF_FILE_ALREADY_ATTACHED:
                     case NOTIF_MESSAGE_SENT:
@@ -461,7 +464,6 @@ public class ColissimoMessageQueue {
                     draftMessage.sortIndex = draftMessage.timestamp;
                 }
                 draftMessage.id = AppDatabase.getInstance().messageDao().insert(draftMessage);
-                AppDatabase.getInstance().messageDao().update(draftMessage);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -32,10 +32,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
 import io.olvid.engine.datatypes.Operation;
@@ -57,6 +60,7 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
     private final HashMap<String, JsonWellKnown> wellKnownCache;
 
     private final NoDuplicateOperationQueue wellKnownDownloadOperationQueue;
+    private final Timer wellKnownDownloadTimer;
 
     public WellKnownCoordinator(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, ObjectMapper jsonObjectMapper) {
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
@@ -68,6 +72,8 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
 
         this.wellKnownDownloadOperationQueue = new NoDuplicateOperationQueue();
         this.wellKnownDownloadOperationQueue.execute(1, "Engine-WellKnownDownloadCoordinator");
+
+        this.wellKnownDownloadTimer = new Timer("Engine-WellKnownDownloadTimer");
     }
 
     public void setNotificationPostingDelegate(NotificationPostingDelegate notificationPostingDelegate) {
@@ -103,10 +109,31 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
             this.cacheInitialized = true;
 
             notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WELL_KNOWN_CACHE_INITIALIZED, new HashMap<>());
+
+            wellKnownDownloadTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
+                        Identity[] ownedIdentities = fetchManagerSession.identityDelegate.getOwnedIdentities(fetchManagerSession.session);
+
+                        Set<String> servers = new HashSet<>();
+                        for (Identity ownedIdentity: ownedIdentities) {
+                            servers.add(ownedIdentity.getServer());
+                        }
+
+                        for (String server: servers) {
+                            queueNewWellKnownDownloadOperation(server);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, Constants.WELL_KNOWN_REFRESH_INTERVAL, Constants.WELL_KNOWN_REFRESH_INTERVAL);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 
     public void queueNewWellKnownDownloadOperation(String server) {
         Logger.d("Requesting .well-known fetch for " + server);

@@ -417,6 +417,30 @@ public class Encoded {
     }
 
 
+    // used to decode a list with some additional bytes at the end
+    public Encoded[] decodeListWithPadding() throws DecodingException {
+        if (data[0] != BYTE_IDS_LIST) {
+            throw new DecodingException();
+        }
+        int totalLen = uint32FromBytes(data, 1);
+        if (totalLen+5 > data.length) {
+            throw new DecodingException();
+        }
+
+        List<Encoded> list = new ArrayList<>();
+        int offset = 5;
+        while (offset  + 4 < totalLen+5) {
+            int len = uint32FromBytes(data, offset+1);
+            if (offset + 5 + len > totalLen+5) {
+                throw new DecodingException();
+            }
+            Encoded elem = new Encoded(Arrays.copyOfRange(data, offset, offset+5+len));
+            list.add(elem);
+            offset += 5 + len;
+        }
+        return list.toArray(new Encoded[0]);
+    }
+
     public Encoded[] decodeList() throws DecodingException {
         if (data[0] != BYTE_IDS_LIST || !isEncodedValue()) {
             throw new DecodingException();

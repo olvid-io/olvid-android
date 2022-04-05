@@ -29,6 +29,13 @@
             android:summary="@string/pref_send_with_hardware_enter_summary"
             android:icon="@drawable/ic_pref_send"
             android:order="27" />
+        <SwitchPreference
+            android:key="pref_key_sending_foreground_service"
+            android:defaultValue="true"
+            android:title="@string/pref_sending_foreground_service"
+            android:summary="@string/pref_sending_foreground_service_summary"
+            android:icon="@drawable/ic_pref_sync"
+            android:order="28" />
         <DropDownPreference
             android:defaultValue="null"
             android:key="pref_key_ping_connectivity_indicator"
@@ -36,8 +43,6 @@
             app:useSimpleSummaryProvider="true"
             android:entries="@array/ping_connectivity_indicator"
             android:entryValues="@array/ping_connectivity_indicator_value"
-            app:isPreferenceVisible="false"
-            tools:isPreferenceVisible="true"
             android:icon="@drawable/ic_pref_ping_indicator"
             android:order="29" />
         <DropDownPreference

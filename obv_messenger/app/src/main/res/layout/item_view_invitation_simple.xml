@@ -47,36 +47,35 @@
                     style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/button_label_go_to_discussion"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    android:text="@string/button_label_go_to_discussion"/>
 
                 <Button
                     android:id="@+id/button_ok"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/button_label_ok"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    android:text="@string/button_label_ok"/>
 
                 <Button
                     android:id="@+id/button_ignore"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/button_label_ignore"
-                    app:layout_constraintEnd_toStartOf="@+id/button_accept"
-                    app:layout_constraintTop_toTopOf="@+id/button_accept"/>
+                    android:text="@string/button_label_ignore"/>
+
+                <Button
+                    android:id="@+id/button_reject"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/button_label_reject"/>
 
                 <Button
                     android:id="@+id/button_accept"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/button_label_accept"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    android:text="@string/button_label_accept"/>
 
             </LinearLayout>
 

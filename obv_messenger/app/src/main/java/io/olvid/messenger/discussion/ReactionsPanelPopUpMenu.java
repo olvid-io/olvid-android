@@ -264,7 +264,7 @@ public class ReactionsPanelPopUpMenu {
             if (emojiPickerView == null) {
                 EmojiPickerViewFactory.EmojiClickListener emojiClickListener = new EmojiPickerViewFactory.EmojiClickListener() {
                     @Override
-                    public void onClick(View emojiView, String emoji) {
+                    public void onClick(String emoji) {
                         react(emoji);
                         reactionPopupWindow.dismiss();
                     }
@@ -276,7 +276,7 @@ public class ReactionsPanelPopUpMenu {
                     }
 
                     @Override
-                    public void onLongClick(View emojiView, String emoji) {
+                    public void onLongClick(String emoji) {
                         togglePreferred(emoji);
                     }
                 };
@@ -304,7 +304,7 @@ public class ReactionsPanelPopUpMenu {
         int fingerOffset = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 8, metrics);
         int x = Math.max(sixteenDpInPx, Math.min(clickX - panelWidthPx / 2, parentView.getWidth() - panelWidthPx - sixteenDpInPx));
         int[] pos = new int[2];
-        parentView.getLocationOnScreen(pos);
+        parentView.getLocationInWindow(pos);
 
         // adjust fingerOffset so the popup remains on screen
         if (clickY - constraintLayoutHeightPx - fingerOffset < 0) {

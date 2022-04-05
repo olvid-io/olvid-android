@@ -129,7 +129,7 @@ public class ContactIntroductionDialogFragment extends DialogFragment {
             if (ownedIdentity == null) {
                 return null;
             }
-            return AppDatabase.getInstance().contactDao().getAllForOwnedIdentityWithChannelExcludingOne(ownedIdentity.bytesOwnedIdentity, bytesContactIdentityA);
+            return AppDatabase.getInstance().contactDao().getAllOneToOneForOwnedIdentityWithChannelExcludingOne(ownedIdentity.bytesOwnedIdentity, bytesContactIdentityA);
         }));
         Button okButton = dialogView.findViewById(R.id.button_ok);
         okButton.setOnClickListener(view -> {

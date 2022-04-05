@@ -7,8 +7,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -70,7 +72,6 @@
         <activity
             android:name=".main.MainActivity"
             android:theme="@style/AppTheme.Splashscreen"
-            android:label="@string/app_name"
             android:launchMode="singleTask"
             android:taskAffinity=""
             android:exported="true">
@@ -211,17 +212,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.DummyActivity"
-            android:allowTaskReparenting="true"
-            android:alwaysRetainTaskState="false"
-            android:clearTaskOnLaunch="true"
-            android:enabled="true"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:noHistory="true"
-            android:stateNotNeeded="true"
-            android:theme="@android:style/Theme.NoDisplay" />
-         <activity
              android:name="net.openid.appauth.RedirectUriReceiverActivity"
              android:exported="true"
              tools:node="replace">
@@ -254,6 +244,7 @@
             android:configChanges="orientation|screenSize|screenLayout|uiMode"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar.DimmedWithStatusTransparent" />
+        <!-- Override the default theme for OSS to have nicer colors -->
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
             android:label="@string/oss_license_title"
@@ -261,6 +252,11 @@
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
             android:theme="@style/AppTheme.WhiteBackground.Licenses" />
+        <!-- Override the default theme for SignInHubActivity to remove nasty close animation after choosing a drive account -->
+        <activity
+            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+            tools:replace="android:theme"
+            android:theme="@style/AppTheme.NoActionBar.Transparent" />
         <activity
             android:name=".owneddetails.SelectDetailsPhotoActivity"
             android:theme="@style/AppTheme.NoActionBar.FullScreen.Black" />
@@ -318,7 +314,7 @@
             android:noHistory="true"
             android:stateNotNeeded="true" />
         <activity android:name=".activities.storage_manager.StorageManagerActivity"
-            android:theme="@style/AppTheme.NoActionBar.ActionModeOverlayStorage" />
+            android:theme="@style/AppTheme.NoActionBar.ActionModeOverlay" />
 
 
         <service

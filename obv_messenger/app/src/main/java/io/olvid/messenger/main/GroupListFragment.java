@@ -45,6 +45,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -63,6 +64,7 @@ import io.olvid.messenger.customClasses.InitialView;
 
 
 public class GroupListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, EngineNotificationListener {
+    private FragmentActivity activity;
     private GroupListViewModel groupListViewModel;
     private GroupListAdapter adapter;
     private Long engineNotificationListenerRegistrationNumber;
@@ -72,6 +74,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activity = requireActivity();
         groupListViewModel = new ViewModelProvider(this).get(GroupListViewModel.class);
         engineNotificationListenerRegistrationNumber = null;
         AppSingleton.getEngine().addNotificationListener(EngineNotifications.SERVER_POLLED, this);
@@ -100,7 +103,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
 
 
         adapter = new GroupListAdapter();
-        groupListViewModel.getGroups().observe(getViewLifecycleOwner(), adapter);
+        groupListViewModel.getGroups().observe(activity, adapter);
         recyclerView.setAdapter(adapter);
 
         recyclerView.addItemDecoration(new DividerItemDecoration(rootView.getContext()));
@@ -192,7 +195,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
             for (int i=0; i<childCount; i++) {
                 View child = parent.getChildAt(i);
                 int position = parent.getChildAdapterPosition(child);
-                if (position == 0 || (adapter.groups.get(position).group.bytesGroupOwnerIdentity != null && adapter.groups.get(position-1).group.bytesGroupOwnerIdentity == null)) {
+                if (position <= 0 || (adapter.groups.get(position).group.bytesGroupOwnerIdentity != null && adapter.groups.get(position-1).group.bytesGroupOwnerIdentity == null)) {
                     continue;
                 }
                 Rect childRect = new Rect();
@@ -262,11 +265,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
                 holder.groupSectionHeader.setVisibility(View.GONE);
             }
 
-            if (group.group.getCustomPhotoUrl() != null) {
-                holder.initialView.setPhotoUrl(group.group.bytesGroupOwnerAndUid, group.group.getCustomPhotoUrl());
-            } else {
-                holder.initialView.setGroup(group.group.bytesGroupOwnerAndUid);
-            }
+            holder.initialView.setGroup(group.group);
             holder.groupName.setText(group.group.getCustomName());
             if (group.contactDisplayNames == null || group.contactDisplayNames.length() == 0) {
                 StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);

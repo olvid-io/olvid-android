@@ -1,4 +1,44 @@
+# Build 161 (0.12.1)
+2022-03-28
+
+- Various bug fix
+
+# ~~Build 160 (0.12.1)~~
+2022-03-26
+
+- Fix automatic backups requesting to sign in on simple network error
+- Fix many small things in engine fetch and send coordinators to avoid "lost" messages in inbox or outbox
+- Added "rejected" status to phone calls
+
+# Build 159 (0.12.0)
+2022-03-24
+
+- Improved search in contacts tab: now also searches in other users and in identity provider (for managed profiles)
+
+# ~~Build 158 (0.12.0)~~
+2022-03-14
+
+- Bugfix for "zealous lint"
+
+# ~~Build 157 (0.12.0)~~
+2022-03-12
+
+- 2-level address book: distinguish between contacts (with a private discussion) and users you encountered (typically, in a group)
+- forward one or several messages in one or several discussions at a time
+- message search inside a discussion
+- added a cloud backup manager
+- added a foreground service when sending a message to avoid unwanted interruption
+- possibility to set custom mute time/date for discussion or profile 
+- improvements to how group calls work
+- bugfix for widget and possibility to confirm message upload with a vibration   
+- connectivity indicator no longer in beta
+- fix font scaling bugs
+- update to libWebRTC 4844
+- update to Emoji 14.0
+
+
 # Build 156 (0.11.1)
+2022-01-27
 
 - Bugfix for continuous ICE gathering
 

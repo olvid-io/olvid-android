@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
@@ -36,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.pm.ShortcutInfoCompat;
@@ -63,9 +65,7 @@ import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockScreenOrNotActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
-import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
-import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.fragments.FilteredDiscussionListFragment;
@@ -151,9 +151,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         }
 
         if (ownedIdentity == null) {
-            currentIdentityInitialView.setKeycloakCertified(false);
-            currentIdentityInitialView.setInactive(false);
-            currentIdentityInitialView.setInitial(new byte[0], " ");
+            currentIdentityInitialView.setUnknown();
             currentIdentityMutedImageView.setVisibility(View.GONE);
             return;
         }
@@ -185,13 +183,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
                 currentNameSecondLineTextView.setText(null);
             }
         }
-        currentIdentityInitialView.setInactive(!ownedIdentity.active);
-        currentIdentityInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-        if (ownedIdentity.photoUrl != null) {
-            currentIdentityInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-        } else {
-            currentIdentityInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-        }
+        currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
         if (ownedIdentity.shouldMuteNotifications()) {
             currentIdentityMutedImageView.setVisibility(View.VISIBLE);
         } else {
@@ -203,7 +195,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         if (separator == null || adapter == null) {
             return;
         }
-        View popupView = getLayoutInflater().inflate(R.layout.popup_switch_owned_identity, null);
+        @SuppressLint("InflateParams") View popupView = getLayoutInflater().inflate(R.layout.popup_switch_owned_identity, null);
         popupWindow = new PopupWindow(popupView, separator.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setElevation(12);
         popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.background_half_rounded_dialog));
@@ -224,7 +216,8 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         }
 
         @Override
-        protected void onHiddenIdentityPasswordEntered(byte[] byteOwnedIdentity) {
+        protected void onHiddenIdentityPasswordEntered(AlertDialog dialog, byte[] byteOwnedIdentity) {
+            dialog.dismiss();
             AppSingleton.getInstance().selectIdentity(byteOwnedIdentity, null);
         }
     }
@@ -238,9 +231,9 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         if (searchableDiscussion != null) {
             ShortcutInfoCompat.Builder builder;
             if (searchableDiscussion.isGroupDiscussion) {
-                builder = getShortcutInfo(searchableDiscussion.discussionId, searchableDiscussion.byteIdentifier, null, searchableDiscussion.title);
+                builder = getShortcutInfo(searchableDiscussion.discussionId, searchableDiscussion.title);
             } else {
-                builder = getShortcutInfo(searchableDiscussion.discussionId, null, searchableDiscussion.byteIdentifier, searchableDiscussion.title);
+                builder = getShortcutInfo(searchableDiscussion.discussionId, searchableDiscussion.title);
             }
             if (builder != null) {
                 setResult(RESULT_OK, ShortcutManagerCompat.createShortcutResultIntent(this, builder.build()));
@@ -256,7 +249,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             ShortcutManager shortcutManager = (ShortcutManager) App.getContext().getSystemService(Context.SHORTCUT_SERVICE);
             if (shortcutManager != null) {
-                ShortcutInfoCompat.Builder builder = getShortcutInfo(discussion.id, discussion.bytesGroupOwnerAndUid, discussion.bytesContactIdentity, discussion.title);
+                ShortcutInfoCompat.Builder builder = getShortcutInfo(discussion.id, discussion.title);
                 if (builder != null) {
                     ShortcutInfo shortcutInfo = builder.build().toShortcutInfo();
                     shortcutManager.updateShortcuts(Collections.singletonList(shortcutInfo));
@@ -265,7 +258,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         }
     }
 
-    public static ShortcutInfoCompat.Builder getShortcutInfo(long discussionId, byte[] bytesGroupOwnedAndUid, byte[] bytesContactIdentity, String title) {
+    public static ShortcutInfoCompat.Builder getShortcutInfo(long discussionId, String title) {
         Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);
         if (discussion == null) {
             return null;
@@ -280,29 +273,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
 
 
         InitialView initialView = new InitialView(App.getContext());
-        if (bytesGroupOwnedAndUid != null) {
-            Group group = AppDatabase.getInstance().groupDao().get(discussion.bytesOwnedIdentity, bytesGroupOwnedAndUid);
-            if (group != null && group.getCustomPhotoUrl() != null) {
-                initialView.setPhotoUrl(bytesGroupOwnedAndUid, group.getCustomPhotoUrl());
-            } else {
-                initialView.setGroup(bytesGroupOwnedAndUid);
-            }
-        } else if (bytesContactIdentity != null) {
-            Contact contact = AppDatabase.getInstance().contactDao().get(discussion.bytesOwnedIdentity, bytesContactIdentity);
-            if (contact != null && contact.getCustomPhotoUrl() != null) {
-                initialView.setPhotoUrl(bytesContactIdentity, contact.getCustomPhotoUrl());
-            } else {
-                initialView.setInitial(bytesContactIdentity, App.getInitial(title));
-            }
-        } else {
-            if (discussion.photoUrl != null) {
-                initialView.setLocked(true);
-                initialView.setPhotoUrl(new byte[0], discussion.photoUrl);
-            } else {
-                initialView.setLocked(true);
-                initialView.setInitial(new byte[0], "");
-            }
-        }
+        initialView.setDiscussion(discussion);
         Bitmap bitmap = initialView.getAdaptiveBitmap();
 
         return new ShortcutInfoCompat.Builder(App.getContext(), DiscussionActivity.SHORTCUT_PREFIX + discussionId)
@@ -372,7 +343,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         for (Discussion discussion: discussions) {
             publishedDiscussionIds[position] = discussion.id;
 
-            ShortcutInfoCompat.Builder builder = ShortcutActivity.getShortcutInfo(discussion.id, discussion.bytesGroupOwnerAndUid, discussion.bytesContactIdentity, discussion.title);
+            ShortcutInfoCompat.Builder builder = ShortcutActivity.getShortcutInfo(discussion.id, discussion.title);
             if (builder != null) {
                 builder.setLongLived(true)
                         .setCategories(contactCategories);

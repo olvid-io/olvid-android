@@ -31,7 +31,6 @@ import java.util.concurrent.Executor;
 
 public class PhoneCallStateListener {
     final WebrtcCallService service;
-    final Executor executor;
     final TelephonyManager telephonyManager;
     final Listener listener;
     final Callback callback;
@@ -39,7 +38,6 @@ public class PhoneCallStateListener {
 
     public PhoneCallStateListener(WebrtcCallService service, Executor executor) {
         this.service = service;
-        this.executor = executor;
         this.telephonyManager = (TelephonyManager) service.getSystemService(Context.TELEPHONY_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             listener = null;

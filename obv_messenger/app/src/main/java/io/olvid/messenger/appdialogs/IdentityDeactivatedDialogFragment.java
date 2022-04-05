@@ -156,9 +156,9 @@ public class IdentityDeactivatedDialogFragment extends DialogFragment implements
         if (!EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED.equals(notificationName)) {
             return;
         }
-        boolean active = (boolean) userInfo.get(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED_ACTIVE_KEY);
+        Boolean active = (Boolean) userInfo.get(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED_ACTIVE_KEY);
         byte[] ownedIdentityBytes = (byte[]) userInfo.get(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED_BYTES_OWNED_IDENTITY_KEY);
-        if (active && Arrays.equals(ownedIdentity.bytesOwnedIdentity, ownedIdentityBytes)) {
+        if (active != null && active && Arrays.equals(ownedIdentity.bytesOwnedIdentity, ownedIdentityBytes)) {
             dismiss();
         }
     }

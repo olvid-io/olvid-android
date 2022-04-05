@@ -78,6 +78,7 @@ import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.ContactGroupJoinDao;
 import io.olvid.messenger.databases.dao.PendingGroupMemberDao;
@@ -275,11 +276,7 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
         invalidateOptionsMenu();
 
         groupNameTextView.setText(group.getCustomName());
-        if (group.getCustomPhotoUrl() != null) {
-            groupInitialView.setPhotoUrl(group.bytesGroupOwnerAndUid, group.getCustomPhotoUrl());
-        } else {
-            groupInitialView.setGroup(group.bytesGroupOwnerAndUid);
-        }
+        groupInitialView.setGroup(group);
         if (groupIsOwned) {
             groupOwnerTextView.setVisibility(View.GONE);
             groupPersonalNoteTextView.setVisibility(View.GONE);
@@ -706,7 +703,7 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
             }
 
             if (group.bytesGroupOwnerIdentity == null) {
-                EditOwnedGroupDetailsDialogFragment dialogFragment = EditOwnedGroupDetailsDialogFragment.newInstance(this, group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, latestDetails, () -> displayGroupDetails(group));
+                EditOwnedGroupDetailsDialogFragment dialogFragment = EditOwnedGroupDetailsDialogFragment.newInstance(this, group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, latestDetails, () -> runOnUiThread(() -> displayGroupDetails(group)));
                 dialogFragment.show(getSupportFragmentManager(), "dialog");
             } else {
                 EditNameAndPhotoDialogFragment editNameAndPhotoDialogFragment = EditNameAndPhotoDialogFragment.newInstance(this, group);
@@ -838,14 +835,8 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
             if (contacts != null) {
                 ContactGroupJoinDao.ContactAndTimestamp contact = contacts.get(position);
                 holder.groupMemberNameTextView.setText(contact.contact.getCustomDisplayName());
-                holder.groupMemberJoinTimestampTextView.setText(getString(R.string.text_joined_group, App.getNiceDateString(GroupDetailsActivity.this, contact.timestamp)));
-                holder.groupMemberInitialView.setKeycloakCertified(contact.contact.keycloakManaged);
-                holder.groupMemberInitialView.setInactive(!contact.contact.active);
-                if (contact.contact.getCustomPhotoUrl() != null) {
-                    holder.groupMemberInitialView.setPhotoUrl(contact.contact.bytesContactIdentity, contact.contact.getCustomPhotoUrl());
-                } else {
-                    holder.groupMemberInitialView.setInitial(contact.contact.bytesContactIdentity, App.getInitial(contact.contact.getCustomDisplayName()));
-                }
+                holder.groupMemberJoinTimestampTextView.setText(getString(R.string.text_joined_group, StringUtils.getNiceDateString(GroupDetailsActivity.this, contact.timestamp)));
+                holder.groupMemberInitialView.setContact(contact.contact);
                 if (Arrays.equals(contact.contact.bytesContactIdentity, byteGroupOwnerIdentity)) {
                     holder.groupMemberOwnerCrownImageView.setVisibility(View.VISIBLE);
                 } else {
@@ -959,14 +950,10 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
                 PendingGroupMemberDao.PendingGroupMemberAndContact pendingGroupMember = pendingGroupMembers.get(position);
                 if (pendingGroupMember.contact == null) {
                     holder.pendingGroupMemberNameTextView.setText(pendingGroupMember.pendingGroupMember.displayName);
-                    holder.pendingGroupMemberInitialView.setInitial(new byte[0], App.getInitial(pendingGroupMember.pendingGroupMember.displayName));
+                    holder.pendingGroupMemberInitialView.setInitial(new byte[0], StringUtils.getInitial(pendingGroupMember.pendingGroupMember.displayName));
                 } else {
                     holder.pendingGroupMemberNameTextView.setText(pendingGroupMember.contact.getCustomDisplayName());
-                    if (pendingGroupMember.contact.getCustomPhotoUrl() != null) {
-                        holder.pendingGroupMemberInitialView.setPhotoUrl(pendingGroupMember.contact.bytesContactIdentity, pendingGroupMember.contact.getCustomPhotoUrl());
-                    } else {
-                        holder.pendingGroupMemberInitialView.setInitial(pendingGroupMember.contact.bytesContactIdentity, App.getInitial(pendingGroupMember.contact.getCustomDisplayName()));
-                    }
+                    holder.pendingGroupMemberInitialView.setContact(pendingGroupMember.contact);
                 }
                 holder.invitationDeclinedTextView.setVisibility(pendingGroupMember.pendingGroupMember.declined? View.VISIBLE: View.GONE);
             }

@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.main;
 
+import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
@@ -42,6 +43,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -69,6 +71,7 @@ import io.olvid.messenger.customClasses.LoadAwareAdapter;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.entity.CallLogItem;
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment;
 import io.olvid.messenger.notifications.NotificationActionService;
@@ -123,7 +126,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
 
         adapter = new DiscussionListAdapter();
         if (discussionListViewModel.getDiscussions() != null) {
-            discussionListViewModel.getDiscussions().observe(getViewLifecycleOwner(), adapter);
+            discussionListViewModel.getDiscussions().observe(activity, adapter);
         }
         recyclerView.setAdapter(adapter);
 
@@ -218,6 +221,13 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
         }
         popup.inflate(R.menu.popup_discussion);
         popup.setOnMenuItemClickListener(this);
+
+        MenuItem deleteItem = popup.getMenu().findItem(R.id.popup_action_delete_discussion);
+        if (deleteItem != null) {
+            SpannableString spannableString = new SpannableString(deleteItem.getTitle());
+            spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(activity, R.color.red)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            deleteItem.setTitle(spannableString);
+        }
         popup.show();
     }
 
@@ -328,8 +338,6 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                 DiscussionDao.DiscussionAndLastMessage discussion = discussionsAndLastMessages.get(position);
                 if (discussion.discussion.isLocked()) {
                     return LOCKED_VIEWTYPE;
-                } else {
-                    return NORMAL_VIEWTYPE;
                 }
             }
             return NORMAL_VIEWTYPE;
@@ -342,12 +350,12 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
             switch (viewType) {
                 case LOCKED_VIEWTYPE: {
                     View discussionRootView = inflater.inflate(R.layout.item_view_discussion_locked, parent, false);
-                    return new DiscussionViewHolder(discussionRootView, true);
+                    return new DiscussionViewHolder(discussionRootView);
                 }
                 case NORMAL_VIEWTYPE:
                 default: {
                     View discussionRootView = inflater.inflate(R.layout.item_view_discussion, parent, false);
-                    return new DiscussionViewHolder(discussionRootView, false);
+                    return new DiscussionViewHolder(discussionRootView);
                 }
             }
         }
@@ -452,6 +460,11 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                                 spannableString = new SpannableString(getString(R.string.text_busy_outgoing_call));
                                 break;
                             }
+                            case -CallLogItem.STATUS_REJECTED:
+                            case CallLogItem.STATUS_REJECTED: {
+                                spannableString = new SpannableString(getString(R.string.text_rejected_call));
+                                break;
+                            }
                             case -CallLogItem.STATUS_MISSED:
                             case -CallLogItem.STATUS_FAILED:
                             case CallLogItem.STATUS_FAILED: {
@@ -490,7 +503,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                         break;
                     }
                     case Message.TYPE_CONTACT_DELETED: {
-                        SpannableString spannableString = new SpannableString(getString(R.string.text_contact_deleted));
+                        SpannableString spannableString = new SpannableString(getString(R.string.text_user_removed_from_contacts));
                         spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         holder.lastMessageContentTextView.setText(spannableString);
                         break;
@@ -520,7 +533,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                         }
                     }
                 }
-                holder.dateTextView.setText(App.getLongNiceDateString(getContext(), discussionAndLastMessage.message.timestamp));
+                holder.dateTextView.setText(StringUtils.getLongNiceDateString(getContext(), discussionAndLastMessage.message.timestamp));
             } else {
                 SpannableString text = new SpannableString(getString(R.string.text_no_messages));
                 StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
@@ -537,33 +550,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
             }
 
 
-
-            if (!holder.locked) {
-                if (discussionAndLastMessage.discussion.bytesGroupOwnerAndUid != null) {
-                    holder.initialView.setKeycloakCertified(discussionAndLastMessage.discussion.keycloakManaged);
-                    holder.initialView.setInactive(!discussionAndLastMessage.discussion.active);
-                    if (discussionAndLastMessage.discussion.photoUrl == null) {
-                        holder.initialView.setGroup(discussionAndLastMessage.discussion.bytesGroupOwnerAndUid);
-                    } else {
-                        holder.initialView.setPhotoUrl(discussionAndLastMessage.discussion.bytesGroupOwnerAndUid, discussionAndLastMessage.discussion.photoUrl);
-                    }
-                } else if (discussionAndLastMessage.discussion.bytesContactIdentity != null) {
-                    holder.initialView.setKeycloakCertified(discussionAndLastMessage.discussion.keycloakManaged);
-                    holder.initialView.setInactive(!discussionAndLastMessage.discussion.active);
-                    if (discussionAndLastMessage.discussion.photoUrl == null) {
-                        holder.initialView.setInitial(discussionAndLastMessage.discussion.bytesContactIdentity, App.getInitial(discussionAndLastMessage.discussion.title));
-                    } else {
-                        holder.initialView.setPhotoUrl(discussionAndLastMessage.discussion.bytesContactIdentity, discussionAndLastMessage.discussion.photoUrl);
-                    }
-                }
-            } else {
-                holder.initialView.setLocked(true);
-                if (discussionAndLastMessage.discussion.photoUrl == null) {
-                    holder.initialView.setInitial(new byte[0], "");
-                } else {
-                    holder.initialView.setPhotoUrl(new byte[0], discussionAndLastMessage.discussion.photoUrl);
-                }
-            }
+            holder.initialView.setDiscussion(discussionAndLastMessage.discussion);
 
             if (discussionAndLastMessage.unreadCount > 0) {
                 holder.lastMessageUnreadImageView.setVisibility(View.VISIBLE);
@@ -639,8 +626,6 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
         }
 
         class DiscussionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-            final boolean locked;
-            final View discussionRootView;
             final ImageView backgroundImageView;
             final InitialView initialView;
             final TextView nameTextView;
@@ -652,10 +637,8 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
             final ImageView notificationsMutedImageView;
             final View customColorView;
 
-            DiscussionViewHolder(View discussionRootView, boolean locked) {
+            DiscussionViewHolder(View discussionRootView) {
                 super(discussionRootView);
-                this.discussionRootView = discussionRootView;
-                this.locked = locked;
                 discussionRootView.setOnClickListener(this);
                 discussionRootView.setOnLongClickListener(this);
                 backgroundImageView = discussionRootView.findViewById(R.id.discussion_background_image);

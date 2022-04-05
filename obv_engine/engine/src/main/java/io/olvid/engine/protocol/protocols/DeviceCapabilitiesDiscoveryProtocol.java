@@ -363,6 +363,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
       public ConcreteProtocolState executeStep() throws Exception {
          ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
+         boolean gainedOneToOneCapability = false;
          {
             // check whether the current device has different capabilities and update them
 
@@ -375,10 +376,26 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
                return new FinishedProtocolState();
             }
 
+            gainedOneToOneCapability = newSet.contains(ObvCapability.ONE_TO_ONE_CONTACTS) && !currentSet.contains(ObvCapability.ONE_TO_ONE_CONTACTS);
+
             // something changed --> update the device
             protocolManagerSession.identityDelegate.setCurrentDevicePublishedCapabilities(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.newOwnCapabilities);
          }
 
+         {
+            // if we just gained the oneToOne capability, notify all contacts of their status
+            if (gainedOneToOneCapability) {
+               UID childProtocolInstanceUid = new UID(getPrng());
+               CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                       SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                       ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID,
+                       childProtocolInstanceUid,
+                       false
+               );
+               ChannelMessageToSend messageToSend = new OneToOneContactInvitationProtocol.InitiateOneToOneStatusSyncWithAllContactsMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
+               protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            }
+         }
 
          {
             // notify all contacts

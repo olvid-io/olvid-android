@@ -23,7 +23,6 @@ package io.olvid.engine.networkfetch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -40,7 +39,6 @@ import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 import io.olvid.engine.datatypes.containers.ReceivedAttachment;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
-import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
@@ -110,8 +108,8 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         this.deleteMessageAndAttachmentsCoordinator = new DeleteMessageAndAttachmentsCoordinator(this, sslSocketFactory, createServerSessionCoordinator);
         this.serverPushNotificationsCoordinator = new RegisterServerPushNotificationsCoordinator(this, sslSocketFactory, createServerSessionCoordinator, downloadMessagesAndListAttachmentsCoordinator);
         this.downloadMessagesAndListAttachmentsCoordinator.setRegisterServerPushNotificationDelegate(this.serverPushNotificationsCoordinator);
-        this.serverQueryCoordinator = new ServerQueryCoordinator(this, sslSocketFactory, prng, createServerSessionCoordinator);
         this.serverUserDataCoordinator = new ServerUserDataCoordinator(this, sslSocketFactory, createServerSessionCoordinator, jsonObjectMapper, prng);
+        this.serverQueryCoordinator = new ServerQueryCoordinator(this, sslSocketFactory, prng, createServerSessionCoordinator, serverUserDataCoordinator);
         this.freeTrialCoordinator = new FreeTrialCoordinator(this, sslSocketFactory);
         this.verifyReceiptCoordinator = new VerifyReceiptCoordinator(this, sslSocketFactory, createServerSessionCoordinator);
         this.wellKnownCoordinator = new WellKnownCoordinator(this, sslSocketFactory, jsonObjectMapper);
@@ -513,9 +511,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     }
 
     public void pingWebsocket (Identity ownedIdentity) {
-        if (!websocketCoordinator.pingWebsocket(ownedIdentity)) {
-            notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PING_LOST, new HashMap<>());
-        }
+        websocketCoordinator.pingWebsocket(ownedIdentity);
     }
 
     @Override

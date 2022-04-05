@@ -17,6 +17,11 @@
         android:icon="@drawable/ic_pref_hide_notification_contents"
         android:widgetLayout="@layout/preference_widget_header_chevron" />
     <Preference
+        android:title="@string/pref_category_contacts_and_groups"
+        android:fragment="io.olvid.messenger.settings.ContactsAndGroupsPreferenceFragment"
+        android:icon="@drawable/ic_pref_group"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
         android:title="@string/pref_category_lock_title"
         android:key="pref_header_key_lock_screen"
         android:fragment="io.olvid.messenger.settings.LockPreferenceFragment"

@@ -45,4 +45,8 @@ public abstract class UploadNotifications {
     public static final String NOTIFICATION_OUTBOX_ATTACHMENT_SIGNED_URL_REFRESHED_OWNED_IDENTITY_KEY = "owned_identity";
     public static final String NOTIFICATION_OUTBOX_ATTACHMENT_SIGNED_URL_REFRESHED_MESSAGE_UID_KEY = "message_uid";
     public static final String NOTIFICATION_OUTBOX_ATTACHMENT_SIGNED_URL_REFRESHED_ATTACHMENT_NUMBER_KEY = "attachment_number";
+
+    public static final String NOTIFICATION_MESSAGE_UPLOAD_FAILED = "network_send_notification_message_upload_failed";
+    public static final String NOTIFICATION_MESSAGE_UPLOAD_FAILED_OWNED_IDENTITY_KEY = "ownedIdentity"; // Identity
+    public static final String NOTIFICATION_MESSAGE_UPLOAD_FAILED_UID_KEY = "uid"; // UID
 }

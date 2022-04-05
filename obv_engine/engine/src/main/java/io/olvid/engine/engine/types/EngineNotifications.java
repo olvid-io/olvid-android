@@ -75,9 +75,15 @@ public abstract class EngineNotifications {
     public static final String MESSAGE_UPLOADED_IDENTIFIER_KEY = "identifier"; // byte[] (message UID)
     public static final String MESSAGE_UPLOADED_TIMESTAMP_FROM_SERVER = "timestamp_from_server";
 
+    public static final String MESSAGE_UPLOAD_FAILED = "engine_notification_message_upload_failed";
+    public static final String MESSAGE_UPLOAD_FAILED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String MESSAGE_UPLOAD_FAILED_IDENTIFIER_KEY = "identifier"; // byte[] (message UID)
+
     public static final String NEW_CONTACT = "engine_notification_new_contact";
     public static final String NEW_CONTACT_OWNED_IDENTITY_KEY = "owned_identity"; // byte[]
     public static final String NEW_CONTACT_CONTACT_IDENTITY_KEY = "contact_identity"; // ObvIdentity
+    public static final String NEW_CONTACT_ONE_TO_ONE_KEY = "one_to_one"; // boolean
+    public static final String NEW_CONTACT_TRUST_LEVEL_KEY = "trust_level"; // int
     public static final String NEW_CONTACT_HAS_UNTRUSTED_PUBLISHED_DETAILS_KEY = "has_untrusted_published_details"; // boolean
 
     public static final String CONTACT_DELETED = "engine_notification_contact_deleted";
@@ -304,4 +310,14 @@ public abstract class EngineNotifications {
     public static final String OWN_CAPABILITIES_UPDATED = "engine_notification_own_capabilities_updated"; // List<ObvCapabilities>
     public static final String OWN_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
     public static final String OWN_CAPABILITIES_UPDATED_CAPABILITIES = "capabilities"; // List<ObvCapabilities>
+
+    public static final String CONTACT_ONE_TO_ONE_CHANGED = "engine_notification_contact_one_to_one_changed";
+    public static final String CONTACT_ONE_TO_ONE_CHANGED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String CONTACT_ONE_TO_ONE_CHANGED_BYTES_CONTACT_IDENTITY_KEY = "bytes_contact_identity"; // byte[]
+    public static final String CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY = "one_to_one"; // boolean
+
+    public static final String CONTACT_TRUST_LEVEL_INCREASED = "engine_notification_contact_trust_level_increased";
+    public static final String CONTACT_TRUST_LEVEL_INCREASED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String CONTACT_TRUST_LEVEL_INCREASED_BYTES_CONTACT_IDENTITY_KEY = "bytes_contact_identity"; // byte[]
+    public static final String CONTACT_TRUST_LEVEL_INCREASED_TRUST_LEVEL_KEY = "trust_level"; // int
 }

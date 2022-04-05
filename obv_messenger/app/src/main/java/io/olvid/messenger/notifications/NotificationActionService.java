@@ -84,6 +84,9 @@ public class NotificationActionService extends IntentService {
                             case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
                                 invitation.associatedDialog.setResponseToAcceptGroupInvite(true);
                                 break;
+                            case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
+                                invitation.associatedDialog.setResponseToAcceptOneToOneInvitation(true);
+                                break;
                             default:
                                 throw new Exception("Bad dialog category");
                         }
@@ -109,6 +112,9 @@ public class NotificationActionService extends IntentService {
                                 break;
                             case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
                                 invitation.associatedDialog.setResponseToAcceptGroupInvite(false);
+                                break;
+                            case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
+                                invitation.associatedDialog.setResponseToAcceptOneToOneInvitation(false);
                                 break;
                             default:
                                 throw new Exception("Bad dialog category");

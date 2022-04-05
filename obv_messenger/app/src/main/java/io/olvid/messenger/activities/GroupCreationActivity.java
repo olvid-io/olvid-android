@@ -87,7 +87,6 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
 
 
     ContactsSelectionFragment contactsSelectionFragment;
-    GroupNameFragment groupNameFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -131,10 +130,9 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
                 switch (position) {
                     case CONTACTS_SELECTION_TAB:
                         contactsSelectionFragment = (ContactsSelectionFragment) fragment;
-                        contactsSelectionFragment.setSelectedContacts(groupCreationViewModel.getSelectedContacts().getValue());
+                        contactsSelectionFragment.setInitiallySelectedContacts(groupCreationViewModel.getSelectedContacts().getValue());
                         break;
                     case GROUP_NAME_TAB:
-                        groupNameFragment = (GroupNameFragment) fragment;
                         break;
                 }
                 return fragment;
@@ -200,34 +198,32 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
 
     @Override
     public boolean onCreateOptionsMenu(@NonNull Menu menu) {
-        switch (viewPager.getCurrentItem()) {
-            case CONTACTS_SELECTION_TAB: {
-                getMenuInflater().inflate(R.menu.menu_group_creation_contact_selection, menu);
-                final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-                searchView.setQueryHint(getString(R.string.hint_search_contact_name));
-                if (SettingsActivity.useKeyboardIncognitoMode()) {
-                    searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
-                }
-                searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_FILTER);
-                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    final EditText editText = new AppCompatEditText(searchView.getContext());
-                    {
-                        contactsSelectionFragment.setContactFilterEditText(editText);
-                    }
-
-                    @Override
-                    public boolean onQueryTextSubmit(String query) {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onQueryTextChange(String newText) {
-                        editText.setText(newText);
-                        return true;
-                    }
-                });
-                break;
+        if (viewPager.getCurrentItem() == CONTACTS_SELECTION_TAB) {
+            getMenuInflater().inflate(R.menu.menu_group_creation_contact_selection, menu);
+            final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+            searchView.setQueryHint(getString(R.string.hint_search_contact_name));
+            if (SettingsActivity.useKeyboardIncognitoMode()) {
+                searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
             }
+            searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_FILTER);
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                final EditText editText = new AppCompatEditText(searchView.getContext());
+
+                {
+                    contactsSelectionFragment.setContactFilterEditText(editText);
+                }
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    editText.setText(newText);
+                    return true;
+                }
+            });
         }
         return true;
     }
@@ -244,13 +240,11 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -399,9 +393,9 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
             return rootView;
         }
 
-        void setSelectedContacts(List<Contact> selectedContacts) {
+        void setInitiallySelectedContacts(List<Contact> selectedContacts) {
             if (selectedContacts != null && filteredContactListFragment != null) {
-                filteredContactListFragment.setSelectedContacts(selectedContacts);
+                filteredContactListFragment.setInitiallySelectedContacts(selectedContacts);
             }
         }
 

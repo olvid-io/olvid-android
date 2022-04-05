@@ -30,12 +30,11 @@ import io.olvid.engine.channel.datatypes.ChannelManagerSession;
 import io.olvid.engine.channel.datatypes.ChannelManagerSessionFactory;
 import io.olvid.engine.channel.datatypes.ChannelReceivedApplicationMessage;
 import io.olvid.engine.channel.datatypes.ChannelReceivedMessage;
-import io.olvid.engine.channel.datatypes.NetworkReceivedMessageDecryptorDelegate;
 import io.olvid.engine.datatypes.containers.MessageType;
 import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
 import io.olvid.engine.datatypes.containers.ProtocolReceivedMessage;
 
-public class ChannelCoordinator implements NetworkReceivedMessageDecryptorDelegate {
+public class ChannelCoordinator {
     private final ChannelManagerSessionFactory channelManagerSessionFactory;
 
 
@@ -45,8 +44,6 @@ public class ChannelCoordinator implements NetworkReceivedMessageDecryptorDelega
 
 
 
-
-    @Override
     public void decryptAndProcess(NetworkReceivedMessage networkReceivedMessage) {
         try (ChannelManagerSession channelManagerSession = channelManagerSessionFactory.getSession()) {
             channelManagerSession.session.startTransaction();
@@ -82,6 +79,8 @@ public class ChannelCoordinator implements NetworkReceivedMessageDecryptorDelega
         }
     }
 
+
+
     private void decryptAndProcess(ChannelManagerSession channelManagerSession, NetworkReceivedMessage networkReceivedMessage, AuthEncKeyAndChannelInfo authEncKeyAndChannelInfo) {
         if (channelManagerSession.networkFetchDelegate == null) {
             return;
@@ -113,7 +112,8 @@ public class ChannelCoordinator implements NetworkReceivedMessageDecryptorDelega
                 try {
                     ChannelReceivedApplicationMessage channelReceivedApplicationMessage = ChannelReceivedApplicationMessage.of(channelReceivedMessage);
                     if (channelReceivedApplicationMessage == null) {
-                        Logger.e("Error parsing a ChannelReceivedMessage");
+                        Logger.e("Error parsing a ChannelReceivedMessage, deleting it");
+                        channelManagerSession.networkFetchDelegate.deleteMessageAndAttachments(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid());
                         break;
                     }
                     channelManagerSession.networkFetchDelegate.setAttachmentKeyAndMetadataAndMessagePayload(

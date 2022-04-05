@@ -56,6 +56,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.helper.widget.Flow;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -66,6 +67,8 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import java.util.Arrays;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.App;
@@ -78,6 +81,7 @@ import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.entity.ActionShortcutConfiguration;
+import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.fragments.FilteredDiscussionListFragment;
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment;
@@ -149,16 +153,15 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
             return true;
         });
 
-        adapter = new OwnedIdentitySelectionDialogFragment.OwnedIdentityListAdapter(getLayoutInflater(), bytesOwnedIdentity -> {
+        adapter = new OwnedIdentitySelectionDialogFragment.OwnedIdentityListAdapter(getLayoutInflater(), (byte[] bytesOwnedIdentity) -> {
             if (ownedIdentityPopupWindow != null) {
                 ownedIdentityPopupWindow.dismiss();
             }
-            AppSingleton.getInstance().selectIdentity(bytesOwnedIdentity, null);
+            viewModel.setBytesOwnedIdentity(bytesOwnedIdentity);
         });
-        Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? null : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
+        Transformations.switchMap(viewModel.getOwnedIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? null : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
 
-        AppSingleton.getCurrentIdentityLiveData().observe(this, this::bindOwnedIdentity);
-
+        viewModel.getOwnedIdentityLiveData().observe(this, this::bindOwnedIdentity);
 
         discussionEmptyTextView = findViewById(R.id.discussion_empty_text_view);
         discussionInitialView = findViewById(R.id.discussion_initial_view);
@@ -213,8 +216,8 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         CheckBox confirmCheckbox = findViewById(R.id.checkbox_confirm_send);
         confirmCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.setActionConfirmBeforeSending(isChecked));
 
-//        CheckBox vibrateCheckbox = findViewById(R.id.checkbox_vibrate_on_send);
-//        vibrateCheckbox.setOnCheckedChangeListener(((buttonView, isChecked) -> viewModel.setActionVibrateAfterSending(isChecked)));
+        CheckBox vibrateCheckbox = findViewById(R.id.checkbox_vibrate_on_send);
+        vibrateCheckbox.setOnCheckedChangeListener(((buttonView, isChecked) -> viewModel.setActionVibrateAfterSending(isChecked)));
 
         TextView cancelButton = findViewById(R.id.button_cancel);
         cancelButton.setOnClickListener(v -> finish());
@@ -276,25 +279,55 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
             try {
                 ActionShortcutConfiguration actionShortcutConfiguration = AppDatabase.getInstance().actionShortcutConfigurationDao().getByAppWidgetId(appWidgetId);
                 if (actionShortcutConfiguration != null) {
-                    ActionShortcutConfiguration.JsonConfiguration jsonConfiguration = actionShortcutConfiguration.getJsonConfiguration();
-                    if (jsonConfiguration != null) {
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            viewModel.setActionDiscussionId(actionShortcutConfiguration.discussionId);
+                    Discussion discussion = AppDatabase.getInstance().discussionDao().getById(actionShortcutConfiguration.discussionId);
+                    if (discussion != null) {
+                        OwnedIdentity ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(discussion.bytesOwnedIdentity);
+                        if (ownedIdentity != null) {
+                            if (!ownedIdentity.isHidden() || Arrays.equals(ownedIdentity.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
+                                new Handler(Looper.getMainLooper()).post(() -> viewModel.setBytesOwnedIdentity(ownedIdentity.bytesOwnedIdentity));
+                                ActionShortcutConfiguration.JsonConfiguration jsonConfiguration = actionShortcutConfiguration.getJsonConfiguration();
+                                if (jsonConfiguration != null) {
+                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                        viewModel.setActionDiscussionId(actionShortcutConfiguration.discussionId);
 
-                            widgetLabelEditText.setText(jsonConfiguration.widgetLabel);
-                            viewModel.setWidgetIcon(jsonConfiguration.widgetIcon);
-                            viewModel.setWidgetTint(jsonConfiguration.widgetIconTint);
-                            widgetBadgeCheckBox.setChecked(jsonConfiguration.widgetShowBadge);
+                                        widgetLabelEditText.setText(jsonConfiguration.widgetLabel);
+                                        viewModel.setWidgetIcon(jsonConfiguration.widgetIcon);
+                                        viewModel.setWidgetTint(jsonConfiguration.widgetIconTint);
+                                        widgetBadgeCheckBox.setChecked(jsonConfiguration.widgetShowBadge);
 
-                            messageEditText.setText(jsonConfiguration.messageToSend);
-                            confirmCheckbox.setChecked(jsonConfiguration.confirmBeforeSend);
-//                            vibrateCheckbox.setChecked(jsonConfiguration.vibrateOnSend);
-                        });
+                                        messageEditText.setText(jsonConfiguration.messageToSend);
+                                        confirmCheckbox.setChecked(jsonConfiguration.confirmBeforeSend);
+                                        vibrateCheckbox.setChecked(jsonConfiguration.vibrateOnSend);
+                                    });
+                                }
+                                return;
+                            } else {
+                                // trying to load the configuration for a hidden identity not currently open --> prompt for password
+                                final ActionShortcutConfiguration.JsonConfiguration jsonConfiguration = actionShortcutConfiguration.getJsonConfiguration();
+                                new Handler(Looper.getMainLooper()).post(() -> new OpenInitialHiddenProfileDialog(this, ownedIdentity.bytesOwnedIdentity, () -> {
+                                    if (jsonConfiguration != null) {
+                                        viewModel.setActionDiscussionId(actionShortcutConfiguration.discussionId);
+
+                                        widgetLabelEditText.setText(jsonConfiguration.widgetLabel);
+                                        viewModel.setWidgetIcon(jsonConfiguration.widgetIcon);
+                                        viewModel.setWidgetTint(jsonConfiguration.widgetIconTint);
+                                        widgetBadgeCheckBox.setChecked(jsonConfiguration.widgetShowBadge);
+
+                                        messageEditText.setText(jsonConfiguration.messageToSend);
+                                        confirmCheckbox.setChecked(jsonConfiguration.confirmBeforeSend);
+                                        vibrateCheckbox.setChecked(jsonConfiguration.vibrateOnSend);
+                                    }
+                                }));
+                                return;
+                            }
+                        }
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            // default ownedIdentity if actionShortcutConfiguration == null or the associated discussion does not exist
+            new Handler(Looper.getMainLooper()).post(() -> viewModel.setBytesOwnedIdentity(AppSingleton.getBytesCurrentIdentity()));
         });
     }
 
@@ -306,15 +339,11 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
 
 
         if (ownedIdentity == null) {
-            viewModel.setBytesOwnedIdentity(null);
-            currentIdentityInitialView.setKeycloakCertified(false);
-            currentIdentityInitialView.setInactive(false);
-            currentIdentityInitialView.setInitial(new byte[0], " ");
+            currentIdentityInitialView.setUnknown();
             currentIdentityMutedImageView.setVisibility(View.GONE);
             return;
         }
 
-        viewModel.setBytesOwnedIdentity(ownedIdentity.bytesOwnedIdentity);
         if (ownedIdentity.customDisplayName != null) {
             currentNameTextView.setText(ownedIdentity.customDisplayName);
             JsonIdentityDetails identityDetails = ownedIdentity.getIdentityDetails();
@@ -342,14 +371,8 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
                 currentNameSecondLineTextView.setText(null);
             }
         }
-        currentIdentityInitialView.setInactive(!ownedIdentity.active);
-        currentIdentityInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-        if (ownedIdentity.photoUrl != null) {
-            currentIdentityInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-        } else {
-            currentIdentityInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-        }
-        if (ownedIdentity.shouldMuteNotifications()) {
+        currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
+        if (ownedIdentity.prefMuteNotifications && (ownedIdentity.prefMuteNotificationsTimestamp == null || ownedIdentity.prefMuteNotificationsTimestamp > System.currentTimeMillis())) {
             currentIdentityMutedImageView.setVisibility(View.VISIBLE);
         } else {
             currentIdentityMutedImageView.setVisibility(View.GONE);
@@ -372,32 +395,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         discussionEmptyTextView.setVisibility(View.GONE);
 
         discussionInitialView.setVisibility(View.VISIBLE);
-        if (discussionAndContactNames.discussion.bytesGroupOwnerAndUid != null) {
-            discussionInitialView.setKeycloakCertified(discussionAndContactNames.discussion.keycloakManaged);
-            discussionInitialView.setInactive(!discussionAndContactNames.discussion.active);
-            if (discussionAndContactNames.discussion.photoUrl == null) {
-                discussionInitialView.setGroup(discussionAndContactNames.discussion.bytesGroupOwnerAndUid);
-            } else {
-                discussionInitialView.setPhotoUrl(discussionAndContactNames.discussion.bytesGroupOwnerAndUid, discussionAndContactNames.discussion.photoUrl);
-            }
-        } else if (discussionAndContactNames.discussion.bytesContactIdentity != null){
-            discussionInitialView.setKeycloakCertified(discussionAndContactNames.discussion.keycloakManaged);
-            discussionInitialView.setInactive(!discussionAndContactNames.discussion.active);
-            if (discussionAndContactNames.discussion.photoUrl == null) {
-                discussionInitialView.setInitial(discussionAndContactNames.discussion.bytesContactIdentity, App.getInitial(discussionAndContactNames.discussion.title));
-            } else {
-                discussionInitialView.setPhotoUrl(discussionAndContactNames.discussion.bytesContactIdentity, discussionAndContactNames.discussion.photoUrl);
-            }
-        } else {
-            discussionInitialView.setKeycloakCertified(false);
-            discussionInitialView.setInactive(false);
-            discussionInitialView.setLocked(true);
-            if (discussionAndContactNames.discussion.photoUrl == null) {
-                discussionInitialView.setInitial(new byte[0], "");
-            } else {
-                discussionInitialView.setPhotoUrl(new byte[0], discussionAndContactNames.discussion.photoUrl);
-            }
-        }
+        discussionInitialView.setDiscussion(discussionAndContactNames.discussion);
 
         discussionTitleTextView.setVisibility(View.VISIBLE);
         discussionTitleTextView.setText(discussionAndContactNames.discussion.title);
@@ -421,6 +419,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         if (separator == null || adapter == null) {
             return;
         }
+        @SuppressLint("InflateParams")
         View popupView = getLayoutInflater().inflate(R.layout.popup_switch_owned_identity, null);
         ownedIdentityPopupWindow = new PopupWindow(popupView, separator.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT, true);
         ownedIdentityPopupWindow.setElevation(12);
@@ -436,16 +435,60 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         ownedIdentityPopupWindow.showAsDropDown(separator);
     }
 
-    private static class OpenHiddenProfileDialog extends io.olvid.messenger.customClasses.OpenHiddenProfileDialog {
+    private class OpenHiddenProfileDialog extends io.olvid.messenger.customClasses.OpenHiddenProfileDialog {
         public OpenHiddenProfileDialog(@NonNull FragmentActivity activity) {
             super(activity);
         }
 
+        @Nullable
         @Override
-        protected void onHiddenIdentityPasswordEntered(byte[] byteOwnedIdentity) {
-            AppSingleton.getInstance().selectIdentity(byteOwnedIdentity, null);
+        protected String getAdditionalMessage() {
+            if (SettingsActivity.useApplicationLockScreen()) {
+                return getString(R.string.dialog_message_widget_open_hidden_profile_warning);
+            } else {
+                return getString(R.string.dialog_message_widget_open_hidden_profile_warning_no_lock_screen);
+            }
+        }
+
+        @Override
+        protected void onHiddenIdentityPasswordEntered(AlertDialog dialog, byte[] byteOwnedIdentity) {
+            dialog.dismiss();
+            viewModel.setBytesOwnedIdentity(byteOwnedIdentity);
         }
     }
+
+    private class OpenInitialHiddenProfileDialog extends io.olvid.messenger.customClasses.OpenHiddenProfileDialog {
+        @NonNull private final byte[] targetBytesOwnedIdentity;
+        @NonNull private final Runnable callback;
+
+        public OpenInitialHiddenProfileDialog(@NonNull FragmentActivity activity, @NonNull byte[] targetBytesOwnedIdentity, @NonNull Runnable callback) {
+            super(activity);
+            this.targetBytesOwnedIdentity = targetBytesOwnedIdentity;
+            this.callback = callback;
+        }
+
+        @Nullable
+        @Override
+        protected String getAdditionalMessage() {
+            return getString(R.string.dialog_message_widget_open_initial_hidden_profile);
+        }
+
+        @Override
+        protected void onDismissCallback() {
+            finish();
+        }
+
+        @Override
+        protected void onHiddenIdentityPasswordEntered(AlertDialog dialog, byte[] byteOwnedIdentity) {
+            if (Arrays.equals(byteOwnedIdentity, targetBytesOwnedIdentity)) {
+                dialog.setOnDismissListener(null);
+                dialog.dismiss();
+                viewModel.setBytesOwnedIdentity(byteOwnedIdentity);
+                callback.run();
+            }
+        }
+    }
+
 
     private void openColorPicker() {
         if (widgetTintButton == null) {
@@ -535,7 +578,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
 
         // center the popup below the button
         int[] pos = new int[2];
-        widgetTintButton.getLocationOnScreen(pos);
+        widgetTintButton.getLocationInWindow(pos);
         final int xOffset;
         if (pos[0] - (popupWidth - widgetTintButton.getWidth()) / 2 < thirtyTwoDp) {
             xOffset = thirtyTwoDp - pos[0];
@@ -604,7 +647,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
 
         // center the popup below the button
         int[] pos = new int[2];
-        widgetIconButton.getLocationOnScreen(pos);
+        widgetIconButton.getLocationInWindow(pos);
         final int xOffset;
         if (pos[0] - (popupWidth - widgetIconButton.getWidth()) / 2 < thirtyTwoDp) {
             xOffset = thirtyTwoDp - pos[0];
@@ -634,7 +677,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
 
             configuration.messageToSend = viewModel.getActionMessage().trim();
             configuration.confirmBeforeSend = viewModel.isActionConfirmBeforeSending();
-//            configuration.vibrateOnSend = viewModel.isActionVibrateAfterSending();
+            configuration.vibrateOnSend = viewModel.isActionVibrateAfterSending();
 
             try {
                 ActionShortcutConfiguration actionShortcutConfiguration = AppDatabase.getInstance().actionShortcutConfigurationDao().getByAppWidgetId(appWidgetId);

@@ -57,6 +57,7 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.dao.MessageDao;
 import io.olvid.messenger.databases.tasks.ComputeAttachmentPreviewsAndPostMessageTask;
 import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
+import io.olvid.messenger.services.UnifiedForegroundService;
 
 @SuppressWarnings("CanBeFinal")
 @Entity(
@@ -96,6 +97,7 @@ public class Message {
     public static final String IMAGE_COUNT = "image_count";
     public static final String WIPED_ATTACHMENT_COUNT = "wiped_attachment_count";
     public static final String EDITED = "edited";
+    public static final String FORWARDED = "forwarded";
     public static final String REACTIONS = "reactions";
     public static final String IMAGE_RESOLUTIONS = "image_resolutions"; // null or "" = no images, "102x234;a340x445" = 2 images, second one is animated
     public static final String MISSED_MESSAGE_COUNT = "missed_message_count"; // only used in inbound messages: the number of missing sequence numbers when this message is received. 0 --> everything is fine
@@ -104,14 +106,14 @@ public class Message {
     // This enum is used in protobuf for webclient, please send notification if you modify anything
     public static final int STATUS_UNPROCESSED = 0; // message not passed to the engine yes
     public static final int STATUS_PROCESSING = 1; // message passed to the Engine (at least for some recipients)
-    public static final int STATUS_SENT = 2; // message sent to ALL recipients
+    public static final int STATUS_SENT = 2; // message (and all attachments) uploaded for ALL recipients
     public static final int STATUS_UNREAD = 3;
     public static final int STATUS_READ = 4;
     public static final int STATUS_DRAFT = 5;
     public static final int STATUS_DELIVERED = 6;
     public static final int STATUS_DELIVERED_AND_READ = 7;
     public static final int STATUS_COMPUTING_PREVIEW = 8; // computing a preview of the image/video attachments before passing to engine
-
+    public static final int STATUS_UNDELIVERED = 9; // for outbound messages, the message could not be uploaded/delivered and will never be
 
     public static final int WIPE_STATUS_NONE = 0;
     public static final int WIPE_STATUS_WIPE_ON_READ = 1;
@@ -205,6 +207,9 @@ public class Message {
     @ColumnInfo(name = EDITED)
     public int edited;
 
+    @ColumnInfo(name = FORWARDED)
+    public boolean forwarded;
+
     @ColumnInfo(name = REACTIONS)
     @Nullable
     public String reactions;
@@ -221,7 +226,7 @@ public class Message {
     }
 
     // default constructor required by Room
-    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, byte[] engineMessageIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount) {
+    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, byte[] engineMessageIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount) {
         this.senderSequenceNumber = senderSequenceNumber;
         this.contentBody = contentBody;
         this.jsonReply = jsonReply;
@@ -240,6 +245,7 @@ public class Message {
         this.imageCount = imageCount;
         this.wipedAttachmentCount = wipedAttachmentCount;
         this.edited = edited;
+        this.forwarded = forwarded;
         this.reactions = reactions;
         this.imageResolutions = imageResolutions;
         this.missedMessageCount = missedMessageCount;
@@ -272,6 +278,7 @@ public class Message {
         this.imageCount = imageCount;
         this.wipedAttachmentCount = 0;
         this.edited = EDITED_NONE;
+        this.forwarded = false;
         this.reactions = null;
         this.imageResolutions = null;
         this.missedMessageCount = 0;
@@ -342,6 +349,7 @@ public class Message {
                 senderThreadIdentifier,
                 0, 0, 0,
                 EDITED_NONE,
+                false,
                 null,
                 null,
                 0);
@@ -365,6 +373,7 @@ public class Message {
                 new UUID(0, 0),
                 0, 0, 0,
                 EDITED_NONE,
+                false,
                 null,
                 null,
                 0
@@ -726,6 +735,8 @@ public class Message {
                         true,
                         false
                 );
+
+                UnifiedForegroundService.processPostMessageOutput(postMessageOutput);
             } else if (messageType == TYPE_DISCUSSION_SETTINGS_UPDATE) {
                 returnReceiptNonce = null;
                 returnReceiptKey = null;
@@ -844,6 +855,8 @@ public class Message {
                         true,
                         false
                 );
+
+                UnifiedForegroundService.processPostMessageOutput(postMessageOutput);
             } else if (messageType == TYPE_DISCUSSION_SETTINGS_UPDATE) {
                 returnReceiptNonce = null;
                 returnReceiptKey = null;
@@ -909,7 +922,7 @@ public class Message {
     }
 
     public boolean refreshOutboundStatus() {
-        if (messageType != TYPE_OUTBOUND_MESSAGE) {
+        if (messageType != TYPE_OUTBOUND_MESSAGE || status == STATUS_UNDELIVERED) {
             return false;
         }
         List<MessageRecipientInfo> messageRecipientInfos = AppDatabase.getInstance().messageRecipientInfoDao().getAllByMessageId(id);
@@ -930,8 +943,10 @@ public class Message {
             }
         }
         if (newStatus != status) {
+            boolean wasSent = (status == STATUS_UNPROCESSED || status == STATUS_PROCESSING || status == STATUS_COMPUTING_PREVIEW)
+                    && (newStatus == STATUS_SENT || newStatus == STATUS_DELIVERED || newStatus == STATUS_DELIVERED_AND_READ);
             status = newStatus;
-            if (status == STATUS_SENT && jsonExpiration != null) {
+            if (wasSent && jsonExpiration != null) {
                 App.runThread(new ExpiringOutboundMessageSent(this));
             }
             return true;
@@ -1006,6 +1021,9 @@ public class Message {
     public JsonMessage getJsonMessage() {
         JsonMessage jsonMessage = new JsonMessage();
         jsonMessage.body = contentBody;
+        if (forwarded) {
+            jsonMessage.forwarded = true;
+        }
         jsonMessage.senderSequenceNumber = senderSequenceNumber;
         jsonMessage.senderThreadIdentifier = senderThreadIdentifier;
         if (jsonReply != null) {
@@ -1136,6 +1154,7 @@ public class Message {
             contentBody = null;
             jsonReply = null;
             edited = EDITED_NONE;
+            forwarded = false;
             wipeStatus = WIPE_STATUS_WIPED;
             reactions = null;
             imageResolutions = null;
@@ -1150,6 +1169,7 @@ public class Message {
         contentBody = null;
         jsonReply = null;
         edited = EDITED_NONE;
+        forwarded = false;
         wipeStatus = WIPE_STATUS_REMOTE_DELETED;
         reactions = null;
         db.messageDao().updateWipe(id, WIPE_STATUS_REMOTE_DELETED);
@@ -1270,6 +1290,7 @@ public class Message {
         UUID senderThreadIdentifier;
         byte[] groupUid;
         byte[] groupOwner;
+        Boolean forwarded;
         JsonMessageReference jsonReply;
         JsonExpiration jsonExpiration;
 
@@ -1326,6 +1347,16 @@ public class Message {
         @JsonProperty("go")
         public void setGroupOwner(byte[] groupOwner) {
             this.groupOwner = groupOwner;
+        }
+
+        @JsonProperty("fw")
+        public Boolean isForwarded() {
+            return forwarded;
+        }
+
+        @JsonProperty("fw")
+        public void setForwarded(Boolean forwarded) {
+            this.forwarded = forwarded;
         }
 
         @JsonProperty("re")

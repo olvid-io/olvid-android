@@ -28,6 +28,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.HashSet;
+import java.util.List;
 
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
@@ -77,6 +78,13 @@ public class StorageManagerViewModel extends ViewModel {
 
     public LiveData<Integer> getSelectedCountLiveData() {
         return selectedCountLiveData;
+    }
+
+    public void selectAllFyles(@NonNull List<FyleMessageJoinWithStatusDao.FyleAndOrigin> fyleAndOrigins) {
+        for (FyleMessageJoinWithStatusDao.FyleAndOrigin fyleAndOrigin : fyleAndOrigins) {
+            selectedFyles.add(fyleAndOrigin.fyleAndStatus);
+        }
+        selectedCountLiveData.postValue(fyleAndOrigins.size());
     }
 
     public enum SortKey {

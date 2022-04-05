@@ -27,6 +27,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import java.util.Arrays;
 import java.util.List;
 
 import io.olvid.messenger.App;
@@ -34,15 +35,17 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.entity.ActionShortcutConfiguration;
+import io.olvid.messenger.databases.entity.OwnedIdentity;
 
 public class ActionShortcutConfigurationViewModel extends ViewModel {
     private final MutableLiveData<byte[]> bytesOwnedIdentityLiveData;
+    private final LiveData<OwnedIdentity> ownedIdentityLiveData;
     private final MutableLiveData<Long> actionDiscussionIdLiveData;
     private final LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> discussionListLiveData;
     private final LiveData<DiscussionDao.DiscussionAndContactDisplayNames> discussionLiveData;
     private String actionMessage = null;
     private boolean actionConfirmBeforeSending = false;
-//    private boolean actionVibrateAfterSending = true;
+    private boolean actionVibrateAfterSending = true;
 
     private final MutableLiveData<String> widgetLabelLiveData;
     private final MutableLiveData<String> widgetIconLiveData;
@@ -54,12 +57,18 @@ public class ActionShortcutConfigurationViewModel extends ViewModel {
 
     public ActionShortcutConfigurationViewModel() {
         bytesOwnedIdentityLiveData = new MutableLiveData<>(null);
+        ownedIdentityLiveData = Transformations.switchMap(bytesOwnedIdentityLiveData, (byte[] bytesOwnedIdentity) -> {
+            if (bytesOwnedIdentity == null) {
+                return null;
+            }
+            return AppDatabase.getInstance().ownedIdentityDao().getLiveData(bytesOwnedIdentity);
+        });
         actionDiscussionIdLiveData = new MutableLiveData<>(null);
         discussionListLiveData = Transformations.switchMap(bytesOwnedIdentityLiveData, (byte[] bytesOwnedIdentity) -> {
             if (bytesOwnedIdentity == null) {
                 return null;
             }
-            return AppDatabase.getInstance().discussionDao().getAllWithContactNames(bytesOwnedIdentity, App.getContext().getString(R.string.text_contact_names_separator));
+            return AppDatabase.getInstance().discussionDao().getAllNotLockedWithContactNames(bytesOwnedIdentity, App.getContext().getString(R.string.text_contact_names_separator));
         });
 
         discussionLiveData = Transformations.switchMap(actionDiscussionIdLiveData, (Long discussionId) -> {
@@ -87,11 +96,10 @@ public class ActionShortcutConfigurationViewModel extends ViewModel {
 
     // to call only on the main thread!
     public void setBytesOwnedIdentity(byte[] bytesOwnedIdentity) {
-        // comment out for now, uncomment once the dialog always opens with the correct identity
-//        if (this.bytesOwnedIdentityLiveData.getValue() != null && !Arrays.equals(bytesOwnedIdentity, this.bytesOwnedIdentityLiveData.getValue())) {
-//            this.actionDiscussionIdLiveData.setValue(null);
-//            checkValid();
-//        }
+        if (this.bytesOwnedIdentityLiveData.getValue() != null && !Arrays.equals(bytesOwnedIdentity, this.bytesOwnedIdentityLiveData.getValue())) {
+            this.actionDiscussionIdLiveData.setValue(null);
+            checkValid();
+        }
         this.bytesOwnedIdentityLiveData.setValue(bytesOwnedIdentity);
     }
 
@@ -99,6 +107,10 @@ public class ActionShortcutConfigurationViewModel extends ViewModel {
     public void setActionDiscussionId(long discussionId) {
         this.actionDiscussionIdLiveData.setValue(discussionId);
         checkValid();
+    }
+
+    public LiveData<OwnedIdentity> getOwnedIdentityLiveData() {
+        return ownedIdentityLiveData;
     }
 
     public LiveData<Long> getActionDiscussionIdLiveData() {
@@ -130,13 +142,13 @@ public class ActionShortcutConfigurationViewModel extends ViewModel {
         this.actionConfirmBeforeSending = actionConfirmBeforeSending;
     }
 
-//    public boolean isActionVibrateAfterSending() {
-//        return actionVibrateAfterSending;
-//    }
+    public boolean isActionVibrateAfterSending() {
+        return actionVibrateAfterSending;
+    }
 
-//    public void setActionVibrateAfterSending(boolean actionVibrateAfterSending) {
-//        this.actionVibrateAfterSending = actionVibrateAfterSending;
-//    }
+    public void setActionVibrateAfterSending(boolean actionVibrateAfterSending) {
+        this.actionVibrateAfterSending = actionVibrateAfterSending;
+    }
 
     public LiveData<Boolean> getValidLiveData() {
         return validLiveData;

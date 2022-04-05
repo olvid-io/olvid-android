@@ -34,7 +34,6 @@ public class UploadMessageCompositeOperation extends Operation {
     public static final int RFC_MESSAGE_NOT_FOUND_IN_DATABASE = 1;
     public static final int RFC_NETWORK_ERROR = 3;
     public static final int RFC_IDENTITY_IS_INACTIVE = 10;
-    public static final int RFC_OK_WITH_MALFORMED_SERVER_RESPONSE = 11;
 
     private final SendManagerSessionFactory sendManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;

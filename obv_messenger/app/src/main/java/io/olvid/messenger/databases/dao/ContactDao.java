@@ -63,6 +63,18 @@ public interface ContactDao {
     void updateActive(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean active);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
+            " SET " + Contact.TRUST_LEVEL + " = :trustLevel " +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
+    void updateTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, int trustLevel);
+
+    @Query("UPDATE " + Contact.TABLE_NAME +
+            " SET " + Contact.ONE_TO_ONE + " = :oneToOne " +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
+    void updateOneToOne(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean oneToOne);
+
+    @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.NEW_PUBLISHED_DETAILS + " = :newPublishedDetails " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
@@ -111,14 +123,27 @@ public interface ContactDao {
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
     void updateCapabilityGroupsV2(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean capable);
 
+    @Query("UPDATE " + Contact.TABLE_NAME +
+            " SET " + Contact.CAPABILITY_ONE_TO_ONE_CONTACTS + " = :capable " +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
+    void updateCapabilityOneToOneContacts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean capable);
+
 
 
 
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
+            " AND " + Contact.ONE_TO_ONE + " = 1 " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllForOwnedIdentity(byte[] ownedIdentityBytes);
+    LiveData<List<Contact>> getAllOneToOneForOwnedIdentity(byte[] ownedIdentityBytes);
+
+    @Query("SELECT * FROM " + Contact.TABLE_NAME +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
+            " AND " + Contact.ONE_TO_ONE + " = 0 " +
+            " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
+    LiveData<List<Contact>> getAllNotOneToOneForOwnedIdentity(byte[] ownedIdentityBytes);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
@@ -136,9 +161,10 @@ public interface ContactDao {
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " != :bytesExcludedContactIdentity " +
             " AND " + Contact.ACTIVE + " = 1 " +
+            " AND " + Contact.ONE_TO_ONE + " = 1 " +
             " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllForOwnedIdentityWithChannelExcludingOne(byte[] bytesOwnedIdentity, byte[] bytesExcludedContactIdentity);
+    LiveData<List<Contact>> getAllOneToOneForOwnedIdentityWithChannelExcludingOne(byte[] bytesOwnedIdentity, byte[] bytesExcludedContactIdentity);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +

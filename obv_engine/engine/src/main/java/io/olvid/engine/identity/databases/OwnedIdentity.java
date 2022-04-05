@@ -474,6 +474,7 @@ public class OwnedIdentity implements ObvDatabase {
             OwnedDevice.createCurrentDevice(identityManagerSession, identity, prng);
             return ownedIdentity;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

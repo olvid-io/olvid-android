@@ -33,14 +33,8 @@
         <item name="android:statusBarColor">@color/olvid_gradient_light</item>
     </style>
 
-    <!-- Discussion activity -->
+    <!-- Discussion/Storage activity -->
     <style name="AppTheme.NoActionBar.ActionModeOverlay">
-        <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeBackground">@color/olvid_gradient_dark</item>
-        <item name="android:windowBackground">@color/almostWhite</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar.ActionModeOverlayStorage">
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeBackground">@color/orange</item>
         <item name="android:windowBackground">@color/almostWhite</item>
@@ -170,5 +164,7 @@
     </style>
     <style name="TransparentBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@android:color/transparent</item>
+        <item name="behavior_skipCollapsed">true</item>
+        <item name="behavior_peekHeight">1000dp</item>
     </style>
 </resources>

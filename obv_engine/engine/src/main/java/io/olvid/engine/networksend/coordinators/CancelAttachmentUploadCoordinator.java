@@ -129,7 +129,7 @@ public class CancelAttachmentUploadCoordinator implements OutboxAttachment.Outbo
         UID messageUid = ((CancelAttachmentUploadCompositeOperation) operation).getMessageUid();
         int attachmentNumber = ((CancelAttachmentUploadCompositeOperation) operation).getAttachmentNumber();
         Integer rfc = operation.getReasonForCancel();
-        Logger.w("UploadAttachmentCompositeOperation cancelled for reason " + rfc);
+        Logger.w("CancelAttachmentUploadCompositeOperation cancelled for reason " + rfc);
         if (rfc == null) {
             rfc = Operation.RFC_NULL;
         }

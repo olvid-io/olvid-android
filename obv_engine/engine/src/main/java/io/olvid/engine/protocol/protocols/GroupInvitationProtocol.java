@@ -26,10 +26,8 @@ import java.util.UUID;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
-import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.GroupMembersChangedCallback;
 import io.olvid.engine.datatypes.Identity;
-import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.DialogType;
@@ -42,7 +40,6 @@ import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
-import io.olvid.engine.protocol.databases.WaitingForTrustLevelIncreaseProtocolInstance;
 import io.olvid.engine.protocol.datatypes.CoreProtocolMessage;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocol;
@@ -97,6 +94,14 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         private final UUID dialogUuid;
         private final HashSet<IdentityWithSerializedDetails> groupMemberIdentitiesAndSerializedDetails;
 
+        InvitationReceivedState(GroupInformation groupInformation, UUID dialogUuid, HashSet<IdentityWithSerializedDetails> groupMemberIdentitiesAndSerializedDetails) {
+            super(INVITATION_RECEIVED_STATE_ID);
+            this.groupInformation = groupInformation;
+            this.dialogUuid = dialogUuid;
+            this.groupMemberIdentitiesAndSerializedDetails = groupMemberIdentitiesAndSerializedDetails;
+        }
+
+        @SuppressWarnings("unused")
         public InvitationReceivedState(Encoded encodedState) throws Exception {
             super(INVITATION_RECEIVED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -109,13 +114,6 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
             for (Encoded encodedIdentityAndDisplayName: list[2].decodeList()) {
                 this.groupMemberIdentitiesAndSerializedDetails.add(IdentityWithSerializedDetails.of(encodedIdentityAndDisplayName));
             }
-        }
-
-        InvitationReceivedState(GroupInformation groupInformation, UUID dialogUuid, HashSet<IdentityWithSerializedDetails> groupMemberIdentitiesAndSerializedDetails) {
-            super(INVITATION_RECEIVED_STATE_ID);
-            this.groupInformation = groupInformation;
-            this.dialogUuid = dialogUuid;
-            this.groupMemberIdentitiesAndSerializedDetails = groupMemberIdentitiesAndSerializedDetails;
         }
 
         @Override
@@ -137,16 +135,17 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
 
 
     public static class InvitationSentState extends ConcreteProtocolState {
+        InvitationSentState() {
+            super(INVITATION_SENT_STATE_ID);
+        }
+
+        @SuppressWarnings("unused")
         public InvitationSentState(Encoded encodedState) throws Exception {
             super(INVITATION_SENT_STATE_ID);
             Encoded[] list = encodedState.decodeList();
             if (list.length != 0) {
                 throw new Exception();
             }
-        }
-
-        InvitationSentState() {
-            super(INVITATION_SENT_STATE_ID);
         }
 
         @Override
@@ -156,16 +155,17 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
     }
 
     public static class ResponseSentState extends ConcreteProtocolState {
+        ResponseSentState() {
+            super(RESPONSE_SENT_STATE_ID);
+        }
+
+        @SuppressWarnings("unused")
         public ResponseSentState(Encoded encodedState) throws Exception {
             super(RESPONSE_SENT_STATE_ID);
             Encoded[] list = encodedState.decodeList();
             if (list.length != 0) {
                 throw new Exception();
             }
-        }
-
-        ResponseSentState() {
-            super(RESPONSE_SENT_STATE_ID);
         }
 
         @Override
@@ -175,16 +175,17 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
     }
 
     public static class ResponseReceivedState extends ConcreteProtocolState {
+        ResponseReceivedState() {
+            super(RESPONSE_RECEIVED_STATE_ID);
+        }
+
+        @SuppressWarnings("unused")
         public ResponseReceivedState(Encoded encodedState) throws Exception {
             super(RESPONSE_RECEIVED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
             if (list.length != 0) {
                 throw new Exception();
             }
-        }
-
-        ResponseReceivedState() {
-            super(RESPONSE_RECEIVED_STATE_ID);
         }
 
         @Override
@@ -208,7 +209,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
     private static final int DIALOG_ACCEPT_GROUP_INVITATION_MESSAGE_ID = 2;
     private static final int ACCEPT_INVITATION_MESSAGE_ID = 3;
     private static final int PROPAGATE_INVITATION_RESPONSE_MESSAGE_ID = 4;
-    private static final int TRUST_LEVEL_INCREASED_MESSAGE_ID = 5;
+//    private static final int TRUST_LEVEL_INCREASED_MESSAGE_ID = 5;
 
     @Override
     protected Class<?> getMessageClass(int protocolMessageId) {
@@ -223,8 +224,6 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                 return InvitationResponseMessage.class;
             case PROPAGATE_INVITATION_RESPONSE_MESSAGE_ID:
                 return PropagateInvitationResponseMessage.class;
-            case TRUST_LEVEL_INCREASED_MESSAGE_ID:
-                return TrustLevelIncreasedMessage.class;
             default:
                 return null;
         }
@@ -287,6 +286,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
             this.groupMemberIdentitiesAndSerializedDetails = groupMemberIdentitiesAndSerializedDetails;
         }
 
+        @SuppressWarnings("unused")
         public GroupInvitationMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -329,6 +329,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
             dialogUuid = null;
         }
 
+        @SuppressWarnings("unused")
         public DialogAcceptGroupInvitationMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getEncodedResponse() == null) {
@@ -351,8 +352,8 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
 
 
     public static class InvitationResponseMessage extends ConcreteProtocolMessage {
-        private UID groupUid;
-        private boolean invitationAccepted;
+        private final UID groupUid;
+        private final boolean invitationAccepted;
 
         InvitationResponseMessage(CoreProtocolMessage coreProtocolMessage, UID groupUid, boolean invitationAccepted) {
             super(coreProtocolMessage);
@@ -360,6 +361,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
             this.invitationAccepted = invitationAccepted;
         }
 
+        @SuppressWarnings("unused")
         public InvitationResponseMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -392,6 +394,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
             this.invitationAccepted = invitationAccepted;
         }
 
+        @SuppressWarnings("unused")
         public PropagateInvitationResponseMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 1) {
@@ -413,29 +416,6 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         }
     }
 
-
-    public static class TrustLevelIncreasedMessage extends ConcreteProtocolMessage {
-        Identity trustLevelIncreasedIdentity;
-
-        public TrustLevelIncreasedMessage(ReceivedMessage receivedMessage) throws Exception {
-            super(new CoreProtocolMessage(receivedMessage));
-            if (receivedMessage.getInputs().length != 1) {
-                throw new Exception();
-            }
-            this.trustLevelIncreasedIdentity = receivedMessage.getInputs()[0].decodeIdentity();
-        }
-
-        @Override
-        public int getProtocolMessageId() {
-            return TRUST_LEVEL_INCREASED_MESSAGE_ID;
-        }
-
-        @Override
-        public Encoded[] getInputs() {
-            return new Encoded[0];
-        }
-    }
-
     // endregion
 
 
@@ -450,7 +430,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
             case INITIAL_STATE_ID:
                 return new Class[]{SendInvitationStep.class, ProcessInvitationStep.class, ProcessResponseStep.class};
             case INVITATION_RECEIVED_STATE_ID:
-                return new Class[]{ProcessInvitationDialogResponseStep.class, ReCheckTrustLevelStep.class, ProcessPropagatedInvitationResponseStep.class};
+                return new Class[]{ProcessInvitationDialogResponseStep.class, ProcessPropagatedInvitationResponseStep.class};
             default:
                 return new Class[0];
         }
@@ -458,6 +438,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
 
 
     public static class SendInvitationStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final InitialMessage receivedMessage;
 
@@ -499,6 +480,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
 
 
     public static class ProcessInvitationStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final GroupInvitationMessage receivedMessage;
 
@@ -558,124 +540,31 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
             JsonGroupDetails jsonGroupDetails = jsonGroupDetailsWithVersionAndPhoto.getGroupDetails();
             String serializedGroupDetails = protocol.getJsonObjectMapper().writeValueAsString(jsonGroupDetails);
 
-            TrustLevel groupOwnerTrustLevel = protocolManagerSession.identityDelegate.getContactIdentityTrustLevel(protocolManagerSession.session, getOwnedIdentity(), groupOwnerIdentity);
-            if (groupOwnerTrustLevel.compareTo(Constants.AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD) >= 0) {
-                // auto-accept
+            // prompt user to accept
 
-                {
-                    // notify groupOwner that you accepted the groupInvitation
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(groupOwnerIdentity, getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new InvitationResponseMessage(coreProtocolMessage, receivedMessage.groupInformation.groupUid, true).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                }
-
-
-                {
-                    // Propagate the accept to other owned devices
-                    int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
-                    if (numberOfOtherDevices > 0) {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                        ChannelMessageToSend messageToSend = new PropagateInvitationResponseMessage(coreProtocolMessage, true).generateChannelProtocolMessageToSend();
-                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            UUID dialogUuid = UUID.randomUUID();
+            {
+                Identity[] identities = new Identity[receivedMessage.groupMemberIdentitiesAndSerializedDetails.size()];
+                String[] serializedDetails = new String[identities.length];
+                int i=0;
+                for (IdentityWithSerializedDetails identityWithSerializedDetails : receivedMessage.groupMemberIdentitiesAndSerializedDetails) {
+                    if (identityWithSerializedDetails.identity.equals(getOwnedIdentity())) {
+                        identities[i] = groupOwnerIdentity;
+                        serializedDetails[i] = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), groupOwnerIdentity);
+                    } else {
+                        identities[i] = identityWithSerializedDetails.identity;
+                        serializedDetails[i] = identityWithSerializedDetails.serializedDetails;
                     }
+                    i++;
                 }
 
-
-                {
-                    // create the group
-                    IdentityWithSerializedDetails[] pendingGroupMembers = new IdentityWithSerializedDetails[receivedMessage.groupMemberIdentitiesAndSerializedDetails.size()-1];
-                    int i=0;
-                    for (IdentityWithSerializedDetails identityWithSerializedDetails : receivedMessage.groupMemberIdentitiesAndSerializedDetails) {
-                        if (identityWithSerializedDetails.identity.equals(getOwnedIdentity())) {
-                            continue;
-                        }
-                        pendingGroupMembers[i] = identityWithSerializedDetails;
-                        i++;
-                    }
-
-                    protocolManagerSession.identityDelegate.createContactGroup(
-                            protocolManagerSession.session,
-                            getOwnedIdentity(),
-                            receivedMessage.groupInformation,
-                            new Identity[]{groupOwnerIdentity},
-                            pendingGroupMembers
-                    );
-                }
-
-                return new ResponseSentState();
-            } else if (groupOwnerTrustLevel.compareTo(Constants.USER_CONFIRMATION_TRUST_LEVEL_THRESHOLD) >= 0) {
-                // prompt user to accept
-
-                UUID dialogUuid = UUID.randomUUID();
-                {
-                    Identity[] identities = new Identity[receivedMessage.groupMemberIdentitiesAndSerializedDetails.size()];
-                    String[] serializedDetails = new String[identities.length];
-                    int i=0;
-                    for (IdentityWithSerializedDetails identityWithSerializedDetails : receivedMessage.groupMemberIdentitiesAndSerializedDetails) {
-                        if (identityWithSerializedDetails.identity.equals(getOwnedIdentity())) {
-                            identities[i] = groupOwnerIdentity;
-                            serializedDetails[i] = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), groupOwnerIdentity);
-                        } else {
-                            identities[i] = identityWithSerializedDetails.identity;
-                            serializedDetails[i] = identityWithSerializedDetails.serializedDetails;
-                        }
-                        i++;
-                    }
-
-                    // display group invite dialog
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createAcceptGroupInviteDialog(serializedGroupDetails, receivedMessage.groupInformation.groupUid, receivedMessage.groupInformation.groupOwnerIdentity, identities, serializedDetails, receivedMessage.getServerTimestamp()), dialogUuid));
-                    ChannelMessageToSend messageToSend = new DialogAcceptGroupInvitationMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                }
-
-                // also insert a WaitingForTrustLevelIncrease to re-evaluate if needed.
-                WaitingForTrustLevelIncreaseProtocolInstance.create(
-                        protocolManagerSession,
-                        getProtocolInstanceUid(),
-                        getOwnedIdentity(),
-                        groupOwnerIdentity,
-                        getProtocolId(),
-                        TRUST_LEVEL_INCREASED_MESSAGE_ID,
-                        Constants.AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD);
-
-                return new InvitationReceivedState(receivedMessage.groupInformation, dialogUuid, receivedMessage.groupMemberIdentitiesAndSerializedDetails);
-            } else {
-                // prompt user to increase trust levels
-
-                UUID dialogUuid = UUID.randomUUID();
-                {
-                    Identity[] identities = new Identity[receivedMessage.groupMemberIdentitiesAndSerializedDetails.size()];
-                    String[] serializedDetails = new String[identities.length];
-                    int i=0;
-                    for (IdentityWithSerializedDetails identityWithSerializedDetails : receivedMessage.groupMemberIdentitiesAndSerializedDetails) {
-                        if (identityWithSerializedDetails.identity.equals(getOwnedIdentity())) {
-                            identities[i] = groupOwnerIdentity;
-                            serializedDetails[i] = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), groupOwnerIdentity);
-                        } else {
-                            identities[i] = identityWithSerializedDetails.identity;
-                            serializedDetails[i] = identityWithSerializedDetails.serializedDetails;
-                        }
-                        i++;
-                    }
-
-                    // display groupOwner TL increase dialog
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createIncreaseGroupOwnerTrustLevelDialog(serializedGroupDetails, receivedMessage.groupInformation.groupUid, groupOwnerIdentity, identities, serializedDetails, receivedMessage.getServerTimestamp()), dialogUuid));
-                    ChannelMessageToSend messageToSend = new DialogAcceptGroupInvitationMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                }
-
-                // and insert a WaitingForTrustLevelIncrease to re-evaluate once TL increased.
-                WaitingForTrustLevelIncreaseProtocolInstance.create(
-                        protocolManagerSession,
-                        getProtocolInstanceUid(),
-                        getOwnedIdentity(),
-                        groupOwnerIdentity,
-                        getProtocolId(),
-                        TRUST_LEVEL_INCREASED_MESSAGE_ID,
-                        Constants.USER_CONFIRMATION_TRUST_LEVEL_THRESHOLD);
-
-                return new InvitationReceivedState(receivedMessage.groupInformation, dialogUuid, receivedMessage.groupMemberIdentitiesAndSerializedDetails);
+                // display group invite dialog
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createAcceptGroupInviteDialog(serializedGroupDetails, receivedMessage.groupInformation.groupUid, receivedMessage.groupInformation.groupOwnerIdentity, identities, serializedDetails, receivedMessage.getServerTimestamp()), dialogUuid));
+                ChannelMessageToSend messageToSend = new DialogAcceptGroupInvitationMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
+
+            return new InvitationReceivedState(receivedMessage.groupInformation, dialogUuid, receivedMessage.groupMemberIdentitiesAndSerializedDetails);
         }
     }
 
@@ -753,208 +642,17 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                         new Identity[]{groupOwnerIdentity},
                         pendingGroupMembers
                 );
-
-                {
-                    // show group joined dialog
-                    JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().readValue(startState.groupInformation.serializedGroupDetailsWithVersionAndPhoto, JsonGroupDetailsWithVersionAndPhoto.class);
-                    JsonGroupDetails jsonGroupDetails = jsonGroupDetailsWithVersionAndPhoto.getGroupDetails();
-                    String serializedGroupDetails = protocol.getJsonObjectMapper().writeValueAsString(jsonGroupDetails);
-
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(),
-                            DialogType.createGroupJoinedDialog(
-                                    serializedGroupDetails,
-                                    startState.groupInformation.groupUid,
-                                    startState.groupInformation.groupOwnerIdentity
-                            ),
-                            startState.dialogUuid));
-                    ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                }
-            } else {
-                // remove the dialog
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startState.dialogUuid));
-                ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
+
+            // remove the dialog
+            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startState.dialogUuid));
+            ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
             return new ResponseSentState();
         }
     }
 
-
-    public static class ReCheckTrustLevelStep extends ProtocolStep {
-        private final InvitationReceivedState startState;
-        private final TrustLevelIncreasedMessage receivedMessage;
-
-        public ReCheckTrustLevelStep(InvitationReceivedState startState, TrustLevelIncreasedMessage receivedMessage, GroupInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
-            this.startState = startState;
-            this.receivedMessage = receivedMessage;
-        }
-
-        @Override
-        public ConcreteProtocolState executeStep() throws Exception {
-            ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
-
-            if (!receivedMessage.trustLevelIncreasedIdentity.equals(startState.groupInformation.groupOwnerIdentity)) {
-                Logger.w("Warning: a GroupInvitationProtocol receive a TrustLevelIncreasedMessage for an Identity that is not the groupOwner");
-                return startState;
-            }
-
-            Identity groupOwnerIdentity = startState.groupInformation.groupOwnerIdentity;
-
-            JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().readValue(startState.groupInformation.serializedGroupDetailsWithVersionAndPhoto, JsonGroupDetailsWithVersionAndPhoto.class);
-            JsonGroupDetails jsonGroupDetails = jsonGroupDetailsWithVersionAndPhoto.getGroupDetails();
-            String serializedGroupDetails = protocol.getJsonObjectMapper().writeValueAsString(jsonGroupDetails);
-
-            TrustLevel groupOwnerTrustLevel = protocolManagerSession.identityDelegate.getContactIdentityTrustLevel(protocolManagerSession.session, getOwnedIdentity(), groupOwnerIdentity);
-            if (groupOwnerTrustLevel.compareTo(Constants.AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD) >= 0) {
-                // auto-accept
-                {
-                    // notify groupOwner that you accepted the groupInvitation
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(groupOwnerIdentity, getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new InvitationResponseMessage(coreProtocolMessage, startState.groupInformation.groupUid, true).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                }
-
-
-                {
-                    // Propagate the accept to other owned devices
-                    int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
-                    if (numberOfOtherDevices > 0) {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                        ChannelMessageToSend messageToSend = new PropagateInvitationResponseMessage(coreProtocolMessage, true).generateChannelProtocolMessageToSend();
-                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                    }
-                }
-
-
-                {
-                    // create the group
-                    IdentityWithSerializedDetails[] pendingGroupMembers = new IdentityWithSerializedDetails[startState.groupMemberIdentitiesAndSerializedDetails.size()-1];
-                    int i=0;
-                    for (IdentityWithSerializedDetails identityWithSerializedDetails : startState.groupMemberIdentitiesAndSerializedDetails) {
-                        if (identityWithSerializedDetails.identity.equals(getOwnedIdentity())) {
-                            continue;
-                        }
-                        pendingGroupMembers[i] = identityWithSerializedDetails;
-                        i++;
-                    }
-
-                    protocolManagerSession.identityDelegate.createContactGroup(
-                            protocolManagerSession.session,
-                            getOwnedIdentity(),
-                            startState.groupInformation,
-                            new Identity[]{groupOwnerIdentity},
-                            pendingGroupMembers
-                    );
-                }
-
-                {
-                    // show the group joined dialog
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(),
-                            DialogType.createGroupJoinedDialog(
-                                    serializedGroupDetails,
-                                    startState.groupInformation.groupUid,
-                                    startState.groupInformation.groupOwnerIdentity
-                            ),
-                            startState.dialogUuid));
-                    ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                }
-
-                return new ResponseSentState();
-            } else if (groupOwnerTrustLevel.compareTo(Constants.USER_CONFIRMATION_TRUST_LEVEL_THRESHOLD) >= 0) {
-                // prompt user to accept
-                {
-                    Identity[] identities = new Identity[startState.groupMemberIdentitiesAndSerializedDetails.size()];
-                    String[] serializedDetails = new String[identities.length];
-                    int i=0;
-                    for (IdentityWithSerializedDetails identityWithSerializedDetails : startState.groupMemberIdentitiesAndSerializedDetails) {
-                        if (identityWithSerializedDetails.identity.equals(getOwnedIdentity())) {
-                            identities[i] = groupOwnerIdentity;
-                            serializedDetails[i] = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), groupOwnerIdentity);
-                        } else {
-                            identities[i] = identityWithSerializedDetails.identity;
-                            serializedDetails[i] = identityWithSerializedDetails.serializedDetails;
-                        }
-                        i++;
-                    }
-
-                    // display group invite dialog
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createAcceptGroupInviteDialog(serializedGroupDetails, startState.groupInformation.groupUid, startState.groupInformation.groupOwnerIdentity, identities, serializedDetails, receivedMessage.getServerTimestamp()), startState.dialogUuid));
-                    ChannelMessageToSend messageToSend = new DialogAcceptGroupInvitationMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                }
-
-                {
-                    // also insert a WaitingForTrustLevelIncrease to re-evaluate if needed (and delete the previous one)
-                    WaitingForTrustLevelIncreaseProtocolInstance instance = WaitingForTrustLevelIncreaseProtocolInstance.get(
-                            protocolManagerSession,
-                            getProtocolInstanceUid(),
-                            getOwnedIdentity(),
-                            receivedMessage.trustLevelIncreasedIdentity);
-                    if (instance != null) {
-                        instance.delete();
-                    }
-                    WaitingForTrustLevelIncreaseProtocolInstance.create(
-                            protocolManagerSession,
-                            getProtocolInstanceUid(),
-                            getOwnedIdentity(),
-                            groupOwnerIdentity,
-                            getProtocolId(),
-                            TRUST_LEVEL_INCREASED_MESSAGE_ID,
-                            Constants.AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD);
-                }
-
-                return new InvitationReceivedState(startState.groupInformation, startState.dialogUuid, startState.groupMemberIdentitiesAndSerializedDetails);
-            } else {
-                // prompt user to increase trust levels (this case should never happen as there is no reason to call this step)
-                {
-                    Identity[] identities = new Identity[startState.groupMemberIdentitiesAndSerializedDetails.size()];
-                    String[] serializedDetails = new String[identities.length];
-                    int i=0;
-                    for (IdentityWithSerializedDetails identityWithSerializedDetails : startState.groupMemberIdentitiesAndSerializedDetails) {
-                        if (identityWithSerializedDetails.identity.equals(getOwnedIdentity())) {
-                            identities[i] = groupOwnerIdentity;
-                            serializedDetails[i] = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), groupOwnerIdentity);
-                        } else {
-                            identities[i] = identityWithSerializedDetails.identity;
-                            serializedDetails[i] = identityWithSerializedDetails.serializedDetails;
-                        }
-                        i++;
-                    }
-
-                    // display groupOwner TL increase dialog
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createIncreaseGroupOwnerTrustLevelDialog(serializedGroupDetails, startState.groupInformation.groupUid, groupOwnerIdentity, identities, serializedDetails, receivedMessage.getServerTimestamp()), startState.dialogUuid));
-                    ChannelMessageToSend messageToSend = new DialogAcceptGroupInvitationMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                }
-
-                {
-                    // also insert a WaitingForTrustLevelIncrease to re-evaluate if needed (and delete the previous one)
-                    WaitingForTrustLevelIncreaseProtocolInstance instance = WaitingForTrustLevelIncreaseProtocolInstance.get(
-                            protocolManagerSession,
-                            getProtocolInstanceUid(),
-                            getOwnedIdentity(),
-                            receivedMessage.trustLevelIncreasedIdentity);
-                    if (instance != null) {
-                        instance.delete();
-                    }
-                    WaitingForTrustLevelIncreaseProtocolInstance.create(
-                            protocolManagerSession,
-                            getProtocolInstanceUid(),
-                            getOwnedIdentity(),
-                            groupOwnerIdentity,
-                            getProtocolId(),
-                            TRUST_LEVEL_INCREASED_MESSAGE_ID,
-                            Constants.USER_CONFIRMATION_TRUST_LEVEL_THRESHOLD);
-                }
-
-                return new InvitationReceivedState(startState.groupInformation, startState.dialogUuid, startState.groupMemberIdentitiesAndSerializedDetails);
-            }
-        }
-    }
 
 
     public static class ProcessPropagatedInvitationResponseStep extends ProtocolStep {
@@ -1013,6 +711,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
 
 
     public static class ProcessResponseStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final InvitationResponseMessage receivedMessage;
 

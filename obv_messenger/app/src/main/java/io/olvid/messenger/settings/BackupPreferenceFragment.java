@@ -44,13 +44,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.Scope;
-import com.google.api.services.drive.DriveScopes;
 
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
@@ -67,10 +61,12 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.NoClickSwitchPreference;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.fragments.dialog.CloudProviderSignInDialogFragment;
+import io.olvid.messenger.services.BackupCloudProviderService;
 
 public class BackupPreferenceFragment extends PreferenceFragmentCompat implements EngineNotificationListener {
     static final int REQUEST_CODE_SAVE_BACKUP = 10089;
-    static final int REQUEST_CODE_AUTHORIZE_DRIVE = 10091;
 
     private BackupPreferenceViewModel viewModel;
     private static int failedLoads = 0;
@@ -87,7 +83,6 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
         setPreferencesFromResource(R.xml.fragment_preferences_backup, rootKey);
         activity = requireActivity();
         viewModel = new ViewModelProvider(activity).get(BackupPreferenceViewModel.class);
-        viewModel.setGoogleApisInstalled(ConnectionResult.SUCCESS == GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity));
 
         PreferenceScreen screen = getPreferenceScreen();
 
@@ -196,6 +191,15 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
             });
         }
 
+        Preference manageCloudBackupsPreference = screen.findPreference(SettingsActivity.PREF_KEY_MANAGE_CLOUD_BACKUPS);
+        if (manageCloudBackupsPreference != null) {
+            manageCloudBackupsPreference.setOnPreferenceClickListener(preference -> {
+                ManageCloudBackupsDialogFragment manageCloudBackupsDialogFragment = ManageCloudBackupsDialogFragment.newInstance();
+                manageCloudBackupsDialogFragment.show(getChildFragmentManager(), "ManageCloudBackupsDialogFragment");
+                return true;
+            });
+        }
+
         engineRegistrationNumber = null;
         AppSingleton.getEngine().addNotificationListener(EngineNotifications.NEW_BACKUP_SEED_GENERATED, this);
         AppSingleton.getEngine().addNotificationListener(EngineNotifications.BACKUP_SEED_GENERATION_FAILED, this);
@@ -257,28 +261,36 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
                 generateBackupKeyPreference.setTitle(R.string.pref_generate_new_backup_key_title_or_verify);
                 if (backupKeyInformation.lastSuccessfulKeyVerificationTimestamp == 0) {
                     generateBackupKeyPreference.setSummary(getString(R.string.pref_generate_new_backup_key_summary_never_verified,
-                            App.getLongNiceDateString(getActivity(), backupKeyInformation.keyGenerationTimestamp)));
+                            StringUtils.getLongNiceDateString(getActivity(), backupKeyInformation.keyGenerationTimestamp)));
                 } else {
                     generateBackupKeyPreference.setSummary(getString(R.string.pref_generate_new_backup_key_summary,
-                            App.getLongNiceDateString(getActivity(), backupKeyInformation.keyGenerationTimestamp),
+                            StringUtils.getLongNiceDateString(getActivity(), backupKeyInformation.keyGenerationTimestamp),
                             backupKeyInformation.successfulVerificationCount,
-                            App.getLongNiceDateString(getActivity(), backupKeyInformation.lastSuccessfulKeyVerificationTimestamp)));
+                            StringUtils.getLongNiceDateString(getActivity(), backupKeyInformation.lastSuccessfulKeyVerificationTimestamp)));
                 }
                 manualBackupPreference.setEnabled(true);
                 if (backupKeyInformation.lastBackupExport == 0) {
                     manualBackupPreference.setSummary(R.string.pref_manual_backup_summary);
                 } else {
                     manualBackupPreference.setSummary(getString(R.string.pref_manual_backup_summary_time,
-                            App.getLongNiceDateString(getActivity(), backupKeyInformation.lastBackupExport)));
+                            StringUtils.getLongNiceDateString(getActivity(), backupKeyInformation.lastBackupExport)));
                 }
                 enableAutomaticBackupPreference.setEnabled(true);
                 String summaryString = getString(R.string.pref_enable_automatic_backup_summary);
                 if (SettingsActivity.useAutomaticBackup()) {
-                    if (SettingsActivity.getAutomaticBackupAccount() != null) {
-                        summaryString += getString(R.string.pref_enable_automatic_backup_summary_account, SettingsActivity.getAutomaticBackupAccount());
+                    BackupCloudProviderService.CloudProviderConfiguration configuration = SettingsActivity.getAutomaticBackupConfiguration();
+                    if (configuration != null && configuration.provider != null) {
+                        switch (configuration.provider) {
+                            case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_GOOGLE_DRIVE:
+                                summaryString += getString(R.string.pref_enable_automatic_backup_summary_google_drive_account, configuration.account);
+                                break;
+                            case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV:
+                                summaryString += getString(R.string.pref_enable_automatic_backup_summary_webdav_account, configuration.account, configuration.serverUrl);
+                                break;
+                        }
                     }
                     if (backupKeyInformation.lastBackupUpload != 0) {
-                        summaryString += getString(R.string.pref_enable_automatic_backup_summary_time, App.getLongNiceDateString(getActivity(), backupKeyInformation.lastBackupUpload));
+                        summaryString += getString(R.string.pref_enable_automatic_backup_summary_time, StringUtils.getLongNiceDateString(getActivity(), backupKeyInformation.lastBackupUpload));
                     }
                 }
                 enableAutomaticBackupPreference.setSummary(summaryString);
@@ -287,44 +299,49 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
     }
 
     void automaticBackupClicked() {
-        if (!viewModel.isGoogleApisInstalled()) {
-            AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
-                    .setTitle(R.string.dialog_title_google_apis_missing)
-                    .setMessage(R.string.dialog_message_google_apis_required_for_automatic_backup)
-                    .setPositiveButton(R.string.button_label_ok, null);
-            builder.create().show();
-        }
         if (enableAutomaticBackupPreference != null) {
             if (enableAutomaticBackupPreference.isChecked()) {
                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_backup_choose_deactivate_or_change_account)
-                        .setNegativeButton(R.string.button_label_deactivate_auto_backup, ((dialog, which) -> {
+                        .setNegativeButton(R.string.button_label_deactivate_auto_backup, (DialogInterface dialog, int which) -> {
+                            // clear any stored webdav configuration
+                            try {
+                                SettingsActivity.setAutomaticBackupConfiguration(null);
+                            } catch (Exception ignored) {}
+                            // sign out any google drive
                             GoogleSignIn.getClient(activity, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut();
                             deactivateAutomaticBackups();
-                        }))
-                        .setPositiveButton(R.string.button_label_switch_account, (dialog, which) -> GoogleSignIn.getClient(activity, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut().addOnCompleteListener(task -> GoogleSignIn.requestPermissions(
-                                this,
-                                REQUEST_CODE_AUTHORIZE_DRIVE,
-                                GoogleSignIn.getLastSignedInAccount(activity),
-                                new Scope(DriveScopes.DRIVE_APPDATA),
-                                new Scope(Scopes.EMAIL)
-                        )));
+                        })
+                        .setPositiveButton(R.string.button_label_switch_account, (DialogInterface dialog, int which) -> openSignInDialog());
                 builder.create().show();
             } else {
-                AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
-                        .setTitle(R.string.dialog_title_backup_choose_drive_account)
-                        .setMessage(R.string.dialog_message_backup_choose_drive_account)
-                        .setNegativeButton(R.string.button_label_cancel, null)
-                        .setPositiveButton(R.string.button_label_ok, (dialog, which) -> GoogleSignIn.requestPermissions(
-                                this,
-                                REQUEST_CODE_AUTHORIZE_DRIVE,
-                                GoogleSignIn.getLastSignedInAccount(activity),
-                                new Scope(DriveScopes.DRIVE_APPDATA),
-                                new Scope(Scopes.EMAIL)
-                        ));
-                builder.create().show();
+                openSignInDialog();
             }
         }
+    }
+
+    private void openSignInDialog() {
+        CloudProviderSignInDialogFragment cloudProviderSignInDialogFragment = CloudProviderSignInDialogFragment.newInstance();
+        cloudProviderSignInDialogFragment.setSignInContext(CloudProviderSignInDialogFragment.SignInContext.ACTIVATE_AUTOMATIC_BACKUPS);
+        cloudProviderSignInDialogFragment.setOnCloudProviderConfigurationCallback(new CloudProviderSignInDialogFragment.OnCloudProviderConfigurationCallback() {
+            @Override
+            public void onCloudProviderConfigurationSuccess(BackupCloudProviderService.CloudProviderConfiguration configuration) {
+                try {
+                    SettingsActivity.setAutomaticBackupConfiguration(configuration);
+                    activity.runOnUiThread(() -> activateAutomaticBackups());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    onCloudProviderConfigurationFailed();
+                }
+            }
+
+            @Override
+            public void onCloudProviderConfigurationFailed() {
+                App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
+                activity.runOnUiThread(() -> deactivateAutomaticBackups());
+            }
+        });
+        cloudProviderSignInDialogFragment.show(getChildFragmentManager(), "CloudProviderSignInDialogFragment");
     }
 
     void activateAutomaticBackups() {
@@ -347,53 +364,36 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case REQUEST_CODE_SAVE_BACKUP: {
-                if (viewModel != null) {
-                    if (resultCode == Activity.RESULT_OK) {
-                        final Uri uri = data.getData();
-                        final byte[] encryptedContent = viewModel.getExportBackupContent();
-                        if (uri != null) {
-                            App.runThread(() -> {
-                                try (OutputStream os = activity.getContentResolver().openOutputStream(uri)) {
-                                    if (os == null) {
-                                        throw new Exception("Unable to write to provided Uri");
-                                    }
-                                    os.write(encryptedContent);
-                                    App.toast(R.string.toast_message_backup_saved, Toast.LENGTH_SHORT);
-                                    AppSingleton.getEngine().markBackupExported(viewModel.getExportBackupKeyUid(), viewModel.getExportBackupVersion());
-                                    activity.runOnUiThread(this::refreshBackupPreferences);
-                                    return;
-                                } catch (Exception e) {
-                                    App.toast(R.string.toast_message_failed_to_save_backup, Toast.LENGTH_SHORT);
-                                }
-                                AppSingleton.getEngine().discardBackup(viewModel.getExportBackupKeyUid(), viewModel.getExportBackupVersion());
-                            });
-                            break;
+        if (requestCode == REQUEST_CODE_SAVE_BACKUP
+                && viewModel != null) {
+            if (resultCode == Activity.RESULT_OK) {
+                final Uri uri = data.getData();
+                final byte[] encryptedContent = viewModel.getExportBackupContent();
+                if (uri != null) {
+                    App.runThread(() -> {
+                        try (OutputStream os = activity.getContentResolver().openOutputStream(uri)) {
+                            if (os == null) {
+                                throw new Exception("Unable to write to provided Uri");
+                            }
+                            os.write(encryptedContent);
+                            App.toast(R.string.toast_message_backup_saved, Toast.LENGTH_SHORT);
+                            AppSingleton.getEngine().markBackupExported(viewModel.getExportBackupKeyUid(), viewModel.getExportBackupVersion());
+                            activity.runOnUiThread(this::refreshBackupPreferences);
+                            return;
+                        } catch (Exception e) {
+                            App.toast(R.string.toast_message_failed_to_save_backup, Toast.LENGTH_SHORT);
                         }
-                    }
-                    AppSingleton.getEngine().discardBackup(viewModel.getExportBackupKeyUid(), viewModel.getExportBackupVersion());
+                        AppSingleton.getEngine().discardBackup(viewModel.getExportBackupKeyUid(), viewModel.getExportBackupVersion());
+                    });
+                    return;
                 }
-                break;
             }
-            case REQUEST_CODE_AUTHORIZE_DRIVE: {
-                if (resultCode == Activity.RESULT_OK) {
-                    GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(activity);
-                    if (account != null) {
-                        SettingsActivity.setAutomaticBackupAccount(account.getEmail());
-
-                        activity.runOnUiThread(this::activateAutomaticBackups);
-                        break;
-                    }
-                    App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
-                }
-                activity.runOnUiThread(this::deactivateAutomaticBackups);
-                break;
-            }
+            AppSingleton.getEngine().discardBackup(viewModel.getExportBackupKeyUid(), viewModel.getExportBackupVersion());
         }
     }
 

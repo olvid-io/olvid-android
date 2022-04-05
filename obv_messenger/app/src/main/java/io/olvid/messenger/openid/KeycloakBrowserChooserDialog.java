@@ -20,6 +20,7 @@
 package io.olvid.messenger.openid;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -102,6 +103,7 @@ public class KeycloakBrowserChooserDialog {
             this.layoutInflater = LayoutInflater.from(context);
         }
 
+        @SuppressLint("InflateParams")
         @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {

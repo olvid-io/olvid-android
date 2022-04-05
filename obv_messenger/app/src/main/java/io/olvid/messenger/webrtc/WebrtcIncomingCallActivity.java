@@ -21,8 +21,10 @@ package io.olvid.messenger.webrtc;
 
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
@@ -37,10 +39,10 @@ import androidx.lifecycle.Observer;
 import java.util.List;
 
 import io.olvid.engine.Logger;
-import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.settings.SettingsActivity;
 
 public class WebrtcIncomingCallActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -55,6 +57,22 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
     TextView bigCountTextView;
     View rejectCallButton;
     View answerCallButton;
+
+    @Override
+    protected void attachBaseContext(Context baseContext) {
+        final Context newContext;
+        float customFontScale = SettingsActivity.getFontScale();
+        float fontScale = baseContext.getResources().getConfiguration().fontScale;
+        if (customFontScale != 1.0f) {
+            Configuration configuration = new Configuration();
+            configuration.fontScale = fontScale * customFontScale;
+            newContext = baseContext.createConfigurationContext(configuration);
+        } else {
+            newContext = baseContext;
+        }
+
+        super.attachBaseContext(newContext);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -116,22 +134,16 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
     private class CallParticipantsObserver implements Observer<List<WebrtcCallService.CallParticipantPojo>> {
         @Override
         public void onChanged(List<WebrtcCallService.CallParticipantPojo> callParticipants) {
-            final Contact callParticipanContact = (callParticipants == null || callParticipants.size() == 0) ? null : callParticipants.get(0).contact;
-            if (callParticipanContact == null) {
+            final Contact callParticipantContact = (callParticipants == null || callParticipants.size() == 0) ? null : callParticipants.get(0).contact;
+            if (callParticipantContact == null) {
                 contactInitialView.setVisibility(View.INVISIBLE);
                 contactNameTextView.setText(null);
                 othersCountTextView.setVisibility(View.GONE);
                 bigCountTextView.setVisibility(View.GONE);
             } else {
                 contactInitialView.setVisibility(View.VISIBLE);
-                contactInitialView.setKeycloakCertified(callParticipanContact.keycloakManaged);
-                contactInitialView.setInactive(!callParticipanContact.active);
-                if (callParticipanContact.getCustomPhotoUrl() != null) {
-                    contactInitialView.setPhotoUrl(callParticipanContact.bytesContactIdentity, callParticipanContact.getCustomPhotoUrl());
-                } else {
-                    contactInitialView.setInitial(callParticipanContact.bytesContactIdentity, App.getInitial(callParticipanContact.getCustomDisplayName()));
-                }
-                contactNameTextView.setText(callParticipanContact.getCustomDisplayName());
+                contactInitialView.setContact(callParticipantContact);
+                contactNameTextView.setText(callParticipantContact.getCustomDisplayName());
                 if (webrtcCallService != null) {
                     int count = webrtcCallService.getIncomingParticipantCount() - 1;
                     if (count > 0) {
@@ -208,7 +220,7 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (!(service instanceof WebrtcCallService.WebrtcCallServiceBinder)) {
-                Logger.e("☎️ Bound to bad service!!!");
+                Logger.e("☎ Bound to bad service!!!");
                 closeActivity();
                 return;
             }

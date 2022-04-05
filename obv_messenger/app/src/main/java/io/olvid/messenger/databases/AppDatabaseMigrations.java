@@ -35,10 +35,36 @@ import java.util.regex.Pattern;
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
-import io.olvid.messenger.App;
+import io.olvid.messenger.customClasses.StringUtils;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[] {
+            new Migration(52, 53) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 52 TO 53");
+
+                    database.execSQL("ALTER TABLE `message_table` ADD COLUMN `forwarded` INTEGER NOT NULL DEFAULT 0");
+                }
+            },
+
+            new Migration(51, 52) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 51 TO 52");
+
+                    database.execSQL("ALTER TABLE `identity_table` ADD COLUMN `capability_one_to_one_contacts` INTEGER NOT NULL DEFAULT 0");
+                    database.execSQL("ALTER TABLE `contact_table` ADD COLUMN `capability_one_to_one_contacts` INTEGER NOT NULL DEFAULT 0");
+                    database.execSQL("ALTER TABLE `contact_table` ADD COLUMN `one_to_one` INTEGER NOT NULL DEFAULT 1");
+                    database.execSQL("ALTER TABLE `contact_table` ADD COLUMN `trust_level` INTEGER NOT NULL DEFAULT 0");
+                    database.execSQL("ALTER TABLE `discussion_table` ADD COLUMN `trust_level` INTEGER DEFAULT NULL");
+
+                    // delete all pending invitations of the categories we removed
+                    database.execSQL("DELETE FROM `invitation_table` WHERE `category_id` IN (9, 10, 11, 12)");
+                    database.execSQL("ALTER TABLE `invitation_table` ADD COLUMN `bytes_contact_identity` BLOB DEFAULT NULL");
+                }
+            },
+
             new Migration(50, 51) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
@@ -302,10 +328,10 @@ class AppDatabaseMigrations {
                             String fullSearchDisplayName;
                             if (customDisplayName != null) {
                                 sortDisplayName = collator.getCollationKey(customDisplayName).toByteArray();
-                                fullSearchDisplayName = App.unAccent(customDisplayName + " " + displayName);
+                                fullSearchDisplayName = StringUtils.unAccent(customDisplayName + " " + displayName);
                             } else {
                                 sortDisplayName = collator.getCollationKey(displayName).toByteArray();
-                                fullSearchDisplayName = App.unAccent(displayName);
+                                fullSearchDisplayName = StringUtils.unAccent(displayName);
                             }
 
                             database.execSQL("INSERT INTO `contact_table` VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?)", new Object[]{

@@ -193,9 +193,9 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
     private void refreshStatus() {
         if (viewModel.freeTrialResults != null && viewModel.subscriptionDetails != null) {
             if (viewModel.freeTrialFailed && viewModel.subscriptionFailed) {
-                View separator = getLayoutInflater().inflate(R.layout.view_subscriptions_separator, null);
+                View separator = getLayoutInflater().inflate(R.layout.view_subscriptions_separator, availablePlansLinearLayout, false);
                 availablePlansLinearLayout.addView(separator, 0);
-                View failed = getLayoutInflater().inflate(R.layout.view_subscriptions_failed, null);
+                View failed = getLayoutInflater().inflate(R.layout.view_subscriptions_failed, availablePlansLinearLayout, false);
                 availablePlansLinearLayout.addView(failed, 1);
                 failed.findViewById(R.id.retry_button).setOnClickListener(v -> {
                     availablePlansLinearLayout.removeAllViews();
@@ -272,12 +272,12 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
         viewModel.subscriptionDetails = skuDetailsList;
         new Handler(Looper.getMainLooper()).post(() -> {
             if (skuDetailsList.size() > 0) {
-                View separator = getLayoutInflater().inflate(R.layout.view_subscriptions_separator, null);
+                View separator = getLayoutInflater().inflate(R.layout.view_subscriptions_separator, availablePlansLinearLayout, false);
                 availablePlansLinearLayout.addView(separator, 0);
             }
 
             for (SkuDetails skuDetails: skuDetailsList) {
-                View subscriptionView = getLayoutInflater().inflate(R.layout.view_subscription_details, null);
+                View subscriptionView = getLayoutInflater().inflate(R.layout.view_subscription_details, availablePlansLinearLayout, false);
                 Button subscriptionButton = subscriptionView.findViewById(R.id.subscription_button);
                 TextView subscriptionTitle = subscriptionView.findViewById(R.id.subscription_title_textview);
                 TextView subscriptionExplanation = subscriptionView.findViewById(R.id.subscription_explanation_textview);
@@ -354,10 +354,10 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
                     }
                     new Handler(Looper.getMainLooper()).post(() -> {
                         if (available) {
-                            View separator = getLayoutInflater().inflate(R.layout.view_subscriptions_separator, null);
+                            View separator = getLayoutInflater().inflate(R.layout.view_subscriptions_separator, availablePlansLinearLayout, false);
                             availablePlansLinearLayout.addView(separator);
 
-                            View freeTrialView = getLayoutInflater().inflate(R.layout.view_subscription_free_trial, null);
+                            View freeTrialView = getLayoutInflater().inflate(R.layout.view_subscription_free_trial, availablePlansLinearLayout, false);
                             freeTrialButton = freeTrialView.findViewById(R.id.start_free_trial_button);
                             freeTrialButton.setOnClickListener((view) -> {
                                 view.setEnabled(false);

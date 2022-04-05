@@ -104,19 +104,20 @@ import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.ObvPostMessageOutput;
 import io.olvid.engine.engine.types.ObvTurnCredentialsFailedReason;
-import io.olvid.messenger.databases.entity.Discussion;
-import io.olvid.messenger.databases.entity.Group;
-import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.CallLogItem;
 import io.olvid.messenger.databases.entity.CallLogItemContactJoin;
 import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 
 import static io.olvid.messenger.App.getContext;
 
@@ -180,7 +181,6 @@ public class WebrtcCallService extends Service {
         RECONNECTING,
         HANGED_UP,
         KICKED,
-        TIMEOUT,
         FAILED
     }
 
@@ -196,7 +196,6 @@ public class WebrtcCallService extends Service {
         SERVER_AUTHENTICATION_ERROR,
         ICE_CONNECTION_ERROR,
         CALL_INITIATION_NOT_SUPPORTED,
-        TIMEOUT,
         KICKED
     }
 
@@ -239,7 +238,7 @@ public class WebrtcCallService extends Service {
 
     public static final long CALL_TIMEOUT_MILLIS = 30_000;
     public static final long RINGING_TIMEOUT_MILLIS = 60_000;
-    public static final long CALL_CONNECTION_TIMEOUT_MILLIS = 10_000;
+    public static final long CALL_CONNECTION_TIMEOUT_MILLIS = 15_000;
     public static final long PEER_CALL_ENDED_WAIT_MILLIS = 3_000;
 
     // HashMap containing ICE candidates received while outside a call: callIdentifier -> (bytesContactIdentity -> candidate)
@@ -364,7 +363,7 @@ public class WebrtcCallService extends Service {
                             case START_CALL_MESSAGE_TYPE: {
                                 JsonStartCallMessage startCallMessage = objectMapper.readValue(serializedMessagePayload, JsonStartCallMessage.class);
 
-                                recipientReceiveCall(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, startCallMessage.sessionDescriptionType, startCallMessage.gzippedSessionDescription, startCallMessage.turnUserName, startCallMessage.turnPassword, startCallMessage.turnServers, startCallMessage.participantCount, startCallMessage.getBytesGroupOwnerAndUid(), startCallMessage.getGatheringPolicy());
+                                recipientReceiveCall(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, startCallMessage.sessionDescriptionType, startCallMessage.gzippedSessionDescription, startCallMessage.turnUserName, startCallMessage.turnPassword/*, startCallMessage.turnServers*/, startCallMessage.participantCount, startCallMessage.getBytesGroupOwnerAndUid(), startCallMessage.getGatheringPolicy());
 
                                 return START_NOT_STICKY;
                             }
@@ -713,14 +712,14 @@ public class WebrtcCallService extends Service {
             if (username1 != null && password1 != null
                     && username2 != null && password2 != null
                     && turnServers != null) {
-                Logger.d("☎️ Reusing cached turn credentials");
+                Logger.d("☎ Reusing cached turn credentials");
                 setState(State.GETTING_TURN_CREDENTIALS);
                 callerSetTurnCredentialsAndInitializeCall(username1, password1, username2, password2, new ArrayList<>(turnServers));
                 return;
             }
         }
 
-        Logger.d("☎️ Requesting new turn credentials");
+        Logger.d("☎ Requesting new turn credentials");
         // request turn credentials
         setState(State.GETTING_TURN_CREDENTIALS);
         AppSingleton.getEngine().getTurnCredentials(bytesOwnedIdentity, callIdentifier, "caller", "recipient");
@@ -728,8 +727,8 @@ public class WebrtcCallService extends Service {
 
     void clearCredentialsCache() {
         executor.execute(() -> {
-            if (isCaller() && state == State.INITIALIZING_CALL) {
-                Logger.d("☎️ Clearing cached turn credentials");
+            if (isCaller()) {
+                Logger.d("☎ Clearing cached turn credentials");
                 SharedPreferences callCredentialsCacheSharedPreference = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_call_credentials_cache), Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = callCredentialsCacheSharedPreference.edit();
                 editor.clear();
@@ -749,14 +748,11 @@ public class WebrtcCallService extends Service {
             this.recipientTurnUserName = recipientUsername;
             this.recipientTurnPassword = recipientPassword;
             for (CallParticipant callParticipant: callParticipants.values()) {
-                callParticipant.peerConnectionHolder.setTurnCredentials(callerUsername, callerPassword, turnServers);
+                callParticipant.peerConnectionHolder.setTurnCredentials(callerUsername, callerPassword/*, turnServers*/);
                 callParticipant.peerConnectionHolder.createPeerConnection();
                 if (callParticipant.peerConnectionHolder.peerConnection == null) {
-                    setFailReason(FailReason.PEER_CONNECTION_CREATION_ERROR);
-                    setState(State.FAILED);
-                    return;
+                    peerConnectionHolderFailed(callParticipant, FailReason.PEER_CONNECTION_CREATION_ERROR);
                 }
-                callParticipant.peerConnectionHolder.createOffer();
             }
 
             setState(State.INITIALIZING_CALL);
@@ -793,7 +789,7 @@ public class WebrtcCallService extends Service {
 
             try {
                 if (callParticipant.peerState == PeerState.INITIAL) {
-                    Logger.d("☎️ Sending peer the following sdp [" + sdpType + "]\n" + sdpDescription);
+                    Logger.d("☎ Sending peer the following sdp [" + sdpType + "]\n" + sdpDescription);
                     if (isCaller()) {
                         if (sendStartCallMessage(callParticipant, sdpType, sdpDescription, recipientTurnUserName, recipientTurnPassword, turnServers)) {
                             callParticipant.setPeerState(PeerState.START_CALL_MESSAGE_SENT);
@@ -813,16 +809,36 @@ public class WebrtcCallService extends Service {
                         }
                     }
                 } else if (callParticipant.peerState == PeerState.CONNECTED || callParticipant.peerState == PeerState.RECONNECTING) {
-                    Logger.d("☎️ Sending peer the following restart sdp [" + sdpType + "]\n" + sdpDescription);
+                    Logger.d("☎ Sending peer the following restart sdp [" + sdpType + "]\n" + sdpDescription);
                     sendReconnectCallMessage(callParticipant, sdpType, sdpDescription, reconnectCounter, peerReconnectCounterToOverride);
                 }
             } catch (IOException e) {
-                setFailReason(FailReason.INTERNAL_ERROR);
-                setState(State.FAILED);
+                peerConnectionHolderFailed(callParticipant, FailReason.INTERNAL_ERROR);
                 e.printStackTrace();
             }
         });
     }
+
+    // Used for debug purpose only
+//    static int countSdpMedia(String description) {
+//        Pattern mediaStart = Pattern.compile("^m=");
+//        BufferedReader br = new BufferedReader(new StringReader(description));
+//        int count = 0;
+//        String line;
+//        try {
+//            while ((line = br.readLine()) != null) {
+//                Matcher m = mediaStart.matcher(line);
+//                if (m.find()) {
+//                    count++;
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return 0;
+//        }
+//        return count;
+//    }
+
 
     void callerHandleRingingMessage(@NonNull CallParticipant callParticipant) {
         executor.execute(() -> {
@@ -843,9 +859,19 @@ public class WebrtcCallService extends Service {
             if (callParticipant.peerState != PeerState.START_CALL_MESSAGE_SENT) {
                 return;
             }
-            createLogEntry(CallLogItem.STATUS_BUSY);
-
             callParticipant.setPeerState(PeerState.BUSY);
+
+            // if all participants are busy, create a busy log entry
+            boolean allBusy = true;
+            for (CallParticipant callParticipantOther : callParticipants.values()) {
+                if (callParticipantOther.peerState != PeerState.BUSY) {
+                    allBusy = false;
+                    break;
+                }
+            }
+            if (allBusy) {
+                createLogEntry(CallLogItem.STATUS_BUSY);
+            }
 
             if (state == State.INITIALIZING_CALL) {
                 outgoingCallRinger.ring(OutgoingCallRinger.Type.BUSY);
@@ -867,15 +893,16 @@ public class WebrtcCallService extends Service {
             try {
                 peerSdpDescription = gunzip(gzippedPeerSdpDescription);
             } catch (IOException e) {
-                setFailReason(FailReason.INTERNAL_ERROR);
-                setState(State.FAILED);
+                peerConnectionHolderFailed(callParticipant, FailReason.INTERNAL_ERROR);
                 e.printStackTrace();
                 return;
             }
 
             callParticipant.peerConnectionHolder.setPeerSessionDescription(peerSdpType, peerSdpDescription);
-            callParticipant.peerConnectionHolder.finishEstablishingConnection();
             callParticipant.setPeerState(PeerState.CONNECTING_TO_PEER);
+            if (state == State.RINGING) {
+                setState(State.INITIALIZING_CALL);
+            }
         });
     }
 
@@ -886,6 +913,17 @@ public class WebrtcCallService extends Service {
             }
             callParticipant.setPeerState(PeerState.CALL_REJECTED);
 
+            // if all participants reject the call, create a reject call log entry
+            boolean allRejected = true;
+            for (CallParticipant callParticipantOther : callParticipants.values()) {
+                if (callParticipantOther.peerState != PeerState.CALL_REJECTED) {
+                    allRejected = false;
+                    break;
+                }
+            }
+            if (allRejected) {
+                createLogEntry(CallLogItem.STATUS_REJECTED);
+            }
             updateStateFromPeerStates();
         });
     }
@@ -895,6 +933,16 @@ public class WebrtcCallService extends Service {
             callParticipant.setPeerState(PeerState.HANGED_UP);
 
             updateStateFromPeerStates();
+
+            // If I am the caller, notify the other call participants that someone hanged up (they should receive a message too, but this ensures everyone is in sync as soon as possible)
+            if (isCaller() && state != State.CALL_ENDED) {
+                JsonUpdateParticipantsInnerMessage message = new JsonUpdateParticipantsInnerMessage(callParticipants.values());
+                for (CallParticipant callPart: callParticipants.values()) {
+                    if (!callPart.equals(callParticipant)) {
+                        sendDataChannelMessage(callPart, message);
+                    }
+                }
+            }
         });
     }
 
@@ -915,7 +963,7 @@ public class WebrtcCallService extends Service {
     private void hangUpCallInternal() {
         // notify peer that you hung up (it's not just a connection loss)
         sendHangedUpMessage(callParticipants.values());
-        if (soundPool != null) {
+        if (soundPool != null && state != State.CALL_ENDED) { // do not play if state is already call ended
             soundPool.play(disconnectSound, 1, 1, 0, 0, 1);
         }
 
@@ -925,7 +973,7 @@ public class WebrtcCallService extends Service {
     }
 
 
-    void recipientReceiveCall(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, UUID callIdentifier, String peerSdpType, byte[] gzippedPeerSdpDescription, String turnUsername, String turnPassword, @Nullable List<String> turnServers, int participantCount, @Nullable byte[] bytesGroupOwnerAndUid, @NonNull GatheringPolicy gatheringPolicy) {
+    void recipientReceiveCall(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, UUID callIdentifier, String peerSdpType, byte[] gzippedPeerSdpDescription, String turnUsername, String turnPassword,/* @Nullable List<String> turnServers,*/ int participantCount, @Nullable byte[] bytesGroupOwnerAndUid, @NonNull GatheringPolicy gatheringPolicy) {
         executor.execute(() -> {
             if (state != State.INITIAL && !callIdentifier.equals(this.callIdentifier)) {
                 sendBusyMessage(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, bytesGroupOwnerAndUid);
@@ -970,7 +1018,7 @@ public class WebrtcCallService extends Service {
             this.incomingParticipantCount = participantCount;
             callParticipant.peerConnectionHolder.setGatheringPolicy(gatheringPolicy);
             callParticipant.peerConnectionHolder.setPeerSessionDescription(peerSdpType, peerSdpDescription);
-            callParticipant.peerConnectionHolder.setTurnCredentials(turnUsername, turnPassword, turnServers);
+            callParticipant.peerConnectionHolder.setTurnCredentials(turnUsername, turnPassword/*, turnServers*/);
 
             showIncomingCallForeground(callParticipant.contact, participantCount);
             sendRingingMessage(callParticipant);
@@ -1028,13 +1076,9 @@ public class WebrtcCallService extends Service {
         callerCallParticipant.peerConnectionHolder.createPeerConnection();
 
         if (callerCallParticipant.peerConnectionHolder.peerConnection == null) {
-            setFailReason(FailReason.PEER_CONNECTION_CREATION_ERROR);
-            setState(State.FAILED);
+            peerConnectionHolderFailed(callerCallParticipant, FailReason.PEER_CONNECTION_CREATION_ERROR);
             return;
         }
-
-        // create the Answer
-        callerCallParticipant.peerConnectionHolder.createAnswer();
 
         setState(State.INITIALIZING_CALL);
     }
@@ -1076,7 +1120,7 @@ public class WebrtcCallService extends Service {
         sendRejectCallMessage(callerCallParticipant);
 
         // create log entry
-        createLogEntry(CallLogItem.STATUS_MISSED);
+        createLogEntry(CallLogItem.STATUS_REJECTED);
 
         callerCallParticipant.setPeerState(PeerState.CALL_REJECTED);
         setState(State.CALL_ENDED);
@@ -1084,35 +1128,71 @@ public class WebrtcCallService extends Service {
     }
 
 
-    void handleTimeout() {
+    void peerConnectionHolderFailed(CallParticipant callParticipant, FailReason failReason) {
         executor.execute(() -> {
-            if (state == State.RINGING) {
-                createLogEntry(CallLogItem.STATUS_MISSED);
-                sendHangedUpMessage(callParticipants.values());
-                if (soundPool != null) {
-                    soundPool.play(disconnectSound, 1, 1, 0, 0, 1);
-                }
+            if (callParticipantIndexes.get(new BytesKey(callParticipant.bytesContactIdentity)) == null) {
+                return;
             }
-            setFailReason(FailReason.TIMEOUT);
-            setState(State.FAILED);
-        });
-    }
 
-    void peerConnectionHolderFailed(FailReason failReason) {
-        executor.execute(() -> {
-            setFailReason(failReason);
-            setState(State.FAILED);
+            if (callParticipants.size() == 1) {
+                // if there is a single participant in the call, fail the whole call
+                setFailReason(failReason);
+                setState(State.FAILED);
+
+                // also send a hang up message to notify peer
+                hangUpCallInternal();
+
+            } else if (isCaller()) {
+                boolean wasConnected = callParticipant.peerState == PeerState.CONNECTED || callParticipant.peerState == PeerState.RECONNECTING;
+
+                // fail this participant only so it will be removed from the call
+                callParticipant.setPeerState(PeerState.FAILED);
+                updateStateFromPeerStates();
+
+                // notify other participants in case the participant was already connected
+                if (wasConnected) {
+                    JsonUpdateParticipantsInnerMessage message = new JsonUpdateParticipantsInnerMessage(callParticipants.values());
+                    for (CallParticipant callPart : callParticipants.values()) {
+                        if (!callPart.equals(callParticipant)) {
+                            sendDataChannelMessage(callPart, message);
+                        }
+                    }
+                }
+            } else {
+                // we were unable to connect to one "secondary" call participant
+                // nothing we can do...
+            }
         });
     }
 
     void reconnectAfterConnectionLoss(CallParticipant callParticipant) {
         executor.execute(() -> {
+            if (state == State.CALL_ENDED || state == State.FAILED) {
+                return;
+            }
+
+            switch (callParticipant.peerState) {
+                case CALL_REJECTED:
+                case HANGED_UP:
+                case KICKED:
+                case FAILED:
+                    // if we are in a final state, no need to try reconnecting
+                    return;
+                case INITIAL:
+                case START_CALL_MESSAGE_SENT:
+                case RINGING:
+                case BUSY:
+                    // if we are in a "too early" state, we should not try reconnecting, audio/data tracks may not have been properly created
+                    return;
+                case CONNECTING_TO_PEER:
+                case CONNECTED:
+                case RECONNECTING:
+                    break;
+            }
             callParticipant.setPeerState(PeerState.RECONNECTING);
             updateStateFromPeerStates();
 
-            if (callParticipant.getGatheringPolicy() != GatheringPolicy.GATHER_CONTINUOUSLY) {
-                callParticipant.peerConnectionHolder.createRestartOffer();
-            }
+            callParticipant.peerConnectionHolder.restartIce();
         });
     }
 
@@ -1180,32 +1260,30 @@ public class WebrtcCallService extends Service {
             List<CallParticipant> newCallParticipants = new ArrayList<>();
             for (Contact contact: contactsToAdd) {
                 if (!Arrays.equals(contact.bytesOwnedIdentity, bytesOwnedIdentity)) {
-                    Logger.w("☎️ Trying to add contact to call for a different ownedIdentity");
+                    Logger.w("☎ Trying to add contact to call for a different ownedIdentity");
                     continue;
                 }
                 if (getCallParticipant(contact.bytesContactIdentity) != null) {
-                    Logger.w("☎️ Trying to add contact to call which is already in the call");
+                    Logger.w("☎ Trying to add contact to call which is already in the call");
                     continue;
                 }
+                Logger.d("☎ Adding a call participant");
                 CallParticipant callParticipant = new CallParticipant(contact, Role.RECIPIENT);
 
                 newCallParticipants.add(callParticipant);
-                if (state != State.INITIAL
-                        && state != State.WAITING_FOR_AUDIO_PERMISSION
-                        && state != State.GETTING_TURN_CREDENTIALS) { // only create the peer if the turn credentials were already retrieved
-                    callParticipant.peerConnectionHolder.setTurnCredentials(this.turnUserName, this.turnPassword, this.turnServers);
-                    callParticipant.peerConnectionHolder.createPeerConnection();
-                    if (callParticipant.peerConnectionHolder.peerConnection == null) {
-                        setFailReason(FailReason.PEER_CONNECTION_CREATION_ERROR);
-                        setState(State.FAILED);
-                        return;
-                    }
-                    callParticipant.peerConnectionHolder.createOffer();
-                }
-
                 callParticipantIndexes.put(new BytesKey(callParticipant.bytesContactIdentity), callParticipantIndex);
                 callParticipants.put(callParticipantIndex, callParticipant);
                 callParticipantIndex++;
+
+                if (state != State.INITIAL
+                        && state != State.WAITING_FOR_AUDIO_PERMISSION
+                        && state != State.GETTING_TURN_CREDENTIALS) { // only create the peer if the turn credentials were already retrieved
+                    callParticipant.peerConnectionHolder.setTurnCredentials(turnUserName, turnPassword/*, turnServers*/);
+                    callParticipant.peerConnectionHolder.createPeerConnection();
+                    if (callParticipant.peerConnectionHolder.peerConnection == null) {
+                        peerConnectionHolderFailed(callParticipant, FailReason.PEER_CONNECTION_CREATION_ERROR);
+                    }
+                }
             }
             notifyCallParticipantsChanged();
 
@@ -1238,19 +1316,19 @@ public class WebrtcCallService extends Service {
         if (index != null) {
             callParticipants.remove(index);
         } else {
-            Logger.w("☎️ Calling removeCallParticipant for participant not in the call");
+            Logger.w("☎ Calling removeCallParticipant for participant not in the call");
         }
         notifyCallParticipantsChanged();
     }
 
     void handleReconnectCallMessage(@NonNull CallParticipant callParticipant, String peerSdpType, byte[] gzippedPeerSdpDescription, int reconnectCounter, int peerReconnectCounterToOverride) {
         executor.execute(() -> {
+            Logger.d("☎ Received reconnect call message");
             String peerSdpDescription;
             try {
                 peerSdpDescription = gunzip(gzippedPeerSdpDescription);
             } catch (IOException e) {
-                setFailReason(FailReason.INTERNAL_ERROR);
-                setState(State.FAILED);
+                peerConnectionHolderFailed(callParticipant, FailReason.INTERNAL_ERROR);
                 e.printStackTrace();
                 return;
             }
@@ -1274,16 +1352,12 @@ public class WebrtcCallService extends Service {
             }
             callParticipant.peerConnectionHolder.setGatheringPolicy(gatheringPolicy);
             callParticipant.peerConnectionHolder.setPeerSessionDescription(sessionDescriptionType, peerSdpDescription);
-            callParticipant.peerConnectionHolder.setTurnCredentials(turnUserName, turnPassword, turnServers);
+            callParticipant.peerConnectionHolder.setTurnCredentials(turnUserName, turnPassword/*, turnServers*/);
 
             callParticipant.peerConnectionHolder.createPeerConnection();
             if (callParticipant.peerConnectionHolder.peerConnection == null) {
-                setFailReason(FailReason.PEER_CONNECTION_CREATION_ERROR);
-                setState(State.FAILED);
-                return;
+                peerConnectionHolderFailed(callParticipant, FailReason.PEER_CONNECTION_CREATION_ERROR);
             }
-
-            callParticipant.peerConnectionHolder.createAnswer();
         });
     }
 
@@ -1304,7 +1378,6 @@ public class WebrtcCallService extends Service {
             }
 
             callParticipant.peerConnectionHolder.setPeerSessionDescription(sessionDescriptionType, peerSdpDescription);
-            callParticipant.peerConnectionHolder.finishEstablishingConnection();
             callParticipant.setPeerState(PeerState.CONNECTING_TO_PEER);
         });
     }
@@ -1321,13 +1394,13 @@ public class WebrtcCallService extends Service {
 
     private void handleNewIceCandidateMessage(@NonNull UUID callIdentifier, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @NonNull JsonIceCandidate jsonIceCandidate) {
         executor.execute(() -> {
-            Logger.w("☎️ received new ICE candidate");
+            Logger.d("☎ received new ICE candidate");
             if (Arrays.equals(bytesOwnedIdentity, this.bytesOwnedIdentity) &&
                     callIdentifier.equals(this.callIdentifier)) {
                 // we are in the right call, handle the message directly (if the participant is in the call)
                 CallParticipant callParticipant = getCallParticipant(bytesContactIdentity);
                 if (callParticipant != null) {
-                    Logger.w("☎️ passing candidate to peerConnectionHolder");
+                    Logger.d("☎ passing candidate to peerConnectionHolder");
                     callParticipant.peerConnectionHolder.addIceCandidates(Collections.singletonList(jsonIceCandidate));
                     return;
                 }
@@ -1364,7 +1437,9 @@ public class WebrtcCallService extends Service {
                 if (callerCandidatesMap != null) {
                     HashSet<JsonIceCandidate> candidates = callerCandidatesMap.get(new BytesKey(bytesContactIdentity));
                     if (candidates != null) {
-                        candidates.removeAll(Arrays.asList(jsonIceCandidates));
+                        for (JsonIceCandidate jsonIceCandidate : jsonIceCandidates) {
+                            candidates.remove(jsonIceCandidate);
+                        }
                         if (candidates.isEmpty()) {
                             callerCandidatesMap.remove(new BytesKey(bytesContactIdentity));
                             if (callerCandidatesMap.isEmpty()) {
@@ -1386,7 +1461,7 @@ public class WebrtcCallService extends Service {
                 if (callParticipant.peerState == PeerState.CONNECTING_TO_PEER ||
                         callParticipant.peerState == PeerState.CONNECTED ||
                         callParticipant.peerState == PeerState.RECONNECTING) {
-                    callParticipant.peerConnectionHolder.createRestartOffer();
+                    callParticipant.peerConnectionHolder.restartIce();
                 }
             }
         });
@@ -1419,17 +1494,18 @@ public class WebrtcCallService extends Service {
                     callParticipantIndex++;
 
                     if (shouldISendTheOfferToCallParticipant(callParticipant)) {
-                        callParticipant.peerConnectionHolder.setTurnCredentials(turnUserName, turnPassword, turnServers);
+                        Logger.d("☎ I am in charge of sending the offer to a new participant");
+                        callParticipant.peerConnectionHolder.setTurnCredentials(turnUserName, turnPassword/*, turnServers*/);
                         callParticipant.peerConnectionHolder.createPeerConnection();
                         if (callParticipant.peerConnectionHolder.peerConnection == null) {
-                            setState(State.FAILED);
-                            return;
+                            peerConnectionHolderFailed(callParticipant, FailReason.PEER_CONNECTION_CREATION_ERROR);
                         }
-                        callParticipant.peerConnectionHolder.createOffer();
                     } else {
+                        Logger.d("☎ I am NOT in charge of sending the offer to a new participant");
                         // check if we already received the offer the CallParticipant is supposed to send us
                         JsonNewParticipantOfferMessage newParticipantOfferMessage = receivedOfferMessages.remove(new BytesKey(callParticipant.bytesContactIdentity));
                         if (newParticipantOfferMessage != null) {
+                            Logger.d("☎ Reusing previously received participant offer message");
                             handleNewParticipantOfferMessage(callParticipant, newParticipantOfferMessage.sessionDescriptionType, newParticipantOfferMessage.gzippedSessionDescription, newParticipantOfferMessage.getGatheringPolicy());
                         }
                     }
@@ -1445,10 +1521,10 @@ public class WebrtcCallService extends Service {
                 if (callParticipant == null || callParticipant.role == Role.CALLER) {
                     continue;
                 }
-                callParticipant.peerConnectionHolder.cleanUp();
-                callParticipant.setPeerState(PeerState.KICKED);
-                callParticipants.remove(index);
-                callParticipantIndexes.remove(bytesKeyToRemove);
+
+                if (callParticipant.peerState != PeerState.HANGED_UP) {
+                    callParticipant.setPeerState(PeerState.KICKED);
+                }
             }
 
             updateLogEntry(newCallParticipants);
@@ -1471,26 +1547,12 @@ public class WebrtcCallService extends Service {
         this.stateLiveData.postValue(state);
 
         // handle special state change hooks
-        switch (state) {
-            case FAILED: {
-                // create the log entry --> this will only create one if one was not already created
-                createLogEntry(CallLogItem.STATUS_FAILED);
-                stopThisService();
-                break;
-            }
-            case GETTING_TURN_CREDENTIALS:
-            case INITIALIZING_CALL:
-            case BUSY:
-            case RINGING: {
-                createStateTimeout(state);
-                break;
-            }
-            case INITIAL:
-            case CALL_IN_PROGRESS:
-            case WAITING_FOR_AUDIO_PERMISSION:
-            case CALL_ENDED: {
-                break;
-            }
+        if (state == State.FAILED) {
+            // create the log entry --> this will only create one if one was not already created
+            createLogEntry(CallLogItem.STATUS_FAILED);
+            stopThisService();
+        } else if (state == State.RINGING && !isCaller()) {
+            createRecipientRingingTimeout();
         }
     }
 
@@ -1620,6 +1682,10 @@ public class WebrtcCallService extends Service {
         return new BytesKey(bytesOwnedIdentity).compareTo(new BytesKey(callParticipant.bytesContactIdentity)) > 0;
     }
 
+    void synchronizeOnExecutor(Runnable runnable) {
+        executor.execute(runnable);
+    }
+
     @Nullable
     private CallParticipant getCallParticipant(byte[] bytesContactIdentity) {
         Integer index = callParticipantIndexes.get(new BytesKey(bytesContactIdentity));
@@ -1664,8 +1730,7 @@ public class WebrtcCallService extends Service {
                 case CALL_REJECTED:
                 case HANGED_UP:
                 case KICKED:
-                case FAILED:
-                case TIMEOUT: {
+                case FAILED: {
                     break;
                 }
             }
@@ -1673,7 +1738,7 @@ public class WebrtcCallService extends Service {
         if (allPeersAreInFinalState) {
             createLogEntry(CallLogItem.STATUS_MISSED); // this only create the log if it was not yet created
 
-            if (soundPool != null) {
+            if (soundPool != null && state != State.CALL_ENDED) {
                 soundPool.play(disconnectSound, 1, 1, 0, 0, 1);
             }
 
@@ -1719,7 +1784,7 @@ public class WebrtcCallService extends Service {
         }
     }
 
-    private void createStateTimeout(State state) {
+    private void createRecipientRingingTimeout() {
         if (timeoutTimerTask != null) {
             timeoutTimerTask.cancel();
             timeoutTimerTask = null;
@@ -1727,16 +1792,15 @@ public class WebrtcCallService extends Service {
         timeoutTimerTask = new TimerTask() {
             @Override
             public void run() {
-                handleTimeout();
+                executor.execute(WebrtcCallService.this::hangUpCallInternal);
             }
         };
         try {
-            timeoutTimer.schedule(timeoutTimerTask, state == State.RINGING ? RINGING_TIMEOUT_MILLIS : CALL_TIMEOUT_MILLIS);
+            timeoutTimer.schedule(timeoutTimerTask, RINGING_TIMEOUT_MILLIS);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
     }
-
 
     private void createLogEntry(int callLogItemStatus) {
         if (callLogItem != null) {
@@ -1755,6 +1819,7 @@ public class WebrtcCallService extends Service {
             case CallLogItem.STATUS_MISSED:
             case CallLogItem.STATUS_BUSY:
             case CallLogItem.STATUS_FAILED:
+            case CallLogItem.STATUS_REJECTED:
                 callLogItem = new CallLogItem(bytesOwnedIdentity, bytesGroupOwnerAndUid, type, callLogItemStatus);
                 break;
         }
@@ -1802,6 +1867,7 @@ public class WebrtcCallService extends Service {
                             }
                         }
                     }
+                    // for multi-call without a discussion, we do not insert a message in any discussion
                 } else {
                     // find the caller, then insert either in a group discussion, or in his one-to-one discussion
                     for (CallParticipant callParticipant : callParticipants) {
@@ -1849,13 +1915,13 @@ public class WebrtcCallService extends Service {
                         .setUsage(AudioAttributesCompat.USAGE_VOICE_COMMUNICATION)
                         .setLegacyStreamType(AudioManager.STREAM_VOICE_CALL)
                         .build())
-                .setOnAudioFocusChangeListener(focusChange -> Logger.d("☎️ Audio focus changed: " + focusChange))
+                .setOnAudioFocusChangeListener(focusChange -> Logger.d("☎ Audio focus changed: " + focusChange))
                 .build();
         int result = AudioManagerCompat.requestAudioFocus(audioManager, audioFocusRequest);
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            Logger.d("☎️ Audio focus granted");
+            Logger.d("☎ Audio focus granted");
         } else {
-            Logger.e("☎️ Audio focus denied");
+            Logger.e("☎ Audio focus denied");
         }
         savedAudioManagerMode = audioManager.getMode();
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
@@ -1901,16 +1967,10 @@ public class WebrtcCallService extends Service {
             CallParticipant callParticipant = callParticipants.values().iterator().next();
 
             if (callParticipant.contact != null) {
-                initialView.setKeycloakCertified(callParticipant.contact.keycloakManaged);
-                initialView.setInactive(!callParticipant.contact.active);
-                if (callParticipant.contact.getCustomPhotoUrl() != null) {
-                    initialView.setPhotoUrl(callParticipant.bytesContactIdentity, callParticipant.contact.getCustomPhotoUrl());
-                } else {
-                    initialView.setInitial(callParticipant.bytesContactIdentity, App.getInitial(callParticipant.contact.getCustomDisplayName()));
-                }
+                initialView.setContact(callParticipant.contact);
                 notificationName = callParticipant.contact.getCustomDisplayName();
             } else {
-                initialView.setInitial(callParticipant.bytesContactIdentity, App.getInitial(callParticipant.displayName));
+                initialView.setInitial(callParticipant.bytesContactIdentity, StringUtils.getInitial(callParticipant.displayName));
                 notificationName = callParticipant.displayName;
             }
         }
@@ -1987,15 +2047,9 @@ public class WebrtcCallService extends Service {
         }
 
         InitialView initialView = new InitialView(getContext());
-        initialView.setKeycloakCertified(contact.keycloakManaged);
-        initialView.setInactive(!contact.active);
-        if (contact.getCustomPhotoUrl() != null) {
-            initialView.setPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
-        } else {
-            initialView.setInitial(contact.bytesContactIdentity, App.getInitial(contact.getCustomDisplayName()));
-        }
         int size = getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
         initialView.setSize(size, size);
+        initialView.setContact(contact);
         Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         initialView.drawOnCanvas(new Canvas(largeIcon));
 
@@ -2200,6 +2254,7 @@ public class WebrtcCallService extends Service {
     private class NetworkMonitorObserver implements NetworkMonitor.NetworkObserver {
         @Override
         public void onConnectionTypeChanged(NetworkMonitorAutoDetect.ConnectionType newConnectionType) {
+            Logger.d("☎ onConnectionTypeChanged");
             handleNetworkConnectionChange();
         }
     }
@@ -2282,7 +2337,7 @@ public class WebrtcCallService extends Service {
                         } else {
                             callerSetTurnCredentialsAndInitializeCall(callerUsername, callerPassword, recipientUsername, recipientPassword, turnServers);
 
-                            Logger.d("☎️ Caching received turn credentials for reuse");
+                            Logger.d("☎ Caching received turn credentials for reuse");
                             SharedPreferences callCredentialsCacheSharedPreference = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_call_credentials_cache), Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = callCredentialsCacheSharedPreference.edit();
                             editor.clear();
@@ -2416,7 +2471,7 @@ public class WebrtcCallService extends Service {
 
             try {
                 JsonNewIceCandidateMessage jsonNewIceCandidateMessage = new JsonNewIceCandidateMessage(jsonIceCandidate.sdp, jsonIceCandidate.sdpMLineIndex, jsonIceCandidate.sdpMid);
-                Logger.w("☎ sending peer an ice candidate for call " + callIdentifier + "\n" + jsonIceCandidate.sdpMLineIndex + " -> " + jsonIceCandidate.sdp);
+                Logger.d("☎ sending peer an ice candidate for call " + callIdentifier + "\n" + jsonIceCandidate.sdpMLineIndex + " -> " + jsonIceCandidate.sdp);
                 if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
                     postMessage(Collections.singletonList(callParticipant), jsonNewIceCandidateMessage);
                 } else {
@@ -2580,6 +2635,7 @@ public class WebrtcCallService extends Service {
 
             byte[] messagePayload = AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
             ObvPostMessageOutput obvPostMessageOutput = AppSingleton.getEngine().post(messagePayload, null, new ObvOutboundAttachment[0], bytesContactIdentities, bytesOwnedIdentity, tagAsVoipMessage, tagAsVoipMessage);
+            // do not use the foreground service for this
             return obvPostMessageOutput.isMessageSent();
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -3601,23 +3657,19 @@ public class WebrtcCallService extends Service {
             switch (peerState) {
                 case INITIAL:
                 case CONNECTED:
-                    break;
                 case START_CALL_MESSAGE_SENT:
                 case BUSY:
-                case RINGING: {
-                    createPeerStateTimeout(peerState == PeerState.RINGING);
+                case RINGING:
                     break;
-                }
                 case RECONNECTING:
                 case CONNECTING_TO_PEER: {
-                    createPeerStateConnectionTimeout();
+                    createPeerConnectionTimeout();
                     break;
                 }
                 case CALL_REJECTED:
                 case HANGED_UP:
                 case KICKED:
-                case FAILED:
-                case TIMEOUT: {
+                case FAILED: {
                     createRemovePeerTimeout();
                     break;
                 }
@@ -3643,7 +3695,7 @@ public class WebrtcCallService extends Service {
             }
         }
 
-        private void createPeerStateTimeout(boolean ringing) {
+        private void createPeerConnectionTimeout() {
             if (markedForRemoval) {
                 return;
             }
@@ -3654,41 +3706,12 @@ public class WebrtcCallService extends Service {
             timeoutTask = new TimerTask() {
                 @Override
                 public void run() {
-                    executor.execute(() -> {
-                        setPeerState(PeerState.TIMEOUT);
-                        updateStateFromPeerStates();
-                    });
+                    Logger.d("☎ Calling reconnectAfterConnectionLoss because of TIMEOUT");
+                    reconnectAfterConnectionLoss(CallParticipant.this);
                 }
             };
             try {
-                timeoutTimer.schedule(timeoutTask, ringing ? RINGING_TIMEOUT_MILLIS : CALL_TIMEOUT_MILLIS);
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-            }
-        }
-
-        private void createPeerStateConnectionTimeout() {
-            if (markedForRemoval) {
-                return;
-            }
-            if (timeoutTask != null) {
-                timeoutTask.cancel();
-                timeoutTask = null;
-            }
-            timeoutTask = new TimerTask() {
-                @Override
-                public void run() {
-                    executor.execute(() -> {
-                        if (callParticipants.size() > 1) {
-                            reconnectAfterConnectionLoss(CallParticipant.this);
-                        } else {
-                            createPeerStateTimeout(false);
-                        }
-                    });
-                }
-            };
-            try {
-                timeoutTimer.schedule(timeoutTask, (long) (CALL_CONNECTION_TIMEOUT_MILLIS * (1 + new Random().nextFloat())));
+                timeoutTimer.schedule(timeoutTask, (long) (CALL_CONNECTION_TIMEOUT_MILLIS * (1 + .33f * new Random().nextFloat())));
             } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
@@ -3718,7 +3741,7 @@ public class WebrtcCallService extends Service {
         }
     }
 
-    public static class CallParticipantPojo {
+    public static class CallParticipantPojo implements Comparable<CallParticipantPojo> {
         public final byte[] bytesContactIdentity;
         @Nullable public final Contact contact;
         public final String displayName;
@@ -3731,6 +3754,23 @@ public class WebrtcCallService extends Service {
             this.displayName = callParticipant.displayName;
             this.peerIsMuted = callParticipant.peerIsMuted;
             this.peerState = callParticipant.peerState;
+        }
+
+        @Override
+        public int compareTo(CallParticipantPojo callParticipantPojo) {
+            final String myName;
+            final String theirName;
+            if (contact != null) {
+                myName = contact.getCustomDisplayName();
+            } else {
+                myName = displayName;
+            }
+            if (callParticipantPojo.contact != null) {
+                theirName = callParticipantPojo.contact.getCustomDisplayName();
+            } else {
+                theirName = callParticipantPojo.displayName;
+            }
+            return myName.compareTo(theirName);
         }
     }
 }

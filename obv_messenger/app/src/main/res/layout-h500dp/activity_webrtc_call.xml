@@ -137,6 +137,7 @@
             android:layout_height="0dp"
             android:contentDescription="@string/content_description_peer_muted_indicator"
             android:elevation="1dp"
+            app:layout_constraintHorizontal_weight="3"
             android:src="@drawable/button_no_micro_red_circle"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/contact_initial_view"
@@ -185,6 +186,7 @@
             android:id="@+id/spacer"
             android:layout_width="0dp"
             android:layout_height="1dp"
+            app:layout_constraintHorizontal_weight="2"
             app:layout_constraintBottom_toBottomOf="@+id/contact_initial_view"
             app:layout_constraintEnd_toStartOf="@+id/peer_is_muted_image_view"
             app:layout_constraintStart_toStartOf="@+id/guideline" />

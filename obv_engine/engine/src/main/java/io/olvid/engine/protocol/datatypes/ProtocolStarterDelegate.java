@@ -33,17 +33,19 @@ import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 
 public interface ProtocolStarterDelegate {
-    void startDeviceDiscoveryProtocol(Identity contactIdentity, Identity ownedIdentity) throws Exception;
-    void startDeviceDiscoveryProtocolWithinTransaction(Session session, Identity contactIdentity, Identity ownedIdentity) throws Exception;
-    void startTrustEstablishmentProtocol(Identity contactIdentity, String contactDisplayName, Identity ownedIdentity) throws Exception;
-    void startMutualScanTrustEstablishmentProtocol(Identity contactIdentity, byte[] signature, Identity ownedIdentity) throws Exception;
-    void startChannelCreationWithContactDeviceProtocol(UID contactDeviceUid, Identity contactIdentity, Identity ownedIdentity) throws Exception;
-    void startContactMutualIntroductionProtocol(Identity contactIdentityA, Identity[] contactIdentities, Identity ownedIdentity) throws Exception;
-    void startGroupCreationProtocol(String serializedGroupDetailsWithVersionAndPhoto, String photoUrl, HashSet<IdentityWithSerializedDetails> groupMemberIdentitiesAndDisplayNames, Identity ownedIdentity) throws Exception;
+    void startDeviceDiscoveryProtocol(Identity ownedIdentity, Identity contactIdentity) throws Exception;
+    void startDeviceDiscoveryProtocolWithinTransaction(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
+    void startTrustEstablishmentProtocol(Identity ownedIdentity, Identity contactIdentity, String contactDisplayName) throws Exception;
+    void startMutualScanTrustEstablishmentProtocol(Identity ownedIdentity, Identity contactIdentity, byte[] signature) throws Exception;
+    void startChannelCreationWithContactDeviceProtocol(Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception;
+    void startContactMutualIntroductionProtocol(Identity ownedIdentity, Identity contactIdentityA, Identity[] contactIdentities) throws Exception;
+    void startGroupCreationProtocol(Identity ownedIdentity, String serializedGroupDetailsWithVersionAndPhoto, String photoUrl, HashSet<IdentityWithSerializedDetails> groupMemberIdentitiesAndDisplayNames) throws Exception;
     void startIdentityDetailsPublicationProtocol(Session session, Identity ownedIdentity, int version) throws Exception;
     void startGroupDetailsPublicationProtocol(Session session, Identity ownedIdentity, byte[] groupUid) throws Exception;
+    void startOneToOneInvitationProtocol(Identity ownedIdentity, Identity contactIdentity) throws Exception;
 
-    void deleteContact(Identity contactIdentity, Identity ownedIdentity) throws Exception;
+    void deleteContact(Identity ownedIdentity, Identity contactIdentity) throws Exception;
+    void downgradeOneToOneContact(Identity ownedIdentity, Identity contactIdentity) throws Exception;
     void addKeycloakContact(Identity ownedIdentity, Identity contactIdentity, String signedContactDetails) throws Exception;
     void startProtocolForBindingOwnedIdentityToKeycloakWithinTransaction(Session session, Identity ownedIdentity, ObvKeycloakState keycloakState, String keycloakUserId) throws Exception;
     void updateCurrentDeviceCapabilitiesForOwnedIdentity(Session session, Identity ownedIdentity, List<ObvCapability> newOwnCapabilities) throws Exception;

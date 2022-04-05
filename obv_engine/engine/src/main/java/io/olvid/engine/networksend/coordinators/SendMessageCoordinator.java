@@ -140,7 +140,6 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
             rfc = Operation.RFC_NULL;
         }
         switch (rfc) {
-            case UploadMessageCompositeOperation.RFC_OK_WITH_MALFORMED_SERVER_RESPONSE:
             case UploadMessageCompositeOperation.RFC_MESSAGE_NOT_FOUND_IN_DATABASE:
                 // nothing to do
                 break;

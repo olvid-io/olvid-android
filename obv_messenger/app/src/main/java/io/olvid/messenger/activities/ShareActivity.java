@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
@@ -30,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
@@ -181,9 +183,7 @@ public class ShareActivity extends LockScreenOrNotActivity {
         }
 
         if (ownedIdentity == null) {
-            currentIdentityInitialView.setKeycloakCertified(false);
-            currentIdentityInitialView.setInactive(false);
-            currentIdentityInitialView.setInitial(new byte[0], " ");
+            currentIdentityInitialView.setUnknown();
             currentIdentityMutedImageView.setVisibility(View.GONE);
             return;
         }
@@ -215,13 +215,7 @@ public class ShareActivity extends LockScreenOrNotActivity {
                 currentNameSecondLineTextView.setText(null);
             }
         }
-        currentIdentityInitialView.setInactive(!ownedIdentity.active);
-        currentIdentityInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-        if (ownedIdentity.photoUrl != null) {
-            currentIdentityInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-        } else {
-            currentIdentityInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-        }
+        currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
         if (ownedIdentity.shouldMuteNotifications()) {
             currentIdentityMutedImageView.setVisibility(View.VISIBLE);
         } else {
@@ -233,7 +227,7 @@ public class ShareActivity extends LockScreenOrNotActivity {
         if (separator == null || adapter == null) {
             return;
         }
-        View popupView = getLayoutInflater().inflate(R.layout.popup_switch_owned_identity, null);
+        @SuppressLint("InflateParams") View popupView = getLayoutInflater().inflate(R.layout.popup_switch_owned_identity, null);
         popupWindow = new PopupWindow(popupView, separator.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setElevation(12);
         popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.background_half_rounded_dialog));
@@ -254,7 +248,8 @@ public class ShareActivity extends LockScreenOrNotActivity {
         }
 
         @Override
-        protected void onHiddenIdentityPasswordEntered(byte[] byteOwnedIdentity) {
+        protected void onHiddenIdentityPasswordEntered(AlertDialog dialog, byte[] byteOwnedIdentity) {
+            dialog.dismiss();
             AppSingleton.getInstance().selectIdentity(byteOwnedIdentity, null);
         }
     }

@@ -33,6 +33,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
@@ -48,7 +49,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
-import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.AppDatabase;
@@ -195,15 +195,7 @@ public class OwnedIdentitySelectionDialogFragment extends DialogFragment {
             }
             OwnedIdentity ownedIdentity = ownedIdentities.get(position);
             holder.bytesOwnedIdentity = ownedIdentity.bytesOwnedIdentity;
-
-            holder.initialView.setInactive(!ownedIdentity.active);
-            holder.initialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-            if (ownedIdentity.photoUrl == null) {
-                holder.initialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-            } else {
-                holder.initialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-            }
-
+            holder.initialView.setOwnedIdentity(ownedIdentity);
             if (ownedIdentity.shouldMuteNotifications()) {
                 holder.notificationMutedImageView.setVisibility(View.VISIBLE);
             } else {
@@ -278,7 +270,8 @@ public class OwnedIdentitySelectionDialogFragment extends DialogFragment {
         }
 
         @Override
-        protected void onHiddenIdentityPasswordEntered(byte[] byteOwnedIdentity) {
+        protected void onHiddenIdentityPasswordEntered(AlertDialog dialog, byte[] byteOwnedIdentity) {
+            dialog.dismiss();
             DialogViewModel dialogViewModel = new ViewModelProvider(activity).get(DialogViewModel.class);
             if (dialogViewModel.onOwnedIdentitySelectedListener != null) {
                 dialogViewModel.onOwnedIdentitySelectedListener.onOwnedIdentitySelected(byteOwnedIdentity);

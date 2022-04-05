@@ -30,28 +30,38 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-
-import androidx.core.content.res.ResourcesCompat;
-
 import android.os.Build;
+import android.util.AttributeSet;
+import android.view.View;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.exifinterface.media.ExifInterface;
 
-import android.util.AttributeSet;
-import android.view.View;
-
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.settings.SettingsActivity;
+import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel;
 
 public class InitialView extends View {
     private byte[] bytes;
@@ -60,6 +70,8 @@ public class InitialView extends View {
     private boolean keycloakCertified = false;
     private boolean locked = false;
     private boolean inactive = false;
+    private boolean notOneToOne = false;
+    private Integer contactTrustLevel = null;
 
     private Paint backgroundPaint;
     private Paint insidePaint;
@@ -95,6 +107,369 @@ public class InitialView extends View {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    public void setContact(Contact contact) {
+        boolean changed = false;
+        if (!Arrays.equals(contact.bytesContactIdentity, bytes)) {
+            bytes = contact.bytesContactIdentity;
+            changed = true;
+        }
+        String contactInitial = StringUtils.getInitial(contact.getCustomDisplayName());
+        if (!Objects.equals(initial, contactInitial)) {
+            initial = contactInitial;
+            changed = true;
+        }
+        String contactPhotoUrl = App.absolutePathFromRelative(contact.getCustomPhotoUrl());
+        if (!Objects.equals(photoUrl, contactPhotoUrl)) {
+            photoUrl = contactPhotoUrl;
+            changed = true;
+        }
+        if (keycloakCertified != contact.keycloakManaged) {
+            keycloakCertified = contact.keycloakManaged;
+            changed = true;
+        }
+        if (inactive == contact.active) { // We are indeed checking that the value changed ;)
+            inactive = !contact.active;
+            changed = true;
+        }
+        if (locked) {
+            locked = false;
+            changed = true;
+        }
+        if (notOneToOne == contact.oneToOne) { // We are indeed checking that the value changed ;)
+            notOneToOne = !contact.oneToOne;
+            changed = true;
+        }
+        if (contactTrustLevel == null || contactTrustLevel != contact.trustLevel) {
+            contactTrustLevel = contact.trustLevel;
+            changed = true;
+        }
+        if (changed) {
+            bitmap = null;
+            init();
+        }
+    }
+
+    public void setOwnedIdentity(OwnedIdentity ownedIdentity) {
+        boolean changed = false;
+        if (!Arrays.equals(ownedIdentity.bytesOwnedIdentity, bytes)) {
+            bytes = ownedIdentity.bytesOwnedIdentity;
+            changed = true;
+        }
+        String contactInitial = StringUtils.getInitial(ownedIdentity.getCustomDisplayName());
+        if (!Objects.equals(initial, contactInitial)) {
+            initial = contactInitial;
+            changed = true;
+        }
+        String contactPhotoUrl = App.absolutePathFromRelative(ownedIdentity.photoUrl);
+        if (!Objects.equals(photoUrl, contactPhotoUrl)) {
+            photoUrl = contactPhotoUrl;
+            changed = true;
+        }
+        if (keycloakCertified != ownedIdentity.keycloakManaged) {
+            keycloakCertified = ownedIdentity.keycloakManaged;
+            changed = true;
+        }
+        if (inactive == ownedIdentity.active) { // We are indeed checking that the value changed ;)
+            inactive = !ownedIdentity.active;
+            changed = true;
+        }
+        if (locked) {
+            locked = false;
+            changed = true;
+        }
+        if (notOneToOne) { // We are indeed checking that the value changed ;)
+            notOneToOne = false;
+            changed = true;
+        }
+        if (contactTrustLevel != null) {
+            contactTrustLevel = null;
+            changed = true;
+        }
+        if (changed) {
+            bitmap = null;
+            init();
+        }
+    }
+
+    public void setGroup(Group group) {
+        boolean changed = false;
+        if (!Arrays.equals(group.bytesGroupOwnerAndUid, bytes)) {
+            bytes = group.bytesGroupOwnerAndUid;
+            changed = true;
+        }
+        if (initial != null) {
+            initial = null;
+            changed = true;
+        }
+        String contactPhotoUrl = App.absolutePathFromRelative(group.getCustomPhotoUrl());
+        if (!Objects.equals(photoUrl, contactPhotoUrl)) {
+            photoUrl = contactPhotoUrl;
+            changed = true;
+        }
+        if (keycloakCertified) {
+            keycloakCertified = false;
+            changed = true;
+        }
+        if (inactive) {
+            inactive = false;
+            changed = true;
+        }
+        if (locked) {
+            locked = false;
+            changed = true;
+        }
+        if (notOneToOne) {
+            notOneToOne = false;
+            changed = true;
+        }
+        if (contactTrustLevel != null) {
+            contactTrustLevel = null;
+            changed = true;
+        }
+        if (changed) {
+            bitmap = null;
+            init();
+        }
+    }
+
+    public void setDiscussion(Discussion discussion) {
+        boolean changed = false;
+        if (discussion.bytesContactIdentity != null) {
+            if (!Arrays.equals(bytes, discussion.bytesContactIdentity)) {
+                bytes = discussion.bytesContactIdentity;
+                changed = true;
+            }
+            String discussionInitial = StringUtils.getInitial(discussion.title);
+            if (!Objects.equals(initial, discussionInitial)) {
+                initial = discussionInitial;
+                changed = true;
+            }
+            if (locked) {
+                locked = false;
+                changed = true;
+            }
+            if (!Objects.equals(contactTrustLevel, discussion.trustLevel)) {
+                contactTrustLevel = discussion.trustLevel;
+                changed = true;
+            }
+        } else if (discussion.bytesGroupOwnerAndUid != null) {
+            if (!Arrays.equals(bytes, discussion.bytesGroupOwnerAndUid)) {
+                bytes = discussion.bytesGroupOwnerAndUid;
+                changed = true;
+            }
+            if (initial != null) {
+                initial = null;
+                changed = true;
+            }
+            if (locked) {
+                locked = false;
+                changed = true;
+            }
+            if (contactTrustLevel != null) {
+                contactTrustLevel = null;
+                changed = true;
+            }
+        } else {
+            if (bytes == null || bytes.length != 0) {
+                bytes = new byte[0];
+                changed = true;
+            }
+            if (initial == null || initial.length() != 0) {
+                initial = "";
+                changed = true;
+            }
+            if (!locked) {
+                locked = true;
+                changed = true;
+            }
+            if (contactTrustLevel != null) {
+                contactTrustLevel = null;
+                changed = true;
+            }
+        }
+        String discussionPhotoUrl = App.absolutePathFromRelative(discussion.photoUrl);
+        if (!Objects.equals(photoUrl, discussionPhotoUrl)) {
+            photoUrl = discussionPhotoUrl;
+            changed = true;
+        }
+        if (keycloakCertified != discussion.keycloakManaged) {
+            keycloakCertified = discussion.keycloakManaged;
+            changed = true;
+        }
+        if (inactive == discussion.active) { // We are indeed checking that the value changed ;)
+            inactive = !discussion.active;
+            changed = true;
+        }
+        if (notOneToOne) {
+            notOneToOne = false;
+            changed = true;
+        }
+        if (changed) {
+            bitmap = null;
+            init();
+        }
+    }
+
+
+    public void setDiscussion(FilteredDiscussionListViewModel.SearchableDiscussion discussion) {
+        boolean changed = false;
+        if (!Arrays.equals(bytes, discussion.byteIdentifier)) {
+            bytes = discussion.byteIdentifier;
+            changed = true;
+        }
+        if (discussion.isGroupDiscussion) {
+            if (initial != null) {
+                initial = null;
+                changed = true;
+            }
+            if (locked) {
+                locked = false;
+                changed = true;
+            }
+        } else if (discussion.byteIdentifier.length != 0) {
+            String discussionInitial = StringUtils.getInitial(discussion.title);
+            if (!Objects.equals(initial, discussionInitial)) {
+                initial = discussionInitial;
+                changed = true;
+            }
+            if (locked) {
+                locked = false;
+                changed = true;
+            }
+        } else {
+            if (initial == null || initial.length() != 0) {
+                initial = "";
+                changed = true;
+            }
+            if (!locked) {
+                locked = true;
+                changed = true;
+            }
+        }
+        String discussionPhotoUrl = App.absolutePathFromRelative(discussion.photoUrl);
+        if (!Objects.equals(photoUrl, discussionPhotoUrl)) {
+            photoUrl = discussionPhotoUrl;
+            changed = true;
+        }
+        if (keycloakCertified != discussion.keycloakManaged) {
+            keycloakCertified = discussion.keycloakManaged;
+            changed = true;
+        }
+        if (inactive == discussion.active) { // We are indeed checking that the value changed ;)
+            inactive = !discussion.active;
+            changed = true;
+        }
+        if (notOneToOne) {
+            notOneToOne = false;
+            changed = true;
+        }
+        if (contactTrustLevel != null) {
+            // we could properly set this for ontToOne discussions, but this is not worth the added work!
+            contactTrustLevel = null;
+            changed = true;
+        }
+        if (changed) {
+            bitmap = null;
+            init();
+        }
+    }
+
+    public void setFromCache(@NonNull byte[] bytesIdentifier) {
+        boolean changed = false;
+        String displayName = AppSingleton.getContactCustomDisplayName(bytesIdentifier);
+        String contactInitial;
+        byte[] bytes;
+        if (displayName == null) {
+            contactInitial = "?";
+            bytes = new byte[0];
+        } else {
+            contactInitial = StringUtils.getInitial(displayName);
+            bytes = bytesIdentifier;
+        }
+
+        if (!Arrays.equals(this.bytes, bytes)) {
+            this.bytes = bytes;
+            changed = true;
+        }
+        if (!Objects.equals(initial, contactInitial)) {
+            initial = contactInitial;
+            changed = true;
+        }
+        String contactPhotoUrl = App.absolutePathFromRelative(AppSingleton.getContactPhotoUrl(bytesIdentifier));
+        if (!Objects.equals(photoUrl, contactPhotoUrl)) {
+            photoUrl = contactPhotoUrl;
+            changed = true;
+        }
+        boolean keycloak = AppSingleton.getContactKeycloakManaged(bytesIdentifier);
+        if (keycloakCertified != keycloak) {
+            keycloakCertified = keycloak;
+            changed = true;
+        }
+        boolean inact = AppSingleton.getContactInactive(bytesIdentifier);
+        if (inactive != inact) {
+            inactive = inact;
+            changed = true;
+        }
+        if (locked) {
+            locked = false;
+            changed = true;
+        }
+        boolean oneToOne = AppSingleton.getContactOneToOne(bytesIdentifier);
+        if (notOneToOne == oneToOne) { // We are indeed checking that the value changed ;)
+            notOneToOne = !oneToOne;
+            changed = true;
+        }
+        Integer trustLevel = AppSingleton.getContactTrustLevel(bytesIdentifier);
+        if (!Objects.equals(contactTrustLevel, trustLevel)) {
+            contactTrustLevel = trustLevel;
+            changed = true;
+        }
+        if (changed) {
+            bitmap = null;
+            init();
+        }
+    }
+
+    public void setUnknown() {
+        boolean changed = false;
+        if (bytes == null || bytes.length != 0) {
+            bytes = new byte[0];
+            changed = true;
+        }
+        if (!Objects.equals(initial, "?")) {
+            initial = "?";
+            changed = true;
+        }
+        if (photoUrl != null) {
+            photoUrl = null;
+            changed = true;
+        }
+        if (keycloakCertified) {
+            keycloakCertified = false;
+            changed = true;
+        }
+        if (inactive) {
+            inactive = false;
+            changed = true;
+        }
+        if (locked) {
+            locked = false;
+            changed = true;
+        }
+        if (notOneToOne) {
+            notOneToOne = false;
+            changed = true;
+        }
+        if (contactTrustLevel != null) {
+            contactTrustLevel = null;
+            changed = true;
+        }
+        if (changed) {
+            bitmap = null;
+            init();
+        }
+    }
+
     public void setGroup(byte[] groupId) {
         this.bitmap = null;
         this.photoUrl = null;
@@ -115,7 +490,6 @@ public class InitialView extends View {
         this.bitmap = null;
         this.photoUrl = App.absolutePathFromRelative(relativePathPhotoUrl);
         this.bytes = bytes;
-        this.initial = null;
         init();
     }
 
@@ -153,6 +527,21 @@ public class InitialView extends View {
         }
     }
 
+    public void setNotOneToOne() {
+        if (notOneToOne) {
+            notOneToOne = false;
+            init();
+        }
+    }
+
+    public void setNullTrustLevel() {
+        if (contactTrustLevel != null) {
+            contactTrustLevel = null;
+            init();
+        }
+    }
+
+
 
     private void init() {
         if (bytes == null || size == 0) {
@@ -168,9 +557,9 @@ public class InitialView extends View {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeFile(photoUrl, options);
-            int size = Math.min(options.outWidth, options.outHeight);
-            if (size != -1) {
-                int subSampling = size / this.size;
+            int photoSize = Math.min(options.outWidth, options.outHeight);
+            if (photoSize != -1) {
+                int subSampling = photoSize / this.size;
                 options = new BitmapFactory.Options();
                 options.inSampleSize = subSampling;
                 Bitmap squareBitmap = BitmapFactory.decodeFile(photoUrl, options);
@@ -182,10 +571,11 @@ public class InitialView extends View {
                     } catch (IOException e) {
                         // exif error, do nothing
                     }
-                    RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(getResources(), squareBitmap);
-                    roundedDrawable.setCornerRadius(this.size / 2f);
                     bitmap = Bitmap.createBitmap(this.size, this.size, Bitmap.Config.ARGB_8888);
                     Canvas canvas = new Canvas(bitmap);
+
+                    RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(getResources(), squareBitmap);
+                    roundedDrawable.setCornerRadius(this.size / 2f);
                     roundedDrawable.setBounds(0, 0, this.size, this.size);
                     if (locked || inactive) {
                         ColorMatrix colorMatrix = new ColorMatrix();
@@ -193,6 +583,19 @@ public class InitialView extends View {
                         roundedDrawable.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
                     }
                     roundedDrawable.draw(canvas);
+
+                    if (contactTrustLevel != null && SettingsActivity.showTrustLevels()) {
+                        int dotSize = (int) (.3f * this.size);
+                        Paint clearPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                        clearPaint.setColor(Color.TRANSPARENT);
+                        clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+                        canvas.drawOval(new RectF(this.size - dotSize, this.size - dotSize, this.size, this.size), clearPaint);
+                        Paint dotPaint = getTrustPaint(getContext(), contactTrustLevel);
+                        canvas.drawOval(new RectF(this.size - .875f * dotSize, this.size - .875f * dotSize, this.size - .125f * dotSize, this.size - .125f * dotSize), dotPaint);
+                        if (notOneToOne) {
+                            canvas.drawOval(new RectF(this.size - .65f * dotSize, this.size - .65f * dotSize, this.size - .35f * dotSize, this.size - .35f * dotSize), clearPaint);
+                        }
+                    }
 
                     if (locked) {
                         int lockSize = (int) (.3f*this.size);
@@ -318,11 +721,7 @@ public class InitialView extends View {
     public static int getTextColor(Context context, byte[] bytes, Integer hue) {
         int computedHue = (hue != null) ? hue : hueFromBytes(bytes);
         if (bytes.length == 0) {
-            if ((context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
-                return ColorUtils.HSLToColor(new float[]{computedHue, 0, 0.4f});
-            } else {
-                return ColorUtils.HSLToColor(new float[]{computedHue, 0, 0.4f});
-            }
+            return ColorUtils.HSLToColor(new float[]{computedHue, 0, 0.4f});
         } else {
             if ((context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
                 return ColorUtils.HSLToColor(new float[]{computedHue, 0.5f, 0.4f});
@@ -330,6 +729,25 @@ public class InitialView extends View {
                 return ColorUtils.HSLToColor(new float[]{computedHue, 0.7f, 0.4f});
             }
         }
+    }
+
+    private static Paint getTrustPaint(Context context, int contactTrustLevel) {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        switch (contactTrustLevel) {
+            case 4:
+                paint.setColor(ContextCompat.getColor(context, R.color.green));
+                break;
+            case 3:
+                paint.setColor(ContextCompat.getColor(context, R.color.olvid_gradient_light));
+                break;
+            case 2:
+                paint.setColor(ContextCompat.getColor(context, R.color.orange));
+                break;
+            default:
+                paint.setColor(ContextCompat.getColor(context, R.color.red));
+                break;
+        }
+        return paint;
     }
 
     public static int hueFromBytes(byte[] bytes) {
@@ -374,6 +792,20 @@ public class InitialView extends View {
                 Canvas bitmapCanvas = new Canvas(localBitmap);
 
                 bitmapCanvas.drawOval(new RectF(0, 0, size, size), backgroundPaint);
+
+                if (contactTrustLevel != null && SettingsActivity.showTrustLevels()) {
+                    int dotSize = (int) (.3f * this.size);
+                    Paint clearPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                    clearPaint.setColor(Color.TRANSPARENT);
+                    clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+                    bitmapCanvas.drawOval(new RectF(this.size - dotSize, this.size - dotSize, this.size, this.size), clearPaint);
+                    Paint dotPaint = getTrustPaint(getContext(), contactTrustLevel);
+                    bitmapCanvas.drawOval(new RectF(this.size - .875f * dotSize, this.size - .875f * dotSize, this.size - .125f * dotSize, this.size - .125f * dotSize), dotPaint);
+                    if (notOneToOne) {
+                        bitmapCanvas.drawOval(new RectF(this.size - .65f * dotSize, this.size - .65f * dotSize, this.size - .35f * dotSize, this.size - .35f * dotSize), clearPaint);
+                    }
+                }
+
 
                 if (overlayBitmap != null) {
                     bitmapCanvas.drawBitmap(overlayBitmap, insideX, insideY, insidePaint);
@@ -450,8 +882,10 @@ public class InitialView extends View {
                         colorMatrix.setSaturation(.5f);
                         Paint matrixPaint = new Paint();
                         matrixPaint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+                        //noinspection DuplicateExpressions
                         canvas.drawBitmap(squareBitmap, null, new Rect(padding, padding, innerSize + padding, innerSize + padding), matrixPaint);
                     } else {
+                        //noinspection DuplicateExpressions
                         canvas.drawBitmap(squareBitmap, null, new Rect(padding, padding, innerSize + padding, innerSize + padding), null);
                     }
                 }
@@ -476,9 +910,5 @@ public class InitialView extends View {
             }
         }
         return bitmap;
-    }
-
-    public byte[] getBytes() {
-        return bytes;
     }
 }

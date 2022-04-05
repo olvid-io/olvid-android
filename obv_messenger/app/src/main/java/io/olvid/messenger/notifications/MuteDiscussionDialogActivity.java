@@ -20,7 +20,9 @@
 package io.olvid.messenger.notifications;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -33,12 +35,28 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.settings.SettingsActivity;
 
 public class MuteDiscussionDialogActivity extends AppCompatActivity {
     private Long discussionId = null;
 
     public static final String DISCUSSION_ID_INTENT_EXTRA = "discussion_id"; // long
 
+    @Override
+    protected void attachBaseContext(Context baseContext) {
+        final Context newContext;
+        float customFontScale = SettingsActivity.getFontScale();
+        float fontScale = baseContext.getResources().getConfiguration().fontScale;
+        if (customFontScale != 1.0f) {
+            Configuration configuration = new Configuration();
+            configuration.fontScale = fontScale * customFontScale;
+            newContext = baseContext.createConfigurationContext(configuration);
+        } else {
+            newContext = baseContext;
+        }
+
+        super.attachBaseContext(newContext);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

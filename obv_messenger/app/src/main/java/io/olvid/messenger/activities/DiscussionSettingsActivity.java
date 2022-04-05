@@ -46,6 +46,10 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.ImageViewPreference;
@@ -53,6 +57,7 @@ import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.MuteNotificationDialog;
 import io.olvid.messenger.customClasses.NoClickSwitchPreference;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
@@ -521,7 +526,7 @@ public class DiscussionSettingsActivity extends LockableActivity {
                 } else if (discussionCustomization.prefMuteNotificationsTimestamp == null) {
                     muteNotificationsPreference.setSummary(getString(R.string.pref_discussion_mute_notifications_on_summary));
                 } else {
-                    CharSequence dateString = App.getNiceDateString(getContext(), discussionCustomization.prefMuteNotificationsTimestamp);
+                    CharSequence dateString = StringUtils.getNiceDateString(getContext(), discussionCustomization.prefMuteNotificationsTimestamp);
                     muteNotificationsPreference.setSummary(getString(R.string.pref_discussion_mute_notifications_on_until_summary, dateString));
                 }
             }
@@ -554,7 +559,18 @@ public class DiscussionSettingsActivity extends LockableActivity {
                     visibilityDurationPreference.setSummary(R.string.pref_discussion_visibility_duration_summary_null);
                 } else {
                     visibilityDurationPreference.setValue(Long.toString(discussionSettingsViewModel.getSettingsVisibilityDuration()));
-                    visibilityDurationPreference.setSummary(getString(R.string.pref_discussion_visibility_duration_summary, visibilityDurationPreference.getEntry()));
+                    CharSequence entry = visibilityDurationPreference.getEntry();
+                    if (entry == null) {
+                        List<CharSequence> values = new ArrayList<>(Arrays.asList(visibilityDurationPreference.getEntryValues()));
+                        List<CharSequence> entries = new ArrayList<>(Arrays.asList(visibilityDurationPreference.getEntries()));
+                        values.add(Long.toString(discussionSettingsViewModel.getSettingsVisibilityDuration()));
+                        entry = StringUtils.getNiceDurationString(requireContext(), discussionSettingsViewModel.getSettingsVisibilityDuration());
+                        entries.add(entry);
+
+                        visibilityDurationPreference.setEntryValues(values.toArray(new CharSequence[0]));
+                        visibilityDurationPreference.setEntries(entries.toArray(new CharSequence[0]));
+                    }
+                    visibilityDurationPreference.setSummary(getString(R.string.pref_discussion_visibility_duration_summary, entry));
                 }
             }
             if (existenceDurationPreference != null) {
@@ -563,7 +579,18 @@ public class DiscussionSettingsActivity extends LockableActivity {
                     existenceDurationPreference.setSummary(R.string.pref_discussion_existence_duration_summary_null);
                 } else {
                     existenceDurationPreference.setValue(Long.toString(discussionSettingsViewModel.getSettingsExistenceDuration()));
-                    existenceDurationPreference.setSummary(getString(R.string.pref_discussion_existence_duration_summary, existenceDurationPreference.getEntry()));
+                    CharSequence entry = existenceDurationPreference.getEntry();
+                    if (entry == null) {
+                        List<CharSequence> values = new ArrayList<>(Arrays.asList(existenceDurationPreference.getEntryValues()));
+                        List<CharSequence> entries = new ArrayList<>(Arrays.asList(existenceDurationPreference.getEntries()));
+                        values.add(Long.toString(discussionSettingsViewModel.getSettingsExistenceDuration()));
+                        entry = StringUtils.getNiceDurationString(requireContext(), discussionSettingsViewModel.getSettingsExistenceDuration());
+                        entries.add(entry);
+
+                        existenceDurationPreference.setEntryValues(values.toArray(new CharSequence[0]));
+                        existenceDurationPreference.setEntries(entries.toArray(new CharSequence[0]));
+                    }
+                    existenceDurationPreference.setSummary(getString(R.string.pref_discussion_existence_duration_summary, entry));
                 }
             }
         }

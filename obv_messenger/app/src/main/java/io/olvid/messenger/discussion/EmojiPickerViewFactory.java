@@ -299,7 +299,6 @@ public class EmojiPickerViewFactory {
     }
 
     private static class EmojiViewHolder extends RecyclerView.ViewHolder {
-        public final int viewType;
         private final TextView emojiTextView;
         @Nullable private final String highlightedEmoji;
         private String emoji;
@@ -307,7 +306,6 @@ public class EmojiPickerViewFactory {
 
         public EmojiViewHolder(@NonNull View itemView, int viewType, EmojiClickListener emojiClickListener, boolean isReactionPopup, @Nullable String highlightedEmoji, @Nullable View windowTokenView) {
             super(itemView);
-            this.viewType = viewType;
             this.highlightedEmoji = highlightedEmoji;
             this.emojiTextView = itemView.findViewById(R.id.emoji_text_view);
             if (emojiClickListener != null) {
@@ -315,12 +313,12 @@ public class EmojiPickerViewFactory {
                     if (highlightedEmoji != null && highlightedEmoji.equals(emoji)) {
                         emojiClickListener.onHighlightedClick(this.itemView, this.emoji);
                     } else {
-                        emojiClickListener.onClick(this.itemView, this.emoji);
+                        emojiClickListener.onClick(this.emoji);
                     }
                 });
                 if (viewType == EmojiListAdapter.TYPE_SINGLE_EMOJI) {
                     this.emojiTextView.setOnLongClickListener(v -> {
-                        emojiClickListener.onLongClick(this.itemView, this.emoji);
+                        emojiClickListener.onLongClick(this.emoji);
                         return true;
                     });
                 } else {
@@ -402,13 +400,13 @@ public class EmojiPickerViewFactory {
             } else {
                 textView.setBackgroundResource(R.drawable.background_circular_ripple);
                 textView.setOnClickListener(v -> {
-                    emojiClickListener.onClick(textView, emoji);
+                    emojiClickListener.onClick(emoji);
                     popupWindow.dismiss();
                 });
             }
 
             textView.setOnLongClickListener(v -> {
-                emojiClickListener.onLongClick(textView, emoji);
+                emojiClickListener.onLongClick(emoji);
                 popupWindow.dismiss();
                 return true;
             });
@@ -425,7 +423,18 @@ public class EmojiPickerViewFactory {
         }
 
         int[] pos = new int[2];
-        anchorView.getLocationOnScreen(pos);
+        if (windowTokenView == null) {
+            anchorView.getLocationInWindow(pos);
+        } else {
+            anchorView.getLocationOnScreen(pos);
+            int[] pos2 = new int[2];
+            windowTokenView.getLocationOnScreen(pos2);
+            pos[0] -= pos2[0];
+            pos[1] -= pos2[1];
+            windowTokenView.getLocationInWindow(pos2);
+            pos[0] += pos2[0];
+            pos[1] += pos2[1];
+        }
 
         int xOffset = -((rowSize - 1) * fortyDp) / 2;
         if (pos[0] + xOffset < fortyDp / 5) {
@@ -439,8 +448,8 @@ public class EmojiPickerViewFactory {
     }
 
     interface EmojiClickListener {
-        void onClick(View emojiView, String emoji);
-        void onLongClick(View emojiView, String emoji);
+        void onClick(String emoji);
+        void onLongClick(String emoji);
         void onHighlightedClick(View emojiView, String emoji);
     }
 

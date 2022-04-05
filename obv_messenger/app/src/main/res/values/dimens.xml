@@ -4,7 +4,6 @@
     <dimen name="attachment_corner_radius">6dp</dimen>
     <dimen name="single_line_emoji_size">48sp</dimen>
     <dimen name="single_line_emoji_reply_size">40sp</dimen>
-    <dimen name="attach_stuff_margin_top">52dp</dimen>
     <dimen name="notification_icon_size">64dp</dimen>
     <dimen name="shortcut_icon_size">108dp</dimen>
     <dimen name="inner_shortcut_icon_size">72dp</dimen>

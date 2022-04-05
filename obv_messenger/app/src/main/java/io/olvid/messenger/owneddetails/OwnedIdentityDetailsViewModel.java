@@ -30,6 +30,7 @@ import java.util.Objects;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.messenger.App;
+import io.olvid.messenger.customClasses.StringUtils;
 
 
 public class OwnedIdentityDetailsViewModel extends ViewModel {
@@ -65,7 +66,7 @@ public class OwnedIdentityDetailsViewModel extends ViewModel {
     public void setBytesOwnedIdentity(byte[] bytesOwnedIdentity) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity,
-                App.getInitial(((firstName==null)?"":firstName.trim()) + ((lastName==null)?"":lastName.trim())),
+                StringUtils.getInitial(((firstName==null)?"":firstName.trim()) + ((lastName==null)?"":lastName.trim())),
                 absolutePhotoUrl));
     }
 
@@ -101,7 +102,7 @@ public class OwnedIdentityDetailsViewModel extends ViewModel {
         if (this.absolutePhotoUrl == null){
             String name = (nickname==null?"":nickname.trim()) + (firstName==null?"":firstName.trim()) + (lastName==null?"":lastName.trim());
             if (name.length() > 0) {
-                initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity,App.getInitial(name), null));
+                initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity, StringUtils.getInitial(name), null));
             } else {
                 initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity," ", null));
             }
@@ -132,14 +133,14 @@ public class OwnedIdentityDetailsViewModel extends ViewModel {
     public void setFirstName(String firstName) {
         if (absolutePhotoUrl == null && (nickname == null || nickname.trim().length() == 0)) {
             if (firstName != null && firstName.trim().length() > 0) {
-                String newInitial = App.getInitial(firstName.trim());
-                String oldInitial = (this.firstName == null || this.firstName.trim().length() == 0) ? null: App.getInitial(this.firstName.trim());
+                String newInitial = StringUtils.getInitial(firstName.trim());
+                String oldInitial = (this.firstName == null || this.firstName.trim().length() == 0) ? null: StringUtils.getInitial(this.firstName.trim());
                 if (!newInitial.equals(oldInitial)) {
                     initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity, newInitial, null));
                 }
             } else if (this.firstName != null && this.firstName.trim().length() > 0) {
                 if (lastName != null && lastName.trim().length() > 0) {
-                    initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity, App.getInitial(lastName.trim()), null));
+                    initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity, StringUtils.getInitial(lastName.trim()), null));
                 } else {
                     initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity," ", null));
                 }
@@ -156,8 +157,8 @@ public class OwnedIdentityDetailsViewModel extends ViewModel {
     public void setLastName(String lastName) {
         if (absolutePhotoUrl == null && (firstName == null || firstName.trim().length() == 0)) {
             if ((lastName != null && lastName.trim().length() > 0)) {
-                String newInitial = App.getInitial(lastName.trim());
-                String oldInitial = (this.lastName == null || this.lastName.trim().length() == 0) ? null : App.getInitial(this.lastName.trim());
+                String newInitial = StringUtils.getInitial(lastName.trim());
+                String oldInitial = (this.lastName == null || this.lastName.trim().length() == 0) ? null : StringUtils.getInitial(this.lastName.trim());
                 if (!newInitial.equals(oldInitial)) {
                     initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity, newInitial, null));
                 }
@@ -202,7 +203,7 @@ public class OwnedIdentityDetailsViewModel extends ViewModel {
         } else if (this.absolutePhotoUrl != null){
             String name = (nickname==null?"":nickname.trim()) + (firstName==null?"":firstName.trim()) + (lastName==null?"":lastName.trim());
             if (name.length() > 0) {
-                initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity,App.getInitial(name), null));
+                initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity, StringUtils.getInitial(name), null));
             } else {
                 initialViewContent.postValue(new InitialViewContent(bytesOwnedIdentity," ", null));
             }

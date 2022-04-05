@@ -104,7 +104,7 @@ public class IncomingCallRinger {
                     .build());
         } catch (Exception e) {
             e.printStackTrace();
-            Logger.w("☎️ Error initializing media player for incoming call ringing");
+            Logger.w("☎ Error initializing media player for incoming call ringing");
             mediaPlayer = null;
         }
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_prev"
+        android:title="@string/menu_action_search_prev"
+        android:orderInCategory="1"
+        android:icon="@drawable/ic_search_prev"
+        android:enabled="false"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_next"
+        android:title="@string/menu_action_search_next"
+        android:orderInCategory="2"
+        android:icon="@drawable/ic_search_next"
+        android:enabled="false"
+        app:showAsAction="always" />
+</menu>

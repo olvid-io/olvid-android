@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.activities.storage_manager;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -51,7 +52,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
 import java.util.ArrayList;
@@ -251,6 +251,7 @@ public class StorageManagerActivity extends LockScreenOrNotActivity {
                 return true;
             }
 
+            @SuppressLint("NotifyDataSetChanged")
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 if (item.getItemId() == R.id.action_delete_attachments) {
@@ -261,15 +262,13 @@ public class StorageManagerActivity extends LockScreenOrNotActivity {
                     final AlertDialog.Builder builder = new SecureAlertDialogBuilder(StorageManagerActivity.this, R.style.CustomAlertDialog)
                             .setTitle(R.string.dialog_title_confirm_deletion)
                             .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_attachments, count, count))
-                            .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
-                                App.runThread(() -> {
-                                    List<FyleMessageJoinWithStatusDao.FyleAndStatus> fylesToDelete = new ArrayList<>(viewModel.selectedFyles);
-                                    viewModel.clearSelectedFyles();
-                                    for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fylesToDelete) {
-                                        new DeleteAttachmentTask(fyleAndStatus).run();
-                                    }
-                                });
-                            })
+                            .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(() -> {
+                                List<FyleMessageJoinWithStatusDao.FyleAndStatus> fylesToDelete = new ArrayList<>(viewModel.selectedFyles);
+                                viewModel.clearSelectedFyles();
+                                for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fylesToDelete) {
+                                    new DeleteAttachmentTask(fyleAndStatus).run();
+                                }
+                            }))
                             .setNegativeButton(R.string.button_label_cancel, null);
                     builder.create().show();
                 } else if (item.getItemId() == R.id.action_save_attachments) {
@@ -283,6 +282,12 @@ public class StorageManagerActivity extends LockScreenOrNotActivity {
                             .setPositiveButton(R.string.button_label_ok, (DialogInterface dialog, int which) -> saveSelectedAttachmentsLauncher.launch(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)))
                             .setNegativeButton(R.string.button_label_cancel, null);
                     builder.create().show();
+                } else if (item.getItemId() == R.id.action_select_all) {
+                    AttachmentListAdapter adapter = tabsPagerAdapter.getAdapter(viewPager.getCurrentItem());
+                    if (adapter != null && adapter.fyleAndOrigins != null) {
+                        viewModel.selectAllFyles(adapter.fyleAndOrigins);
+                        adapter.notifyDataSetChanged();
+                    }
                 }
                 return true;
             }
@@ -362,9 +367,7 @@ public class StorageManagerActivity extends LockScreenOrNotActivity {
         }
 
         if (ownedIdentity == null) {
-            currentIdentityInitialView.setKeycloakCertified(false);
-            currentIdentityInitialView.setInactive(false);
-            currentIdentityInitialView.setInitial(new byte[0], " ");
+            currentIdentityInitialView.setUnknown();
             currentIdentityMutedImageView.setVisibility(View.GONE);
             return;
         }
@@ -396,13 +399,7 @@ public class StorageManagerActivity extends LockScreenOrNotActivity {
                 currentNameSecondLineTextView.setText(null);
             }
         }
-        currentIdentityInitialView.setInactive(!ownedIdentity.active);
-        currentIdentityInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-        if (ownedIdentity.photoUrl != null) {
-            currentIdentityInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-        } else {
-            currentIdentityInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-        }
+        currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
         if (ownedIdentity.shouldMuteNotifications()) {
             currentIdentityMutedImageView.setVisibility(View.VISIBLE);
         } else {
@@ -415,7 +412,7 @@ public class StorageManagerActivity extends LockScreenOrNotActivity {
             return;
         }
         int eightDp = (int) (getResources().getDisplayMetrics().density * 8);
-        View popupView = getLayoutInflater().inflate(R.layout.popup_switch_owned_identity, null);
+        @SuppressLint("InflateParams") View popupView = getLayoutInflater().inflate(R.layout.popup_switch_owned_identity, null);
         popupWindow = new PopupWindow(popupView, anchor.getWidth() - 10 * eightDp, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setElevation(12);
         popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.background_half_rounded_dialog));
@@ -532,7 +529,8 @@ public class StorageManagerActivity extends LockScreenOrNotActivity {
         }
 
         @Override
-        protected void onHiddenIdentityPasswordEntered(byte[] byteOwnedIdentity) {
+        protected void onHiddenIdentityPasswordEntered(AlertDialog dialog, byte[] byteOwnedIdentity) {
+            dialog.dismiss();
             AppSingleton.getInstance().selectIdentity(byteOwnedIdentity, null);
         }
     }

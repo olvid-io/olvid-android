@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.settings;
 
+import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,11 +30,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Base64;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -45,6 +56,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.Purchase;
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 
 import java.lang.ref.WeakReference;
 import java.security.NoSuchAlgorithmException;
@@ -59,20 +71,25 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
+import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.fragments.dialog.LedColorPickerDialogFragment;
+import io.olvid.messenger.services.BackupCloudProviderService;
 
 public class SettingsActivity extends LockableActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, LedColorPickerDialogFragment.OnLedColorSelectedListener {
 
     public static final String SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA = "sub_setting";
     public static final String PREF_HEADER_KEY_BACKUP = "pref_header_key_backup";
-    public static final String PREF_HEADER_KEY_PRIVACY = "pref_header_key_privacy";
+//    public static final String PREF_HEADER_KEY_PRIVACY = "pref_header_key_privacy";
     public static final String PREF_HEADER_KEY_LOCK_SCREEN = "pref_header_key_lock_screen";
 
-    public static final String FONT_SCALE_CHANGED_BROADCAST_ACTION = "font_scale_changed_action";
+    public static final String ACTIVITY_RECREATE_REQUIRED_ACTION = "activity_recreate_required_action";
 
 
     // NON-USER VISIBLE SETTINGS
@@ -91,7 +108,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final boolean PREF_KEY_ENABLE_BETA_FEATURES_DEFAULT = false;
 
     static final String PREF_KEY_SCALED_TURN_REGION = "pref_key_scaled_turn_region";
-    static final String PREF_KEY_SCALED_TURN_REGION_DEFAULT = "null";
+    static final String PREF_KEY_SCALED_TURN_REGION_DEFAULT = "global";
 
     static final String PREF_KEY_EXPORT_APP_DATABASES = "pref_key_export_app_databases";
     static final String PREF_KEY_STORAGE_EXPLORER = "pref_key_storage_explorer";
@@ -184,6 +201,20 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_PERMANENT_WEBSOCKET = "pref_key_permanent_websocket";
     static final boolean PREF_KEY_PERMANENT_WEBSOCKET_DEFAULT = false;
 
+    // CONTACTS & GROUPS
+
+    static final String PREF_KEY_AUTO_JOIN_GROUPS = "pref_key_auto_join_groups";
+    static final String PREF_KEY_AUTO_JOIN_GROUPS_DEFAULT = "contacts";
+
+    public enum AutoJoinGroupsCategory {
+        EVERYONE,
+        CONTACTS,
+        NOBODY,
+    }
+
+    static final String PREF_KEY_SHOW_TRUST_LEVELS = "pref_key_show_trust_levels";
+    static final boolean PREF_KEY_SHOW_TRUST_LEVELS_DEFAULT = false;
+
     // LOCK SCREEN
     static final String PREF_KEY_USE_LOCK_SCREEN = "pref_key_use_lock_screen";
     static final boolean PREF_KEY_USE_LOCK_SCREEN_DEFAULT = false;
@@ -214,8 +245,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_ENABLE_AUTOMATIC_BACKUP = "pref_key_enable_automatic_backup";
     static final boolean PREF_KEY_ENABLE_AUTOMATIC_BACKUP_DEFAULT = false;
     static final String PREF_KEY_AUTOMATIC_BACKUP_DEVICE_UNIQUE_ID = "pref_key_automatic_backup_device_unique_id";
-    static final String PREF_KEY_AUTOMATIC_BACKUP_ACCOUNT = "pref_key_automatic_backup_account";
+    static final String PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION = "pref_key_automatic_backup_configuration";
 
+    static final String PREF_KEY_MANAGE_CLOUD_BACKUPS = "pref_key_manage_cloud_backups";
 
     // CAMERA SETTINGS
     static final String PREF_KEY_CAMERA_RESOLUTION = "pref_key_camera_resolution";
@@ -228,6 +260,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     // OTHER SETTINGS
     static final String PREF_KEY_SEND_WITH_HARDWARE_ENTER = "pref_key_send_with_hardware_enter";
     static final boolean PREF_KEY_SEND_WITH_HARDWARE_ENTER_DEFAULT = false;
+
+    static final String PREF_KEY_SENDING_FOREGROUND_SERVICE = "pref_key_sending_foreground_service";
+    static final boolean PREF_KEY_SENDING_FOREGROUND_SERVICE_DEFAULT = true;
 
     static final String PREF_KEY_QR_CORRECTION_LEVEL = "pref_key_qr_correction_level";
     static final String PREF_KEY_QR_CORRECTION_LEVEL_DEFAULT = "M";
@@ -255,6 +290,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static final String USER_DIALOG_HIDE_GOOGLE_APIS = "user_dialog_hide_google_apis";
     public static final String USER_DIALOG_HIDE_ALARM_SCHEDULING = "user_dialog_hide_alarm_scheduling";
     public static final String USER_DIALOG_HIDE_OPEN_EXTERNAL_APP = "user_dialog_hide_open_external_app";
+    public static final String USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION = "user_dialog_hide_forward_message_explanation";
 
     static final String PREF_KEY_DEBUG_LOG_LEVEL = "pref_key_debug_log_level";
     static final boolean PREF_KEY_DEBUG_LOG_LEVEL_DEFAULT = false;
@@ -383,6 +419,83 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_about) {
+            AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog);
+            List<String> extraFeatures = new ArrayList<>();
+            if (SettingsActivity.getBetaFeaturesEnabled()) {
+                extraFeatures.add("beta");
+            }
+            int uptimeSeconds = (int) ((System.currentTimeMillis() - App.appStartTimestamp) / 1000);
+            final String uptime;
+            if (uptimeSeconds > 86400) {
+                uptime = getResources().getQuantityString(R.plurals.text_app_uptime_days, uptimeSeconds / 86400, uptimeSeconds / 86400, (uptimeSeconds % 86400) / 3600, (uptimeSeconds % 3600) / 60, uptimeSeconds % 60);
+            } else if (uptimeSeconds > 3600) {
+                uptime = getString(R.string.text_app_uptime_hours, uptimeSeconds / 3600, (uptimeSeconds % 3600) / 60, uptimeSeconds % 60);
+            } else {
+                uptime = getString(R.string.text_app_uptime, uptimeSeconds / 60, uptimeSeconds % 60);
+            }
+            builder.setTitle(R.string.dialog_title_about_olvid)
+                    .setPositiveButton(R.string.button_label_ok, null);
+            StringBuilder sb = new StringBuilder();
+            if (extraFeatures.isEmpty() || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O) {
+                sb.append(getString(R.string.dialog_message_about_olvid, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, Constants.SERVER_API_VERSION, Constants.CURRENT_ENGINE_DB_SCHEMA_VERSION, AppDatabase.DB_SCHEMA_VERSION, uptime));
+            } else {
+                String features = String.join(getString(R.string.text_contact_names_separator), extraFeatures);
+                sb.append(getString(R.string.dialog_message_about_olvid_extra_features, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, Constants.SERVER_API_VERSION, Constants.CURRENT_ENGINE_DB_SCHEMA_VERSION, AppDatabase.DB_SCHEMA_VERSION, features, uptime));
+            }
+            sb.append("\n\n");
+
+            String link = getString(R.string.activity_title_open_source_licenses);
+            sb.append(link);
+            SpannableString spannableString = new SpannableString(sb);
+            spannableString.setSpan(new ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View widget) {
+                    OssLicensesMenuActivity.setActivityTitle(getString(R.string.activity_title_open_source_licenses));
+                    startActivity(new Intent(SettingsActivity.this, OssLicensesMenuActivity.class));
+                }
+            }, spannableString.length()-link.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            builder.setMessage(spannableString);
+            Dialog dialog = builder.create();
+
+            dialog.setOnShowListener(dialog1 -> {
+                if (dialog1 instanceof AlertDialog) {
+                    TextView messageTextView = ((AlertDialog) dialog1).findViewById(android.R.id.message);
+                    if (messageTextView != null) {
+                        messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                    }
+                }
+            });
+            dialog.show();
+
+            return true;
+        } else if (itemId == R.id.action_check_update) {
+            final String appPackageName = getPackageName();
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+            } catch (ActivityNotFoundException e) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+            }
+            return true;
+        } else if (itemId == R.id.action_help_faq) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://olvid.io/faq/")));
+            return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     public static class HeadersPreferenceFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -442,21 +555,28 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     @Override
-    public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, Preference pref) {
-        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), pref.getFragment());
+    public boolean onPreferenceStartFragment(@NonNull PreferenceFragmentCompat caller, @NonNull Preference pref) {
+        String prefFragmentName = pref.getFragment();
+        if (prefFragmentName == null) {
+            return false;
+        }
+        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), prefFragmentName);
 
         if (fragment instanceof LedColorPickerDialogFragment.OnLedColorSelectedListener) {
             onLedColorSelectedListenerWeakReference = new WeakReference<>((LedColorPickerDialogFragment.OnLedColorSelectedListener) fragment);
         } else {
             onLedColorSelectedListenerWeakReference = null;
         }
-
-        // Replace the existing Fragment with the new Fragment
-        getSupportFragmentManager().beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
-                .replace(android.R.id.content, fragment)
-                .addToBackStack(null)
-                .commit();
+        try {
+            // Replace the existing Fragment with the new Fragment
+            getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
+                    .replace(android.R.id.content, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // set the activity title
         setTitle(pref.getTitle());
@@ -472,15 +592,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
                 onLedColorSelectedListener.onLedColorSelected(requestCode, color);
             }
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -537,21 +648,17 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static void setForcedDarkMode(boolean forceDarkMode) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (forceDarkMode) {
-                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
                 editor.putString(PREF_KEY_DARK_MODE_API29, "Dark");
-                editor.apply();
             } else {
-                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
                 editor.putString(PREF_KEY_DARK_MODE_API29, "Light");
-                editor.apply();
             }
-        } else if (forceDarkMode) {
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
-            editor.putBoolean(PREF_KEY_DARK_MODE, true);
-            editor.apply();
+        } else {
+            editor.putBoolean(PREF_KEY_DARK_MODE, forceDarkMode);
         }
+        editor.apply();
     }
 
     public static float getFontScale() {
@@ -684,6 +791,16 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static boolean getSendWithHardwareEnter() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_SEND_WITH_HARDWARE_ENTER, PREF_KEY_SEND_WITH_HARDWARE_ENTER_DEFAULT);
+    }
+
+    public static boolean useSendingForegroundService() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_SENDING_FOREGROUND_SERVICE, PREF_KEY_SENDING_FOREGROUND_SERVICE_DEFAULT);
+    }
+
+    public static void setSendingForegroundService(boolean enabled) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_SENDING_FOREGROUND_SERVICE, enabled);
+        editor.apply();
     }
 
     @NonNull
@@ -862,6 +979,12 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return value;
     }
 
+    public static void resetScaledTurn() {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.remove(PREF_KEY_SCALED_TURN_REGION);
+        editor.apply();
+    }
+
     public static boolean getLastDeleteEverywhere() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_LAST_DELETE_EVERYWHERE, PREF_KEY_LAST_DELETE_EVERYWHERE_DEFAULT);
     }
@@ -869,6 +992,55 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static void setLastDeleteEverywhere(boolean deleteEverywhere) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         editor.putBoolean(PREF_KEY_LAST_DELETE_EVERYWHERE, deleteEverywhere);
+        editor.apply();
+    }
+
+    public static AutoJoinGroupsCategory getAutoJoinGroups() {
+        String stringValue = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_AUTO_JOIN_GROUPS, PREF_KEY_AUTO_JOIN_GROUPS_DEFAULT);
+        return getAutoJoinGroupsFromString(stringValue);
+    }
+
+    @NonNull public static AutoJoinGroupsCategory getAutoJoinGroupsFromString(String stringValue) {
+        if (stringValue != null) {
+            switch (stringValue) {
+                case "nobody":
+                    return AutoJoinGroupsCategory.NOBODY;
+                case "everyone":
+                    return AutoJoinGroupsCategory.EVERYONE;
+                case "contacts":
+                default:
+                    break;
+            }
+        }
+        return AutoJoinGroupsCategory.CONTACTS;
+    }
+
+    public static void setAutoJoinGroups(@NonNull AutoJoinGroupsCategory autoJoinGroups) {
+        final String stringValue;
+        switch (autoJoinGroups) {
+            case NOBODY:
+                stringValue = "nobody";
+                break;
+            case EVERYONE:
+                stringValue = "everyone";
+                break;
+            case CONTACTS:
+            default:
+                stringValue = "contacts";
+                break;
+        }
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putString(PREF_KEY_AUTO_JOIN_GROUPS, stringValue);
+        editor.apply();
+    }
+
+    public static boolean showTrustLevels() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_SHOW_TRUST_LEVELS, PREF_KEY_SHOW_TRUST_LEVELS_DEFAULT);
+    }
+
+    public static void setShowTrustLevels(boolean show) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_SHOW_TRUST_LEVELS, show);
         editor.apply();
     }
 
@@ -1097,13 +1269,33 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return deviceUniqueId;
     }
 
-    public static String getAutomaticBackupAccount() {
-        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_AUTOMATIC_BACKUP_ACCOUNT, null);
+    // this method is used when migrating to the new serialized backup configuration
+    @Nullable
+    public static String migrateAutomaticBackupAccount() {
+        String account = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString("pref_key_automatic_backup_account", null);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.remove("pref_key_automatic_backup_account");
+        editor.apply();
+        return account;
     }
 
-    public static void setAutomaticBackupAccount(String email) {
+    public static BackupCloudProviderService.CloudProviderConfiguration getAutomaticBackupConfiguration() {
+        String serializedConfiguration = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION, null);
+        if (serializedConfiguration != null) {
+            try {
+                return AppSingleton.getJsonObjectMapper().readValue(serializedConfiguration, BackupCloudProviderService.CloudProviderConfiguration.class);
+            } catch (Exception ignored) { }
+        }
+        return null;
+    }
+
+    public static void setAutomaticBackupConfiguration(BackupCloudProviderService.CloudProviderConfiguration configuration) throws Exception {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
-        editor.putString(PREF_KEY_AUTOMATIC_BACKUP_ACCOUNT, email);
+        if (configuration == null) {
+            editor.remove(PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION);
+        } else {
+            editor.putString(PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION, AppSingleton.getJsonObjectMapper().writeValueAsString(configuration));
+        }
         editor.apply();
     }
 
@@ -1293,20 +1485,12 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_SEND_ON_ENTER_WEBCLIENT, PREF_KEY_SEND_ON_ENTER_WEBCLIENT_DEFAULT);
     }
 
-    public static boolean sendOnEnterEnabledDefault() {
-        return PREF_KEY_SEND_ON_ENTER_WEBCLIENT_DEFAULT;
-    }
-
     public static boolean showNotificationsOnBrowser() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_NOTIFICATION_SHOW_ON_BROWSER, PREF_KEY_NOTIFICATION_SHOW_ON_BROWSER_DEFAULT);
     }
 
     public static boolean notificationsSoundOnWebclient() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_NOTIFICATION_SOUND_WEBCLIENT, PREF_KEY_NOTIFICATION_SOUND_WEBCLIENT_DEFAULT);
-    }
-
-    public static boolean notificationsOnWebclientDefault() {
-        return PREF_KEY_NOTIFICATION_SOUND_WEBCLIENT_DEFAULT;
     }
 
     public static void setLanguageWebclient(String language) {

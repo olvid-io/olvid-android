@@ -1,0 +1,37 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.1.2'
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdk 32
+
+    defaultConfig {
+        minSdkVersion 21
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+}
+
+dependencies {
+    api 'com.squareup.okhttp3:okhttp:4.9.3'
+
+    implementation ('org.simpleframework:simple-xml:2.7.1') {
+        exclude module: 'stax'
+        exclude module: 'stax-api'
+        exclude module: 'xpp3'
+    }
+
+    testImplementation 'junit:junit:4.13.2'
+}

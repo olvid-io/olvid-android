@@ -78,6 +78,7 @@ import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvTrustOrigin;
 import io.olvid.engine.engine.types.identities.ObvUrlIdentity;
@@ -86,8 +87,10 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.tasks.PromptToDeleteContactTask;
 import io.olvid.messenger.fragments.FullScreenImageFragment;
 import io.olvid.messenger.fragments.dialog.ContactIntroductionDialogFragment;
@@ -95,6 +98,7 @@ import io.olvid.messenger.fragments.FilteredDiscussionListFragment;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment;
 import io.olvid.messenger.main.MainActivity;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.viewModels.ContactDetailsViewModel;
 
@@ -109,6 +113,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
     private ContactDetailsViewModel contactDetailsViewModel;
 
     private ConstraintLayout mainConstraintLayout;
+    private FloatingActionButton discussionButton;
     private InitialView contactInitialView;
     private TextView contactNameTextView;
     private TextView personalNoteTextView;
@@ -120,6 +125,11 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
     private Button reblockRevokedButton;
     private CardView noChannelCardView;
     private ImageView noChannelSpinner;
+    private CardView notOneToOneCardView;
+    private TextView notOneToOneTitleTextView;
+    private TextView notOneToOneExplanationTextView;
+    private Button notOneToOneInviteButton;
+    private Button notOneToOneRejectButton;
     private CardView acceptUpdateCardView;
     private CardView trustedDetailsCardView;
     private LinearLayout publishedDetailsTextViews;
@@ -151,7 +161,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
 
         mainConstraintLayout = findViewById(R.id.contact_details_main_constraint_layout);
 
-        FloatingActionButton discussionButton = findViewById(R.id.contact_discussion_button);
+        discussionButton = findViewById(R.id.contact_discussion_button);
         discussionButton.setOnClickListener(this);
 
         revokedCardView = findViewById(R.id.contact_revoked_cardview);
@@ -165,6 +175,15 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
         Button restartChannelButton = findViewById(R.id.contact_no_channel_restart_button);
         restartChannelButton.setOnClickListener(this);
         noChannelSpinner = findViewById(R.id.contact_no_channel_spinner);
+
+        notOneToOneCardView = findViewById(R.id.contact_not_one_to_one_card);
+        notOneToOneTitleTextView = findViewById(R.id.contact_not_one_to_one_header);
+        notOneToOneExplanationTextView = findViewById(R.id.contact_not_one_to_one_explanation);
+        notOneToOneInviteButton = findViewById(R.id.contact_not_one_to_one_invite_button);
+        notOneToOneInviteButton.setOnClickListener(this);
+        notOneToOneRejectButton = findViewById(R.id.contact_not_one_to_one_reject_button);
+        notOneToOneRejectButton.setOnClickListener(this);
+
 
         contactInitialView = findViewById(R.id.contact_details_initial_view);
         contactInitialView.setOnClickListener(this);
@@ -226,9 +245,12 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
         super.onDestroy();
         AppSingleton.getEngine().removeNotificationListener(EngineNotifications.NEW_CONTACT_PHOTO, this);
         AppSingleton.getEngine().removeNotificationListener(EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS, this);
-        final Contact contact = contactDetailsViewModel.getContact().getValue();
+        if (contactDetailsViewModel.getContactAndInvitation() == null || contactDetailsViewModel.getContactAndInvitation().getValue() == null) {
+            return;
+        }
+        final Contact contact = contactDetailsViewModel.getContactAndInvitation().getValue().contact;
         App.runThread(() -> {
-            if (contact != null && contact.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_UNSEEN) {
+            if (contact.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_UNSEEN) {
                 contact.newPublishedDetails = Contact.PUBLISHED_DETAILS_NEW_SEEN;
                 AppDatabase.getInstance().contactDao().updatePublishedDetailsStatus(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.newPublishedDetails);
             }
@@ -237,14 +259,19 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
 
     @Override
     public boolean onCreateOptionsMenu(@NonNull Menu menu) {
-        Contact contact = contactDetailsViewModel.getContact().getValue();
-        if (contact != null) {
+        if (contactDetailsViewModel.getContactAndInvitation() == null || contactDetailsViewModel.getContactAndInvitation().getValue() == null) {
+            return true;
+        }
+        final Contact contact = contactDetailsViewModel.getContactAndInvitation().getValue().contact;
+        if (contact.oneToOne) {
             getMenuInflater().inflate(R.menu.menu_contact_details, menu);
-            if (contact.active) {
-                getMenuInflater().inflate(R.menu.menu_contact_details_recreate_channels, menu);
-                if (contact.establishedChannelCount > 0) {
-                    getMenuInflater().inflate(R.menu.menu_contact_details_call, menu);
-                }
+        } else {
+            getMenuInflater().inflate(R.menu.menu_contact_details_not_one_to_one, menu);
+        }
+        if (contact.active) {
+            getMenuInflater().inflate(R.menu.menu_contact_details_recreate_channels, menu);
+            if (contact.establishedChannelCount > 0) {
+                getMenuInflater().inflate(R.menu.menu_contact_details_call, menu);
             }
         }
         MenuItem deleteItem = menu.findItem(R.id.action_delete_contact);
@@ -257,22 +284,50 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
     }
 
 
-    public void displayDetails(Contact contact) {
-        if (contact == null) {
-            finish();
+    public void displayDetails(ContactDetailsViewModel.ContactAndInvitation contactAndInvitation) {
+        if (contactAndInvitation == null) {
             return;
         }
+        Contact contact = contactAndInvitation.contact;
+        Invitation invitation = contactAndInvitation.invitation;
 
         invalidateOptionsMenu();
 
-        String displayName = contact.getCustomDisplayName();
-        contactInitialView.setKeycloakCertified(contact.keycloakManaged);
-        contactInitialView.setInactive(!contact.active);
-        if (contact.getCustomPhotoUrl() == null) {
-            contactInitialView.setInitial(contact.bytesContactIdentity, App.getInitial(displayName));
+        if (contact.oneToOne) {
+            setTitle(R.string.activity_title_contact_details);
+            introduceButton.setVisibility(View.VISIBLE);
+            notOneToOneCardView.setVisibility(View.GONE);
+            discussionButton.setVisibility(View.VISIBLE);
         } else {
-            contactInitialView.setPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
+            setTitle(R.string.activity_title_user_details);
+            introduceButton.setVisibility(View.GONE);
+            notOneToOneCardView.setVisibility(View.VISIBLE);
+            discussionButton.setVisibility(View.INVISIBLE);
+            if (invitation == null) {
+                notOneToOneTitleTextView.setText(R.string.label_contact_not_one_to_one);
+                notOneToOneExplanationTextView.setText(getString(R.string.explanation_contact_not_one_to_one, contact.getCustomDisplayName()));
+                notOneToOneInviteButton.setVisibility(View.VISIBLE);
+                notOneToOneInviteButton.setText(R.string.button_label_invite);
+                notOneToOneRejectButton.setVisibility(View.GONE);
+            } else if (invitation.categoryId == ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY) {
+                notOneToOneTitleTextView.setText(R.string.invitation_status_one_to_one_invitation);
+                notOneToOneExplanationTextView.setText(getString(R.string.invitation_status_description_one_to_one_invitation_sent, contact.getCustomDisplayName()));
+                notOneToOneInviteButton.setVisibility(View.GONE);
+                notOneToOneRejectButton.setVisibility(View.VISIBLE);
+                notOneToOneRejectButton.setText(R.string.button_label_abort);
+            } else if (invitation.categoryId == ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY) {
+                AndroidNotificationManager.clearInvitationNotification(invitation.dialogUuid);
+                notOneToOneTitleTextView.setText(R.string.invitation_status_one_to_one_invitation);
+                notOneToOneExplanationTextView.setText(getString(R.string.invitation_status_description_one_to_one_invitation, contact.getCustomDisplayName()));
+                notOneToOneInviteButton.setVisibility(View.VISIBLE);
+                notOneToOneInviteButton.setText(R.string.button_label_accept);
+                notOneToOneRejectButton.setVisibility(View.VISIBLE);
+                notOneToOneRejectButton.setText(R.string.button_label_reject);
+            }
         }
+
+        String displayName = contact.getCustomDisplayName();
+        contactInitialView.setContact(contact);
         contactNameTextView.setText(displayName);
         if (contact.personalNote != null) {
             personalNoteTextView.setVisibility(View.VISIBLE);
@@ -285,6 +340,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
             introduceButton.setEnabled(true);
             noChannelCardView.setVisibility(View.GONE);
             noChannelSpinner.setImageDrawable(null);
+            notOneToOneInviteButton.setEnabled(true);
         } else {
             if (contact.active) {
                 introduceButton.setEnabled(false);
@@ -304,6 +360,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 introduceButton.setEnabled(false);
                 noChannelCardView.setVisibility(View.GONE);
             }
+            notOneToOneInviteButton.setEnabled(false);
         }
 
         EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
@@ -338,10 +395,9 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 publishedDetails = jsons[0].getIdentityDetails();
                 String publishedFirstLine = publishedDetails.formatFirstAndLastName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName());
                 String publishedSecondLine = publishedDetails.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat());
+                publishedDetailsInitialView.setInitial(contact.bytesContactIdentity, StringUtils.getInitial(publishedFirstLine));
                 if (jsons[0].getPhotoUrl() != null) {
                     publishedDetailsInitialView.setPhotoUrl(contact.bytesContactIdentity, jsons[0].getPhotoUrl());
-                } else {
-                    publishedDetailsInitialView.setInitial(contact.bytesContactIdentity, App.getInitial(publishedFirstLine));
                 }
 
                 {
@@ -394,10 +450,9 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 JsonIdentityDetails trustedDetails = jsons[1].getIdentityDetails();
                 String trustedFirstLine  = trustedDetails.formatFirstAndLastName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName());
                 String trustedSecondLine = trustedDetails.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat());
+                trustedDetailsInitialView.setInitial(contact.bytesContactIdentity, StringUtils.getInitial(trustedFirstLine));
                 if (jsons[1].getPhotoUrl() != null) {
                     trustedDetailsInitialView.setPhotoUrl(contact.bytesContactIdentity, jsons[1].getPhotoUrl());
-                } else {
-                    trustedDetailsInitialView.setInitial(contact.bytesContactIdentity, App.getInitial(trustedFirstLine));
                 }
 
                 {
@@ -432,10 +487,9 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 publishedDetails = jsons[0].getIdentityDetails();
                 String publishedFirstLine = publishedDetails.formatFirstAndLastName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName());
                 String publishedSecondLine = publishedDetails.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat());
+                publishedDetailsInitialView.setInitial(contact.bytesContactIdentity, StringUtils.getInitial(publishedFirstLine));
                 if (jsons[0].getPhotoUrl() != null) {
                     publishedDetailsInitialView.setPhotoUrl(contact.bytesContactIdentity, jsons[0].getPhotoUrl());
-                } else {
-                    publishedDetailsInitialView.setInitial(contact.bytesContactIdentity, App.getInitial(publishedFirstLine));
                 }
 
                 {
@@ -517,25 +571,30 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_PHOTO_BYTES_OWNED_IDENTITY_KEY);
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_PHOTO_BYTES_CONTACT_IDENTITY_KEY);
                 Boolean isTrusted = (Boolean) userInfo.get(EngineNotifications.NEW_CONTACT_PHOTO_IS_TRUSTED_KEY);
-
-                final Contact contact = contactDetailsViewModel.getContact().getValue();
+                if (contactDetailsViewModel.getContactAndInvitation() == null) {
+                    break;
+                }
+                final ContactDetailsViewModel.ContactAndInvitation contactAndInvitation = contactDetailsViewModel.getContactAndInvitation().getValue();
                 if (isTrusted != null && !isTrusted
-                        && contact != null
-                        && Arrays.equals(contact.bytesContactIdentity, bytesContactIdentity)
-                        && Arrays.equals(contact.bytesOwnedIdentity, bytesOwnedIdentity)) {
-                    runOnUiThread(() -> displayDetails(contact));
+                        && contactAndInvitation != null
+                        && Arrays.equals(contactAndInvitation.contact.bytesContactIdentity, bytesContactIdentity)
+                        && Arrays.equals(contactAndInvitation.contact.bytesOwnedIdentity, bytesOwnedIdentity)) {
+                    runOnUiThread(() -> displayDetails(contactAndInvitation));
                 }
                 break;
             }
             case EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS: {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS_BYTES_OWNED_IDENTITY_KEY);
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS_BYTES_CONTACT_IDENTITY_KEY);
-                final Contact contact = contactDetailsViewModel.getContact().getValue();
+                if (contactDetailsViewModel.getContactAndInvitation() == null) {
+                    break;
+                }
+                final ContactDetailsViewModel.ContactAndInvitation contactAndInvitation = contactDetailsViewModel.getContactAndInvitation().getValue();
 
-                if (contact != null
-                        && Arrays.equals(contact.bytesContactIdentity, bytesContactIdentity)
-                        && Arrays.equals(contact.bytesOwnedIdentity, bytesOwnedIdentity)) {
-                    runOnUiThread(() -> displayDetails(contact));
+                if ( contactAndInvitation != null
+                        && Arrays.equals(contactAndInvitation.contact.bytesContactIdentity, bytesContactIdentity)
+                        && Arrays.equals(contactAndInvitation.contact.bytesOwnedIdentity, bytesOwnedIdentity))  {
+                    runOnUiThread(() -> displayDetails(contactAndInvitation));
                 }
                 break;
             }
@@ -572,25 +631,22 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
 
         @Override
         public void run() {
-            try {
-                if (!AppSingleton.getEngine().doesContactHaveAutoAcceptTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity)) {
-                    final Button button = buttonWeakReference.get();
-                    if (button != null) {
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            button.setText(button.getContext().getString(R.string.button_label_exchange_digits_with_user, contact.getCustomDisplayName()));
-                            button.setVisibility(View.VISIBLE);
-                            button.getParent().requestLayout();
-                        });
-                    }
+            if (contact.trustLevel < 4) {
+                final Button button = buttonWeakReference.get();
+                if (button != null) {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        button.setText(button.getContext().getString(R.string.button_label_exchange_digits_with_user, contact.getCustomDisplayName()));
+                        button.setVisibility(View.VISIBLE);
+                        button.getParent().requestLayout();
+                    });
                 }
-            } catch (Exception e) {
-                // Nothing to do
             }
+
             try {
                 ObvTrustOrigin[] trustOrigins = AppSingleton.getEngine().getContactTrustOrigins(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                 final SpannableStringBuilder builder = new SpannableStringBuilder();
                 boolean first = true;
-                for (ObvTrustOrigin trustOrigin: trustOrigins) {
+                for (ObvTrustOrigin trustOrigin : trustOrigins) {
                     if (!first) {
                         builder.append("\n");
                     }
@@ -612,9 +668,9 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
         private CharSequence trustOriginToCharSequence(final ObvTrustOrigin trustOrigin, final byte[] bytesOwnedIdentity) {
             switch (trustOrigin.getType()) {
                 case DIRECT:
-                    return context.getString(R.string.trust_origin_direct_type, App.getNiceDateString(context, trustOrigin.getTimestamp()));
+                    return context.getString(R.string.trust_origin_direct_type, StringUtils.getNiceDateString(context, trustOrigin.getTimestamp()));
                 case INTRODUCTION: {
-                    String text = context.getString(R.string.trust_origin_introduction_type, App.getNiceDateString(context, trustOrigin.getTimestamp()));
+                    String text = context.getString(R.string.trust_origin_introduction_type, StringUtils.getNiceDateString(context, trustOrigin.getTimestamp()));
                     SpannableString link = (trustOrigin.getMediatorOrGroupOwner().getIdentityDetails() == null) ? null : new SpannableString(trustOrigin.getMediatorOrGroupOwner().getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()));
                     if (link != null && link.length() > 0) {
                         ClickableSpan clickableSpan = new ClickableSpan() {
@@ -632,7 +688,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                     return TextUtils.concat(text, link);
                 }
                 case GROUP: {
-                    String text = context.getString(R.string.trust_origin_group_type, App.getNiceDateString(context, trustOrigin.getTimestamp()));
+                    String text = context.getString(R.string.trust_origin_group_type, StringUtils.getNiceDateString(context, trustOrigin.getTimestamp()));
                     SpannableString link = (trustOrigin.getMediatorOrGroupOwner().getIdentityDetails() == null) ? null : new SpannableString(trustOrigin.getMediatorOrGroupOwner().getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()));
                     if (link != null && link.length() > 0) {
                         ClickableSpan clickableSpan = new ClickableSpan() {
@@ -650,10 +706,10 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                     return TextUtils.concat(text, link);
                 }
                 case KEYCLOAK: {
-                    return context.getString(R.string.trust_origin_keycloak_type, trustOrigin.getKeycloakServer(), App.getNiceDateString(context, trustOrigin.getTimestamp()));
+                    return context.getString(R.string.trust_origin_keycloak_type, trustOrigin.getKeycloakServer(), StringUtils.getNiceDateString(context, trustOrigin.getTimestamp()));
                 }
                 default:
-                    return context.getString(R.string.trust_origin_unknown_type, App.getNiceDateString(context, trustOrigin.getTimestamp()));
+                    return context.getString(R.string.trust_origin_unknown_type, StringUtils.getNiceDateString(context, trustOrigin.getTimestamp()));
             }
         }
     }
@@ -668,14 +724,14 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
         byte[] contactBytesIdentity = intent.getByteArrayExtra(CONTACT_BYTES_CONTACT_IDENTITY_INTENT_EXTRA);
         byte[] contactBytesOwnedIdentity = intent.getByteArrayExtra(CONTACT_BYTES_OWNED_IDENTITY_INTENT_EXTRA);
 
-        if (contactDetailsViewModel.getContact() != null) {
-            contactDetailsViewModel.getContact().removeObservers(this);
+        if (contactDetailsViewModel.getContactAndInvitation() != null) {
+            contactDetailsViewModel.getContactAndInvitation().removeObservers(this);
         }
         if (contactDetailsViewModel.getGroupDiscussions() != null) {
             contactDetailsViewModel.getGroupDiscussions().removeObservers(this);
         }
-        contactDetailsViewModel.setContactBytes(contactBytesIdentity, contactBytesOwnedIdentity);
-        contactDetailsViewModel.getContact().observe(this, this::displayDetails);
+        contactDetailsViewModel.setContactBytes(contactBytesOwnedIdentity, contactBytesIdentity);
+        contactDetailsViewModel.getContactAndInvitation().observe(this, this::displayDetails);
 
         contactGroupDiscussionsFragment.setUnfilteredDiscussions(contactDetailsViewModel.getGroupDiscussions());
     }
@@ -683,13 +739,14 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
 
     @Override
     public void onClick(View view) {
-        if (contactDetailsViewModel.getContact() == null) {
+        if (contactDetailsViewModel.getContactAndInvitation() == null) {
             return;
         }
-        final Contact contact = contactDetailsViewModel.getContact().getValue();
-        if (contact == null) {
+        final ContactDetailsViewModel.ContactAndInvitation contactAndInvitation = contactDetailsViewModel.getContactAndInvitation().getValue();
+        if (contactAndInvitation == null) {
             return;
         }
+        final Contact contact = contactAndInvitation.contact;
 
         int id = view.getId();
         if (id == R.id.contact_introduce_button) {
@@ -698,6 +755,48 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 contactIntroductionDialogFragment.show(getSupportFragmentManager(), "dialog");
             } else { // this should never happen as the button should be disabled when no channel exists
                 App.toast(R.string.toast_message_established_channel_required_for_introduction, Toast.LENGTH_LONG);
+            }
+        } else if (id == R.id.contact_not_one_to_one_invite_button) {
+            if (contactAndInvitation.invitation != null) {
+                // this is an accept for an invitation
+                if (contactAndInvitation.invitation.categoryId == ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY) {
+                    try {
+                        ObvDialog obvDialog = contactAndInvitation.invitation.associatedDialog;
+                        obvDialog.setResponseToAcceptOneToOneInvitation(true);
+                        AppSingleton.getEngine().respondToDialog(obvDialog);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                // this is an invite initiation
+                try {
+                    AppSingleton.getEngine().startOneToOneInvitationProtocol(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (id == R.id.contact_not_one_to_one_reject_button) {
+            if (contactAndInvitation.invitation != null) {
+                if (contactAndInvitation.invitation.categoryId == ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY) {
+                    // this is a reject invitation
+                    try {
+                        ObvDialog obvDialog = contactAndInvitation.invitation.associatedDialog;
+                        obvDialog.setResponseToAcceptOneToOneInvitation(false);
+                        AppSingleton.getEngine().respondToDialog(obvDialog);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (contactAndInvitation.invitation.categoryId == ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY) {
+                    // this is an abort
+                    try {
+                        ObvDialog obvDialog = contactAndInvitation.invitation.associatedDialog;
+                        obvDialog.setAbortOneToOneInvitationSent(true);
+                        AppSingleton.getEngine().respondToDialog(obvDialog);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         } else if (id == R.id.contact_discussion_button) {
             App.openOneToOneDiscussionActivity(this, contact.bytesOwnedIdentity, contact.bytesContactIdentity, true);
@@ -800,37 +899,34 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
             onBackPressed();
             return true;
         } else if (itemId == R.id.action_call) {
-            if (contactDetailsViewModel.getContact() == null) {
+            if (contactDetailsViewModel.getContactAndInvitation() == null || contactDetailsViewModel.getContactAndInvitation().getValue() == null) {
                 return true;
             }
-            final Contact contact = contactDetailsViewModel.getContact().getValue();
-            if (contact == null || contact.establishedChannelCount == 0) {
+            final Contact contact = contactDetailsViewModel.getContactAndInvitation().getValue().contact;
+            if (contact.establishedChannelCount == 0) {
                 return true;
             }
 
             App.startWebrtcCall(this, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
             return true;
         } else if (itemId == R.id.action_rename) {
-            if (contactDetailsViewModel.getContact() == null) {
+            if (contactDetailsViewModel.getContactAndInvitation() == null || contactDetailsViewModel.getContactAndInvitation().getValue() == null) {
                 return true;
             }
-            final Contact contact = contactDetailsViewModel.getContact().getValue();
-            if (contact == null) {
-                return true;
-            }
+            final Contact contact = contactDetailsViewModel.getContactAndInvitation().getValue().contact;
 
             EditNameAndPhotoDialogFragment editNameAndPhotoDialogFragment = EditNameAndPhotoDialogFragment.newInstance(this, contact);
             editNameAndPhotoDialogFragment.show(getSupportFragmentManager(), "dialog");
             return true;
         } else if (itemId == R.id.action_recreate_channels) {
-            final Contact contact = contactDetailsViewModel.getContact().getValue();
-            if (contact != null) {
+            final ContactDetailsViewModel.ContactAndInvitation contactAndInvitation = contactDetailsViewModel.getContactAndInvitation().getValue();
+            if (contactAndInvitation != null) {
                 final AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_recreate_channels)
                         .setMessage(R.string.dialog_message_recreate_channels)
                         .setPositiveButton(R.string.button_label_ok, (dialogInterface, which) -> {
                             try {
-                                AppSingleton.getEngine().recreateAllChannels(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                AppSingleton.getEngine().recreateAllChannels(contactAndInvitation.contact.bytesOwnedIdentity, contactAndInvitation.contact.bytesContactIdentity);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -840,14 +936,15 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
             }
             return true;
         } else if (itemId == R.id.action_delete_contact) {
-            final Contact contact = contactDetailsViewModel.getContact().getValue();
-            if (contact != null) {
-                App.runThread(new PromptToDeleteContactTask(this, contact.bytesOwnedIdentity, contact.bytesContactIdentity, this::onBackPressed));
+            final ContactDetailsViewModel.ContactAndInvitation contactAndInvitation = contactDetailsViewModel.getContactAndInvitation().getValue();
+            if (contactAndInvitation != null) {
+                App.runThread(new PromptToDeleteContactTask(this, contactAndInvitation.contact.bytesOwnedIdentity, contactAndInvitation.contact.bytesContactIdentity, this::onBackPressed));
             }
             return true;
         } else if (itemId == R.id.action_debug_information) {
-            Contact contact = contactDetailsViewModel.getContact().getValue();
-            if (contact != null) {
+            ContactDetailsViewModel.ContactAndInvitation contactAndInvitation = contactDetailsViewModel.getContactAndInvitation().getValue();
+            if (contactAndInvitation != null) {
+                Contact contact = contactAndInvitation.contact;
                 StringBuilder sb = new StringBuilder();
                 sb.append(getString(R.string.debug_label_number_of_channels_and_devices)).append("\n");
                 sb.append(contact.establishedChannelCount).append("/").append(contact.deviceCount).append("\n\n");
@@ -855,6 +952,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 sb.append(new ObvUrlIdentity(contact.bytesContactIdentity, contact.displayName).getUrlRepresentation()).append("\n\n");
                 sb.append(getString(R.string.debug_label_capabilities)).append("\n");
                 sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_continuous_gathering, contact.capabilityWebrtcContinuousIce)).append("\n");
+                sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_one_to_one_contacts, contact.capabilityOneToOneContacts)).append("\n");
                 sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_groups_v2, contact.capabilityGroupsV2)).append("\n");
 
                 TextView textView = new TextView(this);

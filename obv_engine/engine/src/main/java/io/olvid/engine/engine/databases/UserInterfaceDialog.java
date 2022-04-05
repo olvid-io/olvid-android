@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.encoder.Encoded;
@@ -46,6 +47,9 @@ public class UserInterfaceDialog implements ObvDatabase {
     private long creationTimestamp;
     static final String CREATION_TIMESTAMP = "creation_timestamp";
 
+    public UUID getUuid() {
+        return uuid;
+    }
 
     public void resend() {
         try {
@@ -136,6 +140,28 @@ public class UserInterfaceDialog implements ObvDatabase {
                 statement.execute("DELETE FROM user_interface_dialog");
             }
             oldVersion = 11;
+        }
+        if (oldVersion < 28 && newVersion >= 28) {
+            Logger.d("MIGRATING `user_interface_dialog` TABLE FROM VERSION " + oldVersion + " TO 28");
+            try (Statement statement = session.createStatement()) {
+                List<String> dialogUuids = new ArrayList<>();
+                try (ResultSet res = statement.executeQuery("SELECT * FROM user_interface_dialog")) {
+                    while (res.next()) {
+                        Encoded encodedDialog = new Encoded(res.getBytes("encoded_dialog"));
+                        try {
+                            Encoded encodedCategory = encodedDialog.decodeList()[3];
+                            int id = (int) encodedCategory.decodeList()[0].decodeLong();
+                            if (id == 9 || id == 10 || id == 11 || id == 12) {
+                                dialogUuids.add(res.getString("uuid"));
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                }
+                for (String uuid : dialogUuids) {
+                    statement.execute("DELETE FROM user_interface_dialog WHERE uuid = '" + uuid + "'");
+                }
+            }
+            oldVersion = 28;
         }
     }
 

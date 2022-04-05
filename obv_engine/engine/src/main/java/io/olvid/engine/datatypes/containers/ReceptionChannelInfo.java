@@ -104,16 +104,14 @@ public class ReceptionChannelInfo {
     }
 
     public Encoded encode() {
-        switch (channelType) {
-            case OBLIVIOUS_CHANNEL_TYPE:
-                return Encoded.of(new Encoded[]{
-                        Encoded.of(channelType),
-                        Encoded.of(remoteDeviceUid),
-                        Encoded.of(remoteIdentity),
-                });
-            default:
-                return Encoded.of(new Encoded[]{Encoded.of(channelType)});
+        if (channelType == OBLIVIOUS_CHANNEL_TYPE) {
+            return Encoded.of(new Encoded[]{
+                    Encoded.of(channelType),
+                    Encoded.of(remoteDeviceUid),
+                    Encoded.of(remoteIdentity),
+            });
         }
+        return Encoded.of(new Encoded[]{Encoded.of(channelType)});
     }
 
     public int getChannelType() {

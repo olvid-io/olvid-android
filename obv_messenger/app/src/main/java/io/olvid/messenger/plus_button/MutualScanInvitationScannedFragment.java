@@ -48,6 +48,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -145,20 +146,18 @@ public class MutualScanInvitationScannedFragment extends Fragment implements Vie
 
     private void displayContact(@NonNull OwnedIdentity ownedIdentity, @Nullable Contact contact, @NonNull ObvMutualScanUrl mutualScanUrl) {
         if (contact != null) {
-            contactInitialView.setKeycloakCertified(contact.keycloakManaged);
-            contactInitialView.setInactive(!contact.active);
-            if (contact.getCustomPhotoUrl() != null) {
-                contactInitialView.setPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
-            } else {
-                contactInitialView.setInitial(contact.bytesContactIdentity, App.getInitial(mutualScanUrl.displayName));
-            }
+            contactInitialView.setContact(contact);
 
             mutualScanWarningTextView.setVisibility(View.VISIBLE);
             mutualScanWarningTextView.setBackgroundResource(R.drawable.background_ok_message);
             mutualScanWarningTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_ok_outline, 0, 0, 0);
-            mutualScanWarningTextView.setText(getString(R.string.text_explanation_warning_mutual_scan_contact_already_known, mutualScanUrl.displayName));
+            if (contact.oneToOne) {
+                mutualScanWarningTextView.setText(getString(R.string.text_explanation_warning_mutual_scan_contact_already_known, mutualScanUrl.displayName));
+            } else {
+                mutualScanWarningTextView.setText(getString(R.string.text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one, mutualScanUrl.displayName));
+            }
         } else {
-            contactInitialView.setInitial(mutualScanUrl.getBytesIdentity(), App.getInitial(mutualScanUrl.displayName));
+            contactInitialView.setInitial(mutualScanUrl.getBytesIdentity(), StringUtils.getInitial(mutualScanUrl.displayName));
             mutualScanWarningTextView.setVisibility(View.VISIBLE);
             mutualScanWarningTextView.setBackgroundResource(R.drawable.background_warning_message);
             mutualScanWarningTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_warning_outline, 0, 0, 0);
@@ -184,13 +183,7 @@ public class MutualScanInvitationScannedFragment extends Fragment implements Vie
     }
 
     private void displaySelfInvite(@NonNull OwnedIdentity ownedIdentity) {
-        contactInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-        contactInitialView.setInactive(!ownedIdentity.active);
-        if (ownedIdentity.photoUrl != null) {
-            contactInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-        } else {
-            contactInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.displayName));
-        }
+        contactInitialView.setOwnedIdentity(ownedIdentity);
         contactNameTextView.setText(ownedIdentity.displayName);
 
         mutualScanExplanationTextView.setVisibility(View.GONE);
@@ -204,7 +197,7 @@ public class MutualScanInvitationScannedFragment extends Fragment implements Vie
     }
 
     private void displayBadSignature(@NonNull ObvMutualScanUrl mutualScanUrl) {
-        contactInitialView.setInitial(mutualScanUrl.getBytesIdentity(), App.getInitial(mutualScanUrl.displayName));
+        contactInitialView.setInitial(mutualScanUrl.getBytesIdentity(), StringUtils.getInitial(mutualScanUrl.displayName));
         contactNameTextView.setText(mutualScanUrl.displayName);
 
         mutualScanExplanationTextView.setVisibility(View.GONE);

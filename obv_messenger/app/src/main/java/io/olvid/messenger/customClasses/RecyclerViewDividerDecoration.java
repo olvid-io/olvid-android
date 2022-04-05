@@ -49,6 +49,15 @@ public class RecyclerViewDividerDecoration extends RecyclerView.ItemDecoration {
         foregroundColor = ContextCompat.getColor(context, R.color.lightGrey);
     }
 
+    public RecyclerViewDividerDecoration(Context context, int dpMarginLeft, int dpMarginRight, int backgroundColorResourceId) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        dividerHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, metrics);
+        marginLeft = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpMarginLeft, metrics);
+        marginRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpMarginRight, metrics);
+        backgroundColor = ContextCompat.getColor(context, backgroundColorResourceId);
+        foregroundColor = ContextCompat.getColor(context, R.color.lightGrey);
+    }
+
     @Override
     public void onDrawOver(@NonNull Canvas canvas, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
         int childCount = parent.getChildCount();

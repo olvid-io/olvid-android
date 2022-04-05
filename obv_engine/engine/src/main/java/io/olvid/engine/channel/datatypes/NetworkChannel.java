@@ -98,7 +98,7 @@ public abstract class NetworkChannel extends Channel {
         MessageToSend messageToSend;
         UID messageUid = new UID(prng);
         switch (message.getMessageType()) {
-            case MessageType.APPLICATION_MESSAGE_TYPE:
+            case MessageType.APPLICATION_MESSAGE_TYPE: {
                 if (!(message instanceof ChannelApplicationMessageToSend)) {
                     Logger.w("Trying to post a message of type " + message.getMessageType() + " that is not a ChannelApplicationMessageToSend.");
                     throw new Exception();
@@ -108,7 +108,7 @@ public abstract class NetworkChannel extends Channel {
                 Encoded[] listOfEncodedAttachments = new Encoded[attachments.length + 1];
                 MessageToSend.Attachment[] messageToSendAttachments = new MessageToSend.Attachment[attachments.length];
 
-                for (int i=0; i<attachments.length; i++) {
+                for (int i = 0; i < attachments.length; i++) {
                     AuthEncKey attachmentKey = authEnc.generateKey(prng);
                     listOfEncodedAttachments[i] = Encoded.of(new Encoded[]{
                             Encoded.of(attachmentKey),
@@ -123,6 +123,11 @@ public abstract class NetworkChannel extends Channel {
                         Encoded.of(MessageType.APPLICATION_MESSAGE_TYPE),
                         Encoded.of(listOfEncodedAttachments)
                 });
+                ////////
+                // Add a padding to message to obfuscate content length. Commented out for now
+//                byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
+//                System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
+//                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);
                 EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, plaintextContent.getBytes(), prng);
 
                 final EncryptedBytes encryptedExtendedContent;
@@ -135,19 +140,26 @@ public abstract class NetworkChannel extends Channel {
                 }
                 messageToSend = new MessageToSend(message.getSendChannelInfo().getFromIdentity(), messageUid, server, encryptedContent, encryptedExtendedContent, headers, messageToSendAttachments, channelApplicationMessageToSend.hasUserContent(), channelApplicationMessageToSend.isVoipMessage());
                 break;
-            case MessageType.PROTOCOL_MESSAGE_TYPE:
+            }
+            case MessageType.PROTOCOL_MESSAGE_TYPE: {
                 if (!(message instanceof ChannelProtocolMessageToSend)) {
                     Logger.w("Trying to post a message of type " + message.getMessageType() + " that is not a ChannelProtocolMessageToSend.");
                     throw new Exception();
                 }
                 ChannelProtocolMessageToSend channelProtocolMessageToSend = (ChannelProtocolMessageToSend) message;
-                plaintextContent = Encoded.of(new Encoded[]{
+                Encoded plaintextContent = Encoded.of(new Encoded[]{
                         Encoded.of(MessageType.PROTOCOL_MESSAGE_TYPE),
                         channelProtocolMessageToSend.getEncodedElements()
                 });
-                encryptedContent = authEnc.encrypt(messageKey, plaintextContent.getBytes(), prng);
+                ////////
+                // Add a padding to message to obfuscate content length. Commented out for now
+//                byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
+//                System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
+//                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);
+                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, plaintextContent.getBytes(), prng);
                 messageToSend = new MessageToSend(message.getSendChannelInfo().getFromIdentity(), messageUid, server, encryptedContent, headers);
                 break;
+            }
             default:
                 Logger.w("Trying to post a message of type " + message.getMessageType() + " on a network channel.");
                 throw new Exception();

@@ -20,6 +20,8 @@
 package io.olvid.engine.networkfetch.operations;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -122,35 +124,26 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                                     continue;
                                 }
                                 count++;
-                            }
-                            for (int i = 0; i < messageAndAttachmentLengths.attachmentLengths.length; i++) {
-                                InboxAttachment attachment = InboxAttachment.get(fetchManagerSession, ownedIdentity, messageAndAttachmentLengths.messageUid, i);
-                                if (attachment == null) {
-                                    for (int attempts = 0; attempts < 5; attempts++) { // make a few attempts to create attachment. If all fail, throw to abort everything
-                                        try {
-                                            if (messageAndAttachmentLengths.chunkDownloadPrivateUrls[i] == null) {
-                                                Logger.i("Empty list of chunks. Attachment was deleted from server.");
-                                            }
-                                            InboxAttachment.create(fetchManagerSession,
-                                                    ownedIdentity,
-                                                    messageAndAttachmentLengths.messageUid,
-                                                    i,
-                                                    messageAndAttachmentLengths.attachmentLengths[i],
-                                                    messageAndAttachmentLengths.chunkLengths[i],
-                                                    messageAndAttachmentLengths.chunkDownloadPrivateUrls[i]
-                                            );
-                                            break;
-                                        } catch (SQLException e) {
-                                            if (attempts == 4) {
-                                                e.printStackTrace();
-                                                throw new SQLException();
-                                            }
+
+                                for (int i = 0; i < messageAndAttachmentLengths.attachmentLengths.length; i++) {
+                                    InboxAttachment attachment = InboxAttachment.get(fetchManagerSession, ownedIdentity, messageAndAttachmentLengths.messageUid, i);
+                                    if (attachment == null) {
+                                        if (messageAndAttachmentLengths.chunkDownloadPrivateUrls[i] == null) {
+                                            Logger.i("Empty list of chunks. Attachment was deleted from server.");
                                         }
+                                        InboxAttachment.create(fetchManagerSession,
+                                                ownedIdentity,
+                                                messageAndAttachmentLengths.messageUid,
+                                                i,
+                                                messageAndAttachmentLengths.attachmentLengths[i],
+                                                messageAndAttachmentLengths.chunkLengths[i],
+                                                messageAndAttachmentLengths.chunkDownloadPrivateUrls[i]
+                                        );
                                     }
                                 }
                             }
                         }
-                        Logger.d("DownloadMessagesAndListAttachmentsOperation found " + count + " new messages on the server.");
+                        Logger.d("DownloadMessagesAndListAttachmentsOperation found " + messageAndAttachmentLengthsArray.length + " messages (" + count + " new) on the server.");
                         finished = true;
                         return;
                     }
@@ -246,37 +239,37 @@ class DownloadMessagesAndListAttachmentsServerMethod extends ServerMethod {
         if (returnStatus == ServerMethod.OK) {
             try {
                 downloadTimestamp = receivedData[0].decodeLong();
-                messageAndAttachmentLengthsArray = new MessageAndAttachmentLengths[receivedData.length-1];
-                for (int i=0; i<receivedData.length-1; i++) {
-                    Encoded[] parts = receivedData[i+1].decodeList();
+                List<MessageAndAttachmentLengths> list = new ArrayList<>();
+                for (int i = 0; i < receivedData.length - 1; i++) {
+                    Encoded[] parts = receivedData[i + 1].decodeList();
                     int attachmentCount = parts.length - 5;
-                    messageAndAttachmentLengthsArray[i] = new MessageAndAttachmentLengths(
+                    MessageAndAttachmentLengths messageAndAttachmentLengths = new MessageAndAttachmentLengths(
                             parts[0].decodeUid(),
                             parts[1].decodeLong(),
                             parts[2].decodeEncryptedData(),
                             parts[3].decodeEncryptedData(),
                             parts[4].decodeBoolean(),
                             attachmentCount);
-                    for (int j=0; j<attachmentCount; j++) {
-                        Encoded[] attachmentParts = parts[5+j].decodeList();
+                    for (int j = 0; j < attachmentCount; j++) {
+                        Encoded[] attachmentParts = parts[5 + j].decodeList();
                         int attachmentNumber = (int) attachmentParts[0].decodeLong();
                         long attachmentLength = attachmentParts[1].decodeLong();
                         int chunkLength = (int) attachmentParts[2].decodeLong();
                         String[] privateUrls = attachmentParts[3].decodeStringArray();
-                        messageAndAttachmentLengthsArray[i].attachmentLengths[attachmentNumber] = attachmentLength;
-                        messageAndAttachmentLengthsArray[i].chunkLengths[attachmentNumber] = chunkLength;
-                        if (privateUrls.length == (int)((attachmentLength - 1)/chunkLength) + 1) {
-                            messageAndAttachmentLengthsArray[i].chunkDownloadPrivateUrls[attachmentNumber] = privateUrls;
+                        messageAndAttachmentLengths.attachmentLengths[attachmentNumber] = attachmentLength;
+                        messageAndAttachmentLengths.chunkLengths[attachmentNumber] = chunkLength;
+                        if (chunkLength == 0) {
+                            continue;
+                        }
+                        if (privateUrls.length == (int) ((attachmentLength - 1) / chunkLength) + 1) {
+                            messageAndAttachmentLengths.chunkDownloadPrivateUrls[attachmentNumber] = privateUrls;
                         } else {
-                            messageAndAttachmentLengthsArray[i].chunkDownloadPrivateUrls[attachmentNumber] = null;
+                            messageAndAttachmentLengths.chunkDownloadPrivateUrls[attachmentNumber] = null;
                         }
                     }
-                    for (int j=0; j<attachmentCount; j++) {
-                        if (messageAndAttachmentLengthsArray[i].chunkLengths[j] == 0) {
-                            throw new DecodingException();
-                        }
-                    }
+                    list.add(messageAndAttachmentLengths);
                 }
+                messageAndAttachmentLengthsArray = list.toArray(new MessageAndAttachmentLengths[0]);
             } catch (DecodingException e) {
                 e.printStackTrace();
                 returnStatus = ServerMethod.GENERAL_ERROR;

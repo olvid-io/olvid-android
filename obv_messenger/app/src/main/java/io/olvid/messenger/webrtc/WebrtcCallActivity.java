@@ -20,12 +20,14 @@
 package io.olvid.messenger.webrtc;
 
 import android.Manifest;
+import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
@@ -62,6 +64,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -69,6 +72,7 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.customClasses.InitialView;
@@ -122,6 +126,22 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
 
     boolean foreground = false;
     boolean callEnded = false;
+
+    @Override
+    protected void attachBaseContext(Context baseContext) {
+        final Context newContext;
+        float customFontScale = SettingsActivity.getFontScale();
+        float fontScale = baseContext.getResources().getConfiguration().fontScale;
+        if (customFontScale != 1.0f) {
+            Configuration configuration = new Configuration();
+            configuration.fontScale = fontScale * customFontScale;
+            newContext = baseContext.createConfigurationContext(configuration);
+        } else {
+            newContext = baseContext;
+        }
+
+        super.attachBaseContext(newContext);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -418,14 +438,30 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
             if (webrtcCallService != null) {
                 List<WebrtcCallService.CallParticipantPojo> callParticipants = webrtcCallService.getCallParticipantsLiveData().getValue();
                 if (webrtcCallService.bytesOwnedIdentity != null && callParticipants != null) {
-                    if (callParticipants.size() == 1 && callParticipants.get(0).contact != null) {
-                        Intent discussionIntent = new Intent(App.getContext(), MainActivity.class);
-                        discussionIntent.setAction(MainActivity.FORWARD_ACTION);
-                        discussionIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
-                        discussionIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
-                        discussionIntent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
-                        discussionIntent.putExtra(DiscussionActivity.BYTES_CONTACT_IDENTITY_INTENT_EXTRA, callParticipants.get(0).bytesContactIdentity);
-                        startActivity(discussionIntent);
+                    if (callParticipants.size() == 1) {
+                        Contact contact = callParticipants.get(0).contact;
+                        if (contact != null && contact.oneToOne) {
+                            Intent discussionIntent = new Intent(App.getContext(), MainActivity.class);
+                            discussionIntent.setAction(MainActivity.FORWARD_ACTION);
+                            discussionIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
+                            discussionIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
+                            discussionIntent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
+                            discussionIntent.putExtra(DiscussionActivity.BYTES_CONTACT_IDENTITY_INTENT_EXTRA, callParticipants.get(0).bytesContactIdentity);
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+                                if (km != null && km.isDeviceLocked()) {
+                                    km.requestDismissKeyguard(this, new KeyguardManager.KeyguardDismissCallback() {
+                                        @Override
+                                        public void onDismissSucceeded() {
+                                            startActivity(discussionIntent);
+                                        }
+                                    });
+                                    return;
+                                }
+                            }
+                            startActivity(discussionIntent);
+                        }
                     }
                 }
             }
@@ -433,23 +469,38 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
             if (webrtcCallService != null) {
                 List<WebrtcCallService.CallParticipantPojo> callParticipants = webrtcCallService.getCallParticipantsLiveData().getValue();
                 if (webrtcCallService.bytesOwnedIdentity != null && callParticipants != null) {
+                    @NonNull final Intent discussionIntent;
                     if (webrtcCallService.bytesGroupOwnerAndUid != null) {
-                        Intent discussionIntent = new Intent(App.getContext(), MainActivity.class);
+                        discussionIntent = new Intent(this, MainActivity.class);
                         discussionIntent.setAction(MainActivity.FORWARD_ACTION);
                         discussionIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
                         discussionIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
                         discussionIntent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
                         discussionIntent.putExtra(DiscussionActivity.BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA, webrtcCallService.bytesGroupOwnerAndUid);
-                        startActivity(discussionIntent);
                     } else if (callParticipants.size() == 1 && callParticipants.get(0).contact != null) {
-                        Intent discussionIntent = new Intent(App.getContext(), MainActivity.class);
+                        discussionIntent = new Intent(this, MainActivity.class);
                         discussionIntent.setAction(MainActivity.FORWARD_ACTION);
                         discussionIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
                         discussionIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
                         discussionIntent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
                         discussionIntent.putExtra(DiscussionActivity.BYTES_CONTACT_IDENTITY_INTENT_EXTRA, callParticipants.get(0).bytesContactIdentity);
-                        startActivity(discussionIntent);
+                    } else {
+                        return;
                     }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+                        if (km != null && km.isDeviceLocked()) {
+                            km.requestDismissKeyguard(this, new KeyguardManager.KeyguardDismissCallback() {
+                                @Override
+                                public void onDismissSucceeded() {
+                                    startActivity(discussionIntent);
+                                }
+                            });
+                            return;
+                        }
+                    }
+                    startActivity(discussionIntent);
                 }
             }
         }
@@ -512,9 +563,6 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
                             break;
                         case ICE_CONNECTION_ERROR:
                             callStatusTextView.setText(R.string.webrtc_failed_connection_to_contact_lost);
-                            break;
-                        case TIMEOUT:
-                            callStatusTextView.setText(R.string.webrtc_failed_timeout);
                             break;
                         case KICKED:
                             callStatusTextView.setText(R.string.webrtc_failed_kicked);
@@ -651,7 +699,8 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
                 } else if (webrtcCallService.bytesGroupOwnerAndUid != null) {
                     show = true;
                 } else if (callParticipantPojos.size() == 1) {
-                    show = callParticipantPojos.get(0).contact != null; // in single participant, only show button if participant is indeed a contact
+                    Contact contact = callParticipantPojos.get(0).contact;
+                    show = contact != null && contact.oneToOne; // in single participant, only show button if participant is indeed a oneToOne contact
                 } else {
                     show = false;
                 }
@@ -761,7 +810,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (!(service instanceof WebrtcCallService.WebrtcCallServiceBinder)) {
-                Logger.e("☎️ WebrtcCallActivity bound to bad service!!!");
+                Logger.e("☎ WebrtcCallActivity bound to bad service!!!");
                 closeActivity();
                 return;
             }
@@ -800,7 +849,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
             if (callParticipants == null || callParticipants.size() == 0) {
                 // no one in the call --> should never happen
                 singlePeerIsMutedImageView.setVisibility(View.GONE);
-                singleContactInitialView.setInitial(new byte[0], "");
+                singleContactInitialView.setUnknown();
                 singleContactNameTextView.setText(null);
                 singlePeerStatusTextView.setText(null);
 
@@ -813,12 +862,14 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
                 boolean fullBind = !Arrays.equals(singleBytesContactIdentity, callParticipant.bytesContactIdentity);
 
                 if (fullBind) {
-                    singleContactInitialView.setKeycloakCertified(callParticipant.contact != null && callParticipant.contact.keycloakManaged);
-                    singleContactInitialView.setInactive(callParticipant.contact != null && !callParticipant.contact.active);
-                    if (callParticipant.contact != null && callParticipant.contact.getCustomPhotoUrl() != null) {
-                        singleContactInitialView.setPhotoUrl(callParticipant.bytesContactIdentity, callParticipant.contact.getCustomPhotoUrl());
+                    if (callParticipant.contact != null) {
+                        singleContactInitialView.setContact(callParticipant.contact);
                     } else {
-                        singleContactInitialView.setInitial(callParticipant.bytesContactIdentity, App.getInitial(callParticipant.displayName));
+                        singleContactInitialView.setKeycloakCertified(false);
+                        singleContactInitialView.setInactive(false);
+                        singleContactInitialView.setNotOneToOne();
+                        singleContactInitialView.setNullTrustLevel();
+                        singleContactInitialView.setInitial(callParticipant.bytesContactIdentity, StringUtils.getInitial(callParticipant.displayName));
                     }
                     singleContactNameTextView.setText(callParticipant.displayName);
                 }
@@ -841,6 +892,10 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
                 this.singleBytesContactIdentity = callParticipant.bytesContactIdentity;
                 notifyDataSetChanged();
             } else {
+                // sort the call participants in alphabetical order
+                Collections.sort(callParticipants);
+
+
                 this.singleBytesContactIdentity = null;
 
                 if (this.callParticipants != null && this.callParticipants.size() > 1) {
@@ -946,9 +1001,6 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
                 case FAILED:
                     peerStatusTextView.setText(R.string.webrtc_status_contact_failed);
                     break;
-                case TIMEOUT:
-                    peerStatusTextView.setText(R.string.webrtc_failed_timeout);
-                    break;
                 case INITIAL:
                 case START_CALL_MESSAGE_SENT:
                     if (singleContact) {
@@ -995,12 +1047,14 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
                 holder.bytesContactIdentity = callParticipant.bytesContactIdentity;
                 holder.contact = callParticipant.contact;
 
-                holder.initialView.setKeycloakCertified(callParticipant.contact != null && callParticipant.contact.keycloakManaged);
-                holder.initialView.setInactive(callParticipant.contact != null && !callParticipant.contact.active);
-                if (callParticipant.contact != null && callParticipant.contact.getCustomPhotoUrl() != null) {
-                    holder.initialView.setPhotoUrl(callParticipant.bytesContactIdentity, callParticipant.contact.getCustomPhotoUrl());
+                if (callParticipant.contact != null) {
+                    holder.initialView.setContact(callParticipant.contact);
                 } else {
-                    holder.initialView.setInitial(callParticipant.bytesContactIdentity, App.getInitial(callParticipant.displayName));
+                    holder.initialView.setKeycloakCertified(false);
+                    holder.initialView.setInactive(false);
+                    holder.initialView.setNotOneToOne();
+                    holder.initialView.setNullTrustLevel();
+                    holder.initialView.setInitial(callParticipant.bytesContactIdentity, StringUtils.getInitial(callParticipant.displayName));
                 }
                 holder.contactNameTextView.setText(callParticipant.displayName);
 

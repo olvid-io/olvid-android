@@ -26,19 +26,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.olvid.messenger.App;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 
 
 public class FilteredDiscussionListViewModel extends ViewModel {
     private final MutableLiveData<List<SearchableDiscussion>> filteredDiscussions = new MutableLiveData<>();
+    private final MutableLiveData<List<Long>> selectedDiscussionIds = new MutableLiveData<>();
     private List<SearchableDiscussion> unfilteredDiscussions;
     private String filter;
     private List<Pattern> filterPatterns;
+    private final HashSet<Long> selectedDiscussionIdsHashSet = new HashSet<>();
 
 
     public FilteredDiscussionListViewModel() {
@@ -57,11 +61,11 @@ public class FilteredDiscussionListViewModel extends ViewModel {
             String[] parts = filter.trim().split("\\s+");
             filterPatterns = new ArrayList<>(parts.length);
             for (String part: parts) {
-                filterPatterns.add(Pattern.compile(Pattern.quote(App.unAccent(part))));
+                filterPatterns.add(Pattern.compile(Pattern.quote(StringUtils.unAccent(part))));
             }
         }
         if (unfilteredDiscussions != null) {
-            App.runThread(new FilterDiscussionListTask(filterPatterns, filteredDiscussions, unfilteredDiscussions));
+            App.runThread(new FilterDiscussionListTask(filterPatterns, filteredDiscussions, unfilteredDiscussions, selectedDiscussionIdsHashSet));
         }
     }
 
@@ -73,13 +77,43 @@ public class FilteredDiscussionListViewModel extends ViewModel {
         return filteredDiscussions;
     }
 
+    public LiveData<List<Long>> getSelectedDiscussionIds() {
+        return selectedDiscussionIds;
+    }
+
+    public void selectedDiscussionId(long discussionId) {
+        if (!selectedDiscussionIdsHashSet.remove(discussionId)) {
+            selectedDiscussionIdsHashSet.add(discussionId);
+        }
+        selectedDiscussionIds.postValue(new ArrayList<>(selectedDiscussionIdsHashSet));
+        refreshSelectedDiscussionIds();
+    }
+
+    private void refreshSelectedDiscussionIds() {
+        List<SearchableDiscussion> filteredDiscussions = this.filteredDiscussions.getValue();
+        if (filteredDiscussions != null) {
+            List<SearchableDiscussion> updatedList = new ArrayList<>(filteredDiscussions.size());
+            for (SearchableDiscussion discussion: filteredDiscussions) {
+                discussion.selected = selectedDiscussionIdsHashSet.contains(discussion.discussionId);
+                updatedList.add(discussion);
+            }
+            this.filteredDiscussions.postValue(updatedList);
+        }
+    }
+
+    public void deselectAll() {
+        selectedDiscussionIdsHashSet.clear();
+        selectedDiscussionIds.postValue(new ArrayList<>());
+        refreshSelectedDiscussionIds();
+    }
+
     private static class FilterDiscussionListTask implements Runnable {
         private final List<Pattern> filterPatterns;
         private final MutableLiveData<List<SearchableDiscussion>> liveFilteredDiscussions;
         private final List<SearchableDiscussion> unfilteredDiscussions;
+        private final HashSet<Long> selectedDiscussionIds;
 
-
-        FilterDiscussionListTask(List<Pattern> filterPatterns, MutableLiveData<List<SearchableDiscussion>> liveFilteredDiscussions, List<SearchableDiscussion> unfilteredDiscussions) {
+        FilterDiscussionListTask(List<Pattern> filterPatterns, MutableLiveData<List<SearchableDiscussion>> liveFilteredDiscussions, List<SearchableDiscussion> unfilteredDiscussions, HashSet<Long> selectedDiscussionIds) {
             if (filterPatterns == null) {
                 this.filterPatterns = new ArrayList<>(0);
             } else {
@@ -87,6 +121,7 @@ public class FilteredDiscussionListViewModel extends ViewModel {
             }
             this.liveFilteredDiscussions = liveFilteredDiscussions;
             this.unfilteredDiscussions = unfilteredDiscussions;
+            this.selectedDiscussionIds = new HashSet<>(selectedDiscussionIds); // copy the set to avoid concurrent modification
         }
 
         @Override
@@ -107,6 +142,7 @@ public class FilteredDiscussionListViewModel extends ViewModel {
                     }
                 }
                 if (matches) {
+                    searchableDiscussion.selected = selectedDiscussionIds.contains(searchableDiscussion.discussionId);
                     list.add(searchableDiscussion);
                 }
             }
@@ -119,6 +155,7 @@ public class FilteredDiscussionListViewModel extends ViewModel {
     public static class SearchableDiscussion {
         public final long discussionId;
         public final boolean isGroupDiscussion;
+        @NonNull
         public final byte[] byteIdentifier;
         @NonNull
         public final String title;
@@ -129,6 +166,8 @@ public class FilteredDiscussionListViewModel extends ViewModel {
         public final String photoUrl;
         public final boolean keycloakManaged;
         public final boolean active;
+
+        public boolean selected;
 
         public SearchableDiscussion(@NonNull DiscussionDao.DiscussionAndContactDisplayNames discussionAndContactDisplayNames) {
             this.discussionId = discussionAndContactDisplayNames.discussion.id;
@@ -144,10 +183,12 @@ public class FilteredDiscussionListViewModel extends ViewModel {
             }
             this.title = discussionAndContactDisplayNames.discussion.title;
             this.groupMemberNameList = discussionAndContactDisplayNames.groupContactDisplayNames == null ? "" : discussionAndContactDisplayNames.groupContactDisplayNames;
-            this.patternMatchingField = App.unAccent(title + "\n" + groupMemberNameList);
+            this.patternMatchingField = StringUtils.unAccent(title + "\n" + groupMemberNameList);
             this.photoUrl = discussionAndContactDisplayNames.discussion.photoUrl;
             this.keycloakManaged = discussionAndContactDisplayNames.discussion.keycloakManaged;
             this.active = discussionAndContactDisplayNames.discussion.active;
+
+            this.selected = false;
         }
     }
 }

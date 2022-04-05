@@ -47,6 +47,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
@@ -134,7 +135,7 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
         return super.onOptionsItemSelected(item);
     }
 
-    private void callClicked(CallLogItemDao.CallLogItemAndContacts callLogItem, View view) {
+    private void callClicked(CallLogItemDao.CallLogItemAndContacts callLogItem) {
         if (callLogItem != null) {
             if (callLogItem.contacts.size() == 1) {
                 App.startWebrtcCall(this, callLogItem.oneContact.bytesOwnedIdentity, callLogItem.oneContact.bytesContactIdentity);
@@ -204,24 +205,14 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
 
             CallLogItemDao.CallLogItemAndContacts callLogItemAndContacts = callLogItems.get(position);
             if (callLogItemAndContacts.contacts.size() == 1) {
-                holder.initialView.setKeycloakCertified(callLogItemAndContacts.oneContact.keycloakManaged);
-                holder.initialView.setInactive(!callLogItemAndContacts.oneContact.active);
-                if (callLogItemAndContacts.oneContact.getCustomPhotoUrl() != null) {
-                    holder.initialView.setPhotoUrl(callLogItemAndContacts.oneContact.bytesContactIdentity, callLogItemAndContacts.oneContact.getCustomPhotoUrl());
-                } else {
-                    holder.initialView.setInitial(callLogItemAndContacts.oneContact.bytesContactIdentity, App.getInitial(callLogItemAndContacts.oneContact.getCustomDisplayName()));
-                }
+                holder.initialView.setContact(callLogItemAndContacts.oneContact);
                 holder.contactNameTextView.setMaxLines(1);
                 holder.contactNameTextView.setText(callLogItemAndContacts.oneContact.getCustomDisplayName());
             } else {
                 if (callLogItemAndContacts.group == null) {
                     holder.initialView.setInitial(new byte[0], Integer.toString(callLogItemAndContacts.contacts.size()));
                 } else {
-                    if (callLogItemAndContacts.group.getCustomPhotoUrl() != null) {
-                        holder.initialView.setPhotoUrl(callLogItemAndContacts.group.bytesGroupOwnerAndUid, callLogItemAndContacts.group.getCustomPhotoUrl());
-                    } else {
-                        holder.initialView.setGroup(callLogItemAndContacts.group.bytesGroupOwnerAndUid);
-                    }
+                    holder.initialView.setGroup(callLogItemAndContacts.group);
                 }
                 holder.contactNameTextView.setMaxLines(Integer.MAX_VALUE);
                 String separator = getString(R.string.text_contact_names_separator);
@@ -248,6 +239,9 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
                     case CallLogItem.STATUS_BUSY:
                         holder.callTypeImageView.setImageResource(R.drawable.ic_phone_busy_in);
                         break;
+                    case CallLogItem.STATUS_REJECTED:
+                        holder.callTypeImageView.setImageResource(R.drawable.ic_phone_rejected_in);
+                        break;
                     case CallLogItem.STATUS_MISSED:
                     case CallLogItem.STATUS_FAILED:
                         holder.callTypeImageView.setImageResource(R.drawable.ic_call_missed);
@@ -261,6 +255,9 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
                     case CallLogItem.STATUS_BUSY:
                         holder.callTypeImageView.setImageResource(R.drawable.ic_phone_busy_out);
                         break;
+                    case CallLogItem.STATUS_REJECTED:
+                        holder.callTypeImageView.setImageResource(R.drawable.ic_phone_rejected_out);
+                        break;
                     case CallLogItem.STATUS_MISSED:
                     case CallLogItem.STATUS_FAILED:
                         holder.callTypeImageView.setImageResource(R.drawable.ic_call_failed);
@@ -269,9 +266,9 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
             }
 
             if (callLogItemAndContacts.callLogItem.callStatus == CallLogItem.STATUS_SUCCESSFUL && callLogItemAndContacts.callLogItem.duration > 0) {
-                holder.callTimestampTextView.setText(CallLogActivity.this.getString(R.string.text_call_timestamp_and_duration, App.getLongNiceDateString(CallLogActivity.this, callLogItemAndContacts.callLogItem.timestamp), callLogItemAndContacts.callLogItem.duration / 60, callLogItemAndContacts.callLogItem.duration % 60));
+                holder.callTimestampTextView.setText(CallLogActivity.this.getString(R.string.text_call_timestamp_and_duration, StringUtils.getLongNiceDateString(CallLogActivity.this, callLogItemAndContacts.callLogItem.timestamp), callLogItemAndContacts.callLogItem.duration / 60, callLogItemAndContacts.callLogItem.duration % 60));
             } else {
-                holder.callTimestampTextView.setText(App.getLongNiceDateString(CallLogActivity.this, callLogItemAndContacts.callLogItem.timestamp));
+                holder.callTimestampTextView.setText(StringUtils.getLongNiceDateString(CallLogActivity.this, callLogItemAndContacts.callLogItem.timestamp));
             }
         }
 
@@ -298,7 +295,6 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
         }
 
         class CallLogItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-            final View rootView;
             final InitialView initialView;
             final TextView contactNameTextView;
             final ImageView callTypeImageView;
@@ -307,7 +303,6 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
 
             CallLogItemViewHolder(View rootView) {
                 super(rootView);
-                this.rootView = rootView;
                 rootView.setOnLongClickListener(this);
                 initialView = rootView.findViewById(R.id.initial_view);
                 contactNameTextView = rootView.findViewById(R.id.contact_name_text_view);
@@ -320,7 +315,7 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
             @Override
             public void onClick(View view) {
                 if (view.getId() == R.id.call_image_view) {
-                    CallLogActivity.this.callClicked(callLogItems.get(this.getLayoutPosition()), view);
+                    CallLogActivity.this.callClicked(callLogItems.get(this.getLayoutPosition()));
                 }
             }
 

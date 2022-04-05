@@ -79,7 +79,14 @@ public class HandleNewMessageNotificationTask implements Runnable {
             return;
         }
         try {
-            Message.JsonPayload messagePayload = AppSingleton.getJsonObjectMapper().readValue(obvMessage.getMessagePayload(), Message.JsonPayload.class);
+            Message.JsonPayload messagePayload;
+            try {
+                messagePayload = AppSingleton.getJsonObjectMapper().readValue(obvMessage.getMessagePayload(), Message.JsonPayload.class);
+            } catch (Exception e) {
+                Logger.e("Received a message that cannot be deserialized! Deleting it...");
+                engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
+                return;
+            }
             Message.JsonReturnReceipt jsonReturnReceipt = messagePayload.getJsonReturnReceipt();
             Message.JsonMessage jsonMessage = messagePayload.getJsonMessage();
             Message.JsonWebrtcMessage jsonWebrtcMessage = messagePayload.getJsonWebrtcMessage();
@@ -140,6 +147,13 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 return;
             }
 
+
+            if (jsonMessage.isEmpty() && obvMessage.getAttachments().length == 0) {
+                // we received an empty message with no other attachments, simply discard it.
+                engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
+                return;
+            }
+
             Discussion discussion;
             byte[] bytesGroupUid = jsonMessage.getGroupUid();
             byte[] bytesGroupOwner = jsonMessage.getGroupOwner();
@@ -167,13 +181,11 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid);
             }
 
-
-            if (jsonMessage.isEmpty() && obvMessage.getAttachments().length == 0) {
-                // we received an empty message with no other attachments, simply discard it.
+            if (discussion == null) {
+                // we don't have a discussion to post this message in: probably a message from a not-oneToOne contact --> discarding it
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
-
 
             RemoteDeleteAndEditRequest remoteDeleteAndEditRequest = db.remoteDeleteAndEditRequestDao().getBySenderSequenceNumber(jsonMessage.getSenderSequenceNumber(), jsonMessage.getSenderThreadIdentifier(), contact.bytesContactIdentity, discussion.id);
             List<ReactionRequest> reactionRequests = db.reactionRequestDao().getAllBySenderSequenceNumber(jsonMessage.getSenderSequenceNumber(), jsonMessage.getSenderThreadIdentifier(), contact.bytesContactIdentity, discussion.id);
@@ -203,6 +215,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     message.missedMessageCount = processSequenceNumber(db, discussion.id, contact.bytesContactIdentity, jsonMessage.getSenderThreadIdentifier(), jsonMessage.getSenderSequenceNumber());
                     message.contentBody = null;
                     message.jsonReply = null;
+                    message.forwarded = false;
                     message.edited = Message.EDITED_NONE;
                     message.wipeStatus = Message.WIPE_STATUS_REMOTE_DELETED;
                     message.wipedAttachmentCount = obvMessage.getAttachments().length;
@@ -297,6 +310,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                             finalImageCount
                     );
                     message.missedMessageCount = processSequenceNumber(db, discussion.id, contact.bytesContactIdentity, jsonMessage.getSenderThreadIdentifier(), jsonMessage.getSenderSequenceNumber());
+                    message.forwarded = jsonMessage.isForwarded() != null && jsonMessage.isForwarded();
                     boolean edited = false;
 
                     if (remoteDeleteAndEditRequest != null && remoteDeleteAndEditRequest.requestType == RemoteDeleteAndEditRequest.TYPE_EDIT) {

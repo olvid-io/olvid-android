@@ -56,19 +56,14 @@ public class OutboxMessage implements ObvDatabase {
     static final String SERVER = "server";
     private EncryptedBytes encryptedContent;
     static final String ENCRYPTED_CONTENT = "encrypted_content";
-    private EncryptedBytes encryptedExtendedContent;
-    static final String ENCRYPTED_EXTENDED_CONTENT = "encrypted_extended_content";
-    private UID proofOfWorkUid;
-    static final String PROOF_OF_WORK_UID = "proof_of_work_uid";
-    private Encoded proofOfWorkEncodedChallenge;
-    static final String PROOF_OF_WORK_ENCODED_CHALLENGE = "proof_of_work_encoded_challenge";
-    private Encoded proofOfWorkEncodedSolution;
-    static final String PROOF_OF_WORK_ENCODED_SOLUTION = "proof_of_work_encoded_solution";
     private boolean isApplicationMessage;
     static final String IS_APPLICATION_MESSAGE = "is_application_message";
     private boolean isVoipMessage;
     static final String IS_VOIP_MESSAGE = "is_voip_message";
-
+    private EncryptedBytes encryptedExtendedContent;
+    static final String ENCRYPTED_EXTENDED_CONTENT = "encrypted_extended_content";
+    private long creationTimestamp;
+    static final String CREATION_TIMESTAMP = "creation_timestamp";
 
 
     public Identity getOwnedIdentity() {
@@ -99,17 +94,17 @@ public class OutboxMessage implements ObvDatabase {
         return encryptedExtendedContent;
     }
 
-    public UID getProofOfWorkUid() {
-        return proofOfWorkUid;
-    }
-
-    public Encoded getProofOfWorkEncodedChallenge() {
-        return proofOfWorkEncodedChallenge;
-    }
-
-    public Encoded getProofOfWorkEncodedSolution() {
-        return proofOfWorkEncodedSolution;
-    }
+//    public UID getProofOfWorkUid() {
+//        return proofOfWorkUid;
+//    }
+//
+//    public Encoded getProofOfWorkEncodedChallenge() {
+//        return proofOfWorkEncodedChallenge;
+//    }
+//
+//    public Encoded getProofOfWorkEncodedSolution() {
+//        return proofOfWorkEncodedSolution;
+//    }
 
     public MessageHeader[] getHeaders() {
         return MessageHeader.getAll(sendManagerSession, ownedIdentity, uid);
@@ -131,54 +126,11 @@ public class OutboxMessage implements ObvDatabase {
         return isVoipMessage;
     }
 
+    public long getCreationTimestamp() {
+        return creationTimestamp;
+    }
+
     // region setters
-
-    public void setProofOfWork(UID proofOfWorkUid, Encoded proofOfWorkEncodedChallenge) {
-        if (this.proofOfWorkEncodedChallenge != proofOfWorkEncodedChallenge) {
-            try (PreparedStatement statement = sendManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
-                    " SET " + PROOF_OF_WORK_UID + " = ?, " +
-                    PROOF_OF_WORK_ENCODED_CHALLENGE + " = ?, " +
-                    PROOF_OF_WORK_ENCODED_SOLUTION + " = NULL " +
-                    " WHERE " + OWNED_IDENTITY + " = ? " +
-                    " AND " + UID_ + " = ?;")) {
-                statement.setBytes(1, (proofOfWorkUid==null)?null:proofOfWorkUid.getBytes());
-                statement.setBytes(2, (proofOfWorkEncodedChallenge==null)?null:proofOfWorkEncodedChallenge.getBytes());
-                statement.setBytes(3, ownedIdentity.getBytes());
-                statement.setBytes(4, uid.getBytes());
-                statement.executeUpdate();
-                this.proofOfWorkUid = proofOfWorkUid;
-                this.proofOfWorkEncodedChallenge = proofOfWorkEncodedChallenge;
-                this.proofOfWorkEncodedSolution = null;
-            } catch (SQLException ignored) {}
-        } else {
-            try (PreparedStatement statement = sendManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
-                    " SET " + PROOF_OF_WORK_UID + " = ? " +
-                    " WHERE " + OWNED_IDENTITY + " = ? " +
-                    " AND " + UID_ + " = ?;")) {
-                statement.setBytes(1, proofOfWorkUid.getBytes());
-                statement.setBytes(2, ownedIdentity.getBytes());
-                statement.setBytes(3, uid.getBytes());
-                statement.executeUpdate();
-                this.proofOfWorkUid = proofOfWorkUid;
-            } catch (SQLException ignored) {}
-        }
-    }
-
-    public void removeProofOfWork() {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
-                PROOF_OF_WORK_UID + " = NULL, " +
-                PROOF_OF_WORK_ENCODED_CHALLENGE + " = NULL, " +
-                PROOF_OF_WORK_ENCODED_SOLUTION + " = NULL " +
-                " WHERE " + OWNED_IDENTITY + " = ? " +
-                " AND " + UID_ + " = ?;")) {
-            statement.setBytes(1, ownedIdentity.getBytes());
-            statement.setBytes(2, uid.getBytes());
-            statement.executeUpdate();
-            this.proofOfWorkUid = null;
-            this.proofOfWorkEncodedChallenge = null;
-            this.proofOfWorkEncodedSolution = null;
-        } catch (SQLException ignored) {}
-    }
 
     public void setUidFromServer(UID uidFromServer, byte[] nonce, long timestampFromServer) {
         if (this.uidFromServer != uidFromServer) {
@@ -194,8 +146,10 @@ public class OutboxMessage implements ObvDatabase {
                 statement.executeUpdate();
                 this.uidFromServer = uidFromServer;
                 this.nonce = nonce;
-                this.commitHookBits |= HOOK_BIT_ACKNOWLEDGED;
                 this.acknowledgedTimestampFromSever = timestampFromServer;
+                if (timestampFromServer != 0) {
+                    this.commitHookBits |= HOOK_BIT_ACKNOWLEDGED;
+                }
                 sendManagerSession.session.addSessionCommitListener(this);
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -203,20 +157,6 @@ public class OutboxMessage implements ObvDatabase {
         }
     }
 
-    public void setProofOfWorkEncodedSolution(Encoded proofOfWorkEncodedSolution) {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
-                " SET " + PROOF_OF_WORK_ENCODED_SOLUTION + " = ? " +
-                " WHERE " + OWNED_IDENTITY + " = ? " +
-                " AND " + UID_ + " = ?;")) {
-            statement.setBytes(1, (proofOfWorkEncodedSolution==null)?null:proofOfWorkEncodedSolution.getBytes());
-            statement.setBytes(2, ownedIdentity.getBytes());
-            statement.setBytes(3, uid.getBytes());
-            statement.executeUpdate();
-            this.proofOfWorkEncodedSolution = proofOfWorkEncodedSolution;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     // endregion
 
@@ -249,16 +189,11 @@ public class OutboxMessage implements ObvDatabase {
         this.nonce = res.getBytes(NONCE);
         this.server = res.getString(SERVER);
         this.encryptedContent = new EncryptedBytes(res.getBytes(ENCRYPTED_CONTENT));
-        bytes = res.getBytes(ENCRYPTED_EXTENDED_CONTENT);
-        this.encryptedExtendedContent = (bytes==null)?null:new EncryptedBytes(bytes);
-        bytes = res.getBytes(PROOF_OF_WORK_UID);
-        this.proofOfWorkUid = (bytes==null)?null:new UID(bytes);
-        bytes = res.getBytes(PROOF_OF_WORK_ENCODED_CHALLENGE);
-        this.proofOfWorkEncodedChallenge = (bytes==null)?null:new Encoded(bytes);
-        bytes = res.getBytes(PROOF_OF_WORK_ENCODED_SOLUTION);
-        this.proofOfWorkEncodedSolution = (bytes==null)?null:new Encoded(bytes);
         this.isApplicationMessage = res.getBoolean(IS_APPLICATION_MESSAGE);
         this.isVoipMessage = res.getBoolean(IS_VOIP_MESSAGE);
+        bytes = res.getBytes(ENCRYPTED_EXTENDED_CONTENT);
+        this.encryptedExtendedContent = (bytes==null)?null:new EncryptedBytes(bytes);
+        this.creationTimestamp = res.getLong(CREATION_TIMESTAMP);
     }
 
     private OutboxMessage(SendManagerSession sendManagerSession, Identity ownedIdentity, UID uid, String server, EncryptedBytes encryptedContent, EncryptedBytes encryptedExtendedContent, boolean isApplicationMessage, boolean isVoipMessage) {
@@ -269,12 +204,10 @@ public class OutboxMessage implements ObvDatabase {
         this.nonce = null;
         this.server = server;
         this.encryptedContent = encryptedContent;
-        this.encryptedExtendedContent = encryptedExtendedContent;
-        this.proofOfWorkUid = null;
-        this.proofOfWorkEncodedChallenge = null;
-        this.proofOfWorkEncodedSolution = null;
         this.isApplicationMessage = isApplicationMessage;
         this.isVoipMessage = isVoipMessage;
+        this.encryptedExtendedContent = encryptedExtendedContent;
+        this.creationTimestamp = System.currentTimeMillis();
     }
 
     // endregion
@@ -338,12 +271,10 @@ public class OutboxMessage implements ObvDatabase {
                     NONCE + " BLOB, " +
                     SERVER + " TEXT NOT NULL, " +
                     ENCRYPTED_CONTENT + " BLOB NOT NULL, " +
-                    PROOF_OF_WORK_UID + " BLOB, " +
-                    PROOF_OF_WORK_ENCODED_CHALLENGE + " BLOB, " +
-                    PROOF_OF_WORK_ENCODED_SOLUTION + " BLOB, " +
                     IS_APPLICATION_MESSAGE + " BIT NOT NULL, " +
                     IS_VOIP_MESSAGE + " BIT NOT NULL, " +
                     ENCRYPTED_EXTENDED_CONTENT + " BLOB, " +
+                    CREATION_TIMESTAMP + " BIGINT NOT NULL, " +
                     "CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + OWNED_IDENTITY + ", " + UID_ + "));");
         }
     }
@@ -421,11 +352,43 @@ public class OutboxMessage implements ObvDatabase {
             }
             oldVersion = 22;
         }
+        if (oldVersion < 29 && newVersion >= 29) {
+            Logger.d("MIGRATING `outbox_message` DATABASE FROM VERSION " + oldVersion + " TO 29");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE outbox_message RENAME TO old_outbox_message");
+                statement.execute("CREATE TABLE outbox_message (" +
+                        "owned_identity BLOB NOT NULL, " +
+                        "uid BLOB NOT NULL, " +
+                        "uid_from_server BLOB, " +
+                        "nonce BLOB, " +
+                        "server TEXT NOT NULL, " +
+                        "encrypted_content BLOB NOT NULL, " +
+                        "is_application_message BIT NOT NULL," +
+                        "is_voip_message BIT NOT NULL," +
+                        "encrypted_extended_content BLOB," +
+                        "creation_timestamp BIGINT NOT NULL," +
+                        "CONSTRAINT PK_outbox_message PRIMARY KEY(owned_identity, uid));");
+
+                try (PreparedStatement preparedStatement = session.prepareStatement("INSERT INTO outbox_message " +
+                        "SELECT m.owned_identity, m.uid," +
+                        " m.uid_from_server, m.nonce," +
+                        " m.server, m.encrypted_content," +
+                        " m.is_application_message, m.is_voip_message," +
+                        " m.encrypted_extended_content, ? " +
+                        " FROM old_outbox_message AS m")) {
+                    preparedStatement.setLong(1, System.currentTimeMillis());
+                    preparedStatement.executeUpdate();
+                }
+
+                statement.execute("DROP TABLE old_outbox_message");
+            }
+            oldVersion = 29;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, uid.getBytes());
             statement.setBytes(3, (uidFromServer==null)?null:uidFromServer.getBytes());
@@ -433,13 +396,11 @@ public class OutboxMessage implements ObvDatabase {
             statement.setString(5, server);
 
             statement.setBytes(6, encryptedContent.getBytes());
-            statement.setBytes(7, (proofOfWorkUid==null)?null:proofOfWorkUid.getBytes());
-            statement.setBytes(8, (proofOfWorkEncodedChallenge==null)?null:proofOfWorkEncodedChallenge.getBytes());
-            statement.setBytes(9, (proofOfWorkEncodedSolution==null)?null:proofOfWorkEncodedSolution.getBytes());
+            statement.setBoolean(7, isApplicationMessage);
+            statement.setBoolean(8, isVoipMessage);
+            statement.setBytes(9, (encryptedExtendedContent==null)?null:encryptedExtendedContent.getBytes());
+            statement.setLong(10, creationTimestamp);
 
-            statement.setBoolean(10, isApplicationMessage);
-            statement.setBoolean(11, isVoipMessage);
-            statement.setBytes(12, (encryptedExtendedContent==null)?null:encryptedExtendedContent.getBytes());
             statement.executeUpdate();
             this.commitHookBits |= HOOK_BIT_INSERT;
             sendManagerSession.session.addSessionCommitListener(this);

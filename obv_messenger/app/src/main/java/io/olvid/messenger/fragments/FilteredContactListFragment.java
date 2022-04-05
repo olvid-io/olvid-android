@@ -63,6 +63,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LoadAwareAdapter;
 import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.viewModels.FilteredContactListViewModel;
@@ -75,14 +76,15 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     private FilteredContactListOnClickDelegate onClickDelegate;
     private LiveData<List<Contact>> unfilteredContacts = null;
     protected EmptyRecyclerView recyclerView;
-    protected SwipeRefreshLayout swipeRefreshLayout;
+    protected TextView emptyViewTextView;
 
     private Observer<List<Contact>> selectedContactsObserver;
-    private List<Contact> selectedContacts;
+    private List<Contact> initiallySelectedContacts;
 
 
     private boolean removeBottomPadding = false;
     private boolean selectable = false;
+    private String emptyViewText = null;
 
     protected FilteredContactListAdapter filteredContactListAdapter;
 
@@ -97,12 +99,11 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         if (this.selectedContactsObserver != null) {
             filteredContactListViewModel.getSelectedContacts().observe(this, this.selectedContactsObserver);
         }
-        if (this.selectedContacts != null) {
-            filteredContactListViewModel.setSelectedContacts(selectedContacts);
+        if (this.initiallySelectedContacts != null) {
+            filteredContactListViewModel.setSelectedContacts(initiallySelectedContacts);
         }
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_filtered_contact_list, container, false);
@@ -116,6 +117,10 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         recyclerView.setAdapter(filteredContactListAdapter);
         View recyclerEmptyView = rootView.findViewById(R.id.filtered_contact_list_empty_view);
         recyclerView.setEmptyView(recyclerEmptyView);
+        emptyViewTextView = rootView.findViewById(R.id.widget_list_empty_view_text_view);
+        if (emptyViewText != null) {
+            emptyViewTextView.setText(emptyViewText);
+        }
 
         View loadingSpinner = rootView.findViewById(R.id.loading_spinner);
         recyclerView.setLoadingSpinner(loadingSpinner);
@@ -124,12 +129,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
             recyclerView.setPadding(0,0,0,0);
         }
 
-        recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(rootView.getContext(), 68, 12));
-
-        swipeRefreshLayout = rootView.findViewById(R.id.discussion_list_swipe_refresh_layout);
-        swipeRefreshLayout.setColorSchemeResources(R.color.primary700);
-        swipeRefreshLayout.setProgressBackgroundColorSchemeColor(getResources().getColor(R.color.dialogBackground));
-        swipeRefreshLayout.setEnabled(false);
+        recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(rootView.getContext(), selectable ? 100 : 68, 12));
 
         return rootView;
     }
@@ -171,10 +171,10 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         }
     }
 
-    public void setSelectedContacts(List<Contact> selectedContacts) {
-        this.selectedContacts = selectedContacts;
+    public void setInitiallySelectedContacts(List<Contact> initiallySelectedContacts) {
+        this.initiallySelectedContacts = initiallySelectedContacts;
         if (filteredContactListViewModel != null) {
-            this.filteredContactListViewModel.setSelectedContacts(selectedContacts);
+            this.filteredContactListViewModel.setSelectedContacts(initiallySelectedContacts);
         }
     }
 
@@ -188,6 +188,13 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         this.selectedContactsObserver = observer;
     }
 
+    public void setEmptyViewText(@Nullable String text) {
+        if (emptyViewTextView != null) {
+            emptyViewTextView.setText(text);
+        } else {
+            emptyViewText = text;
+        }
+    }
 
     public void removeBottomPadding() {
         removeBottomPadding = true;
@@ -217,7 +224,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         private static final int DISPLAY_NAME_OR_PHOTO_CHANGE_MASK = 1;
         private static final int ESTABLISHED_CHANNEL_CHANGE_MASK = 2;
         private static final int SELECTED_CHANGE_MASK = 4;
-        private static final int ACTIVE_CHANGE_MASK = 4;
+        private static final int ACTIVE_CHANGE_MASK = 8;
         private static final int NEW_PUBLISHED_DETAILS_CHANGE_MASK = 16;
 
         FilteredContactListAdapter() {
@@ -309,7 +316,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         @NonNull
         @Override
         public ContactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new ContactViewHolder(inflater.inflate(R.layout.item_view_contact, parent, false));
+            return new ContactViewHolder(inflater.inflate(R.layout.item_view_contact_selectable, parent, false));
         }
 
         @Override
@@ -330,7 +337,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
 
         private void matchAndHighlight(String contactName, List<Pattern> patterns, TextView textView) {
             int i = 0;
-            String unAccented = App.unAccent(contactName);
+            String unAccented = StringUtils.unAccent(contactName);
             Spannable highlightedContactName = new SpannableString(contactName);
             for (Pattern pattern : patterns) {
                 if (i == highlightedSpans.length) {
@@ -421,13 +428,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
                     }
                 }
                 if ((changesMask & DISPLAY_NAME_OR_PHOTO_CHANGE_MASK) != 0 || (changesMask & ACTIVE_CHANGE_MASK) != 0) {
-                    holder.initialView.setKeycloakCertified(selectableContact.contact.keycloakManaged);
-                    holder.initialView.setInactive(!selectableContact.contact.active);
-                    if (selectableContact.contact.getCustomPhotoUrl() == null) {
-                        holder.initialView.setInitial(selectableContact.contact.bytesContactIdentity, App.getInitial(selectableContact.contact.getCustomDisplayName()));
-                    } else {
-                        holder.initialView.setPhotoUrl(selectableContact.contact.bytesContactIdentity, selectableContact.contact.getCustomPhotoUrl());
-                    }
+                    holder.initialView.setContact(selectableContact.contact);
                 }
 
                 if ((changesMask & ESTABLISHED_CHANNEL_CHANGE_MASK) != 0 || (changesMask & ACTIVE_CHANGE_MASK) != 0) {

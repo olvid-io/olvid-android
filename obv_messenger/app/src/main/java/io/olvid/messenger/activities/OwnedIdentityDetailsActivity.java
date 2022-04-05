@@ -62,7 +62,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 
-import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.identities.ObvUrlIdentity;
@@ -72,6 +71,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.MuteNotificationDialog;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -189,7 +189,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                 if (identityObserver.ownedIdentity.prefMuteNotificationsTimestamp == null) {
                     builder.setMessage(R.string.dialog_message_unmute_notifications);
                 } else {
-                    builder.setMessage(getString(R.string.dialog_message_unmute_notifications_muted_until, App.getLongNiceDateString(this, identityObserver.ownedIdentity.prefMuteNotificationsTimestamp)));
+                    builder.setMessage(getString(R.string.dialog_message_unmute_notifications_muted_until, StringUtils.getLongNiceDateString(this, identityObserver.ownedIdentity.prefMuteNotificationsTimestamp)));
                 }
                 builder.create().show();
             }
@@ -278,6 +278,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                 sb.append(new ObvUrlIdentity(ownedIdentity.bytesOwnedIdentity, ownedIdentity.displayName).getUrlRepresentation()).append("\n\n");
                 sb.append(getString(R.string.debug_label_capabilities)).append("\n");
                 sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_continuous_gathering, ownedIdentity.capabilityWebrtcContinuousIce)).append("\n");
+                sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_one_to_one_contacts, ownedIdentity.capabilityOneToOneContacts)).append("\n");
                 sb.append(getString(R.string.bullet)).append(" ").append(getString(R.string.debug_label_capability_groups_v2, ownedIdentity.capabilityGroupsV2)).append("\n");
 
                 TextView textView = new TextView(this);
@@ -384,13 +385,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
         keycloakManaged = ownedIdentity.keycloakManaged;
         invalidateOptionsMenu();
 
-        myIdInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-        myIdInitialView.setInactive(!ownedIdentity.active);
-        if (ownedIdentity.photoUrl == null) {
-            myIdInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-        } else {
-            myIdInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-        }
+        myIdInitialView.setOwnedIdentity(ownedIdentity);
         myIdNameTextView.setText(ownedIdentity.getCustomDisplayName());
 
         if (ownedIdentity.active) {
@@ -416,7 +411,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             if (jsons[0].getPhotoUrl() != null) {
                 publishedDetailsInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, jsons[0].getPhotoUrl());
             } else {
-                publishedDetailsInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(publishedFirstLine));
+                publishedDetailsInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, StringUtils.getInitial(publishedFirstLine));
             }
             {
                 TextView tv = makeTextView();
@@ -462,7 +457,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                 if (jsons[1].getPhotoUrl() != null) {
                     latestDetailsInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, jsons[1].getPhotoUrl());
                 } else {
-                    latestDetailsInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(latestFirstLine));
+                    latestDetailsInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, StringUtils.getInitial(latestFirstLine));
                 }
                 {
                     TextView tv = makeTextView();

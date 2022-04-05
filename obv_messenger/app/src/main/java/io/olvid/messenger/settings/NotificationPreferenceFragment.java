@@ -258,13 +258,11 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat imp
 
     @Override
     public void onLedColorSelected(int requestCode, String color) {
-        switch (requestCode) {
-            case MESSAGE_LED_COLOR_REQUEST_CODE: {
-                if (messageLedColorPreference != null) {
-                    SettingsActivity.setMessageLedColor(color);
-                    messageSettingsChanged = true;
-                    updateMessageLedColorImage();
-                }
+        if (requestCode == MESSAGE_LED_COLOR_REQUEST_CODE) {
+            if (messageLedColorPreference != null) {
+                SettingsActivity.setMessageLedColor(color);
+                messageSettingsChanged = true;
+                updateMessageLedColorImage();
             }
         }
     }

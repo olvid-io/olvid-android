@@ -234,12 +234,16 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
     private final ActivityResultLauncher<Intent> attachFileLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             (ActivityResult activityResult) -> {
-                if (activityResult == null || activityResult.getData() == null || activityResult.getResultCode() != Activity.RESULT_OK) {
+                if (activityResult == null || activityResult.getData() == null || activityResult.getResultCode() != Activity.RESULT_OK || discussionViewModel == null) {
                     return;
                 }
                 Uri dataUri = activityResult.getData().getData();
+                final Long discussionId = discussionViewModel.getDiscussionId();
+                if (discussionId == null) {
+                    return;
+                }
                 if (dataUri != null) {
-                    App.runThread(new AddFyleToDraftFromUriTask(dataUri, discussionViewModel.getDiscussionId()));
+                    App.runThread(new AddFyleToDraftFromUriTask(dataUri, discussionId));
                 } else {
                     ClipData clipData = activityResult.getData().getClipData();
                     if (clipData != null) {
@@ -254,7 +258,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                             App.toast(R.string.toast_message_android_bug_attach_duplicate_uri, Toast.LENGTH_LONG);
                         }
                         for (Uri uri : uris) {
-                            App.runThread(new AddFyleToDraftFromUriTask(uri, discussionViewModel.getDiscussionId()));
+                            App.runThread(new AddFyleToDraftFromUriTask(uri, discussionId));
                         }
                     }
                 }
@@ -262,13 +266,13 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
     private final ActivityResultLauncher<Intent> takePictureLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             (ActivityResult activityResult) -> {
-                if (activityResult == null ||activityResult.getResultCode() != Activity.RESULT_OK) {
+                if (activityResult == null || activityResult.getResultCode() != Activity.RESULT_OK || discussionViewModel == null || composeMessageViewModel == null) {
                     return;
                 }
                 final Uri photoUri = composeMessageViewModel.getPhotoOrVideoUri();
                 final File photoFile = composeMessageViewModel.getPhotoOrVideoFile();
-                final long discussionId = discussionViewModel.getDiscussionId();
-                if (photoUri != null && photoFile != null) {
+                final Long discussionId = discussionViewModel.getDiscussionId();
+                if (photoUri != null && photoFile != null && discussionId != null) {
                     App.runThread(() -> {
                         int cameraResolutionSetting = SettingsActivity.getCameraResolution();
                         if (cameraResolutionSetting != -1) {
@@ -281,7 +285,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
     private final ActivityResultLauncher<Intent> takeVideoLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             (ActivityResult activityResult) -> {
-                if (activityResult == null ||activityResult.getResultCode() != Activity.RESULT_OK) {
+                if (activityResult == null ||activityResult.getResultCode() != Activity.RESULT_OK || discussionViewModel == null || composeMessageViewModel == null) {
                     return;
                 }
                 final Uri videoUri = composeMessageViewModel.getPhotoOrVideoUri();
@@ -366,18 +370,11 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         }
 
         ownedIdentityInitialView = rootView.findViewById(R.id.owned_identity_initial_view);
-        AppSingleton.getCurrentIdentityLiveData().observe(this, (OwnedIdentity ownedIdentity) -> {
+        AppSingleton.getCurrentIdentityLiveData().observe(activity, (OwnedIdentity ownedIdentity) -> {
             if (ownedIdentity == null) {
                 return;
             }
-            ownedIdentityInitialView.setLocked(false);
-            ownedIdentityInitialView.setInactive(!ownedIdentity.active);
-            ownedIdentityInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-            if (ownedIdentity.photoUrl != null) {
-                ownedIdentityInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-            } else {
-                ownedIdentityInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-            }
+            ownedIdentityInitialView.setOwnedIdentity(ownedIdentity);
         });
         ownedIdentityInitialView.setOnClickListener(v -> {
             Discussion discussion = discussionViewModel.getDiscussion().getValue();
@@ -443,13 +440,13 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         newMessageAttachmentRecyclerView.setHideIfEmpty(true);
         newMessageAttachmentRecyclerView.addItemDecoration(new DraftAttachmentAdapter.AttachmentSpaceItemDecoration(activity));
 
-        composeMessageViewModel.getDraftMessageFyles().observe(this, newMessageAttachmentAdapter);
-        composeMessageViewModel.getDraftMessageFyles().observe(this, (List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses) -> {
+        composeMessageViewModel.getDraftMessageFyles().observe(activity, newMessageAttachmentAdapter);
+        composeMessageViewModel.getDraftMessageFyles().observe(activity, (List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses) -> {
             hasAttachments = fyleAndStatuses != null && fyleAndStatuses.size() > 0;
             updateComposeAreaLayout();
         });
 
-        composeMessageViewModel.getDraftMessage().observe(this, new Observer<Message>() {
+        composeMessageViewModel.getDraftMessage().observe(activity, new Observer<Message>() {
             private Message message = null;
 
             @Override
@@ -485,7 +482,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             }
         });
 
-        composeMessageViewModel.getDraftMessageReply().observe(this, draftReplyMessage -> {
+        composeMessageViewModel.getDraftMessageReply().observe(activity, draftReplyMessage -> {
             if (draftReplyMessage == null) {
                 composeMessageReplyGroup.setVisibility(View.GONE);
                 composeMessageReplyMessageId = -1;
@@ -512,7 +509,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
                 if (draftReplyMessage.totalAttachmentCount > 0) {
                     composeMessageReplyAttachmentCount.setVisibility(View.VISIBLE);
-                    composeMessageReplyAttachmentCount.setText(getResources().getQuantityString(R.plurals.text_reply_attachment_count, draftReplyMessage.totalAttachmentCount, draftReplyMessage.totalAttachmentCount));
+                    composeMessageReplyAttachmentCount.setText(activity.getResources().getQuantityString(R.plurals.text_reply_attachment_count, draftReplyMessage.totalAttachmentCount, draftReplyMessage.totalAttachmentCount));
                 } else {
                     composeMessageReplyAttachmentCount.setVisibility(View.GONE);
                 }
@@ -526,11 +523,11 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         });
 
 
-        composeMessageViewModel.getEphemeralSettingsChanged().observe(this, (Boolean changed) -> hideOrShowEphemeralMarker(changed != null && changed));
+        composeMessageViewModel.getEphemeralSettingsChanged().observe(activity, (Boolean changed) -> hideOrShowEphemeralMarker(changed != null && changed));
 
-        composeMessageViewModel.getRecordingLiveData().observe(this, recording -> this.recording = recording);
+        composeMessageViewModel.getRecordingLiveData().observe(activity, recording -> this.recording = recording);
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
         updateIconsToShow(metrics.widthPixels);
 
         return rootView;
@@ -1067,7 +1064,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     void updateIconsToShow(int widthPixels) {
         previousWidth = widthPixels;
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
         float widthDp = (float) widthPixels / metrics.density;
         iconSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36, metrics);
         fourDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, metrics);
@@ -1093,7 +1090,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             iconsShown.addAll(icons);
         } else {
             neverOverflow = false;
-            int iconsToShow = Math.min((int) (widthDp - 272) / 36, icons.size());
+            int iconsToShow = Math.max(0, Math.min((int) (widthDp - 272) / 36, icons.size()));
             iconsShown.addAll(icons.subList(0, iconsToShow));
             iconsOverflow.addAll(icons.subList(iconsToShow, icons.size()));
         }

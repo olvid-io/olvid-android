@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.RestrictionsManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
@@ -43,6 +44,7 @@ import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ObvLinkActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.settings.SettingsActivity;
 
 
 public class OnboardingActivity extends AppCompatActivity {
@@ -51,6 +53,21 @@ public class OnboardingActivity extends AppCompatActivity {
 
     public static final String ALREADY_CREATED_BUNDLE_EXTRA = "already_created";
 
+    @Override
+    protected void attachBaseContext(Context baseContext) {
+        final Context newContext;
+        float customFontScale = SettingsActivity.getFontScale();
+        float fontScale = baseContext.getResources().getConfiguration().fontScale;
+        if (customFontScale != 1.0f) {
+            Configuration configuration = new Configuration();
+            configuration.fontScale = fontScale * customFontScale;
+            newContext = baseContext.createConfigurationContext(configuration);
+        } else {
+            newContext = baseContext;
+        }
+
+        super.attachBaseContext(newContext);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

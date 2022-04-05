@@ -171,7 +171,7 @@ public class MultiCallStartDialogFragment extends DialogFragment {
                             initialContacts.add(contact);
                         }
                     }
-                    filteredContactListFragment.setSelectedContacts(initialContacts);
+                    filteredContactListFragment.setInitiallySelectedContacts(initialContacts);
                     initialized = true;
                 }
             }

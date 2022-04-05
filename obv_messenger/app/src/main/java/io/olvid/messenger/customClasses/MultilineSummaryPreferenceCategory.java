@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceViewHolder;
 
@@ -47,7 +48,7 @@ public class MultilineSummaryPreferenceCategory extends PreferenceCategory {
     }
 
     @Override
-    public void onBindViewHolder(PreferenceViewHolder holder) {
+    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         try {
             TextView summary = (TextView) holder.findViewById(android.R.id.summary);

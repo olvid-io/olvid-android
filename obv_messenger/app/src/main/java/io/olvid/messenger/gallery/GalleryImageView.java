@@ -159,7 +159,7 @@ public class GalleryImageView extends androidx.appcompat.widget.AppCompatImageVi
                     Math.max(Math.min(bitmapCenterPoint.y, bitmapHeight-minBitmapCenterY), minBitmapCenterY)
             );
 
-            draggable = (bitmapScale * bitmapWidth > getWidth()) || (bitmapScale*bitmapHeight > getHeight());
+            draggable = (bitmapScale * bitmapWidth > getWidth()+1) || (bitmapScale*bitmapHeight > getHeight()+1);
         }
 
         matrix.reset();

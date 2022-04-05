@@ -86,6 +86,11 @@ public class CancelAttachmentUploadOperation extends Operation {
                     return;
                 }
 
+                if (outboxAttachment.isAcknowledged()) {
+                    finished = true;
+                    return;
+                }
+
                 if (cancelWasRequested()) {
                     return;
                 }

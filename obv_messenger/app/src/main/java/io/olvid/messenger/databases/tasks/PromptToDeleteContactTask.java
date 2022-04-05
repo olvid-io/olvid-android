@@ -42,11 +42,11 @@ public class PromptToDeleteContactTask implements Runnable {
     private final byte[] bytesContactIdentity;
     private final Runnable runOnDelete;
 
-    public PromptToDeleteContactTask(Context context, byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, Runnable runOnDelete) {
+    public PromptToDeleteContactTask(Context context, byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, Runnable runOnDeleteButNotOnDowngrade) {
         this.context = context;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.bytesContactIdentity = bytesContactIdentity;
-        this.runOnDelete = runOnDelete;
+        this.runOnDelete = runOnDeleteButNotOnDowngrade;
     }
 
     @Override
@@ -54,35 +54,52 @@ public class PromptToDeleteContactTask implements Runnable {
         AppDatabase db = AppDatabase.getInstance();
         final Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
         if (contact != null) {
-            if (db.contactGroupJoinDao().countContactGroups(bytesOwnedIdentity, bytesContactIdentity) == 0) {
+            if (contact.oneToOne && contact.capabilityOneToOneContacts) {
                 final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
-                        .setTitle(R.string.dialog_title_delete_contact)
+                        .setTitle(R.string.dialog_title_remove_contact)
+                        .setMessage(context.getString(R.string.dialog_message_remove_contact, contact.getCustomDisplayName()))
                         .setPositiveButton(R.string.button_label_ok, (DialogInterface dialog, int which) -> {
                             try {
-                                AppSingleton.getEngine().deleteContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                                App.toast(R.string.toast_message_contact_deleted, Toast.LENGTH_SHORT);
-                                if (runOnDelete != null) {
-                                    new Handler(Looper.getMainLooper()).post(runOnDelete);
-                                }
+                                AppSingleton.getEngine().downgradeOneToOneContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                App.toast(R.string.toast_message_contact_removed, Toast.LENGTH_SHORT);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         })
                         .setNegativeButton(R.string.button_label_cancel, null);
 
-                List<byte[]> bytesGroupOwnerAndUidList = AppDatabase.getInstance().groupDao().getBytesGroupOwnerAndUidOfJoinedGroupWithPendingMember(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                if (bytesGroupOwnerAndUidList.size() == 0) {
-                    builder.setMessage(context.getString(R.string.dialog_message_delete_contact, contact.getCustomDisplayName()));
-                } else {
-                    builder.setMessage(context.getString(R.string.dialog_message_delete_contact_with_pending_groups, contact.getCustomDisplayName(), bytesGroupOwnerAndUidList.size()));
-                }
                 new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
             } else {
-                final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
-                        .setTitle(R.string.dialog_title_delete_contact_impossible)
-                        .setMessage(context.getString(R.string.dialog_message_delete_contact_impossible, contact.getCustomDisplayName()))
-                        .setPositiveButton(R.string.button_label_ok, null);
-                new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
+                if (db.contactGroupJoinDao().countContactGroups(bytesOwnedIdentity, bytesContactIdentity) == 0) {
+                    final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                            .setTitle(R.string.dialog_title_delete_user)
+                            .setPositiveButton(R.string.button_label_ok, (DialogInterface dialog, int which) -> {
+                                try {
+                                    AppSingleton.getEngine().deleteContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                    App.toast(R.string.toast_message_user_deleted, Toast.LENGTH_SHORT);
+                                    if (runOnDelete != null) {
+                                        runOnDelete.run();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            })
+                            .setNegativeButton(R.string.button_label_cancel, null);
+
+                    List<byte[]> bytesGroupOwnerAndUidList = AppDatabase.getInstance().groupDao().getBytesGroupOwnerAndUidOfJoinedGroupWithPendingMember(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                    if (bytesGroupOwnerAndUidList.size() == 0) {
+                        builder.setMessage(context.getString(R.string.dialog_message_delete_user, contact.getCustomDisplayName()));
+                    } else {
+                        builder.setMessage(context.getString(R.string.dialog_message_delete_user_with_pending_groups, contact.getCustomDisplayName(), bytesGroupOwnerAndUidList.size()));
+                    }
+                    new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
+                } else {
+                    final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                            .setTitle(R.string.dialog_title_delete_user_impossible)
+                            .setMessage(context.getString(R.string.dialog_message_delete_user_impossible, contact.getCustomDisplayName()))
+                            .setPositiveButton(R.string.button_label_ok, null);
+                    new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
+                }
             }
         }
     }

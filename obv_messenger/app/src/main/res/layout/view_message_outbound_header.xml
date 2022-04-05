@@ -21,7 +21,7 @@
         android:paddingBottom="4dp"
         android:theme="@style/SubtleGreyRipple"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/message_content_text_view"
+        app:layout_constraintBottom_toTopOf="@+id/message_forwarded_badge"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -84,6 +84,27 @@
             tools:text="7 attachments"
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/message_forwarded_badge"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/label_forwarded"
+        android:textStyle="italic"
+        android:textSize="12sp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:textColor="@color/greyTint"
+        android:maxLines="1"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/message_content_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_min="wrap"
+        app:drawableStartCompat="@drawable/ic_forwarded"
+        android:drawablePadding="4dp"
+        android:gravity="center_vertical"/>
 
     <TextView
         android:id="@+id/message_content_text_view"
@@ -206,7 +227,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/message_timestamp_bottom_text_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/message_timestamp_bottom_text_view"
-        tools:srcCompat="@drawable/ic_double_ok" />
+        tools:srcCompat="@drawable/ic_message_status_delivered_and_read" />
 
 
     <ImageView

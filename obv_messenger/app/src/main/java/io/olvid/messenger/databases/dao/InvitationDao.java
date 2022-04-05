@@ -28,6 +28,7 @@ import androidx.room.Query;
 import java.util.List;
 import java.util.UUID;
 
+import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.databases.entity.Invitation;
 
 import static androidx.room.OnConflictStrategy.REPLACE;
@@ -40,10 +41,26 @@ public interface InvitationDao {
     @Delete
     void delete(Invitation... invitations);
 
-    @Query("SELECT * FROM " + Invitation.TABLE_NAME + " WHERE " + Invitation.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ORDER BY " + Invitation.INVITATION_TIMESTAMP + " DESC")
-    LiveData<List<Invitation>> getAll(byte[] bytesOwnedIdentity);
+    @Query("SELECT * FROM " + Invitation.TABLE_NAME)
+    List<Invitation> getAll();
 
-    @Query("SELECT * FROM " + Invitation.TABLE_NAME + " WHERE " + Invitation.DIALOG_UUID + " = :dialogUuid")
+    @Query("SELECT * FROM " + Invitation.TABLE_NAME +
+            " WHERE " + Invitation.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " ORDER BY " + Invitation.INVITATION_TIMESTAMP + " DESC")
+    LiveData<List<Invitation>> getAllForOwnedIdentity(byte[] bytesOwnedIdentity);
+
+    @Query("SELECT * FROM " + Invitation.TABLE_NAME +
+            " WHERE " + Invitation.DIALOG_UUID + " = :dialogUuid")
     Invitation getByDialogUuid(UUID dialogUuid);
 
+    @Query("SELECT * FROM " + Invitation.TABLE_NAME +
+            " WHERE " + Invitation.CATEGORY_ID + " = " + ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY)
+    List<Invitation> getAllGroupInvites();
+
+    @Query("SELECT * FROM " + Invitation.TABLE_NAME +
+            " WHERE " + Invitation.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Invitation.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
+            " AND " + Invitation.CATEGORY_ID + " in ( " + ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY + ", " + ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ") " +
+            " LIMIT 1")
+    LiveData<Invitation> getContactOneToOneInvitation(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
 }

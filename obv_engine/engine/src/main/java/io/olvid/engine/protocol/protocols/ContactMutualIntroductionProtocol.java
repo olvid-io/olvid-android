@@ -25,9 +25,7 @@ import java.util.UUID;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
-import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
-import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.DialogType;
@@ -36,7 +34,7 @@ import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
-import io.olvid.engine.protocol.databases.WaitingForTrustLevelIncreaseProtocolInstance;
+import io.olvid.engine.protocol.databases.WaitingForOneToOneContactProtocolInstance;
 import io.olvid.engine.protocol.datatypes.CoreProtocolMessage;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocol;
@@ -62,7 +60,6 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
 
 
     private static final int ACCEPT_TYPE_ALREADY_TRUSTED = 0;
-    private static final int ACCEPT_TYPE_AUTO = 1;
     private static final int ACCEPT_TYPE_MANUAL = 2;
 
     // region states
@@ -104,6 +101,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
 
 
     public static class ContactsIntroducedState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public ContactsIntroducedState(Encoded encodedState) throws Exception {
             super(CONTACTS_INTRODUCED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -127,6 +125,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final Identity mediatorIdentity;
         private final UUID dialogUuid;
 
+        @SuppressWarnings("unused")
         public InvitationReceivedState(Encoded encodedState) throws Exception {
             super(INVITATION_RECEIVED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -166,6 +165,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final UUID dialogUuid;
         private final int acceptType;
 
+        @SuppressWarnings("unused")
         public InvitationAcceptedState(Encoded encodedState) throws Exception {
             super(INVITATION_ACCEPTED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -202,6 +202,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
 
 
     public static class InvitationRejectedState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public InvitationRejectedState(Encoded encodedState) throws Exception {
             super(INVITATION_REJECTED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -226,6 +227,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final UUID dialogUuid;
         private final int acceptType;
 
+        @SuppressWarnings("unused")
         public WaitingForAckState(Encoded encodedState) throws Exception {
             super(WAITING_FOR_ACK_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -262,6 +264,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
 
 
     public static class MutualTrustEstablishedState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public MutualTrustEstablishedState(Encoded encodedState) throws Exception {
             super(MUTUAL_TRUST_ESTABLISHED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -367,6 +370,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             this.contactSerializedDetails = contactSerializedDetails;
         }
 
+        @SuppressWarnings("unused")
         public MediatorInvitationMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -424,6 +428,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             dialogUuid = null;
         }
 
+        @SuppressWarnings("unused")
         public DialogAcceptMediatorInviteMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getEncodedResponse() == null) {
@@ -460,6 +465,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         }
 
 
+        @SuppressWarnings("unused")
         public PropagateConfirmationMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 4) {
@@ -497,6 +503,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             this.signature = signature;
         }
 
+        @SuppressWarnings("unused")
         public NotifyContactOfAcceptedInvitationMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -529,6 +536,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             this.contactDeviceUids = contactDeviceUids;
         }
 
+        @SuppressWarnings("unused")
         public PropagateNotificationMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 1) {
@@ -557,6 +565,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             super(coreProtocolMessage);
         }
 
+        @SuppressWarnings("unused")
         public AckMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 0) {
@@ -607,6 +616,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
     }
 
     public static class IntroduceContactsStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final InitialMessage receivedMessage;
 
@@ -619,6 +629,16 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         @Override
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            {
+                // check that both contacts are active and oneToOne
+                if (!protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityA)
+                    || !protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityB)
+                    || !protocolManagerSession.identityDelegate.isIdentityAnActiveContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityA)
+                    || !protocolManagerSession.identityDelegate.isIdentityAnActiveContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityA)) {
+                    return new ContactsIntroducedState();
+                }
+            }
 
             {
                 // post an invitation message to contact A
@@ -642,6 +662,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
 
 
     public static class CheckTrustLevelsAndShowDialogStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final MediatorInvitationMessage receivedMessage;
 
@@ -657,9 +678,14 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
 
             Identity mediatorIdentity = receivedMessage.getReceptionChannelInfo().getRemoteIdentity();
 
-            // check presented contact trust level
-            boolean contactAlreadyTrusted = protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity);
-            if (contactAlreadyTrusted) {
+            // check that the mediator is a one to one contact --> reject if not
+            if (!protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), mediatorIdentity)) {
+                return new InvitationRejectedState();
+            }
+
+            // check if presented contact is already oneToOne
+            boolean contactAlreadyOneToOne = protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity);
+            if (contactAlreadyOneToOne) {
                 // auto-accept
                 UUID dialogUuid = UUID.randomUUID();
 
@@ -691,14 +717,13 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                 }
 
                 // also insert a WaitingForTrustLevelIncrease to re-evaluate if needed.
-                WaitingForTrustLevelIncreaseProtocolInstance.create(
+                WaitingForOneToOneContactProtocolInstance.create(
                         protocolManagerSession,
                         getProtocolInstanceUid(),
                         getOwnedIdentity(),
                         receivedMessage.contactIdentity,
                         getProtocolId(),
-                        TRUST_LEVEL_INCREASED_MESSAGE_ID,
-                        new TrustLevel(0, 0));
+                        TRUST_LEVEL_INCREASED_MESSAGE_ID);
 
                 return new InvitationReceivedState(receivedMessage.contactIdentity, receivedMessage.contactSerializedDetails, mediatorIdentity, dialogUuid);
             }
@@ -720,8 +745,8 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            // check presented contact trust level
-            boolean contactAlreadyTrusted = protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity);
+            // check if presented contact is already oneToOne
+            boolean contactAlreadyTrusted = protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity);
             if (contactAlreadyTrusted) {
                 // auto-accept
                 {
@@ -760,7 +785,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                 {
                     // also insert a WaitingForTrustLevelIncrease to re-evaluate if needed (and delete the previous one)
                     // one of the 2 creates will fail (duplicate primary key) but this is not a problem
-                    WaitingForTrustLevelIncreaseProtocolInstance instance = WaitingForTrustLevelIncreaseProtocolInstance.get(
+                    WaitingForOneToOneContactProtocolInstance instance = WaitingForOneToOneContactProtocolInstance.get(
                             protocolManagerSession,
                             getProtocolInstanceUid(),
                             getOwnedIdentity(),
@@ -768,14 +793,13 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                     if (instance != null) {
                         instance.delete();
                     }
-                    WaitingForTrustLevelIncreaseProtocolInstance.create(
+                    WaitingForOneToOneContactProtocolInstance.create(
                             protocolManagerSession,
                             getProtocolInstanceUid(),
                             getOwnedIdentity(),
                             startState.contactIdentity,
                             getProtocolId(),
-                            TRUST_LEVEL_INCREASED_MESSAGE_ID,
-                            new TrustLevel(0, 0));
+                            TRUST_LEVEL_INCREASED_MESSAGE_ID);
                 }
 
                 return startState;
@@ -800,13 +824,6 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
 
             if (!startState.dialogUuid.equals(receivedMessage.dialogUuid)) {
                 Logger.e("ObvDialog uuid mismatch in DialogAcceptMediatorInviteMessage.");
-                return null;
-            }
-
-            // Check that the mediator trust level matches the range where user confirmation is enough
-            TrustLevel mediatorTrustLevel = protocolManagerSession.identityDelegate.getContactIdentityTrustLevel(protocolManagerSession.session, getOwnedIdentity(), startState.mediatorIdentity);
-            if (mediatorTrustLevel.compareTo(Constants.USER_CONFIRMATION_TRUST_LEVEL_THRESHOLD) < 0) {
-                Logger.e("Received a DialogAcceptMediatorInviteMessage for a invitation by a mediator with a TrustLevel too low.");
                 return null;
             }
 
@@ -927,10 +944,10 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             }
 
             // only create the contact if it does not already exist
-            if (!protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
-                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity));
+            if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
+                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity), true);
             } else {
-                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity));
+                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity), true);
             }
             for (UID contactDeviceUid: receivedMessage.contactDeviceUids) {
                 protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid);
@@ -974,10 +991,10 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
             // only create the contact if it does not already exist
-            if (!protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
-                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity));
+            if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
+                protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity), true);
             } else {
-                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity));
+                protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity), true);
             }
             for (UID contactDeviceUid: receivedMessage.contactDeviceUids) {
                 protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid);
@@ -1009,12 +1026,6 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                     case ACCEPT_TYPE_MANUAL: {
                         // only show the dialog if the dialogUuid is not all-0
                         CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createMutualTrustConfirmedDialog(startState.contactSerializedDetails, startState.contactIdentity), startState.dialogUuid));
-                        ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                        break;
-                    }
-                    case ACCEPT_TYPE_AUTO: {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createAutoConfirmedContactIntroductionDialog(startState.contactSerializedDetails, startState.contactIdentity, startState.mediatorIdentity), startState.dialogUuid));
                         ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         break;

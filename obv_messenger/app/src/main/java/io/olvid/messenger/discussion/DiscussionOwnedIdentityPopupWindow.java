@@ -92,9 +92,7 @@ public class DiscussionOwnedIdentityPopupWindow {
         final ImageView currentIdentityMutedImageView = popupView.findViewById(R.id.current_identity_muted_marker_image_view);
         this.currentIdentityObserver = (OwnedIdentity ownedIdentity) -> {
             if (ownedIdentity == null) {
-                currentIdentityInitialView.setKeycloakCertified(false);
-                currentIdentityInitialView.setInactive(false);
-                currentIdentityInitialView.setInitial(new byte[0], " ");
+                currentIdentityInitialView.setUnknown();
                 currentIdentityMutedImageView.setVisibility(View.GONE);
                 return;
             }
@@ -125,13 +123,7 @@ public class DiscussionOwnedIdentityPopupWindow {
                     currentNameSecondLineTextView.setText(null);
                 }
             }
-            currentIdentityInitialView.setInactive(!ownedIdentity.active);
-            currentIdentityInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-            if (ownedIdentity.photoUrl != null) {
-                currentIdentityInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-            } else {
-                currentIdentityInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-            }
+            currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
             if (ownedIdentity.shouldMuteNotifications()) {
                 currentIdentityMutedImageView.setVisibility(View.VISIBLE);
             } else {
@@ -287,13 +279,7 @@ public class DiscussionOwnedIdentityPopupWindow {
             holder.bytesOwnedIdentity = ownedIdentityAndDiscussionId.ownedIdentity.bytesOwnedIdentity;
             holder.discussionId = ownedIdentityAndDiscussionId.discussionId;
 
-            holder.initialView.setInactive(!ownedIdentityAndDiscussionId.ownedIdentity.active);
-            holder.initialView.setKeycloakCertified(ownedIdentityAndDiscussionId.ownedIdentity.keycloakManaged);
-            if (ownedIdentityAndDiscussionId.ownedIdentity.photoUrl == null) {
-                holder.initialView.setInitial(ownedIdentityAndDiscussionId.ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentityAndDiscussionId.ownedIdentity.getCustomDisplayName()));
-            } else {
-                holder.initialView.setPhotoUrl(ownedIdentityAndDiscussionId.ownedIdentity.bytesOwnedIdentity, ownedIdentityAndDiscussionId.ownedIdentity.photoUrl);
-            }
+            holder.initialView.setOwnedIdentity(ownedIdentityAndDiscussionId.ownedIdentity);
 
             if (ownedIdentityAndDiscussionId.ownedIdentity.shouldMuteNotifications()) {
                 holder.notificationMutedImageView.setVisibility(View.VISIBLE);

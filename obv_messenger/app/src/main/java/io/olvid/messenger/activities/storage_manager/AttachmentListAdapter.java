@@ -89,7 +89,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
     private final int previewPixelSize;
     private final int selectedColor;
     private final int selectableBackgroundResourceId;
-    private List<FyleMessageJoinWithStatusDao.FyleAndOrigin> fyleAndOrigins;
+    List<FyleMessageJoinWithStatusDao.FyleAndOrigin> fyleAndOrigins;
 
     private static final int TYPE_IMAGE = 0;
     private static final int TYPE_VIDEO = 1;

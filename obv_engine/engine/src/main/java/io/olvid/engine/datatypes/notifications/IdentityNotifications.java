@@ -32,6 +32,8 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_NEW_CONTACT_IDENTITY_OWNED_IDENTITY_KEY = "owned_identity";
     public static final String NOTIFICATION_NEW_CONTACT_IDENTITY_KEYCLOAK_MANAGED_KEY = "keycloak_managed"; // boolean
     public static final String NOTIFICATION_NEW_CONTACT_IDENTITY_ACTIVE_KEY = "active"; // boolean
+    public static final String NOTIFICATION_NEW_CONTACT_IDENTITY_ONE_TO_ONE_KEY = "one_to_one"; // boolean
+    public static final String NOTIFICATION_NEW_CONTACT_IDENTITY_TRUST_LEVEL_KEY = "trust_level"; // int
 
     public static final String NOTIFICATION_CONTACT_IDENTITY_DELETED = "identity_manager_notification_contact_identity_deleted";
     public static final String NOTIFICATION_CONTACT_IDENTITY_DELETED_CONTACT_IDENTITY_KEY = "contact_identity";
@@ -152,4 +154,9 @@ public abstract class IdentityNotifications {
 
     public static final String NOTIFICATION_OWN_CAPABILITIES_UPDATED = "identity_manager_notification_own_capabilities_updated";
     public static final String NOTIFICATION_OWN_CAPABILITIES_UPDATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+
+    public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED = "identity_manager_notification_contact_one_to_one_changed";
+    public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_CONTACT_IDENTITY_KEY = "contact_identity"; // Identity
+    public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY = "one_to_one"; // boolean
 }

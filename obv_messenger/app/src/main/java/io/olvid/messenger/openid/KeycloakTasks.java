@@ -523,7 +523,7 @@ public class KeycloakTasks {
 
     private static String getJkws(@Nullable Uri jwksUri) {
         if (jwksUri != null) {
-            Logger.d("Fetching JKWS at: " + jwksUri.toString());
+            Logger.d("Fetching JKWS at: " + jwksUri);
             HttpURLConnection connection = null;
             try {
                 connection = new NoExceptionConnectionBuilder().openConnection(jwksUri);

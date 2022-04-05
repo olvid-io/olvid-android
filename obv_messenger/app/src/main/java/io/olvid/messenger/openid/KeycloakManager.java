@@ -114,6 +114,7 @@ public class KeycloakManager {
             BytesKey identityBytesKey = new BytesKey(bytesOwnedIdentity);
             ownedIdentityStates.remove(identityBytesKey);
             currentlySyncingOwnedIdentities.remove(identityBytesKey);
+            AndroidNotificationManager.clearKeycloakAuthenticationRequiredNotification(bytesOwnedIdentity);
         });
     }
 

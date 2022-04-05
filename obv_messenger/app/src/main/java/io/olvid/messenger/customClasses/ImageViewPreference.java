@@ -29,6 +29,7 @@ import android.widget.ImageView;
 
 import java.io.IOException;
 
+import androidx.annotation.NonNull;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
@@ -66,7 +67,7 @@ public class ImageViewPreference extends Preference {
     }
 
     @Override
-    public void onBindViewHolder(PreferenceViewHolder holder) {
+    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         widgetImageView = (ImageView) holder.findViewById(R.id.imageView);
         redraw();

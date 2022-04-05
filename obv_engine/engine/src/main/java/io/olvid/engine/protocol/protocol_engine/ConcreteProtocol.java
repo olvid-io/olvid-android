@@ -45,7 +45,8 @@ import io.olvid.engine.protocol.protocols.GroupManagementProtocol;
 import io.olvid.engine.protocol.protocols.IdentityDetailsPublicationProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakBindingAndUnbindingProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol;
-import io.olvid.engine.protocol.protocols.ObliviousChannelManagementProtocol;
+import io.olvid.engine.protocol.protocols.ContactManagementProtocol;
+import io.olvid.engine.protocol.protocols.OneToOneContactInvitationProtocol;
 import io.olvid.engine.protocol.protocols.OwnedIdentityDeletionWithContactNotificationProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithMutualScanProtocol;
@@ -65,13 +66,14 @@ public abstract class ConcreteProtocol {
     public static final int DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID = 7;
     public static final int GROUP_INVITATION_PROTOCOL_ID = 8;
     public static final int GROUP_MANAGEMENT_PROTOCOL_ID = 9;
-    public static final int OBLIVIOUS_CHANNEL_MANAGEMENT_PROTOCOL_ID = 10;
+    public static final int CONTACT_MANAGEMENT_PROTOCOL_ID = 10;
     public static final int TRUST_ESTABLISHMENT_WITH_SAS_PROTOCOL_ID = 11;
     public static final int TRUST_ESTABLISHMENT_WITH_MUTUAL_SCAN_PROTOCOL_ID = 12;
     public static final int FULL_RATCHET_PROTOCOL_ID = 13;
     public static final int DOWNLOAD_GROUP_PHOTO_CHILD_PROTOCOL_ID = 14;
     public static final int KEYCLOAK_CONTACT_ADDITION_PROTOCOL_ID = 15;
     public static final int DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID = 16;
+    public static final int ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID = 17;
 
     // internal protocols, Android only
     public static final int KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID = 1000;
@@ -174,8 +176,8 @@ public abstract class ConcreteProtocol {
                 return new GroupInvitationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case GROUP_MANAGEMENT_PROTOCOL_ID:
                 return new GroupManagementProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
-            case OBLIVIOUS_CHANNEL_MANAGEMENT_PROTOCOL_ID:
-                return new ObliviousChannelManagementProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case CONTACT_MANAGEMENT_PROTOCOL_ID:
+                return new ContactManagementProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case TRUST_ESTABLISHMENT_WITH_SAS_PROTOCOL_ID:
                 return new TrustEstablishmentWithSasProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case TRUST_ESTABLISHMENT_WITH_MUTUAL_SCAN_PROTOCOL_ID:
@@ -192,6 +194,8 @@ public abstract class ConcreteProtocol {
                 return new KeycloakBindingAndUnbindingProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID:
                 return new OwnedIdentityDeletionWithContactNotificationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID:
+                return new OneToOneContactInvitationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             default:
                 Logger.w("Unknown protocol id: " + protocolId);
                 return null;
@@ -199,17 +203,31 @@ public abstract class ConcreteProtocol {
 
     }
 
+    public abstract int getProtocolId();
+
     protected abstract Class<?> getStateClass(int stateId);
     protected final ConcreteProtocolState getProtocolState(Class<?> currentState, Encoded encodedCurrentState) throws Exception {
         Constructor<?> constructor = currentState.getConstructor(Encoded.class);
         return (ConcreteProtocolState) constructor.newInstance(encodedCurrentState);
     }
 
+    public abstract int[] getFinalStateIds();
+    public final boolean hasReachedFinalState() {
+        for (int finalStateId: getFinalStateIds()) {
+            if (currentState.id == finalStateId) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     protected abstract Class<?> getMessageClass(int protocolMessageId);
     public final ConcreteProtocolMessage getConcreteProtocolMessage(ReceivedMessage receivedMessage) {
         try {
             Class<?> messageClass = getMessageClass(receivedMessage.getProtocolMessageId());
+            if (messageClass == null) {
+                return null;
+            }
             Constructor<?> constructor = messageClass.getConstructor(ReceivedMessage.class);
             return (ConcreteProtocolMessage) constructor.newInstance(receivedMessage);
         } catch (Exception e) {
@@ -239,18 +257,4 @@ public abstract class ConcreteProtocol {
             return null;
         }
     }
-
-
-    public abstract int[] getFinalStateIds();
-    public final boolean hasReachedFinalState() {
-        for (int finalStateId: getFinalStateIds()) {
-            if (currentState.id == finalStateId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public abstract int getProtocolId();
-
 }

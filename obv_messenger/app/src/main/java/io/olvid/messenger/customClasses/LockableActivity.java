@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Window;
@@ -46,6 +47,22 @@ public abstract class LockableActivity extends AppCompatActivity {
     public static final String CUSTOM_LOCK_SCREEN_MESSAGE_RESOURCE_ID_INTENT_EXTRA = "custom_lock_screen_message_resource_id";
 
     @Override
+    protected void attachBaseContext(Context baseContext) {
+        final Context newContext;
+        float customFontScale = SettingsActivity.getFontScale();
+        float fontScale = baseContext.getResources().getConfiguration().fontScale;
+        if (customFontScale != 1.0f) {
+            Configuration configuration = new Configuration();
+            configuration.fontScale = fontScale * customFontScale;
+            newContext = baseContext.createConfigurationContext(configuration);
+        } else {
+            newContext = baseContext;
+        }
+
+        super.attachBaseContext(newContext);
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -61,7 +78,7 @@ public abstract class LockableActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter(UnifiedForegroundService.LockSubService.APP_LOCKED_BROADCAST_ACTION);
         intentFilter.addAction(App.NEW_APP_DIALOG_BROADCAST_ACTION);
         intentFilter.addAction(App.CURRENT_HIDDEN_PROFILE_CLOSED_BROADCAST_ACTION);
-        intentFilter.addAction(SettingsActivity.FONT_SCALE_CHANGED_BROADCAST_ACTION);
+        intentFilter.addAction(SettingsActivity.ACTIVITY_RECREATE_REQUIRED_ACTION);
         LocalBroadcastManager.getInstance(this).registerReceiver(eventBroadcastReceiver, intentFilter);
     }
 
@@ -150,7 +167,7 @@ public abstract class LockableActivity extends AppCompatActivity {
                     }
                     break;
                 }
-                case SettingsActivity.FONT_SCALE_CHANGED_BROADCAST_ACTION: {
+                case SettingsActivity.ACTIVITY_RECREATE_REQUIRED_ACTION: {
                     recreate();
                     break;
                 }

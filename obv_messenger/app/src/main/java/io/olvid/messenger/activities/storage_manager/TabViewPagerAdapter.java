@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
@@ -32,6 +33,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.olvid.messenger.R;
@@ -39,8 +41,6 @@ import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
-import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
-import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 
 class TabViewPagerAdapter extends RecyclerView.Adapter<TabViewPagerAdapter.TabViewPagerViewHolder> {
@@ -48,10 +48,30 @@ class TabViewPagerAdapter extends RecyclerView.Adapter<TabViewPagerAdapter.TabVi
     @NonNull private final AudioAttachmentServiceBinding audioAttachmentServiceBinding;
     @NonNull private final StorageManagerViewModel viewModel;
 
+    @Nullable private AttachmentListAdapter adapter0 = null;
+    @Nullable private AttachmentListAdapter adapter1 = null;
+    @Nullable private AttachmentListAdapter adapter2 = null;
+    @Nullable private AttachmentListAdapter adapter3 = null;
+
     public TabViewPagerAdapter(@NonNull FragmentActivity activity, @NonNull AudioAttachmentServiceBinding audioAttachmentServiceBinding) {
         this.activity = activity;
         this.audioAttachmentServiceBinding = audioAttachmentServiceBinding;
         this.viewModel = new ViewModelProvider(activity).get(StorageManagerViewModel.class);
+    }
+
+    @Nullable AttachmentListAdapter getAdapter(int tab) {
+        switch (tab) {
+            case 0:
+                return adapter0;
+            case 1:
+                return adapter1;
+            case 2:
+                return adapter2;
+            case 3:
+                return adapter3;
+            default:
+                return null;
+        }
     }
 
     @NonNull
@@ -73,6 +93,7 @@ class TabViewPagerAdapter extends RecyclerView.Adapter<TabViewPagerAdapter.TabVi
         final LiveData<List<FyleMessageJoinWithStatusDao.FyleAndOrigin>> source;
         switch (position) {
             case 0:
+                adapter0 = adapter;
                 source = Transformations.switchMap(viewModel.getOwnedIdentityAndSortOrderLiveData(), (Pair<OwnedIdentity, StorageManagerViewModel.SortOrder> ownedIdentityAndSortOrder) -> {
                     if (ownedIdentityAndSortOrder == null || ownedIdentityAndSortOrder.first == null || ownedIdentityAndSortOrder.second == null) {
                         return null;
@@ -102,6 +123,7 @@ class TabViewPagerAdapter extends RecyclerView.Adapter<TabViewPagerAdapter.TabVi
                 });
                 break;
             case 1:
+                adapter1 = adapter;
                 source = Transformations.switchMap(viewModel.getOwnedIdentityAndSortOrderLiveData(), (Pair<OwnedIdentity, StorageManagerViewModel.SortOrder> ownedIdentityAndSortOrder) -> {
                     if (ownedIdentityAndSortOrder == null || ownedIdentityAndSortOrder.first == null || ownedIdentityAndSortOrder.second == null) {
                         return null;
@@ -131,6 +153,7 @@ class TabViewPagerAdapter extends RecyclerView.Adapter<TabViewPagerAdapter.TabVi
                 });
                 break;
             case 2:
+                adapter2 = adapter;
                 source = Transformations.switchMap(viewModel.getOwnedIdentityAndSortOrderLiveData(), (Pair<OwnedIdentity, StorageManagerViewModel.SortOrder> ownedIdentityAndSortOrder) -> {
                     if (ownedIdentityAndSortOrder == null || ownedIdentityAndSortOrder.first == null || ownedIdentityAndSortOrder.second == null) {
                         return null;
@@ -161,6 +184,7 @@ class TabViewPagerAdapter extends RecyclerView.Adapter<TabViewPagerAdapter.TabVi
                 break;
             case 3:
             default:
+                adapter3 = adapter;
                 source = Transformations.switchMap(viewModel.getOwnedIdentityAndSortOrderLiveData(), (Pair<OwnedIdentity, StorageManagerViewModel.SortOrder> ownedIdentityAndSortOrder) -> {
                     if (ownedIdentityAndSortOrder == null || ownedIdentityAndSortOrder.first == null || ownedIdentityAndSortOrder.second == null) {
                         return null;

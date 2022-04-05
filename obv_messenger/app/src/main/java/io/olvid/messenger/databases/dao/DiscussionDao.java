@@ -59,6 +59,12 @@ public abstract class DiscussionDao {
     public abstract void updateActive(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean active);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
+            " SET " + Discussion.TRUST_LEVEL + " = :trustLevel " +
+            " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Discussion.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
+    public abstract void updateTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, int trustLevel);
+
+    @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.LAST_MESSAGE_TIMESTAMP + " = :lastMessageTimestamp " +
             " WHERE id = :discussionId ")
     public abstract void updateLastMessageTimestamp(long discussionId, long lastMessageTimestamp);
@@ -98,7 +104,8 @@ public abstract class DiscussionDao {
             " disc." + Discussion.PHOTO_URL + " AS disc_" + Discussion.PHOTO_URL + ", " +
             " disc." + Discussion.KEYCLOAK_MANAGED + " AS disc_" + Discussion.KEYCLOAK_MANAGED + ", " +
             " disc." + Discussion.UNREAD + " AS disc_" + Discussion.UNREAD + ", " +
-            " disc." + Discussion.ACTIVE + " AS disc_" + Discussion.ACTIVE;
+            " disc." + Discussion.ACTIVE + " AS disc_" + Discussion.ACTIVE + ", " +
+            " disc." + Discussion.TRUST_LEVEL + " AS disc_" + Discussion.TRUST_LEVEL;
 
     private static final String PREFIX_DISCUSSION_CUSTOMIZATION_COLUMNS =
             "cust." + DiscussionCustomization.DISCUSSION_ID + " AS cust_" + DiscussionCustomization.DISCUSSION_ID + ", " +
@@ -128,7 +135,7 @@ public abstract class DiscussionDao {
             Message.DISCUSSION_ID + ", " + Message.ENGINE_MESSAGE_IDENTIFIER + ", " +
             Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " +
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
-            Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " +
+            Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
             " ON message." + Message.DISCUSSION_ID + " = disc.id " +
@@ -154,7 +161,7 @@ public abstract class DiscussionDao {
             Message.DISCUSSION_ID + ", " + Message.ENGINE_MESSAGE_IDENTIFIER + ", " +
             Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " +
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
-            Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " +
+            Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " != " + Message.STATUS_DRAFT + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
             " ON message." + Message.DISCUSSION_ID + " = disc.id " +
@@ -220,6 +227,22 @@ public abstract class DiscussionDao {
             " GROUP BY disc.id" +
             " ORDER BY is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndContactDisplayNames>> getAllWithContactNames(byte[] ownedIdentityBytes, String joiner);
+
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
+    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
+            "group_concat(CASE WHEN group_contact." + Contact.CUSTOM_DISPLAY_NAME + " IS NULL THEN group_contact." + Contact.DISPLAY_NAME + " ELSE group_contact." + Contact.CUSTOM_DISPLAY_NAME + " END, :joiner) AS groupContactDisplayNames, CASE WHEN disc.bytes_contact_identity IS NULL THEN 1 ELSE 0 END AS is_group  FROM " + Discussion.TABLE_NAME + " AS disc " +
+            " LEFT JOIN " + ContactGroupJoin.TABLE_NAME + " AS group_join " +
+            " ON disc." + Discussion.BYTES_GROUP_OWNER_AND_UID + " = group_join." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
+            " LEFT JOIN " + Contact.TABLE_NAME + " AS group_contact " +
+            " ON group_contact." + Contact.BYTES_CONTACT_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_CONTACT_IDENTITY +
+            " AND group_contact." + Contact.BYTES_OWNED_IDENTITY + " = group_join." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
+            " AND (disc." + Discussion.BYTES_CONTACT_IDENTITY + " IS NOT NULL " +
+            " OR disc." + Discussion.BYTES_GROUP_OWNER_AND_UID + " IS NOT NULL) " +
+            " GROUP BY disc.id" +
+            " ORDER BY is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
+    public abstract LiveData<List<DiscussionAndContactDisplayNames>> getAllNotLockedWithContactNames(byte[] ownedIdentityBytes, String joiner);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             "group_concat(CASE WHEN group_contact." + Contact.CUSTOM_DISPLAY_NAME + " IS NULL THEN group_contact." + Contact.DISPLAY_NAME + " ELSE group_contact." + Contact.CUSTOM_DISPLAY_NAME + " END, :joiner) AS groupContactDisplayNames FROM " + Discussion.TABLE_NAME + " AS disc " +

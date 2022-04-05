@@ -20,6 +20,7 @@
 package io.olvid.engine.networksend.operations;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -30,6 +31,7 @@ import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.IdentityAndUid;
+import io.olvid.engine.datatypes.notifications.UploadNotifications;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.networksend.databases.MessageHeader;
 import io.olvid.engine.networksend.databases.OutboxAttachment;
@@ -82,7 +84,6 @@ public class UploadMessageAndGetUidsOperation extends Operation {
                     finished = true;
                     return;
                 }
-
                 MessageHeader[] headers = outboxMessage.getHeaders();
                 OutboxAttachment[] attachments = outboxMessage.getAttachments();
 
@@ -120,17 +121,31 @@ public class UploadMessageAndGetUidsOperation extends Operation {
                         cancel(UploadMessageCompositeOperation.RFC_IDENTITY_IS_INACTIVE);
                         return;
                     case ServerMethod.OK_WITH_MALFORMED_SERVER_RESPONSE:
-                        // unable to parse server response and get message Uid --> cancel all attachments.
+                        // unable to parse server response and get message Uid --> cancel all attachments and finish the operation
                         outboxMessage.setUidFromServer(new UID(new byte[UID.UID_LENGTH]), new byte[0], 0);
                         for (OutboxAttachment attachment: attachments) {
                             attachment.setCancelExternallyRequested();
+                            attachment.setCancelProcessed();
                         }
-                        sendManagerSession.session.commit();
-                        cancel(UploadMessageCompositeOperation.RFC_OK_WITH_MALFORMED_SERVER_RESPONSE);
+                        finished = true;
                         return;
                     case ServerMethod.GENERAL_ERROR:
                     default:
-                        cancel(UploadMessageCompositeOperation.RFC_NETWORK_ERROR);
+                        if (System.currentTimeMillis() > outboxMessage.getCreationTimestamp() + Constants.OUTBOX_MESSAGE_MAX_SEND_DELAY) {
+                            // message is too old --> we no longer try sending it
+                            outboxMessage.setUidFromServer(new UID(new byte[UID.UID_LENGTH]), new byte[0], 0);
+                            for (OutboxAttachment attachment: attachments) {
+                                attachment.setCancelExternallyRequested();
+                                attachment.setCancelProcessed();
+                            }
+                            HashMap<String, Object> userInfo = new HashMap<>();
+                            userInfo.put(UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED_UID_KEY, outboxMessage.getUid());
+                            userInfo.put(UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED_OWNED_IDENTITY_KEY, outboxMessage.getOwnedIdentity());
+                            sendManagerSession.notificationPostingDelegate.postNotification(UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED, userInfo);
+                            finished = true;
+                        } else {
+                            cancel(UploadMessageCompositeOperation.RFC_NETWORK_ERROR);
+                        }
                 }
             } catch (Exception e) {
                 e.printStackTrace();

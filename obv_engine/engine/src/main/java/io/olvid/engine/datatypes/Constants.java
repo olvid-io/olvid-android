@@ -21,7 +21,7 @@ package io.olvid.engine.datatypes;
 
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 27;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 30;
     public static final int SERVER_API_VERSION = 13;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
@@ -58,14 +58,16 @@ public abstract class Constants {
     public static final int REPROVISIONING_THRESHOLD = 50;
     public static final long PROVISIONED_KEY_MATERIAL_EXPIRATION_DELAY = 86_400_000L * 2; // expire old ProvisionedKeyMaterial after 2 days
 
+    public static final long OUTBOX_MESSAGE_MAX_SEND_DELAY = 86_400_000L * 30; // after 30 days without being able to upload a message, delete it
     public static final long PROTOCOL_RECEIVED_MESSAGE_EXPIRATION_DELAY = 86_400_000L * 15; // expire ReceivedMessage after 15 days
 
-    public static final long USER_DATA_REFRESH_INTERVAL = 86_400_000L * 7;
-    public static final long GET_USER_DATA_LOCAL_FILE_LIFESPAN = 86_400_000L * 7;
+    public static final long USER_DATA_REFRESH_INTERVAL = 86_400_000L * 7; // 7 days
+    public static final long GET_USER_DATA_LOCAL_FILE_LIFESPAN = 86_400_000L * 7; // 7 days
+    public static final long WELL_KNOWN_REFRESH_INTERVAL = 3_600_000L * 6; // 6 hours
 
     // backups
     public static final long AUTOBACKUP_MAX_INTERVAL = 86_400_000L; // 1 day
-    public static final long AUTOBACKUP_START_DELAY = 120_000L; // 2 minutes
+    public static final long AUTOBACKUP_START_DELAY = 60_000L * 2; // 2 minutes
 
     public static final int SERVER_SESSION_NONCE_LENGTH = 32;
     public static final int SERVER_SESSION_CHALLENGE_LENGTH = 32;
@@ -86,7 +88,6 @@ public abstract class Constants {
 
     // TrustLevel threshold
     public static final TrustLevel AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD = new TrustLevel(3,0);
-    public static final TrustLevel USER_CONFIRMATION_TRUST_LEVEL_THRESHOLD = new TrustLevel(0, 0);
 
     public static final long BASE_RESCHEDULING_TIME = 250L;
 

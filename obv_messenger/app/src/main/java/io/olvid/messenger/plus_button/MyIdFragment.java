@@ -127,36 +127,29 @@ public class MyIdFragment extends Fragment implements View.OnClickListener {
         displayIdentity(viewModel.getCurrentIdentity());
     }
 
-    private void displayIdentity(@Nullable OwnedIdentity identity) {
-        if (identity == null) {
-            identityInitialView.setInitial(new byte[0], "");
+    private void displayIdentity(@Nullable OwnedIdentity ownedIdentity) {
+        if (ownedIdentity == null) {
+            identityInitialView.setUnknown();
             identityTextView.setText(null);
             qrCodeImageView.setImageResource(R.drawable.ic_broken_image);
             scanButton.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_camera, 0, R.drawable.empty, 0);
             keycloakSearchButton.setVisibility(View.GONE);
         } else {
-            if (identity.keycloakManaged) {
+            if (ownedIdentity.keycloakManaged) {
                 scanButton.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_camera, 0, 0, 0);
                 keycloakSearchButton.setVisibility(View.VISIBLE);
-                identityInitialView.setKeycloakCertified(true);
             } else {
                 scanButton.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_camera, 0, R.drawable.empty, 0);
                 keycloakSearchButton.setVisibility(View.GONE);
-                identityInitialView.setKeycloakCertified(false);
             }
-            identityInitialView.setInactive(!identity.active);
-            if (identity.photoUrl != null) {
-                identityInitialView.setPhotoUrl(identity.bytesOwnedIdentity, identity.photoUrl);
-            } else {
-                identityInitialView.setInitial(identity.bytesOwnedIdentity, App.getInitial(identity.displayName));
-            }
-            identityTextView.setText(identity.displayName);
+            identityInitialView.setOwnedIdentity(ownedIdentity);
+            identityTextView.setText(ownedIdentity.displayName);
 
-            JsonIdentityDetails identityDetails = identity.getIdentityDetails();
+            JsonIdentityDetails identityDetails = ownedIdentity.getIdentityDetails();
             if (identityDetails != null) {
-                urlIdentity = new ObvUrlIdentity(identity.bytesOwnedIdentity, identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, false));
+                urlIdentity = new ObvUrlIdentity(ownedIdentity.bytesOwnedIdentity, identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, false));
             } else {
-                urlIdentity = new ObvUrlIdentity(identity.bytesOwnedIdentity, identity.displayName);
+                urlIdentity = new ObvUrlIdentity(ownedIdentity.bytesOwnedIdentity, ownedIdentity.displayName);
             }
             App.setQrCodeImage(qrCodeImageView, urlIdentity.getUrlRepresentation());
         }

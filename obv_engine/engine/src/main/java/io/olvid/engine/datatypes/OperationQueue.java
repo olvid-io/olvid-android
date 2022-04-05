@@ -153,8 +153,13 @@ public class OperationQueue {
                 }
                 if (op.isReady()) {
                     if (op.areConditionsFulfilled()) {
-                        op.execute();
-                    } else {
+                        try {
+                            op.execute();
+                        } catch (Exception e) {
+                            Logger.e("Exception in operation that could have killed a queue!");
+                            e.printStackTrace();
+                        }
+                } else {
                         addOperation(op);
                     }
                 }

@@ -38,9 +38,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
+import io.olvid.messenger.customClasses.StringUtils;
 
 public class MessageDateItemDecoration extends RecyclerView.ItemDecoration {
     private final HashMap<String, Bitmap> headerBitmaps = new HashMap<>();
@@ -106,7 +106,7 @@ public class MessageDateItemDecoration extends RecyclerView.ItemDecoration {
             }
             position--;
             long thisTimestamp = messageListAdapter.messages.get(position).timestamp;
-            String headerString = App.getDayOfDateString(parent.getContext(), thisTimestamp).toString();
+            String headerString = StringUtils.getDayOfDateString(parent.getContext(), thisTimestamp).toString();
             if (headerBitmaps.containsKey(headerString)) {
                 headerStringsToRemove.remove(headerString);
             } else {

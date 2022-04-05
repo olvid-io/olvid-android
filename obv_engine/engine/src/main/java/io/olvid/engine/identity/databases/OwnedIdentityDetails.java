@@ -129,6 +129,7 @@ public class OwnedIdentityDetails implements ObvDatabase {
             ownedIdentityDetails.insert();
             return ownedIdentityDetails;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

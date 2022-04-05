@@ -28,14 +28,7 @@ import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.Dialog;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -44,7 +37,6 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -60,10 +52,6 @@ import androidx.lifecycle.Transformations;
 import androidx.viewpager.widget.ViewPager;
 import android.os.Bundle;
 import android.text.InputType;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -74,22 +62,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 
 import io.olvid.engine.Logger;
-import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.ObvBase64;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvDialog;
+import io.olvid.messenger.activities.ContactDetailsActivity;
 import io.olvid.messenger.activities.storage_manager.StorageManagerActivity;
 import io.olvid.messenger.activities.CallLogActivity;
 import io.olvid.messenger.discussion.DiscussionActivity;
@@ -97,11 +83,11 @@ import io.olvid.messenger.activities.ObvLinkActivity;
 import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.customClasses.ConfigurationPojo;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.fragments.dialog.OtherKnownUsersDialogFragment;
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
-import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockableActivity;
@@ -112,6 +98,7 @@ import io.olvid.messenger.fragments.dialog.DiscussionSearchDialogFragment;
 import io.olvid.messenger.onboarding.OnboardingActivity;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.plus_button.PlusButtonActivity;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MainActivity extends LockableActivity implements View.OnClickListener, FragmentOnAttachListener {
@@ -130,7 +117,6 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     private int pingRed;
     private int pingGolden;
     private int pingGreen;
-    private int pingGrey;
 
     private ContactListFragment contactListFragment;
     private InvitationListFragment invitationListFragment;
@@ -147,13 +133,13 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     public static final String KEYCLOAK_AUTHENTICATION_NEEDED_EXTRA = "keycloak_authentication_needed";
     public static final String BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA = "owned_identity";
     public static final String HEX_STRING_BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA = "hex_owned_identity";
-    public static final String NETWORK_CONNECTIVITY_CHANGED_BROADCAST_ACTION = "network_connectivity_changed_broadcast_action";
 
     private static final Set<String> ALLOWED_FORWARD_TO_VALUES = new HashSet<>(Arrays.asList(
             DiscussionActivity.class.getName(),
             OwnedIdentityDetailsActivity.class.getName(),
             PlusButtonActivity.class.getName(),
             OnboardingActivity.class.getName(),
+            ContactDetailsActivity.class.getName(),
             SettingsActivity.class.getName()
     ));
 
@@ -162,46 +148,6 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     public static final int GROUPS_TAB = 2;
     public static final int INVITATIONS_TAB = 3;
 
-    private static float previousFontScale = 1.0f;
-
-    @Override
-    protected void attachBaseContext(Context baseContext) {
-        // problem: we cannot know if the baseContext we get has already been scaled by our setting or not
-        // solution 1: ignore the system scaling and simply override the fontScale --> not very satisfying
-        // solution 2: "mark" the fontScale by forcing its customized value to have a 17 in the third & fourth decimal place (like 1.5017) --> much more fun!
-        final Context newContext;
-        float customFontScale = SettingsActivity.getFontScale();
-        Configuration configuration = baseContext.getResources().getConfiguration();
-        Logger.d("⚖ MainActivity started, baseContext font scale: " + configuration.fontScale);
-        if (Math.round(configuration.fontScale * 10000) % 100 == 17) {
-            Logger.d("⚖ case 1: fontScale already \"marked\"");
-            if (customFontScale != previousFontScale) { // this detects changes in the settings
-                Logger.d("⚖ case 1.1: customFontScale != previousFontScale --> compensating");
-                configuration.fontScale *= customFontScale / previousFontScale;
-                previousFontScale = customFontScale;
-                // we re-"mark" the font scale
-                configuration.fontScale = (Math.round(configuration.fontScale * 100) + 0.17f)/100f;
-                newContext = baseContext.createConfigurationContext(configuration);
-            } else {
-                Logger.d("⚖ case 1.2: fontScale already \"marked\" with the right scale --> do nothing");
-                // fontScale is already marked --> do nothing
-                newContext = baseContext;
-            }
-        } else {
-            Logger.d("⚖ case 2: fontScale not \"marked\" --> scale it");
-            // fontScale not marked --> this is most probably the default system scaling
-            // - we scale it appropriately
-            // - we mark it
-            if (customFontScale != previousFontScale) { // this detects changes in the settings, or the first launch of the app
-                previousFontScale = customFontScale;
-            }
-            configuration.fontScale *= customFontScale;
-            configuration.fontScale = (Math.round(configuration.fontScale * 100) + 0.17f)/100f;
-            newContext = baseContext.createConfigurationContext(configuration);
-        }
-        Logger.d("⚖ MainActivity started, font scale: " + newContext.getResources().getConfiguration().fontScale);
-        super.attachBaseContext(newContext);
-    }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -255,7 +201,6 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         pingRed = ContextCompat.getColor(this, R.color.red);
         pingGolden = ContextCompat.getColor(this, R.color.golden);
         pingGreen = ContextCompat.getColor(this, R.color.green);
-        pingGrey = ContextCompat.getColor(this, R.color.greyTint);
 
         pingListener = new PingListener();
         AppSingleton.getWebsocketConnectivityStateLiveData().observe(this, pingListener);
@@ -305,20 +250,11 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                         finish();
                     }
                 });
-                ownInitialView.setInactive(false);
-                ownInitialView.setKeycloakCertified(false);
-                ownInitialView.setInitial(new byte[0], " ");
+                ownInitialView.setUnknown();
                 ownedIdentityMutedImageView.setVisibility(View.GONE);
                 return;
             }
-            ownInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-            ownInitialView.setInactive(!ownedIdentity.active);
-            if (ownedIdentity.photoUrl == null) {
-                ownInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-            } else {
-                ownInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-            }
-
+            ownInitialView.setOwnedIdentity(ownedIdentity);
             if (ownedIdentity.shouldMuteNotifications()) {
                 ownedIdentityMutedImageView.setVisibility(View.VISIBLE);
             } else {
@@ -335,7 +271,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
             if (ownedIdentity == null) {
                 return null;
             }
-            return AppDatabase.getInstance().messageDao().hasUnreadMessages(ownedIdentity.bytesOwnedIdentity);
+            return AppDatabase.getInstance().messageDao().hasUnreadMessagesOrDiscussions(ownedIdentity.bytesOwnedIdentity);
         }).observe(this, unreadMessages -> {
             if (unreadMessages != null && unreadMessages) {
                 tabsPagerAdapter.showNotificationDot(DISCUSSIONS_TAB);
@@ -349,7 +285,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
             if (ownedIdentity == null) {
                 return null;
             }
-            return AppDatabase.getInstance().invitationDao().getAll(ownedIdentity.bytesOwnedIdentity);
+            return AppDatabase.getInstance().invitationDao().getAllForOwnedIdentity(ownedIdentity.bytesOwnedIdentity);
         }).observe(this, invitations -> {
             if (invitations != null) {
                 for (Invitation invitation: invitations) {
@@ -359,9 +295,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                         case ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY:
                         case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
                         case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
-                        case ObvDialog.Category.INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY:
-                        case ObvDialog.Category.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY:
-                        case ObvDialog.Category.AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY:
+                        case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
                             tabsPagerAdapter.showNotificationDot(INVITATIONS_TAB);
                             return;
                     }
@@ -390,7 +324,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         if (savedInstanceState != null && savedInstanceState.getBoolean(ALREADY_CREATED_BUNDLE_EXTRA, false)) {
             setIntent(null);
         } else {
-            finishAndRemoveExtraTasks();
+            UnifiedForegroundService.finishAndRemoveExtraTasks(this);
         }
 
         handleIntent(getIntent());
@@ -790,24 +724,6 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         }
     }
 
-    private void finishAndRemoveExtraTasks() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-            if (activityManager != null) {
-                List<ActivityManager.AppTask> appTasks = activityManager.getAppTasks();
-                if (appTasks != null && appTasks.size() > 1) {
-                    for (ActivityManager.AppTask appTask : appTasks) {
-                        ActivityManager.RecentTaskInfo taskInfo = appTask.getTaskInfo();
-                        if (!taskInfo.isRunning) {
-                            Logger.d("Removing empty task");
-                            appTask.finishAndRemoveTask();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     @Override
     public void onAttachFragment(@NonNull FragmentManager fragmentManager, @NonNull Fragment fragment) {
         if ((viewPager != null) && (mainActivityPageChangeListener != null)) {
@@ -822,31 +738,18 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
             if (viewPager.getCurrentItem() == CONTACTS_TAB) {
                 getMenuInflater().inflate(R.menu.menu_main_contact_list, menu);
                 final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-                searchView.setQueryHint(getString(R.string.hint_search_contact_name));
-                searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_FILTER);
-                if (SettingsActivity.useKeyboardIncognitoMode()) {
-                    searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
-                }
-                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    final EditText editText = new AppCompatEditText(searchView.getContext());
-
-                    {
+                if (searchView != null) {
+                    searchView.setQueryHint(getString(R.string.hint_search_contact_name));
+                    searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_FILTER);
+                    if (SettingsActivity.useKeyboardIncognitoMode()) {
+                        searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
+                    }
+                    searchView.setOnSearchClickListener((View view) -> {
                         if (contactListFragment != null) {
-                            contactListFragment.setContactFilterEditText(editText);
+                            contactListFragment.bindToSearchView(searchView);
                         }
-                    }
-
-                    @Override
-                    public boolean onQueryTextSubmit(String query) {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onQueryTextChange(String newText) {
-                        editText.setText(newText);
-                        return true;
-                    }
-                });
+                    });
+                }
             } else if (viewPager.getCurrentItem() == DISCUSSIONS_TAB) {
                 getMenuInflater().inflate(R.menu.menu_main_discussion_list, menu);
             } else if (viewPager.getCurrentItem() == GROUPS_TAB) {
@@ -866,71 +769,10 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
             return true;
         } else if (itemId == R.id.action_storage_management) {
             startActivity(new Intent(this, StorageManagerActivity.class));
-        } else if (itemId == R.id.action_about) {
-            AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog);
-            List<String> extraFeatures = new ArrayList<>();
-            if (SettingsActivity.getBetaFeaturesEnabled()) {
-                extraFeatures.add("beta");
-            }
-            int uptimeSeconds = (int) ((System.currentTimeMillis() - App.appStartTimestamp) / 1000);
-            final String uptime;
-            if (uptimeSeconds > 86400) {
-                uptime = getResources().getQuantityString(R.plurals.text_app_uptime_days, uptimeSeconds / 86400, uptimeSeconds / 86400, (uptimeSeconds % 86400) / 3600, (uptimeSeconds % 3600) / 60, uptimeSeconds % 60);
-            } else if (uptimeSeconds > 3600) {
-                uptime = getString(R.string.text_app_uptime_hours, uptimeSeconds / 3600, (uptimeSeconds % 3600) / 60, uptimeSeconds % 60);
-            } else {
-                uptime = getString(R.string.text_app_uptime, uptimeSeconds / 60, uptimeSeconds % 60);
-            }
-            builder.setTitle(R.string.dialog_title_about_olvid)
-                    .setPositiveButton(R.string.button_label_ok, null);
-            StringBuilder sb = new StringBuilder();
-            if (extraFeatures.isEmpty() || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O) {
-                sb.append(getString(R.string.dialog_message_about_olvid, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, Constants.SERVER_API_VERSION, Constants.CURRENT_ENGINE_DB_SCHEMA_VERSION, AppDatabase.DB_SCHEMA_VERSION, uptime));
-            } else {
-                String features = String.join(getString(R.string.text_contact_names_separator), extraFeatures);
-                sb.append(getString(R.string.dialog_message_about_olvid_extra_features, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, Constants.SERVER_API_VERSION, Constants.CURRENT_ENGINE_DB_SCHEMA_VERSION, AppDatabase.DB_SCHEMA_VERSION, features, uptime));
-            }
-            sb.append("\n\n");
-
-            String link = getString(R.string.activity_title_open_source_licenses);
-            sb.append(link);
-            SpannableString spannableString = new SpannableString(sb);
-            spannableString.setSpan(new ClickableSpan() {
-                @Override
-                public void onClick(@NonNull View widget) {
-                    OssLicensesMenuActivity.setActivityTitle(getString(R.string.activity_title_open_source_licenses));
-                    startActivity(new Intent(MainActivity.this, OssLicensesMenuActivity.class));
-                }
-            }, spannableString.length()-link.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            builder.setMessage(spannableString);
-            Dialog dialog = builder.create();
-
-            dialog.setOnShowListener(dialog1 -> {
-                if (dialog1 instanceof AlertDialog) {
-                    TextView messageTextView = ((AlertDialog) dialog1).findViewById(android.R.id.message);
-                    if (messageTextView != null) {
-                        messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
-                    }
-                }
-            });
-            dialog.show();
-
-            return true;
         } else if (itemId == R.id.action_backup_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             intent.putExtra(SettingsActivity.SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA, SettingsActivity.PREF_HEADER_KEY_BACKUP);
             startActivity(intent);
-            return true;
-        } else if (itemId == R.id.action_check_update) {
-            final String appPackageName = getPackageName();
-            try {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-            } catch (ActivityNotFoundException e) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-            }
-            return true;
-        } else if (itemId == R.id.action_help_faq) {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://olvid.io/faq/")));
             return true;
         } else if (itemId == R.id.action_call_log) {
             startActivity(new Intent(this, CallLogActivity.class));
@@ -941,7 +783,13 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         } else if (itemId == R.id.action_search) {
             if (viewPager.getCurrentItem() == DISCUSSIONS_TAB) {
                 DiscussionSearchDialogFragment discussionSearchDialogFragment = DiscussionSearchDialogFragment.newInstance();
-                discussionSearchDialogFragment.show(getSupportFragmentManager(), "dialog");
+                discussionSearchDialogFragment.show(getSupportFragmentManager(), "discussion_search_dialog_fragment");
+                return true;
+            }
+        } else if (itemId == R.id.action_other_known_users) {
+            if (viewPager.getCurrentItem() == CONTACTS_TAB) {
+                OtherKnownUsersDialogFragment otherKnownUsersDialogFragment = OtherKnownUsersDialogFragment.newInstance();
+                otherKnownUsersDialogFragment.show(getSupportFragmentManager(), "other_known_users_dialog_fragment");
                 return true;
             }
         }
@@ -968,6 +816,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     class PingListener implements EngineNotificationListener, Observer<Integer> {
         private Long registrationNumber = null;
         private int websocketConnectionState = 0;
+        private long lastPing = 0;
 
         public void refresh() {
             onChanged(websocketConnectionState);
@@ -975,26 +824,18 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
 
         @Override
         public void onChanged(Integer websocketConnectionState) {
-            if (websocketConnectionState == -1 && this.websocketConnectionState == 0) {
-                return;
+            if (websocketConnectionState != this.websocketConnectionState) {
+                lastPing = 0;
             }
             this.websocketConnectionState = websocketConnectionState;
 
             final int stateColor;
-            switch (websocketConnectionState) {
-                case 1:
-                    stateColor = pingGolden;
-                    break;
-                case 2:
-                    stateColor = pingGreen;
-                    break;
-                case -1:
-                    stateColor = pingGrey;
-                    break;
-                case 0:
-                default:
-                    stateColor = pingRed;
-                    break;
+            if (websocketConnectionState == 0 || lastPing == -1) {
+                stateColor = pingRed;
+            } else if (websocketConnectionState == 1 || lastPing > 3_000) {
+                stateColor = pingGolden;
+            } else {
+                stateColor = pingGreen;
             }
 
             switch (previousPingConnectivityIndicator) {
@@ -1009,9 +850,6 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                 case FULL:
                     pingConnectivityFull.setBackgroundColor(stateColor);
                     switch (websocketConnectionState) {
-                        case -1:
-                            // ping was lost --> keep previous connectivity state
-                            break;
                         case 1:
                             pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_connecting);
                             break;
@@ -1021,8 +859,14 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                         case 0:
                         default:
                             pingConnectivityFullTextView.setText(R.string.label_ping_connectivity_none);
-                            pingConnectivityFullPingTextView.setText("-");
                             break;
+                    }
+                    if (lastPing == -1) {
+                        pingConnectivityFullPingTextView.setText(getString(R.string.label_over_max_ping_delay, 5));
+                    } else if (lastPing == 0) {
+                        pingConnectivityFullPingTextView.setText("-");
+                    } else {
+                        pingConnectivityFullPingTextView.setText(getString(R.string.label_ping_delay, lastPing));
                     }
                     break;
             }
@@ -1035,17 +879,14 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
             }
             switch (notificationName) {
                 case EngineNotifications.PING_LOST:
-                    runOnUiThread(() -> {
-                        pingConnectivityFullPingTextView.setText(getString(R.string.label_over_max_ping_delay, 10));
-                        onChanged(-1);
-                    });
+                    lastPing = -1;
+                    runOnUiThread(this::refresh);
                     break;
                 case EngineNotifications.PING_RECEIVED:
                     Long delay = (Long) userInfo.get(EngineNotifications.PING_RECEIVED_DELAY_KEY);
                     if (delay != null) {
-                        runOnUiThread(() -> {
-                            pingConnectivityFullPingTextView.setText(getString(R.string.label_ping_delay, delay));
-                        });
+                        lastPing = delay;
+                        runOnUiThread(this::refresh);
                     }
                     break;
             }
@@ -1072,6 +913,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         private final ImageView[] imageViews;
         private final int inactiveColor;
         private final int activeColor;
+        private int currentPosition = -1;
 
         public MainActivityPageChangeListener(ImageView[] imageViews) {
             this.imageViews = imageViews;
@@ -1086,10 +928,13 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
             }
 
             // Update the menu as it depends on the tab
-            invalidateOptionsMenu();
+            if (currentPosition != position) {
+                invalidateOptionsMenu();
+            }
             if (invitationListFragment != null) {
                 invitationListFragment.setInvitationsAreVisible(position == INVITATIONS_TAB);
             }
+            this.currentPosition = position;
         }
 
         @Override

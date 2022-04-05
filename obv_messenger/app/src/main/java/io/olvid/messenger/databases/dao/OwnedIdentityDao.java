@@ -110,17 +110,23 @@ public interface OwnedIdentityDao {
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
     void updateCapabilityGroupsV2(byte[] bytesOwnedIdentity, boolean capable);
 
+    @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
+            " SET " + OwnedIdentity.CAPABILITY_ONE_TO_ONE_CONTACTS + " = :capable " +
+            " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
+    void updateCapabilityOneToOneContacts(byte[] bytesOwnedIdentity, boolean capable);
 
 
-    @Query("SELECT oi.*, unread.count AS unreadMessageCount, unreadinv.count AS unreadInvitationCount FROM " + OwnedIdentity.TABLE_NAME + " AS oi " +
+
+    @Query("SELECT oi.*, unread.count AS unreadMessageCount, unreadinv.count AS unreadInvitationCount, unreaddisc.count AS unreadDiscussionCount FROM " + OwnedIdentity.TABLE_NAME + " AS oi " +
             " LEFT JOIN ( " +
             " SELECT COUNT(*) AS count, disc." + Discussion.BYTES_OWNED_IDENTITY + " AS boi FROM " + Discussion.TABLE_NAME + " AS disc " +
             " JOIN " + Message.TABLE_NAME + " AS mess " +
             " ON disc.id = mess." + Message.DISCUSSION_ID +
-            " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD +
+            " WHERE mess." + Message.STATUS + " = " + Message.STATUS_UNREAD +
             " GROUP BY disc." + Discussion.BYTES_OWNED_IDENTITY +
             " ) AS unread " +
             " ON unread.boi = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
+
             " LEFT JOIN (" +
             " SELECT COUNT(*) AS count, inv." + Invitation.BYTES_OWNED_IDENTITY + " AS boi FROM " + Invitation.TABLE_NAME + " AS inv " +
             " WHERE inv." + Invitation.CATEGORY_ID + " IN ( " +
@@ -129,12 +135,18 @@ public interface OwnedIdentityDao {
             ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY + ") " +
-            " GROUP BY inv." + Discussion.BYTES_OWNED_IDENTITY +
+            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY +
+            ") GROUP BY inv." + Discussion.BYTES_OWNED_IDENTITY +
             " ) as unreadinv " +
             " ON unreadinv.boi = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
+
+            " LEFT JOIN ( " +
+            " SELECT COUNT(*) AS count, disc." + Discussion.BYTES_OWNED_IDENTITY + " AS boi FROM " + Discussion.TABLE_NAME + " AS disc " +
+            " WHERE disc." + Discussion.UNREAD + " = 1 " +
+            " GROUP BY disc." + Discussion.BYTES_OWNED_IDENTITY +
+            " ) AS unreaddisc " +
+            " ON unreaddisc.boi = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
+
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " AND " + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
             " ORDER BY CASE WHEN " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " IS NULL THEN " + OwnedIdentity.DISPLAY_NAME + " ELSE " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " END ASC ")
@@ -195,9 +207,14 @@ public interface OwnedIdentityDao {
             ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY + ") " +
+            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY +
+            ") AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
+            " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
+            " UNION " +
+            " SELECT 1 FROM " + Discussion.TABLE_NAME + " AS disc " +
+            " JOIN " + OwnedIdentity.TABLE_NAME + " AS oi " +
+            " ON disc." + Discussion.BYTES_OWNED_IDENTITY + " = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
+            " WHERE disc." + Discussion.UNREAD + " = 1 " +
             " AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
             " )")
@@ -237,6 +254,7 @@ public interface OwnedIdentityDao {
         public OwnedIdentity ownedIdentity;
         public long unreadMessageCount;
         public long unreadInvitationCount;
+        public long unreadDiscussionCount;
     }
 
     class OwnedIdentityAndDiscussionId {

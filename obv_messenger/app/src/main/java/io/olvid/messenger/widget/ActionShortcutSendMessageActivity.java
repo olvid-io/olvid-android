@@ -31,6 +31,8 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
@@ -146,27 +148,28 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
             vibrator.vibrate(50);
         }
 
-        // Re-enable this code once a foreground service for message sending is implemented
-        // for now, vibration in background is not possible, so we disable this option
-//        if (configuration.vibrateOnSend && messageId != null) {
-//            if (vibrator != null) {
-//                // vibrate when the message status goes to send
-//                LiveData<Message> messageLiveData = db.messageDao().getLive(messageId);
-//                Observer<Message> messageObserver = new Observer<Message>() {
-//                    @Override
-//                    public void onChanged(Message message) {
-//                        if (message.status == Message.STATUS_SENT || message.status == Message.STATUS_DELIVERED || message.status == Message.STATUS_DELIVERED_AND_READ) {
-//                            long[] pattern = new long[]{0, 50, 100, 50};
-//                            vibrator.vibrate(pattern, -1);
-//                            messageLiveData.removeObserver(this);
-//                        }
-//                    }
-//                };
-//                Handler handler = new Handler(Looper.getMainLooper());
-//                handler.post(() -> messageLiveData.observeForever(messageObserver));
-//                handler.postDelayed(() -> messageLiveData.removeObserver(messageObserver), 20_000);
-//            }
-//        }
+        // This code works because there is a foreground service while message is being sent (and because we delay the stop of the service by 200ms)
+        // otherwise, vibration in background is not possible
+        if (configuration.vibrateOnSend && messageId != null) {
+            if (vibrator != null) {
+                // vibrate when the message status goes to send
+                LiveData<Message> messageLiveData = db.messageDao().getLive(messageId);
+                Observer<Message> messageObserver = new Observer<Message>() {
+                    @Override
+                    public void onChanged(Message message) {
+                        if (message.status == Message.STATUS_SENT || message.status == Message.STATUS_DELIVERED || message.status == Message.STATUS_DELIVERED_AND_READ) {
+                            long[] pattern = new long[]{0, 50, 100, 50};
+                            vibrator.vibrate(pattern, -1);
+                            messageLiveData.removeObserver(this);
+                        }
+                    }
+                };
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> messageLiveData.observeForever(messageObserver));
+                // if sending takes more that 20s, we do not vibrate as it would not make much sense any way
+                handler.postDelayed(() -> messageLiveData.removeObserver(messageObserver), 20_000);
+            }
+        }
         finish();
     }
 }

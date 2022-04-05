@@ -5,7 +5,7 @@
         android:entries="@array/camera_resolution"
         android:entryValues="@array/camera_resolution_values"
         android:key="pref_key_camera_resolution"
-        android:singleLineTitle="false"
+        app:singleLineTitle="false"
         android:title="@string/pref_camera_resolution_title"
         app:useSimpleSummaryProvider="true"
         android:icon="@drawable/ic_pref_resize_photo"

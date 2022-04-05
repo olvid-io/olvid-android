@@ -205,16 +205,14 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     }
 
     // this sends a ping for the current ownedIdentity websocket and returns a ping latency inside a notification
-    public boolean pingWebsocket(Identity ownedIdentity) {
+    public void pingWebsocket(Identity ownedIdentity) {
         String server = ownedIdentity.getServer();
         WebSocketClient webSocketClient = existingWebsockets.get(server);
         if (webSocketClient != null) {
             if (webSocketClient.isOpen()) {
                 webSocketClient.sendPing();
-                return true;
             }
         }
-        return false;
     }
 
     private void resetWebsockets() {
@@ -748,7 +746,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             long counter = pingCounter.incrementAndGet();
             long timestamp = System.currentTimeMillis();
             if (lastPingCounter != -1) {
-                if (timestamp - lastPingTimestamp > 10_000 && notificationPostingDelegate != null) {
+                if (timestamp - lastPingTimestamp > 5_000 && notificationPostingDelegate != null) {
                     notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PING_LOST, new HashMap<>());
                 }
             }

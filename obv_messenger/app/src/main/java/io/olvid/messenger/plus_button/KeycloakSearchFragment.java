@@ -61,18 +61,22 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
+import io.olvid.messenger.settings.SettingsActivity;
 
 public class KeycloakSearchFragment extends Fragment implements View.OnClickListener {
     private AppCompatActivity activity;
@@ -312,33 +316,23 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
 
                 holder.setUserDetails(userDetails);
 
-                String name = "";
-                if (userDetails.getFirstName() != null) {
-                    name += userDetails.getFirstName();
-                }
-                if (userDetails.getLastName() != null) {
-                    if (name.length() > 0) {
-                        name += " ";
-                    }
-                    name += userDetails.getLastName();
-                }
+                JsonIdentityDetails identityDetails = userDetails.getIdentityDetails(null);
+                String name = identityDetails.formatFirstAndLastName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName());
                 matchAndHighlight(name, holder.keycloakUserNameTextView);
-                holder.initialView.setInitial(userDetails.getIdentity() == null ? new byte[0] : userDetails.getIdentity(), App.getInitial(name));
 
-                String company = "";
-                if (userDetails.getPosition() != null) {
-                    company += userDetails.getPosition();
-                }
-                if (userDetails.getCompany() != null) {
-                    if (company.length() > 0) {
-                        company += " @ ";
-                    }
-                    company += userDetails.getCompany();
-                }
-                if (company.length() > 0) {
-                    holder.keycloakUserPositionTextView.setVisibility(View.VISIBLE);
-                    matchAndHighlight(company, holder.keycloakUserPositionTextView);
+                if (userDetails.getIdentity() != null && AppSingleton.getContactCustomDisplayName(userDetails.getIdentity()) != null) {
+                    holder.initialView.setFromCache(userDetails.getIdentity());
                 } else {
+                    holder.initialView.setInitial(userDetails.getIdentity() == null ? new byte[0] : userDetails.getIdentity(), StringUtils.getInitial(name));
+                }
+
+                String posComp = identityDetails.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat());
+                if (posComp != null) {
+                    holder.keycloakUserNameTextView.setMaxLines(1);
+                    holder.keycloakUserPositionTextView.setVisibility(View.VISIBLE);
+                    matchAndHighlight(posComp, holder.keycloakUserPositionTextView);
+                } else {
+                    holder.keycloakUserNameTextView.setMaxLines(2);
                     holder.keycloakUserPositionTextView.setVisibility(View.GONE);
                 }
 
@@ -348,12 +342,8 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
                             Contact contact = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, userDetails.getIdentity());
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 if (contact != null) {
-                                    holder.keycloakUserKnownImageView.setVisibility(View.VISIBLE);
-                                    holder.initialView.setKeycloakCertified(contact.keycloakManaged);
-                                    holder.initialView.setInactive(!contact.active);
-                                    if (contact.getCustomPhotoUrl() != null) {
-                                        holder.initialView.setPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
-                                    }
+                                    holder.initialView.setContact(contact);
+                                    holder.keycloakUserKnownImageView.setVisibility(contact.oneToOne ? View.VISIBLE : View.GONE);
                                 } else {
                                     holder.keycloakUserKnownImageView.setVisibility(View.GONE);
                                 }
@@ -368,7 +358,7 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
 
         private void matchAndHighlight(String text, TextView textView) {
             int i = 0;
-            String unAccented = App.unAccent(text);
+            String unAccented = StringUtils.unAccent(text);
             Spannable highlightedString = new SpannableString(text);
             for (Pattern pattern : patterns) {
                 if (i == highlightedSpans.length) {
@@ -425,7 +415,7 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
                 return;
             }
             for (String part: keycloakSearchString.trim().split("\\s+")) {
-                patterns.add(Pattern.compile(Pattern.quote(App.unAccent(part))));
+                patterns.add(Pattern.compile(Pattern.quote(StringUtils.unAccent(part))));
             }
         }
 

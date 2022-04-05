@@ -60,7 +60,7 @@ class BluetoothHeadsetManager {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         bluetoothServiceListener = new BluetoothServiceListener();
         headsetBroadcastReceiver = new BluetoothHeadsetBroadcastReceiver();
-        Logger.e("Started bluetooth");
+        Logger.d("Started bluetooth");
     }
 
 
@@ -71,7 +71,7 @@ class BluetoothHeadsetManager {
 
         if (audioManager != null) {
             if (!audioManager.isBluetoothScoAvailableOffCall()) {
-                Logger.e("☎️ Device does not support off call bluetooth SCO");
+                Logger.e("☎ Device does not support off call bluetooth SCO");
                 return;
             }
         }
@@ -103,13 +103,17 @@ class BluetoothHeadsetManager {
         if (bluetoothHeadset == null) {
             return;
         }
-        List<BluetoothDevice> devices = bluetoothHeadset.getConnectedDevices();
-        if (devices.isEmpty()) {
-            state = State.HEADSET_UNAVAILABLE;
-        } else {
-            if (state == State.HEADSET_UNAVAILABLE) {
-                state = State.HEADSET_AVAILABLE;
+        try {
+            List<BluetoothDevice> devices = bluetoothHeadset.getConnectedDevices();
+            if (devices.isEmpty()) {
+                state = State.HEADSET_UNAVAILABLE;
+            } else {
+                if (state == State.HEADSET_UNAVAILABLE) {
+                    state = State.HEADSET_AVAILABLE;
+                }
             }
+        } catch (SecurityException e) {
+            state = State.HEADSET_UNAVAILABLE;
         }
         webrtcCallService.updateAvailableAudioOutputsList();
     }

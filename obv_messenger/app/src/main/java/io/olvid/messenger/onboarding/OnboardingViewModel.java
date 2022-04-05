@@ -50,6 +50,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.ConfigurationKeycloakPojo;
 import io.olvid.messenger.customClasses.ConfigurationPojo;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
+import io.olvid.messenger.services.BackupCloudProviderService;
 
 
 public class OnboardingViewModel extends ViewModel {
@@ -460,9 +461,16 @@ public class OnboardingViewModel extends ViewModel {
         }
     }
 
-    void setBackupCloud(byte[] backupContent, String accountEmail, String device, String timestamp) {
+    void setBackupCloud(byte[] backupContent, BackupCloudProviderService.CloudProviderConfiguration configuration, String device, String timestamp) {
         this.backupContent.postValue(backupContent);
-        backupName.postValue(App.getContext().getString(R.string.text_description_google_drive_backup, accountEmail, device, timestamp));
+        switch (configuration.provider) {
+            case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV:
+                backupName.postValue(App.getContext().getString(R.string.text_description_webdav_backup, configuration.account + " @ " + configuration.serverUrl, device, timestamp));
+                break;
+            case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_GOOGLE_DRIVE:
+                backupName.postValue(App.getContext().getString(R.string.text_description_google_drive_backup, configuration.account, device, timestamp));
+                break;
+        }
         backupType = BACKUP_TYPE_CLOUD;
         backupReady.postValue(true);
     }

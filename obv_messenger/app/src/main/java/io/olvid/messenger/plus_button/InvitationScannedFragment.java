@@ -56,6 +56,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ObvLinkActivity;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -189,21 +190,18 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
         contactNameTextView.setText(contactUrlIdentity.displayName);
 
         if (contact != null) {
-            contactInitialView.setKeycloakCertified(contact.keycloakManaged);
-            contactInitialView.setInactive(!contact.active);
-            if (contact.getCustomPhotoUrl() != null) {
-                contactInitialView.setPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
-            } else {
-                contactInitialView.setInitial(contact.bytesContactIdentity, App.getInitial(contactUrlIdentity.displayName));
-            }
+            contactInitialView.setContact(contact);
 
             inviteWarningTextView.setVisibility(View.VISIBLE);
             inviteWarningTextView.setBackgroundResource(R.drawable.background_ok_message);
             inviteWarningTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_ok_outline, 0, 0, 0);
-            inviteWarningTextView.setText(activity.getString(R.string.text_explanation_warning_contact_already_known, contactUrlIdentity.displayName));
-
+            if (contact.oneToOne) {
+                inviteWarningTextView.setText(activity.getString(R.string.text_explanation_warning_mutual_scan_contact_already_known, contactUrlIdentity.displayName));
+            } else {
+                inviteWarningTextView.setText(activity.getString(R.string.text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one, contactUrlIdentity.displayName));
+            }
         } else {
-            contactInitialView.setInitial(contactUrlIdentity.getBytesIdentity(), App.getInitial(contactUrlIdentity.displayName));
+            contactInitialView.setInitial(contactUrlIdentity.getBytesIdentity(), StringUtils.getInitial(contactUrlIdentity.displayName));
             inviteWarningTextView.setVisibility(View.GONE);
         }
 
@@ -241,13 +239,7 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
     }
 
     private void displaySelfInvite(@NonNull OwnedIdentity ownedIdentity) {
-        contactInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-        contactInitialView.setInactive(!ownedIdentity.active);
-        if (ownedIdentity.photoUrl != null) {
-            contactInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-        } else {
-            contactInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.displayName));
-        }
+        contactInitialView.setOwnedIdentity(ownedIdentity);
         contactNameTextView.setText(ownedIdentity.displayName);
 
         inviteExplanationTextView.setVisibility(View.GONE);

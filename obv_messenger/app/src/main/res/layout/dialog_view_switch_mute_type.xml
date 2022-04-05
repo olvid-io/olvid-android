@@ -7,25 +7,68 @@
     android:paddingHorizontal="12dp"
     android:paddingTop="8dp">
 
-    <Switch
-        android:id="@+id/mute_profile_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-    <TextView
+    <LinearLayout
+        android:id="@+id/custom_time_or_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:textSize="16sp"
-        android:textColor="@color/almostBlack"
-        android:text="@string/dialog_message_mute_all_profile_switch_label"
-        android:layout_marginStart="6dp"
-        app:layout_constraintStart_toEndOf="@id/mute_profile_switch"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/switch_and_label">
+
+        <TextView
+            android:id="@+id/custom_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="4dp"
+            android:textSize="16sp"
+            android:drawablePadding="4dp"
+            android:textColor="@color/almostBlack"
+            android:text="@string/label_pick_a_time"
+            android:gravity="center"
+            app:drawableStartCompat="@drawable/ic_time"
+            android:background="?attr/selectableItemBackground"
+            android:theme="@style/SubtleBlueRipple" />
+        <TextView
+            android:id="@+id/custom_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="4dp"
+            android:textSize="16sp"
+            android:drawablePadding="4dp"
+            android:textColor="@color/almostBlack"
+            android:text="@string/label_pick_a_date"
+            android:gravity="center"
+            app:drawableStartCompat="@drawable/ic_date"
+            android:background="?attr/selectableItemBackground"
+            android:theme="@style/SubtleBlueRipple" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/switch_and_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/custom_time_or_date"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <Switch
+            android:id="@+id/mute_profile_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/almostBlack"
+            android:text="@string/dialog_message_mute_all_profile_switch_label"
+            android:layout_marginStart="6dp"/>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

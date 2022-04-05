@@ -24,7 +24,6 @@
     <color name="lightGrey">#272727</color>
     <color name="lighterGrey">#171717</color>
     <color name="lighterGrey_75">#bf1d1d1d</color>
-    <color name="darkerLightGrey">#474747</color>
     <color name="darkGrey">#c7c7c7</color>
 
     <color name="accentOverlay">#8870959E</color>
@@ -34,5 +33,6 @@
 
     <!-- New color -->
     <color name="dialogBackground">#303030</color>
+    <color name="dialogBackgroundOverlay">#99303030</color>
     <color name="inboundMessageBody">#c3d9e6</color>
 </resources>

@@ -187,18 +187,15 @@ public class OwnedGroupDetailsFragment extends Fragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_CODE_PERMISSION_CAMERA: {
-                try {
-                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        takePicture();
-                    } else {
-                        App.toast(R.string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT);
-                    }
-                } catch (IllegalStateException e) {
-                    e.printStackTrace();
+        if (requestCode == REQUEST_CODE_PERMISSION_CAMERA) {
+            try {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    takePicture();
+                } else {
+                    App.toast(R.string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT);
                 }
-                break;
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
             }
         }
     }

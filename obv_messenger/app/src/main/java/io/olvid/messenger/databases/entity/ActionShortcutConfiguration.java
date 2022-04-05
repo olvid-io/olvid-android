@@ -121,6 +121,6 @@ public class ActionShortcutConfiguration {
         public String messageToSend;
 
         public boolean confirmBeforeSend;
-//        public boolean vibrateOnSend;
+        public boolean vibrateOnSend;
     }
 }

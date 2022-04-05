@@ -78,22 +78,18 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                     finished = true;
                     return;
                 }
+
+                // message may be null in case of re-list of an already deleted message
                 InboxMessage message = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUid);
-                if (message == null) {
-                    fetchManagerSession.session.startTransaction();
-                    pendingDeleteFromServer.delete();
-                    finished = true;
-                    return;
-                }
 
                 UID toDeviceUid = fetchManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(fetchManagerSession.session, ownedIdentity);
 
-                if (! message.canBeDeleted()) {
+                if (message != null && !message.canBeDeleted()) {
                     cancel(RFC_MESSAGE_AND_ATTACHMENTS_CANNOT_BE_DELETED);
                     return;
                 }
 
-                byte[] serverSessionToken = ServerSession.getToken(fetchManagerSession, message.getOwnedIdentity());
+                byte[] serverSessionToken = ServerSession.getToken(fetchManagerSession, pendingDeleteFromServer.getOwnedIdentity());
                 if (serverSessionToken == null) {
                     cancel(RFC_INVALID_SERVER_SESSION);
                     return;
@@ -103,7 +99,7 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                 }
 
                 DeleteMessageAndAttachmentServerMethod serverMethod = new DeleteMessageAndAttachmentServerMethod(
-                        message.getOwnedIdentity(),
+                        pendingDeleteFromServer.getOwnedIdentity(),
                         serverSessionToken,
                         messageUid,
                         toDeviceUid
@@ -116,11 +112,13 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                 switch (returnStatus) {
                     case ServerMethod.OK:
                         pendingDeleteFromServer.delete();
-                        message.delete();
+                        if (message != null) {
+                            message.delete();
+                        }
                         finished = true;
                         return;
                     case ServerMethod.INVALID_SESSION:
-                        ServerSession.deleteCurrentTokenIfEqualTo(fetchManagerSession, serverSessionToken, message.getOwnedIdentity());
+                        ServerSession.deleteCurrentTokenIfEqualTo(fetchManagerSession, serverSessionToken, pendingDeleteFromServer.getOwnedIdentity());
                         fetchManagerSession.session.commit();
                         cancel(RFC_INVALID_SERVER_SESSION);
                         return;

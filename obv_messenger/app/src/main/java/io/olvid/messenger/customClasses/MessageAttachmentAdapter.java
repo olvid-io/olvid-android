@@ -612,7 +612,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
 
         if ((changesMask & WAS_OPENED_CHANGE_MASK) != 0) {
             if (holder.type == TYPE_AUDIO) {
-                if (fyleAndStatus.fyleMessageJoinWithStatus.wasOpened) {
+                if (fyleAndStatus.fyleMessageJoinWithStatus.wasOpened || visibility == Visibility.HIDDEN) {
                     holder.audioAttachmentNotPlayed.setVisibility(View.GONE);
                 } else {
                     holder.audioAttachmentNotPlayed.setVisibility(View.VISIBLE);

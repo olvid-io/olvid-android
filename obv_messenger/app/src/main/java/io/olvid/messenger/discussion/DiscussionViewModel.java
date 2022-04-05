@@ -26,6 +26,7 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import io.olvid.messenger.databases.AppDatabase;
@@ -35,13 +36,17 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.OwnedIdentity;
 
 
 public class DiscussionViewModel extends ViewModel {
     private final AppDatabase db;
     private boolean selectingForDeletion;
+    private List<Long> messageIdsToForward;
     @NonNull private final MutableLiveData<Long> discussionIdLiveData;
     @NonNull private final MutableLiveData<List<Long>> selectedMessageIds;
+    @NonNull private final HashSet<Long> nonForwardableSelectedMessageIds;
+    @NonNull private final MutableLiveData<byte[]> forwardMessageBytesOwnedIdentityLiveData;
 
 
     @NonNull private final LiveData<Discussion> discussionLiveData;
@@ -50,12 +55,16 @@ public class DiscussionViewModel extends ViewModel {
     @NonNull private final LiveData<MessageDao.UnreadCountAndFirstMessage> unreadCountAndFirstMessage;
     @NonNull private final LiveData<DiscussionCustomization> discussionCustomization;
     @NonNull private final LiveData<Integer>  newDetailsUpdate;
+    @NonNull private final LiveData<OwnedIdentity> forwardMessageOwnedIdentityLiveData;
 
     public DiscussionViewModel() {
         db = AppDatabase.getInstance();
         selectingForDeletion = false;
         discussionIdLiveData = new MutableLiveData<>();
         selectedMessageIds = new MutableLiveData<>();
+        nonForwardableSelectedMessageIds = new HashSet<>();
+        forwardMessageBytesOwnedIdentityLiveData = new MutableLiveData<>();
+
 
         messages = Transformations.switchMap(discussionIdLiveData, discussionId -> {
             if (discussionId == null) {
@@ -117,6 +126,13 @@ public class DiscussionViewModel extends ViewModel {
                 return new MutableLiveData<>(Contact.PUBLISHED_DETAILS_NOTHING_NEW);
             }
         });
+
+        forwardMessageOwnedIdentityLiveData = Transformations.switchMap(forwardMessageBytesOwnedIdentityLiveData, (byte[] bytesOwnedIdentity) -> {
+            if (bytesOwnedIdentity == null) {
+                return null;
+            }
+            return AppDatabase.getInstance().ownedIdentityDao().getLiveData(bytesOwnedIdentity);
+        });
     }
 
 
@@ -163,7 +179,7 @@ public class DiscussionViewModel extends ViewModel {
         return selectingForDeletion;
     }
 
-    public void selectMessageId(long messageId) {
+    public void selectMessageId(long messageId, boolean forwardable) {
         List<Long> ids;
         if (selectedMessageIds.getValue() == null) {
             ids = new ArrayList<>();
@@ -171,13 +187,16 @@ public class DiscussionViewModel extends ViewModel {
             ids = new ArrayList<>(selectedMessageIds.getValue().size());
             ids.addAll(selectedMessageIds.getValue());
         }
-        if (ids.contains(messageId)) {
-            ids.remove(messageId);
+        if (ids.remove(messageId)) {
+            nonForwardableSelectedMessageIds.remove(messageId);
             if (ids.size() == 0) {
                 selectingForDeletion = false;
             }
         } else {
             ids.add(messageId);
+            if (!forwardable) {
+                nonForwardableSelectedMessageIds.add(messageId);
+            }
             selectingForDeletion = true;
         }
         selectedMessageIds.postValue(ids);
@@ -187,6 +206,7 @@ public class DiscussionViewModel extends ViewModel {
         List<Long> ids = selectedMessageIds.getValue();
         if (ids != null) {
             ids.remove(messageId);
+            nonForwardableSelectedMessageIds.remove(messageId);
             selectedMessageIds.postValue(ids);
         }
     }
@@ -196,14 +216,37 @@ public class DiscussionViewModel extends ViewModel {
         return selectedMessageIds;
     }
 
+    public boolean areAllSelectedMessagesForwardable() {
+        return nonForwardableSelectedMessageIds.isEmpty();
+    }
+
     public void deselectAll() {
         selectingForDeletion = false;
+        nonForwardableSelectedMessageIds.clear();
         selectedMessageIds.postValue(new ArrayList<>());
+    }
+
+    public void setMessageIdsToForward(List<Long> messageIds) {
+        this.messageIdsToForward = messageIds;
+    }
+
+    public List<Long> getMessageIdsToForward() {
+        return messageIdsToForward;
     }
 
     public LiveData<Long> getDiscussionIdLiveData() {
         return discussionIdLiveData;
     }
+
+    public void setForwardMessageBytesOwnedIdentity(byte[] bytesOwnedIdentity) {
+        this.forwardMessageBytesOwnedIdentityLiveData.postValue(bytesOwnedIdentity);
+    }
+
+    @NonNull
+    public LiveData<OwnedIdentity> getForwardMessageOwnedIdentityLiveData() {
+        return forwardMessageOwnedIdentityLiveData;
+    }
+
     // endregion
 
 }

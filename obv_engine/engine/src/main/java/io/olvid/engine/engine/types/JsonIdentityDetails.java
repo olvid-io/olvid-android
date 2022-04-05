@@ -271,6 +271,7 @@ public class JsonIdentityDetails {
         return Objects.equals(customFields, other.customFields);
     }
 
+    @JsonIgnore
     public boolean fieldsAreTheSame(JsonIdentityDetails other) {
         if (!(Objects.equals(firstName, other.firstName))) {
             return false;

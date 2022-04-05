@@ -79,6 +79,8 @@ public class ContactIdentity implements ObvDatabase {
     static final String REVOKED_AS_COMPROMISED = "revoked_as_compromised";
     private boolean forcefullyTrustedByUser;
     static final String FORCEFULLY_TRUSTED_BY_USER = "forcefully_trusted_by_user";
+    private boolean oneToOne;
+    static final String ONE_TO_ONE = "one_to_one";
 
     public Identity getContactIdentity() {
         return contactIdentity;
@@ -114,6 +116,10 @@ public class ContactIdentity implements ObvDatabase {
 
     public boolean isActive() {
         return forcefullyTrustedByUser || !revokedAsCompromised;
+    }
+
+    public boolean isOneToOne() {
+        return oneToOne;
     }
 
     // region computed properties
@@ -306,6 +312,21 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
+    public void setOneToOne(boolean oneToOne) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + ONE_TO_ONE + " = ? " +
+                " WHERE " + CONTACT_IDENTITY + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            statement.setBoolean(1, oneToOne);
+            statement.setBytes(2, contactIdentity.getBytes());
+            statement.setBytes(3, ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.oneToOne = oneToOne;
+            commitHookBits |= HOOK_BIT_ONE_TO_ONE_CHANGED;
+            identityManagerSession.session.addSessionCommitListener(this);
+        }
+    }
+
     public void setRevokedAsCompromised(boolean revokedAsCompromised) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + REVOKED_AS_COMPROMISED + " = ? " +
@@ -344,7 +365,7 @@ public class ContactIdentity implements ObvDatabase {
             throw new SQLException("markContactAsCertifiedByOwnKeycloak can only be called from within a transaction");
         }
 
-        // 1. mark contact as keycloakManaged
+        // 1. mark contact as keycloakManaged and add a trust origin
         if (!isCertifiedByOwnKeycloak()) {
             setCertifiedByOwnKeycloak(true);
         }
@@ -370,6 +391,12 @@ public class ContactIdentity implements ObvDatabase {
             } catch (JsonProcessingException e) {
                 // skip update if json fails
             }
+        }
+
+        // 4. add trust origin (this already checks for duplicates)
+        String keycloakServerUrl = identityManagerSession.identityDelegate.getOwnedIdentityKeycloakServerUrl(identityManagerSession.session, ownedIdentity);
+        if (keycloakServerUrl != null) {
+            addTrustOrigin(TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), keycloakServerUrl));
         }
     }
 
@@ -450,9 +477,9 @@ public class ContactIdentity implements ObvDatabase {
         }
 
         //////////
-        // if newTrustOrigin is from keycloak server, check if it is not already there --> avoid pointless duplicates
+        // if newTrustOrigin is not DIRECT, check if it is not already there --> avoid pointless duplicates
         //////////
-        if (newTrustOrigin.getType() == TrustOrigin.TYPE.KEYCLOAK) {
+        if (newTrustOrigin.getType() != TrustOrigin.TYPE.DIRECT) {
             ContactTrustOrigin[] contactTrustOrigins = ContactTrustOrigin.getAll(identityManagerSession, contactIdentity, ownedIdentity);
             for (ContactTrustOrigin contactTrustOrigin: contactTrustOrigins) {
                 TrustOrigin other = contactTrustOrigin.getTrustOrigin();
@@ -493,7 +520,7 @@ public class ContactIdentity implements ObvDatabase {
 
     // region constructors
 
-    public static ContactIdentity create(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, JsonIdentityDetailsWithVersionAndPhoto jsonIdentityDetailsWithVersionAndPhoto, TrustOrigin trustOrigin, boolean revokedAsCompromised) {
+    public static ContactIdentity create(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, JsonIdentityDetailsWithVersionAndPhoto jsonIdentityDetailsWithVersionAndPhoto, TrustOrigin trustOrigin, boolean revokedAsCompromised, boolean oneToOne) {
         if ((contactIdentity == null) || (ownedIdentity == null) || (jsonIdentityDetailsWithVersionAndPhoto == null)) {
             return null;
         }
@@ -509,7 +536,7 @@ public class ContactIdentity implements ObvDatabase {
             }
 
 
-            ContactIdentity contactIdentityObject = new ContactIdentity(identityManagerSession, contactIdentity, ownedIdentity, contactIdentityDetails.getVersion(), new TrustLevel(0, 0));
+            ContactIdentity contactIdentityObject = new ContactIdentity(identityManagerSession, contactIdentity, ownedIdentity, contactIdentityDetails.getVersion(), new TrustLevel(0, 0), oneToOne);
             contactIdentityObject.revokedAsCompromised = revokedAsCompromised;
             contactIdentityObject.insert();
 
@@ -536,7 +563,7 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
-    private ContactIdentity(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, int version, TrustLevel trustLevel) {
+    private ContactIdentity(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, int version, TrustLevel trustLevel, boolean oneToOne) {
         this.identityManagerSession = identityManagerSession;
         this.contactIdentity = contactIdentity;
         this.ownedIdentity = ownedIdentity;
@@ -546,6 +573,7 @@ public class ContactIdentity implements ObvDatabase {
         this.certifiedByOwnKeycloak = false; // this will be set at a later time
         this.revokedAsCompromised = false;
         this.forcefullyTrustedByUser = false;
+        this.oneToOne = oneToOne;
     }
 
     private ContactIdentity(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -562,6 +590,7 @@ public class ContactIdentity implements ObvDatabase {
         this.certifiedByOwnKeycloak = res.getBoolean(CERTIFIED_BY_OWN_KEYCLOAK);
         this.revokedAsCompromised = res.getBoolean(REVOKED_AS_COMPROMISED);
         this.forcefullyTrustedByUser = res.getBoolean(FORCEFULLY_TRUSTED_BY_USER);
+        this.oneToOne = res.getBoolean(ONE_TO_ONE);
     }
 
     // endregion
@@ -580,6 +609,7 @@ public class ContactIdentity implements ObvDatabase {
                     CERTIFIED_BY_OWN_KEYCLOAK + " BIT NOT NULL, " +
                     REVOKED_AS_COMPROMISED + " BIT NOT NULL, " +
                     FORCEFULLY_TRUSTED_BY_USER + " BIT NOT NULL, " +
+                    ONE_TO_ONE + " BIT NOT NULL, " +
                     " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + CONTACT_IDENTITY + ", " + OWNED_IDENTITY + "), " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + "(" + OwnedIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE, " +
                     " FOREIGN KEY (" + CONTACT_IDENTITY + ", " + OWNED_IDENTITY + ", " + TRUSTED_DETAILS_VERSION + ") REFERENCES " + ContactIdentityDetails.TABLE_NAME + "(" + ContactIdentityDetails.CONTACT_IDENTITY + ", " + ContactIdentityDetails.OWNED_IDENTITY + ", " + ContactIdentityDetails.VERSION + "), " +
@@ -775,11 +805,18 @@ public class ContactIdentity implements ObvDatabase {
             }
             oldVersion = 25;
         }
+        if (oldVersion < 28 && newVersion >= 28) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `contact_identity` TABLE FROM VERSION " + oldVersion + " TO 28");
+                statement.execute("ALTER TABLE contact_identity ADD COLUMN one_to_one BIT NOT NULL DEFAULT 1");
+            }
+            oldVersion = 28;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?);")) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, trustedDetailsVersion);
@@ -789,9 +826,9 @@ public class ContactIdentity implements ObvDatabase {
             statement.setBoolean(6, certifiedByOwnKeycloak);
             statement.setBoolean(7, revokedAsCompromised);
             statement.setBoolean(8, forcefullyTrustedByUser);
+            statement.setBoolean(9, oneToOne);
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_INSERTED;
-            commitHookBits |= HOOK_BIT_TRUST_LEVEL_INCREASED;
             identityManagerSession.session.addSessionCommitListener(this);
         }
     }
@@ -950,24 +987,6 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
-    public static boolean isActive(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        if (ownedIdentity == null || contactIdentity == null) {
-            return false;
-        }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + FORCEFULLY_TRUSTED_BY_USER + ", " + REVOKED_AS_COMPROMISED + " FROM " + TABLE_NAME +
-                " WHERE " + OWNED_IDENTITY + " = ?" +
-                " AND " + CONTACT_IDENTITY + " = ?;")) {
-            statement.setBytes(1, ownedIdentity.getBytes());
-            statement.setBytes(2, contactIdentity.getBytes());
-            try (ResultSet res = statement.executeQuery()) {
-                if (res.next()) {
-                    return res.getBoolean(FORCEFULLY_TRUSTED_BY_USER) || !res.getBoolean(REVOKED_AS_COMPROMISED);
-                } else {
-                    return false;
-                }
-            }
-        }
-    }
 
     // endregion
 
@@ -985,6 +1004,7 @@ public class ContactIdentity implements ObvDatabase {
     private static final long HOOK_BIT_KEYCLOAK_MANAGED_CHANGED = 0x40;
     private static final long HOOK_BIT_ACTIVE_CHANGED = 0x80;
     private static final long HOOK_BIT_REVOKED = 0x100;
+    private static final long HOOK_BIT_ONE_TO_ONE_CHANGED = 0x200;
 
     @Override
     public void wasCommitted() {
@@ -994,6 +1014,8 @@ public class ContactIdentity implements ObvDatabase {
             userInfo.put(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_OWNED_IDENTITY_KEY, ownedIdentity);
             userInfo.put(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_KEYCLOAK_MANAGED_KEY, certifiedByOwnKeycloak);
             userInfo.put(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_ACTIVE_KEY, isActive());
+            userInfo.put(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_ONE_TO_ONE_KEY, isOneToOne());
+            userInfo.put(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_TRUST_LEVEL_KEY, trustLevel.major);
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY, userInfo);
         }
         if ((commitHookBits & HOOK_BIT_DELETED) != 0) {
@@ -1050,6 +1072,13 @@ public class ContactIdentity implements ObvDatabase {
             userInfo.put(IdentityNotifications.NOTIFICATION_CONTACT_REVOKED_OWNED_IDENTITY_KEY, ownedIdentity);
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_CONTACT_REVOKED, userInfo);
         }
+        if ((commitHookBits & HOOK_BIT_ONE_TO_ONE_CHANGED) != 0) {
+            HashMap<String, Object> userInfo = new HashMap<>();
+            userInfo.put(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_CONTACT_IDENTITY_KEY, contactIdentity);
+            userInfo.put(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_OWNED_IDENTITY_KEY, ownedIdentity);
+            userInfo.put(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY, isOneToOne());
+            identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED, userInfo);
+        }
         commitHookBits = 0;
    }
 
@@ -1093,6 +1122,7 @@ public class ContactIdentity implements ObvDatabase {
         pojo.trust_level = trustLevel.toString();
         pojo.revoked = revokedAsCompromised;
         pojo.forcefully_trusted = forcefullyTrustedByUser;
+        pojo.one_to_one = oneToOne;
         pojo.trust_origins = ContactTrustOrigin.backupAll(identityManagerSession, ownedIdentity, contactIdentity);
         pojo.contact_groups = ContactGroup.backupAllForOwner(identityManagerSession, ownedIdentity, contactIdentity);
 
@@ -1118,7 +1148,7 @@ public class ContactIdentity implements ObvDatabase {
             published_details = ContactIdentityDetails.restore(identityManagerSession, ownedIdentity, contactIdentity, pojo.published_details);
         }
 
-        ContactIdentity contactIdentityObject = new ContactIdentity(identityManagerSession, contactIdentity, ownedIdentity, trusted_details.getVersion(), TrustLevel.of(pojo.trust_level));
+        ContactIdentity contactIdentityObject = new ContactIdentity(identityManagerSession, contactIdentity, ownedIdentity, trusted_details.getVersion(), TrustLevel.of(pojo.trust_level), (pojo.one_to_one == null || pojo.one_to_one));
         if (published_details != null) {
             contactIdentityObject.publishedDetailsVersion = published_details.getVersion();
         }
@@ -1163,6 +1193,7 @@ public class ContactIdentity implements ObvDatabase {
         public String trust_level;
         public boolean revoked;
         public boolean forcefully_trusted;
+        public Boolean one_to_one;
         public ContactTrustOrigin.Pojo_0[] trust_origins;
         public ContactGroup.Pojo_0[] contact_groups;
     }

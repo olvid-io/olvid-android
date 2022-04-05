@@ -74,9 +74,6 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
     private final Lock awaitingServerSessionRefreshOperationsLock;
     private final NotificationListener notificationListener;
 
-    private boolean initialQueueingPerformed = false;
-    private final Object lock = new Object();
-
     private NotificationListeningDelegate notificationListeningDelegate;
 
     public ServerUserDataCoordinator(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, CreateServerSessionDelegate createServerSessionDelegate, ObjectMapper jsonObjectMapper, PRNGService prng) {
@@ -127,6 +124,8 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                                 queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
                             } else if (userData.nextRefreshTimestamp < System.currentTimeMillis()) {
                                 queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label);
+                            } else {
+                                scheduler.schedule(new IdentityAndUid(userData.ownedIdentity, userData.label), () -> queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label), "ServerQueryOperation", userData.nextRefreshTimestamp - System.currentTimeMillis());
                             }
                         } catch (Exception e) {
                             queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
@@ -138,6 +137,8 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                         queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
                     } else if (userData.nextRefreshTimestamp < System.currentTimeMillis()) {
                         queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label);
+                    } else {
+                        scheduler.schedule(new IdentityAndUid(userData.ownedIdentity, userData.label), () -> queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label), "ServerQueryOperation", userData.nextRefreshTimestamp - System.currentTimeMillis());
                     }
                 }
             }
@@ -179,7 +180,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
     }
 
     private void scheduleNewRefreshUserDataOperation(Identity ownedIdentity, UID label) {
-        scheduler.schedule(new IdentityAndUid(ownedIdentity, label), () -> queueNewRefreshUserDataOperation(ownedIdentity, label), "ServerQueryOperation");
+        scheduler.schedule(new IdentityAndUid(ownedIdentity, label), () -> queueNewRefreshUserDataOperation(ownedIdentity, label), "RefreshUserDataOperation");
     }
 
 
@@ -189,7 +190,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
     }
 
     private void scheduleNewDeleteUserDataOperation(Identity ownedIdentity, UID label) {
-        scheduler.schedule(new IdentityAndUid(ownedIdentity, label), () -> queueNewDeleteUserDataOperation(ownedIdentity, label), "ServerQueryOperation");
+        scheduler.schedule(new IdentityAndUid(ownedIdentity, label), () -> queueNewDeleteUserDataOperation(ownedIdentity, label), "DeleteUserDataOperation");
     }
 
     private void deleteWaitForServerSession(Identity identity, UID label) {
@@ -305,6 +306,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
             Identity ownedIdentity = ((RefreshUserDataOperation) operation).getOwnedIdentity();
             UID label = ((RefreshUserDataOperation) operation).getLabel();
             scheduler.clearFailedCount(new IdentityAndUid(ownedIdentity, label));
+            newUserDataUploaded(ownedIdentity, label);
         } else if (operation instanceof DeleteUserDataOperation) {
             Logger.d("DeleteUserDataOperation finished");
             Identity ownedIdentity = ((DeleteUserDataOperation) operation).getOwnedIdentity();
@@ -313,6 +315,9 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
         }
     }
 
+    void newUserDataUploaded(Identity ownedIdentity, UID label) {
+        scheduler.schedule(new IdentityAndUid(ownedIdentity, label), () -> queueNewRefreshUserDataOperation(ownedIdentity, label), "ServerQueryOperation", Constants.USER_DATA_REFRESH_INTERVAL);
+    }
 
     class NotificationListener implements io.olvid.engine.datatypes.NotificationListener {
         @Override

@@ -47,13 +47,18 @@ public class UpdateGroupNameAndPhotoTask implements Runnable {
             group.photoUrl = photoUrl;
             db.groupDao().updateNameAndPhoto(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.name, group.photoUrl);
 
-            // rename the corresponding one-to-one discussion
+            // rename the corresponding group discussion
             Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
-            discussion.title = group.getCustomName();
-            discussion.photoUrl = group.getCustomPhotoUrl();
-            db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
+            if (discussion != null) {
+                discussion.title = group.getCustomName();
+                discussion.photoUrl = group.getCustomPhotoUrl();
+                db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
 
-            ShortcutActivity.updateShortcut(discussion);
+                ShortcutActivity.updateShortcut(discussion);
+
+                // delete all group details updated messages from the discussion
+                db.messageDao().deleteAllDiscussionNewPublishedDetailsMessages(discussion.id);
+            }
         }
     }
 }

@@ -228,11 +228,12 @@ public class ContactDevice implements ObvDatabase {
         }
     }
 
-    public void setRawDeviceCapabilities(String[] rawDeviceCapabilities) throws SQLException {
+    // return true if the capabilities did change
+    public boolean setRawDeviceCapabilities(String[] rawDeviceCapabilities) throws SQLException {
         byte[] serializedDeviceCapabilities = ObvCapability.serializeRawDeviceCapabilities(rawDeviceCapabilities);
         if (Arrays.equals(serializedDeviceCapabilities, this.serializedDeviceCapabilities)) {
             // if the capabilities did not change, do not update/notify
-            return;
+            return false;
         }
 
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
@@ -248,6 +249,7 @@ public class ContactDevice implements ObvDatabase {
             this.serializedDeviceCapabilities = serializedDeviceCapabilities;
             commitHookBits |= HOOK_BIT_CAPABILITIES_UPDATED;
             identityManagerSession.session.addSessionCommitListener(this);
+            return true;
         }
     }
 

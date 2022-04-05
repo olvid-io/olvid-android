@@ -207,8 +207,8 @@ public class UploadDraftAttachmentHandler {
 
     void cancelAllCurrentUploads() {
         List<Long> localIds = new ArrayList<>(this.attachmentsMap.keySet());
-        for(Object localId: localIds){
-            stopAttachmentUpload((Long) localId);
+        for (Long localId : localIds) {
+            stopAttachmentUpload(localId);
         }
     }
 

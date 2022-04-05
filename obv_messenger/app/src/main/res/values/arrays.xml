@@ -282,14 +282,12 @@
     </string-array>
 
     <string-array name="regional_turn_servers">
-        <item>@string/pref_text_regional_turn_server_none</item>
         <item>@string/pref_text_regional_turn_server_global</item>
         <item>@string/pref_text_regional_turn_server_paris</item>
         <item>@string/pref_text_regional_turn_server_new_york</item>
         <item>@string/pref_text_regional_turn_server_singapore</item>
     </string-array>
     <string-array name="regional_turn_servers_values">
-        <item>null</item>
         <item>global</item>
         <item>par</item>
         <item>nyc</item>
@@ -324,5 +322,16 @@
         <item>dot</item>
         <item>line</item>
         <item>full</item>
+    </string-array>
+
+    <string-array name="auto_join_groups">
+        <item>@string/pref_text_auto_join_groups_everyone</item>
+        <item>@string/pref_text_auto_join_groups_contacts</item>
+        <item>@string/pref_text_auto_join_groups_nobody</item>
+    </string-array>
+    <string-array name="auto_join_groups_values">
+        <item>everyone</item>
+        <item>contacts</item>
+        <item>nobody</item>
     </string-array>
 </resources>

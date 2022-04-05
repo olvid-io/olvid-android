@@ -33,7 +33,6 @@ import io.olvid.engine.channel.databases.ProvisionedKeyMaterial;
 import io.olvid.engine.channel.datatypes.Channel;
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;
 import io.olvid.engine.channel.datatypes.ChannelManagerSessionFactory;
-import io.olvid.engine.channel.datatypes.NetworkReceivedMessageDecryptorDelegate;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Seed;
@@ -56,7 +55,7 @@ import io.olvid.engine.metamanager.ProtocolDelegate;
 import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 
 public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessageDelegate, ChannelManagerSessionFactory, ObvManager {
-    private final NetworkReceivedMessageDecryptorDelegate channelCoordinator;
+    private final ChannelCoordinator channelCoordinator;
 
 
     private CreateSessionDelegate createSessionDelegate;
@@ -150,7 +149,7 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
                                     //  --> we delete the device and start a device discovery protocol
                                     Logger.i("Found a contact device with no channel and no channel creation. Restarting device discovery.");
                                     identityDelegate.removeDeviceForContactIdentity(channelManagerSession.session, ownedIdentity, contactIdentity, contactDeviceUid);
-                                    protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(channelManagerSession.session, contactIdentity, ownedIdentity);
+                                    protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(channelManagerSession.session, ownedIdentity, contactIdentity);
                                 }
                             } catch (Exception e) {
                                 // nothing to do

@@ -20,20 +20,13 @@
 package io.olvid.messenger.webrtc;
 
 
-import android.os.Handler;
-import android.os.Looper;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.DataChannel;
-import org.webrtc.DefaultVideoDecoderFactory;
-import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
-import org.webrtc.Logging;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
 import org.webrtc.PeerConnection;
@@ -41,8 +34,6 @@ import org.webrtc.PeerConnectionFactory;
 import org.webrtc.RtpReceiver;
 import org.webrtc.SdpObserver;
 import org.webrtc.SessionDescription;
-import org.webrtc.VideoDecoderFactory;
-import org.webrtc.VideoEncoderFactory;
 import org.webrtc.audio.AudioDeviceModule;
 import org.webrtc.audio.JavaAudioDeviceModule;
 
@@ -106,7 +97,6 @@ class WebrtcPeerConnectionHolder {
 
     private String turnUsername;
     private String turnPassword;
-    private List<String> turnServers;
 
     private WebrtcCallService.GatheringPolicy gatheringPolicy;
     private boolean readyToProcessPeerIceCandidates;
@@ -140,21 +130,21 @@ class WebrtcPeerConnectionHolder {
 //        WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(true);
 //        WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(true);
 
-        eglBase = EglBase.create();
-        VideoEncoderFactory videoEncoderFactory = new DefaultVideoEncoderFactory(eglBase.getEglBaseContext(), true, true);
-        VideoDecoderFactory videoDecoderFactory = new DefaultVideoDecoderFactory(eglBase.getEglBaseContext());
+//        eglBase = EglBase.create();
+//        VideoEncoderFactory videoEncoderFactory = new DefaultVideoEncoderFactory(eglBase.getEglBaseContext(), true, true);
+//        VideoDecoderFactory videoDecoderFactory = new DefaultVideoDecoderFactory(eglBase.getEglBaseContext());
 
         PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(App.getContext())
                 .createInitializationOptions());
 
-//        Logging.enableLogToDebugOutput(Logging.Severity.LS_INFO);
+//        org.webrtc.Logging.enableLogToDebugOutput(org.webrtc.Logging.Severity.LS_INFO);
 
 
         peerConnectionFactory = PeerConnectionFactory.builder()
                 .setOptions(options)
                 .setAudioDeviceModule(audioDeviceModule)
-                .setVideoEncoderFactory(videoEncoderFactory)
-                .setVideoDecoderFactory(videoDecoderFactory)
+//                .setVideoEncoderFactory(videoEncoderFactory)
+//                .setVideoDecoderFactory(videoDecoderFactory)
                 .createPeerConnectionFactory();
     }
 
@@ -165,16 +155,26 @@ class WebrtcPeerConnectionHolder {
         }
     }
 
-    void setTurnCredentials(String turnUsername, String turnPassword, @Nullable List<String> turnServers) {
+    void setTurnCredentials(String turnUsername, String turnPassword) {
         this.turnUsername = turnUsername;
         this.turnPassword = turnPassword;
-        this.turnServers = turnServers;
     }
 
     public void setPeerSessionDescription(String sessionDescriptionType, String sessionDescription) {
-        Logger.d("☎️ Setting peer sdp\n" + sessionDescription);
-        this.peerSessionDescriptionType = sessionDescriptionType;
-        this.peerSessionDescription = sessionDescription;
+        if (peerConnection == null) {
+            Logger.d("☎ Setting peer sdp\n" + sessionDescription);
+            this.peerSessionDescriptionType = sessionDescriptionType;
+            this.peerSessionDescription = sessionDescription;
+        } else {
+            Logger.d("☎ Setting remote description:\n" + sessionDescription);
+            peerConnection.setRemoteDescription(sessionDescriptionObserver, new SessionDescription(SessionDescription.Type.fromCanonicalForm(sessionDescriptionType), sessionDescription));
+
+            readyToProcessPeerIceCandidates = true;
+            for (WebrtcCallService.JsonIceCandidate jsonIceCandidate : pendingPeerIceCandidates) {
+                peerConnection.addIceCandidate(new IceCandidate(jsonIceCandidate.sdpMid, jsonIceCandidate.sdpMLineIndex, jsonIceCandidate.sdp));
+            }
+            pendingPeerIceCandidates.clear();
+        }
     }
 
     public void setGatheringPolicy(WebrtcCallService.GatheringPolicy gatheringPolicy) {
@@ -228,7 +228,7 @@ class WebrtcPeerConnectionHolder {
         dataChannel.registerObserver(dataChannelObserver);
     }
 
-    private static PeerConnection.IceServer getIceServer(String username, String password, List<String> turnServers) {
+    private static PeerConnection.IceServer getIceServer(String username, String password) {
         List<String> servers;
         if (SettingsActivity.getScaledTurn() != null) {
             switch (SettingsActivity.getScaledTurn()) {
@@ -247,11 +247,7 @@ class WebrtcPeerConnectionHolder {
                     break;
             }
         } else {
-            if (turnServers == null) {
-                servers = TURN_SCALED_SERVERS;
-            } else {
-                servers = turnServers;
-            }
+            servers = TURN_SCALED_SERVERS;
         }
         return PeerConnection.IceServer.builder(servers)
                 .setUsername(username)
@@ -263,9 +259,9 @@ class WebrtcPeerConnectionHolder {
 
 
     void createPeerConnection() {
-        PeerConnection.IceServer iceServer = getIceServer(turnUsername, turnPassword, turnServers);
+        PeerConnection.IceServer iceServer = getIceServer(turnUsername, turnPassword);
         if (iceServer == null) {
-            webrtcCallService.peerConnectionHolderFailed(FailReason.ICE_SERVER_CREDENTIALS_CREATION_ERROR);
+            webrtcCallService.peerConnectionHolderFailed(callParticipant, FailReason.ICE_SERVER_CREDENTIALS_CREATION_ERROR);
             return;
         }
         PeerConnection.RTCConfiguration configuration = new PeerConnection.RTCConfiguration(Collections.singletonList(iceServer));
@@ -273,37 +269,51 @@ class WebrtcPeerConnectionHolder {
         configuration.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN;
         configuration.continualGatheringPolicy = (this.gatheringPolicy == WebrtcCallService.GatheringPolicy.GATHER_CONTINUOUSLY) ? PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY : PeerConnection.ContinualGatheringPolicy.GATHER_ONCE;
 
-        Logger.d("☎️ Creating PeerConnection with GatheringPolicy: " + this.gatheringPolicy);
+        Logger.d("☎ Creating PeerConnection with GatheringPolicy: " + this.gatheringPolicy);
         peerConnection = peerConnectionFactory.createPeerConnection(configuration, peerConnectionObserver);
-    }
+        if (peerConnection != null) {
+            createAudioTrack(new MediaConstraints());
+            createDataChannel();
 
+            if (peerSessionDescription != null && peerSessionDescriptionType != null) {
+                Logger.d("☎ Setting remote description:\n" + peerSessionDescription);
+                peerConnection.setRemoteDescription(sessionDescriptionObserver, new SessionDescription(SessionDescription.Type.fromCanonicalForm(peerSessionDescriptionType), peerSessionDescription));
+                peerSessionDescription = null;
+                peerSessionDescriptionType = null;
 
-
-
-    void createOffer() {
-        createAudioTrack(new MediaConstraints());
-        createDataChannel();
-        peerConnection.createOffer(sessionDescriptionObserver, new MediaConstraints());
-    }
-
-
-    void createAnswer() {
-        createAudioTrack(new MediaConstraints());
-        createDataChannel();
-
-        peerConnection.setRemoteDescription(sessionDescriptionObserver, new SessionDescription(SessionDescription.Type.fromCanonicalForm(peerSessionDescriptionType), peerSessionDescription));
-
-        readyToProcessPeerIceCandidates = true;
-        for (WebrtcCallService.JsonIceCandidate jsonIceCandidate : pendingPeerIceCandidates) {
-            peerConnection.addIceCandidate(new IceCandidate(jsonIceCandidate.sdpMid, jsonIceCandidate.sdpMLineIndex, jsonIceCandidate.sdp));
+                readyToProcessPeerIceCandidates = true;
+                for (WebrtcCallService.JsonIceCandidate jsonIceCandidate : pendingPeerIceCandidates) {
+                    peerConnection.addIceCandidate(new IceCandidate(jsonIceCandidate.sdpMid, jsonIceCandidate.sdpMLineIndex, jsonIceCandidate.sdp));
+                }
+                pendingPeerIceCandidates.clear();
+            }
         }
-        pendingPeerIceCandidates.clear();
-
-        peerConnection.createAnswer(sessionDescriptionObserver, new MediaConstraints());
     }
 
 
-    void createRestartOffer() {
+    void createLocalDescription() {
+        // only called from onRenegotiationNeeded
+        if (peerConnection != null) {
+            switch (peerConnection.signalingState()) {
+                case STABLE:
+                    reconnectOfferCounter++;
+                    peerConnection.createOffer(sessionDescriptionObserver, new MediaConstraints());
+                    break;
+                case HAVE_REMOTE_OFFER:
+                    peerConnection.createAnswer(sessionDescriptionObserver, new MediaConstraints());
+                    break;
+                case HAVE_LOCAL_OFFER:
+                case HAVE_LOCAL_PRANSWER:
+                case HAVE_REMOTE_PRANSWER:
+                case CLOSED:
+                    // do nothing
+                    break;
+            }
+        }
+    }
+
+
+    void restartIce() {
         if (peerConnection != null) {
             if (peerConnection.signalingState() == PeerConnection.SignalingState.HAVE_LOCAL_OFFER) {
                 // rollback to a stable set before creating the new restart offer
@@ -318,10 +328,7 @@ class WebrtcPeerConnectionHolder {
                 }
             }
 
-            reconnectOfferCounter++;
-
             peerConnection.restartIce();
-            peerConnection.createOffer(sessionDescriptionObserver, new MediaConstraints());
         }
     }
 
@@ -333,12 +340,12 @@ class WebrtcPeerConnectionHolder {
             switch (sessionDescriptionType) {
                 case "offer": {
                     if (reconnectCounter < reconnectAnswerCounter) {
-                        Logger.i("☎️ Received restart offer with counter too low " + reconnectCounter + " vs. " + reconnectAnswerCounter);
+                        Logger.i("☎ Received restart offer with counter too low " + reconnectCounter + " vs. " + reconnectAnswerCounter);
                         break;
                     }
 
                     if (peerConnection.signalingState() == PeerConnection.SignalingState.HAVE_REMOTE_OFFER) {
-                        Logger.d("☎️ Received restart offer while already having one --> rollback");
+                        Logger.d("☎ Received restart offer while already having one --> rollback");
                         // rollback to a stable set before handling the new restart offer
                         peerConnection.setLocalDescription(sessionDescriptionObserver, new SessionDescription(SessionDescription.Type.ROLLBACK, ""));
                     } else if (peerConnection.signalingState() == PeerConnection.SignalingState.HAVE_LOCAL_OFFER) {
@@ -346,38 +353,38 @@ class WebrtcPeerConnectionHolder {
                         // if we are the offer sender, do nothing, otherwise rollback and process the new offer
                         if (webrtcCallService.shouldISendTheOfferToCallParticipant(callParticipant)) {
                             if (peerReconnectCounterToOverride == reconnectOfferCounter) {
-                                Logger.d("☎️ Received restart offer while already having created an offer. It specifies to override my current offer --> rollback");
+                                Logger.d("☎ Received restart offer while already having created an offer. It specifies to override my current offer --> rollback");
                                 peerConnection.setLocalDescription(sessionDescriptionObserver, new SessionDescription(SessionDescription.Type.ROLLBACK, ""));
                             } else {
-                                Logger.d("☎️ Received restart offer while already having created an offer. I am the offerer --> ignore this new offer");
+                                Logger.d("☎ Received restart offer while already having created an offer. I am the offerer --> ignore this new offer");
                                 break;
                             }
                         } else {
-                            Logger.d("☎️ Received restart offer while already having created an offer. I am not the offerer --> rollback");
+                            Logger.d("☎ Received restart offer while already having created an offer. I am not the offerer --> rollback");
                             peerConnection.setLocalDescription(sessionDescriptionObserver, new SessionDescription(SessionDescription.Type.ROLLBACK, ""));
                         }
                     }
 
                     reconnectAnswerCounter = reconnectCounter;
+                    Logger.d("☎ Setting remote description:\n" + sessionDescription);
                     peerConnection.setRemoteDescription(sessionDescriptionObserver, new SessionDescription(SessionDescription.Type.fromCanonicalForm(sessionDescriptionType), sessionDescription));
 
-                    Logger.d("☎️ Creating answer for restart offer");
                     peerConnection.restartIce();
-                    peerConnection.createAnswer(sessionDescriptionObserver, new MediaConstraints());
                     break;
                 }
                 case "answer": {
                     if (reconnectCounter != reconnectOfferCounter) {
-                        Logger.i("☎️ Received restart answer with bad counter " + reconnectCounter + " vs. " + reconnectAnswerCounter);
+                        Logger.i("☎ Received restart answer with bad counter " + reconnectCounter + " vs. " + reconnectOfferCounter);
                         break;
                     }
 
                     if (peerConnection.signalingState() != PeerConnection.SignalingState.HAVE_LOCAL_OFFER) {
-                        Logger.d("☎️ Received restart answer while not in the HAVE_LOCAL_OFFER state --> ignore this restart answer");
+                        Logger.d("☎ Received restart answer while not in the HAVE_LOCAL_OFFER state --> ignore this restart answer");
                         break;
                     }
 
-                    Logger.d("☎️ Applying received restart answer");
+                    Logger.d("☎ Applying received restart answer");
+                    Logger.d("☎ Setting remote description:\n" + sessionDescription);
                     peerConnection.setRemoteDescription(sessionDescriptionObserver, new SessionDescription(SessionDescription.Type.fromCanonicalForm(sessionDescriptionType), sessionDescription));
                     break;
                 }
@@ -492,7 +499,7 @@ class WebrtcPeerConnectionHolder {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            webrtcCallService.peerConnectionHolderFailed(FailReason.INTERNAL_ERROR);
+            webrtcCallService.peerConnectionHolderFailed(callParticipant, FailReason.INTERNAL_ERROR);
             return "";
         }
         return sb.toString();
@@ -550,24 +557,13 @@ class WebrtcPeerConnectionHolder {
                         } else {
                             sb.append(";maxaveragebitrate=32000");
                         }
-                        sb.append("\n");
                     } else {
                         sb.append(line);
-                        sb.append("\n");
                     }
+                    sb.append("\n");
                 }
             }
         }
-    }
-
-    public void finishEstablishingConnection() {
-        peerConnection.setRemoteDescription(sessionDescriptionObserver, new SessionDescription(SessionDescription.Type.fromCanonicalForm(peerSessionDescriptionType), peerSessionDescription));
-
-        readyToProcessPeerIceCandidates = true;
-        for (WebrtcCallService.JsonIceCandidate jsonIceCandidate : pendingPeerIceCandidates) {
-            peerConnection.addIceCandidate(new IceCandidate(jsonIceCandidate.sdpMid, jsonIceCandidate.sdpMLineIndex, jsonIceCandidate.sdp));
-        }
-        pendingPeerIceCandidates.clear();
     }
 
     public void cleanUp() {
@@ -624,7 +620,7 @@ class WebrtcPeerConnectionHolder {
         @Override
         public void onIceConnectionChange(PeerConnection.IceConnectionState connectionState) {
             this.connectionState = connectionState;
-            Logger.d("☎️ onIceConnectionChange " + connectionState);
+            Logger.d("☎ onIceConnectionChange " + connectionState);
             switch (connectionState) {
                 case NEW:
                 case CHECKING:
@@ -637,6 +633,7 @@ class WebrtcPeerConnectionHolder {
                 }
                 case DISCONNECTED:
                 case FAILED: {
+                    Logger.d("☎ Calling reconnectAfterConnectionLoss because of ICE DISCONNECT/FAIL");
                     webrtcCallService.reconnectAfterConnectionLoss(callParticipant);
                     break;
                 }
@@ -645,26 +642,41 @@ class WebrtcPeerConnectionHolder {
 
         @Override
         public void onIceConnectionReceivingChange(boolean receiving) {
-            Logger.d("☎️ onIceConnectionReceivingChange");
+            Logger.d("☎ onIceConnectionReceivingChange");
         }
 
         @Override
         public void onIceGatheringChange(PeerConnection.IceGatheringState newState) {
-            Logger.d("☎️ onIceGatheringChange " + newState.toString());
+            Logger.d("☎ onIceGatheringChange " + newState.toString());
             switch (newState) {
                 case NEW:
                     break;
                 case GATHERING: {
                     // we start gathering --> clear the turnCandidates list
                     resetGatheringState();
+                    // if gathering continuously, start a timer to detect potentially invalid credentials
+                    if (gatheringPolicy == WebrtcCallService.GatheringPolicy.GATHER_CONTINUOUSLY && webrtcCallService.isCaller()) {
+                        App.runThread(() -> {
+                            // wait 5 seconds, then check if some candidates were found.
+                            // --> there might be false positives, but this is not a big deal, worst case, we clear the cache...
+                            try {
+                                Thread.sleep(5_000);
+                            } catch (InterruptedException e) {
+                                return;
+                            }
+                            if (turnCandidates == 0) {
+                                webrtcCallService.clearCredentialsCache();
+                            }
+                        });
+                    }
                     break;
                 }
                 case COMPLETE: {
                     if (gatheringPolicy == WebrtcCallService.GatheringPolicy.GATHER_ONCE) {
                         if (turnCandidates == 0 && connectionState == null) {
-                            Logger.w("☎️ No TURN candidate found");
+                            Logger.w("☎ No TURN candidate found");
                             webrtcCallService.clearCredentialsCache();
-                            webrtcCallService.peerConnectionHolderFailed(FailReason.SERVER_UNREACHABLE);
+                            webrtcCallService.peerConnectionHolderFailed(callParticipant, FailReason.SERVER_UNREACHABLE);
                         } else {
                             iceGatheringCompleted();
                         }
@@ -676,25 +688,29 @@ class WebrtcPeerConnectionHolder {
 
         @Override
         public void onIceCandidate(IceCandidate candidate) {
+            Logger.d("☎ onIceCandidate");
             switch (gatheringPolicy) {
                 case GATHER_ONCE: {
                     if (!"".equals(candidate.serverUrl)) {
                         turnCandidates++;
                         if (turnCandidates == 1) {
-                            new Thread(() -> {
+                            App.runThread(() -> {
                                 try {
                                     Thread.sleep(2000);
                                 } catch (InterruptedException e) {
                                     // Nothing special to do
                                 }
                                 iceGatheringCompleted();
-                            }).start();
+                            });
                         }
                     }
                     break;
                 }
                 case GATHER_CONTINUOUSLY: {
-                    webrtcCallService.sendAddIceCandidateMessage(callParticipant, new WebrtcCallService.JsonIceCandidate(candidate.sdp, candidate.sdpMLineIndex, candidate.sdpMid));
+                    if (!"".equals(candidate.serverUrl)) {
+                        turnCandidates++;
+                        webrtcCallService.sendAddIceCandidateMessage(callParticipant, new WebrtcCallService.JsonIceCandidate(candidate.sdp, candidate.sdpMLineIndex, candidate.sdpMid));
+                    }
                     break;
                 }
             }
@@ -702,17 +718,14 @@ class WebrtcPeerConnectionHolder {
 
         @Override
         public void onIceCandidatesRemoved(IceCandidate[] candidates) {
+            Logger.d("☎ onIceCandidatesRemoved");
             switch (gatheringPolicy) {
                 case GATHER_ONCE:
-                    Logger.d("onIceCandidatesRemoved");
                     break;
                 case GATHER_CONTINUOUSLY: {
                     WebrtcCallService.JsonIceCandidate[] jsonIceCandidates = new WebrtcCallService.JsonIceCandidate[candidates.length];
-                    int i = 0;
-                    for (IceCandidate candidate : candidates) {
-                        Logger.e("remove " + candidate.toString());
+                    for (int i = 0; i < candidates.length; i++) {
                         jsonIceCandidates[i] = new WebrtcCallService.JsonIceCandidate(candidates[i].sdp, candidates[i].sdpMLineIndex, candidates[i].sdpMid);
-                        i++;
                     }
                     webrtcCallService.sendRemoveIceCandidatesMessage(callParticipant, jsonIceCandidates);
                     break;
@@ -722,42 +735,36 @@ class WebrtcPeerConnectionHolder {
 
         @Override
         public void onAddStream(MediaStream stream) {
-            Logger.d("onAddStream");
+            Logger.d("☎ onAddStream");
         }
 
         @Override
         public void onRemoveStream(MediaStream stream) {
-            Logger.d("onRemoveStream");
+            Logger.d("☎ onRemoveStream");
         }
 
         @Override
         public void onDataChannel(DataChannel dataChannel) {
-            Logger.d("onDataChannel");
+            Logger.d("☎ onDataChannel");
         }
 
         @Override
         public void onRenegotiationNeeded() {
-            switch (gatheringPolicy) {
-                case GATHER_ONCE:
-                    Logger.d("onRenegotiationNeeded");
-                    resetGatheringState();
-                    break;
-                case GATHER_CONTINUOUSLY:
-                    break;
-            }
+            // called whenever a peerConnection is created, or after a restartICE. May not be called if a negotiation is already in progress
+            webrtcCallService.synchronizeOnExecutor(WebrtcPeerConnectionHolder.this::createLocalDescription);
         }
 
         @Override
         public void onAddTrack(RtpReceiver receiver, MediaStream[] mediaStreams) {
-            Logger.d("onAddTrack");
+            Logger.d("☎ onAddTrack");
         }
     }
 
     private abstract class SdpSetObserver implements SdpObserver {
         @Override
         public void onSetFailure(String error) {
-            Logger.w("☎️ ON SET failure " + error);
-            webrtcCallService.peerConnectionHolderFailed(FailReason.PEER_CONNECTION_CREATION_ERROR);
+            Logger.w("☎ onSetFailure " + error);
+            webrtcCallService.peerConnectionHolderFailed(callParticipant, FailReason.PEER_CONNECTION_CREATION_ERROR);
         }
 
         @Override
@@ -776,22 +783,23 @@ class WebrtcPeerConnectionHolder {
                 // --> we don't set anything
                 return;
             }
-            Logger.d("☎️ ON CREATE success. Filtering codecs.");
+            Logger.d("☎ onCreateSuccess. Filtering codecs.");
             String filteredSdpDescription = filterSdpDescriptionCodec(sdp.description);
-            Logger.d("☎️ Setting filtered local description:\n" + filteredSdpDescription);
+            Logger.d("☎ Setting filtered local description:\n" + filteredSdpDescription);
             switch (gatheringPolicy) {
                 case GATHER_ONCE:
-                    peerConnection.setLocalDescription(this, new SessionDescription(sdp.type, filteredSdpDescription));
                     peerConnectionObserver.resetGatheringState();
+                    peerConnection.setLocalDescription(this, new SessionDescription(sdp.type, filteredSdpDescription));
                     break;
                 case GATHER_CONTINUOUSLY:
                     peerConnection.setLocalDescription(new SdpSetObserver() {
                         @Override
                         public void onSetSuccess() {
+                            Logger.d("☎ onSetSuccess");
                             if (sdp.type == SessionDescription.Type.OFFER) {
-                                webrtcCallService.sendLocalDescriptionToPeer(callParticipant, sdp.type.canonicalForm(), sdp.description, reconnectOfferCounter, reconnectAnswerCounter);
+                                webrtcCallService.sendLocalDescriptionToPeer(callParticipant, sdp.type.canonicalForm(), filteredSdpDescription, reconnectOfferCounter, reconnectAnswerCounter);
                             } else {
-                                webrtcCallService.sendLocalDescriptionToPeer(callParticipant, sdp.type.canonicalForm(), sdp.description, reconnectAnswerCounter, -1);
+                                webrtcCallService.sendLocalDescriptionToPeer(callParticipant, sdp.type.canonicalForm(), filteredSdpDescription, reconnectAnswerCounter, -1);
                             }
                         }
                     }, new SessionDescription(sdp.type, filteredSdpDescription));
@@ -807,14 +815,14 @@ class WebrtcPeerConnectionHolder {
 
         @Override
         public void onCreateFailure(String error) {
-            Logger.w("☎️ ON CREATE failure " + error);
-            webrtcCallService.peerConnectionHolderFailed(FailReason.PEER_CONNECTION_CREATION_ERROR);
+            Logger.w("☎ onCreateFailure " + error);
+            webrtcCallService.peerConnectionHolderFailed(callParticipant, FailReason.PEER_CONNECTION_CREATION_ERROR);
         }
 
         @Override
         public void onSetFailure(String error) {
-            Logger.w("☎️ ON SET failure " + error);
-            webrtcCallService.peerConnectionHolderFailed(FailReason.PEER_CONNECTION_CREATION_ERROR);
+            Logger.w("☎ onSetFailure " + error);
+            webrtcCallService.peerConnectionHolderFailed(callParticipant, FailReason.PEER_CONNECTION_CREATION_ERROR);
         }
     }
 

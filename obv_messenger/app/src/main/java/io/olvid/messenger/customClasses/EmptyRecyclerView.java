@@ -125,13 +125,17 @@ public class EmptyRecyclerView extends RecyclerView {
     }
 
     public void setLoadingSpinner(View loadingSpinner) {
+        setLoadingSpinner(loadingSpinner, 500, 250);
+    }
+
+    public void setLoadingSpinner(View loadingSpinner, int fadeInDelay, int fadeInDuration) {
         if (this.loadingSpinner != null) {
             loadingSpinner.clearAnimation();
         }
         this.loadingSpinner = loadingSpinner;
         loadingSpinnerAlphaAnimation = new AlphaAnimation(0, 1);
-        loadingSpinnerAlphaAnimation.setStartOffset(500);
-        loadingSpinnerAlphaAnimation.setDuration(250);
+        loadingSpinnerAlphaAnimation.setStartOffset(fadeInDelay);
+        loadingSpinnerAlphaAnimation.setDuration(fadeInDuration);
         loadingSpinnerAlphaAnimation.setFillAfter(true);
         checkIfEmpty();
     }

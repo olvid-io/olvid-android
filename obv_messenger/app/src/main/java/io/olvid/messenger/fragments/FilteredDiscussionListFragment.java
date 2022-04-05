@@ -24,9 +24,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Rect;
+import android.annotation.SuppressLint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -42,11 +40,10 @@ import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -57,6 +54,8 @@ import java.util.regex.Pattern;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel;
@@ -69,9 +68,13 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
     private FilteredDiscussionListOnClickDelegate onClickDelegate;
     private LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> unfilteredDiscussions = null;
     private EmptyRecyclerView recyclerView;
-    private boolean useDialogBackground = false;
-    private boolean removeBottomPadding = false;
     private View emptyView;
+
+    private Observer<List<Long>> selectedDiscussionIdsObserver;
+
+    private boolean removeBottomPadding = false;
+    private boolean useDialogBackground = false;
+    private boolean selectable = false;
 
     protected FilteredDiscussionListAdapter filteredDiscussionListAdapter;
 
@@ -82,6 +85,10 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
 
         if (unfilteredDiscussions != null) {
             observeUnfiltered();
+        }
+
+        if (this.selectedDiscussionIdsObserver != null) {
+            filteredDiscussionListViewModel.getSelectedDiscussionIds().observe(this, this.selectedDiscussionIdsObserver);
         }
     }
 
@@ -105,56 +112,13 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
             recyclerView.setEmptyView(emptyView);
         }
 
-        recyclerView.addItemDecoration(new DividerItemDecoration(rootView.getContext()));
+        if (useDialogBackground) {
+            recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(rootView.getContext(), selectable ? 100 : 68, 12, R.color.dialogBackground));
+        } else {
+            recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(rootView.getContext(), selectable ? 100 : 68, 12));
+        }
 
         return rootView;
-    }
-
-    public class DividerItemDecoration extends RecyclerView.ItemDecoration {
-        private final int dividerHeight;
-        private final int marginLeft;
-        private final int marginRight;
-        private final int backgroundColor;
-        private final int foregroundColor;
-
-        DividerItemDecoration(Context context) {
-            DisplayMetrics metrics = getResources().getDisplayMetrics();
-            dividerHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, metrics);
-            marginLeft = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 68, metrics);
-            marginRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12, metrics);
-            backgroundColor = ContextCompat.getColor(context, R.color.almostWhite);
-            foregroundColor = ContextCompat.getColor(context, R.color.lightGrey);
-        }
-
-        @Override
-        public void onDraw(@NonNull Canvas canvas, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-            int childCount = parent.getChildCount();
-            for (int i=0; i<childCount; i++) {
-                View child = parent.getChildAt(i);
-                int position = parent.getChildAdapterPosition(child);
-                if (position == 0) {
-                    continue;
-                }
-                Rect childRect = new Rect();
-                parent.getDecoratedBoundsWithMargins(child, childRect);
-                canvas.save();
-                canvas.clipRect(childRect.left, childRect.top, childRect.right, childRect.top + dividerHeight);
-                canvas.drawColor(backgroundColor);
-                canvas.clipRect(childRect.left + marginLeft, childRect.top, childRect.right - marginRight, childRect.top + dividerHeight);
-                canvas.drawColor(foregroundColor);
-                canvas.restore();
-            }
-        }
-
-        @Override
-        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-            super.getItemOffsets(outRect, view, parent, state);
-            int position = parent.getChildAdapterPosition(view);
-            if (position == 0) {
-                return;
-            }
-            outRect.top = dividerHeight;
-        }
     }
 
 
@@ -173,6 +137,31 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
             recyclerView.setEmptyView(view);
         }
         this.emptyView = view;
+    }
+
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void setSelectable(boolean selectable) {
+        this.selectable = selectable;
+        if (this.filteredDiscussionListAdapter != null && this.filteredDiscussionListAdapter.filteredDiscussions != null) {
+            this.filteredDiscussionListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    public void setSelectedDiscussionIdsObserver(Observer<List<Long>> observer) {
+        if (filteredDiscussionListViewModel != null) {
+            if (this.selectedDiscussionIdsObserver != null) {
+                filteredDiscussionListViewModel.getSelectedDiscussionIds().removeObserver(this.selectedDiscussionIdsObserver);
+            }
+            filteredDiscussionListViewModel.getSelectedDiscussionIds().observe(this, observer);
+        }
+        this.selectedDiscussionIdsObserver = observer;
+    }
+
+    public void deselectAll() {
+        if (filteredDiscussionListViewModel != null) {
+            filteredDiscussionListViewModel.deselectAll();
+        }
     }
 
     private void observeUnfiltered() {
@@ -269,7 +258,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                     view = inflater.inflate(R.layout.item_view_searchable_discussion_direct, parent, false);
                     break;
             }
-            return new FilteredDiscussionListAdapter.DiscussionViewHolder(view, viewType);
+            return new FilteredDiscussionListAdapter.DiscussionViewHolder(view);
         }
 
         @Override
@@ -303,7 +292,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                 if (patterns != null) {
                     int i = 0;
                     Spannable highlightedTitle = new SpannableString(discussion.title);
-                    String unaccentTitle = App.unAccent(discussion.title);
+                    String unaccentTitle = StringUtils.unAccent(discussion.title);
                     for (Pattern pattern : patterns) {
                         if (i == highlightedSpans.length) {
                             break;
@@ -325,7 +314,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                         } else {
                             i = 0;
                             Spannable highlightedGroupMembers = new SpannableString(discussion.groupMemberNameList);
-                            String unaccentGroupMemberNames = App.unAccent(discussion.groupMemberNameList);
+                            String unaccentGroupMemberNames = StringUtils.unAccent(discussion.groupMemberNameList);
                             for (Pattern pattern : patterns) {
                                 if (i == highlightedSpans.length) {
                                     break;
@@ -357,30 +346,13 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                 } else {
                     holder.rootView.setBackgroundColor(ContextCompat.getColor(holder.rootView.getContext(), R.color.almostWhite));
                 }
-                if (discussion.isGroupDiscussion) {
-                    holder.initialView.setKeycloakCertified(discussion.keycloakManaged);
-                    holder.initialView.setInactive(!discussion.active);
-                    if (discussion.photoUrl == null) {
-                        holder.initialView.setGroup(discussion.byteIdentifier);
-                    } else {
-                        holder.initialView.setPhotoUrl(discussion.byteIdentifier, discussion.photoUrl);
-                    }
-                } else if (discussion.byteIdentifier.length != 0){
-                    holder.initialView.setKeycloakCertified(discussion.keycloakManaged);
-                    holder.initialView.setInactive(!discussion.active);
-                    if (discussion.photoUrl == null) {
-                        holder.initialView.setInitial(discussion.byteIdentifier, App.getInitial(discussion.title));
-                    } else {
-                        holder.initialView.setPhotoUrl(discussion.byteIdentifier, discussion.photoUrl);
-                    }
+                holder.initialView.setDiscussion(discussion);
+
+                if (selectable) {
+                    holder.selectionCheckBox.setVisibility(View.VISIBLE);
+                    holder.selectionCheckBox.setChecked(discussion.selected);
                 } else {
-                    // locked discussion
-                    holder.initialView.setLocked(true);
-                    if (discussion.photoUrl == null) {
-                        holder.initialView.setInitial(discussion.byteIdentifier, "");
-                    } else {
-                        holder.initialView.setPhotoUrl(discussion.byteIdentifier, discussion.photoUrl);
-                    }
+                    holder.selectionCheckBox.setVisibility(View.GONE);
                 }
             }
         }
@@ -398,20 +370,26 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
             final TextView discussionTitleTextView;
             final TextView discussionGroupMembersTextView;
             final InitialView initialView;
+            final CheckBox selectionCheckBox;
 
-            DiscussionViewHolder(View itemView, int viewType) {
+            DiscussionViewHolder(View itemView) {
                 super(itemView);
                 rootView = itemView;
                 itemView.setOnClickListener(this);
                 discussionTitleTextView = itemView.findViewById(R.id.discussion_title_text_view);
                 discussionGroupMembersTextView = itemView.findViewById(R.id.discussion_group_members_text_view);
                 initialView = itemView.findViewById(R.id.discussion_initial_view);
+                selectionCheckBox = itemView.findViewById(R.id.discussion_selection_check_box);
             }
 
             @Override
             public void onClick(View view) {
                 int position = this.getLayoutPosition();
-                FilteredDiscussionListFragment.this.onClickDelegate.discussionClicked(view, filteredDiscussions.get(position));
+                if (selectable) {
+                    filteredDiscussionListViewModel.selectedDiscussionId(filteredDiscussions.get(position).discussionId);
+                } else if (FilteredDiscussionListFragment.this.onClickDelegate != null) {
+                    FilteredDiscussionListFragment.this.onClickDelegate.discussionClicked(view, filteredDiscussions.get(position));
+                }
             }
         }
     }

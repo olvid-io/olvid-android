@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="activity_title_contact_details">Détails d\'un contact</string>
+    <string name="activity_title_user_details">Détails d\'un utilisateur</string>
     <string name="activity_title_create_group">Créer un groupe</string>
     <string name="activity_title_group_details">Détails d\'un groupe</string>
     <string name="activity_title_my_details">Mon profil</string>
@@ -30,9 +31,9 @@
     <string name="button_label_generate_my_id">Générer mon ID</string>
     <string name="button_label_go_to_discussion">Voir la discussion</string>
     <string name="button_label_ignore">Ignorer</string>
+    <string name="button_label_reject">Refuser</string>
     <string name="button_label_introduce">Présenter</string>
     <string name="button_label_invite_members">Inviter\ndes membres</string>
-    <string name="button_label_invite_user">Inviter %1$s</string>
     <string name="button_label_next">Suivant</string>
     <string name="button_label_ok">OK</string>
     <string name="button_label_previous">Précédent</string>
@@ -59,7 +60,6 @@
     <string name="dialog_message_disband_non_empty_group_confirmation">Vous êtes sur le point de dissoudre le groupe %1$s.\nCeci va supprimer tous les membres et tous les membres du groupe en attente. Il y a actuellement\u00a0:\n- %2$d membres\n- %3$d membres en attente\n\nSouhaitez-vous effectivement dissoudre le groupe\u00a0?</string>
     <string name="dialog_message_exchange_digits">Souhaitez-vous échanger des codes avec %1$s afin de re-valider leur identité\u00a0?</string>
     <string name="dialog_message_group_reinvite">Souhaitez-vous envoyer à %1$s une nouvelle invitation à rejoindre le groupe %2$s\u00a0?</string>
-    <string name="dialog_message_invite_user">Souhaitez-vous entrer en contact avec %1$s\u00a0?</string>
     <string name="dialog_message_leave_group">Vous êtes sur le point de quitter le groupe %1$s. Les autres membres du groupe seront notifiés et vous cesserez de recevoir les messages envoyés à ce groupe.\n\nSouhaitez-vous effectivement quitter ce groupe\u00a0?</string>
     <string name="dialog_message_recreate_channels">Les canaux sécurisés entre vous et votre contact peuvent se désynchroniser. Si vous constatez que vos messages ne sont plus reçus par votre contact, recréer les canaux sécurisés peut corriger cela.\n\nSouhaitez-vous lancer la recréation des canaux sécurisés\u00a0?</string>
     <string name="dialog_message_restart_channel_establishment">Souhaitez-vous réellement redémarrer le protocole d\'établissement de canal de discussion sécurisé en cours ?</string>
@@ -78,7 +78,6 @@
     <string name="dialog_title_group_reinvite">Renvoyer une invitation</string>
     <string name="dialog_title_introduce_contact">Mettre %1$s en relation avec…</string>
     <string name="dialog_title_invite_group_members">Inviter des contacts dans le groupe</string>
-    <string name="dialog_title_invite_user">Invitation</string>
     <string name="dialog_title_leave_group">Quitter le groupe</string>
     <string name="dialog_title_recreate_channels">Recréer les canaux sécurisés\u00a0?</string>
     <string name="dialog_title_remove_group_members">Supprimer des membres</string>
@@ -113,35 +112,27 @@
     <string name="invitation_label_their_code">Son code</string>
     <string name="invitation_label_your_code">Votre code</string>
     <string name="invitation_status_accept_invite">Invitation en cours</string>
-    <string name="invitation_status_contact_added">Contact ajouté</string>
     <string name="invitation_status_description_accept_group_invite">Accepter cette invitation de %1$s ?</string>
-    <string name="invitation_status_description_accept_group_invite_deleted">Cette invitation provient d\'un utilisateur inconnu. Il est préférable de l\'ignorer.</string>
+    <string name="invitation_status_description_contact_or_mediator_deleted">Cette invitation provient d\'un utilisateur inconnu. Il est préférable de l\'ignorer.</string>
     <string name="invitation_status_description_accept_invite">%1$s aimerait entrer en contact avec vous. Cliquez sur «\u00a0accepter\u00a0» si vous êtes d\'accord. Sinon, vous pouver «\u00a0ignorer\u00a0».</string>
     <string name="invitation_status_description_accept_mediator_invite">%1$s souhaite vous mettre en relation avec %2$s. Accepter ?</string>
     <string name="invitation_status_description_accept_mediator_invite_deleted">Un contact inconnu souhaite vous mettre en relation avec %1$s. Il est recommandé de refuser\u00a0?</string>
-    <string name="invitation_status_description_contact_added_by_mediator">%1$s a été ajouté à vos contacts après vous avoir été présenté par %2$s.</string>
-    <string name="invitation_status_description_contact_added_by_mediator_deleted">%1$s a été ajouté à vos contacts.</string>
     <string name="invitation_status_description_enter_their_sas">Pour entrer en contact avec %1$s, vous devez lui communiquer votre code (%2$s) et saisir le sien.\n\nAssurez-vous que c\'est bien %1$s qui vous donne son code\u00a0: privilégiez le face-à-face ou un appel téléphonique (évitez absolument email, SMS ou toute autre messagerie électronique).</string>
     <string name="invitation_status_description_give_him_sas">Vous avez entré le code de %1$s avec succès. Il ne vous reste plus qu\'à lui communiquer le votre (%2$s).\n\nPrivilégiez le face-à-face ou un appel téléphonique (évitez absolument email, SMS ou toute autre messagerie électronique).</string>
-    <string name="invitation_status_description_group_joined">Vous avez rejoint le groupe %2$s géré par %1$s.</string>
-    <string name="invitation_status_description_group_joined_deleted">Vous avez rejoint le groupe %1$s.</string>
-    <string name="invitation_status_description_group_owner_trust_level_too_low">%1$s vous invite à rejoindre le groupe %2$s.\n\nLa politique de sécurité d\'Olvid requiert que vous re-validiez l\'identité de %1$s en échangeant des codes à 4 chiffres.</string>
     <string name="invitation_status_description_invite_accepted">Nous procédons à la création du canal sécurisé entre vous et %1$s. Merci de patienter…</string>
     <string name="invitation_status_description_invite_sent">En attente de confirmation de la part de %1$s.</string>
     <string name="invitation_status_description_mediator_invite_accepted">En attente que %1$s accepte la mise en relation de %2$s.</string>
     <string name="invitation_status_description_mediator_invite_accepted_deleted">En attente que %1$s accepte la mise en relation.</string>
-    <string name="invitation_status_description_mediator_trust_level_too_low">%1$s souhaite vous mettre en relation avec %2$s.\n\nLa politique de sécurité d\'Olvid requiert que vous re-validiez l\'identité de %1$s en échangeant des codes à 4 chiffres, ou que vous invitiez %2$s directement.</string>
-    <string name="invitation_status_description_mediator_trust_level_too_low_deleted">Un contact inconnu souhaite vous mettre en relation avec %1$s.\n\nVous pouvez inviter %1$s directlement ou abandonner cette invitation.</string>
-    <string name="invitation_status_description_mutual_trust_established">Formidable\u00a0! Un canal sécurisé entre vous et %1$s est en cours de création. Dès qu\'il sera prêt, vous pourrez échanger avec %1$s.</string>
+    <string name="invitation_status_description_mutual_trust_established">Bravo\u00a0! %1$s a été ajouté à vos contacts. Un canal sécurisé entre vous est en cours de création. Dès qu\'il sera prêt, vous pourrez échanger dans votre discussion privée.</string>
+    <string name="invitation_status_description_mutual_trust_established_with_channel">Bravo\u00a0! %1$s fait maintenant partie de vos contacts. Allez dans votre discussion privée pour échanger ensemble.</string>
     <string name="invitation_status_exchange_sas">Échangez vos codes</string>
     <string name="invitation_status_give_him_sas">Code confirmé</string>
     <string name="invitation_status_group_invite">Invitation à un groupe</string>
-    <string name="invitation_status_group_joined">Groupe rejoint</string>
     <string name="invitation_status_invite_accepted">Invitation en cours</string>
     <string name="invitation_status_invite_sent">Invitation en cours</string>
     <string name="invitation_status_mediator_invite">Mise en relation</string>
     <string name="invitation_status_mediator_invite_accepted">Mise en relation acceptée</string>
-    <string name="invitation_status_mutual_trust_established">Canal sécurisé en cours</string>
+    <string name="invitation_status_mutual_trust_established">Utilisateur ajouté à vos contacts</string>
     <string name="label_copy">Copie</string>
     <string name="label_creating_channel">Création\ndu canal</string>
     <string name="label_download">Téléchargement</string>
@@ -214,6 +205,7 @@
     <string name="notification_title_exchange_sas">Échangez votre code avec %1$s</string>
     <string name="notification_title_group_invitation">Invitation au groupe %1$s</string>
     <string name="notification_title_new_invitation">Invitation de %1$s</string>
+    <string name="notification_title_one_to_one_invitation">Invitation de %1$s</string>
     <string name="pref_autodownload_size_title">Télécharger automatiquement les pièces jointes…</string>
     <string name="pref_camera_resolution_title">Redimensionner les photos prises dans Olvid\u00a0?</string>
     <string name="pref_category_camera_title">Photos</string>
@@ -271,14 +263,15 @@
     <string name="trust_origin_direct_type">%1$s - Vérification directe</string>
     <string name="trust_origin_group_type">%1$s - Invitation à un groupe créé par\u0020</string>
     <string name="trust_origin_introduction_type">%1$s - Présentation par\u0020</string>
-    <string name="trust_origin_keycloak_type">%2$s - Ajouté via le fournisseur d\'identités %1$s</string>
+    <string name="trust_origin_keycloak_type">%2$s - Validation par le fournisseur d\'identités %1$s</string>
     <string name="trust_origin_unknown_type">%1$s - Source de confiance inconnue</string>
-    <string name="menu_action_delete_contact">Supprimer ce contact</string>
-    <string name="dialog_title_delete_contact">Supprimer un contact\u00a0?</string>
-    <string name="dialog_message_delete_contact">Vous êtes sur le point de retirer %1$s de vos contacts. Vous ne pourrez plus échanger de message avec cette personne.\n\nSouhaitez-vous supprimer ce contact\u00a0?</string>
-    <string name="dialog_message_delete_contact_with_pending_groups">Vous êtes sur le point de retirer %1$s de vos contacts. Vous ne pourrez plus échanger de message avec cette personne.\n\nNotez que %1$s est un membre en attente dans %2$d groupes auxquel vous appartenez. Il risque d\'être ajouté à vos contacts à nouveau dans un future proche. Vous pouvez vous prémunir de cela en quittant ces groupes.\n\nSouhaitez-vous supprimer ce contact\u00a0?</string>
-    <string name="dialog_title_delete_contact_impossible">Impossible de supprimer le contact</string>
-    <string name="dialog_message_delete_contact_impossible">Vous ne pouvez pas retirer %1$s de vos contacts car vous appartenez à certains groupes en commun. Vous devrez quitter ces groupes pour pouvoir continuer.</string>
+    <string name="menu_action_delete_contact">Retirer ce contact</string>
+    <string name="menu_action_delete_user">Supprimer cet utilisateur</string>
+    <string name="dialog_title_delete_user">Supprimer un utilisateur\u00a0?</string>
+    <string name="dialog_message_delete_user">Vous êtes sur le point de retirer %1$s de votre liste d\'autres utilisateurs.\n\nSouhaitez-vous supprimer cet utilisateur\u00a0?</string>
+    <string name="dialog_message_delete_user_with_pending_groups">Vous êtes sur le point de retirer %1$s de votre liste d\'autres utilisateurs.\n\nNotez que %1$s est un membre en attente dans %2$d groupes auxquel vous appartenez. S\'il rejoint l\'un de ces groupes, il sera à nouveau ajouté à cette liste. Vous pouvez vous prémunir de cela en quittant ces groupes.\n\nSouhaitez-vous supprimer cet utlisateur\u00a0?</string>
+    <string name="dialog_title_delete_user_impossible">Impossible de supprimer cet utilisateur</string>
+    <string name="dialog_message_delete_user_impossible">Vous ne pouvez pas retirer %1$s de votre liste d\'autres utilisateurs car vous appartenez à certains groupes en commun. Vous devez quitter ces groupes pour continuer.</string>
     <string name="text_no_members">Aucun membre</string>
     <string name="message_error_group_name_empty">Veuillez entrer un nom de groupe</string>
     <string name="hint_search_contact_name">Rechercher un contact…</string>
@@ -290,8 +283,8 @@
     <string name="dialog_message_battery_optimization">L\'économie d\'énergie sur Android fonctionne en retardant certains événements d\'arrière-plan pour les exécuter par lots. Cela peut retarder la réception de messages Olvid entrants.\n\nPour être certain de recevoir vos messages au plus vite, vous pouvez désactiver la fonction d\'économie d\'énergie pour certaines applications. Nous vous recommandons de désactiver l\'économie d\'énergie en vous rendant dans les paramètres ci-dessous et en ajoutant Olvid à la liste des «\u00a0exceptions d\'économie d\'énergie\u00a0».</string>
     <string name="dialog_text_do_not_show_again">Ne plus afficher ce message</string>
     <string name="button_label_battery_optimization_settings">Paramètres</string>
-    <string name="text_contact_deleted">Contact supprimé</string>
-    <string name="toast_message_contact_deleted">Contact supprimé</string>
+    <string name="text_user_removed_from_contacts">Utilisateur supprimé de vos contacts</string>
+    <string name="toast_message_user_deleted">Utilisateur supprimé</string>
     <string name="text_original_message_not_found">Message original introuvable</string>
     <string name="text_discussion_end2end_disclaimer">Les messages postés dans cette discussion sont protégés par du chiffrement de bout-en-bout.\nLeur confidentialité, leur authenticité et l\'identité de leur expéditeur sont garanties grâce à la cryptographie.</string>
     <string name="text_unknown_member_joined_the_group">Un membre inconnu a rejoint le groupe</string>
@@ -388,7 +381,8 @@
     <string name="pref_enable_automatic_backup_title">Activer la sauvegarde automatique</string>
     <string name="pref_enable_automatic_backup_summary">Quand cette option est activée, Olvid enverra régulièrement une sauvegarde chiffrée vers le cloud.</string>
     <string name="pref_enable_automatic_backup_summary_time">\nDernière sauvegarde\u00a0: %1$s</string>
-    <string name="pref_enable_automatic_backup_summary_account">\nCompte utilisé\u00a0: %1$s</string>
+    <string name="pref_enable_automatic_backup_summary_google_drive_account">\nCompte Google Drive\u00a0: %1$s</string>
+    <string name="pref_enable_automatic_backup_summary_webdav_account">\nCompte WebDAV\u00a0: %1$s @ %2$s</string>
     <string name="pref_generate_new_backup_key_summary_no_key">Aucune clé de sauvegarde n\'a encore été générée.</string>
     <string name="pref_generate_new_backup_key_summary">Clé de sauvegarde générée\u00a0: %1$s\nNombre de vérifications de la clé\u00a0: %2$d\nDernière vérification de la clé\u00a0: %3$s</string>
     <string name="pref_generate_new_backup_key_summary_never_verified">Clé de sauvegarde générée\u00a0: %1$s\nLa clé n\'a jamais été vérifiée.</string>
@@ -430,24 +424,21 @@
     <string name="dialog_title_identity_activated">ID Olvid réactivée</string>
     <string name="dialog_message_identity_activated">Votre ID Olvid a été réactivée sur cet appareil.\n\nDes canaux sécurisés sont en train d\'être recréés avec tous vos contacts.</string>
     <string name="activity_title_open_source_licenses">Bibliothèques «\u00a0open source\u00a0» utilisées dans Olvid</string>
-    <string name="menu_action_open_source_licenses">Licences open source</string>
-    <string name="toast_message_error_selecting_automatic_backup_account">Erreur lors de la selection d\'un compte Google Drive</string>
-    <string name="dialog_message_google_apis_required_for_automatic_backup">Il semble que les services Google Play ne sont pas installés sur cet appareil.\nLes sauvegardes automatiques utilisent Google Drive et ne peuvent fonctionner sans ces services.</string>
-    <string name="dialog_title_backup_choose_drive_account">Sauvegardes sur Google Drive</string>
-    <string name="dialog_message_backup_choose_drive_account">Les sauvegardes automatiques envoient périodiquement des sauvegardes chiffrées de vos clés et contacts sur un espace réservé de Google Drive, accessible uniquement à Olvid.\n\nSi vous souhaitez continuer, vous devrez choisir un compte Google sur lequel envoyer ces sauvegardes.\n\nOlvid n\'aura accès à aucun de vos fichiers sur Google Drive.</string>
+    <string name="toast_message_error_selecting_automatic_backup_account">Erreur lors de la selection d\'un compte de fournisseur cloud</string>
     <string name="button_label_switch_account">Changer de compte</string>
     <string name="button_label_deactivate_auto_backup">Désactiver les sauvegardes auto</string>
     <string name="dialog_title_backup_choose_deactivate_or_change_account">Souhaitez-vous\u00a0?</string>
-    <string name="toast_message_error_no_backup_on_account">Erreur, aucune sauvegarde Olvid trouvée sur %1$s</string>
+    <string name="toast_message_error_no_backup_on_account">Erreur, aucune sauvegarde Olvid trouvée</string>
     <string name="toast_message_error_while_searching_for_backup_on_account">Erreur lors de la recherche d\'une sauvegarde</string>
     <string name="dialog_message_backup_choose_drive_account_for_restore">Afin de restaurer une sauvegarde depuis le cloud, vous devrez sélectionner le compte Google Drive sur lequel la sauvegarde chiffrée a été enregistrée et accorder à Olvid la permission de lire ce fichier.\n\nOlvid n\'aura accès à aucun de vos autres fichiers sur Google Drive.</string>
     <string name="pref_keyboard_incognito_mode_summary">Une fois cette option activée, Olvid demandera aux claviers compatibles d\'utiliser le «\u00a0mode incognito\u00a0»</string>
     <string name="pref_keyboard_incognito_mode_title">Utiliser le mode incognito du clavier</string>
     <string name="text_date">Date\u00a0:</string>
     <string name="text_device">Appareil\u00a0:</string>
-    <string name="toast_message_error_while_downloading_selected_backup">Erreur lors du téléchargement du fichier de sauvegarde</string>
+    <string name="toast_message_error_while_downloading_selected_backup">Erreur de téléchargement du fichier de sauvegarde. Veuillez réessayer</string>
+    <string name="toast_message_error_while_deleting_selected_backup">Erreur de suppression du fichier de sauvegarde. Veuillez réessayer</string>
     <string name="text_description_google_drive_backup">Compte Google Drive\u00a0: %1$s\nAppareil\u00a0: %2$s\nDate\u00a0: %3$s</string>
-    <string name="dialog_message_google_apis_required_for_cloud_restore">Il semble que les services Google Play ne sont pas installés sur cet appareil.\nLa restauration depuis le cloud utilise Google Drive et ne peut fonctionner sans ces services.</string>
+    <string name="text_description_webdav_backup">Compte WebDAV\u00a0: %1$s\nAppareil\u00a0: %2$s\nDate\u00a0: %3$s</string>
     <string name="dialog_title_identity_reactivation_confirmation">Réactiver Olvid</string>
     <string name="dialog_message_identity_reactivation_confirmation">Souhaitez-vous réellement réactiver Olvid sur cet appareil\u00a0?\n\nCela désactivera Olvid sur tous vos autres appareils. Soyez conscient que cela ne vous permettra pas de recevoir vos messages sur deux appareils en même temps.</string>
     <string name="pref_prevent_screen_capture_title">Interdire les captures d\'écran</string>
@@ -531,7 +522,6 @@
     <string name="webrtc_failed_network_error">Échec d\'appel - Erreur réseau</string>
     <string name="webrtc_failed_no_call_permission">Échec d\'appel - Émission d\'appels interdite</string>
     <string name="webrtc_failed_connection_to_contact_lost">Connexion au contact perdue</string>
-    <string name="webrtc_failed_timeout">Délai d\'attente expiré</string>
     <string name="webrtc_status_reconnecting">Reconnexion…</string>
     <string name="message_biometric_enrollment_detected_pin">Nouvelle entrée biométrique détectée\nVeuillez vous authentifier avec votre PIN</string>
     <string name="message_biometric_enrollment_detected_password">Nouvelle entrée biométrique détectée\nVeuillez vous authentifier avec votre mot de passe</string>
@@ -539,7 +529,7 @@
     <string name="pref_debug_log_level_summary">Quand cette option est activée, logcat inclut les logs d\'Olvid de niveau debug.</string>
     <string name="dialog_title_invite_call_participants">Ajouter des participants à cet appel</string>
     <string name="webrtc_status_contact_hanged_up">Le contact a raccroché</string>
-    <string name="webrtc_status_contact_kicked">Contact retiré de l\'appel</string>
+    <string name="webrtc_status_contact_kicked">Le contact a quitté l\'appel</string>
     <string name="webrtc_status_contact_failed">Appel échoué</string>
     <string name="content_description_reject_call_button">Bouton rejeter l\'appel</string>
     <string name="content_description_accept_call_button">Bouton accepter l\'appel</string>
@@ -903,7 +893,6 @@
     <string name="text_group_details_updated">Détails du groupe mis à jour</string>
     <string name="dialog_title_sd_card_ringtone_bugged_android_9">Bug de notification Android 9</string>
     <string name="dialog_message_sd_card_ringtone_bugged_android_9">Olvid ne peut pas utiliser la sonnerie de notification que vous avez choisie. Elle a été désactivée. Un bug Android 9 empêche l\'utilisation de sonneries de notification personnalisées dans les applcations ne demandant pas l\'accès au stockage externe/la carte SD.\n\nVous devriez essayer de choisir une sonnerie de notification standard. D\'ici là, vos notifications seront silencieuses\u00a0!</string>
-    <string name="content_description_ephemeral_message_button">Bouton de règlage des messages éphémères</string>
     <string name="dialog_title_ephemeral_message_settings">Message éphémère</string>
     <string name="text_default_ephemeral_settings_for_discussion">Paramètres par défaut pour cette discussion</string>
     <string name="dialog_message_ephemeral_message_settings">Utilisez les paramètres ci-dessous pour modifier les durées de visibilité et d\'existence de votre prochain message. Vous ne pouvez pas choisir des paramètres moins restrictifs que les paramètres par défaut de la discussion.</string>
@@ -949,10 +938,12 @@
     <string name="label_custom_contact_color">Couleur de contact personnalisée</string>
     <string name="text_failed_incoming_call_with_contacts">Appel échoué de %1$s</string>
     <string name="text_missed_incoming_call_with_contacts">Appel manqué de %1$s</string>
+    <string name="text_rejected_incoming_call_with_contacts">Appel décliné de %1$s</string>
     <string name="text_busy_incoming_call_with_contacts">Appel de %1$s quand vous étiez occupé</string>
     <string name="text_failed_outgoing_call_with_contacts">Appel échoué avec %1$s</string>
     <string name="text_outgoing_call_with_contacts">Appel téléphonique avec %1$s</string>
     <string name="text_busy_outgoing_call_with_contacts">Appel quand %1$s était occupé</string>
+    <string name="text_rejected_outgoing_call_with_contacts">Appel décliné par %1$s</string>
     <string name="text_incoming_call_with_contacts">Appel téléphonique de %1$s</string>
     <string name="menu_action_group_call">Appel de groupe</string>
     <string name="button_label_call">Appeler</string>
@@ -975,7 +966,7 @@
     <string name="pref_category_other_notifications_title">Autres notifications</string>
     <string name="pref_permanent_foreground_service_title">Utiliser un service d\'avant-plan</string>
     <string name="pref_permanent_foreground_service_summary">Utiliser un service d\'avant plan évite à Olvid de se faire arrêter par le système. Une petite icone est affichée dans la zone de notifications et peut être cachée via les paramètres du système.</string>
-    <string name="pref_share_app_version_title">Partager les version de l\'app et de l\'OS avec Olvid</string>
+    <string name="pref_share_app_version_title">Partager les versions de l\'app et de l\'OS avec Olvid</string>
     <string name="pref_share_app_version_summary">Quand cette option est activée, l\'application partage sa version et la version de votre OS (et rien de plus) avec les serveurs d\'Olvid. Ces données sont une aide précieuse lors du déploiement de nouvelles fonctionnalités.</string>
     <string name="text_app_uptime_hours">%1$dh\u00a0%2$02dm\u00a0%3$02ds</string>
     <string name="text_app_uptime">%1$dm\u00a0%2$02ds</string>
@@ -1000,13 +991,14 @@
     <string name="pref_use_internal_image_viewer_title">Utiliser le visualiseur d\'images intégré</string>
     <string name="pref_use_internal_image_viewer_summary">Une fois cette option activée, cliquer une image l\'ouvrira dans le visualiseur intégré à Olvid. Sinon, l\'application par défaut de votre téléphone sera utilisée.</string>
     <string name="label_unable_to_display_image">Impossible d\'afficher l\'image</string>
-    <string name="dialog_title_backup_requires_drive_sign_in">Connection à Google Drive requise</string>
-    <string name="dialog_message_backup_requires_drive_sign_in">Vous avez configuré Olvid pour effectuer des sauvegardes automatiques vers Google Drive, mais votre session a expiré. Vous devez vous reconnecter à Google Drive.\n\nSi vous ne souhaitez plus profiter des backups automatiques, vous pouvez les désactiver dans les paramètres d\'Olvid. Gardez à l\'esprit que les sauvegardes automatiques sont le seul moyen d\'éviter la perte de vos contacts en cas de perte ou de panne de votre appareil.</string>
+    <string name="dialog_title_backup_requires_sign_in">Connexion à votre fournisseur cloud requise</string>
+    <string name="dialog_message_backup_requires_sign_in">Vous avez configuré Olvid pour effectuer des sauvegardes automatiques vers un fournisseur cloud, mais votre session a expiré. Vous devez vous reconnecter à ce fournisseur.\n\nSi vous ne souhaitez plus profiter des sauvegardes automatiques, vous pouvez les désactiver dans les paramètres d\'Olvid. Gardez à l\'esprit que les sauvegardes automatiques sont le seul moyen d\'éviter la perte de vos contacts en cas de perte ou de panne de votre appareil.</string>
     <string name="button_label_sign_in">Connexion</string>
     <string name="button_label_invite_contact">Inviter ce contact</string>
     <string name="text_explanation_mutual_scan_add_contact">Cliquez sur AJOUTER UN CONTACT pour ajouter %1$s à vos contacts.</string>
     <string name="text_explanation_warning_mutual_scan_direct">Assurez vous que le code QR que vous venez de scanner vous a bien été présenté par %1$s, directement sur son appareil, depuis l\'application Olvid.</string>
     <string name="text_explanation_warning_mutual_scan_contact_already_known">%1$s fait déjà partie de vos contacts.</string>
+    <string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one">%1$s fait partie de votre liste d\'utilisateurs connus mais n\'est pas encore dans vos contacts.</string>
     <string name="label_new">Nouv.</string>
     <string name="label_option_invite_locally">Option 1\u00a0: Inviter localement</string>
     <string name="label_option_invite_remotely">Option 2\u00a0: Inviter à distance</string>
@@ -1023,7 +1015,6 @@
     <string name="toast_message_error_querying_for_available_browsers">Impossible de lister les navigateurs installés</string>
     <string name="dialog_title_choose_browser_for_authentication">Choisissez le navigateur à utiliser pour l\'authentification</string>
     <string name="text_default_browser">Navigateur par défaut</string>
-    <string name="pref_text_regional_turn_server_none">Ne pas utiliser de serveurs TURN régionaux</string>
     <string name="pref_text_regional_turn_server_global">Serveurs TURN régionaux globaux</string>
     <string name="pref_text_regional_turn_server_paris">Serveurs TURN de Paris</string>
     <string name="pref_text_regional_turn_server_new_york">Serveurs TURN de New-York</string>
@@ -1070,7 +1061,7 @@
     <string name="button_label_unblock">Débloquer</string>
     <string name="dialog_title_unblock_revoked_contact_discussion">Déblocage d\'un contact révoqué</string>
     <string name="dialog_message_unblock_revoked_contact_discussion">Cette discussion est verrouillée car votre contact a été révoqué par le fournisseur d\'identités de votre société. Leur ID Olvid a peut-être été compromis et la sécurité de vos communications ne peut être garantie. Ne débloquez cette discussion que si vous êtes certain que l\'ID Olvid de votre contact n\'a jamais été compromis.\nVeuillez contacter votre administrateur pour plus d\'informations.</string>
-    <string name="text_contact_was_blocked">Contact bloqyé</string>
+    <string name="text_contact_was_blocked">Contact bloqué</string>
     <string name="text_contact_was_blocked_revoked">Contact revoqué par le fournisseur d\'identités de votre société</string>
     <string name="toast_message_unable_to_write_to_folder">Impossible d\'écrire dans le répertoire sélectionné</string>
     <string name="toast_message_some_attachments_could_not_be_saved">Impossible d\'enregistrer certaines pièces jointes</string>
@@ -1144,7 +1135,6 @@
     <string name="pref_reload_backup_configuration_title">Relire la configuration des sauvergardes</string>
     <string name="content_description_back_button">Bouton retour</string>
     <string name="content_description_remove_message_reply_to">Enlever le message en réponse</string>
-    <string name="content_description_add_attachment">Afficher les choix de pièces jointe</string>
     <string name="content_description_notification_muted_indicator">Indicateur que les notifications sont désactivées pour ce profil</string>
     <string name="activity_title_create_new_profile">Création de nouveau profil</string>
     <string name="button_label_create_new_profile">Créer un nouveau profil</string>
@@ -1205,8 +1195,8 @@
     <string name="pref_text_font_scale_1_5">Très grande (150\%)</string>
     <string name="pref_send_with_hardware_enter">Envoyer le message avec «\u00a0Entrée\u00a0»</string>
     <string name="pref_send_with_hardware_enter_summary">Quand cette option est activée, si vous utilisez un clavier physique, un appui sur «\u00a0Entrée\u00a0» enverra votre message. «\u00a0Shift + Entrée\u00a0» ajoutera une nouvelle ligne</string>
-    <string name="pref_ping_connectivity_indicator_title">Indicateur de qualité du réseau</string>
-    <string name="pref_text_ping_connectivity_indicator_none">Pas d\'indicateur de qualité</string>
+    <string name="pref_ping_connectivity_indicator_title">Indicateur de connexion au réseau</string>
+    <string name="pref_text_ping_connectivity_indicator_none">Pas d\'indicateur de connexion</string>
     <string name="pref_text_ping_connectivity_indicator_dot">Point coloré sur le «\u00a0i\u00a0» du logo Olvid</string>
     <string name="pref_text_ping_connectivity_indicator_line">Ligne discrète en haut de la liste de discussions</string>
     <string name="pref_text_ping_connectivity_indicator_full">Status de connexion complet en haut de la liste de discussions</string>
@@ -1249,12 +1239,12 @@
     <string name="x_reactions_to">%1$d réactions à\u00a0: %2$s</string>
     <string name="notification_text_xx_reacted">%1$s a réagi %2$s</string>
     <string name="label_attach_emoji">Insérer un emoji</string>
-    <string name="label_long_press_for_favorite">Appui long pour ajouter/retirer des favorits</string>
+    <string name="label_long_press_for_favorite">Appui long pour ajouter/retirer des favoris</string>
     <string name="menu_action_debug_information">Informations de debug</string>
     <string name="debug_label_number_of_channels_and_devices">Nombre de canaux/appareils\u00a0:</string>
     <string name="debug_label_identity_link">Lien d\'ID\u00a0:</string>
     <string name="debug_label_capabilities">Aptitudes\u00a0:</string>
-    <string name="debug_label_capability_continuous_gathering">Gathering ICE continu dans WebRTC\u00a0: %1$s</string>
+    <string name="debug_label_capability_continuous_gathering">VoIP v2\u00a0: %1$s</string>
     <string name="debug_label_capability_groups_v2">Groupes v2\u00a0: %1$s</string>
     <string name="bullet">\u2022</string>
     <string name="pref_use_system_emojis_title">Utiliser la police emoji du système (si disponible)</string>
@@ -1276,7 +1266,6 @@
     <string name="menu_action_sort_name_alt">Trier par nom (inversé)</string>
     <string name="text_sent_by_xx">Envoyé par %1$s</string>
     <string name="text_unknown_sender">Expéditeur inconnu</string>
-    <string name="text_send_by_you">Envoyé par vous</string>
     <string name="text_sent_to_xx">Envoyé à %1$s</string>
     <string name="text_draft_for_xx">Brouillon pour %1$s</string>
     <string name="label_loading_attachments">Chargement des pièces jointes…</string>
@@ -1284,99 +1273,203 @@
     <string name="button_label_delete_one">Supprimer une</string>
     <string name="button_label_delete_all">Supprimer les %1$d</string>
     <string name="dialog_title_save_selected_attachments">Enregistrer les pièces jointes sélectionnées</string>
+    <string name="pref_category_contacts_and_groups">Contacts \u0026 groupes</string>
+    <string name="pref_auto_join_groups_title">Accepter automatiquement les invitations de groupe…</string>
+    <string name="dialog_title_auto_join_pending_groups">Accepter les invitations de groupe en attente\u00a0?</string>
+    <string name="pref_text_auto_join_groups_everyone">De la part de tout le monde</string>
+    <string name="pref_text_auto_join_groups_contacts">De la part de vos contacts</string>
+    <string name="pref_text_auto_join_groups_nobody">De la part de personne</string>
+    <string name="debug_label_capability_one_to_one_contacts">Carnet de contacts à 2 niveaux\u00a0: %1$s</string>
+    <string name="menu_action_other_known_users">Autres utilisateurs</string>
+    <string name="dialog_title_other_known_users">Autres utilisateurs</string>
+    <string name="dialog_message_other_known_users">Ces utilisateurs d\'Olvid que vous avez rencontrés (typiquement dans un groupe) ne font pas partie de vos contacts. Vous pouvez les y ajouter en les invitant à une discussion privée.</string>
+    <string name="button_label_invite">Inviter</string>
+    <string name="explanation_contact_not_one_to_one">Pour démarrer une discussion privée avec %1$s et l\'ajouter à vos contacts, appuyez sur «\u00a0Inviter\u00a0».</string>
+    <string name="label_contact_not_one_to_one">Cette utilisateur n\'est pas encore un contact</string>
+    <string name="invitation_status_description_one_to_one_invitation_sent">Vous avez invité %1$s à une discussion privée. Veuillez attendre que cette invitation soit acceptée, ou appuyez sur «\u00a0Abandonner\u00a0» pour annuler cette invitation.</string>
+    <string name="invitation_status_description_one_to_one_invitation_sent_deleted">L\'utilisateur que vous avez invité à une discussion privée a été retiré de votre liste d\'utilisateurs connus. Vous pouvez appuyer sur «\u00a0Abandonner\u00a0» pour annuler cette invitation.</string>
+    <string name="invitation_status_one_to_one_invitation">Invitation à une discussion privée</string>
+    <string name="invitation_status_description_one_to_one_invitation">%1$s vous invite à une discussion privée. Pour démarrer cette discussion et l\'ajouter à vos contacts, appuyez sur «\u00a0Accepter\u00a0».</string>
+    <string name="toast_message_contact_removed">Contact retiré</string>
+    <string name="dialog_title_remove_contact">Retirer un contact\u00a0?</string>
+    <string name="dialog_message_remove_contact">Retirer %1$s de vos contacts mettra fin à votre discussion privée. Vous pourrez toutefois continuer à échanger des messages dans les discussions de groupes que vous avez en commun.</string>
+    <string name="notification_content_one_to_one_invitation">Invitation à une discussion privée</string>
+    <string name="notification_public_title_one_to_one_invitation">Invitation à une discussion privée</string>
+    <string name="pref_show_trust_levels_title">Afficher un indicateur de «\u00a0source de confiance\u00a0» des contacts</string>
+    <string name="pref_show_trust_levels_summary">Une fois activé, un point de couleur sur leur portrait permet de distinguer les contacts dont vous avez vous-même vérifié l\'identité de ceux qui vous ont été présentés</string>
+    <string name="label_no_other_user_found">Aucun autre utilisateur trouvé</string>
+    <string name="hint_user_name">Nom de l\'utilisateur</string>
+    <string name="notification_title_sending_message">Envoi de message Olvid en cours</string>
+    <string name="dialog_message_widget_open_hidden_profile_warning">Attention\u00a0: l\'utilisation d\'un profil masqué dans un widget pourrait dévoiler l\'existence de ce profil.</string>
+    <string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen">Attention\u00a0: l\'utilisation d\'un profil masqué dans un widget pourrait dévoiler l\'existence de ce profil.\nAu minimum, vous devriez configurer un écran de verrouillage afin de protéger l\'accès à la page de configuration du widget.</string>
+    <string name="dialog_message_widget_open_initial_hidden_profile">Ce widget utilise un profil masqué. Veuillez saisir le mot de passe du profil afin de le configurer.</string>
+    <string name="menu_action_forward">Transférer</string>
+    <string name="dialog_title_forward_message_explanation">Transfert de message</string>
+    <string name="dialog_message_forward_message_explanation">Le transfert de message vous permet de re-poster un ou plusieurs messages et leurs pièces jointes dans une sélection de discussions d\'un seul coup.\n\nL\'auteur d\'origine des messages ne sera PAS mentionné, ce qui signifie que les messages seront vus comme envoyés directement par vous.\nAppuyez sur «\u00a0Poursuivre\u00a0» pour choisir les discussions dans lesquelles transférer ce/ces messages.</string>
+    <string name="dialog_title_forward_to">Transférer vers…</string>
+    <string name="button_label_forward">Transférer</string>
+    <string name="label_forwarded">Transféré</string>
+    <string name="dialog_title_incomplete_attachments">Pièces jointes incomplètes détectées</string>
+    <string name="dialog_message_incomplete_attachments">Les messages sélectionnés contiennent des pièces jointes qui n\'ont pas été entièrement téléchargées. Ces messages ne peuvent pas être transférés en l\'état.</string>
+    <string name="dialog_message_incomplete_attachments_partial">Certains messages sélectionnés contiennent des pièces jointes qui n\'ont pas été entièrement téléchargées. Ces messages ne peuvent pas être transférés en l\'état.\n\nAppuyez sur «\u00a0Poursuivre\u00a0» pour transférer uniquement les messages qui peuvent l\'être.</string>
+    <string name="hint_search_message">Rechercher un message</string>
+    <string name="menu_action_search_prev">Précédent</string>
+    <string name="menu_action_search_next">Suivant</string>
+    <string name="pref_manage_cloud_backups_title">Gérer les sauvegardes cloud</string>
+    <string name="pref_manage_cloud_backups_summary">Cliquez pour télécharger ou supprimer des sauvegardes cloud.</string>
+    <string name="dialog_title_manage_cloud_backups">Sauvegardes cloud</string>
+    <string name="button_label_done">Terminé</string>
+    <string name="label_loading">Chargement…</string>
+    <string name="dialog_title_backup_choose_drive_account">Sauvegardes sur Google Drive</string>
+    <string name="dialog_message_backup_choose_drive_account">Les sauvegardes automatiques utilisent un espace réservé de Google Drive, accessible uniquement à Olvid.\n\nSi vous souhaitez continuer, vous devrez choisir un compte Google sur lequel envoyer ces sauvegardes.\n\nOlvid n\'aura accès à aucun de vos fichiers sur Google Drive.</string>
+    <string name="label_no_backup_found">Aucune sauvegarde trouvée</string>
+    <string name="label_no_account_selected">Aucun compte sélectionné</string>
+    <string name="label_tap_to_select_cloud_account">Appuyez sur «\u00a0Changer de compte\u00a0» pour choisir un fournisseur cloud</string>
+    <string name="label_error_connecting_to_cloud">Échec de connexion au fournisseur cloud\u00a0: Appuyez sur «\u00a0Changer de compte\u00a0» pour réessayer</string>
+    <string name="dialog_title_delete_cloud_backup">Supprimer une sauvegarde cloud</string>
+    <string name="dialog_message_delete_cloud_backup">Souhaitez-vous réellement supprimer cette sauvegarde cloud\u00a0? Cette action est irréversible.\n\nAppuyez sur «\u00a0OK\u00a0» pour continuer.</string>
+    <string name="dialog_title_cloud_provider_sign_in">Connexion à un fournisseur cloud</string>
+    <string name="dialog_message_cloud_provider_sign_in">Les sauvegardes automatiques envoient périodiquement des sauvegardes chiffrées de vos clés et contacts vers un fournisseur cloud. Par défaut, vous pouvez utiliser votre compte Google Drive pour cela, mais des utilisateurs avancés peuvent utiliser un serveur WebDAV de leur choix.</string>
+    <string name="dialog_message_cloud_provider_sign_in_no_google">Les sauvegardes automatiques envoient périodiquement des sauvegardes chiffrées de vos clés et contacts vers un fournisseur cloud. Il semble que votre appareil ne possède pas les services Google nécessaires à l\'utilisation de Google Drive. Vous pouvez quand même utiliser un serveur WebDAV de votre choix.</string>
+    <string name="dialog_message_cloud_provider_sign_in_restore">Veuillez choisir le fournisseur cloud depuis lequel vous souhaitez restaurer une sauvegarde. Par défaut, vous pouvez utiliser votre compte Google Drive, mais les utilisateurs avancés peuvent utiliser un serveur WebDAV de leur choix. Veillez à utiliser le compte qui a été utilisé pour effectuer votre sauvegarde.</string>
+    <string name="dialog_message_cloud_provider_sign_in_restore_no_google">Veuillez choisir le fournisseur cloud depuis lequel vous souhaitez restaurer une sauvegarde. Il semble que votre appareil ne possède pas les services Google nécessaires à l\'utilisation de Google Drive. Vous pouvez quand même utiliser un serveur WebDAV de votre choix. Veillez à utiliser le compte qui a été utilisé pour effectuer votre sauvegarde.</string>
+    <string name="dialog_message_cloud_provider_sign_in_manage">Veuillez sélectionner le fournisseur cloud pour lequel vous souhaitez gérer les sauvegardes Olvid.</string>
+    <string name="label_webdav_configuration">Configuration WebDAV</string>
+    <string name="hint_webdav_server_url">URL du serveur WebDAV (et répertoire)</string>
+    <string name="hint_password">Mot de passe</string>
+    <string name="hint_username">Nom d\'utilisateur</string>
+    <string name="label_validating">Validation…</string>
+    <string name="dialog_title_select_cloud_backup_file">Choisissez un fichier de sauvegarde cloud</string>
+    <string name="dialog_title_backup_choose_webdav">Sauvegardes WebDAV</string>
+    <string name="dialog_message_backup_choose_webdav">Afin d\'utiliser ce serveur WebDAV pour les sauvegardes automatiques, Olvid doit enregistrer les informations de connexion que vous avez saisies au sein de son espace de stockage sur votre appareil. Ces informations ne seront pas accessibles à vos autres applications.\n\nAppuyez sur «\u00a0OK\u00a0» pour continuer.</string>
+    <string name="toast_message_webdav_read_only_access">Écriture impossible sur votre fournisseur cloud. Veuillez vérifier votre configuration serveur</string>
+    <string name="label_pick_a_time">Choisir une heure…</string>
+    <string name="label_pick_a_date">Choisir une date…</string>
+    <string name="label_users_below_not_in_contacts">Les utilisateurs ci-dessous ne sont pas dans vos contacts</string>
+    <string name="label_users_below_from_keycloak">Les utilisateurs ci-dessous ont été trouvés dans l\'annuaire de votre société</string>
+    <string name="label_searching_company_directory">Recherche dans l\'annuaire de votre société…</string>
+    <string name="text_keycloak_missing_some_search_result">… plus de résultats disponibles\nVeuillez afiner votre recherche</string>
+    <string name="notification_action_dismiss">Fermer</string>
+    <string name="text_undelivered">Non reçu</string>
+    <string name="label_metadata_kind_undelivered">Envoi non abouti</string>
+    <string name="text_rejected_call">Appel décliné</string>
+    <string name="pref_sending_foreground_service">Notification «\u00a0Envoi de message en cours\u00a0»</string>
+    <string name="pref_sending_foreground_service_summary">Activer cette option démarrera un service d\'avant plan pendant l\'envoi de messages. Cela réduit les risques que le système tue Olvid pendant l\'envoi d\'une pièce jointe.</string>
+    <string name="menu_action_select_all">Tout sélectionner</string>
 
 
 
-    <plurals name="dialog_message_save_selected_attachments">
+
+    <plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Modifier ce réglage entraînera l\'acceptation automatique d\'une invitation de groupe en attente.\nAppuyez sur OK pour confirmer votre choix et rejoindre ce groupe.</item>
+        <item quantity="other">Modifier ce réglage entraînera l\'acceptation automatique de %1$d invitations de groupe en attente.\nAppuyez sur OK pour confirmer votre choix et rejoindre ces groupes.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Dans l\'écran suivant, choisissez le répertoire dans lequel enregistrer la pièce jointe sélectionnée.\nNotez que l\'accès à certains répertoires peut être restreint.</item>
         <item quantity="other">Dans l\'écran suivant, choisissez le répertoire dans lequel enregistrer les %1$d pièces jointes sélectionnées.\nNotez que l\'accès à certains répertoires peut être restreint.</item>
     </plurals>
-    <plurals name="action_mode_title_storage">
+    <plurals name="action_mode_title_storage" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d sélectionnée</item>
         <item quantity="other">%1$d sélectionnées</item>
     </plurals>
-    <plurals name="dialog_message_delete_attachments">
+    <plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Souhaitez-vous supprimer la pièce jointe sélectionnée\u00a0?</item>
         <item quantity="other">Souhaitez-vous supprimer les %1$d pièces jointes sélectionnées\u00a0?</item>
     </plurals>
-    <plurals name="text_app_uptime_days">
+    <plurals name="text_app_uptime_days" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d\u00a0jour,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
         <item quantity="other">%1$d\u00a0jours,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
     </plurals>
-    <plurals name="text_message_possibly_missing">
+    <plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d message manquant…</item>
         <item quantity="other">%1$d messages manquants…</item>
     </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
+    <plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
         <item quantity="one">Appel de groupe avec %2$s et un autre</item>
         <item quantity="other">Appel de groupe avec %2$s et %1$d autres</item>
     </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
+    <plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
         <item quantity="one">Appel de groupe échoué avec %2$s et un autre</item>
         <item quantity="other">Appel de groupe échoué avec %2$s et %1$d autres</item>
     </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
+    <plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
         <item quantity="one">Appel quand %2$s et un autre étaient occupés</item>
         <item quantity="other">Appel quand %2$s et %1$d autres étaient occupés</item>
     </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
+    <plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
+        <item quantity="one">Appel de groupe décliné par %2$s et un autre</item>
+        <item quantity="other">Appel de groupe décliné par %2$s et %1$d autres</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity">
         <item quantity="one">Appel de groupe de %2$s et un autre</item>
         <item quantity="other">Appel de groupe de %2$s et %1$d autres</item>
     </plurals>
-    <plurals name="action_mode_title_discussion">
+    <plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d sélectionné</item>
         <item quantity="other">%1$d sélectionnés</item>
     </plurals>
-    <plurals name="dialog_message_delete_messages">
+    <plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Souhaitez-vous supprimer le message sélectionné\u00a0?</item>
         <item quantity="other">Souhaitez-vous supprimer les %1$d messages sélectionnés\u00a0?</item>
     </plurals>
-    <plurals name="notification_title_new_messages">
-        <item quantity="one">%1$d nouveau message de %2$s</item>
-        <item quantity="other">%1$d nouveaux messages de %2$s</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
+    <plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d nouveau message</item>
         <item quantity="other">%1$d nouveaux messages</item>
     </plurals>
-    <plurals name="notification_title_new_group_messages">
-        <item quantity="one">%1$d nouveau message pour le groupe %2$s</item>
-        <item quantity="other">%1$d nouveaux messages pour le groupe %2$s</item>
-    </plurals>
-    <plurals name="notification_text_header_added_count">
+    <plurals name="notification_text_header_added_count" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">%1$d nouveau membre\u00a0:\u0020</item>
         <item quantity="other">%1$d nouveaux membres\u00a0:\u0020</item>
     </plurals>
-    <plurals name="notification_text_header_removed_count">
+    <plurals name="notification_text_header_removed_count" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">%1$d membre est parti\u00a0:\u0020</item>
         <item quantity="other">%1$d membres sont partis\u00a0:\u0020</item>
     </plurals>
-    <plurals name="dialog_message_invite_group_members">
+    <plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">%3$s va être invité à rejoindre le groupe %2$s.</item>
         <item quantity="other">Vos %1$d contacts suivants vont être invités à rejoindre le groupe %2$s\u0020: %3$s.</item>
     </plurals>
-    <plurals name="dialog_message_remove_group_members">
+    <plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">%3$s sera exclus du groupe %2$s.</item>
         <item quantity="other">Les %1$d membres suivants seront exclus du groupe %2$s: %3$s.</item>
     </plurals>
-    <plurals name="text_unread_message_count">
+    <plurals name="text_unread_message_count" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d nouveau message</item>
         <item quantity="other">%1$d nouveaux messages</item>
     </plurals>
-    <plurals name="text_reply_attachment_count">
+    <plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d pièce jointe</item>
         <item quantity="other">%1$d pièces jointes</item>
     </plurals>
-    <plurals name="text_and_x_other">
+    <plurals name="text_and_x_other" tools:ignore="MissingQuantity">
         <item quantity="one">Et %1$d autre</item>
         <item quantity="other">Et %1$d autres</item>
     </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
+    <plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Le stratégie de rétention des messages que vous avez choisie conduirait à la suppression d\'un message.\nSouhaitez vous continuer\u00a0?</item>
         <item quantity="other">Le stratégie de rétention des messages que vous avez choisie conduirait à la suppression de %1$d messages.\nSouhaitez vous continuer\u00a0?</item>
     </plurals>
-    <plurals name="text_keycloak_missing_search_result">
+    <plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">… et un autre résultat\nVeuillez afiner votre recherche</item>
         <item quantity="other">… et %1$d autres résultats\nVeuillez afiner votre recherche</item>
+    </plurals>
+    <plurals name="duration_seconds" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0seconde</item>
+        <item quantity="other">%1$d\u00a0secondes</item>
+    </plurals>
+    <plurals name="duration_minutes" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0minute</item>
+        <item quantity="other">%1$d\u00a0minutes</item>
+    </plurals>
+    <plurals name="duration_hours" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0heure</item>
+        <item quantity="other">%1$d\u00a0heures</item>
+    </plurals>
+    <plurals name="duration_days" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0jour</item>
+        <item quantity="other">%1$d\u00a0jours</item>
+    </plurals>
+    <plurals name="duration_years" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0an</item>
+        <item quantity="other">%1$d\u00a0ans</item>
     </plurals>
 </resources>

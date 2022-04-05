@@ -323,7 +323,8 @@ public class InboxAttachment implements ObvDatabase {
                 throw new IOException();
             }
         }
-        if (attachmentDirectory.list().length == 0) {
+        String[] fileNames = attachmentDirectory.list();
+        if (fileNames != null && fileNames.length == 0) {
             if (!attachmentDirectory.delete()) {
                 throw new IOException();
             }

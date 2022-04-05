@@ -23,7 +23,6 @@ import java.util.List;
 
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;

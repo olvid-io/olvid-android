@@ -45,6 +45,8 @@ import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroup;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
+import io.olvid.messenger.databases.entity.MessageMetadata;
+import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
 import io.olvid.messenger.databases.tasks.HandleReceiveReturnReceipt;
 import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
 import io.olvid.messenger.databases.tasks.UpdateContactActiveTask;
@@ -53,6 +55,7 @@ import io.olvid.messenger.databases.tasks.HandleMessageExtendedPayloadTask;
 import io.olvid.messenger.databases.tasks.HandleNewMessageNotificationTask;
 import io.olvid.messenger.databases.tasks.UpdateContactKeycloakManagedTask;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.customClasses.BytesKey;
@@ -70,7 +73,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 import io.olvid.messenger.databases.tasks.UpdateContactDisplayNameAndPhotoTask;
 import io.olvid.messenger.databases.tasks.UpdateGroupNameAndPhotoTask;
-import io.olvid.messenger.services.GoogleDriveService;
+import io.olvid.messenger.services.BackupCloudProviderService;
 
 public class EngineNotificationProcessor implements EngineNotificationListener {
     private final Engine engine;
@@ -98,6 +101,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED,
                 EngineNotifications.ATTACHMENT_DOWNLOAD_FAILED,
                 EngineNotifications.MESSAGE_UPLOADED,
+                EngineNotifications.MESSAGE_UPLOAD_FAILED,
                 EngineNotifications.GROUP_CREATED,
                 EngineNotifications.GROUP_DELETED,
                 EngineNotifications.GROUP_MEMBER_ADDED,
@@ -128,6 +132,8 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 EngineNotifications.CONTACT_CAPABILITIES_UPDATED,
                 EngineNotifications.OWN_CAPABILITIES_UPDATED,
                 EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED,
+                EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED,
+                EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED,
         }) {
                     engine.addNotificationListener(notificationName, this);
         }
@@ -235,42 +241,50 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
             case EngineNotifications.NEW_CONTACT: {
                 final byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_OWNED_IDENTITY_KEY);
                 final ObvIdentity contactIdentity = (ObvIdentity) userInfo.get(EngineNotifications.NEW_CONTACT_CONTACT_IDENTITY_KEY);
+                final Boolean oneToOne = (Boolean) userInfo.get(EngineNotifications.NEW_CONTACT_ONE_TO_ONE_KEY);
+                final Integer trustLevel = (Integer) userInfo.get(EngineNotifications.NEW_CONTACT_TRUST_LEVEL_KEY);
                 final Boolean hasUntrustedPublishedDetails = (Boolean) userInfo.get(EngineNotifications.NEW_CONTACT_HAS_UNTRUSTED_PUBLISHED_DETAILS_KEY);
-                if (bytesOwnedIdentity == null || contactIdentity == null || hasUntrustedPublishedDetails == null) {
+                if (bytesOwnedIdentity == null || contactIdentity == null || hasUntrustedPublishedDetails == null || oneToOne == null || trustLevel == null) {
                     break;
                 }
                 Contact contact = db.contactDao().get(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
                 if (contact == null) {
                     db.runInTransaction(() -> {
                         try {
-                            Contact createdContact = new Contact(contactIdentity.getBytesIdentity(), bytesOwnedIdentity, contactIdentity.getIdentityDetails(), hasUntrustedPublishedDetails, null, contactIdentity.isKeycloakManaged(), contactIdentity.isActive());
+                            Contact createdContact = new Contact(contactIdentity.getBytesIdentity(), bytesOwnedIdentity, contactIdentity.getIdentityDetails(), hasUntrustedPublishedDetails, null, contactIdentity.isKeycloakManaged(), contactIdentity.isActive(), oneToOne, trustLevel);
                             if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
                                 AppSingleton.updateCachedCustomDisplayName(createdContact.bytesContactIdentity, createdContact.getCustomDisplayName());
                                 AppSingleton.updateCachedKeycloakManaged(createdContact.bytesContactIdentity, createdContact.keycloakManaged);
+                                AppSingleton.updateCachedActive(createdContact.bytesContactIdentity, createdContact.active);
+                                AppSingleton.updateCachedOneToOne(createdContact.bytesContactIdentity, createdContact.oneToOne);
+                                AppSingleton.updateCachedTrustLevel(createdContact.bytesContactIdentity, createdContact.trustLevel);
                             }
                             db.contactDao().insert(createdContact);
-                            Discussion discussion = Discussion.createOneToOneDiscussion(createdContact.getCustomDisplayName(), null, bytesOwnedIdentity, contactIdentity.getBytesIdentity(), createdContact.keycloakManaged, createdContact.active);
-                            discussion.id = db.discussionDao().insert(discussion);
 
-                            // set default ephemeral message settings
-                            Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
-                            Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
-                            boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
-                            if (readOnce || visibilityDuration != null || existenceDuration != null) {
-                                DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-                                discussionCustomization.settingExistenceDuration = existenceDuration;
-                                discussionCustomization.settingVisibilityDuration = visibilityDuration;
-                                discussionCustomization.settingReadOnce = readOnce;
-                                discussionCustomization.sharedSettingsVersion = 0;
-                                db.discussionCustomizationDao().insert(discussionCustomization);
-                                db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), bytesOwnedIdentity, false, 0L));
-                            }
+                            if (oneToOne) {
+                                Discussion discussion = Discussion.createOneToOneDiscussion(createdContact.getCustomDisplayName(), null, bytesOwnedIdentity, contactIdentity.getBytesIdentity(), createdContact.keycloakManaged, createdContact.active, createdContact.trustLevel);
+                                discussion.id = db.discussionDao().insert(discussion);
 
-                            // insert revoked message if needed
-                            if (!contactIdentity.isActive()) {
-                                EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
-                                if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
-                                    App.runThread(new InsertContactRevokedMessageTask(bytesOwnedIdentity, contactIdentity.getBytesIdentity()));
+                                // set default ephemeral message settings
+                                Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
+                                Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
+                                boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
+                                if (readOnce || visibilityDuration != null || existenceDuration != null) {
+                                    DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
+                                    discussionCustomization.settingExistenceDuration = existenceDuration;
+                                    discussionCustomization.settingVisibilityDuration = visibilityDuration;
+                                    discussionCustomization.settingReadOnce = readOnce;
+                                    discussionCustomization.sharedSettingsVersion = 0;
+                                    db.discussionCustomizationDao().insert(discussionCustomization);
+                                    db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), bytesOwnedIdentity, false, 0L));
+                                }
+
+                                // insert revoked message if needed
+                                if (!contactIdentity.isActive()) {
+                                    EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
+                                    if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
+                                        App.runThread(new InsertContactRevokedMessageTask(bytesOwnedIdentity, contactIdentity.getBytesIdentity()));
+                                    }
                                 }
                             }
                         } catch (Exception e) {
@@ -302,30 +316,55 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
             }
             case EngineNotifications.UI_DIALOG: {
                 UUID dialogUuid = (UUID) userInfo.get(EngineNotifications.UI_DIALOG_UUID_KEY);
-                Invitation existingInvitation = db.invitationDao().getByDialogUuid(dialogUuid);
                 ObvDialog dialog = (ObvDialog) userInfo.get(EngineNotifications.UI_DIALOG_DIALOG_KEY);
                 Long creationTimestamp = (Long) userInfo.get(EngineNotifications.UI_DIALOG_CREATION_TIMESTAMP_KEY);
                 if (dialog == null || creationTimestamp == null) {
                     break;
                 }
+
+                Invitation existingInvitation = db.invitationDao().getByDialogUuid(dialogUuid);
                 switch (dialog.getCategory().getId()) {
                     case ObvDialog.Category.INVITE_SENT_DIALOG_CATEGORY:
                     case ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY:
                     case ObvDialog.Category.INVITE_ACCEPTED_DIALOG_CATEGORY:
                     case ObvDialog.Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY:
-                    case ObvDialog.Category.GROUP_JOINED_DIALOG_CATEGORY: {
+                    case ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY: {
                         Invitation invitation = new Invitation(dialog, creationTimestamp);
                         db.invitationDao().insert(invitation);
                         break;
                     }
                     case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
                     case ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY:
-                    case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
                     case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
                     case ObvDialog.Category.MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY:
-                    case ObvDialog.Category.INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY:
-                    case ObvDialog.Category.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY:
-                    case ObvDialog.Category.AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY: {
+                    case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY: {
+                        Invitation invitation = new Invitation(dialog, creationTimestamp);
+                        db.invitationDao().insert(invitation);
+                        // only notify if the invitation is different from the previous notification
+                        if ((existingInvitation == null) || (existingInvitation.associatedDialog.getCategory().getId() != invitation.associatedDialog.getCategory().getId())) {
+                            AndroidNotificationManager.displayInvitationNotification(invitation);
+                        }
+                        break;
+                    }
+                    case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY: {
+                        SettingsActivity.AutoJoinGroupsCategory autoJoinGroups = SettingsActivity.getAutoJoinGroups();
+                        if (autoJoinGroups == SettingsActivity.AutoJoinGroupsCategory.EVERYONE) {
+                            try {
+                                dialog.setResponseToAcceptGroupInvite(true);
+                                AppSingleton.getEngine().respondToDialog(dialog);
+                                break;
+                            } catch (Exception ignored) {}
+                        } else if (autoJoinGroups == SettingsActivity.AutoJoinGroupsCategory.CONTACTS) {
+                            Contact groupOwner = db.contactDao().get(dialog.getBytesOwnedIdentity(), dialog.getCategory().getBytesMediatorOrGroupOwnerIdentity());
+                            if (groupOwner != null && groupOwner.oneToOne) {
+                                try {
+                                    dialog.setResponseToAcceptGroupInvite(true);
+                                    AppSingleton.getEngine().respondToDialog(dialog);
+                                    break;
+                                } catch (Exception ignored) {}
+                            }
+                        }
+                        // fallback case, or if an exception occurred during auto-accept
                         Invitation invitation = new Invitation(dialog, creationTimestamp);
                         db.invitationDao().insert(invitation);
                         // only notify if the invitation is different from the previous notification
@@ -463,10 +502,12 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                             long timestamp = System.currentTimeMillis();
                             long messageId = messageRecipientInfos.get(0).messageId;
                             List<MessageRecipientInfo> updatedMessageRecipientInfos = new ArrayList<>(messageRecipientInfos.size());
+                            boolean complete = false;
                             for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
                                 if (messageRecipientInfo.markAttachmentSent(engineNumber)) {
                                     if (messageRecipientInfo.unsentAttachmentNumbers == null) {
                                         messageRecipientInfo.timestampSent = timestamp;
+                                        complete = true;
                                     }
                                     updatedMessageRecipientInfos.add(messageRecipientInfo);
                                 }
@@ -477,6 +518,9 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
 
                                 Message message = db.messageDao().get(messageId);
                                 if (message != null) {
+                                    if (complete && message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                                        UnifiedForegroundService.processUploadedMessageIdentifier(engineMessageIdentifier);
+                                    }
                                     if (message.refreshOutboundStatus()) {
                                         db.messageDao().updateStatus(message.id, message.status);
                                     }
@@ -504,10 +548,12 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                             long timestamp = System.currentTimeMillis();
                             long messageId = messageRecipientInfos.get(0).messageId;
                             List<MessageRecipientInfo> updatedMessageRecipientInfos = new ArrayList<>(messageRecipientInfos.size());
+                            boolean complete = false;
                             for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
                                 if (messageRecipientInfo.markAttachmentSent(engineNumber)) {
                                     if (messageRecipientInfo.unsentAttachmentNumbers == null) {
                                         messageRecipientInfo.timestampSent = timestamp;
+                                        complete = true;
                                     }
                                     updatedMessageRecipientInfos.add(messageRecipientInfo);
                                 }
@@ -518,6 +564,9 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
 
                                 Message message = db.messageDao().get(messageId);
                                 if (message != null) {
+                                    if (complete && message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                                        UnifiedForegroundService.processUploadedMessageIdentifier(engineMessageIdentifier);
+                                    }
                                     if (message.refreshOutboundStatus()) {
                                         db.messageDao().updateStatus(message.id, message.status);
                                     }
@@ -563,8 +612,44 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
 
                         Message message = db.messageDao().get(messageId);
                         if (message != null) {
+                            // if we reach this point, the message did not have any attachments and was indeed fully uploaded
+                            if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                                UnifiedForegroundService.processUploadedMessageIdentifier(engineMessageIdentifier);
+                            }
                             if (message.refreshOutboundStatus()) {
                                 db.messageDao().updateStatus(message.id, message.status);
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            case EngineNotifications.MESSAGE_UPLOAD_FAILED: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.MESSAGE_UPLOAD_FAILED_BYTES_OWNED_IDENTITY_KEY);
+                byte[] engineMessageIdentifier = (byte[]) userInfo.get(EngineNotifications.MESSAGE_UPLOAD_FAILED_IDENTIFIER_KEY);
+
+                List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);
+                if (messageRecipientInfos.size() > 0) {
+                    long messageId = messageRecipientInfos.get(0).messageId;
+                    boolean hasUnsentMessageRecipientInfo = false;
+
+                    for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
+                        if (messageRecipientInfo.timestampSent == null) {
+                            hasUnsentMessageRecipientInfo = true;
+                            break;
+                        }
+                    }
+
+                    if (hasUnsentMessageRecipientInfo) {
+                        Message message = db.messageDao().get(messageId);
+                        if (message != null && message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                            // if we reach this point, the message was indeed not sent to at least one user (and will never be)
+                            UnifiedForegroundService.processUploadedMessageIdentifier(engineMessageIdentifier);
+                            message.status = Message.STATUS_UNDELIVERED;
+                            db.messageDao().updateStatus(message.id, message.status);
+                            db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_UNDELIVERED, System.currentTimeMillis()));
+                            if (message.jsonExpiration != null) {
+                                App.runThread(new ExpiringOutboundMessageSent(message));
                             }
                         }
                     }
@@ -1138,7 +1223,32 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
 
                 if (backupKeyUid != null && version != null && encryptedContent != null
                         && SettingsActivity.useAutomaticBackup()) {
-                    GoogleDriveService.uploadBackupToDrive(encryptedContent, () -> engine.markBackupUploaded(backupKeyUid, version));
+                    BackupCloudProviderService.CloudProviderConfiguration configuration = SettingsActivity.getAutomaticBackupConfiguration();
+                    if (configuration == null) {
+                        App.openAppDialogBackupRequiresSignIn();
+                    } else {
+                        BackupCloudProviderService.uploadBackup(configuration, encryptedContent, new BackupCloudProviderService.OnBackupsUploadCallback() {
+                            @Override
+                            public void onUploadSuccess() {
+                                engine.markBackupUploaded(backupKeyUid, version);
+                            }
+
+                            @Override
+                            public void onUploadFailure(int error) {
+                                switch (error) {
+                                    case BackupCloudProviderService.ERROR_AUTHENTICATION_ERROR:
+                                    case BackupCloudProviderService.ERROR_SIGN_IN_REQUIRED:
+                                    case BackupCloudProviderService.ERROR_TEN_RETRIES_FAILED:
+                                        App.openAppDialogBackupRequiresSignIn();
+                                        break;
+                                    case BackupCloudProviderService.ERROR_NETWORK_ERROR:
+                                    default:
+                                        BackupCloudProviderService.rescheduleBackupUpload(configuration, encryptedContent, this);
+                                        break;
+                                }
+                            }
+                        });
+                    }
                 }
                 break;
             }
@@ -1193,6 +1303,11 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                     db.contactDao().updateCapabilityWebrtcContinuousIce(contact.bytesOwnedIdentity, contact.bytesContactIdentity, capable);
                                 }
                                 break;
+                            case ONE_TO_ONE_CONTACTS:
+                                if (capable != contact.capabilityOneToOneContacts) {
+                                    db.contactDao().updateCapabilityOneToOneContacts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, capable);
+                                }
+                                break;
                             case GROUPS_V2:
                                 if (capable != contact.capabilityGroupsV2) {
                                     db.contactDao().updateCapabilityGroupsV2(contact.bytesOwnedIdentity, contact.bytesContactIdentity, capable);
@@ -1223,6 +1338,11 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                     db.ownedIdentityDao().updateCapabilityWebrtcContinuousIce(ownedIdentity.bytesOwnedIdentity, capable);
                                 }
                                 break;
+                            case ONE_TO_ONE_CONTACTS:
+                                if (capable != ownedIdentity.capabilityOneToOneContacts) {
+                                    db.ownedIdentityDao().updateCapabilityOneToOneContacts(ownedIdentity.bytesOwnedIdentity, capable);
+                                }
+                                break;
                             case GROUPS_V2:
                                 if (capable != ownedIdentity.capabilityGroupsV2) {
                                     db.ownedIdentityDao().updateCapabilityGroupsV2(ownedIdentity.bytesOwnedIdentity, capable);
@@ -1242,6 +1362,85 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
 
                 AppSingleton.setWebsocketConnectivityState(state);
                 break;
+            }
+            case EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_BYTES_OWNED_IDENTITY_KEY);
+                byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_BYTES_CONTACT_IDENTITY_KEY);
+                Boolean oneToOne = (Boolean) userInfo.get(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY);
+
+                if (bytesOwnedIdentity == null || bytesContactIdentity == null || oneToOne == null) {
+                    break;
+                }
+
+                Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                if (contact != null && contact.oneToOne != oneToOne) {
+                    contact.oneToOne = oneToOne;
+                    db.contactDao().updateOneToOne(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.oneToOne);
+                    if (Arrays.equals(contact.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
+                        AppSingleton.updateCachedOneToOne(contact.bytesContactIdentity, contact.oneToOne);
+                    }
+                    if (oneToOne) {
+                        Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                        if (discussion == null) {
+                            discussion = Discussion.createOneToOneDiscussion(contact.getCustomDisplayName(), contact.getCustomPhotoUrl(), contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.keycloakManaged, contact.active, contact.trustLevel);
+                            discussion.unread = true;
+                            discussion.id = db.discussionDao().insert(discussion);
+
+
+                            // set default ephemeral message settings
+                            Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
+                            Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
+                            boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
+                            if (readOnce || visibilityDuration != null || existenceDuration != null) {
+                                DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
+                                discussionCustomization.settingExistenceDuration = existenceDuration;
+                                discussionCustomization.settingVisibilityDuration = visibilityDuration;
+                                discussionCustomization.settingReadOnce = readOnce;
+                                discussionCustomization.sharedSettingsVersion = 0;
+                                db.discussionCustomizationDao().insert(discussionCustomization);
+                                db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), bytesOwnedIdentity, false, 0L));
+                            }
+
+                            // insert revoked message if needed
+                            if (!contact.active) {
+                                EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
+                                    App.runThread(new InsertContactRevokedMessageTask(contact.bytesOwnedIdentity, contact.bytesContactIdentity));
+                                }
+                            }
+                        }
+                    } else {
+                        db.runInTransaction(() -> {
+                            Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                            if (discussion != null) {
+                                discussion.lockWithMessage(db);
+                            }
+                        });
+                    }
+                }
+                break;
+            }
+            case EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED_BYTES_OWNED_IDENTITY_KEY);
+                byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED_BYTES_CONTACT_IDENTITY_KEY);
+                Integer trustLevel = (Integer) userInfo.get(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED_TRUST_LEVEL_KEY);
+
+                if (bytesOwnedIdentity == null || bytesContactIdentity == null || trustLevel == null) {
+                    break;
+                }
+
+                Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                if (contact != null && contact.trustLevel != trustLevel) {
+                    contact.trustLevel = trustLevel;
+                    db.contactDao().updateTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.trustLevel);
+                    if (Arrays.equals(contact.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
+                        AppSingleton.updateCachedTrustLevel(contact.bytesContactIdentity, contact.trustLevel);
+                    }
+
+                    if (contact.oneToOne) {
+                        db.discussionDao().updateTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.trustLevel);
+                    }
+                }
             }
         }
     }

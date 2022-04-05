@@ -755,12 +755,12 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 return new CancelledState();
             }
 
-            if (ChannelCreationPingSignatureReceived.exists(protocolManagerSession, receivedMessage.contactDeviceUid, receivedMessage.contactIdentity, getOwnedIdentity(), receivedMessage.signature)) {
+            if (ChannelCreationPingSignatureReceived.exists(protocolManagerSession, getOwnedIdentity(), receivedMessage.signature)) {
                 // we already received a ping with the same signature!
                 return new CancelledState();
             } else {
                 // store the signature to prevent future replay
-                ChannelCreationPingSignatureReceived.create(protocolManagerSession, receivedMessage.contactDeviceUid, receivedMessage.contactIdentity, getOwnedIdentity(), receivedMessage.signature);
+                ChannelCreationPingSignatureReceived.create(protocolManagerSession, getOwnedIdentity(), receivedMessage.signature);
             }
 
             // Signature is valid! The contact does not have a channel and trusts us
@@ -893,12 +893,12 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                     return new CancelledState();
                 }
 
-                if (ChannelCreationPingSignatureReceived.exists(protocolManagerSession, receivedMessage.contactDeviceUid, receivedMessage.contactIdentity, getOwnedIdentity(), receivedMessage.signature)) {
+                if (ChannelCreationPingSignatureReceived.exists(protocolManagerSession, getOwnedIdentity(), receivedMessage.signature)) {
                     // we already received a ping with the same signature!
                     return new CancelledState();
                 } else {
                     // store the signature to prevent future replay
-                    ChannelCreationPingSignatureReceived.create(protocolManagerSession, receivedMessage.contactDeviceUid, receivedMessage.contactIdentity, getOwnedIdentity(), receivedMessage.signature);
+                    ChannelCreationPingSignatureReceived.create(protocolManagerSession, getOwnedIdentity(), receivedMessage.signature);
                 }
             }
 
@@ -1125,16 +1125,18 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            // We received a message on the obliviousChannel, so we can confirm it
-            protocolManagerSession.channelDelegate.confirmObliviousChannel(
-                    protocolManagerSession.session,
-                    getOwnedIdentity(),
-                    startState.contactDeviceUid,
-                    startState.contactIdentity
-            );
-
-            // update the publishedContactDetails with what we just received
             {
+                // We received a message on the obliviousChannel, so we can confirm it
+                protocolManagerSession.channelDelegate.confirmObliviousChannel(
+                        protocolManagerSession.session,
+                        getOwnedIdentity(),
+                        startState.contactDeviceUid,
+                        startState.contactIdentity
+                );
+            }
+
+            {
+                // update the publishedContactDetails with what we just received
                 try {
                     JsonIdentityDetailsWithVersionAndPhoto contactDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().readValue(receivedMessage.contactSerializedIdentityWithVersionAndPhoto, JsonIdentityDetailsWithVersionAndPhoto.class);
                     if (contactDetailsWithVersionAndPhoto != null) {
@@ -1159,8 +1161,8 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
             }
 
 
-            // send this device capabilities to contact
             {
+                // send this device capabilities to contact
                 UID childProtocolInstanceUid = new UID(getPrng());
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
@@ -1172,31 +1174,48 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-
-            // Delete the ChannelCreationProtocolInstance
-            try {
-                ChannelCreationProtocolInstance channelCreationProtocolInstance = ChannelCreationProtocolInstance.get(protocolManagerSession, startState.contactDeviceUid, startState.contactIdentity, getOwnedIdentity());
-                channelCreationProtocolInstance.delete();
-            } catch (Exception e) {
-                Logger.w("Exception when deleting a ChannelCreationProtocolInstance");
+            {
+                // Delete the ChannelCreationProtocolInstance
+                try {
+                    ChannelCreationProtocolInstance channelCreationProtocolInstance = ChannelCreationProtocolInstance.get(protocolManagerSession, startState.contactDeviceUid, startState.contactIdentity, getOwnedIdentity());
+                    channelCreationProtocolInstance.delete();
+                } catch (Exception e) {
+                    Logger.w("Exception when deleting a ChannelCreationProtocolInstance");
+                }
             }
 
-            String serializedDetailsWithVersionAndPhoto = "";
-            try {
-                JsonIdentityDetailsWithVersionAndPhoto ownedDetailsWithVersionAndPhoto = protocolManagerSession.identityDelegate.getOwnedIdentityPublishedAndLatestDetails(protocolManagerSession.session, getOwnedIdentity())[0];
-                serializedDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().writeValueAsString(ownedDetailsWithVersionAndPhoto);
-            } catch (Exception e) {
-                e.printStackTrace();
+            {
+                // send Ack message to Bob
+                String serializedDetailsWithVersionAndPhoto = "";
+                try {
+                    JsonIdentityDetailsWithVersionAndPhoto ownedDetailsWithVersionAndPhoto = protocolManagerSession.identityDelegate.getOwnedIdentityPublishedAndLatestDetails(protocolManagerSession.session, getOwnedIdentity())[0];
+                    serializedDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().writeValueAsString(ownedDetailsWithVersionAndPhoto);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(
+                        startState.contactIdentity,
+                        getOwnedIdentity(),
+                        new UID[]{startState.contactDeviceUid},
+                        true
+                ));
+                ChannelMessageToSend messageToSend = new SecondAckMessage(coreProtocolMessage, serializedDetailsWithVersionAndPhoto).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(
-                    startState.contactIdentity,
-                    getOwnedIdentity(),
-                    new UID[]{startState.contactDeviceUid},
-                    true
-            ));
-            ChannelMessageToSend messageToSend = new SecondAckMessage(coreProtocolMessage, serializedDetailsWithVersionAndPhoto).generateChannelProtocolMessageToSend();
-            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            {
+                // make sure we agree on our mutual oneToOne status
+                UID childProtocolInstanceUid = new UID(getPrng());
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                        SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID,
+                        childProtocolInstanceUid,
+                        false
+                );
+                ChannelMessageToSend messageToSend = new OneToOneContactInvitationProtocol.InitiateOneToOneStatusSyncWithOneContactMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            }
 
             return new ChannelConfirmedState();
         }

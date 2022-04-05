@@ -72,7 +72,6 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 
 public class QRCodeScannerFragment extends Fragment {
-    private static final int PERMISSION_CAMERA = 658;
     private Context context;
     private PreviewView previewView;
     private NoExceptionSingleThreadExecutor executor;

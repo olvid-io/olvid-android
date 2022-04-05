@@ -28,10 +28,12 @@ import java.util.List;
 
 public enum ObvCapability {
     WEBRTC_CONTINUOUS_ICE,
+    ONE_TO_ONE_CONTACTS,
     GROUPS_V2;
 
     public static List<ObvCapability> currentCapabilities = new ArrayList<>(Arrays.asList(
             // add Engine capabilities here, once there are some
+            ONE_TO_ONE_CONTACTS
 //            GROUPS_V2
     ));
 
@@ -41,6 +43,8 @@ public enum ObvCapability {
                 return WEBRTC_CONTINUOUS_ICE;
             case "groups_v2":
                 return GROUPS_V2;
+            case "one_to_one_contacts":
+                return ONE_TO_ONE_CONTACTS;
         }
         return null;
     }
@@ -49,6 +53,8 @@ public enum ObvCapability {
         switch (this) {
             case WEBRTC_CONTINUOUS_ICE:
                 return "webrtc_continuous_ice";
+            case ONE_TO_ONE_CONTACTS:
+                return "one_to_one_contacts";
             case GROUPS_V2:
                 return "groups_v2";
         }
@@ -84,8 +90,10 @@ public enum ObvCapability {
 
     public static byte[] serializeRawDeviceCapabilities(String[] rawDeviceCapabilities) {
         byte[] serializedDeviceCapabilities;
-        if (rawDeviceCapabilities == null || rawDeviceCapabilities.length == 0) {
+        if (rawDeviceCapabilities == null) {
             serializedDeviceCapabilities = null;
+        } else if (rawDeviceCapabilities.length == 0) {
+            serializedDeviceCapabilities = new byte[0];
         } else {
             // sort the array before serializing to ensure consistent serialization
             Arrays.sort(rawDeviceCapabilities);
@@ -109,7 +117,7 @@ public enum ObvCapability {
 
     public static List<ObvCapability> deserializeDeviceCapabilities(byte[] serializedDeviceCapabilities) {
         if (serializedDeviceCapabilities == null) {
-            return new ArrayList<>(0);
+            return null;
         }
 
         List<ObvCapability> capabilities = new ArrayList<>();

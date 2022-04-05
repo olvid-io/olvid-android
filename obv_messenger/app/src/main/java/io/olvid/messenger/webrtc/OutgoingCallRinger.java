@@ -73,7 +73,7 @@ public class OutgoingCallRinger {
                     .build());
         } catch (IOException e) {
             e.printStackTrace();
-            Logger.w("☎️ Error initializing media player for outgoing call ringing");
+            Logger.w("☎ Error initializing media player for outgoing call ringing");
             mediaPlayer = null;
         }
 

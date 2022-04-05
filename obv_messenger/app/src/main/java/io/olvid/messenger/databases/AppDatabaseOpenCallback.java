@@ -21,14 +21,18 @@ package io.olvid.messenger.databases;
 
 
 import java.io.File;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroup;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.App;
@@ -42,11 +46,13 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 import io.olvid.messenger.databases.tasks.ApplyDiscussionRetentionPoliciesTask;
+import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class AppDatabaseOpenCallback implements Runnable {
@@ -109,6 +115,17 @@ public class AppDatabaseOpenCallback implements Runnable {
 
         // Update Invitation/Dialogs
         try {
+            // first detect dialogs that should be deleted
+            Set<UUID> obvDialogUuids = engine.getAllPersistedDialogUuids();
+            List<Invitation> invitations = db.invitationDao().getAll();
+            for (Invitation invitation : invitations) {
+                if (!obvDialogUuids.contains(invitation.dialogUuid)) {
+                    // this dialog no longer exists on engine side --> delete it
+                    db.invitationDao().delete(invitation);
+                }
+            }
+
+            // then update all ongoing dialogs
             engine.resendAllPersistedDialogs();
         } catch (Exception e) {
             e.printStackTrace();
@@ -268,6 +285,12 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         db.ownedIdentityDao().updateCapabilityWebrtcContinuousIce(dbOwnedIdentity.bytesOwnedIdentity, capable);
                                     }
                                     break;
+                                case ONE_TO_ONE_CONTACTS:
+                                    if (capable != dbOwnedIdentity.capabilityOneToOneContacts) {
+                                        Logger.i("Engine -> App sync: Update own capability ONE_TO_ONE_CONTACTS");
+                                        db.ownedIdentityDao().updateCapabilityOneToOneContacts(dbOwnedIdentity.bytesOwnedIdentity, capable);
+                                    }
+                                    break;
                                 case GROUPS_V2:
                                     if (capable != dbOwnedIdentity.capabilityGroupsV2) {
                                         Logger.i("Engine -> App sync: Update own capability GROUPS_V2");
@@ -292,30 +315,42 @@ public class AppDatabaseOpenCallback implements Runnable {
                             subMap.remove(new BytesKey(contactIdentity.getBytesIdentity()));
                         }
                         String photoUrl = engine.getContactTrustedDetailsPhotoUrl(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
+                        boolean oneToOne = engine.isContactOneToOne(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
+                        int trustLevel = engine.getContactTrustLevel(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
                         if (contact == null) {
                             Logger.i("Engine -> App sync: Found unknown Contact");
                             db.runInTransaction(() -> {
                                 try {
-                                    Contact newContact = new Contact(contactIdentity.getBytesIdentity(), ownedIdentity.getBytesIdentity(), contactIdentity.getIdentityDetails(), false, photoUrl, contactIdentity.isKeycloakManaged(), contactIdentity.isActive());
+                                    Contact newContact = new Contact(contactIdentity.getBytesIdentity(), ownedIdentity.getBytesIdentity(), contactIdentity.getIdentityDetails(), false, photoUrl, contactIdentity.isKeycloakManaged(), contactIdentity.isActive(), oneToOne, trustLevel);
                                     db.contactDao().insert(newContact);
-                                    Discussion discussion = db.discussionDao().getByContact(newContact.bytesOwnedIdentity, newContact.bytesContactIdentity);
-                                    if (discussion == null) {
-                                        discussion = Discussion.createOneToOneDiscussion(newContact.getCustomDisplayName(), newContact.getCustomPhotoUrl(), ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity(), newContact.keycloakManaged, contactIdentity.isActive());
-                                        discussion.id = db.discussionDao().insert(discussion);
+                                    if (oneToOne) {
+                                        Discussion discussion = db.discussionDao().getByContact(newContact.bytesOwnedIdentity, newContact.bytesContactIdentity);
+                                        if (discussion == null) {
+                                            discussion = Discussion.createOneToOneDiscussion(newContact.getCustomDisplayName(), newContact.getCustomPhotoUrl(), ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity(), newContact.keycloakManaged, contactIdentity.isActive(), newContact.trustLevel);
+                                            discussion.id = db.discussionDao().insert(discussion);
 
 
-                                        // set default ephemeral message settings
-                                        Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
-                                        Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
-                                        boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
-                                        if (readOnce || visibilityDuration != null || existenceDuration != null) {
-                                            DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-                                            discussionCustomization.settingExistenceDuration = existenceDuration;
-                                            discussionCustomization.settingVisibilityDuration = visibilityDuration;
-                                            discussionCustomization.settingReadOnce = readOnce;
-                                            discussionCustomization.sharedSettingsVersion = 0;
-                                            db.discussionCustomizationDao().insert(discussionCustomization);
-                                            db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), ownedIdentity.getBytesIdentity(), false, 0L));
+                                            // set default ephemeral message settings
+                                            Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
+                                            Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
+                                            boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
+                                            if (readOnce || visibilityDuration != null || existenceDuration != null) {
+                                                DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
+                                                discussionCustomization.settingExistenceDuration = existenceDuration;
+                                                discussionCustomization.settingVisibilityDuration = visibilityDuration;
+                                                discussionCustomization.settingReadOnce = readOnce;
+                                                discussionCustomization.sharedSettingsVersion = 0;
+                                                db.discussionCustomizationDao().insert(discussionCustomization);
+                                                db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), ownedIdentity.getBytesIdentity(), false, 0L));
+                                            }
+
+                                            // insert revoked message if needed
+                                            if (!contactIdentity.isActive()) {
+                                                EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
+                                                if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
+                                                    App.runThread(new InsertContactRevokedMessageTask(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity()));
+                                                }
+                                            }
                                         }
                                     }
                                 } catch (Exception e) {
@@ -335,6 +370,49 @@ public class AppDatabaseOpenCallback implements Runnable {
                             contact.establishedChannelCount = establishedChannelCount;
                             db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount);
                         }
+                        if (contact.oneToOne != oneToOne) {
+                            Logger.i("Engine -> App sync: Update contact oneToOne status");
+                            contact.oneToOne = oneToOne;
+                            db.contactDao().updateOneToOne(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.oneToOne);
+                            if (oneToOne) {
+                                Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                if (discussion == null) {
+                                    discussion = Discussion.createOneToOneDiscussion(contact.getCustomDisplayName(), contact.getCustomPhotoUrl(), contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.keycloakManaged, contact.active, contact.trustLevel);
+                                    discussion.id = db.discussionDao().insert(discussion);
+
+
+                                    // set default ephemeral message settings
+                                    Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
+                                    Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
+                                    boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
+                                    if (readOnce || visibilityDuration != null || existenceDuration != null) {
+                                        DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
+                                        discussionCustomization.settingExistenceDuration = existenceDuration;
+                                        discussionCustomization.settingVisibilityDuration = visibilityDuration;
+                                        discussionCustomization.settingReadOnce = readOnce;
+                                        discussionCustomization.sharedSettingsVersion = 0;
+                                        db.discussionCustomizationDao().insert(discussionCustomization);
+                                        db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), contact.bytesOwnedIdentity, false, 0L));
+                                    }
+
+                                    // insert revoked message if needed
+                                    if (!contact.active) {
+                                        EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
+                                        if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
+                                            App.runThread(new InsertContactRevokedMessageTask(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity()));
+                                        }
+                                    }
+                                }
+                            } else {
+                                Contact finalContact = contact;
+                                db.runInTransaction(() -> {
+                                    Discussion discussion = db.discussionDao().getByContact(finalContact.bytesOwnedIdentity, finalContact.bytesContactIdentity);
+                                    if (discussion != null) {
+                                        discussion.lockWithMessage(db);
+                                    }
+                                });
+                            }
+                        }
                         if (contact.keycloakManaged != contactIdentity.isKeycloakManaged()) {
                             Logger.i("Engine -> App sync: Update contact keycloakManaged");
                             contact.keycloakManaged = contactIdentity.isKeycloakManaged();
@@ -346,6 +424,12 @@ public class AppDatabaseOpenCallback implements Runnable {
                             contact.active = contactIdentity.isActive();
                             db.contactDao().updateActive(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.active);
                             db.discussionDao().updateActive(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.active);
+                        }
+                        if (contact.trustLevel != trustLevel) {
+                            Logger.i("Engine -> App sync: Update contact trustLevel");
+                            contact.trustLevel = trustLevel;
+                            db.contactDao().updateTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.trustLevel);
+                            db.discussionDao().updateTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.trustLevel);
                         }
                         if (!Objects.equals(contactIdentity.getIdentityDetails(), contact.getIdentityDetails())
                                 || !Objects.equals(contact.photoUrl, photoUrl)) {
@@ -377,6 +461,12 @@ public class AppDatabaseOpenCallback implements Runnable {
                                             if (capable != contact.capabilityWebrtcContinuousIce) {
                                                 Logger.i("Engine -> App sync: Update contact capability WEBRTC_CONTINUOUS_ICE");
                                                 db.contactDao().updateCapabilityWebrtcContinuousIce(contact.bytesOwnedIdentity, contact.bytesContactIdentity, capable);
+                                            }
+                                            break;
+                                        case ONE_TO_ONE_CONTACTS:
+                                            if (capable != contact.capabilityOneToOneContacts) {
+                                                Logger.i("Engine -> App sync: Update contact capability ONE_TO_ONE_CONTACTS");
+                                                db.contactDao().updateCapabilityOneToOneContacts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, capable);
                                             }
                                             break;
                                         case GROUPS_V2:

@@ -77,6 +77,7 @@ public class Discussion {
     public static final String KEYCLOAK_MANAGED = "keycloak_managed";
     public static final String UNREAD = "unread"; // specify if discussion as been manually marked as unread
     public static final String ACTIVE = "active";
+    public static final String TRUST_LEVEL = "trust_level";
 
     @PrimaryKey(autoGenerate = true)
     public long id;
@@ -120,11 +121,12 @@ public class Discussion {
     @ColumnInfo(name = ACTIVE)
     public boolean active;
 
-
+    @ColumnInfo(name = TRUST_LEVEL)
+    @Nullable
+    public Integer trustLevel;
 
     // default constructor required by Room
-
-    public Discussion(String title, @NonNull byte[] bytesOwnedIdentity, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable byte[] bytesGroupOwnerAndUid, @Nullable byte[] bytesContactIdentity, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, boolean active) {
+    public Discussion(String title, @NonNull byte[] bytesOwnedIdentity, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable byte[] bytesGroupOwnerAndUid, @Nullable byte[] bytesContactIdentity, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, boolean active, @Nullable Integer trustLevel) {
         this.title = title;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.senderThreadIdentifier = senderThreadIdentifier;
@@ -136,11 +138,12 @@ public class Discussion {
         this.keycloakManaged = keycloakManaged;
         this.unread = unread;
         this.active = active;
+        this.trustLevel = trustLevel;
     }
 
 
     @Ignore
-    public static Discussion createOneToOneDiscussion(@NonNull String title, @Nullable String photoUrl, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] contactBytesIdentity, boolean keycloakManaged, boolean active) {
+    public static Discussion createOneToOneDiscussion(@NonNull String title, @Nullable String photoUrl, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] contactBytesIdentity, boolean keycloakManaged, boolean active, int contactTrustLevel) {
         return new Discussion(
                 title,
                 bytesOwnedIdentity,
@@ -152,7 +155,8 @@ public class Discussion {
                 photoUrl,
                 keycloakManaged,
                 false,
-                active
+                active,
+                contactTrustLevel
         );
     }
 
@@ -169,7 +173,8 @@ public class Discussion {
                 photoUrl,
                 false,
                 false,
-                true
+                true,
+                null
         );
     }
 
@@ -225,19 +230,13 @@ public class Discussion {
                     // move or copy file
                     File oldFile = new File(App.absolutePathFromRelative(photoUrl));
                     File newFile = new File(App.absolutePathFromRelative(relativeOutputPath));
-                    if (!oldFile.renameTo(newFile)) {
-                        // rename failed --> maybe on 2 different partitions
-                        // fallback to a copy.
-                        try (FileInputStream fileInputStream = new FileInputStream(oldFile); FileOutputStream fileOutputStream = new FileOutputStream(newFile)) {
-                            byte[] buffer = new byte[262_144];
-                            int c;
-                            while ((c = fileInputStream.read(buffer)) != -1) {
-                                fileOutputStream.write(buffer, 0, c);
-                            }
+                    // do not rename (as the contact may simply be not oneToOne) always copy.
+                    try (FileInputStream fileInputStream = new FileInputStream(oldFile); FileOutputStream fileOutputStream = new FileOutputStream(newFile)) {
+                        byte[] buffer = new byte[262_144];
+                        int c;
+                        while ((c = fileInputStream.read(buffer)) != -1) {
+                            fileOutputStream.write(buffer, 0, c);
                         }
-
-                        //noinspection ResultOfMethodCallIgnored
-                        oldFile.delete();
                     }
                     photoUrl = relativeOutputPath;
                 } catch (Exception e) {

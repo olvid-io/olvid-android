@@ -136,6 +136,7 @@
                         android:layout_marginStart="8dp"
                         android:text="@string/button_label_unblock_contact"
                         app:layout_constraintTop_toBottomOf="@id/contact_revoked_explanation"
+                        android:theme="@style/AppTheme.BlueAccent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"/>
@@ -148,6 +149,7 @@
                         android:layout_marginStart="8dp"
                         android:visibility="gone"
                         android:text="@string/button_label_reblock_contact"
+                        android:theme="@style/AppTheme.BlueAccent"
                         app:layout_constraintTop_toBottomOf="@id/contact_revoked_explanation"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -224,10 +226,11 @@
                     <Button
                         android:id="@+id/contact_no_channel_restart_button"
                         style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
+                        android:theme="@style/AppTheme.BlueAccent"
                         android:text="@string/button_restart_channel_establishment"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -235,6 +238,92 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
+
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/contact_not_one_to_one_card"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/almostWhite"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="4dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/contact_no_channel_cardview"
+                tools:visibility="visible">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/contact_not_one_to_one_header"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:text="@string/label_contact_not_one_to_one"
+                        android:textColor="@color/primary700"
+                        android:textSize="18sp"
+                    />
+
+                    <TextView
+                        android:id="@+id/contact_not_one_to_one_explanation"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        tools:text="@string/explanation_contact_not_one_to_one"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toTopOf="@+id/contact_not_one_to_one_buttons"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/contact_not_one_to_one_header"/>
+
+                    <LinearLayout
+                        android:id="@+id/contact_not_one_to_one_buttons"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent">
+                        <Button
+                            android:id="@+id/contact_not_one_to_one_reject_button"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:theme="@style/AppTheme.BlueAccent"
+                            tools:text="@string/button_label_reject"
+                            android:visibility="gone"
+                            android:layout_weight="1" />
+                        <Button
+                            android:id="@+id/contact_not_one_to_one_invite_button"
+                            style="@style/Base.Widget.AppCompat.Button.Colored"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:stateListAnimator="@null"
+                            android:theme="@style/AppTheme.BlueAccent"
+                            tools:text="@string/button_label_invite"
+                            android:layout_weight="1" />
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/contact_accept_update_cardview"
@@ -249,7 +338,7 @@
                 app:cardElevation="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/contact_no_channel_cardview"
+                app:layout_constraintTop_toBottomOf="@+id/contact_not_one_to_one_card"
                 tools:visibility="visible">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -333,6 +422,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/button_label_update"
+                        android:theme="@style/AppTheme.BlueAccent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"/>
@@ -609,6 +699,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
                         android:visibility="gone"
+                        android:theme="@style/AppTheme.BlueAccent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"

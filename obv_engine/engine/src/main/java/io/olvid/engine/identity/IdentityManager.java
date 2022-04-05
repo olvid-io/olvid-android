@@ -164,7 +164,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             if (contactIdentities.length > 0) {
                 Logger.i("Found " + contactIdentities.length + " contacts with no device. Starting corresponding deviceDiscoveryProtocols.");
                 for (ContactIdentity contactIdentity : contactIdentities) {
-                    protocolStarterDelegate.startDeviceDiscoveryProtocol(contactIdentity.getContactIdentity(), contactIdentity.getOwnedIdentity());
+                    protocolStarterDelegate.startDeviceDiscoveryProtocol(contactIdentity.getOwnedIdentity(), contactIdentity.getContactIdentity());
                 }
             }
         } catch (Exception e) {
@@ -267,7 +267,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 OwnedDevice ownedDevice = OwnedDevice.getCurrentDeviceOfOwnedIdentity(identityManagerSession, ownedIdentity.getOwnedIdentity());
 
                 HashSet<ObvCapability> currentCapabilities = new HashSet<>(ObvCapability.currentCapabilities);
-                HashSet<ObvCapability> publishedCapabilities = new HashSet<>(ownedDevice.getDeviceCapabilities());
+                List<ObvCapability> publishedCapabilitiesList = ownedDevice.getDeviceCapabilities();
+                HashSet<ObvCapability> publishedCapabilities = publishedCapabilitiesList == null ? null : new HashSet<>(publishedCapabilitiesList);
 
                 if (!currentCapabilities.equals(publishedCapabilities)) {
                     protocolStarterDelegate.updateCurrentDeviceCapabilitiesForOwnedIdentity(identityManagerSession.session, ownedIdentity.getOwnedIdentity(), ObvCapability.currentCapabilities);
@@ -593,14 +594,14 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return null;
     }
 
-    @Override
-    public JsonWebKeySet getOwnedIdentityKeycloakJwks(Session session, Identity ownedIdentity) throws SQLException {
-        OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
-        if (ownedIdentityObject != null) {
-            return ownedIdentityObject.getKeycloakJwks();
-        }
-        return null;
-    }
+//    @Override
+//    public JsonWebKeySet getOwnedIdentityKeycloakJwks(Session session, Identity ownedIdentity) throws SQLException {
+//        OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
+//        if (ownedIdentityObject != null) {
+//            return ownedIdentityObject.getKeycloakJwks();
+//        }
+//        return null;
+//    }
 
     @Override
     public JsonWebKey getOwnedIdentityKeycloakSignatureKey(Session session, Identity ownedIdentity) throws SQLException {
@@ -649,31 +650,31 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
     }
 
-    @Override
-    public JsonWebKeySet getTrustedKeycloakJwks(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException {
-        KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), keycloakServerUrl, ownedIdentity);
-        if (keycloakServer != null) {
-            try {
-                return keycloakServer.getJwks();
-            } catch (Exception e) {
-                // nothing
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public JsonWebKey getTrustedKeycloakSignatureKey(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException {
-        KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), keycloakServerUrl, ownedIdentity);
-        if (keycloakServer != null) {
-            try {
-                return keycloakServer.getSignatureKey();
-            } catch (Exception e) {
-                // nothing
-            }
-        }
-        return null;
-    }
+//    @Override
+//    public JsonWebKeySet getTrustedKeycloakJwks(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException {
+//        KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), keycloakServerUrl, ownedIdentity);
+//        if (keycloakServer != null) {
+//            try {
+//                return keycloakServer.getJwks();
+//            } catch (Exception e) {
+//                // nothing
+//            }
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    public JsonWebKey getTrustedKeycloakSignatureKey(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException {
+//        KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), keycloakServerUrl, ownedIdentity);
+//        if (keycloakServer != null) {
+//            try {
+//                return keycloakServer.getSignatureKey();
+//            } catch (Exception e) {
+//                // nothing
+//            }
+//        }
+//        return null;
+//    }
 
     @Override
     public List<String> getKeycloakPushTopics(Session session, Identity ownedIdentity) throws SQLException {
@@ -1029,7 +1030,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             ContactIdentity[] contactIdentities = ContactIdentity.getAll(wrapSession(session), ownedIdentity);
             for (ContactIdentity contactIdentity : contactIdentities) {
                 try {
-                    protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(session, contactIdentity.getContactIdentity(), ownedIdentity);
+                    protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(session, ownedIdentity, contactIdentity.getContactIdentity());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1110,7 +1111,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
 
     @Override
-    public void addContactIdentity(Session session, Identity contactIdentity, String serializedDetails, Identity ownedIdentity, TrustOrigin trustOrigin) throws Exception {
+    public void addContactIdentity(Session session, Identity contactIdentity, String serializedDetails, Identity ownedIdentity, TrustOrigin trustOrigin, boolean oneToOne) throws Exception {
         try {
             if (contactIdentity.equals(ownedIdentity)) {
                 throw new Exception("Error: trying to add your ownedIdentity as a contact");
@@ -1132,7 +1133,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 }
             }
 
-            ContactIdentity contactIdentityObject = ContactIdentity.create(wrapSession(session), contactIdentity, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto, trustOrigin, contactIsRevoked);
+            ContactIdentity contactIdentityObject = ContactIdentity.create(wrapSession(session), contactIdentity, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto, trustOrigin, contactIsRevoked, oneToOne);
             if (contactIdentityObject == null) {
                 Logger.w("An error occurred while creating a ContactIdentity.");
                 throw new SQLException();
@@ -1145,13 +1146,16 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public void addTrustOriginToContact(Session session, Identity contactIdentity, Identity ownedIdentity, TrustOrigin trustOrigin) throws SQLException {
+    public void addTrustOriginToContact(Session session, Identity contactIdentity, Identity ownedIdentity, TrustOrigin trustOrigin, boolean markAsOneToOne) throws SQLException {
         ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
         if (contactIdentityObject == null) {
             Logger.e("Error in addTrustOriginToContact: contactIdentity is not a ContactIdentity of ownedIdentity");
             throw new SQLException();
         }
         contactIdentityObject.addTrustOrigin(trustOrigin);
+        if (markAsOneToOne && !contactIdentityObject.isOneToOne()) {
+            contactIdentityObject.setOneToOne(true);
+        }
         session.addSessionCommitListener(backupNeededSessionCommitListener);
     }
 
@@ -1306,6 +1310,15 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
+    public TrustLevel getContactTrustLevel(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        if (contactIdentityObject != null) {
+            return contactIdentityObject.getTrustLevel();
+        }
+        return null;
+    }
+
+    @Override
     public void deleteContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, boolean failIfGroup) throws Exception {
         ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
         if (contactIdentityObject != null) {
@@ -1331,23 +1344,39 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public boolean isIdentityAnActiveContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        return ContactIdentity.isActive(wrapSession(session), ownedIdentity, contactIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        return (contactIdentityObject != null && contactIdentityObject.isActive());
     }
 
     @Override
-    public boolean isIdentityAContactIdentityOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+    public boolean isIdentityAContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
         ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
         return (contactIdentityObject != null);
     }
 
     @Override
-    public TrustLevel getContactIdentityTrustLevel(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+    public boolean isIdentityAOneToOneContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
         ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
-        if (contactIdentityObject == null) {
-            return null;
-        }
-        return contactIdentityObject.getTrustLevel();
+        return (contactIdentityObject != null && contactIdentityObject.isOneToOne());
     }
+
+    @Override
+    public void setContactOneToOne(Session session, Identity ownedIdentity, Identity contactIdentity, boolean oneToOne) throws SQLException {
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        // only actually call the setter if the oneToOne is changed
+        if (contactIdentityObject != null && contactIdentityObject.isOneToOne() != oneToOne) {
+            contactIdentityObject.setOneToOne(oneToOne);
+        }
+    }
+
+//    @Override
+//    public TrustLevel getContactIdentityTrustLevel(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+//        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+//        if (contactIdentityObject == null) {
+//            return null;
+//        }
+//        return contactIdentityObject.getTrustLevel();
+//    }
 
     @Override
     public EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
@@ -1470,7 +1499,10 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             HashSet<ObvCapability> contactCapabilities = null;
             for (ContactDevice contactDevice : contactDevices) {
                 List<ObvCapability> deviceCapabilities = contactDevice.getDeviceCapabilities();
-                if (deviceCapabilities == null || deviceCapabilities.size() == 0) {
+                if (deviceCapabilities == null) {
+                    continue;
+                }
+                if (deviceCapabilities.size() == 0) {
                     return new ArrayList<>();
                 }
                 if (contactCapabilities == null) {
@@ -1504,7 +1536,17 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (contactDevice == null) {
             throw new Exception();
         }
-        contactDevice.setRawDeviceCapabilities(rawDeviceCapabilities);
+        if (contactDevice.setRawDeviceCapabilities(rawDeviceCapabilities)) {
+            // check if this device is capable of handling non-oneToOne contacts
+            List<ObvCapability> contactDeviceCapabilities = contactDevice.getDeviceCapabilities();
+            if (contactDeviceCapabilities != null && !contactDeviceCapabilities.contains(ObvCapability.ONE_TO_ONE_CONTACTS)) {
+                ContactIdentity contact = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+                if (contact != null && !contact.isOneToOne()) {
+                    // the contact need to be upgraded to oneToOne as he will not understand our non-oneToOne protocols
+                    contact.setOneToOne(true);
+                }
+            }
+        }
     }
 
     @Override
@@ -1518,7 +1560,11 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             OwnedDevice[] ownedDevices = OwnedDevice.getOtherDevicesOfOwnedIdentity(identityManagerSession, ownedIdentity);
             for (OwnedDevice ownedDevice : ownedDevices) {
                 List<ObvCapability> deviceCapabilities = ownedDevice.getDeviceCapabilities();
-                if (deviceCapabilities == null || deviceCapabilities.size() == 0) {
+                if (deviceCapabilities == null) {
+                    // skip this device, we do not know its capabilities yet
+                    continue;
+                }
+                if (deviceCapabilities.size() == 0) {
                     return new ArrayList<>();
                 }
                 ownCapabilities.retainAll(deviceCapabilities);
@@ -1533,7 +1579,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     @Override
     public List<ObvCapability> getCurrentDevicePublishedCapabilities(Session session, Identity ownedIdentity) throws Exception {
         OwnedDevice ownedDevice = OwnedDevice.getCurrentDeviceOfOwnedIdentity(wrapSession(session), ownedIdentity);
-        return ownedDevice.getDeviceCapabilities();
+        List<ObvCapability> capabilities = ownedDevice.getDeviceCapabilities();
+        return (capabilities == null)  ? new ArrayList<>() : capabilities;
     }
 
     @Override
@@ -1646,7 +1693,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     public void createContactGroup(Session session, Identity ownedIdentity, GroupInformation groupInformation, Identity[] groupMembers, IdentityWithSerializedDetails[] pendingGroupMembers) throws Exception {
         // check that all members are indeed existing contacts
         for (Identity groupMember: groupMembers) {
-            if (!isIdentityAContactIdentityOfOwnedIdentity(session, ownedIdentity, groupMember)) {
+            if (!isIdentityAContactOfOwnedIdentity(session, ownedIdentity, groupMember)) {
                 Logger.e("Error in createContactGroup: a GroupMember is not a Contact.");
                 throw new Exception();
             }
@@ -1721,7 +1768,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         Group group = getGroup(session, ownedIdentity, groupUid);
         // check the contactIdentities are indeed ContactIdentity of the ownedIdentity
         for (Identity contactIdentity: contactIdentities) {
-            if (!isIdentityAContactIdentityOfOwnedIdentity(session, ownedIdentity, contactIdentity)) {
+            if (!isIdentityAContactOfOwnedIdentity(session, ownedIdentity, contactIdentity)) {
                 Logger.e("Error in addPendingMembersToGroup: contactIdentity is not a Contact.");
                 throw new Exception();
             }
@@ -1812,7 +1859,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             throw new Exception();
         }
         // check the contactIdentity is indeed a ContactIdentity of the ownedIdentity
-        if (!isIdentityAContactIdentityOfOwnedIdentity(session, ownedIdentity, contactIdentity)) {
+        if (!isIdentityAContactOfOwnedIdentity(session, ownedIdentity, contactIdentity)) {
             Logger.e("Error in addGroupMemberFromPendingMember: contactIdentity is not a Contact.");
             throw new Exception();
         }
@@ -1962,7 +2009,9 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     // create contact if it does not exist
                     ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), groupMember.identity, ownedIdentity);
                     if (contactIdentityObject == null) {
-                        addContactIdentity(session, groupMember.identity, groupMember.serializedDetails, ownedIdentity, TrustOrigin.createGroupTrustOrigin(System.currentTimeMillis(), groupInformation.groupOwnerIdentity));
+                        addContactIdentity(session, groupMember.identity, groupMember.serializedDetails, ownedIdentity, TrustOrigin.createGroupTrustOrigin(System.currentTimeMillis(), groupInformation.groupOwnerIdentity), false);
+                    } else {
+                        addTrustOriginToContact(session, groupMember.identity, ownedIdentity, TrustOrigin.createGroupTrustOrigin(System.currentTimeMillis(), groupInformation.groupOwnerIdentity), false);
                     }
 
                     // add contact to group

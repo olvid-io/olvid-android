@@ -20,11 +20,13 @@
 package io.olvid.messenger.customClasses;
 
 
+import android.content.DialogInterface;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,6 +52,12 @@ public abstract class OpenHiddenProfileDialog {
 
     public OpenHiddenProfileDialog(@NonNull FragmentActivity activity) {
         View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_view_open_hidden_profile, null);
+        TextView messageTextView = dialogView.findViewById(R.id.dialog_message);
+        String message = getAdditionalMessage();
+        if (message != null) {
+            messageTextView.setText(message);
+            messageTextView.setVisibility(View.VISIBLE);
+        }
         TextInputEditText passwordEditText = dialogView.findViewById(R.id.password_text_view);
         passwordEditText.addTextChangedListener(new TextChangeListener() {
             @Override
@@ -73,6 +81,7 @@ public abstract class OpenHiddenProfileDialog {
                 window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         });
+        dialog.setOnDismissListener((DialogInterface d) -> onDismissCallback());
         dialog.show();
 
         ownedIdentityPasswordAndSalts = null;
@@ -87,6 +96,11 @@ public abstract class OpenHiddenProfileDialog {
         });
     }
 
+    @Nullable
+    protected String getAdditionalMessage() {
+        return null;
+    }
+
     private void selectIdentityFromPassword(String password) {
         if (ownedIdentityPasswordAndSalts == null || password == null || password.length() == 0) {
             return;
@@ -95,8 +109,7 @@ public abstract class OpenHiddenProfileDialog {
             try {
                 byte[] hash = SettingsActivity.computePINHash(password, ownedIdentityPasswordAndSalt.unlock_salt);
                 if (Arrays.equals(ownedIdentityPasswordAndSalt.unlock_password, hash)) {
-                    dialog.dismiss();
-                    onHiddenIdentityPasswordEntered(ownedIdentityPasswordAndSalt.bytes_owned_identity);
+                    onHiddenIdentityPasswordEntered(dialog, ownedIdentityPasswordAndSalt.bytes_owned_identity);
                     return;
                 }
             } catch (Exception ignored) {
@@ -104,5 +117,10 @@ public abstract class OpenHiddenProfileDialog {
         }
     }
 
-    protected abstract void onHiddenIdentityPasswordEntered(byte[] byteOwnedIdentity);
+    protected void onDismissCallback() {
+        // no onDismissCallback by default, but may be overridden
+        // if so, remember to remove onDismiss before dismissing in onHiddenIdentityPasswordEntered
+    }
+
+    protected abstract void onHiddenIdentityPasswordEntered(AlertDialog dialog, byte[] byteOwnedIdentity);
 }

@@ -485,10 +485,10 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
 
             {
                 // signature is valid and fresh --> create the contact (if it does not already exists)
-                if (!protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity)) {
-                    protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, receivedMessage.aliceIdentity, receivedMessage.serializedAliceDetails, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()));
+                if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity)) {
+                    protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, receivedMessage.aliceIdentity, receivedMessage.serializedAliceDetails, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }  else {
-                    protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.aliceIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()));
+                    protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.aliceIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }
                 for (UID contactDeviceUid: receivedMessage.aliceDeviceUids) {
                     protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid);
@@ -570,10 +570,10 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
 
             {
                 // signature is valid and fresh --> create the contact (if it does not already exists)
-                if (!protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity)) {
-                    protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, receivedMessage.aliceIdentity, receivedMessage.serializedAliceDetails, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()));
+                if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity)) {
+                    protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, receivedMessage.aliceIdentity, receivedMessage.serializedAliceDetails, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 } else {
-                    protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.aliceIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()));
+                    protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.aliceIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }
                 for (UID contactDeviceUid : receivedMessage.aliceDeviceUids) {
                     protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid);
@@ -611,10 +611,10 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
 
             {
                 // Bob added Alice to his contacts --> time for Alice to do the same
-                if (!protocolManagerSession.identityDelegate.isIdentityAContactIdentityOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.bobIdentity)) {
-                    protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.bobIdentity, receivedMessage.serializedBobDetails, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()));
+                if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.bobIdentity)) {
+                    protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.bobIdentity, receivedMessage.serializedBobDetails, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 } else {
-                    protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.bobIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()));
+                    protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.bobIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }
                 for (UID contactDeviceUid : receivedMessage.bobDeviceUids) {
                     protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.bobIdentity, contactDeviceUid);

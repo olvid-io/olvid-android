@@ -38,7 +38,7 @@ public class EmojiKeyboardFragment extends Fragment {
 
     private final EmojiPickerViewFactory.EmojiClickListener emojiClickListener = new EmojiPickerViewFactory.EmojiClickListener() {
         @Override
-        public void onClick(View emojiView, String emoji) {
+        public void onClick(String emoji) {
             if (inputConnection != null) {
                 inputConnection.commitText(emoji, 1);
             }
@@ -46,11 +46,11 @@ public class EmojiKeyboardFragment extends Fragment {
 
         @Override
         public void onHighlightedClick(View emojiView, String emoji) {
-            onClick(emojiView, emoji);
+            onClick(emoji);
         }
 
         @Override
-        public void onLongClick(View emojiView, String emoji) {
+        public void onLongClick(String emoji) {
             if (inputConnection != null) {
                 inputConnection.commitText(emoji, 1);
             }

@@ -54,7 +54,7 @@ public class ChannelReceivedMessage {
             }
 
             // parse
-            Encoded[] listOfEncoded = decryptedMessage.decodeList();
+            Encoded[] listOfEncoded = decryptedMessage.decodeListWithPadding();
             if (listOfEncoded.length != 2) {
                 throw new Exception();
             }

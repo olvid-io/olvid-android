@@ -3,16 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/almostWhite">
+    android:layout_height="wrap_content">
 
-    <View
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="@color/lightGrey"
-        app:layout_constraintEnd_toEndOf="@+id/backup_device_text_view"
-        app:layout_constraintStart_toStartOf="@+id/device"
-        app:layout_constraintTop_toTopOf="parent" />
+    <ImageView
+        android:id="@+id/backup_item_type_image"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="9dp"
+        android:layout_marginBottom="8dp"
+        app:tint="@color/olvid_gradient_light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_cloud_download" />
 
     <TextView
         android:id="@+id/device"
@@ -20,19 +24,22 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/text_device"
-        app:layout_constraintStart_toEndOf="@+id/imageView2"
+        app:layout_constraintStart_toEndOf="@+id/backup_item_type_image"
         app:layout_constraintTop_toTopOf="@+id/backup_device_text_view" />
 
     <TextView
         android:id="@+id/backup_device_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="9dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="4dp"
+        app:layout_goneMarginEnd="8dp"
         android:textColor="@color/primary700"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintBottom_toTopOf="@+id/backup_timestamp_text_view"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button_download"
         app:layout_constraintStart_toEndOf="@+id/device"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
@@ -44,33 +51,57 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/text_date"
-        app:layout_constraintStart_toEndOf="@+id/imageView2"
+        app:layout_constraintStart_toEndOf="@+id/backup_item_type_image"
         app:layout_constraintTop_toTopOf="@+id/backup_timestamp_text_view" />
 
     <TextView
         android:id="@+id/backup_timestamp_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        app:layout_goneMarginEnd="8dp"
         android:layout_marginBottom="8dp"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:textColor="@color/primary700"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button_download"
         app:layout_constraintStart_toEndOf="@+id/date"
         app:layout_constraintTop_toBottomOf="@+id/backup_device_text_view"
         tools:text="Monday September 3, 2019" />
 
+
+
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/button_download"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="9dp"
-        android:layout_marginBottom="8dp"
-        app:tint="@color/olvid_gradient_light"
+        android:padding="4dp"
+        tools:visibility="visible"
+        android:visibility="gone"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_download_blue"
+        android:theme="@style/SubtleBlueRipple"
+        android:background="@drawable/background_circular_ripple"
+        app:layout_constraintEnd_toStartOf="@+id/button_delete"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_cloud_download" />
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ImageView
+        android:id="@+id/button_delete"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="4dp"
+        android:layout_marginEnd="8dp"
+        android:scaleType="fitCenter"
+        tools:visibility="visible"
+        android:visibility="gone"
+        android:src="@drawable/ic_delete_red"
+        android:theme="@style/SubtleBlueRipple"
+        android:background="@drawable/background_circular_ripple"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

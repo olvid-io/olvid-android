@@ -61,6 +61,7 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
     private final HashMap<Identity, List<UID>> awaitingServerSessionOperations;
     private final Lock awaitingServerSessionOperationsLock;
     private final NotificationListener notificationListener;
+    private final ServerUserDataCoordinator serverUserDataCoordinator;
 
     private boolean initialQueueingPerformed = false;
     private final Object lock = new Object();
@@ -72,11 +73,12 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
 
     private ChannelDelegate channelDelegate;
 
-    public ServerQueryCoordinator(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, PRNGService prng, CreateServerSessionDelegate createServerSessionDelegate) {
+    public ServerQueryCoordinator(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, PRNGService prng, CreateServerSessionDelegate createServerSessionDelegate, ServerUserDataCoordinator serverUserDataCoordinator) {
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
         this.prng = prng;
         this.createServerSessionDelegate = createServerSessionDelegate;
+        this.serverUserDataCoordinator = serverUserDataCoordinator;
 
         serverQueriesOperationQueue = new NoDuplicateOperationQueue();
         serverQueriesOperationQueue.execute(1, "Engine-ServerQueryCoordinator");
@@ -283,6 +285,10 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
             } else {
                 pendingServerQuery.delete();
                 fetchManagerSession.session.commit();
+            }
+
+            if (serverQuery.getType().getId() == ServerQuery.Type.PUT_USER_DATA_QUERY_ID) {
+                serverUserDataCoordinator.newUserDataUploaded(serverQuery.getOwnedIdentity(), serverQuery.getType().getServerLabel());
             }
         } catch (Exception e) {
             e.printStackTrace();

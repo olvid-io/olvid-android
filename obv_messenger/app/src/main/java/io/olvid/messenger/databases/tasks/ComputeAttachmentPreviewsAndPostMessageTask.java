@@ -53,6 +53,7 @@ import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
+import io.olvid.messenger.services.UnifiedForegroundService;
 
 import static io.olvid.messenger.databases.entity.Message.TYPE_OUTBOUND_MESSAGE;
 
@@ -234,6 +235,8 @@ public class ComputeAttachmentPreviewsAndPostMessageTask implements Runnable {
                         true,
                         false
                 );
+
+                UnifiedForegroundService.processPostMessageOutput(postMessageOutput);
             } else {
                 return;
             }

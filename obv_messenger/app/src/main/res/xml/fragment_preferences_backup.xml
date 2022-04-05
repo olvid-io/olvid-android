@@ -34,4 +34,11 @@
             android:order="30"
             android:enabled="false"
             />
+        <Preference
+            android:key="pref_key_manage_cloud_backups"
+            android:title="@string/pref_manage_cloud_backups_title"
+            android:summary="@string/pref_manage_cloud_backups_summary"
+            android:icon="@drawable/ic_pref_list"
+            android:order="40"
+            />
 </PreferenceScreen>

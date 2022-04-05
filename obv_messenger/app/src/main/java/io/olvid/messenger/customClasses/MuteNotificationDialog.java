@@ -21,21 +21,33 @@ package io.olvid.messenger.customClasses;
 
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import java.util.Calendar;
+
 import io.olvid.messenger.R;
 
 public class MuteNotificationDialog {
+    @NonNull private final Context context;
+    @NonNull private final OnMuteExpirationSelectedListener onMuteExpirationSelectedListener;
     @NonNull private final AlertDialog.Builder builder;
+    private Dialog dialog = null;
 
     private boolean muteWholeProfile;
 
@@ -46,12 +58,15 @@ public class MuteNotificationDialog {
     }
 
     public MuteNotificationDialog(@NonNull Context context, @NonNull OnMuteExpirationSelectedListener onMuteExpirationSelectedListener, @NonNull MuteType muteType) {
+        this.context = context;
+        this.onMuteExpirationSelectedListener = onMuteExpirationSelectedListener;
+
         final Long[] timeoutOptionsDurations = new Long[]{
                 3_600_000L,
                 28_800_000L,
                 604_800_000L,
                 null};
-        String[] timeoutOptionsLabels = new String[]{
+        final String[] timeoutOptionsLabels = new String[]{
                 context.getString(R.string.pref_mute_notifications_one_hour),
                 context.getString(R.string.pref_mute_notifications_eight_hours),
                 context.getString(R.string.pref_mute_notifications_one_week),
@@ -81,16 +96,25 @@ public class MuteNotificationDialog {
             builder.setTitle(R.string.dialog_title_mute_discussion_notification_duration);
         }
 
+        @SuppressLint("InflateParams")
+        View additionalView = LayoutInflater.from(context).inflate(R.layout.dialog_view_switch_mute_type, null);
+        View switchAndLabel = additionalView.findViewById(R.id.switch_and_label);
         if (muteType == MuteType.DISCUSSION_OR_PROFILE) {
-            @SuppressLint("InflateParams")
-            View switchView = LayoutInflater.from(context).inflate(R.layout.dialog_view_switch_mute_type, null);
+            switchAndLabel.setVisibility(View.VISIBLE);
             @SuppressLint("UseSwitchCompatOrMaterialCode")
-            Switch switsh = switchView.findViewById(R.id.mute_profile_switch);
+            Switch switsh = additionalView.findViewById(R.id.mute_profile_switch);
             switsh.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> muteWholeProfile = isChecked);
-            switchView.setOnClickListener((View v) -> switsh.toggle());
-
-            builder.setView(switchView);
+            switchAndLabel.setOnClickListener((View v) -> switsh.toggle());
+        } else {
+            switchAndLabel.setVisibility(View.GONE);
         }
+
+        TextView customTime = additionalView.findViewById(R.id.custom_time);
+        customTime.setOnClickListener(v -> openCustomTimeExpirationPicker());
+        TextView customDate = additionalView.findViewById(R.id.custom_date);
+        customDate.setOnClickListener(v -> openCustomDateExpirationPicker());
+
+        builder.setView(additionalView);
     }
 
     public void setOnDismissListener(DialogInterface.OnDismissListener onDismissListener) {
@@ -98,7 +122,35 @@ public class MuteNotificationDialog {
     }
 
     public void show() {
-        builder.create().show();
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    private void openCustomTimeExpirationPicker() {
+        final Calendar calendar = Calendar.getInstance();
+        new TimePickerDialog(context, (TimePicker timePicker, int hour, int minute) -> {
+            if (calendar.get(Calendar.HOUR_OF_DAY) > hour || (calendar.get(Calendar.HOUR_OF_DAY) == hour && calendar.get(Calendar.MINUTE) >= minute)) {
+                calendar.add(Calendar.DATE, 1);
+            }
+            calendar.set(Calendar.HOUR_OF_DAY, hour);
+            calendar.set(Calendar.MINUTE, minute);
+            calendar.set(Calendar.SECOND, 0);
+            onMuteExpirationSelectedListener.onMuteExpirationSelected(calendar.getTimeInMillis(), muteWholeProfile);
+            if (this.dialog != null) {
+                this.dialog.dismiss();
+            }
+        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), DateFormat.is24HourFormat(context)).show();
+    }
+
+    private void openCustomDateExpirationPicker() {
+        final Calendar calendar = Calendar.getInstance();
+        new DatePickerDialog(context, (DatePicker datePicker, int year, int month, int dayOfMonth) -> {
+            calendar.set(year, month, dayOfMonth, 0, 0, 0);
+            onMuteExpirationSelectedListener.onMuteExpirationSelected(calendar.getTimeInMillis(), muteWholeProfile);
+            if (this.dialog != null) {
+                this.dialog.dismiss();
+            }
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     public interface OnMuteExpirationSelectedListener {

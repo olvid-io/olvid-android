@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -96,9 +97,7 @@ public class OwnIdentitySelectorPopupWindow {
         currentIdentityInitialView.setOnClickListener(v -> popupWindow.dismiss());
         this.currentIdentityObserver = (OwnedIdentity ownedIdentity) -> {
             if (ownedIdentity == null) {
-                currentIdentityInitialView.setKeycloakCertified(false);
-                currentIdentityInitialView.setInactive(false);
-                currentIdentityInitialView.setInitial(new byte[0], " ");
+                currentIdentityInitialView.setUnknown();
                 currentIdentityMutedImageView.setVisibility(View.GONE);
                 return;
             }
@@ -129,13 +128,7 @@ public class OwnIdentitySelectorPopupWindow {
                     currentNameSecondLineTextView.setText(null);
                 }
             }
-            currentIdentityInitialView.setInactive(!ownedIdentity.active);
-            currentIdentityInitialView.setKeycloakCertified(ownedIdentity.keycloakManaged);
-            if (ownedIdentity.photoUrl != null) {
-                currentIdentityInitialView.setPhotoUrl(ownedIdentity.bytesOwnedIdentity, ownedIdentity.photoUrl);
-            } else {
-                currentIdentityInitialView.setInitial(ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentity.getCustomDisplayName()));
-            }
+            currentIdentityInitialView.setOwnedIdentity(ownedIdentity);
             if (ownedIdentity.shouldMuteNotifications()) {
                 currentIdentityMutedImageView.setVisibility(View.VISIBLE);
             } else {
@@ -211,7 +204,8 @@ public class OwnIdentitySelectorPopupWindow {
         }
 
         @Override
-        protected void onHiddenIdentityPasswordEntered(byte[] byteOwnedIdentity) {
+        protected void onHiddenIdentityPasswordEntered(AlertDialog dialog, byte[] byteOwnedIdentity) {
+            dialog.dismiss();
             AppSingleton.getInstance().selectIdentity(byteOwnedIdentity, null);
             if (!SettingsActivity.isHiddenProfileClosePolicyDefined()) {
                 App.openAppDialogConfigureHiddenProfileClosePolicy();
@@ -275,20 +269,14 @@ public class OwnIdentitySelectorPopupWindow {
             }
             OwnedIdentityDao.OwnedIdentityAndUnreadMessageCount ownedIdentityAndUnreadMessageCount = ownedIdentities.get(position);
             holder.bytesOwnedIdentity = ownedIdentityAndUnreadMessageCount.ownedIdentity.bytesOwnedIdentity;
-            if (ownedIdentityAndUnreadMessageCount.unreadMessageCount + ownedIdentityAndUnreadMessageCount.unreadInvitationCount == 0) {
+            if (ownedIdentityAndUnreadMessageCount.unreadMessageCount + ownedIdentityAndUnreadMessageCount.unreadInvitationCount + ownedIdentityAndUnreadMessageCount.unreadDiscussionCount == 0) {
                 holder.unreadMessageLabel.setVisibility(View.GONE);
             } else {
                 holder.unreadMessageLabel.setVisibility(View.VISIBLE);
-                holder.unreadMessageLabel.setText(Long.toString(ownedIdentityAndUnreadMessageCount.unreadMessageCount + ownedIdentityAndUnreadMessageCount.unreadInvitationCount));
+                holder.unreadMessageLabel.setText(Long.toString(ownedIdentityAndUnreadMessageCount.unreadMessageCount + ownedIdentityAndUnreadMessageCount.unreadInvitationCount + ownedIdentityAndUnreadMessageCount.unreadDiscussionCount));
             }
 
-            holder.initialView.setInactive(!ownedIdentityAndUnreadMessageCount.ownedIdentity.active);
-            holder.initialView.setKeycloakCertified(ownedIdentityAndUnreadMessageCount.ownedIdentity.keycloakManaged);
-            if (ownedIdentityAndUnreadMessageCount.ownedIdentity.photoUrl == null) {
-                holder.initialView.setInitial(ownedIdentityAndUnreadMessageCount.ownedIdentity.bytesOwnedIdentity, App.getInitial(ownedIdentityAndUnreadMessageCount.ownedIdentity.getCustomDisplayName()));
-            } else {
-                holder.initialView.setPhotoUrl(ownedIdentityAndUnreadMessageCount.ownedIdentity.bytesOwnedIdentity, ownedIdentityAndUnreadMessageCount.ownedIdentity.photoUrl);
-            }
+            holder.initialView.setOwnedIdentity(ownedIdentityAndUnreadMessageCount.ownedIdentity);
 
             if (ownedIdentityAndUnreadMessageCount.ownedIdentity.shouldMuteNotifications()) {
                 holder.notificationMutedImageView.setVisibility(View.VISIBLE);

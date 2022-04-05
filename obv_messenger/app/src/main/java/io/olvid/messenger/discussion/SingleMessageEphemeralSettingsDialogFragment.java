@@ -453,7 +453,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
             if (viewModel.valid.getValue() != null && viewModel.valid.getValue()) {
                 Message.JsonExpiration jsonExpiration = new Message.JsonExpiration();
                 if (viewModel.readOnce) {
-                    jsonExpiration.setReadOnce(viewModel.readOnce);
+                    jsonExpiration.setReadOnce(true);
                 }
                 jsonExpiration.setVisibilityDuration(viewModel.visibility);
                 jsonExpiration.setExistenceDuration(viewModel.existence);

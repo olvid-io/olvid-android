@@ -84,7 +84,7 @@ public class WidgetListFragment extends Fragment {
         WidgetListAdapter adapter = new WidgetListAdapter();
         recyclerView.setAdapter(adapter);
 
-        AppDatabase.getInstance().actionShortcutConfigurationDao().getAll().observe(this, adapter);
+        AppDatabase.getInstance().actionShortcutConfigurationDao().getAll().observe(activity, adapter);
 
         return rootView;
     }

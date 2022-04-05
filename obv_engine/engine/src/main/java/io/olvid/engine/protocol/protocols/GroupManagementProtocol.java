@@ -85,6 +85,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
 
 
     public static class FinalState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public FinalState(Encoded encodedState) throws Exception {
             super(FINAL_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -130,9 +131,6 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     private static final int TRIGGER_UPDATE_MEMBERS_MESSAGE_ID = 14;
     private static final int UPLOAD_GROUP_PHOTO_MESSAGE_MESSAGE_ID = 15;
 
-    private static final int RELINQUISH_OWNERSHIP_MESSAGE_ID = 70;
-    private static final int TAKE_OWNERSHIP_MESSAGE_ID = 80;
-
     @Override
     protected Class<?> getMessageClass(int protocolMessageId) {
         switch (protocolMessageId) {
@@ -168,8 +166,6 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 return TriggerUpdateMembersMessage.class;
             case UPLOAD_GROUP_PHOTO_MESSAGE_MESSAGE_ID:
                 return UploadGroupPhotoMessage.class;
-            case RELINQUISH_OWNERSHIP_MESSAGE_ID:
-            case TAKE_OWNERSHIP_MESSAGE_ID:
             default:
                 return null;
         }
@@ -211,6 +207,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             this.absolutePhotoUrl = absolutePhotoUrl;
         }
 
+        @SuppressWarnings("unused")
         public InitiateGroupCreationMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 3) {
@@ -255,6 +252,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             this.groupMemberIdentitiesAndSerializedDetails = groupMemberIdentitiesAndSerializedDetails;
         }
 
+        @SuppressWarnings("unused")
         public PropagateGroupCreationMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -269,7 +267,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
 
         @Override
         public int getProtocolMessageId() {
-            return INITIATE_GROUP_CREATION_MESSAGE_ID;
+            return PROPAGATE_GROUP_CREATION_MESSAGE_ID;
         }
 
         @Override
@@ -292,6 +290,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             super(coreProtocolMessage, groupInformation);
         }
 
+        @SuppressWarnings("unused")
         public GroupMembersOrDetailsChangedTriggerMessage(ReceivedMessage receivedMessage) throws Exception {
             super(receivedMessage);
         }
@@ -316,6 +315,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             this.membersVersion = membersVersion;
         }
 
+        @SuppressWarnings("unused")
         public NewMembersMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 4) {
@@ -370,6 +370,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             this.newMembersIdentity = newMembersIdentity;
         }
 
+        @SuppressWarnings("unused")
         public AddGroupMembersMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -412,6 +413,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             this.removedMemberIdentities = removedMemberIdentities;
         }
 
+        @SuppressWarnings("unused")
         public RemoveGroupMembersMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -454,6 +456,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             this.pendingMemberIdentity = pendingMemberIdentity;
         }
 
+        @SuppressWarnings("unused")
         public ReinvitePendingMemberMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -483,6 +486,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             super(coreProtocolMessage, groupInformation);
         }
 
+        @SuppressWarnings("unused")
         public KickFromGroupMessage(ReceivedMessage receivedMessage) throws Exception {
             super(receivedMessage);
         }
@@ -498,6 +502,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             super(coreProtocolMessage, groupInformation);
         }
 
+        @SuppressWarnings("unused")
         public DisbandGroupMessage(ReceivedMessage receivedMessage) throws Exception {
             super(receivedMessage);
         }
@@ -513,6 +518,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             super(coreProtocolMessage, groupInformation);
         }
 
+        @SuppressWarnings("unused")
         public LeaveGroupMessage(ReceivedMessage receivedMessage) throws Exception {
             super(receivedMessage);
         }
@@ -528,6 +534,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             super(coreProtocolMessage, groupInformation);
         }
 
+        @SuppressWarnings("unused")
         public NotifyGroupLeftMessage(ReceivedMessage receivedMessage) throws Exception {
             super(receivedMessage);
         }
@@ -544,6 +551,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             super(coreProtocolMessage, groupInformation);
         }
 
+        @SuppressWarnings("unused")
         public InitiateGroupMembersQueryMessage(ReceivedMessage receivedMessage) throws Exception {
             super(receivedMessage);
         }
@@ -559,6 +567,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             super(coreProtocolMessage, groupInformation);
         }
 
+        @SuppressWarnings("unused")
         public QueryGroupMembersMessage(ReceivedMessage receivedMessage) throws Exception {
             super(receivedMessage);
         }
@@ -579,6 +588,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             this.memberIdentity = memberIdentity;
         }
 
+        @SuppressWarnings("unused")
         public TriggerReinviteMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -613,6 +623,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             this.memberIdentity = memberIdentity;
         }
 
+        @SuppressWarnings("unused")
         public TriggerUpdateMembersMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -644,6 +655,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             this.groupInformation = groupInformation;
         }
 
+        @SuppressWarnings("unused")
         public UploadGroupPhotoMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getEncodedResponse() != null) {
@@ -675,32 +687,30 @@ public class GroupManagementProtocol extends ConcreteProtocol {
 
     @Override
     protected Class<?>[] getPossibleStepClasses(int stateId) {
-        switch (stateId) {
-            case INITIAL_STATE_ID:
-                return new Class[]{
-                        InitiateGroupCreationStep.class,
-                        NotifyMembersChangedStep.class,
-                        ProcessNewMembersStep.class,
-                        AddGroupMembersStep.class,
-                        RemoveGroupMembersStep.class,
-                        GetKickedStep.class,
-                        ReinvitePendingMemberStep.class,
-                        DisbandGroupStep.class,
-                        LeaveGroupStep.class,
-                        ProcessGroupLeftStep.class,
-                        QueryGroupMembersStep.class,
-                        SendGroupMembersStep.class,
-                        ReinviteStep.class,
-                        UpdateMembersStep.class,
-                };
-            default:
-                return new Class[0];
+        if (stateId == INITIAL_STATE_ID) {
+            return new Class[]{
+                    InitiateGroupCreationStep.class,
+                    NotifyMembersChangedStep.class,
+                    ProcessNewMembersStep.class,
+                    AddGroupMembersStep.class,
+                    RemoveGroupMembersStep.class,
+                    GetKickedStep.class,
+                    ReinvitePendingMemberStep.class,
+                    DisbandGroupStep.class,
+                    LeaveGroupStep.class,
+                    ProcessGroupLeftStep.class,
+                    QueryGroupMembersStep.class,
+                    SendGroupMembersStep.class,
+                    ReinviteStep.class,
+                    UpdateMembersStep.class,
+            };
         }
+        return new Class[0];
     }
 
 
     public static class InitiateGroupCreationStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"unused", "FieldCanBeLocal"})
         private final InitialProtocolState startState;
         private final InitiateGroupCreationMessage receivedMessage;
 
@@ -765,7 +775,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                     ChannelMessageToSend messageToSend = new UploadGroupPhotoMessage(coreProtocolMessage, groupInformation).generateChannelServerQueryMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 } catch (Exception e) {
-                    // an error occured with the photo, this should not prevent group creation, so we do nothing
+                    // an error occurred with the photo, this should not prevent group creation, so we do nothing
                 }
             }
 
@@ -800,15 +810,18 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     }
 
     public static class NotifyMembersChangedStep extends ProtocolStep {
+        @SuppressWarnings("unused")
         private final InitialProtocolState startState;
         private final GroupInformation groupInformation;
 
+        @SuppressWarnings("unused")
         public NotifyMembersChangedStep(InitialProtocolState startState, GroupMembersOrDetailsChangedTriggerMessage receivedMessage, GroupManagementProtocol protocol) throws Exception {
             super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupInformation = receivedMessage.groupInformation;
         }
 
+        @SuppressWarnings("unused")
         public NotifyMembersChangedStep(InitialProtocolState startState, UploadGroupPhotoMessage receivedMessage, GroupManagementProtocol protocol) throws Exception {
             super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
@@ -885,7 +898,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     }
 
     public static class ProcessNewMembersStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final NewMembersMessage receivedMessage;
 
@@ -962,7 +975,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     }
 
     public static class AddGroupMembersStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final AddGroupMembersMessage receivedMessage;
 
@@ -1028,7 +1041,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     }
 
     public static class RemoveGroupMembersStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final RemoveGroupMembersMessage receivedMessage;
 
@@ -1087,7 +1100,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     }
 
     public static class GetKickedStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final KickFromGroupMessage receivedMessage;
 
@@ -1127,7 +1140,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
 
 
     public static class ReinvitePendingMemberStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final ReinvitePendingMemberMessage receivedMessage;
 
@@ -1184,7 +1197,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     }
 
     public static class DisbandGroupStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final DisbandGroupMessage receivedMessage;
 
@@ -1250,7 +1263,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     }
 
     public static class LeaveGroupStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final LeaveGroupMessage receivedMessage;
 
@@ -1292,7 +1305,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     }
 
     public static class ProcessGroupLeftStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final NotifyGroupLeftMessage receivedMessage;
 
@@ -1332,7 +1345,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
 
 
     public static class QueryGroupMembersStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final InitiateGroupMembersQueryMessage receivedMessage;
 
@@ -1364,7 +1377,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
 
 
     public static class SendGroupMembersStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final QueryGroupMembersMessage receivedMessage;
 
@@ -1433,7 +1446,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
 
 
     public static class ReinviteStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final TriggerReinviteMessage receivedMessage;
 
@@ -1499,7 +1512,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
 
 
     public static class UpdateMembersStep extends ProtocolStep {
-        @SuppressWarnings({"FieldCanBeLocal"})
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final TriggerUpdateMembersMessage receivedMessage;
 

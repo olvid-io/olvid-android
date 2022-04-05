@@ -190,7 +190,7 @@ public class CallParticipantAdditionDialogFragment extends DialogFragment {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (!(service instanceof WebrtcCallService.WebrtcCallServiceBinder)) {
-                Logger.e("☎️ CallParticipantAdditionDialogFragment bound to bad service!!!");
+                Logger.e("☎ CallParticipantAdditionDialogFragment bound to bad service!!!");
                 dismiss();
                 return;
             }

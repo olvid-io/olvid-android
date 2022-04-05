@@ -6,16 +6,16 @@ repositories {
 
 dependencies {
     testImplementation 'junit:junit:4.13.2'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.1'
+    // Jackson version 2.13.2 uses Method.getParameterCount() which was added in API 26
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
     implementation files('libs/sqlite-jdbc-3.36.0.jar')
     testImplementation 'org.xerial:sqlite-jdbc:3.36.0' // only here to check if a new version is available
 
     implementation 'org.java-websocket:Java-WebSocket:1.5.2'
-    implementation 'org.slf4j:slf4j-api:1.7.30'
-    implementation 'org.slf4j:slf4j-simple:1.7.30'
+    implementation 'org.slf4j:slf4j-api:1.7.31'
+    implementation 'org.slf4j:slf4j-simple:1.7.31'
 
-    implementation 'org.bitbucket.b_c:jose4j:0.7.9'
+    implementation 'org.bitbucket.b_c:jose4j:0.7.11'
 
     implementation 'net.iharder:base64:2.3.9'
 }

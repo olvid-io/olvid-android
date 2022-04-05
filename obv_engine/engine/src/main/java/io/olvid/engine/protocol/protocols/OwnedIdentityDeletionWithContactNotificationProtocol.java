@@ -246,11 +246,11 @@ public class OwnedIdentityDeletionWithContactNotificationProtocol extends Concre
                     for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
                         try {
                             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(sendChannelInfo,
-                                    OBLIVIOUS_CHANNEL_MANAGEMENT_PROTOCOL_ID,
+                                    CONTACT_MANAGEMENT_PROTOCOL_ID,
                                     protocolInstanceUid,
                                     false);
 
-                            ChannelMessageToSend messageToSend = new ObliviousChannelManagementProtocol.ContactDeletionNotificationMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
+                            ChannelMessageToSend messageToSend = new ContactManagementProtocol.ContactDeletionNotificationMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         } catch (Exception e) {
                             // if the contact has no channel, catch the exception and proceed with the deletion

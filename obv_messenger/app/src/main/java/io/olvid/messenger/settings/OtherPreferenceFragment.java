@@ -51,6 +51,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.main.Utils;
+import io.olvid.messenger.services.UnifiedForegroundService;
 
 public class OtherPreferenceFragment extends PreferenceFragmentCompat {
     private FragmentActivity activity;
@@ -72,6 +73,7 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                 editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_BATTERY_OPTIMIZATION, false);
                 editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_ALARM_SCHEDULING, false);
                 editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP, false);
+                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION, false);
                 editor.putBoolean(SettingsActivity.PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED, false);
                 editor.putBoolean(SettingsActivity.PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED, false);
                 editor.putLong(SettingsActivity.PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP, 0);
@@ -95,6 +97,22 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             });
         }
 
+        SwitchPreference sendingForegroundServicePreference = screen.findPreference(SettingsActivity.PREF_KEY_SENDING_FOREGROUND_SERVICE);
+        if (sendingForegroundServicePreference != null) {
+            sendingForegroundServicePreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
+                App.runThread(() -> {
+                    try {
+                        // wait 1 second for the setting to actually be updated
+                        Thread.sleep(1_000);
+                    } catch (InterruptedException e) {
+                        // do nothing
+                    }
+                    activity.startService(new Intent(activity, UnifiedForegroundService.class));
+                });
+                return true;
+            });
+        }
+
         SwitchPreference debugLogLevelSwitchPreference = screen.findPreference(SettingsActivity.PREF_KEY_DEBUG_LOG_LEVEL);
         if (debugLogLevelSwitchPreference != null) {
             debugLogLevelSwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -102,13 +120,6 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                 Logger.setOutputLogLevel(checked ? Logger.DEBUG : BuildConfig.LOG_LEVEL);
                 return true;
             });
-        }
-
-        DropDownPreference pingConnectivityIndicatorPreference = screen.findPreference(SettingsActivity.PREF_KEY_PING_CONNECTIVITY_INDICATOR);
-        if (pingConnectivityIndicatorPreference != null) {
-            if (SettingsActivity.getBetaFeaturesEnabled()) {
-                pingConnectivityIndicatorPreference.setVisible(true);
-            }
         }
 
         DropDownPreference scaledTurnPreference = screen.findPreference(SettingsActivity.PREF_KEY_SCALED_TURN_REGION);

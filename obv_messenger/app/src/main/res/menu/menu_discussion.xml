@@ -11,4 +11,11 @@
         android:orderInCategory="200"
         android:title="@string/menu_action_delete_discussion"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_white"
+        android:orderInCategory="10"
+        android:title="@string/menu_action_search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
 </menu>

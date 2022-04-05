@@ -22,6 +22,7 @@ package io.olvid.messenger.onboarding;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -31,7 +32,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.OpenableColumns;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,27 +49,19 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.Scope;
-import com.google.api.services.drive.DriveScopes;
-
 import java.util.List;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
-import io.olvid.messenger.services.GoogleDriveService;
+import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.fragments.dialog.CloudProviderSignInDialogFragment;
+import io.olvid.messenger.services.BackupCloudProviderService;
 
 
 public class RestoreChooseFileFragment extends Fragment {
     private static final int REQUEST_CODE_ATTACH_SELECT_BACKUP_FILE = 36004;
-    private static final int REQUEST_CODE_AUTHORIZE_DRIVE = 36005;
 
     private OnboardingViewModel viewModel;
     private Button proceedButton;
@@ -158,29 +150,94 @@ public class RestoreChooseFileFragment extends Fragment {
     }
 
     private void selectBackupCloud() {
-        if (ConnectionResult.SUCCESS != GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(App.getContext())) {
-            AlertDialog.Builder builder = new SecureAlertDialogBuilder(requireContext(), R.style.CustomAlertDialog)
-                    .setTitle(R.string.dialog_title_google_apis_missing)
-                    .setMessage(R.string.dialog_message_google_apis_required_for_cloud_restore)
-                    .setPositiveButton(R.string.button_label_ok, null);
-            builder.create().show();
-            return;
-        }
+        CloudProviderSignInDialogFragment cloudProviderSignInDialogFragment = CloudProviderSignInDialogFragment.newInstance();
+        cloudProviderSignInDialogFragment.setSignInContext(CloudProviderSignInDialogFragment.SignInContext.RESTORE_BACKUP);
+        cloudProviderSignInDialogFragment.setOnCloudProviderConfigurationCallback(new CloudProviderSignInDialogFragment.OnCloudProviderConfigurationCallback() {
+            @Override
+            public void onCloudProviderConfigurationSuccess(BackupCloudProviderService.CloudProviderConfiguration configuration) {
+                BackupCloudProviderService.listBackups(configuration, new BackupCloudProviderService.OnBackupsListCallback() {
+                    @Override
+                    public void onListSuccess(List<BackupCloudProviderService.BackupItem> backupTimestampAndNames) {
+                        if (backupTimestampAndNames.size() == 0) {
+                            App.toast(R.string.toast_message_error_no_backup_on_account, Toast.LENGTH_SHORT);
+                            return;
+                        }
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            Activity activity = getActivity();
+                            if (activity == null) {
+                                return;
+                            }
+                            AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                                    .setTitle(R.string.dialog_title_select_cloud_backup_file)
+                                    .setAdapter(new ArrayAdapter<BackupCloudProviderService.BackupItem>(activity, R.layout.item_view_cloud_backup_item, backupTimestampAndNames) {
+                                        final LayoutInflater layoutInflater = LayoutInflater.from(activity);
 
-        AlertDialog.Builder builder = new SecureAlertDialogBuilder(requireContext(), R.style.CustomAlertDialog)
-                .setTitle(R.string.dialog_title_backup_choose_drive_account)
-                .setMessage(R.string.dialog_message_backup_choose_drive_account_for_restore)
-                .setNegativeButton(R.string.button_label_cancel, null)
-                .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(() ->
-                        GoogleSignIn.getClient(App.getContext(), GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .signOut()
-                                .addOnCompleteListener(task -> GoogleSignIn.requestPermissions(
-                                        this,
-                                        REQUEST_CODE_AUTHORIZE_DRIVE,
-                                        null,
-                                        new Scope(DriveScopes.DRIVE_APPDATA),
-                                        new Scope(Scopes.EMAIL)))));
-        builder.create().show();
+                                        @NonNull
+                                        @Override
+                                        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                                            return viewFromResource(position, convertView, parent);
+                                        }
+
+                                        private View viewFromResource(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                                            final View view;
+                                            if (convertView == null) {
+                                                view = layoutInflater.inflate(R.layout.item_view_cloud_backup_item, parent, false);
+                                            } else {
+                                                view = convertView;
+                                            }
+                                            TextView deviceTextView = view.findViewById(R.id.backup_device_text_view);
+                                            TextView timestampTextView = view.findViewById(R.id.backup_timestamp_text_view);
+                                            BackupCloudProviderService.BackupItem backupItem = getItem(position);
+                                            if (backupItem == null) {
+                                                return view;
+                                            }
+                                            deviceTextView.setText(backupItem.deviceName);
+                                            timestampTextView.setText(StringUtils.getLongNiceDateString(activity, backupItem.timestamp));
+                                            return view;
+                                        }
+                                    }, (DialogInterface dialog, int which) -> {
+                                        viewModel.clearSelectedBackup();
+                                        BackupCloudProviderService.BackupItem backupItem = backupTimestampAndNames.get(which);
+                                        BackupCloudProviderService.downloadBackup(configuration, backupItem, new BackupCloudProviderService.OnBackupDownloadCallback() {
+                                            @Override
+                                            public void onDownloadSuccess(byte[] backupContent) {
+                                                viewModel.setBackupCloud(backupContent, configuration, backupItem.deviceName, StringUtils.getLongNiceDateString(activity, backupItem.timestamp).toString());
+                                            }
+
+                                            @Override
+                                            public void onDownloadFailure(int error) {
+                                                App.toast(R.string.toast_message_error_while_downloading_selected_backup, Toast.LENGTH_SHORT);
+                                            }
+                                        });
+                                    });
+                            builder.create().show();
+                        });
+                        Logger.e(backupTimestampAndNames.toString());
+                    }
+
+                    @Override
+                    public void onListFailure(int error) {
+                        switch (error) {
+                            case BackupCloudProviderService.ERROR_SIGN_IN_REQUIRED: {
+                                App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
+                                break;
+                            }
+                            case BackupCloudProviderService.ERROR_UNKNOWN:
+                            default: {
+                                App.toast(R.string.toast_message_error_while_searching_for_backup_on_account, Toast.LENGTH_SHORT);
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onCloudProviderConfigurationFailed() {
+                // do nothing
+            }
+        });
+        cloudProviderSignInDialogFragment.show(getChildFragmentManager(), "CloudProviderSignInDialogFragment");
     }
 
     @Override
@@ -188,119 +245,30 @@ public class RestoreChooseFileFragment extends Fragment {
         if (data == null) {
             return;
         }
-        switch (requestCode) {
-            case REQUEST_CODE_ATTACH_SELECT_BACKUP_FILE: {
-                if (resultCode == Activity.RESULT_OK) {
-                    viewModel.clearSelectedBackup();
-                    final Uri backupFileUri = data.getData();
-                    if (backupFileUri != null) {
-                        App.runThread(() -> {
-                            ContentResolver contentResolver = App.getContext().getContentResolver();
-                            String fileName = null;
-                            String[] projection = {OpenableColumns.DISPLAY_NAME};
-                            try (Cursor cursor = contentResolver.query(backupFileUri, projection, null, null, null)) {
-                                if ((cursor != null) && cursor.moveToFirst()) {
-                                    int displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                                    if (displayNameIndex >= 0) {
-                                        fileName = cursor.getString(displayNameIndex);
-                                    }
-                                }
-                            }
-                            try {
-                                viewModel.selectBackupFile(backupFileUri, fileName);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                App.toast(R.string.toast_message_error_opening_backup_file, Toast.LENGTH_SHORT);
-                            }
-                        });
-                    }
-                }
-                break;
-            }
-            case REQUEST_CODE_AUTHORIZE_DRIVE: {
-                if (resultCode == Activity.RESULT_OK) {
-                    final GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(App.getContext());
-                    if (account == null) {
-                        App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
-                        break;
-                    }
-                    GoogleDriveService.listBackupsOnDrive(new GoogleDriveService.OnBackupsListedCallback() {
-                        @Override
-                        public void onSuccess(List<BackupItem> backupTimestampAndNames) {
-                            if (backupTimestampAndNames.size() == 0) {
-                                App.toast(App.getContext().getString(R.string.toast_message_error_no_backup_on_account, account.getEmail()), Toast.LENGTH_SHORT, Gravity.BOTTOM);
-                                return;
-                            }
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                Activity activity = getActivity();
-                                if (activity == null) {
-                                    return;
-                                }
-                                AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
-                                        .setTitle(R.string.dialog_title_backup_choose_drive_account)
-                                        .setAdapter(new ArrayAdapter<BackupItem>(activity, R.layout.item_view_cloud_backup_item, backupTimestampAndNames) {
-                                            final LayoutInflater layoutInflater = LayoutInflater.from(activity);
-
-                                            @NonNull
-                                            @Override
-                                            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                                                return viewFromResource(position, convertView, parent);
-                                            }
-
-                                            private View viewFromResource(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                                                final View view;
-                                                if (convertView == null) {
-                                                    view = layoutInflater.inflate(R.layout.item_view_cloud_backup_item, parent, false);
-                                                } else {
-                                                    view = convertView;
-                                                }
-                                                TextView deviceTextView = view.findViewById(R.id.backup_device_text_view);
-                                                TextView timestampTextView = view.findViewById(R.id.backup_timestamp_text_view);
-                                                BackupItem backupItem = getItem(position);
-                                                if (backupItem == null) {
-                                                    return view;
-                                                }
-                                                deviceTextView.setText(backupItem.fileName);
-                                                timestampTextView.setText(App.getLongNiceDateString(activity, backupItem.timestamp));
-                                                return view;
-                                            }
-                                        }, (dialog, which) -> {
-                                            viewModel.clearSelectedBackup();
-                                            BackupItem backupItem = backupTimestampAndNames.get(which);
-                                            GoogleDriveService.downloadBackupFromDrive(backupItem.fileId, new GoogleDriveService.OnBackupDownloadCallback() {
-                                                @Override
-                                                public void onSuccess(byte[] backupContent) {
-                                                    viewModel.setBackupCloud(backupContent, account.getEmail(), backupItem.fileName, App.getLongNiceDateString(activity, backupItem.timestamp).toString());
-                                                }
-
-                                                @Override
-                                                public void onFailure() {
-                                                    App.toast(R.string.toast_message_error_while_downloading_selected_backup, Toast.LENGTH_SHORT);
-                                                }
-                                            });
-                                        });
-                                builder.create().show();
-                            });
-                            Logger.e(backupTimestampAndNames.toString());
-                        }
-
-                        @Override
-                        public void onFailure(int error) {
-                            switch (error) {
-                                case ERROR_NO_ACCOUNT: {
-                                    App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
-                                    break;
-                                }
-                                case ERROR_UNKNOWN:
-                                default: {
-                                    App.toast(R.string.toast_message_error_while_searching_for_backup_on_account, Toast.LENGTH_SHORT);
-                                    break;
-                                }
+        if (requestCode == REQUEST_CODE_ATTACH_SELECT_BACKUP_FILE
+                && resultCode == Activity.RESULT_OK) {
+            viewModel.clearSelectedBackup();
+            final Uri backupFileUri = data.getData();
+            if (backupFileUri != null) {
+                App.runThread(() -> {
+                    ContentResolver contentResolver = App.getContext().getContentResolver();
+                    String fileName = null;
+                    String[] projection = {OpenableColumns.DISPLAY_NAME};
+                    try (Cursor cursor = contentResolver.query(backupFileUri, projection, null, null, null)) {
+                        if ((cursor != null) && cursor.moveToFirst()) {
+                            int displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                            if (displayNameIndex >= 0) {
+                                fileName = cursor.getString(displayNameIndex);
                             }
                         }
-                    });
-                }
-                break;
+                    }
+                    try {
+                        viewModel.selectBackupFile(backupFileUri, fileName);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        App.toast(R.string.toast_message_error_opening_backup_file, Toast.LENGTH_SHORT);
+                    }
+                });
             }
         }
     }

@@ -38,19 +38,8 @@ import androidx.preference.SwitchPreference;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
-import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 
 public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
-    private boolean contactDisplayNameFormatChanged = false;
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (contactDisplayNameFormatChanged) {
-            App.runThread(new ContactDisplayNameFormatChangedTask());
-        }
-    }
-
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.fragment_preferences_customization, rootKey);
@@ -108,7 +97,7 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
             final DropDownPreference fontScalePreference = screen.findPreference(SettingsActivity.PREF_KEY_FONT_SCALE);
             if (fontScalePreference != null) {
                 fontScalePreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
-                    Intent scaleChangedIntent = new Intent(SettingsActivity.FONT_SCALE_CHANGED_BROADCAST_ACTION);
+                    Intent scaleChangedIntent = new Intent(SettingsActivity.ACTIVITY_RECREATE_REQUIRED_ACTION);
                     scaleChangedIntent.setPackage(App.getContext().getPackageName());
                     // we delay sending this intent so we are sure the setting is updated when activities are recreated
                     new Handler(Looper.getMainLooper()).postDelayed(() -> LocalBroadcastManager.getInstance(App.getContext()).sendBroadcast(scaleChangedIntent), 200);
@@ -130,28 +119,6 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
                     }
                     return true;
                 });
-            }
-        }
-
-
-        {
-            final SwitchPreference sortByLastNamePreference = screen.findPreference(SettingsActivity.PREF_KEY_SORT_CONTACTS_BY_LAST_NAME);
-            final ListPreference displayNameFormatPreference = screen.findPreference(SettingsActivity.PREF_KEY_CONTACT_DISPLAY_NAME_FORMAT);
-            final SwitchPreference uppercaseLastNamePreference = screen.findPreference(SettingsActivity.PREF_KEY_UPPERCASE_LAST_NAME);
-
-            Preference.OnPreferenceChangeListener preferenceChangeListener = (Preference preference, Object newValue) -> {
-                contactDisplayNameFormatChanged = true;
-                return true;
-            };
-
-            if (sortByLastNamePreference != null) {
-                sortByLastNamePreference.setOnPreferenceChangeListener(preferenceChangeListener);
-            }
-            if (displayNameFormatPreference != null) {
-                displayNameFormatPreference.setOnPreferenceChangeListener(preferenceChangeListener);
-            }
-            if (uppercaseLastNamePreference != null) {
-                uppercaseLastNamePreference.setOnPreferenceChangeListener(preferenceChangeListener);
             }
         }
     }

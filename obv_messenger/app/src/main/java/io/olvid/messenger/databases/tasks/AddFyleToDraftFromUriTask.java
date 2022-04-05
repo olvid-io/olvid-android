@@ -226,7 +226,6 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                 db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, 0, draftMessage.imageResolutions);
 
                 long lastUpdateTimestamp = 0;
-                //noinspection ConstantConditions
                 try (InputStream is = contentResolver.openInputStream(uri)) {
                     if (is == null) {
                         throw new Exception("Unable to read from provided Uri");

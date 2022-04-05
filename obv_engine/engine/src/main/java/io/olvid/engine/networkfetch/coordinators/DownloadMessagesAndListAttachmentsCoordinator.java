@@ -106,6 +106,12 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
         try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
             // no longer download messages at startup, we download after a successful push notification registration
 
+            // retry processing messages that were downloaded but never decrypted nor marked for deletion
+            InboxMessage[] unprocessedMessages = InboxMessage.getUnprocessedMessages(fetchManagerSession);
+            for (InboxMessage inboxMessage : unprocessedMessages) {
+                messageWasDownloaded(inboxMessage.getNetworkReceivedMessage());
+            }
+
             // resend notifications for decrypted messages not yet marked for deletion
             InboxMessage[] decryptedInboxMessages = InboxMessage.getDecryptedMessages(fetchManagerSession);
             for (InboxMessage inboxMessage: decryptedInboxMessages) {

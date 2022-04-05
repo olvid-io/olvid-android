@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_forward_messages"
+        android:icon="@drawable/ic_forward"
+        android:title="@string/menu_action_forward"
+        android:orderInCategory="20"
+        app:showAsAction="always"/>
+</menu>

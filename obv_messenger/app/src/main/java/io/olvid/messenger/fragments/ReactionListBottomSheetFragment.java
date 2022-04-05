@@ -47,10 +47,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.Reaction;
@@ -134,10 +134,8 @@ public class ReactionListBottomSheetFragment extends BottomSheetDialogFragment {
 
         // set constraint layout height to half screen size (only set min cause recycler view will never grow cause it is scrollable)
         DisplayMetrics displayMetrics = requireContext().getResources().getDisplayMetrics();
-        int height = displayMetrics.heightPixels;
-        int maxHeight = (int) (height*0.50);
         ConstraintLayout constraintLayout = view.findViewById(R.id.constraintLayout);
-        constraintLayout.setMinHeight(maxHeight);
+        constraintLayout.setMinHeight(displayMetrics.heightPixels/2);
 
         return view;
     }
@@ -251,20 +249,9 @@ public class ReactionListBottomSheetFragment extends BottomSheetDialogFragment {
             public void update(@NonNull Reaction reaction) {
                 byte[] bytesIdentity = reaction.bytesIdentity == null ? currentOwnedIdentity.bytesOwnedIdentity : reaction.bytesIdentity;
                 String displayName = AppSingleton.getContactCustomDisplayName(bytesIdentity);
-                String photoUrl = AppSingleton.getContactPhotoUrl(bytesIdentity);
-
-                if (photoUrl != null) {
-                    initialView.setPhotoUrl(bytesIdentity, photoUrl);
-                } else {
-                    String initial = App.getInitial(reaction.bytesIdentity == null ? currentOwnedIdentity.getCustomDisplayName() : displayName);
-                    initialView.setInitial(bytesIdentity, initial);
-                }
-                initialView.setInactive(AppSingleton.getContactInactive(bytesIdentity));
-                initialView.setKeycloakCertified(AppSingleton.getContactKeycloakManaged(bytesIdentity));
-
-
+                initialView.setFromCache(bytesIdentity);
                 contactName.setText(displayName);
-                reactionDate.setText(App.getNiceDateString(getContext(), reaction.timestamp));
+                reactionDate.setText(StringUtils.getNiceDateString(getContext(), reaction.timestamp));
                 reactionContent.setText(reaction.emoji);
             }
         }

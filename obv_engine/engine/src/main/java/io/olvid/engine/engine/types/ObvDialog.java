@@ -87,43 +87,50 @@ public class ObvDialog {
     // region Dialog response setters
 
     public void setResponseToAcceptInvite(boolean acceptInvite) throws Exception {
-        switch (this.category.id) {
-            case Category.ACCEPT_INVITE_DIALOG_CATEGORY:
-                encodedResponse = Encoded.of(acceptInvite);
-                break;
-            default:
-                throw new Exception();
+        if (this.category.id == Category.ACCEPT_INVITE_DIALOG_CATEGORY) {
+            encodedResponse = Encoded.of(acceptInvite);
+        } else {
+            throw new Exception();
         }
     }
 
     public void setResponseToSasExchange(byte[] otherSas) throws Exception {
-        switch (this.category.id) {
-            case Category.SAS_EXCHANGE_DIALOG_CATEGORY:
-                encodedResponse = Encoded.of(otherSas);
-                break;
-            default:
-                throw new Exception();
+        if (this.category.id == Category.SAS_EXCHANGE_DIALOG_CATEGORY) {
+            encodedResponse = Encoded.of(otherSas);
+        } else {
+            throw new Exception();
         }
     }
 
     public void setResponseToAcceptMediatorInvite(boolean acceptInvite) throws Exception {
-        switch (this.category.id) {
-            case Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
-                encodedResponse = Encoded.of(acceptInvite);
-                break;
-            default:
-                throw new Exception();
+        if (this.category.id == Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY) {
+            encodedResponse = Encoded.of(acceptInvite);
+        } else {
+            throw new Exception();
         }
     }
 
     public void setResponseToAcceptGroupInvite(boolean acceptInvite) throws Exception {
-        switch (this.category.id) {
-            case Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
-            case Category.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY:
-                encodedResponse = Encoded.of(acceptInvite);
-                break;
-            default:
-                throw new Exception();
+        if (this.category.id == Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY) {
+            encodedResponse = Encoded.of(acceptInvite);
+        } else {
+            throw new Exception();
+        }
+    }
+
+    public void setAbortOneToOneInvitationSent(boolean abort) throws Exception {
+        if (this.category.id == Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY) {
+            encodedResponse = Encoded.of(abort);
+        } else {
+            throw new Exception();
+        }
+    }
+
+    public void setResponseToAcceptOneToOneInvitation(boolean acceptInvitation) throws Exception {
+        if (this.category.id == Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY) {
+            encodedResponse = Encoded.of(acceptInvitation);
+        } else {
+            throw new Exception();
         }
     }
     // endregion
@@ -143,10 +150,12 @@ public class ObvDialog {
         public static final int ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY = 6;
         public static final int MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY = 7;
         public static final int ACCEPT_GROUP_INVITE_DIALOG_CATEGORY = 8;
-        public static final int INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY = 9;
-        public static final int INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY = 10;
-        public static final int AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY = 11;
-        public static final int GROUP_JOINED_DIALOG_CATEGORY = 12;
+//        public static final int INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY = 9;
+//        public static final int INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY = 10;
+//        public static final int AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY = 11;
+//        public static final int GROUP_JOINED_DIALOG_CATEGORY = 12;
+        public static final int ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY = 13;
+        public static final int ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY = 14;
 
         private final int id;
         private final byte[] bytesContactIdentity;
@@ -252,7 +261,7 @@ public class ObvDialog {
                     break;
                 }
                 case ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
-                case INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY: {
+                {
                     if (vars.length != 4) {
                         throw new DecodingException();
                     }
@@ -263,7 +272,7 @@ public class ObvDialog {
                     break;
                 }
                 case MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY:
-                case AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY: {
+                {
                     if (vars.length != 3) {
                         throw new DecodingException();
                     }
@@ -273,7 +282,7 @@ public class ObvDialog {
                     break;
                 }
                 case ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
-                case INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY: {
+                {
                     if (vars.length != 5) {
                         throw new DecodingException();
                     }
@@ -297,13 +306,19 @@ public class ObvDialog {
                     serverTimestamp = vars[2].decodeLong();
                     break;
                 }
-                case GROUP_JOINED_DIALOG_CATEGORY: {
-                    if (vars.length != 3) {
+                case ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY: {
+                    if (vars.length != 1) {
                         throw new DecodingException();
                     }
-                    serializedGroupDetails = vars[0].decodeString();
-                    bytesGroupUid = vars[1].decodeBytes();
-                    bytesMediatorOrGroupOwnerIdentity = vars[2].decodeBytes();
+                    bytesContactIdentity = vars[0].decodeBytes();
+                    break;
+                }
+                case ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY: {
+                    if (vars.length != 2) {
+                        throw new DecodingException();
+                    }
+                    bytesContactIdentity = vars[0].decodeBytes();
+                    serverTimestamp = vars[1].decodeLong();
                     break;
                 }
                 default:
@@ -356,7 +371,7 @@ public class ObvDialog {
                     break;
                 }
                 case ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
-                case INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY: {
+                {
                     encodedVars = Encoded.of(new Encoded[]{
                             Encoded.of(bytesContactIdentity),
                             Encoded.of(contactDisplayNameOrSerializedDetails),
@@ -366,7 +381,7 @@ public class ObvDialog {
                     break;
                 }
                 case MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY:
-                case AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY: {
+                {
                     encodedVars = Encoded.of(new Encoded[]{
                             Encoded.of(bytesContactIdentity),
                             Encoded.of(contactDisplayNameOrSerializedDetails),
@@ -375,7 +390,7 @@ public class ObvDialog {
                     break;
                 }
                 case ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
-                case INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY: {
+                {
                     Encoded[] pendingEncodeds = new Encoded[pendingGroupMemberIdentities.length];
                     for (int i = 0; i < pendingGroupMemberIdentities.length; i++) {
                         try {
@@ -394,14 +409,17 @@ public class ObvDialog {
                     });
                     break;
                 }
-                case GROUP_JOINED_DIALOG_CATEGORY: {
+                case ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY:
                     encodedVars = Encoded.of(new Encoded[]{
-                            Encoded.of(serializedGroupDetails),
-                            Encoded.of(bytesGroupUid),
-                            Encoded.of(bytesMediatorOrGroupOwnerIdentity),
+                            Encoded.of(bytesContactIdentity),
                     });
                     break;
-                }
+                case ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
+                    encodedVars = Encoded.of(new Encoded[]{
+                            Encoded.of(bytesContactIdentity),
+                            Encoded.of(serverTimestamp),
+                    });
+                    break;
             }
             return Encoded.of(new Encoded[]{
                     Encoded.of(id),
@@ -445,20 +463,12 @@ public class ObvDialog {
             return new Category(ACCEPT_GROUP_INVITE_DIALOG_CATEGORY, null, null, null, null, bytesGroupOwnerIdentity, serializedGroupDetails, groupId, pendingGroupMemberIdentities, serverTimestamp);
         }
 
-        public static Category createIncreaseMediatorTrustLevel(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] bytesMediatorIdentity, long serverTimestamp) {
-            return new Category(INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, serverTimestamp);
+        public static Category createOneToOneInvitationSent(byte[] bytesContactIdentity) {
+            return new Category(ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, null);
         }
 
-        public static Category createIncreaseGroupOwnerTrustLevel(String groupName, byte[] groupId, byte[] bytesGroupOwnerIdentity, ObvIdentity[] pendingGroupMemberIdentities, long serverTimestamp) {
-            return new Category(INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY, null, null, null, null, bytesGroupOwnerIdentity, groupName, groupId, pendingGroupMemberIdentities, serverTimestamp);
-        }
-
-        public static Category createAutoConfirmedContactIntroduction(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] bytesMediatorIdentity) {
-            return new Category(AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, null);
-        }
-
-        public static Category createGroupJoined(String serializedGroupDetails, byte[] bytesGroupUid, byte[] bytesGroupOwnerIdentity) {
-            return new Category(GROUP_JOINED_DIALOG_CATEGORY, null, null, null, null , bytesGroupOwnerIdentity, serializedGroupDetails, bytesGroupUid, null, null);
+        public static Category createAcceptOneToOneInvitation(byte[] bytesContactIdentity, Long serverTimestamp) {
+            return new Category(ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, serverTimestamp);
         }
     }
 }

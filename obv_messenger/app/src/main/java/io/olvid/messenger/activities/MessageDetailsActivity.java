@@ -82,6 +82,7 @@ import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
@@ -148,6 +149,7 @@ public class MessageDetailsActivity extends LockableActivity {
     private long lastRemainingDisplayed;
 
     float statusWidth;
+    private boolean messageIsUndelivered = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -337,11 +339,9 @@ public class MessageDetailsActivity extends LockableActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                onBackPressed();
-                return true;
-            }
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -363,15 +363,15 @@ public class MessageDetailsActivity extends LockableActivity {
         messageTopTimestamp.setVisibility(View.VISIBLE);
         messageCardView.setVisibility(View.VISIBLE);
 
-        messageTopTimestamp.setText(App.getDayOfDateString(this, message.timestamp));
+        messageTopTimestamp.setText(StringUtils.getDayOfDateString(this, message.timestamp));
 
-        messageBottomTimestampTextView.setText(App.getLongNiceDateString(this, message.timestamp));
+        messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(this, message.timestamp));
 
         if (message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
             standardHeaderView.setVisibility(View.GONE);
             ephemeralHeaderView.setVisibility(View.VISIBLE);
 
-            ephemeralTimestampTextView.setText(App.getLongNiceDateString(getApplicationContext(), message.timestamp));
+            ephemeralTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
 
             Message.JsonExpiration expiration = message.getJsonMessage().getJsonExpiration();
             boolean readOnce = expiration.getReadOnce() != null && expiration.getReadOnce();
@@ -451,17 +451,22 @@ public class MessageDetailsActivity extends LockableActivity {
             messageMetadataAdapter.setSentTimestamp(message.timestamp, false);
             switch (message.status) {
                 case Message.STATUS_SENT: {
-                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_ok_grey));
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_sent));
                     messageStatusImageView.clearAnimation();
                     break;
                 }
                 case Message.STATUS_DELIVERED: {
-                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_double_ok_grey));
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_delivered));
                     messageStatusImageView.clearAnimation();
                     break;
                 }
                 case Message.STATUS_DELIVERED_AND_READ: {
-                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_double_ok));
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_delivered_and_read));
+                    messageStatusImageView.clearAnimation();
+                    break;
+                }
+                case Message.STATUS_UNDELIVERED: {
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_undelivered));
                     messageStatusImageView.clearAnimation();
                     break;
                 }
@@ -469,6 +474,10 @@ public class MessageDetailsActivity extends LockableActivity {
                     messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_sync));
                     messageStatusImageView.startAnimation(rotateAnimation);
                 }
+            }
+            if ((message.status == Message.STATUS_UNDELIVERED) != this.messageIsUndelivered) {
+                this.messageIsUndelivered = message.status == Message.STATUS_UNDELIVERED;
+                recipientInfosRecyclerView.invalidate();
             }
         }
 
@@ -496,7 +505,7 @@ public class MessageDetailsActivity extends LockableActivity {
                 wipedAttachmentCountTextView.setText(getResources().getQuantityString(R.plurals.text_reply_attachment_count, message.wipedAttachmentCount, message.wipedAttachmentCount));
                 wipedAttachmentCountTextView.setVisibility(View.VISIBLE);
             }
-        } else if (App.isShortEmojiString(body, 5)) {
+        } else if (StringUtils.isShortEmojiString(body, 5)) {
             messageContentTextView.setVisibility(View.VISIBLE);
             messageContentTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.single_line_emoji_size));
             messageContentTextView.setMinWidth((int) (getResources().getDimensionPixelSize(R.dimen.single_line_emoji_size) * 1.25));
@@ -558,7 +567,7 @@ public class MessageDetailsActivity extends LockableActivity {
                     } else {
                         messageReplyBody.setVisibility(View.VISIBLE);
                         messageReplyBody.setText(replyMessage.getStringContent(this));
-                        if (App.isShortEmojiString(replyMessage.getStringContent(this), 5)) {
+                        if (StringUtils.isShortEmojiString(replyMessage.getStringContent(this), 5)) {
                             messageReplyBody.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.single_line_emoji_reply_size));
                             messageReplyBody.setMinWidth((int) (getResources().getDimensionPixelSize(R.dimen.single_line_emoji_reply_size) * 1.25));
                             messageReplyBody.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -730,11 +739,11 @@ public class MessageDetailsActivity extends LockableActivity {
             MessageRecipientInfo messageRecipientInfo = messageRecipientInfos.get(position);
             holder.recipientNameTextView.setText(AppSingleton.getContactCustomDisplayName(messageRecipientInfo.bytesContactIdentity));
             if (messageRecipientInfo.timestampRead != null) {
-                holder.recipientInfoTimestampTextView.setText(App.getPreciseAbsoluteDateString(MessageDetailsActivity.this, messageRecipientInfo.timestampRead));
+                holder.recipientInfoTimestampTextView.setText(StringUtils.getPreciseAbsoluteDateString(MessageDetailsActivity.this, messageRecipientInfo.timestampRead));
             } else if (messageRecipientInfo.timestampDelivered != null) {
-                holder.recipientInfoTimestampTextView.setText(App.getPreciseAbsoluteDateString(MessageDetailsActivity.this, messageRecipientInfo.timestampDelivered));
+                holder.recipientInfoTimestampTextView.setText(StringUtils.getPreciseAbsoluteDateString(MessageDetailsActivity.this, messageRecipientInfo.timestampDelivered));
             } else if (messageRecipientInfo.timestampSent != null) {
-                holder.recipientInfoTimestampTextView.setText(App.getPreciseAbsoluteDateString(MessageDetailsActivity.this, messageRecipientInfo.timestampSent));
+                holder.recipientInfoTimestampTextView.setText(StringUtils.getPreciseAbsoluteDateString(MessageDetailsActivity.this, messageRecipientInfo.timestampSent));
             } else {
                 holder.recipientInfoTimestampTextView.setText(R.string.text_null_timestamp);
             }
@@ -793,7 +802,7 @@ public class MessageDetailsActivity extends LockableActivity {
             headerHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 28, metrics);
             separatorHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, metrics);
             itemRect = new Rect();
-            bitmapCache = new Bitmap[4];
+            bitmapCache = new Bitmap[5];
         }
 
         @Override
@@ -807,6 +816,9 @@ public class MessageDetailsActivity extends LockableActivity {
                 }
                 if (position == 0 || (recipientInfosAdapter.messageRecipientInfos.get(position).status() != recipientInfosAdapter.messageRecipientInfos.get(position-1).status())) {
                     int status = recipientInfosAdapter.messageRecipientInfos.get(position).status();
+                    if (status == MessageRecipientInfo.RECIPIENT_STATUS_PROCESSING && MessageDetailsActivity.this.messageIsUndelivered) {
+                        status = 4;
+                    }
                     // check the cache, and compute it if needed
                     if (bitmapCache[status] == null) {
                         View headerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_message_details_header, parent, false);
@@ -819,15 +831,19 @@ public class MessageDetailsActivity extends LockableActivity {
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_SENT:
                                 textView.setText(R.string.text_sent);
-                                imageView.setImageResource(R.drawable.ic_ok_grey);
+                                imageView.setImageResource(R.drawable.ic_message_status_sent);
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED:
                                 textView.setText(R.string.text_delivered);
-                                imageView.setImageResource(R.drawable.ic_double_ok_grey);
+                                imageView.setImageResource(R.drawable.ic_message_status_delivered);
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED_AND_READ:
                                 textView.setText(R.string.text_read);
-                                imageView.setImageResource(R.drawable.ic_double_ok);
+                                imageView.setImageResource(R.drawable.ic_message_status_delivered_and_read);
+                                break;
+                            case 4: // 4 is for undelivered message
+                                textView.setText(R.string.text_undelivered);
+                                imageView.setImageResource(R.drawable.ic_message_status_undelivered);
                                 break;
                         }
                         headerView.measure(View.MeasureSpec.makeMeasureSpec(parent.getWidth(), View.MeasureSpec.EXACTLY),
@@ -902,7 +918,7 @@ public class MessageDetailsActivity extends LockableActivity {
                     metadata = messageMetadatas.get(position);
                 } else {
                     if (position == 0) {
-                        holder.metadataTimestampDateTextView.setText(App.getPreciseAbsoluteDateString(MessageDetailsActivity.this, sentTimestamp));
+                        holder.metadataTimestampDateTextView.setText(StringUtils.getPreciseAbsoluteDateString(MessageDetailsActivity.this, sentTimestamp));
                         if (inbound) {
                             holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_uploaded);
                         } else {
@@ -914,7 +930,7 @@ public class MessageDetailsActivity extends LockableActivity {
                     }
                 }
 
-                holder.metadataTimestampDateTextView.setText(App.getPreciseAbsoluteDateString(MessageDetailsActivity.this, metadata.timestamp));
+                holder.metadataTimestampDateTextView.setText(StringUtils.getPreciseAbsoluteDateString(MessageDetailsActivity.this, metadata.timestamp));
                 switch (metadata.kind) {
                     case MessageMetadata.KIND_DELIVERED: {
                         holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_delivered);
@@ -944,6 +960,10 @@ public class MessageDetailsActivity extends LockableActivity {
                                 holder.metadataDescriptionTextView.setText(getString(R.string.label_metadata_kind_remote_deleted_by, contactName));
                             }
                         }
+                        break;
+                    }
+                    case MessageMetadata.KIND_UNDELIVERED: {
+                        holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_undelivered);
                         break;
                     }
                 }

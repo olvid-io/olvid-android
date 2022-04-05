@@ -147,7 +147,7 @@ public class CallContactDialogFragment extends DialogFragment implements View.On
 
     @Override
     public void onClick(View view) {
-        long id = view.getId();
+        int id = view.getId();
         if (id == R.id.button_call) {
             dismiss();
             if (selectedContacts == null || selectedContacts.size() == 0) {

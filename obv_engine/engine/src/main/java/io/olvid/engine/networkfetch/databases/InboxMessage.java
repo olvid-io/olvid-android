@@ -25,8 +25,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 import io.olvid.engine.Logger;
@@ -51,7 +52,9 @@ public class InboxMessage implements ObvDatabase {
 
     private final FetchManagerSession fetchManagerSession;
 
-    private static final HashSet<IdentityAndUid> deletedMessageUids = new HashSet<>();
+    private static final long DELETED_MESSAGE_RETENTION_TIME_MILLIS = 600_000L; // keep deleted messages uids for 10 minutes
+    private static long lastExpungeTimestamp = System.currentTimeMillis();
+    private static final HashMap<IdentityAndUid, Long> deletedMessageUids = new HashMap<>();
 
     private Identity ownedIdentity;
     static final String OWNED_IDENTITY = "owned_identity";
@@ -232,7 +235,14 @@ public class InboxMessage implements ObvDatabase {
 
 
     public static InboxMessage create(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID messageUid, EncryptedBytes encryptedContent, EncryptedBytes wrappedKey, long serverTimestamp, long downloadTimestamp, long localDownloadTimestamp, boolean hasExtendedContent) {
-        if (messageUid == null || ownedIdentity == null || encryptedContent == null || wrappedKey == null || deletedMessageUids.contains(new IdentityAndUid(ownedIdentity, messageUid))) {
+        if (messageUid == null || ownedIdentity == null || encryptedContent == null || wrappedKey == null) {
+            return null;
+        }
+        if (deletedMessageUids.containsKey(new IdentityAndUid(ownedIdentity, messageUid))) {
+            // we listed again a message that was deleted, just to be sure, create a pendingDelete
+            try {
+                PendingDeleteFromServer.create(fetchManagerSession, ownedIdentity, messageUid);
+            } catch (Exception ignored) { }
             return null;
         }
         try {
@@ -332,6 +342,23 @@ public class InboxMessage implements ObvDatabase {
                 }
                 return list.toArray(new InboxMessage[0]);
             }
+        }
+    }
+
+    public static InboxMessage[] getUnprocessedMessages(FetchManagerSession fetchManagerSession) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+                "SELECT * FROM " + TABLE_NAME +
+                        " WHERE " + PAYLOAD + " IS NULL " +
+                        " AND " + MARKED_FOR_DELETION + " = 0;")) {
+            try (ResultSet res = statement.executeQuery()) {
+                List<InboxMessage> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new InboxMessage(fetchManagerSession, res));
+                }
+                return list.toArray(new InboxMessage[0]);
+            }
+        } catch (SQLException e) {
+            return new InboxMessage[0];
         }
     }
 
@@ -541,7 +568,26 @@ public class InboxMessage implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        deletedMessageUids.add(new IdentityAndUid(ownedIdentity, uid));
+        // before inserting a new deletedMessageUid, sometimes expunge all old entries
+        if (System.currentTimeMillis() > lastExpungeTimestamp + DELETED_MESSAGE_RETENTION_TIME_MILLIS) {
+            lastExpungeTimestamp = System.currentTimeMillis();
+            try {
+                long timestamp = System.currentTimeMillis() - DELETED_MESSAGE_RETENTION_TIME_MILLIS;
+                List<IdentityAndUid> toDelete = new ArrayList<>();
+                for (Map.Entry<IdentityAndUid, Long> entry : deletedMessageUids.entrySet()) {
+                    if (entry.getValue() < timestamp) {
+                        toDelete.add(entry.getKey());
+                    }
+                }
+                Logger.d("Expunging " + toDelete.size() + " deletedMessageUids");
+                for (IdentityAndUid key : toDelete) {
+                    deletedMessageUids.remove(key);
+                }
+            } catch (Exception ignored) { }
+        }
+
+        deletedMessageUids.put(new IdentityAndUid(ownedIdentity, uid), System.currentTimeMillis());
+
         // first, cascade delete the attachments, then delete the message itself.
         for (InboxAttachment inboxAttachment : getAttachments()) {
             try {

@@ -23,6 +23,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -66,7 +67,9 @@ import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvDialog;
+import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.LoadAwareAdapter;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
@@ -79,19 +82,27 @@ import io.olvid.messenger.customClasses.InitialView;
 
 
 public class InvitationListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, EngineNotificationListener {
+    private FragmentActivity activity;
     private InvitationListViewModel invitationListViewModel;
     private InvitationListAdapter adapter;
     private boolean invitationsAreVisible;
     private Long engineNotificationListenerRegistrationNumber;
     private SwipeRefreshLayout swipeRefreshLayout;
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activity = requireActivity();
         invitationListViewModel = new ViewModelProvider(this).get(InvitationListViewModel.class);
         invitationsAreVisible = false;
         engineNotificationListenerRegistrationNumber = null;
         AppSingleton.getEngine().addNotificationListener(EngineNotifications.SERVER_POLLED, this);
+        AppSingleton.getContactNamesCache().observe(activity, (HashMap<BytesKey, String> cache) -> {
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -115,7 +126,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
         recyclerView.setLoadingSpinner(loadingSpinner);
 
         adapter = new InvitationListAdapter(this);
-        invitationListViewModel.getInvitations().observe(getViewLifecycleOwner(), adapter);
+        invitationListViewModel.getInvitations().observe(activity, adapter);
         recyclerView.setAdapter(adapter);
 
 
@@ -216,6 +227,36 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                     }
                     break;
                 }
+                case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY: {
+                    try {
+                        dialog.setResponseToAcceptOneToOneInvitation(true);
+                        AppSingleton.getEngine().respondToDialog(dialog);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+            }
+        } else if (viewId == R.id.button_reject) {
+            switch (dialog.getCategory().getId()) {
+                case ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY: {
+                    try {
+                        dialog.setAbortOneToOneInvitationSent(true);
+                        AppSingleton.getEngine().respondToDialog(dialog);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY: {
+                    try {
+                        dialog.setResponseToAcceptOneToOneInvitation(false);
+                        AppSingleton.getEngine().respondToDialog(dialog);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
             }
         } else if (viewId == R.id.button_ignore) {
             switch (dialog.getCategory().getId()) {
@@ -258,16 +299,11 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                 }
             }
         } else if (viewId == R.id.button_ok) {
-            switch (dialog.getCategory().getId()) {
-                case ObvDialog.Category.MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY:
-                case ObvDialog.Category.AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY:
-                case ObvDialog.Category.GROUP_JOINED_DIALOG_CATEGORY: {
-                    try {
-                        AppSingleton.getEngine().deletePersistedDialog(invitation.dialogUuid);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
+            if (dialog.getCategory().getId() == ObvDialog.Category.MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY) {
+                try {
+                    AppSingleton.getEngine().deletePersistedDialog(invitation.dialogUuid);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         } else if (viewId == R.id.button_abort) {
@@ -276,8 +312,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                 case ObvDialog.Category.INVITE_ACCEPTED_DIALOG_CATEGORY:
                 case ObvDialog.Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY:
                 case ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY:
-                case ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY:
-                case ObvDialog.Category.INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY: {
+                case ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY: {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(InvitationListFragment.this.getContext(), R.style.CustomAlertDialog)
                             .setTitle(R.string.dialog_title_abort_invitation)
                             .setMessage(getString(R.string.dialog_message_abort_invitation))
@@ -292,14 +327,21 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                     builder.create().show();
                     break;
                 }
-                case ObvDialog.Category.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY: {
-                    try {
-                        dialog.setResponseToAcceptGroupInvite(false);
-                        AppSingleton.getEngine().respondToDialog(dialog);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
+                case ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY: {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(InvitationListFragment.this.getContext(), R.style.CustomAlertDialog)
+                            .setTitle(R.string.dialog_title_abort_invitation)
+                            .setMessage(getString(R.string.dialog_message_abort_invitation))
+                            .setPositiveButton(R.string.button_label_ok, (dialog1, which) -> {
+                                try {
+                                    ObvDialog obvDialog = invitation.associatedDialog;
+                                    obvDialog.setAbortOneToOneInvitationSent(true);
+                                    AppSingleton.getEngine().respondToDialog(obvDialog);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            })
+                            .setNegativeButton(R.string.button_label_cancel, null);
+                    builder.create().show();
                 }
             }
         }
@@ -341,8 +383,6 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
             Invitation invitation = invitations.get(position);
             switch (invitation.associatedDialog.getCategory().getId()) {
                 case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
-                case ObvDialog.Category.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY:
-                case ObvDialog.Category.GROUP_JOINED_DIALOG_CATEGORY:
                     return TYPE_GROUP;
                 case ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY:
                 case ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY:
@@ -353,8 +393,8 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                 case ObvDialog.Category.INVITE_ACCEPTED_DIALOG_CATEGORY:
                 case ObvDialog.Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY:
                 case ObvDialog.Category.MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY:
-                case ObvDialog.Category.INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY:
-                case ObvDialog.Category.AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY:
+                case ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY:
+                case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
                 default:
                     return TYPE_SIMPLE;
             }
@@ -394,8 +434,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
             String invitationName;
             switch (dialog.getCategory().getId()) {
                 case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
-                case ObvDialog.Category.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY:
-                case ObvDialog.Category.GROUP_JOINED_DIALOG_CATEGORY: {
+                {
                     try {
                         JsonGroupDetails groupDetails = AppSingleton.getJsonObjectMapper().readValue(dialog.getCategory().getSerializedGroupDetails(), JsonGroupDetails.class);
                         invitationName = groupDetails.getName();
@@ -408,9 +447,25 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                 }
                 default: {
                     switch (dialog.getCategory().getId()) {
-                        case ObvDialog.Category.INVITE_SENT_DIALOG_CATEGORY:
-                            invitationName = invitation.associatedDialog.getCategory().getContactDisplayNameOrSerializedDetails();
+                        case ObvDialog.Category.INVITE_SENT_DIALOG_CATEGORY: {
+                            invitationName = AppSingleton.getContactCustomDisplayName(invitation.associatedDialog.getCategory().getBytesContactIdentity());
+                            if (invitationName != null) {
+                                holder.initialView.setFromCache(invitation.associatedDialog.getCategory().getBytesContactIdentity());
+                            } else {
+                                invitationName = invitation.associatedDialog.getCategory().getContactDisplayNameOrSerializedDetails();
+                                holder.initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(invitationName));
+                            }
                             break;
+                        }
+                        case ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY:
+                        case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY: {
+                            invitationName = AppSingleton.getContactCustomDisplayName(invitation.associatedDialog.getCategory().getBytesContactIdentity());
+                            if (invitationName == null) {
+                                invitationName = getString(R.string.text_deleted_contact);
+                            }
+                            holder.initialView.setFromCache(invitation.associatedDialog.getCategory().getBytesContactIdentity());
+                            break;
+                        }
                         case ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY:
                         case ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY:
                         case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
@@ -418,8 +473,6 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                         case ObvDialog.Category.INVITE_ACCEPTED_DIALOG_CATEGORY:
                         case ObvDialog.Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY:
                         case ObvDialog.Category.MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY:
-                        case ObvDialog.Category.INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY:
-                        case ObvDialog.Category.AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY:
                         default:
                             try {
                                 JsonIdentityDetails identityDetails = AppSingleton.getJsonObjectMapper().readValue(invitation.associatedDialog.getCategory().getContactDisplayNameOrSerializedDetails(), JsonIdentityDetails.class);
@@ -428,9 +481,10 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                                 e.printStackTrace();
                                 invitationName = null;
                             }
+                            holder.initialView.setNullTrustLevel();
+                            holder.initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(invitationName));
                             break;
                     }
-                    holder.initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), App.getInitial(invitationName));
                 }
             }
 
@@ -442,19 +496,21 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
             switch (dialog.getCategory().getId()) {
                 case ObvDialog.Category.INVITE_SENT_DIALOG_CATEGORY:
                 case ObvDialog.Category.INVITE_ACCEPTED_DIALOG_CATEGORY:
-                case ObvDialog.Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY: {
-                    holder.timestampTextView.setText(App.getNiceDateString(getContext(), invitation.invitationTimestamp));
+                case ObvDialog.Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY:
+                case ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY: {
+                    holder.timestampTextView.setText(StringUtils.getNiceDateString(getContext(), invitation.invitationTimestamp));
                     holder.abortButton.setVisibility(View.VISIBLE);
                     holder.abortButton.setEnabled(true);
                     holder.goToButton.setVisibility(View.GONE);
                     holder.okButton.setVisibility(View.GONE);
                     holder.ignoreButton.setVisibility(View.GONE);
                     holder.acceptButton.setVisibility(View.GONE);
+                    holder.rejectButton.setVisibility(View.GONE);
                     break;
                 }
                 case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
                 case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY: {
-                    holder.timestampTextView.setText(App.getNiceDateString(getContext(), invitation.associatedDialog.getCategory().serverTimestamp));
+                    holder.timestampTextView.setText(StringUtils.getNiceDateString(getContext(), invitation.associatedDialog.getCategory().serverTimestamp));
                     holder.abortButton.setVisibility(View.GONE);
                     holder.goToButton.setVisibility(View.GONE);
                     holder.okButton.setVisibility(View.GONE);
@@ -462,68 +518,23 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                     holder.ignoreButton.setEnabled(true);
                     holder.acceptButton.setVisibility(View.VISIBLE);
                     holder.acceptButton.setEnabled(true);
+                    holder.rejectButton.setVisibility(View.GONE);
                     break;
                 }
-                case ObvDialog.Category.INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_CATEGORY: {
-                    View group = inflater.inflate(R.layout.view_two_buttons, holder.additionalHeaderSpace, true);
-                    Button mediatorButton = group.findViewById(R.id.button_1);
-                    String mediatorDisplayName = AppSingleton.getContactCustomDisplayName(dialog.getCategory().getBytesMediatorOrGroupOwnerIdentity());
-                    if (mediatorDisplayName != null) {
-                        mediatorButton.setVisibility(View.VISIBLE);
-                        mediatorButton.setText(getString(R.string.button_label_exchange_digits_with_user, mediatorDisplayName));
-                        mediatorButton.setOnClickListener(v -> {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), R.style.CustomAlertDialog);
-                            builder.setMessage(getString(R.string.dialog_message_exchange_digits, mediatorDisplayName))
-                                    .setTitle(R.string.dialog_title_exchange_digits)
-                                    .setPositiveButton(R.string.button_label_ok, (dialogInterface, i) -> {
-                                        try {
-                                            AppSingleton.getEngine().startTrustEstablishmentProtocol(dialog.getCategory().getBytesMediatorOrGroupOwnerIdentity(), mediatorDisplayName, dialog.getBytesOwnedIdentity());
-                                            App.showMainActivityTab(v.getContext(), MainActivity.INVITATIONS_TAB);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    })
-                                    .setNegativeButton(R.string.button_label_cancel, null);
-                            builder.create().show();
-                        });
-                    } else {
-                        mediatorButton.setVisibility(View.GONE);
-                    }
-
-                    Button contactButton = group.findViewById(R.id.button_2);
-                    try {
-                        final JsonIdentityDetails identityDetails = AppSingleton.getJsonObjectMapper().readValue(dialog.getCategory().getContactDisplayNameOrSerializedDetails(), JsonIdentityDetails.class);
-                        contactButton.setText(getString(R.string.button_label_invite_user, identityDetails.formatFirstAndLastName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName())));
-                        contactButton.setOnClickListener(v -> {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), R.style.CustomAlertDialog);
-                            builder.setMessage(getString(R.string.dialog_message_invite_user, identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, SettingsActivity.getUppercaseLastName())))
-                                    .setTitle(R.string.dialog_title_invite_user)
-                                    .setPositiveButton(R.string.button_label_proceed, (dialogInterface, i) -> {
-                                        try {
-                                            AppSingleton.getEngine().startTrustEstablishmentProtocol(dialog.getCategory().getBytesContactIdentity(), identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, SettingsActivity.getUppercaseLastName()), dialog.getBytesOwnedIdentity());
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                        App.showMainActivityTab(v.getContext(), MainActivity.INVITATIONS_TAB);
-                                    })
-                                    .setNegativeButton(R.string.button_label_cancel, null);
-                            builder.create().show();
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    holder.timestampTextView.setText(App.getNiceDateString(getContext(), invitation.associatedDialog.getCategory().serverTimestamp));
-                    holder.abortButton.setVisibility(View.VISIBLE);
-                    holder.abortButton.setEnabled(true);
+                case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY: {
+                    holder.timestampTextView.setText(StringUtils.getNiceDateString(getContext(), invitation.associatedDialog.getCategory().serverTimestamp));
+                    holder.abortButton.setVisibility(View.GONE);
                     holder.goToButton.setVisibility(View.GONE);
                     holder.okButton.setVisibility(View.GONE);
                     holder.ignoreButton.setVisibility(View.GONE);
-                    holder.acceptButton.setVisibility(View.GONE);
+                    holder.acceptButton.setVisibility(View.VISIBLE);
+                    holder.acceptButton.setEnabled(true);
+                    holder.rejectButton.setVisibility(View.VISIBLE);
+                    holder.rejectButton.setEnabled(true);
                     break;
                 }
-                case ObvDialog.Category.AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_CATEGORY:
                 case ObvDialog.Category.MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY: {
-                    holder.timestampTextView.setText(App.getNiceDateString(getContext(), invitation.invitationTimestamp));
+                    holder.timestampTextView.setText(StringUtils.getNiceDateString(getContext(), invitation.invitationTimestamp));
                     final byte[] bytesContactIdentity = dialog.getCategory().getBytesContactIdentity();
                     holder.goToButton.setOnClickListener(view -> App.openOneToOneDiscussionActivity(view.getContext(), dialog.getBytesOwnedIdentity(), bytesContactIdentity, true));
                     holder.abortButton.setVisibility(View.GONE);
@@ -532,10 +543,11 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                     holder.okButton.setEnabled(true);
                     holder.ignoreButton.setVisibility(View.GONE);
                     holder.acceptButton.setVisibility(View.GONE);
+                    holder.rejectButton.setVisibility(View.GONE);
                     break;
                 }
                 case ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY: {
-                    holder.timestampTextView.setText(App.getNiceDateString(getContext(), invitation.associatedDialog.getCategory().serverTimestamp));
+                    holder.timestampTextView.setText(StringUtils.getNiceDateString(getContext(), invitation.associatedDialog.getCategory().serverTimestamp));
                     holder.yourSasTextView.setText(new String(dialog.getCategory().getSasToDisplay(), StandardCharsets.UTF_8));
                     holder.theirSasEditText.setVisibility(View.VISIBLE);
                     if (dialog.getUuid().equals(invitationListViewModel.getLastSasDialogUUID())) {
@@ -560,7 +572,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                     break;
                 }
                 case ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY: {
-                    holder.timestampTextView.setText(App.getNiceDateString(getContext(), invitation.invitationTimestamp));
+                    holder.timestampTextView.setText(StringUtils.getNiceDateString(getContext(), invitation.invitationTimestamp));
                     holder.yourSasTextView.setText(new String(dialog.getCategory().getSasToDisplay(), StandardCharsets.UTF_8));
                     if (dialog.getUuid().equals(invitationListViewModel.getLastSasDialogUUID())) {
                         Context context = InvitationListFragment.this.getContext();
@@ -586,7 +598,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                     break;
                 }
                 case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY: {
-                    holder.timestampTextView.setText(App.getNiceDateString(getContext(), invitation.associatedDialog.getCategory().serverTimestamp));
+                    holder.timestampTextView.setText(StringUtils.getNiceDateString(getContext(), invitation.associatedDialog.getCategory().serverTimestamp));
                     invitation.listGroupMembersAsync(holder.groupMembersTextView);
                     holder.groupMembersGroup.setVisibility(View.VISIBLE);
                     holder.okButton.setVisibility(View.GONE);
@@ -595,56 +607,6 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                     holder.ignoreButton.setEnabled(true);
                     holder.acceptButton.setVisibility(View.VISIBLE);
                     holder.acceptButton.setEnabled(true);
-                    holder.abortButton.setVisibility(View.GONE);
-                    break;
-                }
-                case ObvDialog.Category.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_CATEGORY: {
-                    holder.timestampTextView.setText(App.getNiceDateString(getContext(), invitation.associatedDialog.getCategory().serverTimestamp));
-                    final View group = inflater.inflate(R.layout.view_one_button, holder.additionalHeaderSpace, true);
-                    Button groupOwnerButton = group.findViewById(R.id.button_1);
-                    String groupOwnerDisplayName = AppSingleton.getContactCustomDisplayName(dialog.getCategory().getBytesMediatorOrGroupOwnerIdentity());
-                    if (groupOwnerDisplayName != null) {
-                        groupOwnerButton.setVisibility(View.VISIBLE);
-                        groupOwnerButton.setText(getString(R.string.button_label_exchange_digits_with_user, groupOwnerDisplayName));
-                        groupOwnerButton.setOnClickListener(v -> {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), R.style.CustomAlertDialog);
-                            builder.setMessage(getString(R.string.dialog_message_exchange_digits, groupOwnerDisplayName))
-                                    .setTitle(R.string.dialog_title_exchange_digits)
-                                    .setPositiveButton(R.string.button_label_ok, (dialogInterface, i) -> {
-                                        try {
-                                            AppSingleton.getEngine().startTrustEstablishmentProtocol(dialog.getCategory().getBytesMediatorOrGroupOwnerIdentity(), groupOwnerDisplayName, dialog.getBytesOwnedIdentity());
-                                            App.showMainActivityTab(v.getContext(), MainActivity.INVITATIONS_TAB);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    })
-                                    .setNegativeButton(R.string.button_label_cancel, null);
-                            builder.create().show();
-                        });
-                    } else {
-                        groupOwnerButton.setVisibility(View.GONE);
-                    }
-
-                    invitation.listGroupMembersAsync(holder.groupMembersTextView);
-                    holder.groupMembersGroup.setVisibility(View.VISIBLE);
-                    holder.okButton.setVisibility(View.GONE);
-                    holder.goToButton.setVisibility(View.GONE);
-                    holder.ignoreButton.setVisibility(View.GONE);
-                    holder.acceptButton.setVisibility(View.GONE);
-                    holder.abortButton.setVisibility(View.VISIBLE);
-                    holder.abortButton.setEnabled(true);
-                    break;
-                }
-                case ObvDialog.Category.GROUP_JOINED_DIALOG_CATEGORY: {
-                    holder.timestampTextView.setText(App.getNiceDateString(getContext(), invitation.invitationTimestamp));
-                    final byte[] bytesGroupUid = dialog.getCategory().getBytesGroupOwnerAndUid();
-                    holder.goToButton.setOnClickListener(view -> App.openGroupDiscussionActivity(view.getContext(), dialog.getBytesOwnedIdentity(), bytesGroupUid));
-                    holder.groupMembersGroup.setVisibility(View.GONE);
-                    holder.okButton.setVisibility(View.VISIBLE);
-                    holder.okButton.setEnabled(true);
-                    holder.goToButton.setVisibility(View.VISIBLE);
-                    holder.ignoreButton.setVisibility(View.GONE);
-                    holder.acceptButton.setVisibility(View.GONE);
                     holder.abortButton.setVisibility(View.GONE);
                     break;
                 }
@@ -688,6 +650,9 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                         if ((oldDialog.getCategory().getId() == ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY) && oldDialog.getUuid().equals(invitationListViewModel.getLastSasDialogUUID())){
                             return false;
                         }
+                        if ((oldDialog.getCategory().getId() == ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY || oldDialog.getCategory().getId() == ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY)) {
+                            return false;
+                        }
                         return oldDialog.getCategory().getId() == newList.get(newItemPosition).associatedDialog.getCategory().getId();
                     }
                 });
@@ -710,6 +675,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
             final LinearLayout additionalHeaderSpace;
 
             // default buttons
+            final Button rejectButton;
             final Button acceptButton;
             final Button ignoreButton;
             final Button abortButton;
@@ -740,6 +706,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                 additionalHeaderSpace = this.invitationRootView.findViewById(R.id.additional_header_space);
 
                 acceptButton = this.invitationRootView.findViewById(R.id.button_accept);
+                rejectButton = this.invitationRootView.findViewById(R.id.button_reject);
                 ignoreButton = this.invitationRootView.findViewById(R.id.button_ignore);
                 abortButton = this.invitationRootView.findViewById(R.id.button_abort);
                 okButton = this.invitationRootView.findViewById(R.id.button_ok);
@@ -785,6 +752,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                         });
                         break;
                     case TYPE_SIMPLE:
+                        rejectButton.setOnClickListener(this);
                         acceptButton.setOnClickListener(this);
                         ignoreButton.setOnClickListener(this);
                         abortButton.setOnClickListener(this);

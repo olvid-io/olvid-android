@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ListPreference
+        android:defaultValue="contacts"
+        android:entries="@array/auto_join_groups"
+        android:entryValues="@array/auto_join_groups_values"
+        android:key="pref_key_auto_join_groups"
+        app:singleLineTitle="false"
+        android:title="@string/pref_auto_join_groups_title"
+        app:useSimpleSummaryProvider="true"
+        android:icon="@drawable/ic_pref_group"
+        android:order="10" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="pref_key_show_trust_levels"
+        app:singleLineTitle="false"
+        android:title="@string/pref_show_trust_levels_title"
+        android:summary="@string/pref_show_trust_levels_summary"
+        android:icon="@drawable/ic_pref_trust_level"
+        android:order="15" />
+
+    <ListPreference
+        android:key="pref_key_contact_display_name_format"
+        android:defaultValue="%f %l"
+        android:title="@string/pref_contact_display_name_format_title"
+        android:summary="%1$s"
+        android:entries="@array/display_name_format_choice"
+        android:entryValues="@array/display_name_format_choice_values"
+        android:icon="@drawable/ic_pref_names"
+        android:order="20" />
+
+    <SwitchPreference
+        android:key="pref_key_sort_contacts_by_last_name"
+        android:defaultValue="false"
+        android:title="@string/pref_sort_contacts_by_last_name_title"
+        android:summary="@string/pref_sort_contacts_by_last_name_summary"
+        android:icon="@drawable/ic_pref_sort"
+        android:order="30" />
+
+    <SwitchPreference
+        android:key="pref_key_uppercase_last_name"
+        android:defaultValue="false"
+        android:title="@string/pref_uppercase_last_name_title"
+        android:icon="@drawable/ic_pref_uppercase"
+        android:order="40" />
+</PreferenceScreen>

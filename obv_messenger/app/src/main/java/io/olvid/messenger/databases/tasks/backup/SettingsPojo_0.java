@@ -56,6 +56,9 @@ class SettingsPojo_0 {
     public Boolean disable_push_notifications;
     public Boolean permanent_websocket;
 
+    public String auto_join_groups;
+    public Boolean show_trust_level;
+
     public Long auto_download_size;
     public Boolean auto_open_limited_visibility;
     public Boolean retain_wiped_outbound;
@@ -70,6 +73,7 @@ class SettingsPojo_0 {
 
     public Boolean share_app_version;
     public Boolean notify_certificate_change;
+    public Boolean sending_foreground_service;
     public String qr_correction_level;
     public Boolean low_bandwidth_calls;
     public Boolean debug_log_level;
@@ -107,6 +111,18 @@ class SettingsPojo_0 {
         settingsPojo.disable_push_notifications = SettingsActivity.disablePushNotifications();
         settingsPojo.permanent_websocket = SettingsActivity.usePermanentWebSocket();
 
+        switch (SettingsActivity.getAutoJoinGroups()) {
+            case NOBODY:
+                settingsPojo.auto_join_groups = "nobody";
+                break;
+            case EVERYONE:
+                settingsPojo.auto_join_groups = "everyone";
+                break;
+            case CONTACTS:
+                settingsPojo.auto_join_groups = "contacts";
+                break;
+        }
+
         settingsPojo.auto_download_size = SettingsActivity.getAutoDownloadSize();
         settingsPojo.auto_open_limited_visibility = SettingsActivity.getDefaultAutoOpenLimitedVisibilityInboundMessages();
         settingsPojo.retain_wiped_outbound = SettingsActivity.getDefaultRetainWipedOutboundMessages();
@@ -121,6 +137,7 @@ class SettingsPojo_0 {
 
         settingsPojo.share_app_version = SettingsActivity.shareAppVersion();
         settingsPojo.notify_certificate_change = SettingsActivity.notifyCertificateChange();
+        settingsPojo.sending_foreground_service = SettingsActivity.useSendingForegroundService();
         settingsPojo.qr_correction_level = SettingsActivity.getQrCorrectionLevel();
         settingsPojo.low_bandwidth_calls = SettingsActivity.useLowBandwidthInCalls();
         settingsPojo.debug_log_level = SettingsActivity.useDebugLogLevel();
@@ -157,6 +174,9 @@ class SettingsPojo_0 {
         if (disable_push_notifications != null) { SettingsActivity.setDisablePushNotifications(disable_push_notifications); }
         if (permanent_websocket != null) { SettingsActivity.setUsePermanentWebSocket(permanent_websocket); }
 
+        if (auto_join_groups != null) { SettingsActivity.setAutoJoinGroups(SettingsActivity.getAutoJoinGroupsFromString(auto_join_groups)); }
+        if (show_trust_level != null) { SettingsActivity.setShowTrustLevels(show_trust_level); }
+
         if (auto_download_size != null) { SettingsActivity.setAutoDownloadSize(auto_download_size); }
         if (auto_open_limited_visibility != null) { SettingsActivity.setDefaultAutoOpenLimitedVisibilityInboundMessages(auto_open_limited_visibility); }
         if (retain_wiped_outbound != null) { SettingsActivity.setDefaultRetainWipedOutboundMessages(retain_wiped_outbound); }
@@ -171,6 +191,7 @@ class SettingsPojo_0 {
 
         if (share_app_version != null) { SettingsActivity.setShareAppVersion(share_app_version); }
         if (notify_certificate_change != null) { SettingsActivity.setNotifyCertificateChange(notify_certificate_change); }
+        if (sending_foreground_service != null) { SettingsActivity.setSendingForegroundService(sending_foreground_service); }
         if (qr_correction_level != null) { SettingsActivity.setQrCorrectionLevel(qr_correction_level); }
         if (low_bandwidth_calls != null) { SettingsActivity.setUseLowBandwidthInCalls(low_bandwidth_calls); }
         if (debug_log_level != null) { SettingsActivity.setUseDebugLogLevel(debug_log_level); }

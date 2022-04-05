@@ -31,8 +31,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
-import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -73,8 +73,12 @@ public class Contact {
     public static final String CUSTOM_NAME_HUE = "custom_name_hue";
     public static final String PERSONAL_NOTE = "personal_note";
     public static final String ACTIVE = "active";
+    public static final String ONE_TO_ONE = "one_to_one";
+    public static final String TRUST_LEVEL = "trust_level";
     public static final String CAPABILITY_WEBRTC_CONTINUOUS_ICE = "capability_webrtc_continuous_ice";
     public static final String CAPABILITY_GROUPS_V2 = "capability_groups_v2";
+    public static final String CAPABILITY_ONE_TO_ONE_CONTACTS = "capability_one_to_one_contacts";
+
 
     public static final int PUBLISHED_DETAILS_NOTHING_NEW = 0;
     public static final int PUBLISHED_DETAILS_NEW_UNSEEN = 1;
@@ -143,15 +147,24 @@ public class Contact {
     @ColumnInfo(name = ACTIVE)
     public boolean active;
 
+    @ColumnInfo(name = ONE_TO_ONE)
+    public boolean oneToOne;
+
+    @ColumnInfo(name = TRUST_LEVEL)
+    public int trustLevel;
+
     @ColumnInfo(name = CAPABILITY_WEBRTC_CONTINUOUS_ICE)
     public boolean capabilityWebrtcContinuousIce;
 
     @ColumnInfo(name = CAPABILITY_GROUPS_V2)
     public boolean capabilityGroupsV2;
 
+    @ColumnInfo(name = CAPABILITY_ONE_TO_ONE_CONTACTS)
+    public boolean capabilityOneToOneContacts;
+
 
     // Constructor required by Room
-    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @Nullable String customDisplayName, @NonNull String displayName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, int newPublishedDetails, int deviceCount, int establishedChannelCount, @Nullable String photoUrl, @Nullable String customPhotoUrl, boolean keycloakManaged, @Nullable Integer customNameHue, @Nullable String personalNote, boolean active, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2) {
+    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @Nullable String customDisplayName, @NonNull String displayName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, int newPublishedDetails, int deviceCount, int establishedChannelCount, @Nullable String photoUrl, @Nullable String customPhotoUrl, boolean keycloakManaged, @Nullable Integer customNameHue, @Nullable String personalNote, boolean active, boolean oneToOne, int trustLevel, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
         this.bytesContactIdentity = bytesContactIdentity;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customDisplayName = customDisplayName;
@@ -168,15 +181,18 @@ public class Contact {
         this.customNameHue = customNameHue;
         this.personalNote = personalNote;
         this.active = active;
+        this.oneToOne = oneToOne;
+        this.trustLevel = trustLevel;
         this.capabilityWebrtcContinuousIce = capabilityWebrtcContinuousIce;
         this.capabilityGroupsV2 = capabilityGroupsV2;
+        this.capabilityOneToOneContacts = capabilityOneToOneContacts;
     }
 
 
 
     // Constructor used when inserting a new contact
     @Ignore
-    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @NonNull JsonIdentityDetails identityDetails, boolean hasUntrustedPublishedDetails, @Nullable String photoUrl, boolean keycloakManaged, boolean active) throws Exception {
+    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @NonNull JsonIdentityDetails identityDetails, boolean hasUntrustedPublishedDetails, @Nullable String photoUrl, boolean keycloakManaged, boolean active, boolean oneToOne, int trustLevel) throws Exception {
         this.bytesContactIdentity = bytesContactIdentity;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customDisplayName = null;
@@ -194,8 +210,11 @@ public class Contact {
         this.customNameHue = null;
         this.personalNote = null;
         this.active = active;
+        this.oneToOne = oneToOne;
+        this.trustLevel = trustLevel;
         this.capabilityWebrtcContinuousIce = false;
         this.capabilityGroupsV2 = false;
+        this.capabilityOneToOneContacts = false;
     }
 
     @NonNull
@@ -204,9 +223,9 @@ public class Contact {
             return this.customDisplayName == null ? "" : this.customDisplayName;
         } else {
             if (customDisplayName == null) {
-                return App.unAccent(jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
+                return StringUtils.unAccent(jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
             } else {
-                return App.unAccent(customDisplayName + " " + jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
+                return StringUtils.unAccent(customDisplayName + " " + jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
             }
         }
     }
@@ -293,6 +312,9 @@ public class Contact {
             }
             // delete the contact
             db.contactDao().delete(this);
+
+            // remove this contact from all caches
+            AppSingleton.updateCacheContactDeleted(bytesContactIdentity);
 
             // get all unsent (not passed to the engine because of a lack of channel) MessageRecipientInfo and delete them
             //  --> update message status accordingly

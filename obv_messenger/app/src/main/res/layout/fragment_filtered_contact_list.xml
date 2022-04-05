@@ -6,22 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/discussion_list_swipe_refresh_layout"
+    <io.olvid.messenger.customClasses.EmptyRecyclerView
+        android:id="@+id/filtered_contact_list_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:elevation="6dp">
-
-        <io.olvid.messenger.customClasses.EmptyRecyclerView
-            android:id="@+id/filtered_contact_list_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="88dp"
-            android:scrollbars="vertical"
-            tools:listitem="@layout/item_view_contact"/>
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        android:clipToPadding="false"
+        android:paddingBottom="88dp"
+        android:scrollbars="vertical"
+        tools:itemCount="4"
+        tools:listitem="@layout/item_view_contact_selectable"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/filtered_contact_list_empty_view"

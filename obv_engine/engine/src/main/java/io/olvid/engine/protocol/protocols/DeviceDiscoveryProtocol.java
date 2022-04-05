@@ -214,11 +214,10 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
             return CHILD_PROTOCOL_REACHED_EXPECTED_STATE_MESSAGE_ID;
         }
 
+        // not used for this type of message
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
-                    Encoded.of(childToParentProtocolMessageInputs.toEncodedInputs())
-            };
+            return new Encoded[0];
         }
 
         public DeviceDiscoveryChildProtocol.DeviceUidsReceivedState getDeviceUidsReceivedState() {

@@ -28,7 +28,6 @@ public class BackupPreferenceViewModel extends ViewModel {
     private byte[] exportBackupContent;
     private int exportBackupVersion;
     private byte[] exportBackupKeyUid;
-    private boolean googleApisInstalled;
 
     public byte[] getExportBackupContent() {
         return exportBackupContent;
@@ -60,13 +59,5 @@ public class BackupPreferenceViewModel extends ViewModel {
 
     public void setBackupKeyInformation(ObvBackupKeyInformation backupKeyInformation) {
         this.backupKeyInformation = backupKeyInformation;
-    }
-
-    public boolean isGoogleApisInstalled() {
-        return googleApisInstalled;
-    }
-
-    public void setGoogleApisInstalled(boolean googleApisInstalled) {
-        this.googleApisInstalled = googleApisInstalled;
     }
 }

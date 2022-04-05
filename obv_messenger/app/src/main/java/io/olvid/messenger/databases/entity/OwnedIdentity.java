@@ -61,6 +61,7 @@ public class OwnedIdentity {
     public static final String PREF_SHOW_NEUTRAL_NOTIFICATION_WHEN_HIDDEN = "pref_show_neutral_notification_when_hidden"; // if true, even when the profile is hidden you will get an "Olvid requires your attention" notification
     public static final String CAPABILITY_WEBRTC_CONTINUOUS_ICE = "capability_webrtc_continuous_ice";
     public static final String CAPABILITY_GROUPS_V2 = "capability_groups_v2";
+    public static final String CAPABILITY_ONE_TO_ONE_CONTACTS = "capability_one_to_one_contacts";
 
     public static final int UNPUBLISHED_DETAILS_NOTHING_NEW = 0;
     public static final int UNPUBLISHED_DETAILS_EXIST = 1;
@@ -141,8 +142,11 @@ public class OwnedIdentity {
     @ColumnInfo(name = CAPABILITY_GROUPS_V2)
     public boolean capabilityGroupsV2;
 
+    @ColumnInfo(name = CAPABILITY_ONE_TO_ONE_CONTACTS)
+    public boolean capabilityOneToOneContacts;
+
     // Constructor required by Room
-    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, String customDisplayName, byte[] unlockPassword, byte[] unlockSalt, boolean prefMuteNotifications, @Nullable Long prefMuteNotificationsTimestamp, boolean prefShowNeutralNotificationWhenHidden, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2) {
+    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, String customDisplayName, byte[] unlockPassword, byte[] unlockSalt, boolean prefMuteNotifications, @Nullable Long prefMuteNotificationsTimestamp, boolean prefShowNeutralNotificationWhenHidden, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.displayName = displayName;
         this.identityDetails = identityDetails;
@@ -161,6 +165,7 @@ public class OwnedIdentity {
         this.prefShowNeutralNotificationWhenHidden = prefShowNeutralNotificationWhenHidden;
         this.capabilityWebrtcContinuousIce = capabilityWebrtcContinuousIce;
         this.capabilityGroupsV2 = capabilityGroupsV2;
+        this.capabilityOneToOneContacts = capabilityOneToOneContacts;
     }
 
 
@@ -184,6 +189,7 @@ public class OwnedIdentity {
         this.prefShowNeutralNotificationWhenHidden = false;
         this.capabilityWebrtcContinuousIce = false;
         this.capabilityGroupsV2 = false;
+        this.capabilityOneToOneContacts = false;
     }
 
     public void setIdentityDetails(@Nullable JsonIdentityDetails jsonIdentityDetails) throws Exception {

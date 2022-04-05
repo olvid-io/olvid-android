@@ -20,6 +20,7 @@
 package io.olvid.messenger.services;
 
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -27,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -39,14 +41,19 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import java.util.HashSet;
+import java.util.List;
+
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.engine.engine.types.EngineAPI;
+import io.olvid.engine.engine.types.ObvPostMessageOutput;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
-import io.olvid.messenger.activities.DummyActivity;
+import io.olvid.messenger.customClasses.BytesKey;
+import io.olvid.messenger.customClasses.LockScreenOrNotActivity;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.PreviewUtils;
@@ -65,6 +72,7 @@ public class UnifiedForegroundService extends Service {
 
     public static final int SUB_SERVICE_LOCK = 1;
     public static final int SUB_SERVICE_WEB_CLIENT = 2;
+    public static final int SUB_SERVICE_MESSAGE_SENDING = 3;
 
     final NoExceptionSingleThreadExecutor executor = new NoExceptionSingleThreadExecutor("UnifiedForegroundService-Executor");
 
@@ -72,7 +80,7 @@ public class UnifiedForegroundService extends Service {
 
     private LockSubService lockSubService = null;
     private WebClientSubService webClientSubService = null;
-
+    private MessageSendingSubService messageSendingSubService = null;
 
     public static void onAppForeground(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -153,21 +161,32 @@ public class UnifiedForegroundService extends Service {
         if (webClientSubService != null) {
             webClientSubService.stopService();
         }
+        if (messageSendingSubService != null) {
+            messageSendingSubService.onDestroy();
+            messageSendingSubService = null;
+        }
         executor.shutdownNow();
     }
 
+    private static boolean removingExtraTasks = false;
+
     @Override
     public void onTaskRemoved(Intent rootIntent) {
+        if (removingExtraTasks) {
+            return;
+        }
         executor.execute(() -> {
-            if (App.isVisible()) {
-                return;
-            }
-
             ComponentName intentComponent = rootIntent.getComponent();
             if (intentComponent != null) {
                 if (WebrtcCallActivity.class.getName().equals(intentComponent.getClassName())
                         || WebrtcIncomingCallActivity.class.getName().equals(intentComponent.getClassName())) {
                     return;
+                }
+                try {
+                    if (LockScreenOrNotActivity.class.isAssignableFrom(Class.forName(intentComponent.getClassName()))) {
+                        return;
+                    }
+                } catch (ClassNotFoundException ignored) {
                 }
             }
             if (lockSubService != null) {
@@ -179,11 +198,31 @@ public class UnifiedForegroundService extends Service {
 
             // purge the in-memory thumbnails cache to reclaim memory
             PreviewUtils.purgeCache();
-
-            Intent intent = new Intent(this, DummyActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
         });
+    }
+
+    public static void finishAndRemoveExtraTasks(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+                if (activityManager != null) {
+                    List<ActivityManager.AppTask> appTasks = activityManager.getAppTasks();
+                    if (appTasks != null && appTasks.size() > 1) {
+                        removingExtraTasks = true;
+                        for (ActivityManager.AppTask appTask : appTasks) {
+                            ActivityManager.RecentTaskInfo taskInfo = appTask.getTaskInfo();
+                            if (!taskInfo.isRunning) {
+                                Logger.e("Removing empty task");
+                                appTask.finishAndRemoveTask();
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            } finally {
+                removingExtraTasks = false;
+            }
+        }
     }
 
 
@@ -214,6 +253,15 @@ public class UnifiedForegroundService extends Service {
                         }
                         break;
                     }
+                    case SUB_SERVICE_MESSAGE_SENDING: {
+                        if (intent.getAction() != null) {
+                            if (messageSendingSubService == null) {
+                                messageSendingSubService = new MessageSendingSubService(this);
+                            }
+                            messageSendingSubService.onStartCommand(intent.getAction(), intent);
+                        }
+                        break;
+                    }
                 }
             } else {
                 stopOrRestartForegroundService();
@@ -237,20 +285,22 @@ public class UnifiedForegroundService extends Service {
         return false;
     }
 
-    public static boolean willUnifiedForegroundServiceStartForegroun() {
+    public static boolean willUnifiedForegroundServiceStartForeground() {
         boolean showWebClientNotification = WebClientSubService.isRunning;
         boolean showLockScreenNotification = SettingsActivity.useApplicationLockScreen() && (!LockSubService.locked || SettingsActivity.keepLockServiceOpen());
         boolean showPermanentNotification = SettingsActivity.usePermanentWebSocket() || SettingsActivity.usePermanentForegroundService();
+        boolean showMessageSendingNotification = MessageSendingSubService.isSendingMessage;
 
-        return showLockScreenNotification || showWebClientNotification || showPermanentNotification;
+        return showLockScreenNotification || showWebClientNotification || showPermanentNotification || showMessageSendingNotification;
     }
 
     private void stopOrRestartForegroundService() {
         boolean showWebClientNotification = webClientSubService != null && WebClientSubService.isRunning;
         boolean showLockScreenNotification = SettingsActivity.useApplicationLockScreen() && (!LockSubService.locked || SettingsActivity.keepLockServiceOpen());
         boolean showPermanentNotification = SettingsActivity.usePermanentWebSocket() || SettingsActivity.usePermanentForegroundService();
+        boolean showMessageSendingNotification = SettingsActivity.useSendingForegroundService() && MessageSendingSubService.isSendingMessage;
 
-        if (!showLockScreenNotification && !showWebClientNotification && !showPermanentNotification) {
+        if (!showLockScreenNotification && !showWebClientNotification && !showPermanentNotification && !showMessageSendingNotification) {
             stopForeground(true);
             return;
         }
@@ -266,6 +316,9 @@ public class UnifiedForegroundService extends Service {
         if (showWebClientNotification) {
             builder.setContentTitle(getString(R.string.notification_title_webclient_connected))
                     .setSmallIcon(R.drawable.ic_webclient_animated);
+        } else if (showMessageSendingNotification) {
+            builder.setContentTitle(getString(R.string.notification_title_sending_message))
+                    .setSmallIcon(R.drawable.ic_sending_animated);
         } else if (showLockScreenNotification) {
             if (LockSubService.locked) {
                 builder.setContentTitle(getString(R.string.notification_title_olvid_is_locked))
@@ -289,7 +342,7 @@ public class UnifiedForegroundService extends Service {
         ////////
         Intent openIntent = new Intent(this, MainActivity.class);
         PendingIntent openPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             openPendingIntent = PendingIntent.getActivity(App.getContext(), 0, openIntent, PendingIntent.FLAG_IMMUTABLE);
         } else {
             openPendingIntent = PendingIntent.getActivity(App.getContext(), 0, openIntent, 0);
@@ -302,7 +355,7 @@ public class UnifiedForegroundService extends Service {
             lockIntent.setAction(LockSubService.LOCK_APP_ACTION);
             lockIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_LOCK);
             PendingIntent lockPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 lockPendingIntent = PendingIntent.getService(App.getContext(), 0, lockIntent, PendingIntent.FLAG_IMMUTABLE);
             } else {
                 lockPendingIntent = PendingIntent.getService(App.getContext(), 0, lockIntent, 0);
@@ -315,12 +368,25 @@ public class UnifiedForegroundService extends Service {
             disconnectIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_WEB_CLIENT);
             disconnectIntent.setAction(WebClientSubService.ACTION_DISCONNECT);
             PendingIntent disconnectPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 disconnectPendingIntent = PendingIntent.getService(App.getContext(), 0, disconnectIntent, PendingIntent.FLAG_IMMUTABLE);
             } else {
                 disconnectPendingIntent = PendingIntent.getService(App.getContext(), 0, disconnectIntent, 0);
             }
             builder.addAction(R.drawable.ic_webclient_disconnected, App.getContext().getString(R.string.notification_action_disconnect), disconnectPendingIntent);
+        }
+
+        if (showMessageSendingNotification) {
+            Intent dismissIntent = new Intent(this, UnifiedForegroundService.class);
+            dismissIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_MESSAGE_SENDING);
+            dismissIntent.setAction(MessageSendingSubService.DISMISS_ACTION);
+            PendingIntent dismissPendingIntent;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                dismissPendingIntent = PendingIntent.getService(App.getContext(), 0, dismissIntent, PendingIntent.FLAG_IMMUTABLE);
+            } else {
+                dismissPendingIntent = PendingIntent.getService(App.getContext(), 0, dismissIntent, 0);
+            }
+            builder.addAction(R.drawable.ic_close, App.getContext().getString(R.string.notification_action_dismiss), dismissPendingIntent);
         }
 
         if (App.isVisible()) {
@@ -356,7 +422,7 @@ public class UnifiedForegroundService extends Service {
 
         private static boolean isRunning = false;
 
-        private final UnifiedForegroundService unifiedForegroundService;
+        @NonNull private final UnifiedForegroundService unifiedForegroundService;
         private final byte[] bytesOwnedIdentity;
         private final MutableLiveData<Boolean> serviceClosing; //if fragment still bound, used to indicate service closing to close fragment too
         private final Context webClientContext;
@@ -367,7 +433,7 @@ public class UnifiedForegroundService extends Service {
 
         private WebClientManager manager;
 
-        WebClientSubService(UnifiedForegroundService unifiedForegroundService, byte[] bytesOwnedIdentity) {
+        WebClientSubService(@NonNull UnifiedForegroundService unifiedForegroundService, byte[] bytesOwnedIdentity) {
             isRunning = true;
 
             this.unifiedForegroundService = unifiedForegroundService;
@@ -595,9 +661,9 @@ public class UnifiedForegroundService extends Service {
             return locked && SettingsActivity.useApplicationLockScreen();
         }
 
-        private final UnifiedForegroundService unifiedForegroundService;
+        @NonNull private final UnifiedForegroundService unifiedForegroundService;
 
-        LockSubService(UnifiedForegroundService unifiedForegroundService) {
+        LockSubService(@NonNull UnifiedForegroundService unifiedForegroundService) {
             this.unifiedForegroundService = unifiedForegroundService;
             if (!SettingsActivity.useApplicationLockScreen()) {
                 unlockApplication();
@@ -734,6 +800,104 @@ public class UnifiedForegroundService extends Service {
             }
             lockIntent.setPackage(App.getContext().getPackageName());
             LocalBroadcastManager.getInstance(unifiedForegroundService).sendBroadcast(lockIntent);
+        }
+    }
+
+
+
+
+    public static void processPostMessageOutput(ObvPostMessageOutput postMessageOutput) {
+        HashSet<BytesKey> messageIdentifiers = new HashSet<>();
+        for (byte[] messageIdentifier : postMessageOutput.getMessageIdentifierByContactIdentity().values()) {
+            if (messageIdentifier != null) {
+                messageIdentifiers.add(new BytesKey(messageIdentifier));
+            }
+        }
+        for (BytesKey messageIdentifier: messageIdentifiers) {
+            Intent messageUploadedIntent = new Intent(App.getContext(), UnifiedForegroundService.class);
+            messageUploadedIntent.setAction(MessageSendingSubService.MESSAGE_POSTED_ACTION);
+            messageUploadedIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_MESSAGE_SENDING);
+            messageUploadedIntent.putExtra(MessageSendingSubService.MESSAGE_IDENTIFIER_INTENT_EXTRA, messageIdentifier.bytes);
+            App.getContext().startService(messageUploadedIntent);
+        }
+    }
+
+    public static void processUploadedMessageIdentifier(byte[] engineMessageIdentifier) {
+        // notify the UnifiedForegroundService.MessageSendingSubService that the message was fully uploaded
+        Intent messageUploadedIntent = new Intent(App.getContext(), UnifiedForegroundService.class);
+        messageUploadedIntent.setAction(UnifiedForegroundService.MessageSendingSubService.MESSAGE_UPLOADED_ACTION);
+        messageUploadedIntent.putExtra(UnifiedForegroundService.SUB_SERVICE_INTENT_EXTRA, UnifiedForegroundService.SUB_SERVICE_MESSAGE_SENDING);
+        messageUploadedIntent.putExtra(UnifiedForegroundService.MessageSendingSubService.MESSAGE_IDENTIFIER_INTENT_EXTRA, engineMessageIdentifier);
+        App.getContext().startService(messageUploadedIntent);
+    }
+
+
+
+    public static class MessageSendingSubService {
+        public static final String MESSAGE_POSTED_ACTION = "message_posted";
+        public static final String MESSAGE_UPLOADED_ACTION = "message_uploaded";
+        public static final String DISMISS_ACTION = "dismiss";
+        public static final String MESSAGE_IDENTIFIER_INTENT_EXTRA = "message_identifier"; // byte[]
+
+        @NonNull private final UnifiedForegroundService unifiedForegroundService;
+        @NonNull private final HashSet<BytesKey> currentlySendingMessages; // this set contains message identifiers that have been passed to the engine but are not yet fully uploaded
+        @NonNull private final HashSet<BytesKey> finishedSendingMessages; // this set contains message identifiers that were fully sent but for which we were not yet notified they have been passed to the engine
+
+        static boolean isSendingMessage = false;
+
+        MessageSendingSubService(@NonNull UnifiedForegroundService unifiedForegroundService) {
+            this.unifiedForegroundService = unifiedForegroundService;
+            this.currentlySendingMessages = new HashSet<>();
+            this.finishedSendingMessages = new HashSet<>();
+        }
+
+        synchronized void onStartCommand(@NonNull String action, @NonNull Intent intent) {
+            switch (action) {
+                case MESSAGE_POSTED_ACTION: {
+                    byte[] messageIdentifier = intent.getByteArrayExtra(MESSAGE_IDENTIFIER_INTENT_EXTRA);
+                    if (messageIdentifier != null) {
+                        BytesKey key = new BytesKey(messageIdentifier);
+                        if (!finishedSendingMessages.remove(key)) {
+                            currentlySendingMessages.add(key);
+                            if (!isSendingMessage) {
+                                isSendingMessage = true;
+                                unifiedForegroundService.stopOrRestartForegroundService();
+                            }
+                        }
+                    }
+                    break;
+                }
+                case MESSAGE_UPLOADED_ACTION: {
+                    byte[] messageIdentifier = intent.getByteArrayExtra(MESSAGE_IDENTIFIER_INTENT_EXTRA);
+                    if (messageIdentifier != null) {
+                        BytesKey key = new BytesKey(messageIdentifier);
+                        if (!currentlySendingMessages.remove(key)) {
+                            finishedSendingMessages.add(key);
+                        } else if (currentlySendingMessages.isEmpty()) {
+                            // if we just remove the last sending message --> stop the foreground service
+                            isSendingMessage = false;
+                            // delay stop service by 200ms to allow liveData to be updated (for vibrateOnSend of widget)
+                            new Handler(Looper.getMainLooper()).postDelayed(unifiedForegroundService::stopOrRestartForegroundService, 200);
+                        }
+                    }
+                    break;
+                }
+                case DISMISS_ACTION: {
+                    // clear all hashsets and dismiss notification
+                    currentlySendingMessages.clear();
+                    finishedSendingMessages.clear();
+
+                    isSendingMessage = false;
+                    unifiedForegroundService.stopOrRestartForegroundService();
+                    break;
+                }
+            }
+        }
+
+        void onDestroy() {
+            isSendingMessage = false;
+            currentlySendingMessages.clear();
+            finishedSendingMessages.clear();
         }
     }
 }

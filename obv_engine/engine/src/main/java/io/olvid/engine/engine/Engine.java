@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -50,6 +51,7 @@ import io.olvid.engine.channel.ChannelManager;
 import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
+import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
@@ -343,7 +345,11 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                             if (listener == null) { // remove the listener
                                 removeNotificationListener(engineNotification.notificationName, entry.getKey());
                             } else { // call callback method
-                                listener.callback(engineNotification.notificationName, engineNotification.userInfo);
+                                try {
+                                    listener.callback(engineNotification.notificationName, engineNotification.userInfo);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     } else {
@@ -414,6 +420,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_LIST_UPDATED,
                 IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_PUBLISHED_DETAILS_UPDATED,
                 IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY,
+                IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED,
                 IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED,
                 IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE,
                 IdentityNotifications.NOTIFICATION_GROUP_CREATED,
@@ -437,10 +444,12 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS,
                 IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED,
                 IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED,
+                IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED,
                 UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS,
                 UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_FINISHED,
                 UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_CANCELLED,
                 UploadNotifications.NOTIFICATION_MESSAGE_UPLOADED,
+                UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED,
                 BackupNotifications.NOTIFICATION_NEW_BACKUP_SEED_GENERATED,
                 BackupNotifications.NOTIFICATION_BACKUP_SEED_GENERATION_FAILED,
                 BackupNotifications.NOTIFICATION_BACKUP_FOR_EXPORT_FINISHED,
@@ -893,22 +902,42 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                     Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_OWNED_IDENTITY_KEY);
                     boolean keycloakManaged = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_KEYCLOAK_MANAGED_KEY);
                     boolean active = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_ACTIVE_KEY);
+                    boolean oneToOne = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_ONE_TO_ONE_KEY);
+                    int trustLevel = (int) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_TRUST_LEVEL_KEY);
                     if (contactIdentity == null || ownedIdentity == null) {
                         break;
                     }
 
-                    protocolManager.startDeviceDiscoveryProtocol(contactIdentity, ownedIdentity);
+                    protocolManager.startDeviceDiscoveryProtocol(ownedIdentity, contactIdentity);
 
                     HashMap<String, Object> engineInfo = new HashMap<>();
                     JsonIdentityDetails contactDetails = identityManager.getContactIdentityTrustedDetails(engineSession.session, ownedIdentity, contactIdentity);
 
                     engineInfo.put(EngineNotifications.NEW_CONTACT_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
                     engineInfo.put(EngineNotifications.NEW_CONTACT_CONTACT_IDENTITY_KEY, new ObvIdentity(contactIdentity, contactDetails, keycloakManaged, active));
+                    engineInfo.put(EngineNotifications.NEW_CONTACT_ONE_TO_ONE_KEY, oneToOne);
+                    engineInfo.put(EngineNotifications.NEW_CONTACT_TRUST_LEVEL_KEY, trustLevel);
                     engineInfo.put(EngineNotifications.NEW_CONTACT_HAS_UNTRUSTED_PUBLISHED_DETAILS_KEY, identityManager.contactHasUntrustedPublishedDetails(engineSession.session, ownedIdentity, contactIdentity));
                     postEngineNotification(EngineNotifications.NEW_CONTACT, engineInfo);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                break;
+            }
+            case IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED: {
+                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED_CONTACT_IDENTITY_KEY);
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED_OWNED_IDENTITY_KEY);
+                TrustLevel trustLevel = (TrustLevel) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED_TRUST_LEVEL_KEY);
+                if (contactIdentity == null || ownedIdentity == null || trustLevel == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED_TRUST_LEVEL_KEY, trustLevel.major);
+
+                postEngineNotification(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED, engineInfo);
                 break;
             }
             case IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED: {
@@ -1296,7 +1325,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
 
                 if (active) {
                     try {
-                        protocolManager.startDeviceDiscoveryProtocol(contactIdentity, ownedIdentity);
+                        protocolManager.startDeviceDiscoveryProtocol(ownedIdentity, contactIdentity);
                     } catch (Exception ignored) {}
                 }
 
@@ -1385,6 +1414,22 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 }
                 break;
             }
+            case IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED: {
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_OWNED_IDENTITY_KEY);
+                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_CONTACT_IDENTITY_KEY);
+                boolean oneToOne = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY);
+
+                if (ownedIdentity == null || contactIdentity == null) {
+                    break;
+                }
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY, oneToOne);
+
+                postEngineNotification(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED, engineInfo);
+                break;
+            }
             case UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS: {
                 Identity ownedIdentity = (Identity) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_OWNED_IDENTITY_KEY);
                 UID messageUid = (UID) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_MESSAGE_UID_KEY);
@@ -1449,6 +1494,20 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 engineInfo.put(EngineNotifications.MESSAGE_UPLOADED_TIMESTAMP_FROM_SERVER, timestampFromServer);
 
                 postEngineNotification(EngineNotifications.MESSAGE_UPLOADED, engineInfo);
+                break;
+            }
+            case UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED: {
+                Identity ownedIdentity = (Identity) userInfo.get(UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED_OWNED_IDENTITY_KEY);
+                UID messageUid = (UID) userInfo.get(UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED_UID_KEY);
+                if (ownedIdentity == null || messageUid == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.MESSAGE_UPLOAD_FAILED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.MESSAGE_UPLOAD_FAILED_IDENTIFIER_KEY, messageUid.getBytes());
+
+                postEngineNotification(EngineNotifications.MESSAGE_UPLOAD_FAILED, engineInfo);
                 break;
             }
             case IdentityNotifications.NOTIFICATION_NEW_GROUP_PUBLISHED_DETAILS: {
@@ -1661,41 +1720,12 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 category = ObvDialog.Category.createAcceptGroupInvite(dialogType.serializedGroupDetails, dialogType.groupUid.getBytes(), bytesGroupOwnedIdentity, pendingGroupMemberIdentities, dialogType.serverTimestamp);
                 break;
             }
-            case DialogType.INCREASE_MEDIATOR_TRUST_LEVEL_DIALOG_ID: {
-                byte[] bytesMediatorIdentity = null;
-                if (dialogType.mediatorOrGroupOwnerIdentity != null) {
-                    bytesMediatorIdentity = dialogType.mediatorOrGroupOwnerIdentity.getBytes();
-                }
-                category = ObvDialog.Category.createIncreaseMediatorTrustLevel(dialogType.contactIdentity.getBytes(), dialogType.contactDisplayNameOrSerializedDetails, bytesMediatorIdentity, dialogType.serverTimestamp);
+            case DialogType.ONE_TO_ONE_INVITATION_SENT_DIALOG_ID: {
+                category = ObvDialog.Category.createOneToOneInvitationSent(dialogType.contactIdentity.getBytes());
                 break;
             }
-            case DialogType.INCREASE_GROUP_OWNER_TRUST_LEVEL_DIALOG_ID: {
-                byte[] bytesGroupOwnerIdentity = null;
-                if (dialogType.mediatorOrGroupOwnerIdentity != null) {
-                    bytesGroupOwnerIdentity = dialogType.mediatorOrGroupOwnerIdentity.getBytes();
-                }
-                ObvIdentity[] pendingGroupMemberIdentities = new ObvIdentity[dialogType.pendingGroupMemberIdentities.length];
-                for (int i = 0; i < pendingGroupMemberIdentities.length; i++) {
-                    try {
-                        JsonIdentityDetails identityDetails = jsonObjectMapper.readValue(dialogType.pendingGroupMemberSerializedDetails[i], JsonIdentityDetails.class);
-                        pendingGroupMemberIdentities[i] = new ObvIdentity(dialogType.pendingGroupMemberIdentities[i], identityDetails, false, true);
-                    } catch (Exception e) {
-                        break;
-                    }
-                }
-                category = ObvDialog.Category.createIncreaseGroupOwnerTrustLevel(dialogType.serializedGroupDetails, dialogType.groupUid.getBytes(), bytesGroupOwnerIdentity, pendingGroupMemberIdentities, dialogType.serverTimestamp);
-                break;
-            }
-            case DialogType.AUTO_CONFIRMED_CONTACT_INTRODUCTION_DIALOG_ID: {
-                byte[] bytesMediatorIdentity = null;
-                if (dialogType.mediatorOrGroupOwnerIdentity != null) {
-                    bytesMediatorIdentity = dialogType.mediatorOrGroupOwnerIdentity.getBytes();
-                }
-                category = ObvDialog.Category.createAutoConfirmedContactIntroduction(dialogType.contactIdentity.getBytes(), dialogType.contactDisplayNameOrSerializedDetails, bytesMediatorIdentity);
-                break;
-            }
-            case DialogType.GROUP_JOINED_DIALOG_ID: {
-                category = ObvDialog.Category.createGroupJoined(dialogType.serializedGroupDetails, dialogType.groupUid.getBytes(), dialogType.mediatorOrGroupOwnerIdentity.getBytes());
+            case DialogType.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_ID: {
+                category = ObvDialog.Category.createAcceptOneToOneInvitation(dialogType.contactIdentity.getBytes(), dialogType.serverTimestamp);
                 break;
             }
             default:
@@ -2152,6 +2182,15 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     }
 
     @Override
+    public boolean isContactOneToOne(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
+        try (EngineSession engineSession = getSession()) {
+            Identity contactIdentity = Identity.of(bytesContactIdentity);
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            return identityManager.isIdentityAOneToOneContactOfOwnedIdentity(engineSession.session, ownedIdentity, contactIdentity);
+        }
+    }
+
+    @Override
     public int getContactDeviceCount(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
         try (EngineSession engineSession = getSession()) {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
@@ -2215,13 +2254,28 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     }
 
     @Override
-    public boolean doesContactHaveAutoAcceptTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
+    public int getContactTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
         Identity contactIdentity = Identity.of(bytesContactIdentity);
+
         try (EngineSession engineSession = getSession()) {
-            return (identityManager.getContactIdentityTrustLevel(engineSession.session, ownedIdentity, contactIdentity).compareTo(Constants.AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD)) >= 0;
+            TrustLevel contactTrustLevel = identityManager.getContactTrustLevel(engineSession.session, ownedIdentity, contactIdentity);
+            if (contactTrustLevel != null) {
+                return contactTrustLevel.major;
+            } else {
+                return 0;
+            }
         }
     }
+
+//    @Override
+//    public boolean doesContactHaveAutoAcceptTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
+//        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+//        Identity contactIdentity = Identity.of(bytesContactIdentity);
+//        try (EngineSession engineSession = getSession()) {
+//            return (identityManager.getContactIdentityTrustLevel(engineSession.session, ownedIdentity, contactIdentity).compareTo(Constants.AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD)) >= 0;
+//        }
+//    }
 
     // returns null in case of error, empty list if there are no capabilities
     @Override
@@ -2381,6 +2435,18 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     }
 
     @Override
+    public Set<UUID> getAllPersistedDialogUuids() throws Exception {
+        try (EngineSession engineSession = getSession()) {
+            UserInterfaceDialog[] dialogs = UserInterfaceDialog.getAll(engineSession);
+            Set<UUID> obvDialogUuids = new HashSet<>();
+            for (UserInterfaceDialog dialog : dialogs) {
+                obvDialogUuids.add(dialog.getUuid());
+            }
+            return obvDialogUuids;
+        }
+    }
+
+    @Override
     public void resendAllPersistedDialogs() throws Exception {
         try (EngineSession engineSession = getSession()) {
             UserInterfaceDialog[] dialogs = UserInterfaceDialog.getAll(engineSession);
@@ -2430,7 +2496,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     public void startTrustEstablishmentProtocol(byte[] bytesRemoteIdentity, String contactDisplayName, byte[] bytesOwnedIdentity) throws Exception {
         Identity remoteIdentity = Identity.of(bytesRemoteIdentity);
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-        protocolManager.startTrustEstablishmentProtocol(remoteIdentity, contactDisplayName, ownedIdentity);
+        protocolManager.startTrustEstablishmentProtocol(ownedIdentity, remoteIdentity, contactDisplayName);
     }
 
     @Override
@@ -2459,7 +2525,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     public void startMutualScanTrustEstablishmentProtocol(byte[] bytesOwnedIdentity, byte[] bytesRemoteIdentity, byte[] signature) throws Exception {
         Identity contactIdentity = Identity.of(bytesRemoteIdentity);
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-        protocolManager.startMutualScanTrustEstablishmentProtocol(contactIdentity, signature, ownedIdentity);
+        protocolManager.startMutualScanTrustEstablishmentProtocol(ownedIdentity, contactIdentity, signature);
     }
 
     @Override
@@ -2473,7 +2539,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 throw new Exception();
             }
         }
-        protocolManager.startContactMutualIntroductionProtocol(contactIdentityA, contactIdentities, ownedIdentity);
+        protocolManager.startContactMutualIntroductionProtocol(ownedIdentity, contactIdentityA, contactIdentities);
     }
 
     @Override
@@ -2492,7 +2558,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
             }
         }
 
-        protocolManager.startGroupCreationProtocol(serializedGroupDetailsWithVersionAndPhoto, absolutePhotoUrl, groupMemberIdentitiesAndDisplayNames, ownedIdentity);
+        protocolManager.startGroupCreationProtocol(ownedIdentity, serializedGroupDetailsWithVersionAndPhoto, absolutePhotoUrl, groupMemberIdentitiesAndDisplayNames);
     }
 
     @Override
@@ -2509,7 +2575,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                     identityManager.removeDeviceForContactIdentity(engineSession.session, ownedIdentity, contactIdentity, deviceUid);
                 }
             }
-            protocolManager.startDeviceDiscoveryProtocolWithinTransaction(engineSession.session, contactIdentity, ownedIdentity);
+            protocolManager.startDeviceDiscoveryProtocolWithinTransaction(engineSession.session, ownedIdentity, contactIdentity);
             engineSession.session.commit();
         }
     }
@@ -2522,7 +2588,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
             engineSession.session.startTransaction();
             channelManager.deleteObliviousChannelsWithContact(engineSession.session, ownedIdentity, contactIdentity);
             identityManager.removeAllDevicesForContactIdentity(engineSession.session, ownedIdentity, contactIdentity);
-            protocolManager.startDeviceDiscoveryProtocolWithinTransaction(engineSession.session, contactIdentity, ownedIdentity);
+            protocolManager.startDeviceDiscoveryProtocolWithinTransaction(engineSession.session, ownedIdentity, contactIdentity);
             engineSession.session.commit();
         }
     }
@@ -2571,7 +2637,21 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     public void deleteContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
         Identity contactIdentity = Identity.of(bytesContactIdentity);
-        protocolManager.deleteContact(contactIdentity, ownedIdentity);
+        protocolManager.deleteContact(ownedIdentity, contactIdentity);
+    }
+
+    @Override
+    public void downgradeOneToOneContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        Identity contactIdentity = Identity.of(bytesContactIdentity);
+        protocolManager.downgradeOneToOneContact(ownedIdentity, contactIdentity);
+    }
+
+    @Override
+    public void startOneToOneInvitationProtocol(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        Identity contactIdentity = Identity.of(bytesContactIdentity);
+        protocolManager.startOneToOneInvitationProtocol(ownedIdentity, contactIdentity);
     }
 
     @Override

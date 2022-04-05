@@ -56,6 +56,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.StringUtils;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public class StorageExplorer extends LockableActivity {
@@ -215,7 +216,7 @@ public class StorageExplorer extends LockableActivity {
                     holder.sizeTextView.setText(Formatter.formatShortFileSize(App.getContext(),element.size));
                 }
                 if (element.modificationTimestamp != 0) {
-                    holder.creationTimestampTextView.setText(App.getPreciseAbsoluteDateString(App.getContext(), element.modificationTimestamp, " "));
+                    holder.creationTimestampTextView.setText(StringUtils.getPreciseAbsoluteDateString(App.getContext(), element.modificationTimestamp, " "));
                 } else {
                     holder.creationTimestampTextView.setText(null);
                 }
@@ -290,30 +291,32 @@ public class StorageExplorer extends LockableActivity {
                     try {
                         if (folder.isDirectory()) {
                             List<ExplorerElement> list = new ArrayList<>();
-                            for (String fileName : folder.list()) {
-                                File file = new File(folder, fileName);
-                                list.add(new ExplorerElement(
-                                        path + File.separator + fileName,
-                                        fileName,
-                                        file.length(),
-                                        file.lastModified(),
-                                        file.isDirectory() ? ELEMENT_TYPE.FOLDER : ELEMENT_TYPE.FILE
-                                ));
-                            }
-                            Collections.sort(list, (ExplorerElement o1, ExplorerElement o2) -> {
-                                if ((o1.type == ELEMENT_TYPE.FOLDER) && (o2.type != ELEMENT_TYPE.FOLDER)) {
-                                    return -1;
-                                } else if ((o2.type == ELEMENT_TYPE.FOLDER) && (o1.type != ELEMENT_TYPE.FOLDER)) {
-                                    return 1;
+                            String[] fileNames = folder.list();
+                            if (fileNames != null) {
+                                for (String fileName : fileNames) {
+                                    File file = new File(folder, fileName);
+                                    list.add(new ExplorerElement(
+                                            path + File.separator + fileName,
+                                            fileName,
+                                            file.length(),
+                                            file.lastModified(),
+                                            file.isDirectory() ? ELEMENT_TYPE.FOLDER : ELEMENT_TYPE.FILE
+                                    ));
                                 }
-                                return o1.name.compareTo(o2.name);
-                            });
-                            return list;
+                                Collections.sort(list, (ExplorerElement o1, ExplorerElement o2) -> {
+                                    if ((o1.type == ELEMENT_TYPE.FOLDER) && (o2.type != ELEMENT_TYPE.FOLDER)) {
+                                        return -1;
+                                    } else if ((o2.type == ELEMENT_TYPE.FOLDER) && (o1.type != ELEMENT_TYPE.FOLDER)) {
+                                        return 1;
+                                    }
+                                    return o1.name.compareTo(o2.name);
+                                });
+                                return list;
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    return null;
                 }
                 return null;
             });

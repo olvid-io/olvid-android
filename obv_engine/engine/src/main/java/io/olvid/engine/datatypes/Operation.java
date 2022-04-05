@@ -250,19 +250,9 @@ public abstract class Operation {
                         return false;
                 }
             case FINISHED:
-                switch (newState) {
-                    case FINISHED:
-                        return true;
-                    default:
-                        return false;
-                }
+                return newState == State.FINISHED;
             case CANCELLED:
-                switch (newState) {
-                    case CANCELLED:
-                        return true;
-                    default:
-                        return false;
-                }
+                return newState == State.CANCELLED;
         }
         return false;
     }
