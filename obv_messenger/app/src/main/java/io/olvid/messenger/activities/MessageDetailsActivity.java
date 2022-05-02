@@ -130,6 +130,7 @@ public class MessageDetailsActivity extends LockableActivity {
     TextView messageContentTextView;
     TextView wipedAttachmentCountTextView;
     TextView messageBottomTimestampTextView;
+    TextView messageForwardedTextView;
     View timestampSpacer;
     ImageView messageStatusImageView;
     RotateAnimation rotateAnimation;
@@ -197,6 +198,7 @@ public class MessageDetailsActivity extends LockableActivity {
         messageContentTextView = findViewById(R.id.message_content_text_view);
         wipedAttachmentCountTextView = findViewById(R.id.wiped_attachment_count);
         messageBottomTimestampTextView = findViewById(R.id.message_timestamp_bottom_text_view);
+        messageForwardedTextView = findViewById(R.id.message_forwarded_badge);
         timestampSpacer = findViewById(R.id.timestamp_spacer);
         messageStatusImageView = findViewById(R.id.message_status_image_view);
         rotateAnimation = new RotateAnimation(360f, 0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
@@ -366,6 +368,15 @@ public class MessageDetailsActivity extends LockableActivity {
         messageTopTimestamp.setText(StringUtils.getDayOfDateString(this, message.timestamp));
 
         messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(this, message.timestamp));
+
+        if (message.messageType == Message.TYPE_INBOUND_MESSAGE
+                || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+            if (message.forwarded) {
+                messageForwardedTextView.setVisibility(View.VISIBLE);
+            } else {
+                messageForwardedTextView.setVisibility(View.GONE);
+            }
+        }
 
         if (message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
             standardHeaderView.setVisibility(View.GONE);

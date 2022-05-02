@@ -156,8 +156,8 @@ public class Utils {
                             if (openDialogCallback != null) {
                                 openDialogCallback.run();
                             }
-                            ForwardMessagesDialogFragment callContactDialogFragment = ForwardMessagesDialogFragment.newInstance();
-                            callContactDialogFragment.show(activity.getSupportFragmentManager(), "ForwardMessagesDialogFragment");
+                            ForwardMessagesDialogFragment forwardMessageDialogFragment = ForwardMessagesDialogFragment.newInstance();
+                            forwardMessageDialogFragment.show(activity.getSupportFragmentManager(), "ForwardMessagesDialogFragment");
                         });
                 builder.create().show();
             }

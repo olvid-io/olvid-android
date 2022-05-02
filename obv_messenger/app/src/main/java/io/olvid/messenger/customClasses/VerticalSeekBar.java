@@ -19,12 +19,15 @@
 
 package io.olvid.messenger.customClasses;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
-public class VerticalSeekBar extends androidx.appcompat.widget.AppCompatSeekBar {
+import androidx.appcompat.widget.AppCompatSeekBar;
+
+public class VerticalSeekBar extends AppCompatSeekBar {
     public VerticalSeekBar(Context context) {
         super(context);
     }
@@ -60,6 +63,7 @@ public class VerticalSeekBar extends androidx.appcompat.widget.AppCompatSeekBar 
         super.onDraw(c);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!isEnabled()) {

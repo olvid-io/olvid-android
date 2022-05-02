@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -35,11 +36,11 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Message;
 
 public class ShareSelectedMessageTask implements Runnable {
-    private final WeakReference<AppCompatActivity> activityWeakReference;
+    private final WeakReference<FragmentActivity> activityWeakReference;
     private final Long selectedMessageId;
 
 
-    public ShareSelectedMessageTask(AppCompatActivity activity, Long selectedMessageId) {
+    public ShareSelectedMessageTask(FragmentActivity activity, Long selectedMessageId) {
         activityWeakReference = new WeakReference<>(activity);
         this.selectedMessageId = selectedMessageId;
     }
@@ -78,7 +79,7 @@ public class ShareSelectedMessageTask implements Runnable {
                 intent.setAction(Intent.ACTION_SEND);
             }
             intent.setType(mimeType);
-            AppCompatActivity activity = activityWeakReference.get();
+            FragmentActivity activity = activityWeakReference.get();
             if (activity != null) {
                 activity.startActivity(Intent.createChooser(intent, activity.getString(R.string.title_sharing_chooser)));
             }

@@ -6,4 +6,9 @@
             <corners android:radius="10dp" />
         </shape>
     </item>
+    <item>
+        <ripple android:color="@color/whiteOverlay">
+            <item android:id="@android:id/mask" android:drawable="@drawable/background_swipe_button_mask"/>
+        </ripple>
+    </item>
 </layer-list>

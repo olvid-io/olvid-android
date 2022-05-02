@@ -333,9 +333,6 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             }
         });
         newMessageEditText.setOnClickListener(v -> {
-            if (discussionDelegate != null) {
-                discussionDelegate.closeSwipeMenu();
-            }
             setShowAttachIcons(false, true);
         });
         newMessageEditText.requestFocus();

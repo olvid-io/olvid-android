@@ -563,6 +563,7 @@ class WebdavProvider {
                     onValidateCallback.onValidateSuccess();
                 }
             } catch (SardineException e) {
+                e.printStackTrace();
                 switch (e.getStatusCode()) {
                     case 401:
                     case 403:

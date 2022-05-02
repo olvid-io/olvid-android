@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:id="@+id/reactions_popup_linear_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="vertical"
+        android:background="@drawable/background_rounded_dialog"
+        android:elevation="12dp"
+        android:animateLayoutChanges="true">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/reactions_constraint_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.helper.widget.Flow
+                android:id="@+id/reactions_flow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:flow_wrapMode="aligned"
+                app:flow_horizontalStyle="packed"
+                app:flow_horizontalBias="0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <ImageView
+                android:id="@+id/plus_button"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:src="@drawable/ic_plus_reaction"
+                android:padding="7dp"
+                android:theme="@style/SubtleBlueRipple"
+                android:background="@drawable/background_circular_ripple" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/top_swipe_row"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_swipe_row"
+        android:baselineAligned="false"
+        android:clickable="true"
+        android:background="@color/almostWhite"
+        android:elevation="10dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/swipe_menu_reply"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_swipe_button">
+
+            <ImageView
+                android:id="@+id/swipe_menu_reply_imageview"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                app:layout_constraintHeight_max="24dp"
+                app:srcCompat="@drawable/ic_reply_blue_circle"
+                app:layout_constraintBottom_toTopOf="@+id/swipe_menu_reply_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_goneMarginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/swipe_menu_reply_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_swipe_reply"
+                android:textColor="@color/almostBlack"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/swipe_menu_reply_imageview" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/swipe_menu_share"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_swipe_button">
+
+            <ImageView
+                android:id="@+id/swipe_menu_share_imageview"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                app:srcCompat="@drawable/ic_swipe_share"
+                app:layout_constraintBottom_toTopOf="@+id/swipe_menu_share_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_max="24dp"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_goneMarginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/swipe_menu_share_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/menu_action_share"
+                android:textColor="@color/almostBlack"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/swipe_menu_share_imageview" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/swipe_menu_forward"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_swipe_button">
+
+            <ImageView
+                android:id="@+id/swipe_menu_forward_imageview"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                app:srcCompat="@drawable/ic_swipe_forward"
+                app:layout_constraintBottom_toTopOf="@+id/swipe_menu_forward_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_max="24dp"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_goneMarginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/swipe_menu_forward_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/menu_action_forward"
+                android:textColor="@color/almostBlack"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/swipe_menu_forward_imageview" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/swipe_menu_copy"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_swipe_button">
+
+            <ImageView
+                android:id="@+id/swipe_menu_copy_imageview"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                app:layout_constraintHeight_max="24dp"
+                app:srcCompat="@drawable/ic_swipe_copy"
+                app:layout_constraintBottom_toTopOf="@+id/swipe_menu_copy_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_goneMarginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/swipe_menu_copy_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_swipe_copy"
+                android:textColor="@color/almostBlack"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/swipe_menu_copy_imageview" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/bottom_swipe_row"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:baselineAligned="false"
+        android:clickable="true"
+        android:background="@color/almostWhite"
+        android:elevation="10dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/swipe_menu_select"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_swipe_button">
+
+            <ImageView
+                android:id="@+id/swipe_menu_select_imageview"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                app:layout_constraintHeight_max="24dp"
+                app:srcCompat="@drawable/ic_swipe_select"
+                app:layout_constraintBottom_toTopOf="@+id/swipe_menu_select_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_goneMarginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/swipe_menu_select_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_swipe_select"
+                android:textColor="@color/almostBlack"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/swipe_menu_select_imageview" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/swipe_menu_details"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_swipe_button">
+
+            <ImageView
+                android:id="@+id/swipe_menu_details_imageview"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                app:layout_constraintHeight_max="24dp"
+                app:srcCompat="@drawable/ic_swipe_info"
+                app:layout_constraintBottom_toTopOf="@+id/swipe_menu_details_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_goneMarginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/swipe_menu_details_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_swipe_details"
+                android:textColor="@color/almostBlack"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/swipe_menu_details_imageview" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/swipe_menu_edit"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_swipe_button">
+
+            <ImageView
+                android:id="@+id/swipe_menu_edit_imageview"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                app:layout_constraintHeight_max="24dp"
+                app:srcCompat="@drawable/ic_swipe_edit"
+                app:layout_constraintBottom_toTopOf="@+id/swipe_menu_edit_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_goneMarginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/swipe_menu_edit_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_swipe_edit"
+                android:textColor="@color/almostBlack"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/swipe_menu_edit_imageview" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/swipe_menu_delete"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_swipe_button_red">
+
+            <ImageView
+                android:id="@+id/swipe_menu_delete_imageview"
+                android:layout_width="24dp"
+                app:layout_constraintHeight_max="24dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                app:srcCompat="@drawable/ic_delete"
+                app:layout_constraintBottom_toTopOf="@+id/swipe_menu_delete_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_goneMarginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/swipe_menu_delete_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/menu_action_delete"
+                android:textColor="@color/alwaysWhite"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/swipe_menu_delete_imageview" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -146,7 +146,6 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.MessageExpiration;
 import io.olvid.messenger.databases.tasks.ApplyDiscussionRetentionPoliciesTask;
-import io.olvid.messenger.databases.tasks.CopySelectedMessageTask;
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked;
 import io.olvid.messenger.databases.tasks.CreateReadMessageMetadata;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
@@ -163,7 +162,6 @@ import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.tasks.SaveDraftTask;
 import io.olvid.messenger.databases.tasks.SetDraftReplyTask;
-import io.olvid.messenger.databases.tasks.ShareSelectedMessageTask;
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.customClasses.SizeAwareCardView;
@@ -221,6 +219,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     private LinearLayoutManager messageListLinearLayoutManager;
     private FloatingActionButton scrollDownFab;
     private ImageView rootBackgroundImageView;
+    private DiscussionDelegate discussionDelegate;
 
     private ComposeMessageFragment composeMessageFragment;
     private ComposeMessageFragment.ComposeMessageDelegate composeMessageDelegate;
@@ -347,7 +346,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 transaction.commit();
             }
         });
-        composeMessageFragment.setDiscussionDelegate(new DiscussionDelegate() {
+        discussionDelegate = new DiscussionDelegate() {
             @Override
             public void markMessagesRead() {
                 DiscussionActivity.this.markMessagesRead(false);
@@ -359,19 +358,44 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
 
             @Override
-            public void closeSwipeMenu() {
-                if (messageListAdapter != null) {
-                    messageListAdapter.closeMenu();
-                }
-            }
-
-            @Override
             public void scrollToMessage(long messageId) {
                 if (messageListAdapter != null) {
                     messageListAdapter.requestScrollToMessageId(messageId, false, true);
                 }
             }
-        });
+
+            @Override
+            public void replyToMessage(long discussionId, long messageId) {
+                if (composeMessageViewModel != null) {
+                    App.runThread(new SetDraftReplyTask(discussionId, messageId, composeMessageViewModel.getRawNewMessageText() == null ? null : composeMessageViewModel.getRawNewMessageText().toString()));
+                    if (composeMessageDelegate != null) {
+                        composeMessageDelegate.showSoftInputKeyboard();
+                    }
+                }
+            }
+
+            @Override
+            public void initiateMessageForward(long messageId, Runnable openDialogCallback) {
+                if (discussionViewModel != null) {
+                    discussionViewModel.setMessageIdsToForward(Collections.singletonList(messageId));
+                    Utils.openForwardMessageDialog(DiscussionActivity.this, Collections.singletonList(messageId), openDialogCallback);
+                }
+            }
+
+            @Override
+            public void selectMessage(long messageId, boolean forwardable) {
+                if (discussionViewModel != null) {
+                    discussionViewModel.selectMessageId(messageId, forwardable);
+                }
+            }
+
+            @Override
+            public void setAdditionalBottomPadding(int paddingPx) {
+                additionalHeightForPopup = paddingPx;
+                composeMessageHeightListener.onNewComposeMessageHeight(-1);
+            }
+        };
+        composeMessageFragment.setDiscussionDelegate(discussionDelegate);
         composeMessageFragment.setAudioAttachmentServiceBinding(audioAttachmentServiceBinding);
 
         spacer = findViewById(R.id.spacer);
@@ -412,7 +436,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
             messageDateItemDecoration.setScrolling(scrolling);
             if (state == RecyclerView.SCROLL_STATE_DRAGGING) {
-                messageListAdapter.closeMenu();
                 if (composeMessageDelegate != null) {
                     composeMessageDelegate.hideSoftInputKeyboard();
                 }
@@ -423,7 +446,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         MessageListAdapter.SwipeCallback swipeCallback = messageListAdapter.getSwipeCallback();
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeCallback);
         itemTouchHelper.attachToRecyclerView(messageRecyclerView);
-        messageRecyclerView.addOnItemTouchListener(swipeCallback);
 
 
         scrollDownFab = findViewById(R.id.discussion_scroll_down_fab);
@@ -747,16 +769,15 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         attachmentFileHeight = getResources().getDimensionPixelSize(R.dimen.attachment_small_preview_size);
         statusIconWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 26, metrics);
         noStatusIconWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, metrics);
-        if (swipeCallback != null) {
-            swipeCallback.computeDimensions(metrics);
-        }
     }
 
     private int currentComposeMessageHeight = 0;
     private int currentSpacerBottomMargin = 0;
     private int currentLockHeight = 0;
     private int currentNoChannelHeight = 0;
+    private int additionalHeightForPopup = 0;
     AnimatorSet animatorSet = null;
+
 
     ComposeMessageFragment.ComposeMessageHeightListener composeMessageHeightListener = (int heightPixels) -> {
         if (heightPixels != -1) {
@@ -773,7 +794,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             });
             spacerAnimator.setDuration(150);
 
-            ValueAnimator recyclerAnimator = ValueAnimator.ofInt(messageRecyclerView.getPaddingBottom(), currentComposeMessageHeight + currentLockHeight + currentNoChannelHeight);
+            ValueAnimator recyclerAnimator = ValueAnimator.ofInt(messageRecyclerView.getPaddingBottom(), additionalHeightForPopup + currentComposeMessageHeight + currentLockHeight + currentNoChannelHeight);
             recyclerAnimator.addUpdateListener((ValueAnimator animation) -> messageRecyclerView.setPadding(0, messageRecyclerView.getPaddingTop(), 0, (int) animation.getAnimatedValue()));
             recyclerAnimator.setDuration(150);
 
@@ -788,7 +809,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             spacerLayoutParams.bottomMargin = currentSpacerBottomMargin;
             spacer.setLayoutParams(spacerLayoutParams);
 
-            messageRecyclerView.setPadding(0, messageRecyclerView.getPaddingTop(), 0, currentComposeMessageHeight + currentLockHeight + currentNoChannelHeight);
+            messageRecyclerView.setPadding(0, messageRecyclerView.getPaddingTop(), 0, additionalHeightForPopup + currentComposeMessageHeight + currentLockHeight + currentNoChannelHeight);
         }
     };
 
@@ -1006,10 +1027,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         }
         if (composeMessageDelegate != null && composeMessageDelegate.stopVoiceRecorderIfRecording()) {
             // do nothing --> recording was stopped by on back pressed
-            return;
-        }
-        if (messageListAdapter.closeMenu()) {
-            // do nothing --> menu was closed
             return;
         }
         finishAndClearViewModel();
@@ -1388,8 +1405,19 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         }, 500);
     }
 
-    private void messageLongClicked(Message message) {
-        discussionViewModel.selectMessageId(message.id, (message.messageType == Message.TYPE_OUTBOUND_MESSAGE || message.messageType == Message.TYPE_INBOUND_MESSAGE) && message.wipeStatus == Message.WIPE_STATUS_NONE);
+    private void messageLongClicked(Message message, View messageView) {
+        if (discussionViewModel.isSelectingForDeletion()) {
+            discussionViewModel.selectMessageId(message.id, (message.messageType == Message.TYPE_OUTBOUND_MESSAGE || message.messageType == Message.TYPE_INBOUND_MESSAGE) && message.wipeStatus == Message.WIPE_STATUS_NONE);
+        } else {
+            if (discussionDelegate != null) {
+                int[] posRecyclerView = new int[2];
+                int[] posMessageView = new int[2];
+
+                messageRecyclerView.getLocationInWindow(posRecyclerView);
+                messageView.getLocationInWindow(posMessageView);
+                new MessageLongPressPopUp(DiscussionActivity.this, discussionDelegate, messageRecyclerView, posMessageView[0] - posRecyclerView[0] + messageView.getWidth() / 2, posMessageView[1] - posRecyclerView[1], posRecyclerView[1] + messageRecyclerView.getHeight() - posMessageView[1] - messageView.getHeight(), message.id);
+            }
+        }
     }
 
     private void messageClicked(Message message) {
@@ -1408,6 +1436,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     public void attachmentLongClicked(FyleMessageJoinWithStatusDao.FyleAndStatus longClickedFyleAndStatus, View clickedView, MessageAttachmentAdapter.Visibility visibility, boolean readOnce, boolean multipleAttachments) {
         App.runThread(() -> {
             Message message = AppDatabase.getInstance().messageDao().get(longClickedFyleAndStatus.fyleMessageJoinWithStatus.messageId);
+            if (message == null) {
+                return;
+            }
 
             this.longClickedFyleAndStatus = longClickedFyleAndStatus;
             runOnUiThread(() -> {
@@ -1561,7 +1592,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         actionMode.finish();
                     }
                     actionMode = startSupportActionMode(actionModeCallback);
-                    closeMenu();
                 } else if (!selectingForDeletion) {
                     // if selection for deletion just ended, finish the actionMode
                     if (actionMode != null) {
@@ -1731,10 +1761,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         Message oldItem = oldList.get(oldItemPosition);
                         Message newItem = newList.get(newItemPosition);
                         int changesMask = 0;
-
-                        if (Objects.equals(swipeCallback.currentlySwipingMessageId, oldItem.id) && !swipeCallback.swiping) {
-                            return 0;
-                        }
 
                         if (oldItem.messageType != newItem.messageType) {
                             // message type changed (limited visibility message was clicked) --> rebind everything
@@ -2960,88 +2986,44 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             discussionViewModel.getNewDetailsUpdate().removeObserver(holder.newDetailsObserver);
         }
 
-        public boolean closeMenu() {
-            if (swipeCallback.currentlySwipingMessageId != null) {
-                swipeCallback.notifyAndClearBitmap(swipeCallback.currentlySwipingMessageId, swipeCallback.currentlySwipingAdapterPosition);
-                swipeCallback.currentlySwipingMessageId = null;
-                return true;
-            }
-            return false;
-        }
-
-        private class SwipeCallback extends ItemTouchHelper.SimpleCallback implements RecyclerView.OnItemTouchListener, MessageAttachmentAdapter.BlockMessageSwipeListener {
-            private final LayoutInflater inflater;
-            private final ConcurrentHashMap<Long, BitmapAndSizesAndButtons> bitmapCache;
-            private int screenWidthPx;
-            private float showMenuLabelsHeightThreshold;
-            private int smallHeaderHeightPx;
-            private int largeHeaderHeightPx;
-            private int replyIconHeight;
-
-            private Long currentlySwipingMessageId;
-            private boolean currentlySwipingMessageHasAttachments;
-            private boolean currentlySwipingMessageHasTextContent;
-            private boolean swiping;
-            private int currentlySwipingAdapterPosition;
-            private Bitmap replyIcon;
-            private float maxReplyOpacitySwipePx;
-            private static final float maxReplyOpacity = 0.8f;
+        private class SwipeCallback extends ItemTouchHelper.SimpleCallback implements MessageAttachmentAdapter.BlockMessageSwipeListener {
+            private final Bitmap replyIcon;
+            private final int replyIconHeight;
+            private final int maxReplySwipePx;
 
             private boolean swipeBlocked = false; // use by audio attachments to allow scrolling
 
-            private final GestureDetector gestureDetector;
+            private Long currentlySwipingMessageId = null;
+            private boolean swiping = false;
+            private boolean swiped = false;
+
 
             private SwipeCallback() {
-                super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
-                this.bitmapCache = new ConcurrentHashMap<>();
-                this.inflater = LayoutInflater.from(DiscussionActivity.this);
-                this.currentlySwipingMessageId = null;
-                this.currentlySwipingAdapterPosition = -1;
-                this.swiping = false;
+                super(0, ItemTouchHelper.RIGHT);
 
                 DisplayMetrics metrics = getResources().getDisplayMetrics();
-                computeDimensions(metrics);
-
-                int DENSITY_INDEPENDENT_THRESHOLD = 200;
-                int SWIPE_THRESHOLD_VELOCITY = (int)(DENSITY_INDEPENDENT_THRESHOLD * metrics.density);
-
-                this.gestureDetector = new GestureDetector(DiscussionActivity.this, new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapUp(MotionEvent e) {
-                        return onSingleTap(e);
-                    }
-
-                    @Override
-                    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                        if (4*Math.abs(velocityY) < Math.abs(velocityX)
-                                && velocityX > SWIPE_THRESHOLD_VELOCITY) {
-                            closeMenu();
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-            }
-
-            public void computeDimensions(DisplayMetrics metrics) {
-                this.screenWidthPx = metrics.widthPixels;
-                this.showMenuLabelsHeightThreshold = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 68, metrics);
-                this.smallHeaderHeightPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, metrics);
-                this.largeHeaderHeightPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, metrics);
                 this.replyIconHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, metrics);
-                this.maxReplyOpacitySwipePx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, metrics);
+                this.maxReplySwipePx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, metrics);
+
+                View iconReply = LayoutInflater.from(DiscussionActivity.this).inflate(R.layout.view_swipe_reply, messageRecyclerView, false);
+                iconReply.measure(View.MeasureSpec.makeMeasureSpec(maxReplySwipePx, View.MeasureSpec.EXACTLY),
+                        View.MeasureSpec.makeMeasureSpec(replyIconHeight, View.MeasureSpec.EXACTLY));
+                iconReply.layout(0, 0, iconReply.getMeasuredWidth(), iconReply.getMeasuredHeight());
+                Bitmap bitmap = Bitmap.createBitmap(iconReply.getMeasuredWidth(), iconReply.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                iconReply.draw(canvas);
+                replyIcon = bitmap;
             }
 
             @Override
             public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder vh) {
-                if (selectingForDeletion || swipeBlocked) {
+                if (selectingForDeletion || swipeBlocked || locked) {
                     return 0;
                 }
                 if (vh instanceof MessageViewHolder) {
                     MessageViewHolder messageViewHolder = (MessageViewHolder) vh;
                     switch (messageViewHolder.viewType) {
                         case DISCLAIMER:
-                            return 0;
                         case INFO:
                         case INFO_GROUP_MEMBER:
                         case PHONE_CALL:
@@ -3051,7 +3033,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         case INBOUND_EPHEMERAL_WITH_ATTACHMENT:
                         case OUTBOUND_EPHEMERAL:
                         case OUTBOUND_EPHEMERAL_WITH_ATTACHMENT:
-                            return makeMovementFlags(0, ItemTouchHelper.LEFT);
+                            return 0;
                         case INBOUND:
                         case INBOUND_WITH_ATTACHMENT:
                         case OUTBOUND:
@@ -3065,195 +3047,26 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             @Override
             public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
                 super.onSelectedChanged(viewHolder, actionState);
-
-                // we started a swipe
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                    if (!(viewHolder instanceof MessageViewHolder)) {
-                        return;
+                    if (viewHolder instanceof MessageViewHolder) {
+                        swiping = true;
+                        swiped = false;
+                        currentlySwipingMessageId = ((MessageViewHolder) viewHolder).messageId;
                     }
-
-                    MessageViewHolder messageViewHolder = (MessageViewHolder) viewHolder;
-
-                    if (currentlySwipingMessageId != null && currentlySwipingMessageId != messageViewHolder.messageId) {
-                        // another message was being swiped
-                        //    --> reset it before overwriting the messageId and adapterPosition
-                        notifyAndClearBitmap(currentlySwipingMessageId, currentlySwipingAdapterPosition);
-                    }
-
-                    currentlySwipingMessageId = messageViewHolder.messageId;
-                    currentlySwipingMessageHasAttachments = messageViewHolder.viewType == ViewType.INBOUND_WITH_ATTACHMENT ||
-                            messageViewHolder.viewType == ViewType.OUTBOUND_WITH_ATTACHMENT ||
-                            messageViewHolder.viewType == ViewType.OUTBOUND_EPHEMERAL_WITH_ATTACHMENT ||
-                            messageViewHolder.viewType == ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT;
-                    swiping = true;
-                    currentlySwipingAdapterPosition = messageViewHolder.getBindingAdapterPosition();
-                    if (currentlySwipingAdapterPosition != RecyclerView.NO_POSITION) {
-                        Message message = messages.get(currentlySwipingAdapterPosition - 1);
-                        addBitmapToCache(message, viewHolder.itemView);
-                        currentlySwipingMessageHasTextContent = message.contentBody != null && message.contentBody.length() != 0;
-                    } else {
-                        currentlySwipingMessageHasTextContent = false;
-                    }
-                    loadReplyIcon();
                 } else if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
+                    if (swiping && swiped && currentlySwipingMessageId != null) {
+                        final long messageId = currentlySwipingMessageId;
+                        final long discussionId = discussionViewModel.getDiscussionId();
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            App.runThread(new SetDraftReplyTask(discussionId, messageId, composeMessageViewModel.getRawNewMessageText() == null ? null : composeMessageViewModel.getRawNewMessageText().toString()));
+                            if (composeMessageDelegate != null) {
+                                composeMessageDelegate.showSoftInputKeyboard();
+                            }
+                        }, 100);
+                    }
                     swiping = false;
                     currentlySwipingMessageId = null;
                 }
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder vh, int direction) {
-                if (!(vh instanceof MessageViewHolder)) {
-                    return;
-                }
-                MessageViewHolder messageViewHolder = (MessageViewHolder) vh;
-
-                currentlySwipingMessageId = messageViewHolder.messageId;
-                // do not set the currentlySwipingMessageHasAttachments and currentlySwipingMessageHasTextContent booleans --> they were set by the last call to onSelectedChanged
-                if (direction == ItemTouchHelper.RIGHT) {
-                    App.runThread(new SetDraftReplyTask(discussionViewModel.getDiscussionId(), messageViewHolder.messageId, composeMessageViewModel.getRawNewMessageText() == null ? null : composeMessageViewModel.getRawNewMessageText().toString()));
-                    if (composeMessageDelegate != null) {
-                        composeMessageDelegate.showSoftInputKeyboard();
-                    }
-                    closeMenu();
-                }
-            }
-
-            @Override
-            public boolean onInterceptTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent e) {
-                if (currentlySwipingMessageId != null) {
-                    View swipedView = recyclerView.findChildViewUnder(e.getX() - recyclerView.getWidth(), e.getY());
-                    if (swipedView != null) {
-                        return gestureDetector.onTouchEvent(e);
-                    }
-                }
-                return false;
-            }
-
-            private boolean onSingleTap(@NonNull MotionEvent e) {
-                View swipedView = messageRecyclerView.findChildViewUnder(e.getX() - messageRecyclerView.getWidth(), e.getY());
-                if (swipedView != null) {
-                    BitmapAndSizesAndButtons bitmapAndSizesAndButtons = bitmapCache.get(currentlySwipingMessageId);
-
-                    if (bitmapAndSizesAndButtons != null) {
-                        int adjustedTop = Math.max(swipedView.getTop(), toolBar.getBottom());
-                        int adjustedBottom = Math.min(swipedView.getBottom(), messageRecyclerView.getBottom() - currentComposeMessageHeight);
-
-                        float buttonTopY = (adjustedBottom + adjustedTop - bitmapAndSizesAndButtons.bitmap.getHeight()) / 2f;
-                        if (buttonTopY < adjustedTop) {
-                            if (adjustedTop == toolBar.getBottom()) {
-                                buttonTopY = adjustedBottom - bitmapAndSizesAndButtons.bitmap.getHeight();
-                            } else {
-                                buttonTopY = adjustedTop;
-                            }
-                        }
-                        if (e.getY() < buttonTopY ||
-                                e.getY() > buttonTopY + bitmapAndSizesAndButtons.bitmap.getHeight()) {
-                            closeMenu();
-                            return false;
-                        }
-
-                        int buttonNumber = (int) (e.getX() * bitmapAndSizesAndButtons.buttons.size()) / messageRecyclerView.getWidth();
-                        switch (bitmapAndSizesAndButtons.buttons.get(buttonNumber)) {
-                            case SHARE: {
-                                App.runThread(new ShareSelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId));
-                                closeMenu();
-                                break;
-                            }
-                            case FORWARD: {
-                                discussionViewModel.setMessageIdsToForward(Collections.singletonList(currentlySwipingMessageId));
-                                Utils.openForwardMessageDialog(DiscussionActivity.this, Collections.singletonList(currentlySwipingMessageId), MessageListAdapter.this::closeMenu);
-                                break;
-                            }
-                            case COPY: {
-                                if (currentlySwipingMessageHasAttachments && currentlySwipingMessageHasTextContent) {
-                                    View anchorView;
-                                    if (swipedView instanceof ConstraintLayout) {
-                                        anchorView = new View(swipedView.getContext());
-                                        ((ViewGroup) swipedView).addView(anchorView);
-                                        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(messageRecyclerView.getWidth()/ bitmapAndSizesAndButtons.buttons.size(), bitmapAndSizesAndButtons.bitmap.getHeight());
-                                        layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
-                                        layoutParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
-                                        layoutParams.topMargin = (int) ((adjustedBottom - adjustedTop - bitmapAndSizesAndButtons.bitmap.getHeight()) / 2f);
-                                        if (swipedView.getTop() < toolBar.getBottom()) {
-                                            layoutParams.topMargin += toolBar.getBottom() - swipedView.getTop();
-                                        }
-                                        if (layoutParams.topMargin + bitmapAndSizesAndButtons.bitmap.getHeight() > swipedView.getHeight()) {
-                                            layoutParams.height -= layoutParams.topMargin + bitmapAndSizesAndButtons.bitmap.getHeight() - swipedView.getHeight();
-                                        }
-                                        layoutParams.leftMargin = messageRecyclerView.getWidth() + buttonNumber * messageRecyclerView.getWidth()/ bitmapAndSizesAndButtons.buttons.size();
-                                        anchorView.setLayoutParams(layoutParams);
-                                    } else {
-                                        anchorView = null;
-                                    }
-                                    PopupMenu popup = new PopupMenu(DiscussionActivity.this, anchorView != null ? anchorView : swipedView);
-                                    popup.inflate(R.menu.popup_copy_message_text_and_attachments);
-                                    popup.setOnDismissListener(menu -> {
-                                        if (anchorView != null) {
-                                            ((ViewGroup) swipedView).removeView(anchorView);
-                                        }
-                                    });
-                                    popup.setOnMenuItemClickListener((MenuItem item) -> {
-                                        if (item.getItemId() == R.id.popup_action_copy_message_text) {
-                                            App.runThread(new CopySelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId, false));
-                                            closeMenu();
-                                            return true;
-                                        } else if (item.getItemId() == R.id.popup_action_copy_text_and_attachments) {
-                                            App.runThread(new CopySelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId, true));
-                                            closeMenu();
-                                            return true;
-                                        }
-                                        return false;
-                                    });
-                                    popup.show();
-                                } else if (currentlySwipingMessageHasAttachments) {
-                                    App.runThread(new CopySelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId, true));
-                                    closeMenu();
-                                } else {
-                                    App.runThread(new CopySelectedMessageTask(DiscussionActivity.this, currentlySwipingMessageId, false));
-                                    closeMenu();
-                                }
-                                break;
-                            }
-                            case DETAILS: {
-                                markAsReadOnPause = false;
-                                App.openMessageDetails(DiscussionActivity.this, currentlySwipingMessageId, messages.get(currentlySwipingAdapterPosition - 1).hasAttachments(), messages.get(currentlySwipingAdapterPosition - 1).isInbound());
-                                closeMenu();
-                                break;
-                            }
-                            case DELETE: {
-                                Discussion discussion = discussionViewModel.getDiscussion().getValue();
-                                if (discussion == null) {
-                                    break;
-                                }
-                                final long messageIdToDelete = currentlySwipingMessageId;
-                                if (bitmapAndSizesAndButtons.canBeDeletedEverywhere && locked != null && !locked) {
-                                    final SecureDeleteEverywhereDialogBuilder builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                            .setTitle(R.string.dialog_title_confirm_deletion)
-                                            .setType(SecureDeleteEverywhereDialogBuilder.TYPE.SINGLE_MESSAGE)
-                                            .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, 1, 1))
-                                            .setDeleteCallback(deleteEverywhere -> App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(messageIdToDelete), deleteEverywhere)));
-                                    builder.create().show();
-                                } else {
-                                    final AlertDialog.Builder builder = new SecureAlertDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                            .setTitle(R.string.dialog_title_confirm_deletion)
-                                            .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, 1, 1))
-                                            .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(messageIdToDelete), false)))
-                                            .setNegativeButton(R.string.button_label_cancel, null);
-                                    builder.create().show();
-                                }
-                                closeMenu();
-                                break;
-                            }
-                            case EDIT: {
-                                Utils.launchModifyMessagePopup(DiscussionActivity.this, messages.get(currentlySwipingAdapterPosition - 1));
-                                closeMenu();
-                            }
-                        }
-                        return true;
-                    }
-                }
-                return false;
             }
 
             @Override
@@ -3261,30 +3074,14 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 if (!(viewHolder instanceof MessageViewHolder)) {
                     return;
                 }
-                MessageViewHolder messageViewHolder = (MessageViewHolder) viewHolder;
                 View itemView = viewHolder.itemView;
-                BitmapAndSizesAndButtons bitmapAndSizesAndButtons = bitmapCache.get(messageViewHolder.messageId);
                 int adjustedTop = Math.max(itemView.getTop(), toolBar.getBottom());
                 int adjustedBottom = Math.min(itemView.getBottom(), messageRecyclerView.getBottom() - currentComposeMessageHeight);
                 float offsetY;
 
-                if (dX < 0) {
-                    if (bitmapAndSizesAndButtons != null) {
-                        offsetY = (adjustedBottom + adjustedTop - bitmapAndSizesAndButtons.bitmap.getHeight()) / 2f;
-                        if (offsetY < adjustedTop) {
-                            if (adjustedTop == toolBar.getBottom()) {
-                                offsetY = adjustedBottom - bitmapAndSizesAndButtons.bitmap.getHeight();
-                            } else {
-                                offsetY = adjustedTop;
-                            }
-                        }
-                        c.save();
-                        c.drawBitmap(bitmapAndSizesAndButtons.bitmap, itemView.getRight() + dX, offsetY, null);
-                        c.restore();
-                    }
-                } else if (dX > 0) {
+                if (dX > 0) {
                     Paint opacityPaint = new Paint();
-                    opacityPaint.setAlpha((int) (255f * maxReplyOpacity * Math.min(dX, maxReplyOpacitySwipePx) / maxReplyOpacitySwipePx));
+                    opacityPaint.setAlpha((int) (255f * Math.min(dX, maxReplySwipePx) / maxReplySwipePx));
                     offsetY = (adjustedBottom + adjustedTop - replyIconHeight) / 2f;
                     if (offsetY < adjustedTop) {
                         if (adjustedTop == toolBar.getBottom()) {
@@ -3298,121 +3095,27 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     c.restore();
                 }
 
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                if (swiping) {
+                    swiped = dX >= maxReplySwipePx;
+                }
+
+                super.onChildDraw(c, recyclerView, viewHolder, Math.min(dX, maxReplySwipePx), dY, actionState, isCurrentlyActive);
             }
 
-            private void notifyAndClearBitmap(final long messageId, final int adapterPosition) {
-                final BitmapAndSizesAndButtons bitmapAndSizesAndButtons = bitmapCache.get(messageId);
-                new Handler(Looper.getMainLooper()).post(() -> notifyItemChanged(adapterPosition));
-                if (bitmapAndSizesAndButtons != null) {
-                    bitmapAndSizesAndButtons.canBeDeleted = true;
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        BitmapAndSizesAndButtons bitmap = bitmapCache.get(messageId);
-                        if (bitmap != null && bitmap.canBeDeleted) {
-                            bitmapCache.remove(messageId);
-                        }
-                    }, 1000);
-                }
+            // the next two methods make sure the message is never fully "swiped"
+            @Override
+            public float getSwipeThreshold(@NonNull RecyclerView.ViewHolder viewHolder) {
+                return 2;
             }
 
-            private void addBitmapToCache(Message message, View messageView) {
-                BitmapAndSizesAndButtons bitmapAndSizesAndButtons = bitmapCache.get(message.id);
-                if (bitmapAndSizesAndButtons != null) {
-                    bitmapAndSizesAndButtons.canBeDeleted = false;
-                    return;
-                }
-
-                View menuView = inflater.inflate(R.layout.item_view_swipe_menu, messageRecyclerView, false);
-
-                boolean showLabels = messageView.getHeight() > showMenuLabelsHeightThreshold;
-
-                List<MenuButtonType> buttons = new ArrayList<>(4);
-                boolean canBeDeletedEverywhere = message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED;
-
-                switch (message.messageType) {
-                    case Message.TYPE_GROUP_MEMBER_JOINED:
-                    case Message.TYPE_GROUP_MEMBER_LEFT:
-                    case Message.TYPE_LEFT_GROUP:
-                    case Message.TYPE_CONTACT_DELETED:
-                    case Message.TYPE_DISCUSSION_SETTINGS_UPDATE:
-                    case Message.TYPE_DISCUSSION_REMOTELY_DELETED:
-                    case Message.TYPE_PHONE_CALL:
-                    case Message.TYPE_NEW_PUBLISHED_DETAILS:
-                    case Message.TYPE_CONTACT_INACTIVE_REASON:
-                        canBeDeletedEverywhere = false;
-                        menuView.findViewById(R.id.swipe_menu_share).setVisibility(View.GONE);
-                        menuView.findViewById(R.id.swipe_menu_forward).setVisibility(View.GONE);
-                        menuView.findViewById(R.id.swipe_menu_copy).setVisibility(View.GONE);
-                        break;
-                    case Message.TYPE_INBOUND_EPHEMERAL_MESSAGE:
-                        menuView.findViewById(R.id.swipe_menu_share).setVisibility(View.GONE);
-                        menuView.findViewById(R.id.swipe_menu_forward).setVisibility(View.GONE);
-                        menuView.findViewById(R.id.swipe_menu_copy).setVisibility(View.GONE);
-                        break;
-                    default:
-                        if (message.wipeStatus == Message.WIPE_STATUS_NONE) {
-                            buttons.add(MenuButtonType.SHARE);
-                            buttons.add(MenuButtonType.FORWARD);
-                            buttons.add(MenuButtonType.COPY);
-                        } else {
-                            menuView.findViewById(R.id.swipe_menu_share).setVisibility(View.GONE);
-                            menuView.findViewById(R.id.swipe_menu_forward).setVisibility(View.GONE);
-                            menuView.findViewById(R.id.swipe_menu_copy).setVisibility(View.GONE);
-                        }
-                        break;
-                }
-                if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                        || message.messageType == Message.TYPE_INBOUND_MESSAGE
-                        || message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
-                    buttons.add(MenuButtonType.DETAILS);
-                } else {
-                    menuView.findViewById(R.id.swipe_menu_details).setVisibility(View.GONE);
-                }
-                if (locked
-                        || message.messageType != Message.TYPE_OUTBOUND_MESSAGE
-                        || message.wipeStatus == Message.WIPE_STATUS_WIPED
-                        || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
-                    menuView.findViewById(R.id.swipe_menu_edit).setVisibility(View.GONE);
-                } else {
-                    buttons.add(MenuButtonType.EDIT);
-                }
-                buttons.add(MenuButtonType.DELETE);
-
-                if (!showLabels) {
-                    menuView.findViewById(R.id.swipe_menu_share_textview).setVisibility(View.GONE);
-                    menuView.findViewById(R.id.swipe_menu_forward_textview).setVisibility(View.GONE);
-                    menuView.findViewById(R.id.swipe_menu_copy_textview).setVisibility(View.GONE);
-                    menuView.findViewById(R.id.swipe_menu_details_textview).setVisibility(View.GONE);
-                    menuView.findViewById(R.id.swipe_menu_edit_textview).setVisibility(View.GONE);
-                    menuView.findViewById(R.id.swipe_menu_delete_textview).setVisibility(View.GONE);
-
-                    menuView.measure(View.MeasureSpec.makeMeasureSpec(screenWidthPx, View.MeasureSpec.EXACTLY),
-                            View.MeasureSpec.makeMeasureSpec(smallHeaderHeightPx, View.MeasureSpec.EXACTLY));
-                } else {
-                    menuView.measure(View.MeasureSpec.makeMeasureSpec(screenWidthPx, View.MeasureSpec.EXACTLY),
-                            View.MeasureSpec.makeMeasureSpec(largeHeaderHeightPx, View.MeasureSpec.EXACTLY));
-                }
-                menuView.layout(0, 0, menuView.getMeasuredWidth(), menuView.getMeasuredHeight());
-                Bitmap bitmap = Bitmap.createBitmap(menuView.getMeasuredWidth(), menuView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                menuView.draw(canvas);
-
-                bitmapCache.put(message.id, new BitmapAndSizesAndButtons(bitmap, buttons, canBeDeletedEverywhere));
+            @Override
+            public float getSwipeEscapeVelocity(float defaultValue) {
+                return Float.MAX_VALUE;
             }
 
-            private void loadReplyIcon() {
-                if (replyIcon == null) {
-                    View iconReply = inflater.inflate(R.layout.item_view_swipe_reply, messageRecyclerView, false);
 
-                    iconReply.measure(View.MeasureSpec.makeMeasureSpec(screenWidthPx, View.MeasureSpec.EXACTLY),
-                            View.MeasureSpec.makeMeasureSpec(replyIconHeight, View.MeasureSpec.EXACTLY));
-                    iconReply.layout(0, 0, iconReply.getMeasuredWidth(), iconReply.getMeasuredHeight());
-                    Bitmap bitmap = Bitmap.createBitmap(iconReply.getMeasuredWidth(), iconReply.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-                    Canvas canvas = new Canvas(bitmap);
-                    iconReply.draw(canvas);
-                    replyIcon = bitmap;
-                }
-            }
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder vh, int direction) { }
 
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
@@ -3420,16 +3123,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
 
             @Override
-            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) { }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) { }
-
-            @Override
             public void blockMessageSwipe(boolean block) {
                 this.swipeBlocked = block;
             }
         }
+
 
         class MessageViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
             private final ViewType viewType;
@@ -3528,9 +3226,13 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
                         @Override
                         public void onLongPress(MotionEvent e) {
-                            messageRecyclerView.getLocationInWindow(posRecyclerView);
-                            messageContentCardView.getLocationInWindow(posCardView);
-                            new ReactionsPanelPopUpMenu(DiscussionActivity.this, messageRecyclerView, posCardView[0] - posRecyclerView[0] + (int) e.getX(), posCardView[1] - posRecyclerView[1] + (int) e.getY(), messageId);
+                            if (discussionDelegate != null) {
+                                messageRecyclerView.getLocationInWindow(posRecyclerView);
+                                messageContentCardView.getLocationInWindow(posCardView);
+                                new MessageLongPressPopUp(DiscussionActivity.this, discussionDelegate, messageRecyclerView, posCardView[0] - posRecyclerView[0] + (int) e.getX(), posCardView[1] - posRecyclerView[1] + (int) e.getY(),
+                                        posRecyclerView[1] + messageRecyclerView.getHeight() - posCardView[1] - messageContentCardView.getHeight(),
+                                        messageId);
+                            }
                         }
                     });
                     messageContentCardView.setOnTouchListener((View v, MotionEvent event) -> gestureDetector.onTouchEvent(event));
@@ -3864,7 +3566,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             @Override
             public boolean onLongClick(View messageView) {
                 Message message = messages.get(this.getLayoutPosition() - 1);
-                DiscussionActivity.this.messageLongClicked(message);
+                DiscussionActivity.this.messageLongClicked(message, messageView);
                 return true;
             }
 
@@ -3938,7 +3640,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                 }
                             }
                         } else if (viewType == ViewType.INBOUND_EPHEMERAL || viewType == ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT) {
-                            closeMenu();
                             if (getLayoutPosition() > 0 && id == R.id.message_content_card) {
                                 App.runThread(new InboundEphemeralMessageClicked(messages.get(getLayoutPosition() - 1).id));
                             }
@@ -3973,7 +3674,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             }
                         } else {
                             expandMessage = !expandMessage;
-                            closeMenu();
                             notifyItemChanged(getLayoutPosition(), MESSAGE_EXPAND_CHANGE_MASK);
                         }
                     } else {
@@ -3993,7 +3693,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     interface DiscussionDelegate {
         void markMessagesRead();
         void doNotMarkAsReadOnPause();
-        void closeSwipeMenu();
         void scrollToMessage(long messageId);
+        void replyToMessage(long discussionId, long messageId);
+        void initiateMessageForward(long messageId, Runnable openDialogCallback);
+        void selectMessage(long messageId, boolean forwardable);
+        void setAdditionalBottomPadding(int paddingPx);
     }
 }

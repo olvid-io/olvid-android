@@ -1356,6 +1356,8 @@
     <string name="pref_sending_foreground_service">Notification «\u00a0Envoi de message en cours\u00a0»</string>
     <string name="pref_sending_foreground_service_summary">Activer cette option démarrera un service d\'avant plan pendant l\'envoi de messages. Cela réduit les risques que le système tue Olvid pendant l\'envoi d\'une pièce jointe.</string>
     <string name="menu_action_select_all">Tout sélectionner</string>
+    <string name="label_swipe_reply">Répondre</string>
+    <string name="label_swipe_select">Sélectionner</string>
 
 
 

@@ -1,3 +1,12 @@
+# Build 163 (0.12.2)
+
+- Bugfix
+
+# ~~Build 162 (0.12.2)~~
+2022-04-07
+
+- Unified message long press menu
+
 # Build 161 (0.12.1)
 2022-03-28
 

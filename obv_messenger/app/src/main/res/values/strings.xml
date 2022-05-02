@@ -1368,6 +1368,8 @@
     <string name="pref_sending_foreground_service">Enable the \"message being sent\" notification</string>
     <string name="pref_sending_foreground_service_summary">Activating this setting will enable a foreground service to run when a message is being sent. This may prevent the system from killing Olvid while an attachment is being uploaded.</string>
     <string name="menu_action_select_all">Select all</string>
+    <string name="label_swipe_reply">Reply</string>
+    <string name="label_swipe_select">Select</string>
 
 
     <plurals name="dialog_message_auto_join_pending_groups">

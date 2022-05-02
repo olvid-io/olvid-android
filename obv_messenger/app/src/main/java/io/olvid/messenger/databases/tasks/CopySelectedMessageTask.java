@@ -27,6 +27,7 @@ import android.content.Context;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -39,12 +40,12 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Message;
 
 public class CopySelectedMessageTask implements Runnable {
-    private final WeakReference<AppCompatActivity> activityWeakReference;
+    private final WeakReference<FragmentActivity> activityWeakReference;
     private final Long selectedMessageId;
     private final boolean copyAttachments;
 
 
-    public CopySelectedMessageTask(AppCompatActivity activity, Long selectedMessageId, boolean copyAttachnments) {
+    public CopySelectedMessageTask(FragmentActivity activity, Long selectedMessageId, boolean copyAttachnments) {
         activityWeakReference = new WeakReference<>(activity);
         this.selectedMessageId = selectedMessageId;
         this.copyAttachments = copyAttachnments;
@@ -76,7 +77,6 @@ public class CopySelectedMessageTask implements Runnable {
                     for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {
                         clipItems.add(new ClipData.Item(fyleAndStatus.getContentUri()));
                         mimeTypes.add(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
-//                        mimeType = ShareSelectedMessageTask.mimeGcd(mimeType, fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
                     }
                     ClipDescription clipDescription = new ClipDescription(App.getContext().getString(R.string.label_message_copied_from_olvid), mimeTypes.toArray(new String[0]));
                     clipData = new ClipData(clipDescription, clipItems.get(0));
@@ -94,7 +94,7 @@ public class CopySelectedMessageTask implements Runnable {
 
 
             if (clipData != null) {
-                final AppCompatActivity activity = activityWeakReference.get();
+                final FragmentActivity activity = activityWeakReference.get();
                 if (activity != null) {
                     activity.runOnUiThread(() -> {
                         ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
