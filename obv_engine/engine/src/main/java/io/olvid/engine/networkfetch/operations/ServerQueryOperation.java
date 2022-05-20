@@ -181,6 +181,27 @@ public class ServerQueryOperation extends Operation {
                         cancel(RFC_USER_DATA_TOO_LARGE);
                         return;
                     default:
+                        // check if the serverQuery has expired
+                        if (System.currentTimeMillis() > pendingServerQuery.getCreationTimestamp() + Constants.SERVER_QUERY_EXPIRATION_DELAY) {
+                            switch (serverQuery.getType().getId()) {
+                                case ServerQuery.Type.DEVICE_DISCOVERY_QUERY_ID:
+                                    serverResponse = Encoded.of(new Encoded[0]); // return an empty deviceUid list
+                                    finished = true;
+                                    return;
+                                case ServerQuery.Type.CHECK_KEYCLOAK_REVOCATION_QUERY_ID:
+                                    serverResponse = Encoded.of(true); // consider the user is not revoked (rationale: another protocol has probably been run since then, we do not want to delete the user)
+                                    finished = true;
+                                    return;
+                                case ServerQuery.Type.PUT_USER_DATA_QUERY_ID:
+                                    serverResponse = null; // pretend the data was properly uploaded
+                                    finished = true;
+                                    return;
+                                case ServerQuery.Type.GET_USER_DATA_QUERY_ID:
+                                    serverResponse = Encoded.of(""); // as if it was deleted from the server
+                                    finished = true;
+                                    return;
+                            }
+                        }
                         cancel(RFC_NETWORK_ERROR);
                         return;
                 }

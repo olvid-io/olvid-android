@@ -12,8 +12,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 163
-        versionName "0.12.2"
+        versionCode 167
+        versionName "0.12.3"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
 
@@ -80,7 +80,7 @@ dependencies {
 
     // for latest versions see https://github.com/material-components/material-components-android/releases
     implementation 'com.google.android.material:material:1.5.0'
-    implementation('com.google.firebase:firebase-messaging:23.0.2') {
+    implementation('com.google.firebase:firebase-messaging:23.0.3') {
         exclude group: 'com.google.firebase', module: 'firebase-core'
         exclude group: 'com.google.firebase', module: 'firebase-analytics'
         exclude group: 'com.google.firebase', module: 'firebase-measurement-connector'
@@ -108,7 +108,7 @@ dependencies {
     implementation 'androidx.media2:media2-player:1.2.1'
     implementation 'androidx.media2:media2-session:1.2.1'
     implementation 'androidx.media2:media2-widget:1.2.1'
-    implementation 'androidx.media:media:1.5.0'
+    implementation 'androidx.media:media:1.6.0'
     implementation 'androidx.navigation:navigation-fragment:2.4.2'
     implementation 'androidx.navigation:navigation-ui:2.4.2'
     implementation 'androidx.preference:preference:1.2.0'
@@ -122,14 +122,14 @@ dependencies {
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
 
     // connection to google drive
-    implementation 'com.google.android.gms:play-services-auth:20.1.0'
-    implementation('com.google.http-client:google-http-client-gson:1.41.7') {
+    implementation 'com.google.android.gms:play-services-auth:20.2.0'
+    implementation('com.google.http-client:google-http-client-gson:1.41.8') {
         exclude group: 'org.apache.httpcomponents'
     }
     implementation('com.google.api-client:google-api-client-android:1.34.0') {
         exclude group: 'org.apache.httpcomponents'
     }
-    implementation('com.google.apis:google-api-services-drive:v3-rev20220214-1.32.1') {
+    implementation('com.google.apis:google-api-services-drive:v3-rev20220417-1.32.1') {
         exclude group: 'org.apache.httpcomponents'
     }
 
@@ -139,7 +139,7 @@ dependencies {
 
     // openID
     implementation 'net.openid:appauth:0.11.1'
-    implementation 'org.bitbucket.b_c:jose4j:0.7.11'
+    implementation 'org.bitbucket.b_c:jose4j:0.7.12'
 }
 
 apply plugin: 'com.google.gms.google-services'

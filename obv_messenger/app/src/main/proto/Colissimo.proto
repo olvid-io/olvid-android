@@ -33,6 +33,7 @@ import "requests/RequestDownloadAttachment.proto";
 import "requests/RequestAddReactionToMessage.proto";
 import "notifications/NotifDiscussionUpdated.proto";
 import "notifications/NotifNewMessage.proto";
+import "notifications/NotifNewDiscussion.proto";
 import "notifications/NotifUpdateMessage.proto";
 import "notifications/NotifDeleteMessage.proto";
 import "notifications/NotifNewDraftAttachment.proto";
@@ -59,11 +60,13 @@ enum ColissimoType {
 
 	CONNECTION_PING = 1;
 
-    BYE = 2;
+  BYE = 2;
 
-    SETTINGS = 3;
+  SETTINGS = 3;
 
-	// client to app messages 
+  REFRESH = 4;
+
+	// client to app messages
 	REQUEST_DISCUSSIONS = 20;
 	REQUEST_DISCUSSIONS_RESPONSE = 21;
 	REQUEST_MESSAGES = 22;
@@ -75,39 +78,40 @@ enum ColissimoType {
 	NOTIF_DISCUSSION_UPDATED = 30;
 	NOTIF_DISCUSSION_DELETED = 31;
 	NOTIF_NEW_MESSAGE = 32;
-    NOTIF_DELETE_MESSAGE = 33;
-    NOTIF_NEW_DRAFT_ATTACHMENT = 34;
-    NOTIF_NEW_ATTACHMENT = 35;
-    NOTIF_DELETE_DRAFT_ATTACHMENT = 36;
-    NOTIF_NO_DRAFT_FOR_DISCUSSION = 37;
-    NOTIF_FILE_ALREADY_EXISTS = 38; //possible response to SEND_ATTACHMENT_NOTICE
-    NOTIF_FILE_ALREADY_ATTACHED = 39; //possible response to SEND_ATTACHMENT_NOTICE
-    NOTIF_UPLOAD_FILE = 40; //possible response to SEND_ATTACHMENT_NOTICE
-    NOTIF_UPLOAD_RESULT = 41; //success or failure of upload for one file
-    NOTIF_DELETE_DISCUSSION = 42;
-    NOTIF_DELETE_ATTACHMENT = 43;
-    NOTIF_UPDATE_MESSAGE = 44;
-    NOTIF_UPDATE_ATTACHMENT = 45;
-    NOTIF_UPDATE_DRAFT_ATTACHMENT=46;
-    
+  NOTIF_NEW_DISCUSSION = 49;
+  NOTIF_DELETE_MESSAGE = 33;
+  NOTIF_NEW_DRAFT_ATTACHMENT = 34;
+  NOTIF_NEW_ATTACHMENT = 35;
+  NOTIF_DELETE_DRAFT_ATTACHMENT = 36;
+  NOTIF_NO_DRAFT_FOR_DISCUSSION = 37;
+  NOTIF_FILE_ALREADY_EXISTS = 38; //possible response to SEND_ATTACHMENT_NOTICE
+  NOTIF_FILE_ALREADY_ATTACHED = 39; //possible response to SEND_ATTACHMENT_NOTICE
+  NOTIF_UPLOAD_FILE = 40; //possible response to SEND_ATTACHMENT_NOTICE
+  NOTIF_UPLOAD_RESULT = 41; //success or failure of upload for one file
+  NOTIF_DELETE_DISCUSSION = 42;
+  NOTIF_DELETE_ATTACHMENT = 43;
+  NOTIF_UPDATE_MESSAGE = 44;
+  NOTIF_UPDATE_ATTACHMENT = 45;
+  NOTIF_UPDATE_DRAFT_ATTACHMENT = 46;
+
 	CREATE_MESSAGE = 47;
 	NOTIF_MESSAGE_SENT = 48;
     
-    REQUEST_THUMBNAIL = 50; //request image as thumbnail
-    REQUEST_THUMBNAIL_RESPONSE = 52;
-    
-    SEND_ATTACHMENT_NOTICE = 60;
-    SEND_ATTACHMENT_CHUNK = 61;
-    SEND_ATTACHMENT_DONE = 62;
-    
-    REQUEST_SAVE_DRAFT_MESSAGE = 70;
-    REQUEST_DELETE_DRAFT_ATTACHMENT = 71;
-    REQUEST_DOWNLOAD_ATTACHMENT = 72;
-    REQUEST_DELETE_DRAFT_MESSAGE = 73;
-    REQUEST_STOP_DRAFT_ATTACHMENT_UPLOAD = 74;
+  REQUEST_THUMBNAIL = 50; //request image as thumbnail
+  REQUEST_THUMBNAIL_RESPONSE = 52;
 
-    RECEIVE_DOWNLOAD_ATTACHMENT_CHUNK = 80;
-    RECEIVE_DOWNLOAD_ATTACHMENT_DONE  = 81;
+  SEND_ATTACHMENT_NOTICE = 60;
+  SEND_ATTACHMENT_CHUNK = 61;
+  SEND_ATTACHMENT_DONE = 62;
+
+  REQUEST_SAVE_DRAFT_MESSAGE = 70;
+  REQUEST_DELETE_DRAFT_ATTACHMENT = 71;
+  REQUEST_DOWNLOAD_ATTACHMENT = 72;
+  REQUEST_DELETE_DRAFT_MESSAGE = 73;
+  REQUEST_STOP_DRAFT_ATTACHMENT_UPLOAD = 74;
+
+  RECEIVE_DOWNLOAD_ATTACHMENT_CHUNK = 80;
+  RECEIVE_DOWNLOAD_ATTACHMENT_DONE  = 81;
 }
 
 message Colissimo {
@@ -126,40 +130,39 @@ message Colissimo {
 	RequestAddReactionToMessage requestAddReactionToMessage = 26;
 
 	NotifDiscussionUpdated notifDiscussionUpdated = 40;
-	NotifNewMessage notifNewMessage = 41;
-    NotifDeleteMessage notifDeleteMessage = 42;
-    NotifNewDraftAttachment notifNewDraftAttachment = 43;
-    NotifNewAttachment notifNewAttachment = 44;
-    NotifDeleteDraftAttachment notifDeleteDraftAttachment = 45;
-    NotifNoDraftForDiscussion notifNoDraftForDiscussion = 46;
-    NotifFileAlreadyExists notifFileAlreadyExists = 47;
-    NotifFileAlreadyAttached notifFileAlreadyAttached = 48;
-    NotifUploadFile notifUploadFile = 49;
-    NotifUploadResult notifUploadResult = 50;
-    NotifDeleteAttachment notifDeleteAttachment = 51;
-    NotifDeleteDiscussion notifDeleteDiscussion = 52;
-    NotifUpdateMessage notifUpdateMessage = 53;
-    NotifUpdateAttachment notifUpdateAttachment = 54;
-    NotifUpdateDraftAttachment notifUpdateDraftAttachment = 55;
+  NotifNewMessage notifNewMessage = 41;
+  NotifNewDiscussion notifNewDiscussion = 58; // added after ...
+  NotifDeleteMessage notifDeleteMessage = 42;
+  NotifNewDraftAttachment notifNewDraftAttachment = 43;
+  NotifNewAttachment notifNewAttachment = 44;
+  NotifDeleteDraftAttachment notifDeleteDraftAttachment = 45;
+  NotifNoDraftForDiscussion notifNoDraftForDiscussion = 46;
+  NotifFileAlreadyExists notifFileAlreadyExists = 47;
+  NotifFileAlreadyAttached notifFileAlreadyAttached = 48;
+  NotifUploadFile notifUploadFile = 49;
+  NotifUploadResult notifUploadResult = 50;
+  NotifDeleteAttachment notifDeleteAttachment = 51;
+  NotifDeleteDiscussion notifDeleteDiscussion = 52;
+  NotifUpdateMessage notifUpdateMessage = 53;
+  NotifUpdateAttachment notifUpdateAttachment = 54;
+  NotifUpdateDraftAttachment notifUpdateDraftAttachment = 55;
     
 	CreateMessage createMessage = 56;
 	NotifMessageSent notifMessageSent = 57;
     
-    RequestThumbnail requestThumbnail = 60;
-    RequestThumbnailResponse requestThumbnailResponse = 62;
-    
-    SendAttachmentNotice sendAttachmentNotice = 70;
-    SendAttachmentChunk sendAttachmentChunk = 71;
-    SendAttachmentDone sendAttachmentDone = 72;
-    
-    
-    RequestSaveDraftMessage requestSaveDraftMessage = 80;
-    RequestDeleteDraftAttachment requestDeleteDraftAttachment = 81;
-    RequestDownloadAttachment requestDownloadAttachment = 82;
-    RequestDeleteDraftMessage requestDeleteDraftMessage = 83;
-    RequestStopDraftAttachmentUpload requestStopDraftAttachmentUpload = 84;
-    
-    ReceiveDownloadAttachmentChunk receiveDownloadAttachmentChunk = 90;
-    ReceiveDownloadAttachmentDone receiveDownloadAttachmentDone = 91;
-    
+  RequestThumbnail requestThumbnail = 60;
+  RequestThumbnailResponse requestThumbnailResponse = 62;
+
+  SendAttachmentNotice sendAttachmentNotice = 70;
+  SendAttachmentChunk sendAttachmentChunk = 71;
+  SendAttachmentDone sendAttachmentDone = 72;
+
+  RequestSaveDraftMessage requestSaveDraftMessage = 80;
+  RequestDeleteDraftAttachment requestDeleteDraftAttachment = 81;
+  RequestDownloadAttachment requestDownloadAttachment = 82;
+  RequestDeleteDraftMessage requestDeleteDraftMessage = 83;
+  RequestStopDraftAttachmentUpload requestStopDraftAttachmentUpload = 84;
+
+  ReceiveDownloadAttachmentChunk receiveDownloadAttachmentChunk = 90;
+  ReceiveDownloadAttachmentDone receiveDownloadAttachmentDone = 91;
 }

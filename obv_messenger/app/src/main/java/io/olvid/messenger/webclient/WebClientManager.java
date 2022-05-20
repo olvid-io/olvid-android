@@ -21,6 +21,8 @@ package io.olvid.messenger.webclient;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -49,6 +51,7 @@ import io.olvid.messenger.webclient.listeners.AttachmentListener;
 import io.olvid.messenger.webclient.listeners.DiscussionListener;
 import io.olvid.messenger.webclient.listeners.DraftAttachmentListener;
 import io.olvid.messenger.webclient.listeners.MessageListener;
+import io.olvid.messenger.webclient.listeners.OwnedIdentityObserver;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.Colissimo;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.ColissimoType;
 import io.olvid.messenger.webclient.protobuf.ConnectionColissimoOuterClass.ConnectionColissimo;
@@ -89,13 +92,14 @@ public class WebClientManager {
     private final NoExceptionSingleThreadExecutor executor;
     @NonNull
     private final UnifiedForegroundService.WebClientSubService service;
-    private final byte[] bytesOwnedIdentity;
+    private byte[] bytesCurrentOwnedIdentity;
     private WebsocketClient webSocketClient;
     private WebClientEstablishmentProtocol protocol;
     private final ColissimoMessageQueue colissimoMessageQueue;
     private Cryptography cryptography;
 
     // listeners
+    @NonNull private final OwnedIdentityObserver ownedIdentityObserver;
     private final DiscussionListener discussionListener;
     private final MessageListener messageListener;
     private final AttachmentListener attachmentListener;
@@ -135,14 +139,18 @@ public class WebClientManager {
 
     public WebClientManager(@NonNull UnifiedForegroundService.WebClientSubService webClientService, String QrCodeBase64Data) {
         this.service = webClientService;
-        this.bytesOwnedIdentity = this.service.getBytesOwnedIdentity();
+        this.bytesCurrentOwnedIdentity = this.service.getBytesOwnedIdentity();
         this.executor = new NoExceptionSingleThreadExecutor("WebClientManager-TaskWrapper");
         this.colissimoMessageQueue = new ColissimoMessageQueue(this);
 
         this.QrCodeBase64Data = QrCodeBase64Data;
         this.connectionIdentifier = UUID.randomUUID().toString();
 
-        this.discussionListener = new DiscussionListener(this, this.bytesOwnedIdentity);
+        // setup owned identity observer
+        this.ownedIdentityObserver = new OwnedIdentityObserver(this);
+        new Handler(Looper.getMainLooper()).post(() -> AppSingleton.getCurrentIdentityLiveData().observeForever(this.ownedIdentityObserver));
+
+        this.discussionListener = new DiscussionListener(this);
         this.messageListener = new MessageListener(this);
         this.attachmentListener = new AttachmentListener(this);
         this.draftAttachmentListener = new DraftAttachmentListener(this);
@@ -172,9 +180,6 @@ public class WebClientManager {
         if (this.webSocketClient != null) {
             this.webSocketClient.close();
         }
-        if (this.discussionListener != null) {
-            discussionListener.stop();
-        }
         this.stopAllListeners();
         // stop ping timer
         this.stopPingTimer();
@@ -201,6 +206,7 @@ public class WebClientManager {
         if (this.draftAttachmentListener != null) {
             draftAttachmentListener.stop();
         }
+        AppSingleton.getCurrentIdentityLiveData().removeObserver(this.ownedIdentityObserver);
     }
 
     private void taskWrapper(Runnable task) {
@@ -843,8 +849,11 @@ public class WebClientManager {
     public AttachmentListener getAttachmentListener() { return attachmentListener; }
     public DraftAttachmentListener getDraftAttachmentListener() { return draftAttachmentListener; }
 
+    // setters
+    public void updateBytesCurrentIdentity() { this.bytesCurrentOwnedIdentity = AppSingleton.getBytesCurrentIdentity(); }
+
     // getters
-    public byte[] getBytesOwnedIdentity() { return bytesOwnedIdentity; }
+    public byte[] getBytesCurrentOwnedIdentity() { return bytesCurrentOwnedIdentity; }
     public ColissimoMessageQueue getColissimoMessageQueue() { return colissimoMessageQueue; }
     public State getCurrentState() { return this.currentState; }
     public MutableLiveData<String> getSasCodeLiveData() { return sasCodeLiveData; }

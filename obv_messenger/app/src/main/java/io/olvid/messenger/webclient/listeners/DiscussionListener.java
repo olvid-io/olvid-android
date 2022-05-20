@@ -35,23 +35,22 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.webclient.WebClientManager;
+import io.olvid.messenger.webclient.datatypes.Constants;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.Colissimo;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.ColissimoType;
 import io.olvid.messenger.webclient.protobuf.notifications.NotifDeleteDiscussionOuterClass;
-import io.olvid.messenger.webclient.protobuf.notifications.NotifDiscussionUpdatedOuterClass.NotifDiscussionUpdated;
 import io.olvid.messenger.webclient.protobuf.RequestDiscussionsOuterClass.RequestDiscussionsResponse;
 import io.olvid.messenger.webclient.protobuf.datatypes.DiscussionOuterClass.Discussion;
 import io.olvid.messenger.webclient.protobuf.datatypes.MessageOuterClass.Message;
+import io.olvid.messenger.webclient.protobuf.notifications.NotifNewDiscussionOuterClass.NotifNewDiscussion;
 
 public class DiscussionListener {
     private LiveData<List<DiscussionDao.DiscussionAndLastMessage>> liveData;
     private DiscussionObserver observer;
     private final WebClientManager manager;
-    private final byte[] currentOwnedIdentity;
 
-    public DiscussionListener(WebClientManager manager, byte[] currentOwnedIdentity) {
+    public DiscussionListener(WebClientManager manager) {
         this.manager = manager;
-        this.currentOwnedIdentity = currentOwnedIdentity;
         this.liveData = null;
         this.observer = null;
         Logger.d("DiscussionListener: Started DAO observer (DAOObserver)");
@@ -63,7 +62,7 @@ public class DiscussionListener {
             Logger.d("Conversation observer already launched, ignoring");
             return ;
         }
-        this.liveData = AppDatabase.getInstance().discussionDao().getAllDiscussionsAndLastMessages(this.currentOwnedIdentity);
+        this.liveData = AppDatabase.getInstance().discussionDao().getAllDiscussionsAndLastMessages(this.manager.getBytesCurrentOwnedIdentity());
         if (this.liveData != null) {
             this.observer = new DiscussionObserver(this.manager, this.liveData);
             this.liveData.observeForever(this.observer);
@@ -101,18 +100,56 @@ public class DiscussionListener {
 
         @Override
         boolean batchedElementHandler(List<DiscussionDao.DiscussionAndLastMessage> elements) {
+            int index;
             Colissimo colissimo;
             RequestDiscussionsResponse.Builder requestDiscussionsResponseBuilder;
 
+            // add as much discussion as possible in requestDiscussionResponse, if size is exceeded
+            // send other discussion using notif_new_discussion messages
+            index = 0;
             requestDiscussionsResponseBuilder = RequestDiscussionsResponse.newBuilder();
-            for (DiscussionDao.DiscussionAndLastMessage discussionAndLastMessage:elements) {
-                requestDiscussionsResponseBuilder.addDiscussions(fillDiscussionFromDiscussionAndLastMessage(discussionAndLastMessage, this.manager.getService().getWebClientContext()));
+            while (index < elements.size()) {
+                requestDiscussionsResponseBuilder.addDiscussions(fillDiscussionFromDiscussionAndLastMessage(elements.get(index), this.manager.getService().getWebClientContext()));
+                index++;
+                if (requestDiscussionsResponseBuilder.build().getSerializedSize() > Constants.MAX_FRAME_SIZE) {
+                    break ;
+                }
             }
+
+            // send response colissimo first
             colissimo = Colissimo.newBuilder()
                     .setType(ColissimoType.REQUEST_DISCUSSIONS_RESPONSE)
                     .setRequestDiscussionsResponse(requestDiscussionsResponseBuilder)
                     .build();
             this.manager.sendColissimo(colissimo);
+
+            // if all discussions were sent just quit
+            if (index == elements.size()) {
+                return true;
+            }
+
+            // send other discussions in notif messages
+            NotifNewDiscussion.Builder notifBuilder = NotifNewDiscussion.newBuilder();
+            for (DiscussionDao.DiscussionAndLastMessage element:elements.subList(index, elements.size())) {
+                notifBuilder.addDiscussions(fillDiscussionFromDiscussionAndLastMessage(element, this.manager.getService().getWebClientContext()));
+                if (notifBuilder.build().getSerializedSize() > Constants.MAX_FRAME_SIZE) {
+                    colissimo = Colissimo.newBuilder()
+                            .setType(ColissimoType.NOTIF_NEW_DISCUSSION)
+                            .setNotifNewDiscussion(notifBuilder)
+                            .build();
+                    this.manager.sendColissimo(colissimo);
+                    notifBuilder = NotifNewDiscussion.newBuilder();
+                }
+            }
+
+            // send last notif message if necessary
+            if (notifBuilder.getDiscussionsCount() > 0) {
+                colissimo = Colissimo.newBuilder()
+                        .setType(ColissimoType.NOTIF_NEW_DISCUSSION)
+                        .setNotifNewDiscussion(notifBuilder)
+                        .build();
+                this.manager.sendColissimo(colissimo);
+            }
             return true;
         }
 
@@ -163,14 +200,14 @@ public class DiscussionListener {
         @Override
         void newElementHandler(DiscussionDao.DiscussionAndLastMessage element) {
             Discussion.Builder discussionBuilder;
-            NotifDiscussionUpdated.Builder notifBuilder;
+            NotifNewDiscussion.Builder notifBuilder;
             Colissimo.Builder colissimoBuilder;
 
             discussionBuilder = fillDiscussionFromDiscussionAndLastMessage(element, this.manager.getService().getWebClientContext());
             colissimoBuilder = Colissimo.newBuilder();
-            colissimoBuilder.setType(ColissimoType.NOTIF_DISCUSSION_UPDATED);
-            notifBuilder = NotifDiscussionUpdated.newBuilder().setDiscussion(discussionBuilder);
-            colissimoBuilder.setNotifDiscussionUpdated(notifBuilder);
+            colissimoBuilder.setType(ColissimoType.NOTIF_NEW_DISCUSSION);
+            notifBuilder = NotifNewDiscussion.newBuilder().addDiscussions(discussionBuilder);
+            colissimoBuilder.setNotifNewDiscussion(notifBuilder);
             this.manager.sendColissimo(colissimoBuilder.build());
         }
 
@@ -215,7 +252,7 @@ public class DiscussionListener {
                     lastMessageBuilder.setSenderName(context.getString(R.string.text_deleted_contact));
                     lastMessageBuilder.setSenderIsSelf(false);
                 } else {
-                    if(Arrays.equals(manager.getBytesOwnedIdentity(), discussionAndLastMessage.message.senderIdentifier)){
+                    if(Arrays.equals(manager.getBytesCurrentOwnedIdentity(), discussionAndLastMessage.message.senderIdentifier)){
                         lastMessageBuilder.setSenderName(context.getString(R.string.text_you));
                         lastMessageBuilder.setSenderIsSelf(true);
                     } else{

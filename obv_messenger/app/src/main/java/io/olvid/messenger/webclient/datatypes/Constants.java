@@ -21,7 +21,6 @@ package io.olvid.messenger.webclient.datatypes;
 
 public class Constants {
     public static final int VERSION = 0;
-    public static final int WEBCLIENT_SERVICE_ID = 1997;
 
     public static final String QRCODE_URL_SCHEME = "https://web.olvid.io/#";
 

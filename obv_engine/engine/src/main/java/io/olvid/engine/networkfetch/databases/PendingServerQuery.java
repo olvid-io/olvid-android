@@ -26,6 +26,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
@@ -39,10 +40,12 @@ public class PendingServerQuery implements ObvDatabase {
 
     private final FetchManagerSession fetchManagerSession;
 
-    private UID uid;
     static final String UID_ = "uid";
-    private Encoded encodedQuery;
+    private UID uid;
     static final String ENCODED_QUERY = "encoded_query";
+    private Encoded encodedQuery;
+    static final String CREATION_TIMESTAMP = "creation_timestamp";
+    private long creationTimestamp;
 
     public UID getUid() {
         return uid;
@@ -52,9 +55,13 @@ public class PendingServerQuery implements ObvDatabase {
         return encodedQuery;
     }
 
+    public long getCreationTimestamp() {
+        return creationTimestamp;
+    }
+
 
     // region constructors
-
+    
     public static PendingServerQuery create(FetchManagerSession fetchManagerSession, ServerQuery serverQuery, PRNGService prng) {
         if (serverQuery == null) {
             return null;
@@ -76,6 +83,7 @@ public class PendingServerQuery implements ObvDatabase {
 
         this.uid = uid;
         this.encodedQuery = encodedQuery;
+        this.creationTimestamp = System.currentTimeMillis();
     }
 
     private PendingServerQuery(FetchManagerSession fetchManagerSession, ResultSet res) throws SQLException {
@@ -83,6 +91,7 @@ public class PendingServerQuery implements ObvDatabase {
 
         this.uid = new UID(res.getBytes(UID_));
         this.encodedQuery = new Encoded(res.getBytes(ENCODED_QUERY));
+        this.creationTimestamp = res.getLong(CREATION_TIMESTAMP);
     }
 
     // endregion
@@ -93,18 +102,28 @@ public class PendingServerQuery implements ObvDatabase {
         try (Statement statement = session.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
                     UID_ + " BLOB PRIMARY KEY, " +
-                    ENCODED_QUERY + " BLOB NOT NULL);");
+                    ENCODED_QUERY + " BLOB NOT NULL, " +
+                    CREATION_TIMESTAMP + " BIGINT NOT NULL " +
+                    " );");
         }
     }
 
     public static void upgradeTable(Session session, int oldVersion, int newVersion) throws SQLException {
+        if (oldVersion < 31 && newVersion >= 31) {
+            Logger.d("MIGRATING `server_query` DATABASE FROM VERSION " + oldVersion + " TO 31");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE `server_query` ADD COLUMN `creation_timestamp` BIGINT NOT NULL DEFAULT " + System.currentTimeMillis());
+            }
+            oldVersion = 31;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, encodedQuery.getBytes());
+            statement.setLong(3, creationTimestamp);
             statement.executeUpdate();
             this.commitHookBits |= HOOK_BIT_INSERTED;
             fetchManagerSession.session.addSessionCommitListener(this);

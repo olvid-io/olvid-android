@@ -198,7 +198,6 @@ public class App extends Application implements DefaultLifecycleObserver {
         runThread(() -> AvailableSpaceHelper.refreshAvailableSpace(false));
 
         AndroidNotificationManager.clearNeutralNotification();
-        showAppDialogs();
     }
 
     @Override
@@ -734,7 +733,9 @@ public class App extends Application implements DefaultLifecycleObserver {
             map.put(dialogTag, dialogParameters);
         }
         dialogsToShowLock.unlock();
-        showAppDialogs();
+        if (!SettingsActivity.useApplicationLockScreen() || !UnifiedForegroundService.LockSubService.isApplicationLocked()) {
+            showAppDialogs();
+        }
     }
 
     public static AppDialogTag getNextDialogTag() {

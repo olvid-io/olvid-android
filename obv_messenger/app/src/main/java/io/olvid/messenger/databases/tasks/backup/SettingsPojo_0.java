@@ -183,8 +183,8 @@ class SettingsPojo_0 {
         if (default_retention_count != null) { SettingsActivity.setDefaultDiscussionRetentionCount(default_retention_count); }
         if (default_retention_duration != null) { SettingsActivity.setDefaultDiscussionRetentionDuration(default_retention_duration); }
         if (default_read_once != null) { SettingsActivity.setDefaultDiscussionReadOnce(default_read_once); }
-        if (default_visibility_duration != null) { SettingsActivity.setDefaultDiscussionVisibilityDuration(default_visibility_duration); }
-        if (default_existence_duration != null) { SettingsActivity.setDefaultDiscussionExistenceDuration(default_existence_duration); }
+        if (default_visibility_duration != null && default_visibility_duration > 0) { SettingsActivity.setDefaultDiscussionVisibilityDuration(default_visibility_duration); }
+        if (default_existence_duration != null && default_existence_duration > 0) { SettingsActivity.setDefaultDiscussionExistenceDuration(default_existence_duration); }
 
         if (camera_resize_resolution != null) { SettingsActivity.setCameraResolution(camera_resize_resolution); }
         if (remove_jpeg_metadata != null) { SettingsActivity.setMetadataRemovalPreference(remove_jpeg_metadata); }

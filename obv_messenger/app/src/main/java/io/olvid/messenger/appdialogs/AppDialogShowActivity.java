@@ -65,6 +65,7 @@ import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.openid.KeycloakTasks;
 import io.olvid.messenger.services.AvailableSpaceHelper;
 import io.olvid.messenger.services.BackupCloudProviderService;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.PrivacyPreferenceFragment;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -137,8 +138,8 @@ public class AppDialogShowActivity extends LockableActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // no layout here, app is transparent and only shows dialogs
 
+        // no layout here, app is transparent and only shows dialogs
         appDialogShowViewModel = new ViewModelProvider(this).get(AppDialogShowViewModel.class);
         showNextDialog();
     }

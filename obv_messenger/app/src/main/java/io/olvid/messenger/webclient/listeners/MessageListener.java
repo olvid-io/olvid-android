@@ -42,6 +42,7 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.webclient.WebClientManager;
+import io.olvid.messenger.webclient.datatypes.Constants;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass;
 import io.olvid.messenger.webclient.protobuf.RequestMessageOuterClass.RequestMessageResponse;
 import io.olvid.messenger.webclient.protobuf.notifications.NotifDeleteMessageOuterClass;
@@ -143,22 +144,60 @@ public class MessageListener {
 
             @Override
             public void run() {
+                int index;
                 RequestMessageResponse.Builder requestMessageResponseBuilder;
                 ColissimoOuterClass.Colissimo colissimo;
 
+                index = 0;
                 requestMessageResponseBuilder = RequestMessageResponse.newBuilder();
-                for (Message message:elements) {
-                    if(message.totalAttachmentCount > 0) {
-                        this.manager.getAttachmentListener().addListener(message.id);
+                // add as much messages as possible in requestMessageResponse, if size is exceeded
+                // send other messages using notif_new_message messages
+                while (index < elements.size()) {
+                    if(elements.get(index).totalAttachmentCount > 0) {
+                        this.manager.getAttachmentListener().addListener(elements.get(index).id);
                     }
-                    requestMessageResponseBuilder.addMessages(FillProtobufMessageFromOlvidMessageAndSend.fillProtobufMessageFromOlvidMessage(message, this.manager.getService().getWebClientContext(), this.manager));
+                    requestMessageResponseBuilder.addMessages(FillProtobufMessageFromOlvidMessageAndSend.fillProtobufMessageFromOlvidMessage(elements.get(index), this.manager.getService().getWebClientContext(), this.manager));
+                    index++;
+                    if (requestMessageResponseBuilder.build().getSerializedSize() > Constants.MAX_FRAME_SIZE) {
+                        break;
+                    }
                 }
+
+                // send response colissimo first
                 requestMessageResponseBuilder.setDiscussionId(discussionId);
                 colissimo = ColissimoOuterClass.Colissimo.newBuilder()
                         .setType(ColissimoOuterClass.ColissimoType.REQUEST_MESSAGES_RESPONSE)
                         .setRequestMessageResponse(requestMessageResponseBuilder.build())
                         .build();
                 manager.sendColissimo(colissimo);
+
+                // if all discussions were sent just quit
+                if (index == elements.size()) {
+                    return ;
+                }
+
+                // send other messages in notif messages
+                NotifNewMessageOuterClass.NotifNewMessage.Builder notifBuilder = NotifNewMessageOuterClass.NotifNewMessage.newBuilder();
+                for (Message message:elements.subList(index, elements.size())) {
+                    notifBuilder.addMessages(FillProtobufMessageFromOlvidMessageAndSend.fillProtobufMessageFromOlvidMessage(message, this.manager.getService().getWebClientContext(), this.manager));
+                    if (notifBuilder.build().getSerializedSize() > Constants.MAX_FRAME_SIZE) {
+                        colissimo = ColissimoOuterClass.Colissimo.newBuilder()
+                                .setType(ColissimoOuterClass.ColissimoType.NOTIF_NEW_MESSAGE)
+                                .setNotifNewMessage(notifBuilder.build())
+                                .build();
+                        this.manager.sendColissimo(colissimo);
+                        notifBuilder = NotifNewMessageOuterClass.NotifNewMessage.newBuilder();
+                    }
+                }
+
+                // send last notif message if necessary
+                if (notifBuilder.getMessagesCount() > 0) {
+                    colissimo = ColissimoOuterClass.Colissimo.newBuilder()
+                            .setType(ColissimoOuterClass.ColissimoType.NOTIF_NEW_MESSAGE)
+                            .setNotifNewMessage(notifBuilder.build())
+                            .build();
+                    this.manager.sendColissimo(colissimo);
+                }
             }
         }
 
@@ -233,7 +272,7 @@ public class MessageListener {
                 if (colissimoType == ColissimoOuterClass.ColissimoType.NOTIF_NEW_MESSAGE) {
                     colissimoBuilder.setType(ColissimoOuterClass.ColissimoType.NOTIF_NEW_MESSAGE);
                     NotifNewMessageOuterClass.NotifNewMessage.Builder notifBuilder = NotifNewMessageOuterClass.NotifNewMessage.newBuilder();
-                    notifBuilder.setMessage(fillProtobufMessageFromOlvidMessage(message, this.webClientManager.getService().getWebClientContext(), this.webClientManager));
+                    notifBuilder.addMessages(fillProtobufMessageFromOlvidMessage(message, this.webClientManager.getService().getWebClientContext(), this.webClientManager));
                     colissimoBuilder.setNotifNewMessage(notifBuilder);
                 } else if (colissimoType == ColissimoOuterClass.ColissimoType.NOTIF_UPDATE_MESSAGE) {
                     colissimoBuilder.setType(ColissimoOuterClass.ColissimoType.NOTIF_UPDATE_MESSAGE);
@@ -349,7 +388,7 @@ public class MessageListener {
                     messageBuilder.setSenderName(context.getString(R.string.text_deleted_contact));
                     messageBuilder.setSenderIsSelf(false);
                 } else {
-                    if(Arrays.equals(manager.getBytesOwnedIdentity(), message.senderIdentifier)){
+                    if (Arrays.equals(manager.getBytesCurrentOwnedIdentity(), message.senderIdentifier)){
                         messageBuilder.setSenderName(context.getString(R.string.text_you));
                         messageBuilder.setSenderIsSelf(true);
                     } else{
@@ -373,7 +412,7 @@ public class MessageListener {
                             messageBuilder.setReplyAuthor(context.getString(R.string.text_deleted_contact));
                             messageBuilder.setSenderIsSelf(false);
                         } else {
-                            if(Arrays.equals(manager.getBytesOwnedIdentity(), message.getJsonMessage().getJsonReply().getSenderIdentifier())){
+                            if(Arrays.equals(manager.getBytesCurrentOwnedIdentity(), message.getJsonMessage().getJsonReply().getSenderIdentifier())){
                                 messageBuilder.setReplyAuthor(context.getString(R.string.text_you));
                                 messageBuilder.setSenderIsSelf(true);
                             } else{
@@ -409,7 +448,7 @@ public class MessageListener {
             io.olvid.messenger.databases.entity.Message draft = AppDatabase.getInstance().messageDao().getDiscussionDraftMessageSync(discussionId);
             if(draft != null){
                 messageBuilder = MessageObserver.FillProtobufMessageFromOlvidMessageAndSend.fillProtobufMessageFromOlvidMessage(draft, this.webClientManager.getService().getWebClientContext(), this.webClientManager);
-                notifBuilder.setMessage(messageBuilder);
+                notifBuilder.addMessages(messageBuilder);
                 colissimoBuilder.setType(ColissimoOuterClass.ColissimoType.NOTIF_NEW_MESSAGE);
                 colissimoBuilder.setNotifNewMessage(notifBuilder);
                 this.webClientManager.sendColissimo(colissimoBuilder.build());

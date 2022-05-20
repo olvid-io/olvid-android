@@ -104,6 +104,12 @@ public interface FyleMessageJoinWithStatusDao {
             " AND " + FyleMessageJoinWithStatus.ENGINE_NUMBER + " = :number")
     void updateMiniPreview(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int number, byte[] miniPreview);
 
+    @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
+            " SET " + FyleMessageJoinWithStatus.FILE_PATH + " = :filePath " +
+            " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
+            " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
+    void updateFilePath(long messageId, long fyleId, String filePath);
+
     @Query("SELECT " + FyleMessageJoinWithStatus.MESSAGE_ID + " FROM " + FyleMessageJoinWithStatus.TABLE_NAME +
             " WHERE " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId")
     List<Long> getMessageIdsForFyleSync(final long fyleId);
@@ -324,6 +330,7 @@ public interface FyleMessageJoinWithStatusDao {
     LiveData<List<FyleAndOrigin>> getFyleAndOriginNameAsc(byte[] bytesOwnedIdentity);
     @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
     LiveData<List<FyleAndOrigin>> getFyleAndOriginNameDesc(byte[] bytesOwnedIdentity);
+
 
 
     class FyleAndOrigin {

@@ -110,8 +110,8 @@ class WebsocketClient extends org.java_websocket.client.WebSocketClient {
         JsonMessage.RegisterConnection registerConnection;
         String jsonMessageAsString;
 
-        byte[] token = AppSingleton.getEngine().getServerAuthenticationToken(manager.getBytesOwnedIdentity());
-        registerConnection = new JsonMessage.RegisterConnection(identifier, manager.getBytesOwnedIdentity(), token);
+        byte[] token = AppSingleton.getEngine().getServerAuthenticationToken(manager.getBytesCurrentOwnedIdentity());
+        registerConnection = new JsonMessage.RegisterConnection(identifier, manager.getBytesCurrentOwnedIdentity(), token);
         try {
             jsonMessageAsString = AppSingleton.getJsonObjectMapper().writeValueAsString(registerConnection);
         } catch (JsonProcessingException e) {

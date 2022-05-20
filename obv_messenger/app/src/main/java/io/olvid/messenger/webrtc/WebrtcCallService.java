@@ -1642,13 +1642,20 @@ public class WebrtcCallService extends Service {
             switch (audioOutput) {
                 case PHONE:
                 case HEADSET:
-                    audioManager.setSpeakerphoneOn(false);
+                    if (audioManager.isSpeakerphoneOn()) {
+                        audioManager.setSpeakerphoneOn(false);
+                    }
                     break;
                 case LOUDSPEAKER:
-                    audioManager.setSpeakerphoneOn(true);
+                    if (!audioManager.isSpeakerphoneOn()) {
+                        audioManager.setSpeakerphoneOn(true);
+                    }
                     break;
                 case BLUETOOTH:
                     if (bluetoothHeadsetManager != null) {
+                        if (audioManager.isSpeakerphoneOn()) {
+                            audioManager.setSpeakerphoneOn(false);
+                        }
                         bluetoothHeadsetManager.connectAudio();
                     } else {
                         return;
@@ -2221,6 +2228,7 @@ public class WebrtcCallService extends Service {
         }
         if (audioManager != null && audioFocusRequest != null) {
             AudioManagerCompat.abandonAudioFocusRequest(audioManager, audioFocusRequest);
+            audioManager.setSpeakerphoneOn(false);
             audioManager.setMode(savedAudioManagerMode);
         }
         if (engineTurnCredentialsReceiver != null) {

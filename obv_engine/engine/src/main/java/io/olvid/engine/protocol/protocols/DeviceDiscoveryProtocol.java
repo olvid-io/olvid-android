@@ -305,13 +305,20 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            Identity receivedContactIdentity = receivedMessage.getDeviceUidsReceivedState().getRemoteIdentity();
+            DeviceDiscoveryChildProtocol.DeviceUidsReceivedState deviceUidsReceivedState = receivedMessage.getDeviceUidsReceivedState();
+
+            Identity receivedContactIdentity = deviceUidsReceivedState.getRemoteIdentity();
             if (!receivedContactIdentity.equals(startState.contactIdentity)) {
                 Logger.w("Received UID from another remoteIdentity!");
                 return new CancelledState();
             }
 
-            HashSet<UID> newContactDeviceUids = new HashSet<>(Arrays.asList(receivedMessage.getDeviceUidsReceivedState().getDeviceUids()));
+            HashSet<UID> newContactDeviceUids = new HashSet<>(Arrays.asList(deviceUidsReceivedState.getDeviceUids()));
+            if (newContactDeviceUids.isEmpty()) {
+                Logger.w("Device discovery did not find any device! Probably an expired query.");
+                return new CancelledState();
+            }
+
             HashSet<UID> oldContactDeviceUids = new HashSet<>(Arrays.asList(protocolManagerSession.identityDelegate.getDeviceUidsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity)));
             for (UID contactDeviceUid: oldContactDeviceUids) {
                 if (!newContactDeviceUids.contains(contactDeviceUid)) {

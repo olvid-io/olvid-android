@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -112,6 +113,7 @@ public abstract class ServerMethod {
             try {
                 // Timeout after 5 seconds
                 connection.setConnectTimeout(5000);
+                connection.setReadTimeout(10000);
                 connection.setDoOutput(true);
                 connection.setFixedLengthStreamingMode(dataToSend.length);
                 connection.setRequestProperty("Cache-Control", "no-store");

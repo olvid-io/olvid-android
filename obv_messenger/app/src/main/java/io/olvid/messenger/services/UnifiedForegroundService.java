@@ -423,7 +423,7 @@ public class UnifiedForegroundService extends Service {
         private static boolean isRunning = false;
 
         @NonNull private final UnifiedForegroundService unifiedForegroundService;
-        private final byte[] bytesOwnedIdentity;
+        private byte[] bytesOwnedIdentity;
         private final MutableLiveData<Boolean> serviceClosing; //if fragment still bound, used to indicate service closing to close fragment too
         private final Context webClientContext;
 
@@ -512,6 +512,10 @@ public class UnifiedForegroundService extends Service {
             }
             if (this.manager != null) {
                 this.manager.stop();
+            }
+            // update current identity before restarting WebClientManager
+            if (AppSingleton.getBytesCurrentIdentity() != null) {
+                this.bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
             }
             this.manager = new WebClientManager(this, this.qrCodeData);
             unifiedForegroundService.stopOrRestartForegroundService();

@@ -139,6 +139,11 @@ public class DeleteMessagesTask implements Runnable {
                             break;
                     }
                     fyles.add(fyleAndStatus.fyle);
+
+                    // delete the fyle message join for deleteEverywhere, as the cascade delete will not work
+                    if (deleteEverywhere && !wholeDiscussion) {
+                        db.fyleMessageJoinWithStatusDao().delete(fyleAndStatus.fyleMessageJoinWithStatus);
+                    }
                 }
             }
         }

@@ -25,6 +25,8 @@ option java_package = "io.olvid.messenger.webclient.protobuf.notifications";
 
 import "datatypes/Message.proto";
 
+// repeated field because this kind of message can be used if request response is too heavy
+// will send other messages in new message type
 message NotifNewMessage {
-    Message message = 1;
+    repeated Message messages = 1;
 }

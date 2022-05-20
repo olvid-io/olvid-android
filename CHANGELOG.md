@@ -1,4 +1,27 @@
+# Build 167 (0.12.3)
+2022-05-06
+
+- Fix a crash when starting a voice message recording
+- Fix a problem where remote deleting a message would not delete its attachments locally
+
+# ~~Build 166 (0.12.3)~~
+2022-05-05
+
+- Fix a bug in video player not using correct file path for imported files
+
+# ~~Build 165 (0.12.3)~~
+2022-05-04
+
+- Fixes for the webclient
+
+# ~~Build 164 (0.12.3)~~
+2022-05-02
+
+- Several bug fixes
+- Re-introduced left swipe to open the message long-press menu
+
 # Build 163 (0.12.2)
+2022-04-18
 
 - Bugfix
 
@@ -37,9 +60,9 @@
 - message search inside a discussion
 - added a cloud backup manager
 - added a foreground service when sending a message to avoid unwanted interruption
-- possibility to set custom mute time/date for discussion or profile 
+- possibility to set custom mute time/date for discussion or profile
 - improvements to how group calls work
-- bugfix for widget and possibility to confirm message upload with a vibration   
+- bugfix for widget and possibility to confirm message upload with a vibration
 - connectivity indicator no longer in beta
 - fix font scaling bugs
 - update to libWebRTC 4844

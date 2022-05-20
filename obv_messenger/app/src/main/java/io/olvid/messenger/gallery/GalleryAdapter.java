@@ -172,7 +172,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
             });
         } else if (holder.mediaPlayer != null) {
             try {
-                MediaItem mediaItem = new FileMediaItem.Builder(ParcelFileDescriptor.open(new File(fyleAndStatus.fyleMessageJoinWithStatus.getAbsoluteFilePath()), ParcelFileDescriptor.MODE_READ_ONLY))
+                String filePath = App.absolutePathFromRelative(fyleAndStatus.fyle.filePath);
+                if (filePath == null) {
+                    filePath = fyleAndStatus.fyleMessageJoinWithStatus.getAbsoluteFilePath();
+                }
+                MediaItem mediaItem = new FileMediaItem.Builder(ParcelFileDescriptor.open(new File(filePath), ParcelFileDescriptor.MODE_READ_ONLY))
                         .setMetadata(new MediaMetadata.Builder()
                                 .putString(MediaMetadata.METADATA_KEY_TITLE, "")
                                 .build())

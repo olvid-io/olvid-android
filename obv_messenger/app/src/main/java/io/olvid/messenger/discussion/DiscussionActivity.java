@@ -253,8 +253,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     private boolean sendReadReceipt = false;
     private boolean retainWipedOutboundMessages = false;
 
-    private MessageListAdapter.SwipeCallback swipeCallback = null;
-
     private boolean screenShotBlockedForEphemeral = false;
 
     private boolean animateLayoutChanges = false;
@@ -415,12 +413,12 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         messageRecyclerView.setItemAnimator(null);
         new Handler(Looper.getMainLooper()).postDelayed(() -> messageRecyclerView.setItemAnimator(new DefaultItemAnimator()), 1000);
 
-        messageListAdapter = new MessageListAdapter(this);
-
-        messageRecyclerView.setAdapter(messageListAdapter);
         messageListLinearLayoutManager = new LinearLayoutManager(this);
         messageListLinearLayoutManager.setStackFromEnd(true);
         messageRecyclerView.setLayoutManager(messageListLinearLayoutManager);
+
+        messageListAdapter = new MessageListAdapter(this);
+        messageRecyclerView.setAdapter(messageListAdapter);
 
         View loadingSpinner = findViewById(R.id.message_loading_spinner);
         messageRecyclerView.setLoadingSpinner(loadingSpinner);
@@ -443,8 +441,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         });
 
         // enable Message swiping
-        MessageListAdapter.SwipeCallback swipeCallback = messageListAdapter.getSwipeCallback();
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeCallback);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(messageListAdapter.getSwipeCallback());
         itemTouchHelper.attachToRecyclerView(messageRecyclerView);
 
 
@@ -1552,6 +1549,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         private boolean requestedScrollFlash;
         private long highlightOnBindMessageId;
         private DiscussionSearch.MessageHighlightInfo messageHighlightInfo;
+        private final SwipeCallback swipeCallback = new SwipeCallback();
+
 
         private final LayoutInflater inflater;
         private final RotateAnimation rotateAnimation;
@@ -1613,9 +1612,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         }
 
         SwipeCallback getSwipeCallback() {
-            if (swipeCallback == null) {
-                swipeCallback = new SwipeCallback();
-            }
             return swipeCallback;
         }
 
@@ -2988,18 +2984,21 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
         private class SwipeCallback extends ItemTouchHelper.SimpleCallback implements MessageAttachmentAdapter.BlockMessageSwipeListener {
             private final Bitmap replyIcon;
+            private final Bitmap menuIcon;
             private final int replyIconHeight;
             private final int maxReplySwipePx;
 
             private boolean swipeBlocked = false; // use by audio attachments to allow scrolling
 
+            private View currentlySwipingItemView = null;
             private Long currentlySwipingMessageId = null;
             private boolean swiping = false;
             private boolean swiped = false;
+            private boolean replying = false;
 
 
             private SwipeCallback() {
-                super(0, ItemTouchHelper.RIGHT);
+                super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
 
                 DisplayMetrics metrics = getResources().getDisplayMetrics();
                 this.replyIconHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, metrics);
@@ -3013,17 +3012,27 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 Canvas canvas = new Canvas(bitmap);
                 iconReply.draw(canvas);
                 replyIcon = bitmap;
+
+                View iconMenu = LayoutInflater.from(DiscussionActivity.this).inflate(R.layout.view_swipe_menu, messageRecyclerView, false);
+                iconMenu.measure(View.MeasureSpec.makeMeasureSpec(maxReplySwipePx, View.MeasureSpec.EXACTLY),
+                        View.MeasureSpec.makeMeasureSpec(replyIconHeight, View.MeasureSpec.EXACTLY));
+                iconMenu.layout(0, 0, iconMenu.getMeasuredWidth(), iconMenu.getMeasuredHeight());
+                bitmap = Bitmap.createBitmap(iconMenu.getMeasuredWidth(), iconMenu.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+                canvas = new Canvas(bitmap);
+                iconMenu.draw(canvas);
+                menuIcon = bitmap;
             }
 
             @Override
             public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder vh) {
-                if (selectingForDeletion || swipeBlocked || locked) {
+                if (selectingForDeletion || swipeBlocked) {
                     return 0;
                 }
                 if (vh instanceof MessageViewHolder) {
                     MessageViewHolder messageViewHolder = (MessageViewHolder) vh;
                     switch (messageViewHolder.viewType) {
                         case DISCLAIMER:
+                            return 0;
                         case INFO:
                         case INFO_GROUP_MEMBER:
                         case PHONE_CALL:
@@ -3033,15 +3042,15 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         case INBOUND_EPHEMERAL_WITH_ATTACHMENT:
                         case OUTBOUND_EPHEMERAL:
                         case OUTBOUND_EPHEMERAL_WITH_ATTACHMENT:
-                            return 0;
+                            return makeMovementFlags(0, ItemTouchHelper.LEFT);
                         case INBOUND:
                         case INBOUND_WITH_ATTACHMENT:
                         case OUTBOUND:
                         case OUTBOUND_WITH_ATTACHMENT:
-                            break;
+                            return makeMovementFlags(0, ItemTouchHelper.LEFT | (locked ? 0 : ItemTouchHelper.RIGHT));
                     }
                 }
-                return super.getMovementFlags(recyclerView, vh);
+                return 0;
             }
 
             @Override
@@ -3051,20 +3060,33 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     if (viewHolder instanceof MessageViewHolder) {
                         swiping = true;
                         swiped = false;
+                        currentlySwipingItemView = viewHolder.itemView;
                         currentlySwipingMessageId = ((MessageViewHolder) viewHolder).messageId;
                     }
                 } else if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
-                    if (swiping && swiped && currentlySwipingMessageId != null) {
+                    if (swiping && swiped && currentlySwipingMessageId != null && currentlySwipingItemView != null) {
                         final long messageId = currentlySwipingMessageId;
                         final long discussionId = discussionViewModel.getDiscussionId();
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            App.runThread(new SetDraftReplyTask(discussionId, messageId, composeMessageViewModel.getRawNewMessageText() == null ? null : composeMessageViewModel.getRawNewMessageText().toString()));
-                            if (composeMessageDelegate != null) {
-                                composeMessageDelegate.showSoftInputKeyboard();
-                            }
-                        }, 100);
+                        if (replying) {
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                App.runThread(new SetDraftReplyTask(discussionId, messageId, composeMessageViewModel.getRawNewMessageText() == null ? null : composeMessageViewModel.getRawNewMessageText().toString()));
+                                if (composeMessageDelegate != null) {
+                                    composeMessageDelegate.showSoftInputKeyboard();
+                                }
+                            }, 100);
+                        } else {
+                            final int[] posRecyclerView = new int[2];
+                            messageRecyclerView.getLocationInWindow(posRecyclerView);
+                            final int[] posMessageView = new int[2];
+                            currentlySwipingItemView.getLocationInWindow(posMessageView);
+                            final int itemWidth = currentlySwipingItemView.getWidth();
+                            final int itemHeight = currentlySwipingItemView.getHeight();
+
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> new MessageLongPressPopUp(DiscussionActivity.this, discussionDelegate, messageRecyclerView, posMessageView[0] - posRecyclerView[0] + itemWidth / 2, posMessageView[1] - posRecyclerView[1], posRecyclerView[1] + messageRecyclerView.getHeight() - posMessageView[1] - itemHeight, messageId), 100);
+                        }
                     }
                     swiping = false;
+                    currentlySwipingItemView = null;
                     currentlySwipingMessageId = null;
                 }
             }
@@ -3080,6 +3102,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 float offsetY;
 
                 if (dX > 0) {
+                    replying = true;
                     Paint opacityPaint = new Paint();
                     opacityPaint.setAlpha((int) (255f * Math.min(dX, maxReplySwipePx) / maxReplySwipePx));
                     offsetY = (adjustedBottom + adjustedTop - replyIconHeight) / 2f;
@@ -3093,13 +3116,28 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     c.save();
                     c.drawBitmap(replyIcon, itemView.getLeft(), offsetY, opacityPaint);
                     c.restore();
+                } else if (dX < 0) {
+                    replying = false;
+                    Paint opacityPaint = new Paint();
+                    opacityPaint.setAlpha((int) (255f * Math.min(-dX, maxReplySwipePx) / maxReplySwipePx));
+                    offsetY = (adjustedBottom + adjustedTop - replyIconHeight) / 2f;
+                    if (offsetY < adjustedTop) {
+                        if (adjustedTop == toolBar.getBottom()) {
+                            offsetY = adjustedBottom - replyIconHeight;
+                        } else {
+                            offsetY = adjustedTop;
+                        }
+                    }
+                    c.save();
+                    c.drawBitmap(menuIcon, itemView.getLeft() + itemView.getWidth() - maxReplySwipePx, offsetY, opacityPaint);
+                    c.restore();
                 }
 
                 if (swiping) {
-                    swiped = dX >= maxReplySwipePx;
+                    swiped = Math.abs(dX) >= maxReplySwipePx;
                 }
 
-                super.onChildDraw(c, recyclerView, viewHolder, Math.min(dX, maxReplySwipePx), dY, actionState, isCurrentlyActive);
+                super.onChildDraw(c, recyclerView, viewHolder, Math.max(Math.min(dX, maxReplySwipePx), -maxReplySwipePx), dY, actionState, isCurrentlyActive);
             }
 
             // the next two methods make sure the message is never fully "swiped"

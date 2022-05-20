@@ -89,19 +89,16 @@ public class ProcessWebsocketReceivedMessageOperation extends Operation {
 
                 InboxMessage message = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUid);
                 if (message == null) {
-                    message = InboxMessage.create(fetchManagerSession,
+                    InboxMessage.create(fetchManagerSession,
                             ownedIdentity,
                             messageUid,
                             messageContent,
                             wrappedKey,
                             serverTimestamp,
-                            serverTimestamp, // we assume that downloadTimestamp is equal to serverTimestamp as websocket received messages are received immediately
+                            serverTimestamp, // we assume that downloadTimestamp is equal to serverTimestamp as websocket received messages are received almost immediately
                             System.currentTimeMillis(),
                             false
                     );
-                    if (message == null) {
-                        return;
-                    }
                 }
                 finished = true;
             } catch (Exception e) {

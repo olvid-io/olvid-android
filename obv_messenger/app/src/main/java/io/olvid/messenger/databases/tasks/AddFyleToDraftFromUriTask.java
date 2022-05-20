@@ -357,6 +357,9 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                         fyle.moveToFyleDirectory(localFile.getPath());
                         db.fyleDao().update(fyle);
 
+                        //noinspection ConstantConditions
+                        fyleMessageJoinWithStatus.filePath = fyle.filePath;
+                        db.fyleMessageJoinWithStatusDao().updateFilePath(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.filePath);
 
                         // check all downloading operations, mark them as complete and delete the associated inboxAttachment (this will cancel the download operation)
                         List<FyleMessageJoinWithStatus> fyleMessageJoinWithStatusList = db.fyleMessageJoinWithStatusDao().getForFyleId(fyle.id);
@@ -420,6 +423,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                     // update the filePath and mark the Fyle as complete
                     fyle.moveToFyleDirectory(localFile.getPath());
                     db.fyleDao().update(fyle);
+                    db.fyleMessageJoinWithStatusDao().updateFilePath(draftMessage.id, fyle.id, fyle.filePath);
 
                     // re-post the message if it was put on hold
                     Message reDraftMessage = db.messageDao().get(draftMessage.id);

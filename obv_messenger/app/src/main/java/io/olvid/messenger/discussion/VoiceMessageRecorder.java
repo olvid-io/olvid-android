@@ -20,14 +20,21 @@
 package io.olvid.messenger.discussion;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRecorder;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.PowerManager;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,6 +75,7 @@ class VoiceMessageRecorder implements View.OnTouchListener {
     private final Timer timer;
     private TimerTask startRecordTask;
     private TimerTask sampleTask;
+    private PowerManager.WakeLock wakeLock;
 
     public VoiceMessageRecorder(@NonNull FragmentActivity activity, @NonNull View recordingOverlay, @NonNull RequestAudioPermissionDelegate requestAudioPermissionDelegate) {
         this.activity = activity;
@@ -96,6 +104,7 @@ class VoiceMessageRecorder implements View.OnTouchListener {
             return false;
         }
         startRecordTask = new TimerTask() {
+            @SuppressLint("WakelockTimeout")
             @Override
             public void run() {
                 if (recording) {
@@ -136,6 +145,20 @@ class VoiceMessageRecorder implements View.OnTouchListener {
                     activity.runOnUiThread(() -> recordingOverlay.setVisibility(View.GONE));
                     return;
                 }
+
+                // prevent app from sleeping and screen from turning off
+                new Handler(Looper.getMainLooper()).post(() -> {
+                            Window window = activity.getWindow();
+                            if (window != null) {
+                                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                            }
+                        });
+                PowerManager powerManager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+                if (powerManager != null) {
+                    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Olvid:VoiceMessageRecording");
+                    wakeLock.acquire();
+                }
+
                 sampleTask = new TimerTask() {
                     boolean started = false;
 
@@ -173,6 +196,18 @@ class VoiceMessageRecorder implements View.OnTouchListener {
     }
 
     void stopRecord(boolean discard) {
+        // release wake locks
+        new Handler(Looper.getMainLooper()).post(() -> {
+            Window window = activity.getWindow();
+            if (window != null) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
+        });
+        if (wakeLock != null) {
+            wakeLock.release();
+            wakeLock = null;
+        }
+
         if (startRecordTask != null) {
             startRecordTask.cancel();
             startRecordTask = null;

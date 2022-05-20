@@ -231,6 +231,8 @@ public class ColissimoMessageQueue {
                                 manager.getDraftAttachmentListener().stop();
                             }
                             manager.getDiscussionListener().stop();
+                            // update current identity before restart to check if it changed
+                            this.manager.updateBytesCurrentIdentity();
                             manager.getDiscussionListener().addListener();
                         });
                         break;
@@ -386,6 +388,7 @@ public class ColissimoMessageQueue {
                         long messageId = colissimo.getRequestAddReactionToMessage().getMessageId();
                         App.runThread(new UpdateReactionsTask(messageId, "".equals(reaction) ? null : reaction, null, 0));
                         break;
+                    case NOTIF_NEW_DISCUSSION:
                     case NOTIF_FILE_ALREADY_ATTACHED:
                     case NOTIF_MESSAGE_SENT:
                     case NOTIF_UPDATE_DRAFT_ATTACHMENT:
@@ -409,6 +412,7 @@ public class ColissimoMessageQueue {
                     case RECEIVE_DOWNLOAD_ATTACHMENT_CHUNK:
                     case RECEIVE_DOWNLOAD_ATTACHMENT_DONE:
                     case NOTIF_NO_DRAFT_FOR_DISCUSSION:
+                    case REFRESH:
                         Logger.e("Client sent a request response or notification message (ignoring)");
                         break;
                     case UNRECOGNIZED:

@@ -526,6 +526,8 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                     }
                                 }
                             }
+                        } else {
+                            UnifiedForegroundService.processUploadedMessageIdentifier(engineMessageIdentifier);
                         }
                     });
                 }
@@ -572,6 +574,8 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                     }
                                 }
                             }
+                        } else {
+                            UnifiedForegroundService.processUploadedMessageIdentifier(engineMessageIdentifier);
                         }
                     });
                 }
@@ -621,6 +625,8 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                             }
                         }
                     }
+                } else {
+                    UnifiedForegroundService.processUploadedMessageIdentifier(engineMessageIdentifier);
                 }
                 break;
             }

@@ -1642,6 +1642,7 @@ public class AndroidNotificationManager {
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setCategory(NotificationCompat.CATEGORY_ERROR)
                     .setOngoing(true)
+                    .setOnlyAlertOnce(true)
                     .setContentTitle(App.getContext().getString(R.string.text_notification_keycloak_authentication_required_title))
                     .setContentText(App.getContext().getString(R.string.text_notification_keycloak_authentication_required_message))
                     .setVibrate(new long[0]);

@@ -109,7 +109,7 @@ public class DraftListener {
                 notifBuilder = NotifNewMessageOuterClass.NotifNewMessage.newBuilder();
                 colissimoBuilder = ColissimoOuterClass.Colissimo.newBuilder();
                 messageBuilder = fillProtobufMessageFromOlvidMessage(message, this.webClientManager.getService().getWebClientContext(), this.webClientManager);
-                notifBuilder.setMessage(messageBuilder);
+                notifBuilder.addMessages(messageBuilder);
                 colissimoBuilder.setType(ColissimoOuterClass.ColissimoType.NOTIF_NEW_MESSAGE);
                 colissimoBuilder.setNotifNewMessage(notifBuilder);
                 this.webClientManager.sendColissimo(colissimoBuilder.build());
@@ -150,7 +150,7 @@ public class DraftListener {
                             messageBuilder.setReplyAuthor(context.getString(R.string.text_deleted_contact));
                             messageBuilder.setSenderIsSelf(false);
                         } else {
-                            if(Arrays.equals(manager.getBytesOwnedIdentity(), message.getJsonMessage().getJsonReply().getSenderIdentifier())){
+                            if(Arrays.equals(manager.getBytesCurrentOwnedIdentity(), message.getJsonMessage().getJsonReply().getSenderIdentifier())){
                                 messageBuilder.setReplyAuthor(context.getString(R.string.text_you));
                                 messageBuilder.setSenderIsSelf(true);
                             } else{

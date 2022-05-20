@@ -21,7 +21,7 @@ package io.olvid.engine.datatypes;
 
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 30;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 31;
     public static final int SERVER_API_VERSION = 13;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
@@ -60,6 +60,7 @@ public abstract class Constants {
 
     public static final long OUTBOX_MESSAGE_MAX_SEND_DELAY = 86_400_000L * 30; // after 30 days without being able to upload a message, delete it
     public static final long PROTOCOL_RECEIVED_MESSAGE_EXPIRATION_DELAY = 86_400_000L * 15; // expire ReceivedMessage after 15 days
+    public static final long SERVER_QUERY_EXPIRATION_DELAY = 86_400_000L * 15; // expire PendingServerQuery after 15 days
 
     public static final long USER_DATA_REFRESH_INTERVAL = 86_400_000L * 7; // 7 days
     public static final long GET_USER_DATA_LOCAL_FILE_LIFESPAN = 86_400_000L * 7; // 7 days
