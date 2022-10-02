@@ -374,7 +374,7 @@ class GoogleDriveProvider {
                 }
 
                 String deviceUniqueId = SettingsActivity.getAutomaticBackupDeviceUniqueId();
-                String fileName = deviceUniqueId + "|" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART;
+                String fileName = deviceUniqueId + "_" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART;
 
                 List<File> fileList = googleDriveService.files().list()
                         .setQ("name = '" + fileName + "' and '" + folderId + "' in parents")
@@ -598,7 +598,7 @@ class WebdavProvider {
                 }
 
                 String deviceUniqueId = SettingsActivity.getAutomaticBackupDeviceUniqueId();
-                String fileName = deviceUniqueId + "|" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART + BACKUP_FILE_EXTENSION;
+                String fileName = deviceUniqueId + "_" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART + BACKUP_FILE_EXTENSION;
                 String url = (serverUrl.endsWith("/") ? serverUrl : serverUrl + "/") + URLEncoder.encode(fileName, StandardCharsets.UTF_8.name());
 
                 if (sardine.exists(url)) {
