@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import io.olvid.engine.datatypes.ObvBase64;
+import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.ObvBackupKeyVerificationOutput;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
@@ -49,7 +50,6 @@ import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.ConfigurationKeycloakPojo;
 import io.olvid.messenger.customClasses.ConfigurationPojo;
-import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.messenger.services.BackupCloudProviderService;
 
 
@@ -309,13 +309,13 @@ public class OnboardingViewModel extends ViewModel {
         try {
             ConfigurationPojo configurationPojo = AppSingleton.getJsonObjectMapper().readValue(ObvBase64.decode(base64configuration), ConfigurationPojo.class);
             if (configurationPojo != null) {
-                if (configurationPojo.getServer() != null) {
-                    setServer(configurationPojo.getServer());
+                if (configurationPojo.server != null) {
+                    setServer(configurationPojo.server);
                 }
-                if (configurationPojo.getApikey() != null) {
-                    setApiKey(configurationPojo.getApikey());
+                if (configurationPojo.apikey != null) {
+                    setApiKey(configurationPojo.apikey);
                 }
-                ConfigurationKeycloakPojo keycloakPojo = configurationPojo.getKeycloak();
+                ConfigurationKeycloakPojo keycloakPojo = configurationPojo.keycloak;
                 if (keycloakPojo != null) {
                     setKeycloakServer(keycloakPojo.getServer());
                     setKeycloakClientId(keycloakPojo.getClientId());

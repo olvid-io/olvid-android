@@ -30,6 +30,40 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <LinearLayout
+        android:id="@+id/eta_group"
+        android:layout_width="64dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="@id/attachment_progress"
+        app:layout_constraintBottom_toBottomOf="@id/attachment_progress"
+        app:layout_constraintEnd_toEndOf="@id/attachment_progress"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:background="@drawable/background_eta_24dp"
+        android:paddingEnd="26dp"
+        android:gravity="center|end"
+        tools:ignore="RtlSymmetry">
+
+        <TextView
+            android:id="@+id/eta_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="12dp"
+            android:textSize="9dp"
+            tools:ignore="SpUsage"
+            android:textColor="@color/olvid_gradient_dark"
+            tools:text="352k/s"
+            android:layout_marginBottom="-4dp"/>
+        <TextView
+            android:id="@+id/eta_eta"
+            android:layout_width="wrap_content"
+            android:layout_height="12dp"
+            android:textSize="9dp"
+            tools:ignore="SpUsage"
+            android:textColor="@color/olvid_gradient_dark"
+            tools:text="42s"/>
+    </LinearLayout>
+
     <ProgressBar
         android:id="@+id/attachment_progress"
         style="?android:attr/progressBarStyleHorizontal"

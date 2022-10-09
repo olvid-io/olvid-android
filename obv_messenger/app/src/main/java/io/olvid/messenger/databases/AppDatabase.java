@@ -19,12 +19,12 @@
 
 package io.olvid.messenger.databases;
 
-import androidx.sqlite.db.SupportSQLiteDatabase;
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
-import androidx.annotation.NonNull;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.databases.dao.ActionShortcutConfigurationDao;
@@ -35,6 +35,9 @@ import io.olvid.messenger.databases.dao.DiscussionCustomizationDao;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.dao.FyleDao;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
+import io.olvid.messenger.databases.dao.Group2Dao;
+import io.olvid.messenger.databases.dao.Group2MemberDao;
+import io.olvid.messenger.databases.dao.Group2PendingMemberDao;
 import io.olvid.messenger.databases.dao.GroupDao;
 import io.olvid.messenger.databases.dao.InvitationDao;
 import io.olvid.messenger.databases.dao.KnownCertificateDao;
@@ -59,6 +62,9 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Group2;
+import io.olvid.messenger.databases.entity.Group2Member;
+import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.KnownCertificate;
 import io.olvid.messenger.databases.entity.LatestDiscussionSenderSequenceNumber;
@@ -96,12 +102,15 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
                 LatestDiscussionSenderSequenceNumber.class,
                 ReactionRequest.class,
                 ActionShortcutConfiguration.class,
+                Group2.class,
+                Group2PendingMember.class,
+                Group2Member.class,
         },
         version = AppDatabase.DB_SCHEMA_VERSION
 )
 @TypeConverters({ObvTypeConverters.class})
 public abstract class AppDatabase extends RoomDatabase {
-    public static final int DB_SCHEMA_VERSION = 53;
+    public static final int DB_SCHEMA_VERSION = 57;
     public static final String DB_FILE_NAME = "app_database";
 
     public abstract ContactDao contactDao();
@@ -126,6 +135,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract LatestDiscussionSenderSequenceNumberDao latestDiscussionSenderSequenceNumberDao();
     public abstract ReactionRequestDao reactionRequestDao();
     public abstract ActionShortcutConfigurationDao actionShortcutConfigurationDao();
+    public abstract Group2Dao group2Dao();
+    public abstract Group2MemberDao group2MemberDao();
+    public abstract Group2PendingMemberDao group2PendingMemberDao();
 
     private static final RoomDatabase.Callback roomDatabaseOpenCallback = new RoomDatabase.Callback(){
         @Override

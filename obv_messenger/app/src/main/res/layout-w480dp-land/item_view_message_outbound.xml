@@ -14,6 +14,19 @@
     android:paddingTop="2dp"
     android:theme="@style/SubtleGreyRipple">
 
+    <CheckBox
+        android:id="@+id/message_selection_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="2dp"
+        android:theme="@style/AppTheme.OrangeAccent"
+        android:clickable="false"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/message_content_card"
+        tools:visibility="visible"/>
+
 
     <io.olvid.messenger.customClasses.SizeAwareCardView
         android:id="@+id/message_content_card"
@@ -35,20 +48,6 @@
 
         <include layout="@layout/view_message_outbound_header" />
     </io.olvid.messenger.customClasses.SizeAwareCardView>
-
-    <CheckBox
-        android:id="@+id/message_selection_checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="2dp"
-        android:theme="@style/AppTheme.OrangeAccent"
-        android:clickable="false"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/message_content_card"
-        tools:visibility="visible"/>
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/reactions_constraint_layout"
@@ -73,7 +72,6 @@
             android:background="@drawable/background_reaction"
             app:flow_wrapMode="chain" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     <TextView
         android:id="@+id/message_timer_textview"

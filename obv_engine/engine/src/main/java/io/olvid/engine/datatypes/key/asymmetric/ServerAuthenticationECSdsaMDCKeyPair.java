@@ -64,4 +64,10 @@ public class ServerAuthenticationECSdsaMDCKeyPair extends KeyPair {
         }
         return new ServerAuthenticationECSdsaMDCKeyPair(new ServerAuthenticationECSdsaMDCPublicKey(publicKeyDictionary), new ServerAuthenticationECSdsaMDCPrivateKey(privateKeyDictionary));
     }
+
+    public static boolean areKeysMatching(ServerAuthenticationECSdsaMDCPublicKey publicKey, ServerAuthenticationECSdsaMDCPrivateKey privateKey) {
+        EdwardCurve mdc = Suite.getCurve(EdwardCurve.MDC);
+        EdwardCurvePoint A = mdc.scalarMultiplicationWithX(privateKey.getSignaturePrivateKey().getA(), mdc.G);
+        return A.getY().equals(publicKey.getSignaturePublicKey().getAy());
+    }
 }

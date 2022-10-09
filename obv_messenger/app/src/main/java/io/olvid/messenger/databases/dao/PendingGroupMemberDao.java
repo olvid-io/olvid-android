@@ -19,8 +19,6 @@
 
 package io.olvid.messenger.databases.dao;
 
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -28,6 +26,9 @@ import androidx.room.Embedded;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
+
+import java.util.List;
+
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 
@@ -65,6 +66,20 @@ public interface PendingGroupMemberDao {
             " WHERE pending." + PendingGroupMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND pending." + PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
     LiveData<List<PendingGroupMemberAndContact>> getGroupPendingMemberAndContactsLiveData(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+
+    @Query("SELECT " +
+            " pending." + PendingGroupMember.BYTES_IDENTITY + " AS pending_" + PendingGroupMember.BYTES_IDENTITY + ", " +
+            " pending." + PendingGroupMember.BYTES_OWNED_IDENTITY + " AS pending_" + PendingGroupMember.BYTES_OWNED_IDENTITY + ", " +
+            " pending." + PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " AS pending_" + PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + ", " +
+            " pending." + PendingGroupMember.DISPLAY_NAME + " AS pending_" + PendingGroupMember.DISPLAY_NAME + ", " +
+            " pending." + PendingGroupMember.DECLINED + " AS pending_" + PendingGroupMember.DECLINED + ", " +
+            " contact.* FROM " + PendingGroupMember.TABLE_NAME + " AS pending " +
+            " LEFT JOIN " + Contact.TABLE_NAME + " AS contact " +
+            " ON contact." + Contact.BYTES_OWNED_IDENTITY + " = pending." + PendingGroupMember.BYTES_OWNED_IDENTITY +
+            " AND contact." + Contact.BYTES_CONTACT_IDENTITY + " = pending." + PendingGroupMember.BYTES_IDENTITY +
+            " WHERE pending." + PendingGroupMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND pending." + PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
+    List<PendingGroupMemberAndContact> getGroupPendingMemberAndContacts(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
 
     class PendingGroupMemberAndContact {
         @Embedded(prefix = "pending_")

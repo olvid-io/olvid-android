@@ -30,7 +30,6 @@ import androidx.room.Update;
 import java.util.List;
 import java.util.UUID;
 
-import io.olvid.messenger.databases.entity.ContactGroupJoin;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Fyle;
@@ -45,6 +44,8 @@ public interface MessageDao {
             "mess." + Message.JSON_REPLY + " AS mess_" + Message.JSON_REPLY + ", " +
             "mess." + Message.JSON_EXPIRATION + " AS mess_" + Message.JSON_EXPIRATION + ", " +
             "mess." + Message.JSON_RETURN_RECEIPT + " AS mess_" + Message.JSON_RETURN_RECEIPT + ", " +
+            "mess." + Message.JSON_LOCATION + " AS mess_" + Message.JSON_LOCATION + ", " +
+            "mess." + Message.LOCATION_TYPE + " AS mess_" + Message.LOCATION_TYPE + ", " +
             "mess." + Message.SORT_INDEX + " AS mess_" + Message.SORT_INDEX + ", " +
             "mess." + Message.TIMESTAMP + " AS mess_" + Message.TIMESTAMP + ", " +
             "mess." + Message.STATUS + " AS mess_" + Message.STATUS + ", " +
@@ -61,7 +62,9 @@ public interface MessageDao {
             "mess." + Message.FORWARDED + " AS mess_" + Message.FORWARDED + ", " +
             "mess." + Message.REACTIONS + " AS mess_" + Message.REACTIONS + ", " +
             "mess." + Message.IMAGE_RESOLUTIONS + " AS mess_" + Message.IMAGE_RESOLUTIONS + ", " +
-            "mess." + Message.MISSED_MESSAGE_COUNT + " AS mess_" + Message.MISSED_MESSAGE_COUNT;
+            "mess." + Message.MISSED_MESSAGE_COUNT + " AS mess_" + Message.MISSED_MESSAGE_COUNT + ", " +
+            "mess." + Message.EXPIRATION_START_TIMESTAMP + " AS mess_" + Message.EXPIRATION_START_TIMESTAMP  + ", " +
+            "mess." + Message.LIMITED_VISIBILITY + " AS mess_" + Message.LIMITED_VISIBILITY;
 
     @Insert
     long insert(Message message);
@@ -111,7 +114,8 @@ public interface MessageDao {
             Message.EDITED + " = " + Message.EDITED_NONE + ", " +
             Message.CONTENT_BODY + " = NULL, " +
             Message.REACTIONS + " = NULL, " +
-            Message.JSON_REPLY + " = NULL " +
+            Message.JSON_REPLY + " = NULL, " +
+            Message.JSON_LOCATION + " = NULL " +
             " WHERE id = :messageId")
     void updateWipe(long messageId, int wipeStatus);
 
@@ -122,9 +126,25 @@ public interface MessageDao {
     void updateBody(long messageId, String body);
 
     @Query("UPDATE " + Message.TABLE_NAME +
+            " SET " + Message.CONTENT_BODY + " = :body, " +
+            Message.JSON_LOCATION + " = :jsonLocation " +
+            " WHERE id = :messageId")
+    void updateLocation(long messageId, String body, String jsonLocation);
+
+    @Query("UPDATE " + Message.TABLE_NAME +
+            " SET " + Message.LOCATION_TYPE + " = :locationType " +
+            " WHERE id = :messageId")
+    void updateLocationType(long messageId, int locationType);
+
+    @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.REACTIONS + " = :reactions " +
             " WHERE id = :messageId")
     void updateReactions(long messageId, String reactions);
+
+    @Query("UPDATE " + Message.TABLE_NAME +
+            " SET " + Message.EXPIRATION_START_TIMESTAMP + " = :expirationStartTimestamp " +
+            " WHERE id = :messageId")
+    void updateExpirationStartTimestamp(long messageId, long expirationStartTimestamp);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " ASC")
     LiveData<List<Message>> getDiscussionMessages(long discussionId);
@@ -166,41 +186,9 @@ public interface MessageDao {
             " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE)
     List<Message> getUnprocessedAndPreviewingMessages();
 
-    @Query("SELECT message.* FROM " + Message.TABLE_NAME + " AS message " +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
-            " ON message." + Message.DISCUSSION_ID + " = discussion.id" +
-            " WHERE (" + Message.STATUS + " = " + Message.STATUS_UNPROCESSED +
-            " OR " + Message.STATUS + " = " + Message.STATUS_COMPUTING_PREVIEW + ") " +
-            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE +
-            " AND discussion." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND discussion." + Discussion.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    List<Message> getUnprocessedOrPreviewingMessagesForContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
-
-    @Query("SELECT message.* FROM " + Message.TABLE_NAME + " AS message " +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
-            " ON message." + Message.DISCUSSION_ID + " = discussion.id" +
-            " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS cgjoin " +
-            " ON discussion." + Discussion.BYTES_GROUP_OWNER_AND_UID + " = cgjoin." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID +
-            " AND discussion." + Discussion.BYTES_OWNED_IDENTITY  + " = cgjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
-            " WHERE (" + Message.STATUS + " = " + Message.STATUS_UNPROCESSED +
-            " OR " + Message.STATUS + " = " + Message.STATUS_COMPUTING_PREVIEW + ") " +
-            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE +
-            " AND cgjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND cgjoin." + ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    List<Message> getUnprocessedOrPreviewingGroupMessagesForContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
-
-    @Query("SELECT message.* FROM " + Message.TABLE_NAME + " AS message " +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
-            " ON message." + Message.DISCUSSION_ID + " = discussion.id" +
-            " WHERE (" + Message.STATUS + " = " + Message.STATUS_UNPROCESSED +
-            " OR " + Message.STATUS + " = " + Message.STATUS_COMPUTING_PREVIEW + ") " +
-            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE +
-            " AND discussion." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND discussion." + Discussion.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    List<Message> getUnprocessedAndPreviewingGroupMessages(byte[] bytesGroupOwnerAndUid, byte[] bytesOwnedIdentity);
-
-
-    @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_PROCESSING + " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE)
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.STATUS + " = " + Message.STATUS_PROCESSING +
+            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE)
     List<Message> getProcessingMessages();
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
@@ -421,6 +409,36 @@ public interface MessageDao {
     " AND mess.id IN ( :selectedMessageIds )")
     int countMessagesWithIncompleteFyles(List<Long> selectedMessageIds);
 
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
+            " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE)
+    List<Message> getOutboundSharingLocationMessages();
+
+    @Query("SELECT COUNT(*) FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
+            " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE)
+    int countOutboundSharingLocationMessages();
+
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
+            " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND " + Message.DISCUSSION_ID + " = :discussionId " +
+            " ORDER BY " + Message.SORT_INDEX + " ASC ")
+    LiveData<List<Message>> getCurrentlySharingLocationMessagesInDiscussionLiveData(long discussionId);
+
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
+            " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE +
+            " AND " + Message.DISCUSSION_ID + " = :discussionId " +
+            " ORDER BY " + Message.SORT_INDEX + " ASC ")
+    List<Message> getCurrentlySharingOutboundLocationMessagesInDiscussion(long discussionId);
+
+    @Query("SELECT id FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.LIMITED_VISIBILITY + " = 1")
+    List<Long> getAllLimitedVisibilityMessageIds();
 
     class UnreadCountAndFirstMessage {
         @ColumnInfo(name = "unread_count")

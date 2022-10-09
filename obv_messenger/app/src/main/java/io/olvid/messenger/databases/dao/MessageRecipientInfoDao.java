@@ -19,17 +19,16 @@
 
 package io.olvid.messenger.databases.dao;
 
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Embedded;
 import androidx.room.Insert;
-
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+
+import java.util.List;
 
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
@@ -38,6 +37,18 @@ import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 
 @Dao
 public interface MessageRecipientInfoDao {
+    String PREFIX_MESSAGE_RECIPIENT_INFO_COLUMNS = " mri." + MessageRecipientInfo.MESSAGE_ID + " AS mri_" + MessageRecipientInfo.MESSAGE_ID + ", " +
+            " mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + " AS mri_" + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + ", " +
+            " mri." + MessageRecipientInfo.RETURN_RECEIPT_NONCE + " AS mri_" + MessageRecipientInfo.RETURN_RECEIPT_NONCE + ", " +
+            " mri." + MessageRecipientInfo.RETURN_RECEIPT_KEY + " AS mri_" + MessageRecipientInfo.RETURN_RECEIPT_KEY + ", " +
+            " mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " AS mri_" + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + ", " +
+            " mri." + MessageRecipientInfo.UNSENT_ATTACHMENT_NUMBERS + " AS mri_" + MessageRecipientInfo.UNSENT_ATTACHMENT_NUMBERS + ", " +
+            " mri." + MessageRecipientInfo.TIMESTAMP_SENT + " AS mri_" + MessageRecipientInfo.TIMESTAMP_SENT + ", " +
+            " mri." + MessageRecipientInfo.TIMESTAMP_DELIVERED + " AS mri_" + MessageRecipientInfo.TIMESTAMP_DELIVERED + ", " +
+            " mri." + MessageRecipientInfo.TIMESTAMP_READ + " AS mri_" + MessageRecipientInfo.TIMESTAMP_READ + ", " +
+            " mri." + MessageRecipientInfo.UNDELIVERED_ATTACHMENT_NUMBERS + " AS mri_" + MessageRecipientInfo.UNDELIVERED_ATTACHMENT_NUMBERS + ", " +
+            " mri." + MessageRecipientInfo.UNREAD_ATTACHMENT_NUMBERS + " AS mri_" + MessageRecipientInfo.UNREAD_ATTACHMENT_NUMBERS;
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(MessageRecipientInfo... messageRecipientInfos);
 
@@ -72,24 +83,19 @@ public interface MessageRecipientInfoDao {
             " AND " + MessageRecipientInfo.TIMESTAMP_SENT + " IS NULL")
     List<MessageRecipientInfo> getAllNotSentByMessageId(long messageId);
 
-    @Query("SELECT mri." + MessageRecipientInfo.MESSAGE_ID + " AS mri_" + MessageRecipientInfo.MESSAGE_ID + ", " +
-            " mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + " AS mri_" + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + ", " +
-            " mri." + MessageRecipientInfo.RETURN_RECEIPT_NONCE + " AS mri_" + MessageRecipientInfo.RETURN_RECEIPT_NONCE + ", " +
-            " mri." + MessageRecipientInfo.RETURN_RECEIPT_KEY + " AS mri_" + MessageRecipientInfo.RETURN_RECEIPT_KEY + ", " +
-            " mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " AS mri_" + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + ", " +
-            " mri." + MessageRecipientInfo.UNSENT_ATTACHMENT_NUMBERS + " AS mri_" + MessageRecipientInfo.UNSENT_ATTACHMENT_NUMBERS + ", " +
-            " mri." + MessageRecipientInfo.TIMESTAMP_SENT + " AS mri_" + MessageRecipientInfo.TIMESTAMP_SENT + ", " +
-            " mri." + MessageRecipientInfo.TIMESTAMP_DELIVERED + " AS mri_" + MessageRecipientInfo.TIMESTAMP_DELIVERED + ", " +
-            " mri." + MessageRecipientInfo.TIMESTAMP_READ + " AS mri_" + MessageRecipientInfo.TIMESTAMP_READ + ", " +
-            " mri." + MessageRecipientInfo.UNDELIVERED_ATTACHMENT_NUMBERS + " AS mri_" + MessageRecipientInfo.UNDELIVERED_ATTACHMENT_NUMBERS + ", " +
-            " mri." + MessageRecipientInfo.UNREAD_ATTACHMENT_NUMBERS + " AS mri_" + MessageRecipientInfo.UNREAD_ATTACHMENT_NUMBERS + ", " +
+    @Query("SELECT MIN(" + MessageRecipientInfo.TIMESTAMP_SENT + ") FROM " + MessageRecipientInfo.TABLE_NAME +
+            " WHERE " + MessageRecipientInfo.MESSAGE_ID + " = :messageId " +
+            " AND " + MessageRecipientInfo.TIMESTAMP_SENT + " IS NOT NULL")
+    Long getOriginalServerTimestampForMessage(long messageId);
+
+    @Query("SELECT " + PREFIX_MESSAGE_RECIPIENT_INFO_COLUMNS + ", " +
             " message.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +
             " INNER JOIN " + Message.TABLE_NAME + " AS message " +
             " ON message.id = mri." + MessageRecipientInfo.MESSAGE_ID +
             " WHERE mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND message." + Message.SENDER_IDENTIFIER + " = :bytesOwnedIdentity " +
             " AND mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " IS NULL")
-    List<MessageRecipientInfoAndMessage> getAllNotProcessedByContactIdentity(byte[] bytesContactIdentity, byte[] bytesOwnedIdentity);
+    List<MessageRecipientInfoAndMessage> getAllUnsentForContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
 
     @Query("SELECT DISTINCT " + MessageRecipientInfo.RETURN_RECEIPT_KEY + " FROM " + MessageRecipientInfo.TABLE_NAME +
             " WHERE " + MessageRecipientInfo.RETURN_RECEIPT_NONCE + " = :nonce")
@@ -114,6 +120,22 @@ public interface MessageRecipientInfoDao {
             " AND mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " IS NULL")
     List<MessageRecipientInfo> getUnsentForContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+
+    @Query("SELECT " + PREFIX_MESSAGE_RECIPIENT_INFO_COLUMNS + ", m.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +
+            " INNER JOIN " + Message.TABLE_NAME + " AS m " +
+            " ON m.id = mri." + MessageRecipientInfo.MESSAGE_ID +
+            " WHERE m." + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
+            " AND mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " IS NULL")
+    List<MessageRecipientInfoAndMessage> getUnsentForContactInDiscussion(long discussionId, byte[] bytesContactIdentity);
+
+
+    @Query("SELECT mri.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +
+            " INNER JOIN " + Message.TABLE_NAME + " AS m " +
+            " ON m.id = mri." + MessageRecipientInfo.MESSAGE_ID +
+            " WHERE m." + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND mri." + MessageRecipientInfo.TIMESTAMP_SENT + " IS NULL")
+    List<MessageRecipientInfo> getAllUnsentForDiscussion(long discussionId);
 
 
     class MessageRecipientInfoAndMessage {

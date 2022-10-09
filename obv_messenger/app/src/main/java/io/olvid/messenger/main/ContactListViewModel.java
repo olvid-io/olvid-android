@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
-import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.entity.Contact;

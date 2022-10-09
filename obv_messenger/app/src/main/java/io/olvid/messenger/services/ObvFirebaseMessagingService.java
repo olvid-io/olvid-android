@@ -19,12 +19,13 @@
 
 package io.olvid.messenger.services;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
 
-import androidx.annotation.NonNull;
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.identities.ObvIdentity;

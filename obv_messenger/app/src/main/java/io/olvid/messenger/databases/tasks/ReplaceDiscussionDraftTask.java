@@ -21,9 +21,10 @@ package io.olvid.messenger.databases.tasks;
 
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 
-import androidx.annotation.NonNull;
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.databases.AppDatabase;

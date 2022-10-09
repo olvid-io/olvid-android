@@ -23,45 +23,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigurationPojo {
-    String server;
-    String apikey;
-    ConfigurationKeycloakPojo keycloak;
-    ConfigurationSettingsPojo settings;
-
-    public ConfigurationPojo() {
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public void setServer(String server) {
-        this.server = server;
-    }
-
-    public String getApikey() {
-        return apikey;
-    }
-
-    public void setApikey(String apikey) {
-        this.apikey = apikey;
-    }
-
-    public ConfigurationKeycloakPojo getKeycloak() {
-        return keycloak;
-    }
-
-    public void setKeycloak(ConfigurationKeycloakPojo keycloak) {
-        this.keycloak = keycloak;
-    }
-
-    public ConfigurationSettingsPojo getSettings() {
-        return settings;
-    }
-
-    public void setSettings(ConfigurationSettingsPojo settings) {
-        this.settings = settings;
-    }
+    public String server;
+    public String apikey;
+    public ConfigurationKeycloakPojo keycloak;
+    public ConfigurationSettingsPojo settings;
 }
 
 

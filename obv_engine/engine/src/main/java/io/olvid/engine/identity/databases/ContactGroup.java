@@ -659,7 +659,7 @@ public class ContactGroup implements ObvDatabase {
     @Override
     public void delete() throws SQLException {
         if (!identityManagerSession.session.isInTransaction()) {
-            Logger.e("Running ContactGroup delete outside a transaction");
+            Logger.e("Running ContactGroup.delete() outside a transaction");
             throw new SQLException();
         }
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ?;")) {

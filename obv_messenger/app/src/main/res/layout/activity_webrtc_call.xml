@@ -56,7 +56,7 @@
         android:layout_height="48dp"
         android:foreground="@drawable/background_circular_ripple"
         android:theme="@style/AlwaysWhiteRipple"
-        app:srcCompat="@drawable/button_no_micro"
+        app:srcCompat="@drawable/button_micro"
         android:contentDescription="@string/content_description_toggle_mute_microphone_button"
         app:layout_constraintBottom_toBottomOf="@+id/end_call_button"
         app:layout_constraintEnd_toStartOf="@+id/toggle_speakerphone_button"

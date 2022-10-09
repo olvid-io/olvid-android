@@ -26,7 +26,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
 import java.lang.ref.WeakReference;

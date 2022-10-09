@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -56,6 +55,10 @@ public abstract class ServerMethod {
     public static final byte FREE_TRIAL_ALREADY_USED = 0x0f;
 //    public static final byte STATUS_RECEIPT_IS_EXPIRED = 0x10; // used on iOS only
     public static final byte EXTENDED_PAYLOAD_UNAVAILABLE = 0x11;
+    public static final byte GROUP_UID_ALREADY_USED = 0x12;
+    public static final byte GROUP_IS_LOCKED = 0x13;
+    public static final byte INVALID_SIGNATURE = 0x14;
+    public static final byte GROUP_NOT_LOCKED = 0x15;
 
     public static final byte GENERAL_ERROR = (byte) 0xff;
 
@@ -113,7 +116,7 @@ public abstract class ServerMethod {
             try {
                 // Timeout after 5 seconds
                 connection.setConnectTimeout(5000);
-                connection.setReadTimeout(10000);
+                connection.setReadTimeout(20000);
                 connection.setDoOutput(true);
                 connection.setFixedLengthStreamingMode(dataToSend.length);
                 connection.setRequestProperty("Cache-Control", "no-store");
@@ -151,6 +154,7 @@ public abstract class ServerMethod {
 
                                 // Parse the received data and return the server status code
                                 returnStatus = returnStatusBytes[0];
+
                                 parseReceivedData(Arrays.copyOfRange(responseList, 1, responseList.length));
                             }
                             break;
@@ -158,6 +162,9 @@ public abstract class ServerMethod {
                         case 413: { // payload too large
                             returnStatus = PAYLOAD_TOO_LARGE;
                             break;
+                        }
+                        default: { // unknown server response
+                            returnStatus = SERVER_CONNECTION_ERROR;
                         }
                     }
                 }

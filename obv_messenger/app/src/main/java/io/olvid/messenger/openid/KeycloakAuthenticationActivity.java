@@ -108,7 +108,7 @@ public class KeycloakAuthenticationActivity extends AppCompatActivity {
                         AuthState authState = AuthState.jsonDeserialize(serializedAuthState);
                         if (authState.getAuthorizationServiceConfiguration() != null) {
                             String codeVerifier = CodeVerifierUtil.generateRandomCodeVerifier();
-                            String nonce = UUID.randomUUID().toString();
+                            String nonce = Logger.getUuidString(UUID.randomUUID());
 
                             AuthorizationRequest.Builder authorizationRequestBuilder;
                             authorizationRequestBuilder = new AuthorizationRequest.Builder(authState.getAuthorizationServiceConfiguration(), clientId, ResponseTypeValues.CODE, Uri.parse(BuildConfig.KEYCLOAK_REDIRECT_URL));

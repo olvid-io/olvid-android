@@ -20,26 +20,11 @@
 package io.olvid.messenger.activities;
 
 import android.animation.LayoutTransition;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import androidx.fragment.app.FragmentTransaction;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.cardview.widget.CardView;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Spannable;
@@ -63,6 +48,22 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,9 +72,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
-import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
-import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
@@ -85,17 +86,18 @@ import io.olvid.engine.engine.types.identities.ObvUrlIdentity;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.tasks.PromptToDeleteContactTask;
+import io.olvid.messenger.fragments.FilteredDiscussionListFragment;
 import io.olvid.messenger.fragments.FullScreenImageFragment;
 import io.olvid.messenger.fragments.dialog.ContactIntroductionDialogFragment;
-import io.olvid.messenger.fragments.FilteredDiscussionListFragment;
-import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
@@ -708,6 +710,27 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 case KEYCLOAK: {
                     return context.getString(R.string.trust_origin_keycloak_type, trustOrigin.getKeycloakServer(), StringUtils.getNiceDateString(context, trustOrigin.getTimestamp()));
                 }
+                case SERVER_GROUP_V2: {
+                    String text = context.getString(R.string.trust_origin_group_v2_type, StringUtils.getNiceDateString(context, trustOrigin.getTimestamp()));
+                    Group2 group2 = AppDatabase.getInstance().group2Dao().get(bytesOwnedIdentity, trustOrigin.getBytesGroupIdentifier());
+                    SpannableString link;
+                    if (group2 == null) {
+                        link = new SpannableString(context.getString(R.string.text_deleted_group));
+                        StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
+                        link.setSpan(styleSpan, 0, link.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    } else {
+                        String groupName = group2.getTruncatedCustomName();
+                        link = new SpannableString(groupName);
+                        ClickableSpan clickableSpan = new ClickableSpan() {
+                            @Override
+                            public void onClick(View view) {
+                                App.openGroupV2DetailsActivity(view.getContext(), bytesOwnedIdentity, trustOrigin.getBytesGroupIdentifier());
+                            }
+                        };
+                        link.setSpan(clickableSpan, 0, link.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                    return TextUtils.concat(text, link);
+                }
                 default:
                     return context.getString(R.string.trust_origin_unknown_type, StringUtils.getNiceDateString(context, trustOrigin.getTimestamp()));
             }
@@ -948,6 +971,11 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 StringBuilder sb = new StringBuilder();
                 sb.append(getString(R.string.debug_label_number_of_channels_and_devices)).append("\n");
                 sb.append(contact.establishedChannelCount).append("/").append(contact.deviceCount).append("\n\n");
+                try {
+                    Identity contactIdentity = Identity.of(contact.bytesContactIdentity);
+                    sb.append(getString(R.string.debug_label_server)).append(" ");
+                    sb.append(contactIdentity.getServer()).append("\n\n");
+                } catch (DecodingException ignored) {}
                 sb.append(getString(R.string.debug_label_identity_link)).append("\n");
                 sb.append(new ObvUrlIdentity(contact.bytesContactIdentity, contact.displayName).getUrlRepresentation()).append("\n\n");
                 sb.append(getString(R.string.debug_label_capabilities)).append("\n");

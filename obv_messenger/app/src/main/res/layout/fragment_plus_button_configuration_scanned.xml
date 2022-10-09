@@ -357,18 +357,19 @@
 
                     <TextView
                         android:id="@+id/settings_update_title_text_view"
+                        style="@style/RobotoMedium"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/plus_button_card_margins"
+                        android:layout_marginTop="12dp"
                         android:layout_marginEnd="@dimen/plus_button_card_margins"
-                        android:layout_marginTop="@dimen/plus_button_card_half_margins"
-                        style="@style/RobotoMedium"
-                        android:textSize="18sp"
+                        android:text="@string/label_title_change_list"
                         android:textColor="@color/olvid_gradient_light"
-                        app:layout_constraintTop_toTopOf="parent"
+                        android:textSize="18sp"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
-                        android:text="@string/label_settings_update"/>
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/settings_update_details_text_view"
@@ -378,10 +379,9 @@
                         android:layout_marginEnd="@dimen/plus_button_card_margins"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="4dp"
-                        tools:text="https://server.olvid.io"
-                        android:textAlignment="center"
+                        android:textColor="@color/greyTint"
+                        tools:text="Enable beta features: yes"
                         android:textSize="12sp"
-                        android:typeface="monospace"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/settings_update_title_text_view" />

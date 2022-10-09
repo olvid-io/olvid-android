@@ -133,7 +133,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
-        android:id="@+id/bottom_mask"
+        android:id="@+id/black_overlay"
         android:layout_width="0dp"
         android:layout_height="200dp"
         android:background="@color/blackOverlay"

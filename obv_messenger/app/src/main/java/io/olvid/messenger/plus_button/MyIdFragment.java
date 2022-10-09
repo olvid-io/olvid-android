@@ -101,13 +101,6 @@ public class MyIdFragment extends Fragment implements View.OnClickListener {
 
         viewModel = new ViewModelProvider(activity).get(PlusButtonViewModel.class);
 
-        // set screen brightness to the max
-        WindowManager.LayoutParams params = activity.getWindow().getAttributes();
-        if (params != null && activity.getWindow() != null) {
-            params.screenBrightness = 1f;
-            activity.getWindow().setAttributes(params);
-        }
-
         view.findViewById(R.id.back_button).setOnClickListener(this);
         identityInitialView = view.findViewById(R.id.myid_initial_view);
         identityTextView = view.findViewById(R.id.myid_name_text_view);
@@ -239,6 +232,17 @@ public class MyIdFragment extends Fragment implements View.OnClickListener {
             } catch (Exception e) {
                 // do nothing
             }
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // set screen brightness to the max
+        WindowManager.LayoutParams params = activity.getWindow().getAttributes();
+        if (params != null && activity.getWindow() != null) {
+            params.screenBrightness = 1f;
+            activity.getWindow().setAttributes(params);
         }
     }
 

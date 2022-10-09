@@ -52,13 +52,13 @@ import java.util.TimerTask;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
-import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
-import io.olvid.messenger.discussion.DiscussionActivity;
-import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
+import io.olvid.messenger.discussion.DiscussionActivity;
+import io.olvid.messenger.main.MainActivity;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.webrtc.WebrtcCallActivity;
 import io.olvid.messenger.webrtc.WebrtcIncomingCallActivity;

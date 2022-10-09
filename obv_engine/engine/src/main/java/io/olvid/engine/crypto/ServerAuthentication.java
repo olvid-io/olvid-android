@@ -22,6 +22,7 @@ package io.olvid.engine.crypto;
 
 import java.security.InvalidKeyException;
 
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaCurve25519PrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaCurve25519PublicKey;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaMDCPrivateKey;
@@ -36,8 +37,6 @@ public interface ServerAuthentication {
 }
 
 abstract class ServerAuthenticationECSdsa implements ServerAuthentication {
-    public static final byte[] PREFIX = "authentChallenge".getBytes();
-    public static final int PADDING_LENGTH = 16;
     private final SignatureECSdsa signatureECSdsa;
 
     ServerAuthenticationECSdsa(SignatureECSdsa signatureECSdsa) {
@@ -45,15 +44,15 @@ abstract class ServerAuthenticationECSdsa implements ServerAuthentication {
     }
 
     byte[] internalSolveChallenge(byte[] challenge, ServerAuthenticationECSdsaPrivateKey privateKey, ServerAuthenticationECSdsaPublicKey publicKey, PRNGService prng) throws InvalidKeyException {
-        byte[] padding = prng.bytes(PADDING_LENGTH);
-        byte[] formattedChallenge = new byte[PREFIX.length + challenge.length + PADDING_LENGTH];
-        System.arraycopy(PREFIX, 0, formattedChallenge, 0, PREFIX.length);
-        System.arraycopy(challenge, 0, formattedChallenge, PREFIX.length, challenge.length);
-        System.arraycopy(padding, 0, formattedChallenge, PREFIX.length + challenge.length, PADDING_LENGTH);
+        byte[] padding = prng.bytes(Constants.SIGNATURE_PADDING_LENGTH);
+        byte[] formattedChallenge = new byte[Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX.length + challenge.length + Constants.SIGNATURE_PADDING_LENGTH];
+        System.arraycopy(Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX, 0, formattedChallenge, 0, Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX.length);
+        System.arraycopy(challenge, 0, formattedChallenge, Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX.length, challenge.length);
+        System.arraycopy(padding, 0, formattedChallenge, Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX.length + challenge.length, Constants.SIGNATURE_PADDING_LENGTH);
         byte[] signature = signatureECSdsa.sign(privateKey.getSignaturePrivateKey(), publicKey.getSignaturePublicKey(), formattedChallenge, prng);
-        byte[] response = new byte[PADDING_LENGTH + signature.length];
-        System.arraycopy(padding, 0, response, 0, PADDING_LENGTH);
-        System.arraycopy(signature, 0, response, PADDING_LENGTH, signature.length);
+        byte[] response = new byte[Constants.SIGNATURE_PADDING_LENGTH + signature.length];
+        System.arraycopy(padding, 0, response, 0, Constants.SIGNATURE_PADDING_LENGTH);
+        System.arraycopy(signature, 0, response, Constants.SIGNATURE_PADDING_LENGTH, signature.length);
         return response;
     }
 }

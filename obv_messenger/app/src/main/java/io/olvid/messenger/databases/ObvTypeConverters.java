@@ -23,6 +23,7 @@ import androidx.room.TypeConverter;
 
 import java.util.UUID;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.AppSingleton;
@@ -43,7 +44,7 @@ public class ObvTypeConverters {
         if (uuid == null) {
             return null;
         }
-        return uuid.toString();
+        return Logger.getUuidString(uuid);
     }
     // endregion
 

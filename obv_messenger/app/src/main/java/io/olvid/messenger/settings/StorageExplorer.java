@@ -55,7 +55,7 @@ import java.util.List;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
-import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.StringUtils;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
@@ -95,7 +95,7 @@ public class StorageExplorer extends LockableActivity {
 
         recyclerView = findViewById(R.id.storage_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(this, 0, 0));
+        recyclerView.addItemDecoration(new ItemDecorationSimpleDivider(this, 0, 0));
         StorageExplorerAdapter adapter = new StorageExplorerAdapter(getLayoutInflater(), this::onItemClicked);
         recyclerView.setAdapter(adapter);
 
@@ -147,7 +147,7 @@ public class StorageExplorer extends LockableActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && data != null) {
             final Uri uri = data.getData();
-            if (uri != null) {
+            if (StringUtils.validateUri(uri)) {
                 App.runThread(() -> {
                     try (OutputStream os = getContentResolver().openOutputStream(uri)) {
                         if (os == null) {

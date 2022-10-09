@@ -26,12 +26,25 @@
         app:layout_constraintVertical_bias="0.33"
         app:layout_constraintVertical_chainStyle="packed" />
 
+    <ImageView
+        android:id="@+id/portrait_color_circle_image_view"
+        android:layout_width="192dp"
+        android:layout_height="192dp"
+        app:layout_constraintTop_toTopOf="@id/contact_initial_view"
+        app:layout_constraintBottom_toBottomOf="@id/contact_initial_view"
+        app:layout_constraintStart_toStartOf="@id/contact_initial_view"
+        app:layout_constraintEnd_toEndOf="@id/contact_initial_view"
+        android:src="@drawable/initial_view_color_circle"
+        android:visibility="gone"
+        tools:visibility="visible"
+        />
+
     <io.olvid.messenger.customClasses.InitialView
         android:id="@+id/contact_initial_view"
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toTopOf="@+id/contact_name_text_view"
         app:layout_constraintEnd_toEndOf="parent"
@@ -44,7 +57,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
         android:maxLines="2"
         android:textAlignment="center"
@@ -132,7 +145,7 @@
         android:id="@+id/big_count_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:textColor="@color/alwaysWhite"
         android:textSize="48sp"
         app:layout_constraintBottom_toBottomOf="@+id/contact_initial_view"

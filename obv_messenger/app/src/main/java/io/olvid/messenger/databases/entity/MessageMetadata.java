@@ -55,6 +55,8 @@ public class MessageMetadata {
     public static final int KIND_EDITED = 3;
     public static final int KIND_REMOTE_DELETED = 4;
     public static final int KIND_UNDELIVERED = 5; // when we set the outbound status to undelivered
+    public static final int KIND_LOCATION_SHARING_LATEST_UPDATE = 6; // used to avoid multiple edited metadata when sharing location
+    public static final int KIND_LOCATION_SHARING_END = 7;
 
     @PrimaryKey(autoGenerate = true)
     public long id;

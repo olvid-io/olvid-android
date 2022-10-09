@@ -57,18 +57,11 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/button_go_to"
+                    android:id="@+id/button_reject"
                     style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/button_label_go_to_discussion"/>
-
-                <Button
-                    android:id="@+id/button_ok"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/button_label_ok"/>
+                    android:text="@string/button_label_reject"/>
 
                 <Button
                     android:id="@+id/button_ignore"
@@ -83,13 +76,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/button_label_accept"/>
-
-                <Button
-                    android:id="@+id/button_abort"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/button_label_abort"/>
 
         </LinearLayout>
 

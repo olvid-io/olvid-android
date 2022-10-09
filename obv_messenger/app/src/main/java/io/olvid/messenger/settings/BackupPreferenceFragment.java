@@ -348,7 +348,7 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
         if (enableAutomaticBackupPreference != null) {
             if (enableAutomaticBackupPreference.callChangeListener(true)) {
                 enableAutomaticBackupPreference.setChecked(true);
-                AppSingleton.getEngine().setAutoBackupEnabled(true);
+                AppSingleton.getEngine().setAutoBackupEnabled(true, true);
             }
             refreshBackupPreferences();
         }
@@ -358,7 +358,7 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
         if (enableAutomaticBackupPreference != null) {
             if (enableAutomaticBackupPreference.callChangeListener(false)) {
                 enableAutomaticBackupPreference.setChecked(false);
-                AppSingleton.getEngine().setAutoBackupEnabled(false);
+                AppSingleton.getEngine().setAutoBackupEnabled(false, true);
             }
             refreshBackupPreferences();
         }
@@ -374,7 +374,7 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
             if (resultCode == Activity.RESULT_OK) {
                 final Uri uri = data.getData();
                 final byte[] encryptedContent = viewModel.getExportBackupContent();
-                if (uri != null) {
+                if (StringUtils.validateUri(uri)) {
                     App.runThread(() -> {
                         try (OutputStream os = activity.getContentResolver().openOutputStream(uri)) {
                             if (os == null) {

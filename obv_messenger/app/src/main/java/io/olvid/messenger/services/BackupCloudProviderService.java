@@ -558,10 +558,8 @@ class WebdavProvider {
                     String url = (serverUrl.endsWith("/") ? serverUrl : serverUrl + "/") + FILE_NAME_FOR_WRITE_ACCESS_TEST;
                     sardine.put(url, "test".getBytes(StandardCharsets.UTF_8));
                     sardine.delete(url);
-                    onValidateCallback.onValidateSuccess();
-                } else {
-                    onValidateCallback.onValidateSuccess();
                 }
+                onValidateCallback.onValidateSuccess();
             } catch (SardineException e) {
                 e.printStackTrace();
                 switch (e.getStatusCode()) {
@@ -599,11 +597,13 @@ class WebdavProvider {
 
                 String deviceUniqueId = SettingsActivity.getAutomaticBackupDeviceUniqueId();
                 String fileName = deviceUniqueId + "|" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART + BACKUP_FILE_EXTENSION;
+                //noinspection DuplicateExpressions
                 String url = (serverUrl.endsWith("/") ? serverUrl : serverUrl + "/") + URLEncoder.encode(fileName, StandardCharsets.UTF_8.name());
 
                 if (sardine.exists(url)) {
                     // a file already exists with the name, do a "rotation" instead of brutally overwriting it
                     String fileNameAlt = fileName.substring(0, fileName.length() - BACKUP_FILE_EXTENSION.length()) + BACKUP_ALT_NAME_SUFFIX + BACKUP_FILE_EXTENSION;
+                    //noinspection DuplicateExpressions
                     String urlAlt = (serverUrl.endsWith("/") ? serverUrl : serverUrl + "/") + URLEncoder.encode(fileNameAlt, StandardCharsets.UTF_8.name());
                     sardine.move(url, urlAlt, true);
                 }

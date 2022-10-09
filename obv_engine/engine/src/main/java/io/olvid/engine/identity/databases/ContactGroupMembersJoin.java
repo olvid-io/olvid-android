@@ -19,6 +19,8 @@
 
 package io.olvid.engine.identity.databases;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -293,7 +295,7 @@ public class ContactGroupMembersJoin implements ObvDatabase {
         }
     }
 
-
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Pojo_0 {
         public byte[] contact_identity;
     }

@@ -178,18 +178,21 @@ public class QRCodeScannerFragment extends Fragment {
                             return;
                         }
                         // image is YUV --> first plane is luminance
-                        ByteBuffer data = image.getPlanes()[0].getBuffer();
+                        ImageProxy.PlaneProxy plane = image.getPlanes()[0];
+                        ByteBuffer data = plane.getBuffer();
                         data.rewind();
                         byte[] bytes = new byte[data.remaining()];
                         data.get(bytes);
+                        int width = plane.getRowStride()/plane.getPixelStride();
+                        int height = bytes.length * plane.getPixelStride()/plane.getRowStride();
                         PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(
                                 bytes,
-                                image.getWidth(),
-                                image.getHeight(),
+                                width,
+                                height,
                                 0,
                                 0,
-                                image.getWidth(),
-                                image.getHeight(),
+                                width,
+                                height,
                                 false);
                         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
                         try {

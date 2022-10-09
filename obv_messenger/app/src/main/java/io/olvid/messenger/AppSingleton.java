@@ -22,24 +22,10 @@ package io.olvid.messenger;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-//import net.openid.appauth.AuthState;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,11 +36,21 @@ import androidx.lifecycle.Transformations;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
@@ -69,6 +65,7 @@ import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.CustomSSLSocketFactory;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
@@ -92,9 +89,17 @@ public class AppSingleton {
     private static final AppSingleton instance = new AppSingleton();
 
     private final Engine engine;
-    private final SSLSocketFactory sslSocketFactory;
+    private final CustomSSLSocketFactory sslSocketFactory;
     @SuppressWarnings({"FieldCanBeLocal", "unused", "RedundantSuppression"})
     private final EngineNotificationProcessor engineNotificationProcessor;
+    @SuppressWarnings({"FieldCanBeLocal", "unused", "RedundantSuppression"})
+    private final EngineNotificationProcessorForContacts engineNotificationProcessorForContacts;
+    @SuppressWarnings({"FieldCanBeLocal", "unused", "RedundantSuppression"})
+    private final EngineNotificationProcessorForGroups engineNotificationProcessorForGroups;
+    @SuppressWarnings({"FieldCanBeLocal", "unused", "RedundantSuppression"})
+    private final EngineNotificationProcessorForGroupsV2 engineNotificationProcessorForGroupsV2;
+    @SuppressWarnings({"FieldCanBeLocal", "unused", "RedundantSuppression"})
+    private final EngineNotificationProcessorForMessages engineNotificationProcessorForMessages;
     private final ObjectMapper jsonObjectMapper;
     private final AppDatabase db;
     private final Observer<List<OwnedIdentity>> firstIdentitySelector;
@@ -141,6 +146,16 @@ public class AppSingleton {
                 SettingsActivity.setComposeMessageIconPreferredOrder(icons);
             }
         }
+
+        // TODO: enable this once location is no longer in beta
+//        if (lastBuildExecuted != 0 && lastBuildExecuted < 171) {
+//            // if the user has customized attach icon order, add the send location icon so they see it
+//            List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
+//            if (icons != null && !icons.contains(ComposeMessageFragment.ICON_SEND_LOCATION)) {
+//                icons.add(0, ComposeMessageFragment.ICON_SEND_LOCATION);
+//                SettingsActivity.setComposeMessageIconPreferredOrder(icons);
+//            }
+//        }
 
         {
             // generate App directories
@@ -205,6 +220,10 @@ public class AppSingleton {
             throw new RuntimeException(e);
         }
         this.engineNotificationProcessor = new EngineNotificationProcessor(this.engine);
+        this.engineNotificationProcessorForContacts = new EngineNotificationProcessorForContacts(this.engine);
+        this.engineNotificationProcessorForGroups = new EngineNotificationProcessorForGroups(this.engine);
+        this.engineNotificationProcessorForGroupsV2 = new EngineNotificationProcessorForGroupsV2(this.engine);
+        this.engineNotificationProcessorForMessages = new EngineNotificationProcessorForMessages(this.engine);
         this.websocketConnectivityStateLiveData = new MutableLiveData<>(0);
         this.engine.startSendingNotifications();
 
@@ -217,6 +236,9 @@ public class AppSingleton {
             return null;
         });
         availableIdentities = db.ownedIdentityDao().getAllNotHiddenLiveData();
+        if (this.sslSocketFactory != null) {
+            this.sslSocketFactory.loadKnownCertificates();
+        }
 
         // this observer is used in case there is no latest identity, or the latest identity cannot be found
         firstIdentitySelector = new Observer<List<OwnedIdentity>>() {
@@ -568,6 +590,24 @@ public class AppSingleton {
                             } catch (Exception ignored) {
                                 // failed to check if there are unpublished details, nobody cares!
                             }
+                            // set ownedIdentity capabilities
+                            List<ObvCapability> ownCapabilities = engine.getOwnCapabilities(ownedIdentity.bytesOwnedIdentity);
+                            if (ownCapabilities != null) {
+                                for (ObvCapability obvCapability : ownCapabilities) {
+                                    switch (obvCapability) {
+                                        case WEBRTC_CONTINUOUS_ICE:
+                                            ownedIdentity.capabilityWebrtcContinuousIce = true;
+                                            break;
+                                        case ONE_TO_ONE_CONTACTS:
+                                            ownedIdentity.capabilityOneToOneContacts = true;
+                                            break;
+                                        case GROUPS_V2:
+                                            ownedIdentity.capabilityGroupsV2 = true;
+                                            break;
+                                    }
+                                }
+                            }
+
                             db.ownedIdentityDao().insert(ownedIdentity);
 
                             Logger.w("💾 Restored own identity");
@@ -632,7 +672,7 @@ public class AppSingleton {
                             if (appDataBackup != null) {
                                 Boolean success = new RestoreAppDataFromBackupTask(appDataBackup).call();
                                 if (success != null && !success) {
-                                    Logger.w("💾 Failed to restore som app data");
+                                    Logger.w("💾 Failed to restore some app data");
                                     App.toast(R.string.toast_message_unable_to_restore_app_data, Toast.LENGTH_LONG);
                                 } else {
                                     Logger.w("💾 App data successfully restored");
@@ -731,7 +771,7 @@ public class AppSingleton {
         return instance.engine;
     }
 
-    public static SSLSocketFactory getSslSocketFactory() {
+    public static CustomSSLSocketFactory getSslSocketFactory() {
         return instance.sslSocketFactory;
     }
 
@@ -840,6 +880,12 @@ public class AppSingleton {
         }
         if (!ownedIdentity.active) {
             contactInactiveHashSet.add(ownKey);
+        }
+
+        List<Group2PendingMember> pendingMembers = AppDatabase.getInstance().group2PendingMemberDao().getAll(ownedIdentity.bytesOwnedIdentity);
+        for (Group2PendingMember pendingMember : pendingMembers) {
+            BytesKey key = new BytesKey(pendingMember.bytesContactIdentity);
+            contactNamesHashMap.put(key, pendingMember.displayName);
         }
 
         getInstance().contactNamesCache.postValue(contactNamesHashMap);

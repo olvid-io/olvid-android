@@ -203,7 +203,7 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
         OwnedIdentityKeycloakBindingMessage receivedMessage;
 
         public OwnedIdentityKeycloakBindingStep(InitialProtocolState startState, OwnedIdentityKeycloakBindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -247,7 +247,7 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
         OwnedIdentityKeycloakUnbindingMessage receivedMessage;
 
         public OwnedIdentityKeycloakUnbindingStep(InitialProtocolState startState, OwnedIdentityKeycloakUnbindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

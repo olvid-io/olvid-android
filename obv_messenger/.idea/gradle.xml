@@ -17,7 +17,6 @@
             <option value="$PROJECT_DIR$/sardine-android" />
           </set>
         </option>
-        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

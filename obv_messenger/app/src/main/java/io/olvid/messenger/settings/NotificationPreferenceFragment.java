@@ -37,18 +37,19 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
-import io.olvid.messenger.notifications.AndroidNotificationManager;
+import java.util.Objects;
+
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.ImageViewPreference;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.fragments.dialog.LedColorPickerDialogFragment;
-import io.olvid.messenger.services.UnifiedForegroundService;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 
-public class NotificationPreferenceFragment extends PreferenceFragmentCompat implements LedColorPickerDialogFragment.OnLedColorSelectedListener {
+public class NotificationPreferenceFragment extends PreferenceFragmentCompat {
     FragmentActivity activity;
 
     public static final int MESSAGE_RINGTONE_REQUEST_CODE = 23;
-    public static final int MESSAGE_LED_COLOR_REQUEST_CODE = 24;
     public static final int CALL_RINGTONE_REQUEST_CODE = 25;
 
     Preference messageRingtonePreference;
@@ -98,11 +99,16 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat imp
             });
         }
 
-        messageLedColorPreference = screen.findPreference(SettingsActivity.PREF_KEY_MESSAGE_LED);
+        messageLedColorPreference = screen.findPreference(SettingsActivity.PREF_KEY_MESSAGE_LED_COLOR);
         if (messageLedColorPreference != null) {
             messageLedColorPreference.setOnPreferenceClickListener((Preference preference) -> {
-                LedColorPickerDialogFragment ledColorPickerDialogFragment = LedColorPickerDialogFragment.newInstance(MESSAGE_LED_COLOR_REQUEST_CODE);
+                LedColorPickerDialogFragment ledColorPickerDialogFragment = LedColorPickerDialogFragment.newInstance();
                 ledColorPickerDialogFragment.setInitialColor(SettingsActivity.getMessageLedColor());
+                ledColorPickerDialogFragment.setOnLedColorSelectedListener((String color) -> {
+                    SettingsActivity.setMessageLedColor(color);
+                    messageSettingsChanged = true;
+                    updateMessageLedColorImage();
+                });
                 ledColorPickerDialogFragment.show(getChildFragmentManager(), "dialog");
                 return true;
             });
@@ -120,7 +126,7 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat imp
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, callRingtone);
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_RINGTONE_URI);
-                startActivityForResult(intent, CALL_RINGTONE_REQUEST_CODE);
+                App.startActivityForResult(this, intent, CALL_RINGTONE_REQUEST_CODE);
                 return true;
             });
             updateCallRingtoneSummary();
@@ -147,21 +153,7 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat imp
             }
         }
 
-        SwitchPreference permanentForegroundPreference = screen.findPreference(SettingsActivity.PREF_KEY_PERMANENT_FOREGROUND_SERVICE);
-        if (permanentForegroundPreference != null) {
-            permanentForegroundPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
-                App.runThread(() -> {
-                    try {
-                        // wait 1 second for the setting to actually be updated
-                        Thread.sleep(1_000);
-                    } catch (InterruptedException e) {
-                        // do nothing
-                    }
-                    activity.startService(new Intent(activity, UnifiedForegroundService.class));
-                });
-                return true;
-            });
-        }
+
     }
 
     private void updateMessageRingtoneSummary() {
@@ -219,12 +211,12 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat imp
             case MESSAGE_RINGTONE_REQUEST_CODE: {
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-                    if (uri == null) {
-                        SettingsActivity.setMessageRingtone(Uri.EMPTY.toString());
-                    } else if (uri.equals(Settings.System.DEFAULT_NOTIFICATION_URI)) {
+                    if (Objects.equals(uri, Settings.System.DEFAULT_NOTIFICATION_URI)) {
                         SettingsActivity.setMessageRingtone(null);
-                    } else {
+                    } else if (StringUtils.validateUri(uri)) {
                         SettingsActivity.setMessageRingtone(uri.toString());
+                    } else {
+                        SettingsActivity.setMessageRingtone(Uri.EMPTY.toString());
                     }
                     updateMessageRingtoneSummary();
                     messageSettingsChanged = true;
@@ -234,12 +226,12 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat imp
             case CALL_RINGTONE_REQUEST_CODE: {
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-                    if (uri == null) {
-                        SettingsActivity.setCallRingtone(Uri.EMPTY.toString());
-                    } else if (uri.equals(Settings.System.DEFAULT_NOTIFICATION_URI)) {
+                    if (Objects.equals(uri, Settings.System.DEFAULT_NOTIFICATION_URI)) {
                         SettingsActivity.setCallRingtone(null);
-                    } else {
+                    } else if (StringUtils.validateUri(uri)) {
                         SettingsActivity.setCallRingtone(uri.toString());
+                    } else {
+                        SettingsActivity.setCallRingtone(Uri.EMPTY.toString());
                     }
                     updateCallRingtoneSummary();
                 }
@@ -253,17 +245,6 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat imp
         super.onDetach();
         if (messageSettingsChanged) {
             AndroidNotificationManager.updateMessageChannel(true);
-        }
-    }
-
-    @Override
-    public void onLedColorSelected(int requestCode, String color) {
-        if (requestCode == MESSAGE_LED_COLOR_REQUEST_CODE) {
-            if (messageLedColorPreference != null) {
-                SettingsActivity.setMessageLedColor(color);
-                messageSettingsChanged = true;
-                updateMessageLedColorImage();
-            }
         }
     }
 }

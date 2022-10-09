@@ -59,14 +59,15 @@ import java.util.Date;
 import java.util.Locale;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
-import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
+import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.fragments.dialog.HiddenProfilePasswordCreationDialogFragment;
 import io.olvid.messenger.settings.SettingsActivity;
-import io.olvid.messenger.customClasses.InitialView;
 
 
 public class OwnedIdentityDetailsFragment extends Fragment {
@@ -339,7 +340,9 @@ public class OwnedIdentityDetailsFragment extends Fragment {
         switch (requestCode) {
             case REQUEST_CODE_CHOOSE_IMAGE: {
                 if (resultCode == Activity.RESULT_OK && data != null) {
-                    startActivityForResult(new Intent(null, data.getData(), App.getContext(), SelectDetailsPhotoActivity.class), REQUEST_CODE_SELECT_ZONE);
+                    if (StringUtils.validateUri(data.getData())) {
+                        startActivityForResult(new Intent(null, data.getData(), App.getContext(), SelectDetailsPhotoActivity.class), REQUEST_CODE_SELECT_ZONE);
+                    }
                 }
                 break;
             }
@@ -386,7 +389,7 @@ public class OwnedIdentityDetailsFragment extends Fragment {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                 App.startActivityForResult(this, takePictureIntent, REQUEST_CODE_TAKE_PICTURE);
             } catch (IOException e) {
-                Logger.w("Error creating photo capture file " + photoFile.toString());
+                Logger.w("Error creating photo capture file " + photoFile);
             }
         }
     }

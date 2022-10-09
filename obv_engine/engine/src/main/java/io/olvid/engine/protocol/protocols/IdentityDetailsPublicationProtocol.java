@@ -287,7 +287,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public StartPhotoUploadStep(InitialProtocolState startState, InitialMessage receivedMessage, IdentityDetailsPublicationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -358,7 +358,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
         private final ServerPutPhotoMessage receivedMessage;
 
         public SendDetailsStep(UploadingPhotoState startState, ServerPutPhotoMessage receivedMessage, IdentityDetailsPublicationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -389,7 +389,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
         private final SendDetailsMessage receivedMessage;
 
         public ReceiveDetailsStep(InitialProtocolState startState, SendDetailsMessage receivedMessage, IdentityDetailsPublicationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

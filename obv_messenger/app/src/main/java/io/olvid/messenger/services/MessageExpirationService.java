@@ -32,12 +32,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import io.olvid.engine.Logger;
-import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageExpiration;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MessageExpirationService extends BroadcastReceiver {

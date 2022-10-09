@@ -38,27 +38,45 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/discussion_unread_message_count_text_view"
+    <LinearLayout
+        android:id="@+id/unread_and_pinned_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_marginTop="4dp"
-        android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
-        android:background="@drawable/background_red_badge"
-        android:paddingStart="7sp"
-        android:paddingTop="1sp"
-        android:paddingEnd="7sp"
-        android:paddingBottom="2sp"
-        android:textColor="@color/alwaysWhite"
-        android:textSize="14sp"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/discussion_last_message_attachment_count_text_view"
         app:layout_constraintEnd_toEndOf="@+id/end_guideline"
-        app:layout_constraintTop_toBottomOf="@+id/discussion_background_image"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
-        tools:text="6"
-        tools:visibility="visible" />
+        android:gravity="bottom"
+        tools:ignore="UseCompoundDrawables">
+        <ImageView
+            android:id="@+id/discussion_pinned_image_view"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="4dp"
+            android:src="@drawable/ic_pinned"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/discussion_unread_message_count_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_red_badge"
+            android:paddingStart="7sp"
+            android:paddingTop="1sp"
+            android:paddingEnd="7sp"
+            android:paddingBottom="2sp"
+            android:layout_marginEnd="4dp"
+            android:textColor="@color/alwaysWhite"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="6"
+            tools:visibility="visible" />
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/discussion_last_message_attachment_count_text_view"
@@ -76,9 +94,9 @@
         android:textColor="@color/grey"
         android:textSize="10sp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/discussion_background_image"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/end_guideline"
-        app:layout_constraintTop_toBottomOf="@+id/discussion_unread_message_count_text_view"
+        app:layout_constraintTop_toBottomOf="@+id/unread_and_pinned_group"
         tools:ignore="SmallSp"
         tools:text="3 attachments"
         tools:visibility="visible" />
@@ -88,7 +106,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="start"
-        app:constraint_referenced_ids="discussion_last_message_attachment_count_text_view, discussion_unread_message_count_text_view" />
+        app:constraint_referenced_ids="discussion_last_message_attachment_count_text_view, unread_and_pinned_group" />
 
     <TextView
         android:id="@+id/discussion_title"
@@ -103,7 +121,7 @@
         android:textColor="@color/primary700"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/discussion_last_message_content"
-        app:layout_constraintEnd_toStartOf="@+id/discussion_unread_message_count_text_view"
+        app:layout_constraintEnd_toStartOf="@+id/unread_and_pinned_group"
         app:layout_constraintStart_toEndOf="@+id/initial_view"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"

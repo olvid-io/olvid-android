@@ -476,7 +476,7 @@ public class FullRatchetProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public AliceSendEphemeralKeyStep(InitialProtocolState startState, InitialMessage receivedMessage, FullRatchetProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -516,7 +516,7 @@ public class FullRatchetProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public AliceResendEphemeralKeyStep(AliceWaitingForK1State startState, InitialMessage receivedMessage, FullRatchetProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.contactIdentity = startState.contactIdentity;
             this.contactDeviceUid = startState.contactDeviceUid;
             this.previousRestartCounter = startState.restartCounter;
@@ -524,7 +524,7 @@ public class FullRatchetProtocol extends ConcreteProtocol {
         }
 
         public AliceResendEphemeralKeyStep(AliceWaitingForAckState startState, InitialMessage receivedMessage, FullRatchetProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.contactIdentity = startState.contactIdentity;
             this.contactDeviceUid = startState.contactDeviceUid;
             this.previousRestartCounter = startState.restartCounter;
@@ -560,13 +560,13 @@ public class FullRatchetProtocol extends ConcreteProtocol {
         private final AliceEphemeralKeyMessage receivedMessage;
 
         public BobSendEphemeralKeyAndK1Step(InitialProtocolState startState, AliceEphemeralKeyMessage receivedMessage, FullRatchetProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.previousState = null;
             this.receivedMessage = receivedMessage;
         }
 
         public BobSendEphemeralKeyAndK1Step(BobWaitingForK2State startState, AliceEphemeralKeyMessage receivedMessage, FullRatchetProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
             this.previousState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -614,7 +614,7 @@ public class FullRatchetProtocol extends ConcreteProtocol {
         private final BobEphemeralKeyAndK1Message receivedMessage;
 
         public AliceRecoverK1AndSendK2Step(AliceWaitingForK1State startState, BobEphemeralKeyAndK1Message receivedMessage, FullRatchetProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -660,7 +660,7 @@ public class FullRatchetProtocol extends ConcreteProtocol {
         private final AliceK2Message receivedMessage;
 
         public BobRecoverK2ToUpdateReceiveSeedAndSendAckStep(BobWaitingForK2State startState, AliceK2Message receivedMessage, FullRatchetProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -700,7 +700,7 @@ public class FullRatchetProtocol extends ConcreteProtocol {
         private final BobAckMessage receivedMessage;
 
         public AliceUpdateSendSeedStep(AliceWaitingForAckState startState, BobAckMessage receivedMessage, FullRatchetProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

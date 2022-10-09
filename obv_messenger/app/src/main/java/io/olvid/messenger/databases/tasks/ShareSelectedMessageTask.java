@@ -23,7 +23,6 @@ package io.olvid.messenger.databases.tasks;
 import android.content.Intent;
 import android.net.Uri;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
 import java.lang.ref.WeakReference;
@@ -51,6 +50,13 @@ public class ShareSelectedMessageTask implements Runnable {
         Message message = db.messageDao().get(selectedMessageId);
 
         if (message != null) {
+            if ((message.messageType != Message.TYPE_OUTBOUND_MESSAGE
+                    && message.messageType != Message.TYPE_INBOUND_MESSAGE)
+                    || message.wipeStatus != Message.WIPE_STATUS_NONE
+                    || message.limitedVisibility) {
+                return;
+            }
+
             Intent intent = new Intent();
             String mimeType = null;
             boolean multiple = ((message.contentBody != null && message.contentBody.length() > 0) && (message.totalAttachmentCount > 0)) || (message.totalAttachmentCount > 1);

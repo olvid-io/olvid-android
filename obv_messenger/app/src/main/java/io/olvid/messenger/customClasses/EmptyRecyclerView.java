@@ -20,10 +20,11 @@
 package io.olvid.messenger.customClasses;
 
 import android.content.Context;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 

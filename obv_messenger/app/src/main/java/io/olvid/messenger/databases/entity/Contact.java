@@ -19,13 +19,13 @@
 
 package io.olvid.messenger.databases.entity;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
-import androidx.annotation.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -114,7 +114,7 @@ public class Contact {
 
     @ColumnInfo(name = IDENTITY_DETAILS)
     @Nullable
-    public String identityDetails;
+    public String identityDetails; // serialized JsonIdentityDetails
 
     @ColumnInfo(name = NEW_PUBLISHED_DETAILS)
     public int newPublishedDetails;
@@ -313,8 +313,10 @@ public class Contact {
             // delete the contact
             db.contactDao().delete(this);
 
-            // remove this contact from all caches
-            AppSingleton.updateCacheContactDeleted(bytesContactIdentity);
+            if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), bytesOwnedIdentity)) {
+                // remove this contact from all caches
+                AppSingleton.updateCacheContactDeleted(bytesContactIdentity);
+            }
 
             // get all unsent (not passed to the engine because of a lack of channel) MessageRecipientInfo and delete them
             //  --> update message status accordingly

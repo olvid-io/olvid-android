@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.RestrictionsManager;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
@@ -55,18 +54,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
     @Override
     protected void attachBaseContext(Context baseContext) {
-        final Context newContext;
-        float customFontScale = SettingsActivity.getFontScale();
-        float fontScale = baseContext.getResources().getConfiguration().fontScale;
-        if (customFontScale != 1.0f) {
-            Configuration configuration = new Configuration();
-            configuration.fontScale = fontScale * customFontScale;
-            newContext = baseContext.createConfigurationContext(configuration);
-        } else {
-            newContext = baseContext;
-        }
-
-        super.attachBaseContext(newContext);
+        super.attachBaseContext(SettingsActivity.overrideContextScales(baseContext));
     }
 
     @Override

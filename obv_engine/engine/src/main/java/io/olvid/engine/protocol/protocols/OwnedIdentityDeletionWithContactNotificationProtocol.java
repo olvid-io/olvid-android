@@ -159,7 +159,7 @@ public class OwnedIdentityDeletionWithContactNotificationProtocol extends Concre
         InitialMessage receivedMessage;
 
         public OwnedIdentityDeletionWithContactNotificationStep(InitialProtocolState startState, InitialMessage receivedMessage, OwnedIdentityDeletionWithContactNotificationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

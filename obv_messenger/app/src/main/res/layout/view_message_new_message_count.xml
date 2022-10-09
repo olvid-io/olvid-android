@@ -10,7 +10,7 @@
         android:id="@+id/message_new_message_count_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="1dp"
         android:background="@drawable/background_new_message_count"
         android:paddingBottom="4dp"
         android:paddingEnd="16dp"

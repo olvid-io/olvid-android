@@ -73,6 +73,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
@@ -146,6 +147,10 @@ public class GalleryActivity extends LockableActivity {
 
         viewModel = new ViewModelProvider(this).get(GalleryViewModel.class);
 
+
+        //noinspection unused // this useless line is here to prevent the linter from removing the id (causing a crash)
+        View blackOverlay = findViewById(R.id.black_overlay);
+        
         galleryMotionLayout = findViewById(R.id.gallery_motion_layout);
         bottomBar = findViewById(R.id.bottom_bar);
         fileNameTextView = findViewById(R.id.file_name_text_view);
@@ -606,6 +611,7 @@ public class GalleryActivity extends LockableActivity {
         } else if (item.getItemId() == R.id.action_save) {
             FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = galleryAdapter.getItemAt(viewPager.getCurrentItem());
             if (fyleAndStatus != null && fyleAndStatus.fyle.isComplete()) {
+                App.prepareForStartActivityForResult(this);
                 saveAttachmentLauncher.launch(new Pair<>(fyleAndStatus.fyleMessageJoinWithStatus.fileName, fyleAndStatus));
             }
         } else if (item.getItemId() == R.id.action_share) {
@@ -627,7 +633,7 @@ public class GalleryActivity extends LockableActivity {
         }
         Uri uri = result.first;
         FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = result.second;
-        if (uri != null && fyleAndStatus != null) {
+        if (StringUtils.validateUri(uri) && fyleAndStatus != null) {
             App.runThread(() -> {
                 try (OutputStream os = getContentResolver().openOutputStream(uri)) {
                     if (os == null) {

@@ -48,6 +48,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/group_details_group_description_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -55,7 +56,8 @@
         android:layout_marginTop="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/group_details_group_name_layout">
+        app:layout_constraintTop_toBottomOf="@+id/group_details_group_name_layout"
+        app:layout_constraintBottom_toTopOf="@+id/personal_note_group">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/group_details_group_description"
@@ -64,5 +66,36 @@
             android:hint="@string/hint_group_description"
             android:imeOptions="flagNoPersonalizedLearning"
             android:inputType="textCapSentences" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/personal_note_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/group_details_group_description_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="visible"
+        app:errorEnabled="false">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/personal_note_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_personal_note"
+            android:imeOptions="actionNone"
+            android:inputType="textCapSentences|textMultiLine|textLongMessage"
+            android:maxLines="2"
+            android:minLines="1"
+            android:textSize="14sp"
+            android:focusable="true"
+            android:selectAllOnFocus="false"
+            android:singleLine="false"
+            android:textColor="@color/greyTint"
+            android:importantForAutofill="no"/>
     </com.google.android.material.textfield.TextInputLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

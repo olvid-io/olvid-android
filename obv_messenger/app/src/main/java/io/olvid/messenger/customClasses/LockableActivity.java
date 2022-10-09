@@ -29,37 +29,52 @@ import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.activities.LockScreenActivity;
+import io.olvid.messenger.appdialogs.AppDialogShowActivity;
 import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
-import io.olvid.messenger.appdialogs.AppDialogShowActivity;
 
 
 public abstract class LockableActivity extends AppCompatActivity {
+    protected boolean disableScaling = false;
     private EventBroadcastReceiver eventBroadcastReceiver = null;
     private boolean activityResumed = false;
 
     public static final String CUSTOM_LOCK_SCREEN_MESSAGE_RESOURCE_ID_INTENT_EXTRA = "custom_lock_screen_message_resource_id";
 
+    int attachedDensityDpi = 0;
+
     @Override
     protected void attachBaseContext(Context baseContext) {
-        final Context newContext;
-        float customFontScale = SettingsActivity.getFontScale();
-        float fontScale = baseContext.getResources().getConfiguration().fontScale;
-        if (customFontScale != 1.0f) {
-            Configuration configuration = new Configuration();
-            configuration.fontScale = fontScale * customFontScale;
-            newContext = baseContext.createConfigurationContext(configuration);
+        if (disableScaling) {
+            attachedDensityDpi = baseContext.getResources().getConfiguration().densityDpi;
+            super.attachBaseContext(baseContext);
         } else {
-            newContext = baseContext;
+            Context newContext = SettingsActivity.overrideContextScales(baseContext);
+            attachedDensityDpi = newContext.getResources().getConfiguration().densityDpi;
+            super.attachBaseContext(newContext);
         }
+    }
 
-        super.attachBaseContext(newContext);
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (attachedDensityDpi != 0 && newConfig.densityDpi != attachedDensityDpi) {
+            float customScreenScale = SettingsActivity.getScreenScale();
+            if (customScreenScale != 1.0f) {
+                // this is a hack, but we need to update values that were overridden in attachBaseContext (overridden values are not updated on configuration change)
+                Configuration configuration = getResources().getConfiguration();
+                configuration.screenWidthDp = (int) (newConfig.screenWidthDp / customScreenScale);
+                configuration.screenHeightDp = (int) (newConfig.screenHeightDp / customScreenScale);
+                configuration.smallestScreenWidthDp = (int) (newConfig.smallestScreenWidthDp / customScreenScale);
+            }
+        }
     }
 
     @Override

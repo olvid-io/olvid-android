@@ -251,7 +251,7 @@ public class DeviceDiscoveryChildProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public SendRequestStep(InitialProtocolState startState, InitialMessage receivedMessage, DeviceDiscoveryChildProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -272,7 +272,7 @@ public class DeviceDiscoveryChildProtocol extends ConcreteProtocol {
         private final ServerQueryMessage receivedMessage;
 
         public ProcessDeviceUidsStep(ServerRequestSentState startState, ServerQueryMessage receivedMessage, DeviceDiscoveryChildProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

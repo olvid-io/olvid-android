@@ -29,6 +29,7 @@ import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Chunk;
 import io.olvid.engine.datatypes.EncryptedBytes;
+import io.olvid.engine.datatypes.EtaEstimator;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.PriorityOperation;
@@ -115,6 +116,8 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                     return;
                 }
 
+                final EtaEstimator etaEstimator = new EtaEstimator(attachment.getReceivedLength(), attachment.getExpectedLength());
+
                 while (attachment.getReceivedLength() != attachment.getExpectedLength()) {
                     if (cancelWasRequested()) {
                         return;
@@ -151,8 +154,12 @@ public class DownloadAttachmentOperation extends PriorityOperation {
 
                         @Override
                         public void onProgress(long byteCount) {
-                            float progress = (float) (attachment.getReceivedLength()+byteCount)/attachment.getExpectedLength();
+                            float progress = (float) (attachment.getReceivedLength() + byteCount) / attachment.getExpectedLength();
                             userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY, progress);
+                            etaEstimator.update(attachment.getReceivedLength() + byteCount);
+                            EtaEstimator.SpeedAndEta speedAndEta = etaEstimator.getSpeedAndEta();
+                            userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_SPEED_BPS_KEY, speedAndEta.speedBps);
+                            userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_ETA_SECONDS_KEY, speedAndEta.etaSeconds);
                             fetchManagerSession.notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS, userInfo);
                         }
                     });

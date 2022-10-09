@@ -39,9 +39,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.databases.tasks.UpdateGroupV2CustomNameAndPhotoTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
 
@@ -49,13 +51,25 @@ public class EditOwnedGroupDetailsDialogFragment extends DialogFragment {
     private OwnedGroupDetailsViewModel viewModel;
     private Runnable onOkCallback;
 
-    public static EditOwnedGroupDetailsDialogFragment newInstance(AppCompatActivity parentActivity, byte[] byteOwnedIdentity, byte[] bytesGroupOwnerAndUid, JsonGroupDetailsWithVersionAndPhoto groupDetails, Runnable onOkCallback) {
+    public static EditOwnedGroupDetailsDialogFragment newInstance(AppCompatActivity parentActivity, byte[] byteOwnedIdentity, byte[] bytesGroupOwnerAndUid, JsonGroupDetailsWithVersionAndPhoto groupDetails, String personalNote, Runnable onOkCallback) {
         EditOwnedGroupDetailsDialogFragment fragment = new EditOwnedGroupDetailsDialogFragment();
         fragment.onOkCallback = onOkCallback;
         OwnedGroupDetailsViewModel viewModel = new ViewModelProvider(parentActivity).get(OwnedGroupDetailsViewModel.class);
+        viewModel.setGroupV2(false);
         viewModel.setBytesOwnedIdentity(byteOwnedIdentity);
-        viewModel.setBytesGroupOwnerAndUid(bytesGroupOwnerAndUid);
-        viewModel.setOwnedGroupDetails(groupDetails);
+        viewModel.setBytesGroupOwnerAndUidOrIdentifier(bytesGroupOwnerAndUid);
+        viewModel.setOwnedGroupDetails(groupDetails, personalNote);
+        return fragment;
+    }
+
+    public static EditOwnedGroupDetailsDialogFragment newInstanceV2(AppCompatActivity parentActivity, byte[] byteOwnedIdentity, byte[] bytesGroupIdentifier, JsonGroupDetails groupDetails, String photoUrl, String personalNote, Runnable onOkCallback) {
+        EditOwnedGroupDetailsDialogFragment fragment = new EditOwnedGroupDetailsDialogFragment();
+        fragment.onOkCallback = onOkCallback;
+        OwnedGroupDetailsViewModel viewModel = new ViewModelProvider(parentActivity).get(OwnedGroupDetailsViewModel.class);
+        viewModel.setGroupV2(true);
+        viewModel.setBytesOwnedIdentity(byteOwnedIdentity);
+        viewModel.setBytesGroupOwnerAndUidOrIdentifier(bytesGroupIdentifier);
+        viewModel.setOwnedGroupDetailsV2(groupDetails, photoUrl, personalNote);
         return fragment;
     }
 
@@ -105,35 +119,66 @@ public class EditOwnedGroupDetailsDialogFragment extends DialogFragment {
         Button publishButton = dialogView.findViewById(R.id.button_publish);
         publishButton.setOnClickListener(view -> {
             dismiss();
-            App.runThread(() -> {
-                boolean changed = false;
-                if (viewModel.detailsChanged()) {
-                    JsonGroupDetails newDetails = viewModel.getJsonGroupDetails();
-                    try {
-                        AppSingleton.getEngine().updateLatestGroupDetails(viewModel.getBytesOwnedIdentity(), viewModel.getBytesGroupOwnerAndUid(), newDetails);
-                        changed = true;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        App.toast(R.string.toast_message_error_publishing_group_details, Toast.LENGTH_SHORT);
+            if (viewModel.isGroupV2()) {
+                App.runThread(() -> {
+                    boolean changed = false;
+
+                    ObvGroupV2.ObvGroupV2ChangeSet obvChangeSet = new ObvGroupV2.ObvGroupV2ChangeSet();
+                    if (viewModel.detailsChanged()) {
+                        try {
+                            obvChangeSet.updatedSerializedGroupDetails = AppSingleton.getJsonObjectMapper().writeValueAsString(viewModel.getJsonGroupDetails());
+                            changed = true;
+                        } catch (Exception ignored) {}
                     }
-                }
-                if (viewModel.photoChanged()) {
-                    String absolutePhotoUrl = viewModel.getAbsolutePhotoUrl();
-                    try {
-                        AppSingleton.getEngine().updateOwnedGroupPhoto(viewModel.getBytesOwnedIdentity(), viewModel.getBytesGroupOwnerAndUid(), absolutePhotoUrl);
+                    if (viewModel.photoChanged()) {
+                        obvChangeSet.updatedPhotoUrl = viewModel.getAbsolutePhotoUrl() == null ? "" : viewModel.getAbsolutePhotoUrl();
                         changed = true;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        App.toast(R.string.toast_message_error_publishing_group_details, Toast.LENGTH_SHORT);
                     }
-                }
-                if (changed) {
-                    AppSingleton.getEngine().publishLatestGroupDetails(viewModel.getBytesOwnedIdentity(), viewModel.getBytesGroupOwnerAndUid());
-                }
-                if (onOkCallback != null) {
-                    onOkCallback.run();
-                }
-            });
+                    if (changed) {
+                        try {
+                            AppSingleton.getEngine().initiateGroupV2Update(viewModel.getBytesOwnedIdentity(), viewModel.getBytesGroupOwnerAndUidOrIdentifier(), obvChangeSet);
+                            new UpdateGroupV2CustomNameAndPhotoTask(viewModel.getBytesOwnedIdentity(), viewModel.getBytesGroupOwnerAndUidOrIdentifier(), null, null, viewModel.getPersonalNote()).run();
+                            if (onOkCallback != null) {
+                                onOkCallback.run();
+                            }
+                        } catch (Exception e) {
+                            App.toast(R.string.toast_message_error_retry, Toast.LENGTH_SHORT);
+                        }
+                    } else if (viewModel.personalNoteChanged()) {
+                        new UpdateGroupV2CustomNameAndPhotoTask(viewModel.getBytesOwnedIdentity(), viewModel.getBytesGroupOwnerAndUidOrIdentifier(), null, null, viewModel.getPersonalNote()).run();
+                    }
+                });
+            } else {
+                App.runThread(() -> {
+                    boolean changed = false;
+                    if (viewModel.detailsChanged()) {
+                        JsonGroupDetails newDetails = viewModel.getJsonGroupDetails();
+                        try {
+                            AppSingleton.getEngine().updateLatestGroupDetails(viewModel.getBytesOwnedIdentity(), viewModel.getBytesGroupOwnerAndUidOrIdentifier(), newDetails);
+                            changed = true;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            App.toast(R.string.toast_message_error_publishing_group_details, Toast.LENGTH_SHORT);
+                        }
+                    }
+                    if (viewModel.photoChanged()) {
+                        String absolutePhotoUrl = viewModel.getAbsolutePhotoUrl();
+                        try {
+                            AppSingleton.getEngine().updateOwnedGroupPhoto(viewModel.getBytesOwnedIdentity(), viewModel.getBytesGroupOwnerAndUidOrIdentifier(), absolutePhotoUrl);
+                            changed = true;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            App.toast(R.string.toast_message_error_publishing_group_details, Toast.LENGTH_SHORT);
+                        }
+                    }
+                    if (changed) {
+                        AppSingleton.getEngine().publishLatestGroupDetails(viewModel.getBytesOwnedIdentity(), viewModel.getBytesGroupOwnerAndUidOrIdentifier());
+                    }
+                    if (onOkCallback != null) {
+                        onOkCallback.run();
+                    }
+                });
+            }
         });
         viewModel.getValid().observe(this, valid -> publishButton.setEnabled(valid != null && valid));
 

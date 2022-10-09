@@ -19,24 +19,17 @@
 
 package io.olvid.messenger.discussion;
 
-import androidx.core.content.pm.ShortcutInfoCompat;
-import androidx.core.content.pm.ShortcutManagerCompat;
-import androidx.exifinterface.media.ExifInterface;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.animation.AnimatorSet;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -54,34 +47,18 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.appcompat.view.ActionMode;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-
 import android.text.Layout;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -101,6 +78,35 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.view.ActionMode;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.pm.ShortcutInfoCompat;
+import androidx.core.content.pm.ShortcutManagerCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.exifinterface.media.ExifInterface;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -116,56 +122,58 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
-import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
-import io.olvid.messenger.activities.DiscussionSettingsActivity;
-import io.olvid.messenger.activities.ShortcutActivity;
-import io.olvid.messenger.customClasses.DynamicFlow;
-import io.olvid.messenger.customClasses.LoadAwareAdapter;
-import io.olvid.messenger.customClasses.PreviewUtils;
-import io.olvid.messenger.customClasses.StringUtils;
-import io.olvid.messenger.databases.dao.CallLogItemDao;
-import io.olvid.messenger.databases.entity.CallLogItem;
-import io.olvid.messenger.databases.entity.CallLogItemContactJoin;
-import io.olvid.messenger.databases.entity.Group;
-import io.olvid.messenger.databases.entity.MessageMetadata;
-import io.olvid.messenger.databases.tasks.SaveMultipleAttachmentsTask;
-import io.olvid.messenger.fragments.FullScreenImageFragment;
-import io.olvid.messenger.fragments.ReactionListBottomSheetFragment;
-import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.R;
+import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding;
+import io.olvid.messenger.customClasses.BytesKey;
+import io.olvid.messenger.customClasses.DynamicFlow;
+import io.olvid.messenger.customClasses.EmptyRecyclerView;
+import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.LoadAwareAdapter;
 import io.olvid.messenger.customClasses.LockableActivity;
+import io.olvid.messenger.customClasses.MessageAttachmentAdapter;
+import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
+import io.olvid.messenger.customClasses.SizeAwareCardView;
+import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.dao.CallLogItemDao;
+import io.olvid.messenger.databases.dao.DiscussionDao;
+import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
+import io.olvid.messenger.databases.entity.CallLogItem;
+import io.olvid.messenger.databases.entity.CallLogItemContactJoin;
+import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
+import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Group2;
+import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageExpiration;
+import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.databases.tasks.ApplyDiscussionRetentionPoliciesTask;
-import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked;
 import io.olvid.messenger.databases.tasks.CreateReadMessageMetadata;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask;
+import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked;
 import io.olvid.messenger.databases.tasks.ReplaceDiscussionDraftTask;
-import io.olvid.messenger.R;
-import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
-import io.olvid.messenger.databases.entity.Contact;
-import io.olvid.messenger.databases.entity.Discussion;
-import io.olvid.messenger.databases.entity.Message;
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter;
-import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.tasks.SaveDraftTask;
+import io.olvid.messenger.databases.tasks.SaveMultipleAttachmentsTask;
 import io.olvid.messenger.databases.tasks.SetDraftReplyTask;
-import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel;
-import io.olvid.messenger.settings.SettingsActivity;
-import io.olvid.messenger.customClasses.SizeAwareCardView;
+import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity;
+import io.olvid.messenger.fragments.FullScreenImageFragment;
+import io.olvid.messenger.fragments.ReactionListBottomSheetFragment;
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
+import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel;
+import io.olvid.messenger.services.UnifiedForegroundService;
+import io.olvid.messenger.settings.SettingsActivity;
 
 public class DiscussionActivity extends LockableActivity implements View.OnClickListener, MessageAttachmentAdapter.AttachmentLongClickListener, PopupMenu.OnMenuItemClickListener {
     public static final String FULL_SCREEN_IMAGE_FRAGMENT_TAG = "full_screen_image";
@@ -175,6 +183,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     public static final String BYTES_OWNED_IDENTITY_INTENT_EXTRA = "bytes_owned_identity";
     public static final String BYTES_CONTACT_IDENTITY_INTENT_EXTRA = "bytes_contact_identity";
     public static final String BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA = "bytes_group_uid";
+    public static final String BYTES_GROUP_IDENTIFIER_INTENT_EXTRA = "bytes_group_identifier";
 
     private enum ViewType {
         DISCLAIMER,
@@ -191,17 +200,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         SETTINGS_UPDATE,
         PHONE_CALL,
         NEW_PUBLISHED_DETAILS,
+        INBOUND_LOCATION,
+        INBOUND_EPHEMERAL_LOCATION,
+        OUTBOUND_LOCATION,
+        OUTBOUND_EPHEMERAL_LOCATION,
     }
-
-    enum MenuButtonType {
-        SHARE,
-        FORWARD,
-        COPY,
-        DETAILS,
-        DELETE,
-        EDIT,
-    }
-
 
     private DiscussionViewModel discussionViewModel;
     private ComposeMessageViewModel composeMessageViewModel;
@@ -218,6 +221,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     private EmptyRecyclerView messageRecyclerView;
     private LinearLayoutManager messageListLinearLayoutManager;
     private FloatingActionButton scrollDownFab;
+    private FloatingActionButton locationSharingFab;
     private ImageView rootBackgroundImageView;
     private DiscussionDelegate discussionDelegate;
 
@@ -448,7 +452,22 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         scrollDownFab = findViewById(R.id.discussion_scroll_down_fab);
         scrollDownFab.setOnClickListener(this);
 
+        locationSharingFab = findViewById(R.id.discussion_location_sharing_fab);
+        locationSharingFab.setOnClickListener(this);
 
+        discussionViewModel.getCurrentlySharingLocationMessagesLiveData().observe(this, messages -> {
+            if (messages == null || messages.size() == 0) {
+                locationSharingFab.hide();
+                return;
+            }
+            if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.getDiscussionId())) {
+                locationSharingFab.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.red, null)));
+            }
+            else {
+                locationSharingFab.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.green, null)));
+            }
+            locationSharingFab.show();
+        });
 
         // when a cached name or photo changes --> reload the messages
         AppSingleton.getContactNamesCache().observe(this, cache -> messageListAdapter.notifyDataSetChanged());
@@ -486,31 +505,59 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     if (selectedMessageIds != null) {
                         Discussion discussion = discussionViewModel.getDiscussion().getValue();
                         if (discussion != null) {
-                            if (locked != null && !locked) {
-                                final SecureDeleteEverywhereDialogBuilder builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                        .setTitle(R.string.dialog_title_confirm_deletion)
-                                        .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, selectedMessageIds.size(), selectedMessageIds.size()))
-                                        .setDeleteCallback(deleteEverywhere -> {
-                                            App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, selectedMessageIds, deleteEverywhere));
-                                            discussionViewModel.deselectAll();
-                                        });
-                                if (selectedMessageIds.size() == 1) {
-                                    builder.setType(SecureDeleteEverywhereDialogBuilder.TYPE.SINGLE_MESSAGE);
+                            App.runThread(() -> {
+                                boolean canRemoteDelete;
+                                boolean canRemoteDeleteOwn;
+                                if (discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                                    Group2 group2 = AppDatabase.getInstance().group2Dao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                                    if (group2 != null) {
+                                        canRemoteDelete = group2.ownPermissionRemoteDeleteAnything;
+                                        canRemoteDeleteOwn = group2.ownPermissionEditOrRemoteDeleteOwnMessages;
+                                    } else {
+                                        canRemoteDelete = false;
+                                        canRemoteDeleteOwn = false;
+                                    }
                                 } else {
-                                    builder.setType(SecureDeleteEverywhereDialogBuilder.TYPE.MULTIPLE_MESSAGE);
+                                    canRemoteDelete = discussion.canPostMessages();
+                                    canRemoteDeleteOwn = discussion.canPostMessages();
                                 }
-                                builder.create().show();
-                            } else {
-                                final AlertDialog.Builder builder = new SecureAlertDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                        .setTitle(R.string.dialog_title_confirm_deletion)
-                                        .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, selectedMessageIds.size(), selectedMessageIds.size()))
-                                        .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
-                                            App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, selectedMessageIds, false));
-                                            discussionViewModel.deselectAll();
-                                        })
-                                        .setNegativeButton(R.string.button_label_cancel, null);
-                                builder.create().show();
-                            }
+                                if (!canRemoteDelete && canRemoteDeleteOwn) {
+                                    canRemoteDelete = true;
+                                    // check if messages are all outbound messages (in which case remote delete is allowed)
+                                    for (Long messageId : selectedMessageIds) {
+                                        Message message = AppDatabase.getInstance().messageDao().get(messageId);
+                                        if (message != null && message.messageType != Message.TYPE_OUTBOUND_MESSAGE) {
+                                            canRemoteDelete = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                                final AlertDialog.Builder builder;
+                                if (canRemoteDelete) {
+                                    builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
+                                            .setTitle(R.string.dialog_title_confirm_deletion)
+                                            .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, selectedMessageIds.size(), selectedMessageIds.size()))
+                                            .setDeleteCallback(deleteEverywhere -> {
+                                                App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, selectedMessageIds, deleteEverywhere));
+                                                discussionViewModel.deselectAll();
+                                            });
+                                    if (selectedMessageIds.size() == 1) {
+                                        ((SecureDeleteEverywhereDialogBuilder) builder).setType(SecureDeleteEverywhereDialogBuilder.TYPE.SINGLE_MESSAGE);
+                                    } else {
+                                        ((SecureDeleteEverywhereDialogBuilder) builder).setType(SecureDeleteEverywhereDialogBuilder.TYPE.MULTIPLE_MESSAGE);
+                                    }
+                                } else {
+                                    builder = new SecureAlertDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
+                                            .setTitle(R.string.dialog_title_confirm_deletion)
+                                            .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, selectedMessageIds.size(), selectedMessageIds.size()))
+                                            .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
+                                                App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, selectedMessageIds, false));
+                                                discussionViewModel.deselectAll();
+                                            })
+                                            .setNegativeButton(R.string.button_label_cancel, null);
+                                }
+                                new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
+                            });
                         }
                     }
                     return true;
@@ -547,32 +594,59 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
             invalidateOptionsMenu();
             toolBarInitialView.setDiscussion(discussion);
-            if (discussion.bytesGroupOwnerAndUid != null) {
-                toolBarTitle.setText(discussion.title);
-                toolbarClickedCallback = () -> App.openGroupDetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid);
-                discussionNoChannelMessage.setText(R.string.message_discussion_no_channel_group);
-                if (discussion.active) {
-                    setLocked(false, false);
+            if (discussion.isLocked()) {
+                if (discussion.title.length() == 0) {
+                    SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_discussion));
+                    spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    toolBarTitle.setText(spannableString);
                 } else {
-                    setLocked(true, true);
+                    toolBarTitle.setText(discussion.title);
                 }
-            } else if (discussion.bytesContactIdentity != null) {
-                // don't set the title yet, it will be set once we get the contact
-                toolbarClickedCallback = () -> App.openContactDetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesContactIdentity);
-                discussionNoChannelMessage.setText(R.string.message_discussion_no_channel);
-                if (discussion.active) {
-                    setLocked(false, false);
+                if (discussion.discussionType == Discussion.TYPE_CONTACT) {
+                    toolbarClickedCallback = () -> App.runThread(() -> {
+                        Contact contact = AppDatabase.getInstance().contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                        if (contact != null) {
+                            App.openContactDetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                        }
+                    });
                 } else {
-                    setLocked(true, true);
+                    toolbarClickedCallback = null;
                 }
-            } else {
-                toolBarTitle.setText(discussion.title);
-                toolbarClickedCallback = null;
                 discussionNoChannelMessage.setText(null);
                 setLocked(true, false);
+            } else {
+                switch (discussion.discussionType) {
+                    case Discussion.TYPE_CONTACT: {
+                        toolBarTitle.setText(discussion.title);
+                        toolbarClickedCallback = () -> App.openContactDetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                        break;
+                    }
+                    case Discussion.TYPE_GROUP: {
+                        toolBarTitle.setText(discussion.title);
+                        toolbarClickedCallback = () -> App.openGroupDetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                        break;
+                    }
+                    case Discussion.TYPE_GROUP_V2: {
+                        if (discussion.title.length() == 0) {
+                            SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_group));
+                            spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            toolBarTitle.setText(spannableString);
+                        } else {
+                            toolBarTitle.setText(discussion.title);
+                        }
+                        toolbarClickedCallback = () -> App.openGroupV2DetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                        discussionNoChannelMessage.setText(null);
+                        break;
+                    }
+                }
+                if (discussion.active) {
+                    setLocked(false, false);
+                } else {
+                    setLocked(true, true);
+                }
             }
-            // display sender name for group discussions or locked discussions
-            messageListAdapter.setShowInboundSenderName(discussion.bytesContactIdentity == null);
+            // display sender name for group discussions only
+            messageListAdapter.setShowInboundSenderName(discussion.discussionType != Discussion.TYPE_CONTACT);
 
             if (discussion.unread) {
                 App.runThread(() -> AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(discussion.id, false));
@@ -580,84 +654,75 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         });
 
         discussionViewModel.getDiscussionContacts().observe(this, (List<Contact> contacts) -> {
-            if (contacts != null) {
-                if (messageListAdapter != null) {
-                    messageListAdapter.notifyDataSetChanged();
-                }
+            if (contacts == null) {
+                toolBarSubtitle.setVisibility(View.GONE);
+                makeDiscussionNoChannelGroupVisible(false, null);
+                return;
+            }
 
-                // only called if discussion is not locked
-                Discussion discussion = discussionViewModel.getDiscussion().getValue();
-                if (discussion != null) {
-                    if (discussion.bytesGroupOwnerAndUid != null) {
-                        StringBuilder sb = new StringBuilder();
-                        String joiner = getString(R.string.text_contact_names_separator);
-                        boolean first = true;
-                        for (Contact contact : contacts) {
-                            if (!first) {
-                                sb.append(joiner);
-                            }
-                            first = false;
-                            sb.append(contact.getCustomDisplayName());
-                        }
+            if (messageListAdapter != null) {
+                messageListAdapter.notifyDataSetChanged();
+            }
+
+            // only called if discussion is not locked (locked discussions return a null List of contacts)
+            Discussion discussion = discussionViewModel.getDiscussion().getValue();
+            if (discussion == null) {
+                toolBarSubtitle.setVisibility(View.GONE);
+                makeDiscussionNoChannelGroupVisible(false, null);
+                return;
+            }
+
+
+            if (discussion.discussionType == Discussion.TYPE_CONTACT && contacts.size() == 1) {
+                Contact contact = contacts.get(0);
+                JsonIdentityDetails identityDetails = contact.getIdentityDetails();
+                if (identityDetails != null) {
+                    if (contact.customDisplayName != null) {
                         toolBarSubtitle.setVisibility(View.VISIBLE);
-                        toolBarSubtitle.setText(sb.toString());
-                    } else if (discussion.bytesContactIdentity != null && contacts.size() == 1) {
-                        Contact contact = contacts.get(0);
-                        JsonIdentityDetails identityDetails = contact.getIdentityDetails();
-                        if (identityDetails != null) {
-                            if (contact.customDisplayName != null) {
-                                toolBarTitle.setText(contact.customDisplayName);
-                                toolBarSubtitle.setVisibility(View.VISIBLE);
-                                toolBarSubtitle.setText(identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, SettingsActivity.getUppercaseLastName()));
-                            } else {
-                                toolBarTitle.setText(identityDetails.formatFirstAndLastName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()));
-                                String posComp = identityDetails.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat());
-                                if (posComp != null) {
-                                    toolBarSubtitle.setVisibility(View.VISIBLE);
-                                    toolBarSubtitle.setText(posComp);
-                                } else {
-                                    toolBarSubtitle.setVisibility(View.GONE);
-                                }
-                            }
+                        toolBarSubtitle.setText(identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, SettingsActivity.getUppercaseLastName()));
+                    } else {
+                        String posComp = identityDetails.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat());
+                        if (posComp != null) {
+                            toolBarSubtitle.setVisibility(View.VISIBLE);
+                            toolBarSubtitle.setText(posComp);
                         } else {
-                            toolBarTitle.setText(discussion.title);
                             toolBarSubtitle.setVisibility(View.GONE);
                         }
-                    } else {
-                        toolBarSubtitle.setVisibility(View.GONE);
                     }
-
-                    boolean hasChannel = contacts.size() == 0;
-                    for (Contact contact : contacts) {
-                        if (contact.establishedChannelCount > 0) {
-                            hasChannel = true;
-                            break;
-                        }
-                    }
-                    if (hasChannel || !discussion.active) {
-                        if (discussionNoChannelGroup.getVisibility() != View.GONE) {
-                            discussionNoChannelGroup.setVisibility(View.GONE);
-                            discussionNoChannelImageView.setImageDrawable(null);
-                            recomputeLockAndNoChannelHeight();
-                        }
-                    } else {
-                        if (discussionNoChannelGroup.getVisibility() != View.VISIBLE) {
-                            discussionNoChannelGroup.setVisibility(View.VISIBLE);
-                            final AnimatedVectorDrawableCompat animated = AnimatedVectorDrawableCompat.create(App.getContext(), R.drawable.dots);
-                            if (animated != null) {
-                                animated.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
-                                    @Override
-                                    public void onAnimationEnd(Drawable drawable) {
-                                        new Handler(Looper.getMainLooper()).post(animated::start);
-                                    }
-                                });
-                                discussionNoChannelImageView.setImageDrawable(animated);
-                                animated.start();
-                            }
-                            recomputeLockAndNoChannelHeight();
-                        }
-                    }
+                } else {
+                    toolBarSubtitle.setVisibility(View.GONE);
                 }
+
+                makeDiscussionNoChannelGroupVisible(contact.establishedChannelCount <= 0 && discussion.active, R.string.message_discussion_no_channel);
+            } else {
+                toolBarSubtitle.setVisibility(View.VISIBLE);
+                // for TYPE_GROUP_V2, the view is shown/hidden by getDiscussionGroupMemberCountLiveData()
+                if (discussion.discussionType != Discussion.TYPE_GROUP_V2) {
+                    makeDiscussionNoChannelGroupVisible(false, null);
+                }
+            }
+        });
+
+        discussionViewModel.getDiscussionGroupMemberCountLiveData().observe(this, (DiscussionDao.DiscussionAndGroupMembersCount discussionAndGroupMembersCount) -> {
+            if (discussionAndGroupMembersCount != null
+                    && discussionAndGroupMembersCount.discussion != null
+                    && !discussionAndGroupMembersCount.discussion.isLocked()
+                    && discussionAndGroupMembersCount.count != -1) {
+                if (discussionAndGroupMembersCount.count != 0) {
+                    toolBarSubtitle.setText(getResources().getQuantityString(R.plurals.other_members_count, discussionAndGroupMembersCount.count, discussionAndGroupMembersCount.count));
+                } else {
+                    SpannableString text = new SpannableString(getString(R.string.text_no_members));
+                    StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
+                    text.setSpan(styleSpan, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    toolBarSubtitle.setText(text);
+                }
+            }
+
+            if (discussionAndGroupMembersCount != null
+                    && discussionAndGroupMembersCount.discussion != null
+                    && !discussionAndGroupMembersCount.discussion.isLocked()
+                    && discussionAndGroupMembersCount.discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                makeDiscussionNoChannelGroupVisible(discussionAndGroupMembersCount.updating != 0, discussionAndGroupMembersCount.updating == Group2.UPDATE_SYNCING ? R.string.message_discussion_group_v2_updating : R.string.message_discussion_group_v2_creating);
             }
         });
 
@@ -751,6 +816,31 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         handleIntent(getIntent());
     }
 
+    private void makeDiscussionNoChannelGroupVisible(boolean showDiscussionNoChannelGroup, @StringRes Integer resourceId) {
+        if (showDiscussionNoChannelGroup && discussionNoChannelGroup.getVisibility() != View.VISIBLE) {
+            discussionNoChannelGroup.setVisibility(View.VISIBLE);
+            discussionNoChannelMessage.setText(resourceId);
+            final AnimatedVectorDrawableCompat animated = AnimatedVectorDrawableCompat.create(App.getContext(), R.drawable.dots);
+            if (animated != null) {
+                animated.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
+                    @Override
+                    public void onAnimationEnd(Drawable drawable) {
+                        if (discussionNoChannelImageView.getDrawable() == animated) {
+                            new Handler(Looper.getMainLooper()).post(animated::start);
+                        }
+                    }
+                });
+                discussionNoChannelImageView.setImageDrawable(animated);
+                animated.start();
+            }
+            recomputeLockAndNoChannelHeight();
+        } else if (!showDiscussionNoChannelGroup && discussionNoChannelGroup.getVisibility() == View.VISIBLE) {
+            discussionNoChannelGroup.setVisibility(View.GONE);
+            discussionNoChannelImageView.setImageDrawable(null);
+            recomputeLockAndNoChannelHeight();
+        }
+    }
+
     private void computeDimensions() {
         // attachments dimensions
         DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -764,8 +854,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 )
         );
         attachmentFileHeight = getResources().getDimensionPixelSize(R.dimen.attachment_small_preview_size);
-        statusIconWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 26, metrics);
         noStatusIconWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, metrics);
+        statusIconWidth = noStatusIconWidth + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 18, metrics);
     }
 
     private int currentComposeMessageHeight = 0;
@@ -778,7 +868,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
     ComposeMessageFragment.ComposeMessageHeightListener composeMessageHeightListener = (int heightPixels) -> {
         if (heightPixels != -1) {
-            currentComposeMessageHeight = heightPixels;
+            if (locked == null || locked) {
+                currentComposeMessageHeight = 0;
+            } else {
+                currentComposeMessageHeight = heightPixels;
+            }
         }
         ConstraintLayout.LayoutParams spacerLayoutParams = (ConstraintLayout.LayoutParams) spacer.getLayoutParams();
 
@@ -875,6 +969,20 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             messageListAdapter.onChanged(null);
             App.runThread(() -> {
                 Discussion discussion = AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+                runOnUiThread(() -> {
+                    if (discussion == null) {
+                        discussionNotFound();
+                    } else {
+                        setDiscussionId(discussion.id, intent);
+                    }
+                });
+            });
+        } else if (intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA) && intent.hasExtra(BYTES_GROUP_IDENTIFIER_INTENT_EXTRA)) {
+            final byte[] bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA);
+            final byte[] bytesGroupIdentifier = intent.getByteArrayExtra(BYTES_GROUP_IDENTIFIER_INTENT_EXTRA);
+            messageListAdapter.onChanged(null);
+            App.runThread(() -> {
+                Discussion discussion = AppDatabase.getInstance().discussionDao().getByGroupIdentifier(bytesOwnedIdentity, bytesGroupIdentifier);
                 runOnUiThread(() -> {
                     if (discussion == null) {
                         discussionNotFound();
@@ -1061,15 +1169,25 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             MenuItem searchItem = menu.findItem(R.id.action_search);
             new DiscussionSearch(this, menu, searchItem, messageListAdapter, messageListLinearLayoutManager);
 
-            if (discussion.bytesGroupOwnerAndUid != null) {
-                getMenuInflater().inflate(R.menu.menu_discussion_group, menu);
-                if (discussion.active) {
-                    getMenuInflater().inflate(R.menu.menu_discussion_group_call, menu);
+            if (discussion.canPostMessages()) {
+                switch (discussion.discussionType) {
+                    case Discussion.TYPE_CONTACT: {
+                        getMenuInflater().inflate(R.menu.menu_discussion_one_to_one, menu);
+                        if (discussion.active) {
+                            getMenuInflater().inflate(R.menu.menu_discussion_one_to_one_call, menu);
+                        }
+                        break;
+                    }
+                    case Discussion.TYPE_GROUP:
+                    case Discussion.TYPE_GROUP_V2: {
+                        getMenuInflater().inflate(R.menu.menu_discussion_group, menu);
+                        break;
+                    }
                 }
-            } else if (discussion.bytesContactIdentity != null) {
-                getMenuInflater().inflate(R.menu.menu_discussion_one_to_one, menu);
-                if (discussion.active) {
-                    getMenuInflater().inflate(R.menu.menu_discussion_one_to_one_call, menu);
+
+                DiscussionCustomization discussionCustomization = discussionViewModel.getDiscussionCustomization().getValue();
+                if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
+                    getMenuInflater().inflate(R.menu.menu_discussion_muted, menu);
                 }
             }
 
@@ -1079,13 +1197,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
             if (ShortcutManagerCompat.isRequestPinShortcutSupported(this)) {
                 getMenuInflater().inflate(R.menu.menu_discussion_shortcut, menu);
-            }
-
-            if (!discussion.isLocked()) {
-                DiscussionCustomization discussionCustomization = discussionViewModel.getDiscussionCustomization().getValue();
-                if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
-                    getMenuInflater().inflate(R.menu.menu_discussion_muted, menu);
-                }
             }
 
             MenuItem deleteItem = menu.findItem(R.id.action_delete_discussion);
@@ -1106,21 +1217,27 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             return true;
         } else if (itemId == R.id.action_call) {
             Discussion discussion = discussionViewModel.getDiscussion().getValue();
-            if (discussion != null) {
-                if (discussion.bytesContactIdentity != null) {
-                    List<Contact> contacts = discussionViewModel.getDiscussionContacts().getValue();
-                    if (contacts != null && contacts.size() > 0 && contacts.get(0).establishedChannelCount > 0) {
-                        App.startWebrtcCall(this, discussion.bytesOwnedIdentity, discussion.bytesContactIdentity);
-                    }
-                } else if (discussion.bytesGroupOwnerAndUid != null) {
-                    List<Contact> contacts = discussionViewModel.getDiscussionContacts().getValue();
-                    if (contacts != null) {
-                        List<byte[]> bytesContactIdentities = new ArrayList<>(contacts.size());
-                        for (Contact contact : contacts) {
-                            bytesContactIdentities.add(contact.bytesContactIdentity);
+            if (discussion != null && discussion.canPostMessages()) {
+                switch (discussion.discussionType) {
+                    case Discussion.TYPE_CONTACT: {
+                        List<Contact> contacts = discussionViewModel.getDiscussionContacts().getValue();
+                        if (contacts != null && contacts.size() > 0 && contacts.get(0).establishedChannelCount > 0) {
+                            App.startWebrtcCall(this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
                         }
-                        MultiCallStartDialogFragment multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid, bytesContactIdentities);
-                        multiCallStartDialogFragment.show(getSupportFragmentManager(), "dialog");
+                        break;
+                    }
+                    case Discussion.TYPE_GROUP:
+                    case Discussion.TYPE_GROUP_V2: {
+                        List<Contact> contacts = discussionViewModel.getDiscussionContacts().getValue();
+                        if (contacts != null) {
+                            ArrayList<BytesKey> bytesContactIdentities = new ArrayList<>(contacts.size());
+                            for (Contact contact : contacts) {
+                                bytesContactIdentities.add(new BytesKey(contact.bytesContactIdentity));
+                            }
+                            MultiCallStartDialogFragment multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier, bytesContactIdentities);
+                            multiCallStartDialogFragment.show(getSupportFragmentManager(), "dialog");
+                        }
+                        break;
                     }
                 }
             }
@@ -1137,11 +1254,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 if (discussion != null) {
                     Intent intent = new Intent(this, DiscussionSettingsActivity.class);
                     intent.putExtra(DiscussionSettingsActivity.DISCUSSION_ID_INTENT_EXTRA, discussion.id);
-                    intent.putExtra(DiscussionSettingsActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, discussion.bytesOwnedIdentity);
-                    intent.putExtra(DiscussionSettingsActivity.LOCKED_INTENT_EXTRA, discussion.isLocked());
-                    if (discussion.bytesGroupOwnerAndUid != null) {
-                        intent.putExtra(DiscussionSettingsActivity.BYTES_GROUP_OWNED_AND_UID_INTENT_EXTRA, discussion.bytesGroupOwnerAndUid);
-                    }
                     startActivity(intent);
                 }
             }
@@ -1151,7 +1263,13 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 final Discussion discussion = discussionViewModel.getDiscussion().getValue();
                 if (discussion != null) {
                     App.runThread(() -> {
-                        ShortcutInfoCompat.Builder builder = ShortcutActivity.getShortcutInfo(discussion.id, discussion.title);
+                        final String title;
+                        if (discussion.title.length() == 0) {
+                            title = getString(R.string.text_unnamed_discussion);
+                        } else {
+                            title = discussion.title;
+                        }
+                        ShortcutInfoCompat.Builder builder = ShortcutActivity.getShortcutInfo(discussion.id, title);
                         if (builder != null) {
                             try {
                                 ShortcutInfoCompat shortcutInfo = builder.build();
@@ -1169,27 +1287,46 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         } else if (itemId == R.id.action_delete_discussion) {
             final Discussion discussion = discussionViewModel.getDiscussion().getValue();
             if (discussion != null) {
-                if (locked != null && !locked) {
-                    final SecureDeleteEverywhereDialogBuilder builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                            .setTitle(R.string.dialog_title_delete_discussion)
-                            .setMessage(getString(R.string.dialog_message_delete_discussion, discussion.title))
-                            .setType(SecureDeleteEverywhereDialogBuilder.TYPE.DISCUSSION)
-                            .setDeleteCallback(deleteEverywhere -> {
-                                App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, discussion.id, deleteEverywhere, false));
-                                finishAndClearViewModel();
-                            });
-                    builder.create().show();
-                } else {
-                    final AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                            .setTitle(R.string.dialog_title_delete_discussion)
-                            .setMessage(getString(R.string.dialog_message_delete_discussion, discussion.title))
-                            .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
-                                App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, discussion.id, false, false));
-                                finishAndClearViewModel();
-                            })
-                            .setNegativeButton(R.string.button_label_cancel, null);
-                    builder.create().show();
-                }
+                App.runThread(() -> {
+                    final String title;
+                    if (discussion.title.length() == 0) {
+                        title = getString(R.string.text_unnamed_discussion);
+                    } else {
+                        title = discussion.title;
+                    }
+                    boolean canRemoteDelete;
+                    if (discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                        Group2 group2 = AppDatabase.getInstance().group2Dao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                        if (group2 != null) {
+                            canRemoteDelete = group2.ownPermissionRemoteDeleteAnything;
+                        } else {
+                            canRemoteDelete = false;
+                        }
+                    } else {
+                        canRemoteDelete = discussion.canPostMessages();
+                    }
+                    final AlertDialog.Builder builder;
+                    if (canRemoteDelete) {
+                        builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
+                                .setTitle(R.string.dialog_title_delete_discussion)
+                                .setMessage(getString(R.string.dialog_message_delete_discussion, title))
+                                .setType(SecureDeleteEverywhereDialogBuilder.TYPE.DISCUSSION)
+                                .setDeleteCallback(deleteEverywhere -> {
+                                    App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, discussion.id, deleteEverywhere, false));
+                                    finishAndClearViewModel();
+                                });
+                    } else {
+                        builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                                .setTitle(R.string.dialog_title_delete_discussion)
+                                .setMessage(getString(R.string.dialog_message_delete_discussion, title))
+                                .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
+                                    App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, discussion.id, false, false));
+                                    finishAndClearViewModel();
+                                })
+                                .setNegativeButton(R.string.button_label_cancel, null);
+                    }
+                    new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
+                });
             }
             return true;
         } else if (itemId == R.id.action_unmute) {
@@ -1216,9 +1353,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             return true;
         } else if (itemId == R.id.action_unblock) {
             final Discussion discussion = discussionViewModel.getDiscussion().getValue();
-            if (discussion != null) {
-                if (discussion.bytesContactIdentity != null) {
-                    EnumSet<ObvContactActiveOrInactiveReason> notActiveReasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity);
+            if (discussion != null && discussion.canPostMessages()) {
+                if (discussion.discussionType == Discussion.TYPE_CONTACT) {
+                    EnumSet<ObvContactActiveOrInactiveReason> notActiveReasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
                     if (notActiveReasons != null) {
                         if (notActiveReasons.contains(ObvContactActiveOrInactiveReason.REVOKED)
                                 && !notActiveReasons.contains(ObvContactActiveOrInactiveReason.FORCEFULLY_UNBLOCKED)) {
@@ -1227,7 +1364,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                     .setMessage(R.string.dialog_message_unblock_revoked_contact_discussion)
                                     .setNegativeButton(R.string.button_label_cancel, null)
                                     .setPositiveButton(R.string.button_label_unblock, (dialog, which) -> {
-                                        if (!AppSingleton.getEngine().forcefullyUnblockContact(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity)) {
+                                        if (!AppSingleton.getEngine().forcefullyUnblockContact(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier)) {
                                             App.toast(R.string.toast_message_failed_to_unblock_contact, Toast.LENGTH_SHORT);
                                         }
                                     });
@@ -1236,7 +1373,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         }
                     }
 
-                    if (!AppSingleton.getEngine().forcefullyUnblockContact(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity)) {
+                    if (!AppSingleton.getEngine().forcefullyUnblockContact(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier)) {
                         App.toast(R.string.toast_message_failed_to_unblock_contact, Toast.LENGTH_SHORT);
                     }
                 }
@@ -1282,6 +1419,52 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 }
             }
         }
+        else if (id == R.id.discussion_location_sharing_fab) {
+            if (discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue() == null
+                || discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().size() == 0) {
+                return;
+            }
+
+            // if only one sharing message go to it, do not show menu
+            if (discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().size() == 1) {
+                messageListAdapter.requestScrollToMessageId(discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().get(0).id, true, true);
+                return;
+            }
+
+            PopupMenu locationMessagePopUp = new PopupMenu(DiscussionActivity.this, view);
+            List<Message> messagesShownInMenu = new ArrayList<>(discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().size());
+
+            int index = 0;
+            // handle current identity
+            for (Message message : discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue()) {
+                if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                    locationMessagePopUp.getMenu().add(0, messagesShownInMenu.size(), index, "You");
+                    messagesShownInMenu.add(message);
+                    break;
+                }
+            }
+
+            for (Message message : discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue()) {
+                if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE) {
+                    String displayName = AppSingleton.getContactCustomDisplayName(message.senderIdentifier);
+                    locationMessagePopUp.getMenu().add(0, messagesShownInMenu.size(), index, displayName);
+                    messagesShownInMenu.add(message);
+                }
+            }
+
+            locationMessagePopUp.setOnMenuItemClickListener((item) -> {
+                if (item.getItemId() < 0 || item.getItemId() >= messagesShownInMenu.size()) {
+                    return false;
+                }
+                Message message = messagesShownInMenu.get(item.getItemId());
+                messageListAdapter.requestScrollToMessageId(message.id, true, true);
+                return true;
+            });
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                locationMessagePopUp.setGravity(Gravity.TOP | Gravity.END);
+            }
+            locationMessagePopUp.show();
+        }
     }
 
 
@@ -1295,7 +1478,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             case REQUEST_CODE_SAVE_ATTACHMENT: {
                 if (resultCode == RESULT_OK && data != null) {
                     final Uri uri = data.getData();
-                    if (uri != null) {
+                    if (StringUtils.validateUri(uri)) {
                         App.runThread(() -> {
                             try (OutputStream os = DiscussionActivity.this.getContentResolver().openOutputStream(uri)) {
                                 if (os == null) {
@@ -1325,7 +1508,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             case REQUEST_CODE_SAVE_ALL_ATTACHMENTS: {
                 if (resultCode == RESULT_OK && data != null && longClickedFyleAndStatus != null) {
                     Uri folderUri = data.getData();
-                    if (folderUri != null && longClickedFyleAndStatus != null) {
+                    if (StringUtils.validateUri(folderUri) && longClickedFyleAndStatus != null) {
                         long messageId = longClickedFyleAndStatus.fyleMessageJoinWithStatus.messageId;
                         App.runThread(new SaveMultipleAttachmentsTask(this, folderUri, messageId));
                     }
@@ -1364,7 +1547,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     }
 
     private void saveDraft() {
-        if (discussionViewModel.getDiscussionId() != null) {
+        if (discussionViewModel.getDiscussionId() != null && (locked != null && !locked)) {
             App.runThread(new SaveDraftTask(discussionViewModel.getDiscussionId(), composeMessageViewModel.getTrimmedNewMessageText(), composeMessageViewModel.getDraftMessage().getValue()));
         }
     }
@@ -1376,7 +1559,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             transaction.commit();
             composeMessageHeightListener.onNewComposeMessageHeight(0);
 
-            discussionNoChannelGroup.setVisibility(View.GONE);
             discussionLockedGroup.setVisibility(View.VISIBLE);
             recomputeLockAndNoChannelHeight();
             if (lockedAsInactive) {
@@ -1532,7 +1714,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 }
             } else {
                 if (scrollDownFab.getVisibility() != View.VISIBLE) {
-                    scrollDownFab.show();
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (messageListAdapter.messages != null && messageListLinearLayoutManager.findLastVisibleItemPosition() != (messageListAdapter.messages.size())) {
+                            scrollDownFab.show();
+                        }
+                    }, 300);
                 }
             }
         }
@@ -1569,6 +1755,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         static final int REACTIONS_CHANGE_MASK = 256;
         static final int MISSED_COUNT_CHANGE_MASK = 512;
         static final int FORWARDED_CHANGE_MASK = 1024;
+        static final int LOCATION_CHANGE_MASK = 2048;
 
         @SuppressLint("NotifyDataSetChanged")
         MessageListAdapter(Context context) {
@@ -1814,6 +2001,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             changesMask |= MISSED_COUNT_CHANGE_MASK;
                         }
 
+                        if (!Objects.equals(oldItem.jsonLocation, newItem.jsonLocation)
+                            || oldItem.locationType != newItem.locationType) {
+                            changesMask |= LOCATION_CHANGE_MASK;
+                        }
+
                         payloadCache[newItemPosition] = changesMask;
                         payloadComputed[newItemPosition] = true;
                         return changesMask;
@@ -1850,33 +2042,43 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             switch (message.messageType) {
                 case Message.TYPE_OUTBOUND_MESSAGE:
                     if (message.wipeStatus != Message.WIPE_STATUS_NONE) {
-                        if (message.hasAttachments()) {
+                        if (message.isLocationMessage()) {
+                            return ViewType.OUTBOUND_EPHEMERAL_LOCATION.ordinal();
+                        } else if (message.hasAttachments()) {
                             return ViewType.OUTBOUND_EPHEMERAL_WITH_ATTACHMENT.ordinal();
                         } else {
                             return ViewType.OUTBOUND_EPHEMERAL.ordinal();
                         }
                     } else {
-                        if (message.hasAttachments()) {
+                        if (message.isLocationMessage()) {
+                            return ViewType.OUTBOUND_LOCATION.ordinal();
+                        } else if (message.hasAttachments()) {
                             return ViewType.OUTBOUND_WITH_ATTACHMENT.ordinal();
                         } else {
                             return ViewType.OUTBOUND.ordinal();
                         }
                     }
                 case Message.TYPE_INBOUND_EPHEMERAL_MESSAGE:
-                    if (message.hasAttachments()) {
+                    if (message.isLocationMessage()) {
+                        return ViewType.INBOUND_EPHEMERAL_LOCATION.ordinal();
+                    } else if (message.hasAttachments()) {
                         return ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT.ordinal();
                     } else {
                         return ViewType.INBOUND_EPHEMERAL.ordinal();
                     }
                 case Message.TYPE_INBOUND_MESSAGE:
                     if (message.wipeStatus != Message.WIPE_STATUS_NONE) {
-                        if (message.hasAttachments()) {
+                        if (message.isLocationMessage()) {
+                            return ViewType.INBOUND_EPHEMERAL_LOCATION.ordinal();
+                        } else if (message.hasAttachments()) {
                             return ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT.ordinal();
                         } else {
                             return ViewType.INBOUND_EPHEMERAL.ordinal();
                         }
                     } else {
-                        if (message.hasAttachments()) {
+                        if (message.isLocationMessage()) {
+                            return ViewType.INBOUND_LOCATION.ordinal();
+                        } else if (message.hasAttachments()) {
                             return ViewType.INBOUND_WITH_ATTACHMENT.ordinal();
                         } else {
                             return ViewType.INBOUND.ordinal();
@@ -1895,6 +2097,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 case Message.TYPE_CONTACT_DELETED:
                 case Message.TYPE_DISCUSSION_REMOTELY_DELETED:
                 case Message.TYPE_CONTACT_INACTIVE_REASON:
+                case Message.TYPE_CONTACT_RE_ADDED:
+                case Message.TYPE_RE_JOINED_GROUP:
+                case Message.TYPE_JOINED_GROUP:
+                case Message.TYPE_GAINED_GROUP_ADMIN:
+                case Message.TYPE_LOST_GROUP_ADMIN:
                 default:
                     return ViewType.INFO.ordinal();
             }
@@ -1944,6 +2151,16 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 }
                 case NEW_PUBLISHED_DETAILS: {
                     View view = inflater.inflate(R.layout.item_view_message_new_published_details, parent, false);
+                    return new MessageViewHolder(view, viewType);
+                }
+                case INBOUND_EPHEMERAL_LOCATION:
+                case INBOUND_LOCATION: {
+                    View view = inflater.inflate(R.layout.item_view_message_inbound_location, parent, false);
+                    return new MessageViewHolder(view, viewType);
+                }
+                case OUTBOUND_EPHEMERAL_LOCATION:
+                case OUTBOUND_LOCATION: {
+                    View view = inflater.inflate(R.layout.item_view_message_outbound_location, parent, false);
                     return new MessageViewHolder(view, viewType);
                 }
                 case INBOUND:
@@ -2131,6 +2348,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                 } else {
                                     holder.shouldAnimateStatusImageView = true;
                                     holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_sync));
+                                    if (holder.itemView.isAttachedToWindow()) {
+                                        holder.messageStatusImageView.startAnimation(rotateAnimation);
+                                    }
                                 }
                             }
                         }
@@ -2141,21 +2361,25 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     if (holder.expandMessage) {
                         holder.messageContentTextView.setMaxLines(Integer.MAX_VALUE);
                         holder.messageContentTextView.setEllipsize(null);
-                        if (message.messageType == Message.TYPE_INBOUND_MESSAGE) {
-                            holder.messageContentExpander.setImageResource(R.drawable.ic_expander_inbound_close);
-                        } else {
-                            holder.messageContentExpander.setImageResource(R.drawable.ic_expander_outbound_close);
+                        if (holder.messageContentExpander != null) { // location message have no expander
+                            if (message.messageType == Message.TYPE_INBOUND_MESSAGE) {
+                                holder.messageContentExpander.setImageResource(R.drawable.ic_expander_inbound_close);
+                            } else {
+                                holder.messageContentExpander.setImageResource(R.drawable.ic_expander_outbound_close);
+                            }
                         }
                     } else {
                         holder.messageContentTextView.setMaxLines(COMPACT_MESSAGE_LINE_COUNT);
                         holder.messageContentTextView.setEllipsize(TextUtils.TruncateAt.END);
                         if (holder.contentTruncated) {
-                            if (message.messageType == Message.TYPE_INBOUND_MESSAGE) {
-                                holder.messageContentExpander.setImageResource(R.drawable.ic_expander_inbound);
-                            } else {
-                                holder.messageContentExpander.setImageResource(R.drawable.ic_expander_outbound);
+                            if (holder.messageContentExpander != null) { // location message have no expander
+                                if (message.messageType == Message.TYPE_INBOUND_MESSAGE) {
+                                    holder.messageContentExpander.setImageResource(R.drawable.ic_expander_inbound);
+                                } else {
+                                    holder.messageContentExpander.setImageResource(R.drawable.ic_expander_outbound);
+                                }
+                                holder.messageContentExpander.setVisibility(View.VISIBLE);
                             }
-                            holder.messageContentExpander.setVisibility(View.VISIBLE);
                         }
                     }
                 }
@@ -2235,8 +2459,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
 
             if ((changesMask & BODY_OR_HIGHLIGHT_CHANGE_MASK) != 0) {
-                if (message.messageType == Message.TYPE_INBOUND_MESSAGE
-                        || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                if ((message.messageType == Message.TYPE_INBOUND_MESSAGE
+                        || message.messageType == Message.TYPE_OUTBOUND_MESSAGE)
+                        && !message.isLocationMessage()) {
                     String body = message.getStringContent(DiscussionActivity.this);
 
                     if (holder.wipedAttachmentCountTextView != null) {
@@ -2368,8 +2593,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
 
             if ((changesMask & EDITED_CHANGE_MASK) != 0) {
-                if (message.messageType == Message.TYPE_INBOUND_MESSAGE
-                        || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                if (holder.editedBadge != null
+                        && (message.messageType == Message.TYPE_INBOUND_MESSAGE
+                        || message.messageType == Message.TYPE_OUTBOUND_MESSAGE)) {
                     switch (message.edited) {
                         case Message.EDITED_SEEN: {
                             holder.editedBadge.setVisibility(View.VISIBLE);
@@ -2477,6 +2703,12 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 }
             }
 
+            if ((changesMask & LOCATION_CHANGE_MASK) != 0) {
+                if (message.isLocationMessage()) {
+                    setLocationMessageContent(message, holder);
+                }
+            }
+
             if (changesMask == -1) {
                 // here we do everything that only needs to be set once for a message
                 if (message.status == Message.STATUS_UNREAD
@@ -2578,66 +2810,68 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     holder.messageBottomTimestampTextView.setMinWidth(0);
                     final Message.JsonMessage jsonMessage = message.getJsonMessage();
 
-                    if (jsonMessage.getJsonReply() == null) {
-                        holder.messageReplyGroup.setVisibility(View.GONE);
-                        holder.messageReplyBody.setText(null);
-                    } else {
-                        holder.messageReplyGroup.setVisibility(View.VISIBLE);
-                        Message.JsonMessageReference jsonReply = jsonMessage.getJsonReply();
-                        holder.repliedToMessage = AppDatabase.getInstance().messageDao().getBySenderSequenceNumberAsync(jsonReply.getSenderSequenceNumber(), jsonReply.getSenderThreadIdentifier(), jsonReply.getSenderIdentifier(), message.discussionId);
-                        holder.repliedToMessage.observe(DiscussionActivity.this, replyMessage -> {
-                            if (replyMessage == null) {
-                                holder.replyMessageId = -1;
-                                holder.messageReplyBody.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-                                holder.messageReplyBody.setMinWidth(0);
-                                holder.messageReplyBody.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
-                                holder.messageReplyAttachmentCount.setVisibility(View.GONE);
-
-                                StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
-                                SpannableString spannableString = new SpannableString(getString(R.string.text_original_message_not_found));
-                                spannableString.setSpan(styleSpan, 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                holder.messageReplyBody.setText(spannableString);
-                            } else {
-                                holder.replyMessageId = replyMessage.id;
-                                if (replyMessage.totalAttachmentCount > 0) {
-                                    holder.messageReplyAttachmentCount.setVisibility(View.VISIBLE);
-                                    holder.messageReplyAttachmentCount.setText(getResources().getQuantityString(R.plurals.text_reply_attachment_count, replyMessage.totalAttachmentCount, replyMessage.totalAttachmentCount));
-                                } else {
+                    if (holder.messageReplyGroup != null) {
+                        if (jsonMessage.getJsonReply() == null) {
+                            holder.messageReplyGroup.setVisibility(View.GONE);
+                            holder.messageReplyBody.setText(null);
+                        } else {
+                            holder.messageReplyGroup.setVisibility(View.VISIBLE);
+                            Message.JsonMessageReference jsonReply = jsonMessage.getJsonReply();
+                            holder.repliedToMessage = AppDatabase.getInstance().messageDao().getBySenderSequenceNumberAsync(jsonReply.getSenderSequenceNumber(), jsonReply.getSenderThreadIdentifier(), jsonReply.getSenderIdentifier(), message.discussionId);
+                            holder.repliedToMessage.observe(DiscussionActivity.this, replyMessage -> {
+                                if (replyMessage == null) {
+                                    holder.replyMessageId = -1;
+                                    holder.messageReplyBody.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                                    holder.messageReplyBody.setMinWidth(0);
+                                    holder.messageReplyBody.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
                                     holder.messageReplyAttachmentCount.setVisibility(View.GONE);
-                                }
-                                if (replyMessage.getStringContent(DiscussionActivity.this).length() == 0) {
-                                    holder.messageReplyBody.setVisibility(View.GONE);
+
+                                    StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
+                                    SpannableString spannableString = new SpannableString(getString(R.string.text_original_message_not_found));
+                                    spannableString.setSpan(styleSpan, 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    holder.messageReplyBody.setText(spannableString);
                                 } else {
-                                    holder.messageReplyBody.setVisibility(View.VISIBLE);
-                                    holder.messageReplyBody.setText(replyMessage.getStringContent(DiscussionActivity.this));
-                                    if (StringUtils.isShortEmojiString(replyMessage.getStringContent(DiscussionActivity.this), 5)) {
-                                        holder.messageReplyBody.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.single_line_emoji_reply_size));
-                                        holder.messageReplyBody.setMinWidth((int) (getResources().getDimensionPixelSize(R.dimen.single_line_emoji_reply_size) * 1.25));
-                                        holder.messageReplyBody.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                    holder.replyMessageId = replyMessage.id;
+                                    if (replyMessage.totalAttachmentCount > 0) {
+                                        holder.messageReplyAttachmentCount.setVisibility(View.VISIBLE);
+                                        holder.messageReplyAttachmentCount.setText(getResources().getQuantityString(R.plurals.text_reply_attachment_count, replyMessage.totalAttachmentCount, replyMessage.totalAttachmentCount));
                                     } else {
-                                        holder.messageReplyBody.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-                                        holder.messageReplyBody.setMinWidth(0);
-                                        holder.messageReplyBody.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+                                        holder.messageReplyAttachmentCount.setVisibility(View.GONE);
+                                    }
+                                    if (replyMessage.getStringContent(DiscussionActivity.this).length() == 0) {
+                                        holder.messageReplyBody.setVisibility(View.GONE);
+                                    } else {
+                                        holder.messageReplyBody.setVisibility(View.VISIBLE);
+                                        holder.messageReplyBody.setText(replyMessage.getStringContent(DiscussionActivity.this));
+                                        if (StringUtils.isShortEmojiString(replyMessage.getStringContent(DiscussionActivity.this), 5)) {
+                                            holder.messageReplyBody.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.single_line_emoji_reply_size));
+                                            holder.messageReplyBody.setMinWidth((int) (getResources().getDimensionPixelSize(R.dimen.single_line_emoji_reply_size) * 1.25));
+                                            holder.messageReplyBody.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                        } else {
+                                            holder.messageReplyBody.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                                            holder.messageReplyBody.setMinWidth(0);
+                                            holder.messageReplyBody.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+                                        }
                                     }
                                 }
+                            });
+
+                            String displayName = AppSingleton.getContactCustomDisplayName(jsonMessage.getJsonReply().getSenderIdentifier());
+                            if (displayName != null) {
+                                holder.messageReplySenderName.setText(displayName);
+                            } else {
+                                holder.messageReplySenderName.setText(R.string.text_deleted_contact);
                             }
-                        });
+                            int color = InitialView.getTextColor(DiscussionActivity.this, jsonMessage.getJsonReply().getSenderIdentifier(), AppSingleton.getContactCustomHue(jsonMessage.getJsonReply().getSenderIdentifier()));
+                            holder.messageReplySenderName.setTextColor(color);
 
-                        String displayName = AppSingleton.getContactCustomDisplayName(jsonMessage.getJsonReply().getSenderIdentifier());
-                        if (displayName != null) {
-                            holder.messageReplySenderName.setText(displayName);
-                        } else {
-                            holder.messageReplySenderName.setText(R.string.text_deleted_contact);
-                        }
-                        int color = InitialView.getTextColor(DiscussionActivity.this, jsonMessage.getJsonReply().getSenderIdentifier(), AppSingleton.getContactCustomHue(jsonMessage.getJsonReply().getSenderIdentifier()));
-                        holder.messageReplySenderName.setTextColor(color);
-
-                        Drawable drawable = ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.background_reply_white);
-                        if (drawable instanceof LayerDrawable) {
-                            Drawable border = ((LayerDrawable) drawable).findDrawableByLayerId(R.id.reply_color_border);
-                            border.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-                            ((LayerDrawable) drawable).setDrawableByLayerId(R.id.reply_color_border, border);
-                            holder.messageReplyGroup.setBackground(drawable);
+                            Drawable drawable = ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.background_reply_white);
+                            if (drawable instanceof LayerDrawable) {
+                                Drawable border = ((LayerDrawable) drawable).findDrawableByLayerId(R.id.reply_color_border);
+                                border.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                                ((LayerDrawable) drawable).setDrawableByLayerId(R.id.reply_color_border, border);
+                                holder.messageReplyGroup.setBackground(drawable);
+                            }
                         }
                     }
 
@@ -2741,11 +2975,20 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     if (callLogItemId != null) {
                         if (holder.callCachedString != null) {
                             holder.messageInfoTextView.setText(holder.callCachedString);
+                            if (holder.callCachedDuration != 0) {
+                                holder.callDurationTextView.setVisibility(View.VISIBLE);
+                                if (holder.callCachedDuration > 60) {
+                                    holder.callDurationTextView.setText(DiscussionActivity.this.getString(R.string.text_call_duration, holder.callCachedDuration / 60, holder.callCachedDuration % 60));
+                                } else {
+                                    holder.callDurationTextView.setText(DiscussionActivity.this.getString(R.string.text_call_duration_short, holder.callCachedDuration));
+                                }
+                            } else {
+                                holder.callDurationTextView.setVisibility(View.GONE);
+                            }
                         } else {
                             final long finalCallLogItemId = callLogItemId;
                             App.runThread(() -> {
                                 CallLogItemDao.CallLogItemAndContacts callLogItemAndContacts = AppDatabase.getInstance().callLogItemDao().get(finalCallLogItemId);
-
                                 if (callLogItemAndContacts != null) {
                                     runOnUiThread(() -> {
                                         if (Objects.equals(holder.callLogItemId, finalCallLogItemId) && callLogItemAndContacts.oneContact != null) {
@@ -2816,16 +3059,33 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
                                             holder.messageInfoTextView.setText(holder.callCachedString);
                                         }
+
+                                        LayoutTransition savedLayoutTransition = ((ViewGroup) holder.itemView).getLayoutTransition();
+                                        ((ViewGroup) holder.itemView).setLayoutTransition(null);
+                                        holder.callCachedDuration = callLogItemAndContacts.callLogItem.duration;
+                                        if (holder.callCachedDuration != 0) {
+                                            holder.callDurationTextView.setVisibility(View.VISIBLE);
+                                            if (holder.callCachedDuration > 60) {
+                                                holder.callDurationTextView.setText(DiscussionActivity.this.getString(R.string.text_call_duration, holder.callCachedDuration / 60, holder.callCachedDuration % 60));
+                                            } else {
+                                                holder.callDurationTextView.setText(DiscussionActivity.this.getString(R.string.text_call_duration_short, holder.callCachedDuration));
+                                            }
+                                        } else {
+                                            holder.callDurationTextView.setVisibility(View.GONE);
+                                        }
+                                        ((ViewGroup) holder.itemView).setLayoutTransition(savedLayoutTransition);
                                     });
                                 }
                             });
                         }
+                    } else {
+                        holder.callDurationTextView.setVisibility(View.GONE);
                     }
                     holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
                 } else if (message.messageType == Message.TYPE_NEW_PUBLISHED_DETAILS) {
                     discussionViewModel.getNewDetailsUpdate().observe(DiscussionActivity.this, holder.newDetailsObserver);
                     Discussion discussion = discussionViewModel.getDiscussion().getValue();
-                    if (discussion != null && discussion.bytesGroupOwnerAndUid != null) {
+                    if (discussion != null && discussion.discussionType != Discussion.TYPE_CONTACT) {
                         holder.messageInfoTextView.setText(R.string.text_group_details_updated);
                     } else {
                         holder.messageInfoTextView.setText(R.string.text_contact_details_updated);
@@ -2891,6 +3151,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         }
                         if (!ephemeral) {
                             holder.settingsUpdateNotEphemeral.setVisibility(View.VISIBLE);
+                            holder.settingsUpdateReadOnce.setVisibility(View.GONE);
+                            holder.settingsUpdateVisibilityDuration.setVisibility(View.GONE);
+                            holder.settingsUpdateExistenceDuration.setVisibility(View.GONE);
                         } else {
                             holder.settingsUpdateNotEphemeral.setVisibility(View.GONE);
                         }
@@ -2912,6 +3175,21 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     } else {
                         holder.messageInfoTextView.setText(R.string.text_contact_was_blocked);
                     }
+                    holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
+                } else if (message.messageType == Message.TYPE_CONTACT_RE_ADDED) {
+                    holder.messageInfoTextView.setText(R.string.text_user_added_to_contacts);
+                    holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
+                } else if (message.messageType == Message.TYPE_RE_JOINED_GROUP) {
+                    holder.messageInfoTextView.setText(R.string.text_group_re_joined);
+                    holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
+                } else if (message.messageType == Message.TYPE_JOINED_GROUP) {
+                    holder.messageInfoTextView.setText(R.string.text_group_joined);
+                    holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
+                } else if (message.messageType == Message.TYPE_GAINED_GROUP_ADMIN) {
+                    holder.messageInfoTextView.setText(R.string.text_you_became_admin);
+                    holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
+                } else if (message.messageType == Message.TYPE_LOST_GROUP_ADMIN) {
+                    holder.messageInfoTextView.setText(R.string.text_you_are_no_longer_admin);
                     holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
                 }
             }
@@ -2941,6 +3219,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             holder.readOnce = false;
             holder.wipeOnly = false;
             holder.callCachedString = null;
+            holder.callCachedDuration = 0;
             if (holder.expirationTimestamp != null) {
                 holder.expirationTimestamp = null;
             }
@@ -2980,6 +3259,140 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 holder.adapter.onChanged(null);
             }
             discussionViewModel.getNewDetailsUpdate().removeObserver(holder.newDetailsObserver);
+        }
+
+        private void setLocationMessageContent(Message message, MessageViewHolder holder) {
+            final Message.JsonMessage jsonMessage = message.getJsonMessage();
+
+            holder.messageContentTextView.setVisibility(View.VISIBLE);
+            holder.messageContentTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+
+            // set location
+            final String truncatedLatitudeString = jsonMessage.getJsonLocation().getTruncatedLatitudeString();
+            final String truncatedLongitudeString = jsonMessage.getJsonLocation().getTruncatedLongitudeString();
+            holder.messageContentTextView.setText(getString(R.string.label_location_message_content_position, truncatedLatitudeString, truncatedLongitudeString));
+            holder.altitudeTextView.setText(getString(R.string.label_location_message_content_altitude, jsonMessage.getJsonLocation().getTruncatedAltitudeString(DiscussionActivity.this)));
+            holder.precisionTextView.setText(getString(R.string.label_location_message_content_precision, jsonMessage.getJsonLocation().getTruncatedPrecisionString(DiscussionActivity.this)));
+
+            // set timestamp
+            holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
+            holder.messageBottomTimestampTextView.setMinWidth(0);
+
+            // set share location fields
+            if (message.locationType == Message.LOCATION_TYPE_SHARE || message.locationType == Message.LOCATION_TYPE_SHARE_FINISHED) {
+                // update location type if needed (will update locationType )
+                if (message.isSharingExpired()) { // isSharingExpired only return true if locationType == LOCATION_TYPE_SHARE
+                    // if outbound: tell service to stop sharing
+                    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                        UnifiedForegroundService.LocationSharingSubService.stopSharingLocation(DiscussionActivity.this, message.discussionId);
+                    } else if (message.messageType == Message.TYPE_INBOUND_MESSAGE) {
+                        // if inbound just mark as finished in database
+                        App.runThread(() -> AppDatabase.getInstance().messageDao().updateLocationType(message.id, Message.LOCATION_TYPE_SHARE_FINISHED));
+                    }
+                }
+
+                // set live badge visibility
+                if (message.locationType == Message.LOCATION_TYPE_SHARE_FINISHED) {
+                    holder.locationMessageLiveSharingBadge.setVisibility(View.GONE);
+                    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                        holder.locationMessageStopSharingButton.setVisibility(View.GONE);
+                    }
+                    holder.locationMessageSharingExpirationTextView.setText(R.string.label_location_sharing_ended);
+                    holder.locationMessageSharingExpirationTextView.setVisibility(View.VISIBLE);
+                    holder.locationIconBackgroundView.setBackgroundResource(R.drawable.background_location_icon_top_left_rounded);
+                } else {
+                    // live badge
+                    holder.locationMessageLiveSharingBadge.setVisibility(View.VISIBLE);
+                    // sharing location expiration
+                    if (jsonMessage.getJsonLocation().getSharingExpiration() != null) {
+                        holder.locationMessageSharingExpirationTextView.setText(
+                            getString(R.string.label_sharing_location_until, DateUtils.formatDateTime(getApplicationContext(), jsonMessage.getJsonLocation().getSharingExpiration(), DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH))
+                        );
+                        holder.locationMessageSharingExpirationTextView.setVisibility(View.VISIBLE);
+                        holder.locationIconBackgroundView.setBackgroundResource(R.drawable.background_location_icon_top_left_rounded);
+                    } else {
+                        holder.locationMessageSharingExpirationTextView.setVisibility(View.GONE);
+                        holder.locationIconBackgroundView.setBackgroundResource(R.drawable.background_location_icon_left_rounded);
+                    }
+                    // stop sharing button
+                    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                        holder.locationMessageStopSharingButton.setVisibility(View.VISIBLE);
+                        holder.locationMessageStopSharingButton.setOnClickListener(view ->
+                                UnifiedForegroundService.LocationSharingSubService.stopSharingLocation(DiscussionActivity.this, discussionViewModel.getDiscussionId())
+                        );
+                    }
+                }
+
+                // set last update field
+                holder.locationMessageLastUpdateTextView.setVisibility(View.VISIBLE);
+                holder.locationMessageLastUpdateTextView.setText(getString(R.string.label_share_location_latest_update, DateUtils.formatDateTime(DiscussionActivity.this, jsonMessage.getJsonLocation().getTimestamp(), DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH))
+                );
+            } else {
+                // hide location sharing fields
+                holder.locationMessageLiveSharingBadge.setVisibility(View.GONE);
+                holder.locationMessageLastUpdateTextView.setVisibility(View.GONE);
+                holder.locationMessageSharingExpirationTextView.setVisibility(View.GONE);
+                holder.locationIconBackgroundView.setBackgroundResource(R.drawable.background_location_icon_left_rounded);
+                if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                    holder.locationMessageStopSharingButton.setVisibility(View.GONE);
+                }
+            }
+
+            // set copy coordinate button
+            holder.copyCoordinateImageView.setOnClickListener(view -> copyLocationToClipboard(truncatedLatitudeString, truncatedLongitudeString));
+
+            // open map when clicking message
+            holder.locationMessageConstraintLayout.setOnClickListener((view) -> App.openLocationInMapApplication(DiscussionActivity.this, truncatedLatitudeString, truncatedLongitudeString, message.contentBody, () -> markAsReadOnPause = false));
+
+            // set context menu
+            holder.locationMessageConstraintLayout.setOnLongClickListener(view -> {
+                PopupMenu locationMessagePopUp = new PopupMenu(DiscussionActivity.this, view);
+                MenuInflater inflater = locationMessagePopUp.getMenuInflater();
+                inflater.inflate(R.menu.popup_location_message, locationMessagePopUp.getMenu());
+
+                if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE && message.locationType == Message.LOCATION_TYPE_SHARE) {
+                    MenuItem stopSharingItem = locationMessagePopUp.getMenu().findItem(R.id.popup_action_location_message_stop_sharing);
+                    if (stopSharingItem != null) {
+                        stopSharingItem.setVisible(true);
+                        SpannableString spannableString = new SpannableString(stopSharingItem.getTitle());
+                        spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(DiscussionActivity.this, R.color.red)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        stopSharingItem.setTitle(spannableString);
+                    }
+                }
+
+                locationMessagePopUp.setOnMenuItemClickListener((item) -> {
+                    switch (item.getItemId()) {
+                        case (R.id.popup_action_location_message_open): {
+                            App.openLocationInMapApplication(DiscussionActivity.this, truncatedLatitudeString, truncatedLongitudeString, message.contentBody, () -> markAsReadOnPause = false);
+                            break;
+                        }
+                        case (R.id.popup_action_location_message_copy): {
+                            copyLocationToClipboard(truncatedLatitudeString, truncatedLongitudeString);
+                            break;
+                        }
+                        case (R.id.popup_action_location_message_stop_sharing): {
+                            AlertDialog.Builder builder = new SecureAlertDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
+                                    .setTitle(R.string.title_stop_sharing_location)
+                                    .setMessage(R.string.label_stop_sharing_location)
+                                    .setPositiveButton(R.string.button_label_stop, (dialogInterface, i) -> UnifiedForegroundService.LocationSharingSubService.stopSharingLocation(DiscussionActivity.this, discussionViewModel.getDiscussionId()))
+                                    .setNegativeButton(R.string.button_label_cancel, null);
+                            builder.create().show();
+                            break;
+                        }
+                    }
+                    return true;
+                });
+                locationMessagePopUp.show();
+                return true;
+            });
+        }
+
+        private void copyLocationToClipboard(String truncatedLatitudeString, String truncatedLongitudeString) {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clipData = ClipData.newPlainText(getString(R.string.label_gps_coordinates), String.format("%s,%s", truncatedLatitudeString, truncatedLongitudeString));
+            clipboard.setPrimaryClip(clipData);
+
+            App.toast(R.string.toast_location_coordinates_copied_to_clipboard , Toast.LENGTH_SHORT, Gravity.BOTTOM);
         }
 
         private class SwipeCallback extends ItemTouchHelper.SimpleCallback implements MessageAttachmentAdapter.BlockMessageSwipeListener {
@@ -3040,14 +3453,18 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         case SETTINGS_UPDATE:
                         case INBOUND_EPHEMERAL:
                         case INBOUND_EPHEMERAL_WITH_ATTACHMENT:
+                        case INBOUND_EPHEMERAL_LOCATION:
                         case OUTBOUND_EPHEMERAL:
                         case OUTBOUND_EPHEMERAL_WITH_ATTACHMENT:
+                        case OUTBOUND_EPHEMERAL_LOCATION:
                             return makeMovementFlags(0, ItemTouchHelper.LEFT);
+                        case INBOUND_LOCATION:
+                        case OUTBOUND_LOCATION:
                         case INBOUND:
                         case INBOUND_WITH_ATTACHMENT:
                         case OUTBOUND:
                         case OUTBOUND_WITH_ATTACHMENT:
-                            return makeMovementFlags(0, ItemTouchHelper.LEFT | (locked ? 0 : ItemTouchHelper.RIGHT));
+                            return makeMovementFlags(0, ItemTouchHelper.LEFT | ((locked == null || locked) ? 0 : ItemTouchHelper.RIGHT));
                     }
                 }
                 return 0;
@@ -3200,6 +3617,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             private final TextView settingsUpdateNotEphemeral;
 
             private final ImageView callBackButton;
+            private final TextView callDurationTextView;
             private final ImageView newDetailsIcon;
             private final ImageView newDetailsRedDot;
             private final Observer<Integer> newDetailsObserver;
@@ -3216,6 +3634,17 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
             private final DynamicFlow reactionsDynamicFlow;
 
+            // location messages
+            private final ConstraintLayout locationMessageConstraintLayout;
+            private final View locationIconBackgroundView;
+            private final TextView locationMessageStopSharingButton;
+            private final TextView altitudeTextView;
+            private final TextView precisionTextView;
+            private final ImageView copyCoordinateImageView;
+            private final TextView locationMessageLiveSharingBadge;
+            private final TextView locationMessageLastUpdateTextView;
+            private final TextView locationMessageSharingExpirationTextView;
+
             private LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> attachmentFyles;
             private LiveData<Message> repliedToMessage;
 
@@ -3229,6 +3658,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             private long lastRemainingDisplayed;
             private Long callLogItemId;
             private String callCachedString;
+            private int callCachedDuration;
 
             @SuppressLint("ClickableViewAccessibility")
             MessageViewHolder(View itemView, ViewType viewType) {
@@ -3237,7 +3667,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 statusWidth = (viewType == ViewType.OUTBOUND_EPHEMERAL
                         || viewType == ViewType.OUTBOUND
                         || viewType == ViewType.OUTBOUND_EPHEMERAL_WITH_ATTACHMENT
-                        || viewType == ViewType.OUTBOUND_WITH_ATTACHMENT) ? statusIconWidth : noStatusIconWidth;
+                        || viewType == ViewType.OUTBOUND_WITH_ATTACHMENT
+                        || viewType == ViewType.OUTBOUND_LOCATION
+                ) ? statusIconWidth : noStatusIconWidth;
 
                 if (viewType != ViewType.DISCLAIMER) {
                     itemView.setOnLongClickListener(this);
@@ -3252,7 +3684,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
                         @Override
                         public boolean onDoubleTap(MotionEvent e) {
-                            Utils.launchModifyMessagePopup(DiscussionActivity.this, messages.get(getBindingAdapterPosition() - 1));
+                            try {
+                                Utils.launchModifyMessagePopup(DiscussionActivity.this, messages.get(getBindingAdapterPosition() - 1));
+                            } catch (Exception ignored) {}
                             return true;
                         }
 
@@ -3348,6 +3782,21 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 // reactions
                 reactionsDynamicFlow = itemView.findViewById(R.id.reactions_dynamic_flow);
 
+                // location
+                locationMessageConstraintLayout = itemView.findViewById(R.id.message_location_content_layout);
+                locationIconBackgroundView = itemView.findViewById(R.id.message_location_content_image_background);
+                locationMessageStopSharingButton = itemView.findViewById(R.id.message_location_sharing_stop_button);
+                altitudeTextView = itemView.findViewById(R.id.message_location_content_altitude_text_view);
+                precisionTextView = itemView.findViewById(R.id.message_location_content_precision_text_view);
+                copyCoordinateImageView = itemView.findViewById(R.id.message_location_content_copy_coordinates_button);
+                locationMessageLiveSharingBadge = itemView.findViewById(R.id.message_location_content_live_sharing_badge);
+                locationMessageLastUpdateTextView = itemView.findViewById(R.id.message_location_content_last_update_text_view);
+                locationMessageSharingExpirationTextView = itemView.findViewById(R.id.message_location_content_sharing_expiration_text_view);
+                if (locationMessageConstraintLayout != null) {
+                    locationMessageConstraintLayout.setClipToOutline(true);
+                }
+
+
                 expandMessage = false;
                 contentTruncated = false;
                 replyMessageId = -1;
@@ -3355,7 +3804,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 if (viewType == ViewType.INBOUND_WITH_ATTACHMENT ||
                         viewType == ViewType.OUTBOUND_WITH_ATTACHMENT ||
                         viewType == ViewType.OUTBOUND_EPHEMERAL_WITH_ATTACHMENT ||
-                        viewType == ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT) {
+                        viewType == ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT ||
+                        viewType == ViewType.INBOUND_EPHEMERAL_LOCATION ||
+                        viewType == ViewType.INBOUND_LOCATION ||
+                        viewType == ViewType.OUTBOUND_EPHEMERAL_LOCATION ||
+                        viewType == ViewType.OUTBOUND_LOCATION) {
                     adapter = new MessageAttachmentAdapter(DiscussionActivity.this, audioAttachmentServiceBinding, discussionViewModel.getDiscussionId());
                     adapter.setAttachmentLongClickListener(DiscussionActivity.this);
                     adapter.setNoWipeListener(() -> markAsReadOnPause = false);
@@ -3390,9 +3843,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
                 if (viewType == ViewType.PHONE_CALL) {
                     callBackButton = itemView.findViewById(R.id.call_back_button);
+                    callDurationTextView = itemView.findViewById(R.id.call_duration_text_view);
                     callBackButton.setOnClickListener(this);
                 } else {
                     callBackButton = null;
+                    callDurationTextView = null;
                 }
 
                 if (viewType == ViewType.NEW_PUBLISHED_DETAILS) {
@@ -3558,25 +4013,33 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             final float statusWidth;
 
             private void recomputeLayout() {
+                if (viewType == ViewType.INBOUND_LOCATION ||
+                        viewType == ViewType.INBOUND_EPHEMERAL_LOCATION ||
+                        viewType == ViewType.OUTBOUND_LOCATION ||
+                        viewType == ViewType.OUTBOUND_EPHEMERAL_LOCATION) {
+                    return;
+                }
                 new Handler(Looper.getMainLooper()).post(() -> {
                     Layout messageTextLayout = messageContentTextView.getLayout();
                     Layout timestampLayout = messageBottomTimestampTextView.getLayout();
                     if (messageTextLayout != null) {
                         int lineCount = messageTextLayout.getLineCount();
-                        if (lineCount > COMPACT_MESSAGE_LINE_COUNT || (lineCount == COMPACT_MESSAGE_LINE_COUNT &&
-                                messageTextLayout.getEllipsisCount(COMPACT_MESSAGE_LINE_COUNT - 1) > 0)) {
-                            // text is ellipsized
-                            contentTruncated = true;
-                            if (messageContentExpander.getVisibility() != View.VISIBLE) {
-                                if (viewType == ViewType.INBOUND || viewType == ViewType.INBOUND_WITH_ATTACHMENT) {
-                                    messageContentExpander.setImageResource(R.drawable.ic_expander_inbound);
-                                } else {
-                                    messageContentExpander.setImageResource(R.drawable.ic_expander_outbound);
+                        if (messageContentExpander != null) { // location message have no contentExpander
+                            if (lineCount > COMPACT_MESSAGE_LINE_COUNT || (lineCount == COMPACT_MESSAGE_LINE_COUNT &&
+                                    messageTextLayout.getEllipsisCount(COMPACT_MESSAGE_LINE_COUNT - 1) > 0)) {
+                                // text is ellipsized
+                                contentTruncated = true;
+                                if (messageContentExpander.getVisibility() != View.VISIBLE) {
+                                    if (viewType == ViewType.INBOUND || viewType == ViewType.INBOUND_WITH_ATTACHMENT) {
+                                        messageContentExpander.setImageResource(R.drawable.ic_expander_inbound);
+                                    } else {
+                                        messageContentExpander.setImageResource(R.drawable.ic_expander_outbound);
+                                    }
                                 }
+                                messageContentExpander.setVisibility(View.VISIBLE);
+                            } else {
+                                messageContentExpander.setVisibility(View.GONE);
                             }
-                            messageContentExpander.setVisibility(View.VISIBLE);
-                        } else {
-                            messageContentExpander.setVisibility(View.GONE);
                         }
 
                         if (timestampLayout != null) {
@@ -3639,26 +4102,26 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         App.runThread(() -> {
                             CallLogItemDao.CallLogItemAndContacts callLogItem = AppDatabase.getInstance().callLogItemDao().get(callLogItemId);
                             if (callLogItem != null) {
-                                if (callLogItem.contacts.size() == 1 && callLogItem.callLogItem.bytesGroupOwnerAndUid == null) {
+                                if (callLogItem.contacts.size() == 1 && callLogItem.callLogItem.bytesGroupOwnerAndUidOrIdentifier == null) {
                                     if (callLogItem.oneContact != null && callLogItem.oneContact.establishedChannelCount > 0) {
                                         App.startWebrtcCall(DiscussionActivity.this, callLogItem.oneContact.bytesOwnedIdentity, callLogItem.oneContact.bytesContactIdentity);
                                     }
                                 } else {
-                                    List<byte[]> bytesContactIdentities = new ArrayList<>(callLogItem.contacts.size());
+                                    ArrayList<BytesKey> bytesContactIdentities = new ArrayList<>(callLogItem.contacts.size());
                                     for (CallLogItemContactJoin callLogItemContactJoin : callLogItem.contacts) {
-                                        bytesContactIdentities.add(callLogItemContactJoin.bytesContactIdentity);
+                                        bytesContactIdentities.add(new BytesKey(callLogItemContactJoin.bytesContactIdentity));
                                     }
-                                    MultiCallStartDialogFragment multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(callLogItem.callLogItem.bytesOwnedIdentity, callLogItem.callLogItem.bytesGroupOwnerAndUid, bytesContactIdentities);
+                                    MultiCallStartDialogFragment multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(callLogItem.callLogItem.bytesOwnedIdentity, callLogItem.callLogItem.bytesGroupOwnerAndUidOrIdentifier, bytesContactIdentities);
                                     multiCallStartDialogFragment.show(getSupportFragmentManager(), "dialog");
                                 }
                             }
                         });
                     } else {
                         Discussion discussion = discussionViewModel.getDiscussion().getValue();
-                        if (discussion != null && discussion.bytesContactIdentity != null) {
+                        if (discussion != null && discussion.canPostMessages() && discussion.discussionType == Discussion.TYPE_CONTACT) {
                             List<Contact> contacts = discussionViewModel.getDiscussionContacts().getValue();
                             if (contacts != null && contacts.size() > 0 && contacts.get(0).establishedChannelCount > 0) {
-                                App.startWebrtcCall(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesContactIdentity);
+                                App.startWebrtcCall(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
                             }
                         }
                     }
@@ -3670,14 +4133,23 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     if (!selectingForDeletion) {
                         if (viewType == ViewType.NEW_PUBLISHED_DETAILS) {
                             Discussion discussion = discussionViewModel.getDiscussion().getValue();
-                            if (discussion != null) {
-                                if (discussion.bytesGroupOwnerAndUid != null) {
-                                    App.openGroupDetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid);
-                                } else if (discussion.bytesContactIdentity != null) {
-                                    App.openContactDetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesContactIdentity);
+                            if (discussion != null && discussion.canPostMessages()) {
+                                switch (discussion.discussionType) {
+                                    case Discussion.TYPE_CONTACT: {
+                                        App.openContactDetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                                        break;
+                                    }
+                                    case Discussion.TYPE_GROUP: {
+                                        App.openGroupDetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                                        break;
+                                    }
+                                    case Discussion.TYPE_GROUP_V2: {
+                                        App.openGroupV2DetailsActivity(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                                        break;
+                                    }
                                 }
                             }
-                        } else if (viewType == ViewType.INBOUND_EPHEMERAL || viewType == ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT) {
+                        } else if (viewType == ViewType.INBOUND_EPHEMERAL || viewType == ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT || viewType == ViewType.INBOUND_EPHEMERAL_LOCATION) {
                             if (getLayoutPosition() > 0 && id == R.id.message_content_card) {
                                 App.runThread(new InboundEphemeralMessageClicked(messages.get(getLayoutPosition() - 1).id));
                             }
@@ -3687,12 +4159,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                 markAsReadOnPause = false;
                                 Intent intent = new Intent(DiscussionActivity.this, DiscussionSettingsActivity.class);
                                 intent.putExtra(DiscussionSettingsActivity.DISCUSSION_ID_INTENT_EXTRA, discussion.id);
-                                intent.putExtra(DiscussionSettingsActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, discussion.bytesOwnedIdentity);
-                                intent.putExtra(DiscussionSettingsActivity.LOCKED_INTENT_EXTRA, discussion.isLocked());
-                                intent.putExtra(DiscussionSettingsActivity.SCROLL_TO_EPHEMERAL, true);
-                                if (discussion.bytesGroupOwnerAndUid != null) {
-                                    intent.putExtra(DiscussionSettingsActivity.BYTES_GROUP_OWNED_AND_UID_INTENT_EXTRA, discussion.bytesGroupOwnerAndUid);
-                                }
+                                intent.putExtra(DiscussionSettingsActivity.SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA, DiscussionSettingsActivity.PREF_KEY_DISCUSSION_CATEGORY_SHARED_EPHEMERAL_SETTINGS);
                                 startActivity(intent);
                             }
                         } else if (viewType == ViewType.INFO_GROUP_MEMBER && id == R.id.message_info_background) {

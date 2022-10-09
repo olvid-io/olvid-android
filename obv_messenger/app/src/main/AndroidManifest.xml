@@ -3,18 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="io.olvid.messenger">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.BLUETOOTH"
-        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
-        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -49,6 +52,10 @@
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" />
         </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
     </queries>
 
     <application
@@ -58,6 +65,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:localeConfig="@xml/locales_config"
         android:manageSpaceActivity="io.olvid.messenger.activities.storage_manager.StorageManagerActivity">
 
         <meta-data android:name="android.content.APP_RESTRICTIONS"
@@ -152,6 +160,18 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activities.NotificationSettingsOpenerActivity"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:noHistory="true"
+            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar.FullScreen.Transparent">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.NOTIFICATION_PREFERENCES" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".discussion.DiscussionActivity"
             android:theme="@style/AppTheme.NoActionBar.ActionModeOverlay"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"/>
@@ -167,6 +187,8 @@
             android:label="@string/activity_title_contact_details" />
         <activity
             android:name=".activities.GroupDetailsActivity"
+            android:label="@string/activity_title_group_details" />
+        <activity android:name=".activities.GroupV2DetailsActivity"
             android:label="@string/activity_title_group_details" />
         <activity android:name=".activities.GroupCreationActivity" />
         <activity android:name=".gallery.GalleryActivity"
@@ -227,7 +249,7 @@
             android:name=".activities.MessageDetailsActivity"
             android:label="@string/activity_title_message_details" />
         <activity
-            android:name=".activities.DiscussionSettingsActivity"
+            android:name=".discussion.settings.DiscussionSettingsActivity"
             android:label="@string/activity_title_discussion_settings"
             android:theme="@style/AppTheme.WhiteBackground" />
         <activity
@@ -330,12 +352,13 @@
         <service
             android:name=".services.UnifiedForegroundService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="location"/>
         <service
             android:name=".webrtc.WebrtcCallService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="phoneCall"/>
+            android:foregroundServiceType="phoneCall|microphone"/>
         <service android:name=".services.MediaPlayerService"
             android:enabled="true"
             android:exported="false"

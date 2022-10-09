@@ -52,10 +52,6 @@ public abstract class ConcreteProtocolMessage {
         return coreProtocolMessage.getToIdentity();
     }
 
-    public Identity getAssociatedOwnedIdentity() {
-        return coreProtocolMessage.getAssociatedOwnedIdentity();
-    }
-
     public long getServerTimestamp() {
         return coreProtocolMessage.getServerTimestamp();
     }

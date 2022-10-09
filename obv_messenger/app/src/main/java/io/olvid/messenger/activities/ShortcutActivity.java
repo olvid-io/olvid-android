@@ -116,12 +116,12 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
             return true;
         });
 
-        LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> unfilteredDiscussions = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
+        LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
             bindOwnedIdentity(ownedIdentity);
             if (ownedIdentity == null) {
                 return null;
             } else {
-                return AppDatabase.getInstance().discussionDao().getAllWithContactNames(ownedIdentity.bytesOwnedIdentity, getString(R.string.text_contact_names_separator));
+                return AppDatabase.getInstance().discussionDao().getAllWithGroupMembersNames(ownedIdentity.bytesOwnedIdentity);
             }
         });
 
@@ -229,12 +229,13 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
 
     private void proceed(final FilteredDiscussionListViewModel.SearchableDiscussion searchableDiscussion) {
         if (searchableDiscussion != null) {
-            ShortcutInfoCompat.Builder builder;
-            if (searchableDiscussion.isGroupDiscussion) {
-                builder = getShortcutInfo(searchableDiscussion.discussionId, searchableDiscussion.title);
+            final String title;
+            if (searchableDiscussion.title.length() == 0) {
+                title = App.getContext().getString(R.string.text_unnamed_discussion);
             } else {
-                builder = getShortcutInfo(searchableDiscussion.discussionId, searchableDiscussion.title);
+                title = searchableDiscussion.title;
             }
+            ShortcutInfoCompat.Builder builder = getShortcutInfo(searchableDiscussion.discussionId, title);
             if (builder != null) {
                 setResult(RESULT_OK, ShortcutManagerCompat.createShortcutResultIntent(this, builder.build()));
                 runOnUiThread(this::finish);
@@ -249,7 +250,13 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             ShortcutManager shortcutManager = (ShortcutManager) App.getContext().getSystemService(Context.SHORTCUT_SERVICE);
             if (shortcutManager != null) {
-                ShortcutInfoCompat.Builder builder = getShortcutInfo(discussion.id, discussion.title);
+                final String title;
+                if (discussion.title.length() == 0) {
+                    title = App.getContext().getString(R.string.text_unnamed_discussion);
+                } else {
+                    title = discussion.title;
+                }
+                ShortcutInfoCompat.Builder builder = getShortcutInfo(discussion.id, title);
                 if (builder != null) {
                     ShortcutInfo shortcutInfo = builder.build().toShortcutInfo();
                     shortcutManager.updateShortcuts(Collections.singletonList(shortcutInfo));
@@ -342,8 +349,13 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         int position = 0;
         for (Discussion discussion: discussions) {
             publishedDiscussionIds[position] = discussion.id;
-
-            ShortcutInfoCompat.Builder builder = ShortcutActivity.getShortcutInfo(discussion.id, discussion.title);
+            final String title;
+            if (discussion.title.length() == 0) {
+                title = App.getContext().getString(R.string.text_unnamed_discussion);
+            } else {
+                title = discussion.title;
+            }
+            ShortcutInfoCompat.Builder builder = ShortcutActivity.getShortcutInfo(discussion.id, title);
             if (builder != null) {
                 builder.setLongLived(true)
                         .setCategories(contactCategories);

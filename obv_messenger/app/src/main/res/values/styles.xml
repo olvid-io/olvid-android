@@ -13,7 +13,7 @@
     <style name="CustomAlertDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
         <item name="android:windowTitleStyle">@style/CustomAlertDialog.Title</item>
         <item name="android:textColorPrimary">@color/greyTint</item>
-        <item name="android:background">@color/dialogBackground</item>
+        <item name="android:colorBackground">@color/dialogBackground</item>
         <item name="android:textSize">16sp</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
@@ -112,6 +112,11 @@
         <item name="colorControlHighlight">@color/greyOverlay</item>
     </style>
 
+    <style name="RedRipple" parent="AppTheme">
+        <item name="colorControlHighlight">@color/red</item>
+    </style>
+
+
     <!-- OnClick small element (upload file, ....)-->
     <style name="SubtleGreyRipple" parent="AppTheme">
         <item name="colorControlHighlight">@color/greySubtleOverlay</item>
@@ -156,6 +161,12 @@
     </style>
     <style name="AppTheme.GreyAccent">
         <item name="colorAccent">@color/greyOverlay</item>
+    </style>
+    <style name="AppTheme.GreenAccent">
+        <item name="colorAccent">@color/green</item>
+    </style>
+    <style name="AppTheme.RedAccent">
+        <item name="colorAccent">@color/red</item>
     </style>
 
     <!--  bottom sheet with transparent background  -->

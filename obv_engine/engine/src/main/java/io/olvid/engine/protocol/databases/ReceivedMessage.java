@@ -53,10 +53,10 @@ public class ReceivedMessage implements ObvDatabase {
     static final String TO_IDENTITY = "to_identity";
     private Encoded[] inputs;
     static final String INPUTS = "inputs";
-    private Encoded encodedResponse;
-    static final String ENCODED_RESPONSE = "encoded_response";
     private UUID userDialogUuid;
     static final String USER_DIALOG_UUID = "user_dialog_uuid";
+    private Encoded encodedResponse;
+    static final String ENCODED_RESPONSE = "encoded_response";
     private UID protocolInstanceUid;
     static final String PROTOCOL_INSTANCE_UID = "protocol_instance_uid";
     private int protocolMessageId;
@@ -65,8 +65,6 @@ public class ReceivedMessage implements ObvDatabase {
     static final String PROTOCOL_ID = "protocol_id";
     private ReceptionChannelInfo receptionChannelInfo;
     static final String RECEPTION_CHANNEL_INFO = "reception_channel_info";
-    private Identity associatedOwnedIdentity;
-    static final String ASSOCIATED_OWNED_IDENTITY = "associated_owned_identity";
     private long expirationTimestamp;
     static final String EXPIRATION_TIMESTAMP = "expiration_timestamp";
     private long serverTimestamp;
@@ -112,10 +110,6 @@ public class ReceivedMessage implements ObvDatabase {
         return receptionChannelInfo;
     }
 
-    public Identity getAssociatedOwnedIdentity() {
-        return associatedOwnedIdentity;
-    }
-
     public long getServerTimestamp() {
         return serverTimestamp;
     }
@@ -137,7 +131,6 @@ public class ReceivedMessage implements ObvDatabase {
                     message.getProtocolMessageId(),
                     message.getProtocolId(),
                     message.getReceptionChannelInfo(),
-                    message.getAssociatedOwnedIdentity(),
                     message.getServerTimestamp(),
                     prng);
             receivedMessage.insert();
@@ -157,7 +150,6 @@ public class ReceivedMessage implements ObvDatabase {
                            int protocolMessageId,
                            int protocolId,
                            ReceptionChannelInfo receptionChannelInfo,
-                           Identity associatedOwnedIdentity,
                            long serverTimestamp,
                            PRNGService prng) {
         this.protocolManagerSession = protocolManagerSession;
@@ -172,7 +164,6 @@ public class ReceivedMessage implements ObvDatabase {
         this.protocolMessageId = protocolMessageId;
         this.protocolId = protocolId;
         this.receptionChannelInfo = receptionChannelInfo;
-        this.associatedOwnedIdentity = associatedOwnedIdentity;
 
         this.expirationTimestamp = System.currentTimeMillis() + Constants.PROTOCOL_RECEIVED_MESSAGE_EXPIRATION_DELAY;
         this.serverTimestamp = serverTimestamp;
@@ -212,11 +203,6 @@ public class ReceivedMessage implements ObvDatabase {
         } catch (DecodingException e) {
             throw new SQLException();
         }
-        try {
-            this.associatedOwnedIdentity = Identity.of(res.getBytes(ASSOCIATED_OWNED_IDENTITY));
-        } catch (DecodingException e) {
-            throw new SQLException();
-        }
 
         this.expirationTimestamp = res.getLong(EXPIRATION_TIMESTAMP);
         this.serverTimestamp = res.getLong(SERVER_TIMESTAMP);
@@ -239,7 +225,6 @@ public class ReceivedMessage implements ObvDatabase {
                     PROTOCOL_MESSAGE_ID + " INT NOT NULL, " +
                     PROTOCOL_ID + " INT NOT NULL, " +
                     RECEPTION_CHANNEL_INFO + " BLOB NOT NULL, " +
-                    ASSOCIATED_OWNED_IDENTITY + " BLOB NOT NULL, " +
 
                     EXPIRATION_TIMESTAMP + " BIGINT NOT NULL, " +
                     SERVER_TIMESTAMP + " BIGINT NOT NULL);");
@@ -261,16 +246,23 @@ public class ReceivedMessage implements ObvDatabase {
             }
             oldVersion = 11;
         }
+        if (oldVersion < 32 && newVersion >= 32) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `received_message` DATABASE FROM VERSION " + oldVersion + " TO 32");
+                statement.execute("ALTER TABLE `received_message` DROP COLUMN `associated_owned_identity`");
+            }
+            oldVersion = 32;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, toIdentity.getBytes());
             statement.setBytes(3, Encoded.of(inputs).getBytes());
             if (userDialogUuid != null) {
-                statement.setString(4, userDialogUuid.toString());
+                statement.setString(4, Logger.getUuidString(userDialogUuid));
             } else {
                 statement.setNull(4, Types.VARCHAR);
             }
@@ -284,10 +276,9 @@ public class ReceivedMessage implements ObvDatabase {
             statement.setInt(7, protocolMessageId);
             statement.setInt(8, protocolId);
             statement.setBytes(9, receptionChannelInfo.encode().getBytes());
-            statement.setBytes(10, associatedOwnedIdentity.getBytes());
+            statement.setLong(10, expirationTimestamp);
 
-            statement.setLong(11, expirationTimestamp);
-            statement.setLong(12, serverTimestamp);
+            statement.setLong(11, serverTimestamp);
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_INSERTED;
             protocolManagerSession.session.addSessionCommitListener(this);
@@ -340,10 +331,10 @@ public class ReceivedMessage implements ObvDatabase {
         }
     }
 
-    public static ReceivedMessage[] getAll(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, Identity associatedOwnedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + PROTOCOL_INSTANCE_UID + " = ? AND " + ASSOCIATED_OWNED_IDENTITY + " = ?;")) {
+    public static ReceivedMessage[] getAll(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, Identity ownedIdentity) throws SQLException {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + PROTOCOL_INSTANCE_UID + " = ? AND " + TO_IDENTITY + " = ?;")) {
             statement.setBytes(1, protocolInstanceUid.getBytes());
-            statement.setBytes(2, associatedOwnedIdentity.getBytes());
+            statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 List<ReceivedMessage> list = new ArrayList<>();
                 while (res.next()) {
@@ -367,7 +358,7 @@ public class ReceivedMessage implements ObvDatabase {
     }
 
     public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + ASSOCIATED_OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + TO_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }

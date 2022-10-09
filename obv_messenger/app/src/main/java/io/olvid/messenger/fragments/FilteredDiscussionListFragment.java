@@ -19,20 +19,9 @@
 
 package io.olvid.messenger.fragments;
 
-import androidx.core.view.inputmethod.EditorInfoCompat;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.annotation.SuppressLint;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -47,6 +36,17 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.inputmethod.EditorInfoCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -54,19 +54,19 @@ import java.util.regex.Pattern;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
-import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
-import io.olvid.messenger.customClasses.StringUtils;
-import io.olvid.messenger.settings.SettingsActivity;
-import io.olvid.messenger.databases.dao.DiscussionDao;
-import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
+import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.databases.dao.DiscussionDao;
+import io.olvid.messenger.settings.SettingsActivity;
+import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel;
 
 public class FilteredDiscussionListFragment extends Fragment implements TextWatcher {
     private EditText discussionFilterEditText;
     protected FilteredDiscussionListViewModel filteredDiscussionListViewModel = null;
     private FilteredDiscussionListOnClickDelegate onClickDelegate;
-    private LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> unfilteredDiscussions = null;
+    private LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = null;
     private EmptyRecyclerView recyclerView;
     private View emptyView;
 
@@ -113,16 +113,16 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
         }
 
         if (useDialogBackground) {
-            recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(rootView.getContext(), selectable ? 100 : 68, 12, R.color.dialogBackground));
+            recyclerView.addItemDecoration(new ItemDecorationSimpleDivider(rootView.getContext(), selectable ? 100 : 68, 12, R.color.dialogBackground));
         } else {
-            recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(rootView.getContext(), selectable ? 100 : 68, 12));
+            recyclerView.addItemDecoration(new ItemDecorationSimpleDivider(rootView.getContext(), selectable ? 100 : 68, 12));
         }
 
         return rootView;
     }
 
 
-    public void setUnfilteredDiscussions(LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> unfilteredDiscussions) {
+    public void setUnfilteredDiscussions(LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions) {
         if (this.unfilteredDiscussions != null) {
             this.unfilteredDiscussions.removeObservers(this);
         }
@@ -165,13 +165,13 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
     }
 
     private void observeUnfiltered() {
-        this.unfilteredDiscussions.observe(this, (List<DiscussionDao.DiscussionAndContactDisplayNames> discussionAndContactDisplayNamesList) -> {
-            if (discussionAndContactDisplayNamesList == null) {
+        this.unfilteredDiscussions.observe(this, (List<DiscussionDao.DiscussionAndGroupMembersNames> discussionAndGroupMembersNamesList) -> {
+            if (discussionAndGroupMembersNamesList == null) {
                 filteredDiscussionListViewModel.setUnfilteredDiscussions(null);
             } else {
-                List<FilteredDiscussionListViewModel.SearchableDiscussion> list = new ArrayList<>(discussionAndContactDisplayNamesList.size());
-                for (DiscussionDao.DiscussionAndContactDisplayNames discussionAndContactDisplayNames : discussionAndContactDisplayNamesList) {
-                    list.add(new FilteredDiscussionListViewModel.SearchableDiscussion(discussionAndContactDisplayNames));
+                List<FilteredDiscussionListViewModel.SearchableDiscussion> list = new ArrayList<>(discussionAndGroupMembersNamesList.size());
+                for (DiscussionDao.DiscussionAndGroupMembersNames discussionAndGroupMembersNames : discussionAndGroupMembersNamesList) {
+                    list.add(new FilteredDiscussionListViewModel.SearchableDiscussion(discussionAndGroupMembersNames));
                 }
                 filteredDiscussionListViewModel.setUnfilteredDiscussions(list);
             }
@@ -329,7 +329,13 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                         }
                     }
                 } else {
-                    holder.discussionTitleTextView.setText(discussion.title);
+                    if (discussion.title.length() == 0) {
+                        SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_discussion));
+                        spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        holder.discussionTitleTextView.setText(spannableString);
+                    } else {
+                        holder.discussionTitleTextView.setText(discussion.title);
+                    }
                     if (discussion.isGroupDiscussion) {
                         if (discussion.groupMemberNameList.length() == 0) {
                             StyleSpan sp = new StyleSpan(Typeface.ITALIC);

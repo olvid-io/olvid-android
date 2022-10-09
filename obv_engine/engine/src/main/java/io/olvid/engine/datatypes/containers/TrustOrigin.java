@@ -29,12 +29,14 @@ public class TrustOrigin {
         INTRODUCTION,
         GROUP,
         KEYCLOAK,
+        SERVER_GROUP_V2,
     }
 
     private final TYPE type;
     private final long timestamp;
     private final Identity mediatorOrGroupOwnerIdentity;
     private final String keycloakServer;
+    private final GroupV2.Identifier groupIdentifier;
 
     public TYPE getType() {
         return type;
@@ -52,17 +54,23 @@ public class TrustOrigin {
         return keycloakServer;
     }
 
-    private TrustOrigin(TYPE type, long timestamp, Identity mediatorOrGroupOwnerIdentity, String keycloakServer) {
+    public GroupV2.Identifier getGroupIdentifier() {
+        return groupIdentifier;
+    }
+
+    public TrustOrigin(TYPE type, long timestamp, Identity mediatorOrGroupOwnerIdentity, String keycloakServer, GroupV2.Identifier groupIdentifier) {
         this.type = type;
         this.timestamp = timestamp;
         this.mediatorOrGroupOwnerIdentity = mediatorOrGroupOwnerIdentity;
         this.keycloakServer = keycloakServer;
+        this.groupIdentifier = groupIdentifier;
     }
 
     public static TrustOrigin createDirectTrustOrigin(long timestamp) {
         return new TrustOrigin(
                 TYPE.DIRECT,
                 timestamp,
+                null,
                 null,
                 null);
     }
@@ -72,6 +80,7 @@ public class TrustOrigin {
                 TYPE.INTRODUCTION,
                 timestamp,
                 mediatorIdentity,
+                null,
                 null);
     }
 
@@ -80,6 +89,7 @@ public class TrustOrigin {
                 TYPE.GROUP,
                 timestamp,
                 groupOwner,
+                null,
                 null);
     }
 
@@ -88,8 +98,19 @@ public class TrustOrigin {
                 TYPE.KEYCLOAK,
                 timestamp,
                 null,
-                keycloakServer);
+                keycloakServer,
+                null);
     }
+
+    public static TrustOrigin createServerGroupV2TrustOrigin(long timestamp, GroupV2.Identifier groupIdentifier) {
+        return new TrustOrigin(
+                TYPE.SERVER_GROUP_V2,
+                timestamp,
+                null,
+                null,
+                groupIdentifier);
+    }
+
 
     // Note that equals does not check the timestamp
     @Override
@@ -107,6 +128,8 @@ public class TrustOrigin {
                 return Objects.equals(castedOther.mediatorOrGroupOwnerIdentity, mediatorOrGroupOwnerIdentity);
             case KEYCLOAK:
                 return Objects.equals(castedOther.keycloakServer, keycloakServer);
+            case SERVER_GROUP_V2:
+                return Objects.equals(castedOther.groupIdentifier, groupIdentifier);
             case DIRECT:
             default:
                 return true;

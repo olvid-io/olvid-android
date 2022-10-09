@@ -46,14 +46,14 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
-import io.olvid.messenger.BuildConfig;
-import io.olvid.messenger.notifications.AndroidNotificationManager;
-import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
-import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.customClasses.BytesKey;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
+import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
+import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
 
 public class KeycloakManager {
     private static KeycloakManager INSTANCE = null;

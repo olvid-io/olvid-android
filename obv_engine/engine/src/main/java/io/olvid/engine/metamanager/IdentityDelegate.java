@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.GroupMembersChangedCallback;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Seed;
@@ -39,6 +40,7 @@ import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.Group;
 import io.olvid.engine.datatypes.containers.GroupInformation;
+import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
@@ -51,6 +53,7 @@ import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 
@@ -149,8 +152,10 @@ public interface IdentityDelegate {
 
     Seed getDeterministicSeedForOwnedIdentity(Identity ownedIdentity, byte[] diversificationTag) throws Exception;
 
-    byte[] signIdentities(Session session, byte[] prefix, Identity[] identities, Identity ownedIdentity, PRNGService prng) throws Exception;
-    boolean verifyIdentitiesSignature(byte[] prefix, Identity[] identities, Identity signerIdentity, byte[] signature) throws Exception;
+    byte[] signIdentities(Session session, Constants.SignatureContext signatureContext, Identity[] identities, Identity ownedIdentity, PRNGService prng) throws Exception;
+    byte[] signChannel(Session session, Constants.SignatureContext signatureContext, Identity contactIdentity, UID contactDeviceUid, Identity ownedIdentity, UID ownedDeviceUid, PRNGService prng) throws Exception;
+    byte[] signBlock(Session session, Constants.SignatureContext signatureContext, byte[] block, Identity ownedIdentity, PRNGService prng) throws Exception;
+    byte[] signGroupInvitationNonce(Session session, Constants.SignatureContext signatureContext, GroupV2.Identifier groupIdentifier, byte[] nonce, Identity contactIdentity, Identity ownedIdentity, PRNGService prng) throws Exception;
 
     void createContactGroup(Session session, Identity ownedIdentity, GroupInformation groupInformation, Identity[] groupMembers, IdentityWithSerializedDetails[] pendingGroupMembers) throws Exception;
     void leaveGroup(Session session, byte[] groupUid, Identity ownedIdentity) throws Exception;
@@ -162,12 +167,11 @@ public interface IdentityDelegate {
     void updateGroupMembersAndDetails(Session session, Identity ownedIdentity, GroupInformation groupInformation, HashSet<IdentityWithSerializedDetails> groupMembers, HashSet<IdentityWithSerializedDetails> pendingMembers, long membersVersion) throws Exception;
     void deleteGroup(Session session, byte[] groupOwnerAndUid, Identity ownedIdentity) throws Exception;
     void resetGroupMembersAndPublishedDetailsVersions(Session session, Identity ownedIdentity, GroupInformation groupInformation) throws Exception;
-
     GroupWithDetails[] getGroupsForOwnedIdentity(Session session, Identity ownedIdentity) throws Exception;
     Group getGroup(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws Exception;
     GroupWithDetails getGroupWithDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws Exception;
     GroupInformation getGroupInformation(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws Exception;
-    JsonGroupDetailsWithVersionAndPhoto[] getGroupPublishedAndLatestOrTrustedDetails(Session session, Identity ownedIdentity, byte[] groupUid) throws SQLException;
+    JsonGroupDetailsWithVersionAndPhoto[] getGroupPublishedAndLatestOrTrustedDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
     String getGroupPhotoUrl(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
     void trustPublishedGroupDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
     void updateLatestGroupDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, JsonGroupDetails jsonGroupDetails) throws Exception;
@@ -179,6 +183,38 @@ public interface IdentityDelegate {
     byte[][] getGroupOwnerAndUidOfGroupsWhereContactIsPending(Session session, Identity contactIdentity, Identity ownedIdentity);
     void refreshMembersOfGroupsOwnedByGroupOwner(UID currentDeviceUid, Identity remoteIdentity);
     void pushMembersOfOwnedGroupsToContact(UID currentDeviceUid, Identity remoteIdentity);
+
+
+    // region groups v2
+
+    void createNewGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, String absolutePhotoUrl, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, HashSet<GroupV2.IdentityAndPermissionsAndDetails> otherGroupMembers) throws Exception;
+    boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob) throws Exception;
+    GroupV2.ServerBlob getGroupV2ServerBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    String getGroupV2PhotoUrl(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    void deleteGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    void freezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    void unfreezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    Integer getGroupV2Version(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    boolean isGroupV2Frozen(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    GroupV2.BlobKeys getGroupV2BlobKeys(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    HashSet<GroupV2.IdentityAndPermissions> getGroupV2OtherMembersAndPermissions(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
+    boolean getGroupV2HasOtherAdminMember(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
+    List<Identity> updateGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe) throws SQLException;
+    List<Identity> getGroupV2MembersAndPendingMembersFromNonce(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, byte[] groupMemberInvitationNonce) throws Exception;
+    byte[] getGroupV2OwnGroupInvitationNonce(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    void moveGroupV2PendingMemberToMembers(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity groupMemberIdentity) throws Exception;
+    void setGroupV2DownloadedPhoto(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] photov) throws Exception;
+    ObvGroupV2 getObvGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
+    void trustGroupV2PublishedDetails(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    GroupV2.ServerPhotoInfo getGroupV2PublishedServerPhotoInfo(Session session, Identity ownedIdentity, byte[] bytesGroupIdentifier);
+    ObvGroupV2.ObvGroupV2DetailsAndPhotos getGroupV2DetailsAndPhotos(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier);
+    void setUpdatedGroupV2PhotoUrl(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String absolutePhotoUrl) throws Exception;
+    GroupV2.AdministratorsChain getGroupV2AdministratorsChain(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
+    boolean getGroupV2AdminStatus(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
+    List<ObvGroupV2> getObvGroupsV2ForOwnedIdentity(Identity ownedIdentity) throws Exception;
+    GroupV2.IdentifierVersionAndKeys[] getGroupsV2IdentifierVersionAndKeysForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
+    void initiateGroupV2BatchKeysResend(UID currentDeviceUid, Identity contactIdentity, UID contactDeviceUid);
+    // endregion
 
 
     void initiateBackup(final BackupDelegate backupDelegate, final String tag, final UID backupKeyUid, final int version);

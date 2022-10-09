@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory
+        android:key="pref_key_discussion_category_locked_explanation"
+        android:title="@string/pref_discussion_category_locked_explanation_title"
+        android:summary="@string/pref_discussion_category_locked_explanation_summary"
+        app:iconSpaceReserved="false"
+        app:isPreferenceVisible="false"
+        />
+
+
+    <io.olvid.messenger.customClasses.NoClickSwitchPreference
+        android:defaultValue="false"
+        android:key="pref_key_discussion_pin"
+        android:title="@string/pref_discussion_pin_title"
+        android:summary="@string/pref_discussion_pin_summary"
+        android:icon="@drawable/ic_pref_pin" />
+    <io.olvid.messenger.customClasses.NoClickSwitchPreference
+        android:defaultValue="false"
+        android:key="pref_key_discussion_mute_notifications"
+        android:title="@string/pref_discussion_mute_notifications_title"
+        android:summary="@string/pref_discussion_mute_notifications_summary"
+        android:icon="@drawable/ic_pref_mute_notification" />
+    <Preference
+        android:title="@string/pref_discussion_category_notifications_title"
+        android:key="pref_header_key_notifications"
+        android:fragment="io.olvid.messenger.discussion.settings.DiscussionNotificationsPreferenceFragment"
+        android:icon="@drawable/ic_pref_vibrator"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_discussion_category_customization_title"
+        android:fragment="io.olvid.messenger.discussion.settings.DiscussionCustomizationPreferenceFragment"
+        android:icon="@drawable/ic_pref_customization"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_discussion_category_send_receive"
+        android:key="pref_key_discussion_category_send_receive"
+        android:fragment="io.olvid.messenger.discussion.settings.DiscussionSendReceiveMessagesPreferenceFragment"
+        android:icon="@drawable/ic_pref_send"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_discussion_category_retention_policy_title"
+        android:fragment="io.olvid.messenger.discussion.settings.DiscussionRetentionPolicyPreferenceFragment"
+        android:icon="@drawable/ic_pref_date"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:title="@string/pref_discussion_category_shared_ephemeral_settings_title"
+        android:key="pref_key_discussion_category_shared_ephemeral_settings"
+        android:fragment="io.olvid.messenger.discussion.settings.DiscussionSharedEphemeralSettingsPreferenceFragment"
+        android:icon="@drawable/ic_pref_read_once"
+        android:widgetLayout="@layout/preference_widget_header_chevron" /></PreferenceScreen>

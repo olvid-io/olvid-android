@@ -19,25 +19,30 @@
 
 package io.olvid.messenger.databases.entity;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.EnumSet;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
+import io.olvid.messenger.services.UnifiedForegroundService;
+import io.olvid.messenger.settings.SettingsActivity;
 
 @SuppressWarnings("CanBeFinal")
 @Entity(tableName = Discussion.TABLE_NAME,
@@ -46,19 +51,10 @@ import io.olvid.messenger.databases.AppDatabase;
                         parentColumns = OwnedIdentity.BYTES_OWNED_IDENTITY,
                         childColumns = Discussion.BYTES_OWNED_IDENTITY,
                         onDelete = ForeignKey.CASCADE),
-                @ForeignKey(entity = Contact.class,
-                        parentColumns = {Contact.BYTES_CONTACT_IDENTITY, Contact.BYTES_OWNED_IDENTITY},
-                        childColumns = {Discussion.BYTES_CONTACT_IDENTITY, Discussion.BYTES_OWNED_IDENTITY},
-                        onDelete = ForeignKey.NO_ACTION),
-                @ForeignKey(entity = Group.class,
-                        parentColumns = {Group.BYTES_GROUP_OWNER_AND_UID, Group.BYTES_OWNED_IDENTITY},
-                        childColumns = {Discussion.BYTES_GROUP_OWNER_AND_UID, Discussion.BYTES_OWNED_IDENTITY},
-                        onDelete = ForeignKey.NO_ACTION),
         },
         indices = {
                 @Index(Discussion.BYTES_OWNED_IDENTITY),
-                @Index(value = {Discussion.BYTES_CONTACT_IDENTITY, Discussion.BYTES_OWNED_IDENTITY}, unique = true),
-                @Index(value = {Discussion.BYTES_GROUP_OWNER_AND_UID, Discussion.BYTES_OWNED_IDENTITY}, unique = true),
+                @Index(value = {Discussion.BYTES_OWNED_IDENTITY, Discussion.DISCUSSION_TYPE, Discussion.BYTES_DISCUSSION_IDENTIFIER}, unique = true),
                 @Index(Discussion.TITLE),
         }
 )
@@ -67,17 +63,25 @@ public class Discussion {
 
     public static final String TITLE = "title";
     public static final String BYTES_OWNED_IDENTITY = "bytes_owned_identity";
+    public static final String DISCUSSION_TYPE = "discussion_type"; // discussion type can be: contact, group, groupV2
+    public static final String BYTES_DISCUSSION_IDENTIFIER = "bytes_discussion_identifier"; // the bytes_contact_identity or bytes_group_owner_and_uid or bytes_groupV2_identifier, depending on discussion type
     public static final String SENDER_THREAD_IDENTIFIER = "sender_thread_identifier";
     public static final String LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER = "last_outbound_message_sequence_number";
     public static final String LAST_MESSAGE_TIMESTAMP = "last_message_timestamp";
-    // If both groupUid and bytesContactIdentity are null, the discussion is locked
-    public static final String BYTES_CONTACT_IDENTITY = "bytes_contact_identity";
-    public static final String BYTES_GROUP_OWNER_AND_UID = "bytes_group_owner_and_uid";
     public static final String PHOTO_URL = "photo_url";
     public static final String KEYCLOAK_MANAGED = "keycloak_managed";
+    public static final String PINNED = "pinned";
     public static final String UNREAD = "unread"; // specify if discussion as been manually marked as unread
     public static final String ACTIVE = "active";
     public static final String TRUST_LEVEL = "trust_level";
+    public static final String STATUS = "status"; // normal, locked, (pre-discussion?)
+
+    public static final int TYPE_CONTACT = 1;
+    public static final int TYPE_GROUP = 2;
+    public static final int TYPE_GROUP_V2 = 3;
+
+    public static final int STATUS_NORMAL = 1;
+    public static final int STATUS_LOCKED = 2;
 
     @PrimaryKey(autoGenerate = true)
     public long id;
@@ -89,6 +93,13 @@ public class Discussion {
     @NonNull
     public byte[] bytesOwnedIdentity;
 
+    @ColumnInfo(name = DISCUSSION_TYPE)
+    public int discussionType;
+
+    @ColumnInfo(name = BYTES_DISCUSSION_IDENTIFIER)
+    @NonNull
+    public byte[] bytesDiscussionIdentifier;
+
     @ColumnInfo(name = SENDER_THREAD_IDENTIFIER)
     @NonNull
     public UUID senderThreadIdentifier;
@@ -98,14 +109,6 @@ public class Discussion {
 
     @ColumnInfo(name = LAST_MESSAGE_TIMESTAMP)
     public long lastMessageTimestamp;
-
-    @ColumnInfo(name = BYTES_GROUP_OWNER_AND_UID)
-    @Nullable
-    public byte[] bytesGroupOwnerAndUid;
-
-    @ColumnInfo(name = BYTES_CONTACT_IDENTITY)
-    @Nullable
-    public byte[] bytesContactIdentity;
 
     @ColumnInfo(name = PHOTO_URL)
     @Nullable
@@ -118,6 +121,9 @@ public class Discussion {
     @ColumnInfo(name = UNREAD)
     public boolean unread;
 
+    @ColumnInfo(name = PINNED)
+    public boolean pinned;
+
     @ColumnInfo(name = ACTIVE)
     public boolean active;
 
@@ -125,61 +131,242 @@ public class Discussion {
     @Nullable
     public Integer trustLevel;
 
+    @ColumnInfo(name = STATUS)
+    public int status;
+
     // default constructor required by Room
-    public Discussion(String title, @NonNull byte[] bytesOwnedIdentity, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable byte[] bytesGroupOwnerAndUid, @Nullable byte[] bytesContactIdentity, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, boolean active, @Nullable Integer trustLevel) {
+    public Discussion(String title, @NonNull byte[] bytesOwnedIdentity, int discussionType, @NonNull byte[] bytesDiscussionIdentifier, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, boolean pinned, boolean active, @Nullable Integer trustLevel, int status) {
         this.title = title;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
+        this.discussionType = discussionType;
+        this.bytesDiscussionIdentifier = bytesDiscussionIdentifier;
         this.senderThreadIdentifier = senderThreadIdentifier;
         this.lastOutboundMessageSequenceNumber = lastOutboundMessageSequenceNumber;
         this.lastMessageTimestamp = lastMessageTimestamp;
-        this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
-        this.bytesContactIdentity = bytesContactIdentity;
         this.photoUrl = photoUrl;
         this.keycloakManaged = keycloakManaged;
         this.unread = unread;
+        this.pinned = pinned;
         this.active = active;
         this.trustLevel = trustLevel;
+        this.status = status;
     }
 
 
     @Ignore
-    public static Discussion createOneToOneDiscussion(@NonNull String title, @Nullable String photoUrl, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] contactBytesIdentity, boolean keycloakManaged, boolean active, int contactTrustLevel) {
-        return new Discussion(
-                title,
-                bytesOwnedIdentity,
-                UUID.randomUUID(),
-                0,
-                System.currentTimeMillis(),
-        null,
-                contactBytesIdentity,
-                photoUrl,
-                keycloakManaged,
-                false,
-                active,
-                contactTrustLevel
-        );
+    public static Discussion createOrReuseOneToOneDiscussion(@NonNull AppDatabase db, @NonNull Contact contact) {
+        if (!db.inTransaction()) {
+            Logger.e("ERROR: running discussion createOrReuseOneToOneDiscussion outside a transaction");
+            return null;
+        }
+
+        // check if a discussion already exists
+        Discussion discussion = db.discussionDao().getByContactWithAnyStatus(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+
+        if (discussion == null) {
+            // no existing discussion --> create a new one
+            discussion = new Discussion(
+                    contact.getCustomDisplayName(),
+                    contact.bytesOwnedIdentity,
+                    TYPE_CONTACT,
+                    contact.bytesContactIdentity,
+                    UUID.randomUUID(),
+                    0,
+                    System.currentTimeMillis(),
+                    contact.getCustomPhotoUrl(),
+                    contact.keycloakManaged,
+                    false,
+                    false,
+                    contact.active,
+                    contact.trustLevel,
+                    STATUS_NORMAL
+            );
+            discussion.id = db.discussionDao().insert(discussion);
+
+            // set default ephemeral message settings
+            Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
+            Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
+            boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
+            if (readOnce || visibilityDuration != null || existenceDuration != null) {
+                DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
+                discussionCustomization.settingExistenceDuration = existenceDuration;
+                discussionCustomization.settingVisibilityDuration = visibilityDuration;
+                discussionCustomization.settingReadOnce = readOnce;
+                discussionCustomization.sharedSettingsVersion = 0;
+                db.discussionCustomizationDao().insert(discussionCustomization);
+                db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact.bytesOwnedIdentity, false, 0L));
+            }
+
+            // insert revoked message if needed
+            if (!contact.active) {
+                EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
+                    App.runThread(new InsertContactRevokedMessageTask(contact.bytesOwnedIdentity, contact.bytesContactIdentity));
+                }
+            }
+        } else if (!discussion.canPostMessages()) {
+            if (discussion.status == STATUS_LOCKED) {
+                Message contactReAdded = Message.createContactReAddedMessage(db, discussion.id, contact.bytesContactIdentity);
+                db.messageDao().insert(contactReAdded);
+            }
+
+            discussion.title = contact.getCustomDisplayName();
+            discussion.lastMessageTimestamp = System.currentTimeMillis();
+            discussion.photoUrl = contact.getCustomPhotoUrl();
+            discussion.keycloakManaged = contact.keycloakManaged;
+            discussion.active = contact.active;
+            discussion.trustLevel = contact.trustLevel;
+            discussion.status = Discussion.STATUS_NORMAL;
+            db.discussionDao().updateAll(discussion);
+
+
+            // insert revoked message if needed
+            if (!contact.active) {
+                EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
+                    App.runThread(new InsertContactRevokedMessageTask(contact.bytesOwnedIdentity, contact.bytesContactIdentity));
+                }
+            }
+        }
+
+        return discussion;
     }
 
     @Ignore
-    public static Discussion createGroupDiscussion(@NonNull String title, @Nullable String photoUrl, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] groupId) {
-        return new Discussion(
-                title,
-                bytesOwnedIdentity,
-                UUID.randomUUID(),
-                0,
-                System.currentTimeMillis(),
-                groupId,
-                null,
-                photoUrl,
-                false,
-                false,
-                true,
-                null
-        );
+    public static Discussion createOrReuseGroupDiscussion(AppDatabase db, @NonNull Group group) {
+        if (!db.inTransaction()) {
+            Logger.e("ERROR: running discussion createOrReuseGroupDiscussion outside a transaction");
+            return null;
+        }
+
+        // check if a discussion already exists
+        Discussion discussion = db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
+
+        if (discussion == null) {
+            discussion = new Discussion(
+                    group.getCustomName(),
+                    group.bytesOwnedIdentity,
+                    TYPE_GROUP,
+                    group.bytesGroupOwnerAndUid,
+                    UUID.randomUUID(),
+                    0,
+                    System.currentTimeMillis(),
+                    group.getCustomPhotoUrl(),
+                    false,
+                    false,
+                    false,
+                    true,
+                    null,
+                    STATUS_NORMAL
+            );
+            discussion.id = db.discussionDao().insert(discussion);
+
+            if (group.bytesGroupOwnerIdentity == null) {
+                Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
+                Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
+                boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
+                if (readOnce || visibilityDuration != null || existenceDuration != null) {
+                    DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
+                    discussionCustomization.settingExistenceDuration = existenceDuration;
+                    discussionCustomization.settingVisibilityDuration = visibilityDuration;
+                    discussionCustomization.settingReadOnce = readOnce;
+                    discussionCustomization.sharedSettingsVersion = 0;
+                    db.discussionCustomizationDao().insert(discussionCustomization);
+                    db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), group.bytesOwnedIdentity, false, 0L));
+                }
+            }
+        } else if (!discussion.canPostMessages()) {
+            if (discussion.status == STATUS_LOCKED) {
+                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                db.messageDao().insert(reJoinedGroup);
+            }
+
+            discussion.title = group.getCustomName();
+            discussion.lastMessageTimestamp = System.currentTimeMillis();
+            discussion.photoUrl = group.getCustomPhotoUrl();
+            discussion.keycloakManaged = false;
+            discussion.active = true;
+            discussion.trustLevel = null;
+            discussion.status = Discussion.STATUS_NORMAL;
+            db.discussionDao().updateAll(discussion);
+        }
+
+        return discussion;
     }
+
+    @Ignore
+    public static Discussion createOrReuseGroupV2Discussion(AppDatabase db, @NonNull Group2 group2, boolean groupWasJustCreatedByMe) {
+        if (!db.inTransaction()) {
+            Logger.e("ERROR: running discussion createOrReuseGroupV2Discussion outside a transaction");
+            return null;
+        }
+
+        // check if a discussion already exists
+        Discussion discussion = db.discussionDao().getByGroupIdentifierWithAnyStatus(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
+
+        if (discussion == null) {
+            discussion = new Discussion(
+                    group2.getCustomName(),
+                    group2.bytesOwnedIdentity,
+                    TYPE_GROUP_V2,
+                    group2.bytesGroupIdentifier,
+                    UUID.randomUUID(),
+                    0,
+                    System.currentTimeMillis(),
+                    group2.getCustomPhotoUrl(),
+                    group2.keycloakManaged,
+                    false,
+                    false,
+                    true,
+                    null,
+                    STATUS_NORMAL
+            );
+            discussion.id = db.discussionDao().insert(discussion);
+
+            // if the is a group we just created, we should apply default ephemeral settings
+            if (groupWasJustCreatedByMe) {
+                Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
+                Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
+                boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
+                if (readOnce || visibilityDuration != null || existenceDuration != null) {
+                    DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
+                    discussionCustomization.settingExistenceDuration = existenceDuration;
+                    discussionCustomization.settingVisibilityDuration = visibilityDuration;
+                    discussionCustomization.settingReadOnce = readOnce;
+                    discussionCustomization.sharedSettingsVersion = 0;
+                    db.discussionCustomizationDao().insert(discussionCustomization);
+                    db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), group2.bytesOwnedIdentity, false, 0L));
+                }
+            } else {
+                Message reJoinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                db.messageDao().insert(reJoinedGroup);
+            }
+        } else if (!discussion.canPostMessages()) {
+            if (discussion.status == STATUS_LOCKED) {
+                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                db.messageDao().insert(reJoinedGroup);
+            }
+
+            discussion.title = group2.getCustomName();
+            discussion.lastMessageTimestamp = System.currentTimeMillis();
+            discussion.photoUrl = group2.getCustomPhotoUrl();
+            discussion.keycloakManaged = group2.keycloakManaged;
+            discussion.active = true;
+            discussion.trustLevel = null;
+            discussion.status = Discussion.STATUS_NORMAL;
+            db.discussionDao().updateAll(discussion);
+        }
+
+        return discussion;
+    }
+
 
     public boolean isLocked() {
-        return bytesGroupOwnerAndUid == null && bytesContactIdentity == null;
+        return status == STATUS_LOCKED;
+    }
+
+    public boolean canPostMessages() {
+        return status == STATUS_NORMAL;
     }
 
     public boolean updateLastMessageTimestamp(long lastMessageTimestamp) {
@@ -204,17 +391,42 @@ public class Discussion {
         db.messageDao().deleteDiscussionDraftMessage(id);
         db.messageDao().deleteAllDiscussionNewPublishedDetailsMessages(id);
 
+        for (MessageRecipientInfo messageRecipientInfo : db.messageRecipientInfoDao().getAllUnsentForDiscussion(id)) {
+            if (messageRecipientInfo.engineMessageIdentifier == null) {
+                // message was never sent (and will never be) --> delete
+                db.messageRecipientInfoDao().delete(messageRecipientInfo);
+            } else {
+                messageRecipientInfo.timestampSent = 0L;
+                db.messageRecipientInfoDao().update(messageRecipientInfo);
+                Message message = db.messageDao().get(messageRecipientInfo.messageId);
+                if (message != null && message.refreshOutboundStatus()) {
+                    db.messageDao().updateStatus(message.id, message.status);
+                }
+            }
+        }
+
         if (db.messageDao().countMessagesInDiscussion(id) == 0) {
             // discussion is empty and will be locked --> delete it
             db.discussionDao().delete(this);
         } else {
+            // clear the LatestDiscussionSenderSequenceNumber to avoid "xx messages missing" if you re-join this discussion
+            db.latestDiscussionSenderSequenceNumberDao().deleteForDiscussion(id);
+
             // the discussion has messages, do not delete it and insert a discussion left message
-            if (bytesContactIdentity != null) {
-                Message contactDeletedMessage = Message.createContactDeletedMessage(id, bytesContactIdentity);
-                db.messageDao().insert(contactDeletedMessage);
-            } else if (bytesGroupOwnerAndUid != null) {
-                Message groupLeftMessage = Message.createLeftGroupMessage(id, bytesOwnedIdentity);
-                db.messageDao().insert(groupLeftMessage);
+            switch (discussionType) {
+                case TYPE_CONTACT: {
+                    Message contactDeletedMessage = Message.createContactDeletedMessage(db, id, bytesDiscussionIdentifier);
+                    db.messageDao().insert(contactDeletedMessage);
+                    break;
+                }
+                case TYPE_GROUP:
+                case TYPE_GROUP_V2: {
+                    Message groupLeftMessage = Message.createLeftGroupMessage(db, id, bytesOwnedIdentity);
+                    db.messageDao().insert(groupLeftMessage);
+                    break;
+                }
+                default:
+                    return;
             }
 
             // copy the discussion photoUrl to customPhotos folder, unless it is already in there :)
@@ -223,7 +435,7 @@ public class Discussion {
                     int i = 0;
                     String relativeOutputPath;
                     do {
-                        relativeOutputPath = AppSingleton.CUSTOM_PHOTOS_DIRECTORY + File.separator + UUID.randomUUID().toString();
+                        relativeOutputPath = AppSingleton.CUSTOM_PHOTOS_DIRECTORY + File.separator + Logger.getUuidString(UUID.randomUUID());
                         i++;
                     } while (i < 10 && new File(App.absolutePathFromRelative(relativeOutputPath)).exists());
 
@@ -247,11 +459,16 @@ public class Discussion {
             }
 
             // lock the discussion
-            bytesContactIdentity = null;
-            bytesGroupOwnerAndUid = null;
+            status = STATUS_LOCKED;
             keycloakManaged = false;
+            active = true;
+            trustLevel = null;
+
             db.discussionDao().updateAsLocked(id);
 
+            if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(id)) {
+                UnifiedForegroundService.LocationSharingSubService.stopSharingLocationSync(id);
+            }
             ShortcutActivity.updateShortcut(this);
         }
     }

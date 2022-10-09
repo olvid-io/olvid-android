@@ -39,12 +39,18 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvDialog;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
@@ -135,6 +141,8 @@ public class Invitation {
             case ObvDialog.Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY:
                 return App.getContext().getString(R.string.invitation_status_mediator_invite_accepted);
             case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
+            case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY:
+            case ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY:
                 return App.getContext().getString(R.string.invitation_status_group_invite);
             case ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY:
             case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
@@ -247,7 +255,8 @@ public class Invitation {
                 });
                 break;
             }
-            case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY: {
+            case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
+            case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY: {
                 textView.setText(null);
                 final WeakReference<TextView> textViewWeakReference = new WeakReference<>(textView);
                 App.runThread(() -> {
@@ -263,6 +272,10 @@ public class Invitation {
                         });
                     }
                 });
+                break;
+            }
+            case ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY: {
+                textView.setText(R.string.invitation_status_description_group_v2_frozen_invitation);
                 break;
             }
             case ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY: {
@@ -310,18 +323,12 @@ public class Invitation {
         if (associatedDialog.getCategory().getId() == ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY) {
             final WeakReference<TextView> membersTextViewWeakReference = new WeakReference<>(membersTextView);
             App.runThread(() -> {
-                String separator = App.getContext().getString(R.string.text_contact_names_separator);
-                final SpannableStringBuilder builder = new SpannableStringBuilder();
                 final byte[] bytesOwnedIdentity = associatedDialog.getBytesOwnedIdentity();
-                boolean first = true;
+                List<CharSequence> memberNames = new ArrayList<>();
                 for (final ObvIdentity contactIdentity : associatedDialog.getCategory().getPendingGroupMemberIdentities()) {
-                    if (!first) {
-                        builder.append(separator);
-                    }
-                    first = false;
                     Contact contact = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
                     if (contact == null) {
-                        builder.append(contactIdentity.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()));
+                        memberNames.add(contactIdentity.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()));
                     } else {
                         ClickableSpan clickableSpan = new ClickableSpan() {
                             @Override
@@ -331,15 +338,99 @@ public class Invitation {
                         };
                         SpannableString contactName = new SpannableString(contact.getCustomDisplayName());
                         contactName.setSpan(clickableSpan, 0, contactName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        builder.append(contactName);
+                        memberNames.add(contactName);
                     }
                 }
-                if (first) {
+
+                Collections.sort(memberNames, (CharSequence cs1, CharSequence cs2) -> {
+                    int minLen = Math.min(cs1.length(), cs2.length());
+                    for (int i=0; i<minLen; i++) {
+                        if (cs1.charAt(i) != cs2.charAt(i)) {
+                            return cs1.charAt(i) - cs2.charAt(i);
+                        }
+                    }
+                    return cs2.length() - cs1.length();
+                });
+
+                final SpannableStringBuilder builder = new SpannableStringBuilder();
+                if (memberNames.isEmpty()) {
                     StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
                     SpannableString spannableString = new SpannableString(App.getContext().getString(R.string.text_nobody));
                     spannableString.setSpan(styleSpan, 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     builder.append(spannableString);
+                } else {
+                    String separator = App.getContext().getString(R.string.text_contact_names_separator);
+                    boolean first = true;
+                    for (CharSequence memberName : memberNames) {
+                        if (!first) {
+                            builder.append(separator);
+                        }
+                        first = false;
+                        builder.append(memberName);
+                    }
                 }
+
+                final TextView membersTV = membersTextViewWeakReference.get();
+                if (membersTV != null) {
+                    new Handler(Looper.getMainLooper()).post(() -> membersTV.setText(builder));
+                }
+            });
+        } else if (associatedDialog.getCategory().getId() == ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY
+                || associatedDialog.getCategory().getId() == ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY) {
+            final WeakReference<TextView> membersTextViewWeakReference = new WeakReference<>(membersTextView);
+            App.runThread(() -> {
+                final byte[] bytesOwnedIdentity = associatedDialog.getBytesOwnedIdentity();
+                List<CharSequence> memberNames = new ArrayList<>();
+                for (final ObvGroupV2.ObvGroupV2PendingMember groupV2Member : associatedDialog.getCategory().getObvGroupV2().pendingGroupMembers) {
+                    Contact contact = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, groupV2Member.bytesIdentity);
+                    if (contact == null) {
+                        try {
+                            JsonIdentityDetails identityDetails = AppSingleton.getJsonObjectMapper().readValue(groupV2Member.serializedDetails, JsonIdentityDetails.class);
+                            memberNames.add(identityDetails.formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()));
+                        } catch (JsonProcessingException e) {
+                            memberNames.add("???");
+                        }
+                    } else {
+                        ClickableSpan clickableSpan = new ClickableSpan() {
+                            @Override
+                            public void onClick(View view) {
+                                App.openContactDetailsActivity(view.getContext(), bytesOwnedIdentity, groupV2Member.bytesIdentity);
+                            }
+                        };
+                        SpannableString contactName = new SpannableString(contact.getCustomDisplayName());
+                        contactName.setSpan(clickableSpan, 0, contactName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        memberNames.add(contactName);
+                    }
+                }
+
+                Collections.sort(memberNames, (CharSequence cs1, CharSequence cs2) -> {
+                    int minLen = Math.min(cs1.length(), cs2.length());
+                    for (int i=0; i<minLen; i++) {
+                        if (cs1.charAt(i) != cs2.charAt(i)) {
+                            return cs1.charAt(i) - cs2.charAt(i);
+                        }
+                    }
+                    return cs2.length() - cs1.length();
+                });
+
+                final SpannableStringBuilder builder = new SpannableStringBuilder();
+                if (memberNames.isEmpty()) {
+                    StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
+                    SpannableString spannableString = new SpannableString(App.getContext().getString(R.string.text_nobody));
+                    spannableString.setSpan(styleSpan, 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    builder.append(spannableString);
+                } else {
+                    String separator = App.getContext().getString(R.string.text_contact_names_separator);
+                    boolean first = true;
+                    for (CharSequence memberName : memberNames) {
+                        if (!first) {
+                            builder.append(separator);
+                        }
+                        first = false;
+                        builder.append(memberName);
+                    }
+                }
+
                 final TextView membersTV = membersTextViewWeakReference.get();
                 if (membersTV != null) {
                     new Handler(Looper.getMainLooper()).post(() -> membersTV.setText(builder));

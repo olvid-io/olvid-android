@@ -72,6 +72,8 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                 contact.setCustomDisplayName(customDisplayName);
                 db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
                 AppSingleton.updateCachedCustomDisplayName(contact.bytesContactIdentity, contact.getCustomDisplayName());
+
+                new UpdateAllGroupMembersNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity).run();
             }
 
             if (!Objects.equals(App.absolutePathFromRelative(contact.customPhotoUrl), absoluteCustomPhotoUrl)) {
@@ -96,7 +98,7 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                         int i = 0;
                         String relativeOutputPath;
                         do {
-                            relativeOutputPath = AppSingleton.CUSTOM_PHOTOS_DIRECTORY + File.separator + UUID.randomUUID().toString();
+                            relativeOutputPath = AppSingleton.CUSTOM_PHOTOS_DIRECTORY + File.separator + Logger.getUuidString(UUID.randomUUID());
                             i++;
                         } while (i < 10 && new File(App.absolutePathFromRelative(relativeOutputPath)).exists());
 

@@ -115,11 +115,11 @@ import io.olvid.messenger.databases.entity.CallLogItem;
 import io.olvid.messenger.databases.entity.CallLogItemContactJoin;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
-
-import static io.olvid.messenger.App.getContext;
 
 public class WebrtcCallService extends Service {
     public static final String ACTION_START_CALL = "action_start_call";
@@ -133,6 +133,7 @@ public class WebrtcCallService extends Service {
     public static final String SINGLE_CONTACT_IDENTITY_BUNDLE_KEY = "0";
     public static final String CONTACT_IDENTITIES_BUNDLE_INTENT_EXTRA = "contact_identities_bundle";
     public static final String BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA = "bytes_group_owner_and_uid";
+    public static final String GROUP_V2_INTENT_EXTRA = "group_v2";
     public static final String CALL_IDENTIFIER_INTENT_EXTRA = "call_identifier";
     public static final String MESSAGE_TYPE_INTENT_EXTRA = "message_type";
     public static final String SERIALIZED_MESSAGE_PAYLOAD_INTENT_EXTRA = "serialized_message_payload";
@@ -253,7 +254,8 @@ public class WebrtcCallService extends Service {
     private Role role = Role.NONE;
     UUID callIdentifier = null;
     byte[] bytesOwnedIdentity = null;
-    byte[] bytesGroupOwnerAndUid = null;
+    int discussionType = Discussion.TYPE_CONTACT; // updated whenever bytesGroupOwnerAndUidOrIdentifier is set
+    byte[] bytesGroupOwnerAndUidOrIdentifier = null;
     private State state = State.INITIAL;
     private FailReason failReason = FailReason.NONE;
     private final MutableLiveData<State> stateLiveData = new MutableLiveData<>(state);
@@ -330,11 +332,12 @@ public class WebrtcCallService extends Service {
                         bytesContactIdentities.add(contactIdentitiesBundle.getByteArray(key));
                     }
                     byte[] bytesGroupOwnerAndUid = intent.getByteArrayExtra(BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA);
+                    boolean groupV2 = intent.getBooleanExtra(GROUP_V2_INTENT_EXTRA, false);
 
                     if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                        callerStartCall(bytesOwnedIdentity, bytesContactIdentities, bytesGroupOwnerAndUid);
+                        callerStartCall(bytesOwnedIdentity, bytesContactIdentities, bytesGroupOwnerAndUid, groupV2);
                     } else {
-                        callerWaitForAudioPermission(bytesOwnedIdentity, bytesContactIdentities, bytesGroupOwnerAndUid);
+                        callerWaitForAudioPermission(bytesOwnedIdentity, bytesContactIdentities, bytesGroupOwnerAndUid, groupV2);
                     }
 
                     return START_NOT_STICKY;
@@ -604,7 +607,7 @@ public class WebrtcCallService extends Service {
         });
     }
 
-    private void callerStartCall(@NonNull byte[] bytesOwnedIdentity, @NonNull List<byte[]> bytesContactIdentities, @Nullable byte[] bytesGroupOwnerAndUid) {
+    private void callerStartCall(@NonNull byte[] bytesOwnedIdentity, @NonNull List<byte[]> bytesContactIdentities, @Nullable byte[] bytesGroupOwnerAndUidOrIdentifier, boolean groupV2) {
         executor.execute(() -> {
             if (state != State.INITIAL) {
                 App.toast(R.string.toast_message_already_in_a_call, Toast.LENGTH_SHORT);
@@ -625,8 +628,8 @@ public class WebrtcCallService extends Service {
             }
 
             setContactsAndRole(bytesOwnedIdentity, contacts, callIdentifier, true);
-            this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
-
+            this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier;
+            this.discussionType = bytesGroupOwnerAndUidOrIdentifier == null ? Discussion.TYPE_CONTACT : (groupV2 ? Discussion.TYPE_GROUP_V2 : Discussion.TYPE_GROUP);
 
             // show notification
             showOngoingForeground();
@@ -635,7 +638,7 @@ public class WebrtcCallService extends Service {
         });
     }
 
-    private void callerWaitForAudioPermission(@NonNull byte[] bytesOwnedIdentity, @NonNull List<byte[]> bytesContactIdentities, @Nullable byte[] bytesGroupOwnerAndUid) {
+    private void callerWaitForAudioPermission(@NonNull byte[] bytesOwnedIdentity, @NonNull List<byte[]> bytesContactIdentities, @Nullable byte[] bytesGroupOwnerAndUidOrIdentifier, boolean groupV2) {
         executor.execute(() -> {
             if (state != State.INITIAL) {
                 App.toast(R.string.toast_message_already_in_a_call, Toast.LENGTH_SHORT);
@@ -656,7 +659,8 @@ public class WebrtcCallService extends Service {
             }
 
             setContactsAndRole(bytesOwnedIdentity, contacts, callIdentifier, true);
-            this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
+            this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier;
+            this.discussionType = bytesGroupOwnerAndUidOrIdentifier == null ? Discussion.TYPE_CONTACT : (groupV2 ? Discussion.TYPE_GROUP_V2 : Discussion.TYPE_GROUP);
 
             setState(State.WAITING_FOR_AUDIO_PERMISSION);
         });
@@ -973,16 +977,16 @@ public class WebrtcCallService extends Service {
     }
 
 
-    void recipientReceiveCall(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, UUID callIdentifier, String peerSdpType, byte[] gzippedPeerSdpDescription, String turnUsername, String turnPassword,/* @Nullable List<String> turnServers,*/ int participantCount, @Nullable byte[] bytesGroupOwnerAndUid, @NonNull GatheringPolicy gatheringPolicy) {
+    void recipientReceiveCall(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, UUID callIdentifier, String peerSdpType, byte[] gzippedPeerSdpDescription, String turnUsername, String turnPassword,/* @Nullable List<String> turnServers,*/ int participantCount, @Nullable byte[] bytesGroupOwnerAndUidOrIdentifier, @NonNull GatheringPolicy gatheringPolicy) {
         executor.execute(() -> {
             if (state != State.INITIAL && !callIdentifier.equals(this.callIdentifier)) {
-                sendBusyMessage(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, bytesGroupOwnerAndUid);
+                sendBusyMessage(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, bytesGroupOwnerAndUidOrIdentifier);
                 return;
             }
 
             if (callIdentifier.equals(this.callIdentifier) && !Arrays.equals(bytesOwnedIdentity, this.bytesOwnedIdentity)) {
                 // receiving a call from another profile on same device...
-                sendBusyMessage(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, bytesGroupOwnerAndUid);
+                sendBusyMessage(bytesOwnedIdentity, bytesContactIdentity, callIdentifier, bytesGroupOwnerAndUidOrIdentifier);
                 return;
             }
 
@@ -1012,10 +1016,24 @@ public class WebrtcCallService extends Service {
             }
 
 
-            this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
+            this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier;
             this.turnUserName = turnUsername;
             this.turnPassword = turnPassword;
             this.incomingParticipantCount = participantCount;
+
+            Discussion discussion;
+            if (bytesGroupOwnerAndUidOrIdentifier == null) {
+                discussion = AppDatabase.getInstance().discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
+                this.discussionType = Discussion.TYPE_CONTACT;
+            } else {
+                discussion = AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUidOrIdentifier(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier);
+                this.discussionType = discussion.discussionType;
+            }
+            DiscussionCustomization discussionCustomization = null;
+            if (discussion != null) {
+                discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
+            }
+
             callParticipant.peerConnectionHolder.setGatheringPolicy(gatheringPolicy);
             callParticipant.peerConnectionHolder.setPeerSessionDescription(peerSdpType, peerSdpDescription);
             callParticipant.peerConnectionHolder.setTurnCredentials(turnUsername, turnPassword/*, turnServers*/);
@@ -1023,7 +1041,7 @@ public class WebrtcCallService extends Service {
             showIncomingCallForeground(callParticipant.contact, participantCount);
             sendRingingMessage(callParticipant);
             registerScreenOffReceiver();
-            incomingCallRinger.ring(callIdentifier);
+            incomingCallRinger.ring(callIdentifier, discussionCustomization);
 
             setState(State.RINGING);
         });
@@ -1827,7 +1845,7 @@ public class WebrtcCallService extends Service {
             case CallLogItem.STATUS_BUSY:
             case CallLogItem.STATUS_FAILED:
             case CallLogItem.STATUS_REJECTED:
-                callLogItem = new CallLogItem(bytesOwnedIdentity, bytesGroupOwnerAndUid, type, callLogItemStatus);
+                callLogItem = new CallLogItem(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier, type, callLogItemStatus);
                 break;
         }
         if (callLogItem != null) {
@@ -1853,11 +1871,11 @@ public class WebrtcCallService extends Service {
                 }
 
                 if (this.callLogItem.callType == CallLogItem.TYPE_OUTGOING) {
-                    if (this.callLogItem.bytesGroupOwnerAndUid != null) {
+                    if (this.callLogItem.bytesGroupOwnerAndUidOrIdentifier != null) {
                         // group discussion
-                        Discussion discussion = AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, this.callLogItem.bytesGroupOwnerAndUid);
+                        Discussion discussion = AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUidOrIdentifier(bytesOwnedIdentity, this.callLogItem.bytesGroupOwnerAndUidOrIdentifier);
                         if (discussion != null) {
-                            Message callMessage = Message.createPhoneCallMessage(discussion.id, bytesOwnedIdentity, this.callLogItem);
+                            Message callMessage = Message.createPhoneCallMessage(AppDatabase.getInstance(), discussion.id, bytesOwnedIdentity, this.callLogItem);
                             AppDatabase.getInstance().messageDao().insert(callMessage);
                             if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
                                 AppDatabase.getInstance().discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -1867,7 +1885,7 @@ public class WebrtcCallService extends Service {
                         // one-to-one discussion
                         Discussion discussion = AppDatabase.getInstance().discussionDao().getByContact(bytesOwnedIdentity, callParticipants[0].bytesContactIdentity);
                         if (discussion != null) {
-                            Message callMessage = Message.createPhoneCallMessage(discussion.id, callParticipants[0].bytesContactIdentity, this.callLogItem);
+                            Message callMessage = Message.createPhoneCallMessage(AppDatabase.getInstance(), discussion.id, callParticipants[0].bytesContactIdentity, this.callLogItem);
                             AppDatabase.getInstance().messageDao().insert(callMessage);
                             if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
                                 AppDatabase.getInstance().discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -1880,14 +1898,14 @@ public class WebrtcCallService extends Service {
                     for (CallParticipant callParticipant : callParticipants) {
                         if (callParticipant.role == Role.CALLER) {
                             Discussion discussion = null;
-                            if (this.callLogItem.bytesGroupOwnerAndUid != null) {
-                                discussion = AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, this.callLogItem.bytesGroupOwnerAndUid);
+                            if (this.callLogItem.bytesGroupOwnerAndUidOrIdentifier != null) {
+                                discussion = AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUidOrIdentifier(bytesOwnedIdentity, this.callLogItem.bytesGroupOwnerAndUidOrIdentifier);
                             }
                             if (discussion == null) {
                                 discussion = AppDatabase.getInstance().discussionDao().getByContact(bytesOwnedIdentity, callParticipant.bytesContactIdentity);
                             }
                             if (discussion != null) {
-                                Message callMessage = Message.createPhoneCallMessage(discussion.id, callParticipant.bytesContactIdentity, this.callLogItem);
+                                Message callMessage = Message.createPhoneCallMessage(AppDatabase.getInstance(), discussion.id, callParticipant.bytesContactIdentity, this.callLogItem);
                                 AppDatabase.getInstance().messageDao().insert(callMessage);
                                 if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
                                     AppDatabase.getInstance().discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -1942,32 +1960,46 @@ public class WebrtcCallService extends Service {
 
         Intent endCallIntent = new Intent(this, WebrtcCallService.class);
         endCallIntent.setAction(ACTION_HANG_UP);
-        endCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, callIdentifier.toString());
+        endCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(callIdentifier));
         PendingIntent endCallPendingIntent;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            endCallPendingIntent = PendingIntent.getService(getContext(), 0, endCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            endCallPendingIntent = PendingIntent.getService(this, 0, endCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            endCallPendingIntent = PendingIntent.getService(getContext(), 0, endCallIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            endCallPendingIntent = PendingIntent.getService(this, 0, endCallIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
 
         Intent callActivityIntent = new Intent(this, WebrtcCallActivity.class);
         PendingIntent callActivityPendingIntent;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            callActivityPendingIntent = PendingIntent.getActivity(getContext(), 0, callActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            callActivityPendingIntent = PendingIntent.getActivity(this, 0, callActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            callActivityPendingIntent = PendingIntent.getActivity(getContext(), 0, callActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            callActivityPendingIntent = PendingIntent.getActivity(this, 0, callActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
 
-        InitialView initialView = new InitialView(getContext());
-        String notificationName;
+        InitialView initialView = new InitialView(App.getContext());
+        String notificationName = null;
 
-        if (callParticipants.size() > 1 && bytesGroupOwnerAndUid != null) {
-            Group group = AppDatabase.getInstance().groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
-            if (group != null && group.getCustomPhotoUrl() != null) {
-                initialView.setPhotoUrl(bytesGroupOwnerAndUid, group.getCustomPhotoUrl());
-                notificationName = getString(R.string.text_count_contacts_from_group, callParticipants.size(), group.getCustomName());
-            } else {
-                initialView.setGroup(bytesGroupOwnerAndUid);
+        if (callParticipants.size() > 1 && bytesGroupOwnerAndUidOrIdentifier != null) {
+            switch (discussionType) {
+                case Discussion.TYPE_GROUP: {
+                    Group group = AppDatabase.getInstance().groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier);
+                    if (group != null && group.getCustomPhotoUrl() != null) {
+                        initialView.setPhotoUrl(bytesGroupOwnerAndUidOrIdentifier, group.getCustomPhotoUrl());
+                        notificationName = getString(R.string.text_count_contacts_from_group, callParticipants.size(), group.getCustomName());
+                    }
+                    break;
+                }
+                case Discussion.TYPE_GROUP_V2: {
+                    Group2 group = AppDatabase.getInstance().group2Dao().get(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier);
+                    if (group != null && group.getCustomPhotoUrl() != null) {
+                        initialView.setPhotoUrl(bytesGroupOwnerAndUidOrIdentifier, group.getCustomPhotoUrl());
+                        notificationName = getString(R.string.text_count_contacts_from_group, callParticipants.size(), group.getCustomName()); // this group has members, so no need to check if getCustomName() returns ""
+                    }
+                    break;
+                }
+            }
+            if (notificationName == null) {
+                initialView.setGroup(bytesGroupOwnerAndUidOrIdentifier);
                 notificationName = getString(R.string.text_count_contacts, callParticipants.size());
             }
         } else {
@@ -1981,7 +2013,7 @@ public class WebrtcCallService extends Service {
                 notificationName = callParticipant.displayName;
             }
         }
-        int size = getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
+        int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
         initialView.setSize(size, size);
         Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         initialView.drawOnCanvas(new Canvas(largeIcon));
@@ -2026,35 +2058,35 @@ public class WebrtcCallService extends Service {
     private void showIncomingCallForeground(Contact contact, int participantCount) {
         Intent rejectCallIntent = new Intent(this, WebrtcCallService.class);
         rejectCallIntent.setAction(ACTION_REJECT_CALL);
-        rejectCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, callIdentifier.toString());
+        rejectCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(callIdentifier));
         PendingIntent rejectCallPendingIntent;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            rejectCallPendingIntent = PendingIntent.getService(getContext(), 0, rejectCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            rejectCallPendingIntent = PendingIntent.getService(this, 0, rejectCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            rejectCallPendingIntent = PendingIntent.getService(getContext(), 0, rejectCallIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            rejectCallPendingIntent = PendingIntent.getService(this, 0, rejectCallIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
 
         Intent answerCallIntent = new Intent(this, WebrtcCallActivity.class);
         answerCallIntent.setAction(WebrtcCallActivity.ANSWER_CALL_ACTION);
-        answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER, callIdentifier.toString());
+        answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER, Logger.getUuidString(callIdentifier));
         answerCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent answerCallPendingIntent;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            answerCallPendingIntent = PendingIntent.getActivity(getContext(), 0, answerCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            answerCallPendingIntent = PendingIntent.getActivity(this, 0, answerCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            answerCallPendingIntent = PendingIntent.getActivity(getContext(), 0, answerCallIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            answerCallPendingIntent = PendingIntent.getActivity(this, 0, answerCallIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
 
         Intent fullScreenIntent = new Intent(this, WebrtcIncomingCallActivity.class);
         PendingIntent fullScreenPendingIntent;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            fullScreenPendingIntent = PendingIntent.getActivity(getContext(), 0, fullScreenIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            fullScreenPendingIntent = PendingIntent.getActivity(this, 0, fullScreenIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } else {
-            fullScreenPendingIntent = PendingIntent.getActivity(getContext(), 0, fullScreenIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            fullScreenPendingIntent = PendingIntent.getActivity(this, 0, fullScreenIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
 
-        InitialView initialView = new InitialView(getContext());
-        int size = getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
+        InitialView initialView = new InitialView(App.getContext());
+        int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
         initialView.setSize(size, size);
         initialView.setContact(contact);
         Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
@@ -2078,7 +2110,7 @@ public class WebrtcCallService extends Service {
 
             Notification.Builder publicBuilder = new Notification.Builder(this, AndroidNotificationManager.WEBRTC_CALL_SERVICE_NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_phone_animated)
-                    .setContentTitle(getContext().getString(R.string.notification_public_title_incoming_webrtc_call));
+                    .setContentTitle(getString(R.string.notification_public_title_incoming_webrtc_call));
 
             Notification.Builder builder = new Notification.Builder(this, AndroidNotificationManager.WEBRTC_CALL_SERVICE_NOTIFICATION_CHANNEL_ID)
                     .setPublicVersion(publicBuilder.build())
@@ -2098,14 +2130,14 @@ public class WebrtcCallService extends Service {
                 // we make it dismissible
                 builder.setOngoing(false);
 
-                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
                 notificationManager.notify(NOT_FOREGROUND_NOTIFICATION_ID, builder.build());
             }
         } else {
 
             NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(this, AndroidNotificationManager.WEBRTC_CALL_SERVICE_NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_phone_animated)
-                    .setContentTitle(getContext().getString(R.string.notification_public_title_incoming_webrtc_call));
+                    .setContentTitle(getString(R.string.notification_public_title_incoming_webrtc_call));
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, AndroidNotificationManager.WEBRTC_CALL_SERVICE_NOTIFICATION_CHANNEL_ID);
             builder.setContentTitle(getString(R.string.notification_title_incoming_webrtc_call, contact.getCustomDisplayName()))
@@ -2141,7 +2173,7 @@ public class WebrtcCallService extends Service {
                 // we make it dismissible
                 builder.setOngoing(false);
 
-                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
                 notificationManager.notify(NOT_FOREGROUND_NOTIFICATION_ID, builder.build());
             }
         }
@@ -2461,11 +2493,24 @@ public class WebrtcCallService extends Service {
     // region Send messages via Oblivious channel
 
     public boolean sendStartCallMessage(CallParticipant callParticipant, String sessionDescriptionType, String sessionDescription, String turnUserName, String turnPassword, List<String> turnServers) throws IOException {
-        final JsonStartCallMessage startCallMessage;
-        if (bytesGroupOwnerAndUid != null && AppDatabase.getInstance().contactGroupJoinDao().isGroupMember(bytesOwnedIdentity, callParticipant.bytesContactIdentity, bytesGroupOwnerAndUid)) {
-            startCallMessage = new JsonStartCallMessage(sessionDescriptionType, gzip(sessionDescription), turnUserName, turnPassword, turnServers, callParticipants.size(), bytesGroupOwnerAndUid, callParticipant.gatheringPolicy);
-        } else {
-            startCallMessage = new JsonStartCallMessage(sessionDescriptionType, gzip(sessionDescription), turnUserName, turnPassword, turnServers, callParticipants.size(), null, callParticipant.gatheringPolicy);
+        JsonStartCallMessage startCallMessage = null;
+        switch (discussionType) {
+            case Discussion.TYPE_GROUP: {
+                if (AppDatabase.getInstance().contactGroupJoinDao().isGroupMember(bytesOwnedIdentity, callParticipant.bytesContactIdentity, bytesGroupOwnerAndUidOrIdentifier)) {
+                    startCallMessage = new JsonStartCallMessage(sessionDescriptionType, gzip(sessionDescription), turnUserName, turnPassword, turnServers, callParticipants.size(), bytesGroupOwnerAndUidOrIdentifier, false, callParticipant.gatheringPolicy);
+                }
+                break;
+            }
+            case Discussion.TYPE_GROUP_V2: {
+                if (AppDatabase.getInstance().group2MemberDao().isGroupMember(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier, callParticipant.bytesContactIdentity)) {
+                    startCallMessage = new JsonStartCallMessage(sessionDescriptionType, gzip(sessionDescription), turnUserName, turnPassword, turnServers, callParticipants.size(), bytesGroupOwnerAndUidOrIdentifier, true, callParticipant.gatheringPolicy);
+                }
+
+            }
+        }
+
+        if (startCallMessage == null) {
+            startCallMessage = new JsonStartCallMessage(sessionDescriptionType, gzip(sessionDescription), turnUserName, turnPassword, turnServers, callParticipants.size(), null, false, callParticipant.gatheringPolicy);
         }
         return postMessage(Collections.singletonList(callParticipant), startCallMessage);
     }
@@ -2479,7 +2524,7 @@ public class WebrtcCallService extends Service {
 
             try {
                 JsonNewIceCandidateMessage jsonNewIceCandidateMessage = new JsonNewIceCandidateMessage(jsonIceCandidate.sdp, jsonIceCandidate.sdpMLineIndex, jsonIceCandidate.sdpMid);
-                Logger.d("☎ sending peer an ice candidate for call " + callIdentifier + "\n" + jsonIceCandidate.sdpMLineIndex + " -> " + jsonIceCandidate.sdp);
+                Logger.d("☎ sending peer an ice candidate for call " + Logger.getUuidString(callIdentifier) + "\n" + jsonIceCandidate.sdpMLineIndex + " -> " + jsonIceCandidate.sdp);
                 if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
                     postMessage(Collections.singletonList(callParticipant), jsonNewIceCandidateMessage);
                 } else {
@@ -2541,7 +2586,7 @@ public class WebrtcCallService extends Service {
 
             Discussion discussion = AppDatabase.getInstance().discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
             if (discussion != null) {
-                Message busyCallMessage = Message.createPhoneCallMessage(discussion.id, bytesContactIdentity, callLogItem);
+                Message busyCallMessage = Message.createPhoneCallMessage(AppDatabase.getInstance(), discussion.id, bytesContactIdentity, callLogItem);
                 AppDatabase.getInstance().messageDao().insert(busyCallMessage);
                 if (discussion.updateLastMessageTimestamp(busyCallMessage.timestamp)) {
                     AppDatabase.getInstance().discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -3034,6 +3079,7 @@ public class WebrtcCallService extends Service {
         int participantCount;
         byte[] bytesGroupOwner;
         byte[] groupId;
+        byte[] groupV2Identifier;
         Integer rawGatheringPolicy;
 
 
@@ -3042,14 +3088,14 @@ public class WebrtcCallService extends Service {
         }
 
         @JsonIgnore
-        public JsonStartCallMessage(String sessionDescriptionType, byte[] gzippedSessionDescription, String turnUserName, String turnPassword, List<String> turnServers, int participantCount, byte[] bytesGroupOwnerAndUid, @NonNull GatheringPolicy gatheringPolicy) {
+        public JsonStartCallMessage(String sessionDescriptionType, byte[] gzippedSessionDescription, String turnUserName, String turnPassword, List<String> turnServers, int participantCount, byte[] bytesGroupOwnerAndUid, boolean isGroupV2, @NonNull GatheringPolicy gatheringPolicy) {
             this.sessionDescriptionType = sessionDescriptionType;
             this.gzippedSessionDescription = gzippedSessionDescription;
             this.turnUserName = turnUserName;
             this.turnPassword = turnPassword;
             this.turnServers = turnServers;
             this.participantCount = participantCount;
-            this.setBytesGroupOwnerAndUid(bytesGroupOwnerAndUid);
+            this.setBytesGroupOwnerAndUid(bytesGroupOwnerAndUid, isGroupV2);
             switch (gatheringPolicy) {
                 case GATHER_ONCE:
                     this.rawGatheringPolicy = 1;
@@ -3140,6 +3186,16 @@ public class WebrtcCallService extends Service {
             this.groupId = groupId;
         }
 
+        @JsonProperty("gid2")
+        public byte[] getGroupV2Identifier() {
+            return groupV2Identifier;
+        }
+
+        @JsonProperty("gid2")
+        public void setGroupV2Identifier(byte[] groupV2Identifier) {
+            this.groupV2Identifier = groupV2Identifier;
+        }
+
         @JsonProperty("gp")
         public Integer getRawGatheringPolicy() {
             return rawGatheringPolicy;
@@ -3152,7 +3208,9 @@ public class WebrtcCallService extends Service {
 
         @JsonIgnore
         public byte[] getBytesGroupOwnerAndUid() {
-            if (this.bytesGroupOwner == null || this.groupId == null) {
+            if (this.groupV2Identifier != null) {
+                return groupV2Identifier;
+            } else if (this.bytesGroupOwner == null || this.groupId == null) {
                 return null;
             }
             byte[] bytesGroupOwnerAndUid = new byte[bytesGroupOwner.length + groupId.length];
@@ -3162,11 +3220,17 @@ public class WebrtcCallService extends Service {
         }
 
         @JsonIgnore
-        public void setBytesGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) {
-            if (bytesGroupOwnerAndUid == null || bytesGroupOwnerAndUid.length < 32) {
+        public void setBytesGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid, boolean isGroupV2) {
+            if (isGroupV2) {
+                this.groupV2Identifier = bytesGroupOwnerAndUid;
+                this.bytesGroupOwner = null;
+                this.groupId = null;
+            } else if (bytesGroupOwnerAndUid == null || bytesGroupOwnerAndUid.length < 32) {
+                this.groupV2Identifier = null;
                 this.bytesGroupOwner = null;
                 this.groupId = null;
             } else {
+                this.groupV2Identifier = null;
                 this.bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
                 this.groupId = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
             }

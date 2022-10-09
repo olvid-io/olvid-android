@@ -42,7 +42,7 @@ public class JsonGroupDetails {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = nullOrTrim(name);
     }
 
     public String getDescription() {
@@ -50,7 +50,7 @@ public class JsonGroupDetails {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = nullOrTrim(description);
     }
 
     @JsonIgnore

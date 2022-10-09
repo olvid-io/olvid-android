@@ -47,7 +47,7 @@ public class UpdateLockedDiscussionTitleAndPhotoTask implements Runnable {
     public void run() {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(discussionId);
-        if (discussion == null || discussion.bytesContactIdentity != null || discussion.bytesGroupOwnerAndUid != null) {
+        if (discussion == null || !discussion.isLocked()) {
             // this method should only be used to rename locked discussions
             return;
         }
@@ -74,7 +74,7 @@ public class UpdateLockedDiscussionTitleAndPhotoTask implements Runnable {
                     int i = 0;
                     String relativeOutputPath;
                     do {
-                        relativeOutputPath = AppSingleton.CUSTOM_PHOTOS_DIRECTORY + File.separator + UUID.randomUUID().toString();
+                        relativeOutputPath = AppSingleton.CUSTOM_PHOTOS_DIRECTORY + File.separator + Logger.getUuidString(UUID.randomUUID());
                         i++;
                     } while (i < 10 && new File(App.absolutePathFromRelative(relativeOutputPath)).exists());
 

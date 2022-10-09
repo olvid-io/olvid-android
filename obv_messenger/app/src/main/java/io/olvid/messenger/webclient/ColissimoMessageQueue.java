@@ -24,6 +24,7 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.Nullable;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,24 +40,21 @@ import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import androidx.annotation.Nullable;
-
 import io.olvid.engine.Logger;
-import io.olvid.messenger.customClasses.PreviewUtils;
-import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
-import io.olvid.messenger.databases.tasks.UpdateMessageBodyTask;
-import io.olvid.messenger.databases.tasks.UpdateReactionsTask;
-import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.databases.tasks.PostMessageInDiscussionTask;
-
+import io.olvid.messenger.databases.tasks.UpdateMessageBodyTask;
+import io.olvid.messenger.databases.tasks.UpdateReactionsTask;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.notifications.NotificationActionService;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.webclient.datatypes.Constants;
@@ -100,7 +98,7 @@ public class ColissimoMessageQueue {
         worker = new ColissimoMessageQueueWorker(this.manager);
         worker.start();
         executing = true;
-        if(SettingsActivity.notifyAfterInactivity()){
+        if(SettingsActivity.webclientNotifyAfterInactivity()){
             startOrRestartTimeoutDeclareInactive();
         }
     }
@@ -178,12 +176,12 @@ public class ColissimoMessageQueue {
                             if (lang != null && Arrays.asList(Constants.SUPPORTED_LANGUAGES).contains(lang) ||
                                     "BrowserDefault".equals(lang) ||
                                     "AppDefault".equals(lang)) {
-                                SettingsActivity.setLanguageWebclient(lang);
+                                SettingsActivity.setWebclientLanguage(lang);
                             }
                             SettingsActivity.setThemeWebclient(obj_settings.getTheme());
-                            SettingsActivity.setSendOnEnterWebClient(obj_settings.isSendOnEnter());
-                            SettingsActivity.setNotificationsSoundWebclient(obj_settings.isNotificationSound());
-                            SettingsActivity.setShowNotificationsOnBrowser(obj_settings.isShowNotifications());
+                            SettingsActivity.setWebclientSendOnEnter(obj_settings.isSendOnEnter());
+                            SettingsActivity.setPlayWebclientNotificationsSoundInBrowser(obj_settings.isNotificationSound());
+                            SettingsActivity.setShowWebclientNotificationsInBrowser(obj_settings.isShowNotifications());
 
                             //update web service context for language changes
                             if ("BrowserDefault".equals(lang)) {
@@ -528,7 +526,7 @@ public class ColissimoMessageQueue {
     // Called only for certain types of messages : either resets inactivity timeout if webclient is not declared inactive, or notify user.
     // Reacts to the first event and then considers webclient as active again.
     private void activityAfterInactivity() {
-        if (!SettingsActivity.notifyAfterInactivity()) {
+        if (!SettingsActivity.webclientNotifyAfterInactivity()) {
             return;
         }
         if (webclientInactive) {

@@ -115,11 +115,11 @@ public class GalleryImageView extends androidx.appcompat.widget.AppCompatImageVi
         if (drawable != null) {
             bitmapWidth = drawable.getIntrinsicWidth();
             bitmapHeight = drawable.getIntrinsicHeight();
-            recomputeMatrix(true, false, false);
         } else {
             bitmapWidth = -1;
             bitmapHeight = -1;
         }
+        recomputeMatrix(true, false, false);
     }
 
     public void setParentViewPagerUserInputController(ParentViewPagerUserInputController parentViewPagerUserInputController) {
@@ -132,6 +132,10 @@ public class GalleryImageView extends androidx.appcompat.widget.AppCompatImageVi
 
 
     private void recomputeMatrix(boolean forceAutoFit, boolean maintainAutoFit, boolean animate) {
+        if (bitmapWidth == -1 || bitmapHeight == -1) {
+            draggable = false;
+            return;
+        }
         if (forceAutoFit || (maintainAutoFit && autoFit)) {
             autoFit = true;
             bitmapCenterPoint.set(bitmapWidth / 2.f, bitmapHeight / 2.f);

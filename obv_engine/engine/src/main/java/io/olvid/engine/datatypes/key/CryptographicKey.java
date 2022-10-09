@@ -56,6 +56,11 @@ public abstract class CryptographicKey {
         return key.equals(other.getKey());
     }
 
+    @Override
+    public int hashCode() {
+        return key.hashCode() + 31 * algorithmClass + 631 * algorithmImplementation;
+    }
+
     public byte getAlgorithmClass() {
         return algorithmClass;
     }

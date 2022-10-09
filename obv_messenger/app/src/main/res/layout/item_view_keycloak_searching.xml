@@ -15,7 +15,6 @@
         android:theme="@style/AppTheme.BlueAccent" />
 
     <TextView
-        android:id="@+id/spinner_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/label_searching_company_directory" />

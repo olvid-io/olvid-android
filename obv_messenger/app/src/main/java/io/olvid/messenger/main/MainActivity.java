@@ -19,48 +19,47 @@
 
 package io.olvid.messenger.main;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatEditText;
-import androidx.appcompat.widget.SearchView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.content.ContextCompat;
-import androidx.core.splashscreen.SplashScreen;
-import androidx.core.view.inputmethod.EditorInfoCompat;
-
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-
-import androidx.fragment.app.FragmentOnAttachListener;
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.Transformations;
-import androidx.viewpager.widget.ViewPager;
-import android.os.Bundle;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.splashscreen.SplashScreen;
+import androidx.core.view.inputmethod.EditorInfoCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentOnAttachListener;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
+import androidx.preference.PreferenceManager;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -75,26 +74,27 @@ import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvDialog;
-import io.olvid.messenger.activities.ContactDetailsActivity;
-import io.olvid.messenger.activities.storage_manager.StorageManagerActivity;
-import io.olvid.messenger.activities.CallLogActivity;
-import io.olvid.messenger.discussion.DiscussionActivity;
-import io.olvid.messenger.activities.ObvLinkActivity;
-import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
-import io.olvid.messenger.customClasses.ConfigurationPojo;
-import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.fragments.dialog.OtherKnownUsersDialogFragment;
-import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment;
-import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.activities.CallLogActivity;
+import io.olvid.messenger.activities.ContactDetailsActivity;
+import io.olvid.messenger.activities.ObvLinkActivity;
+import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
+import io.olvid.messenger.activities.storage_manager.StorageManagerActivity;
+import io.olvid.messenger.customClasses.ConfigurationPojo;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockableActivity;
+import io.olvid.messenger.customClasses.OpenHiddenProfileDialog;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Invitation;
+import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.fragments.dialog.DiscussionSearchDialogFragment;
+import io.olvid.messenger.fragments.dialog.OtherKnownUsersDialogFragment;
+import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.onboarding.OnboardingActivity;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.plus_button.PlusButtonActivity;
@@ -131,6 +131,8 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     public static final String TAB_TO_SHOW_INTENT_EXTRA = "tab_to_show";
     public static final String ALREADY_CREATED_BUNDLE_EXTRA = "already_created";
     public static final String KEYCLOAK_AUTHENTICATION_NEEDED_EXTRA = "keycloak_authentication_needed";
+    public static final String BLOCKED_CERTIFICATE_ID_EXTRA = "blocked_certificate_id";
+    public static final String LAST_TRUSTED_CERTIFICATE_ID_EXTRA = "last_trusted_certificate_id";
     public static final String BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA = "owned_identity";
     public static final String HEX_STRING_BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA = "hex_owned_identity";
 
@@ -147,6 +149,19 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     public static final int CONTACTS_TAB = 1;
     public static final int GROUPS_TAB = 2;
     public static final int INVITATIONS_TAB = 3;
+
+
+    ActivityResultLauncher<String> requestNotificationPermission = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+        if (!isGranted) {
+            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+            boolean hideDialog = prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS, false);
+            if (!hideDialog) {
+                AlertDialog.Builder builder = Utils.getNotificationDisabledDialogBuilder(this, prefs);
+                builder.create().show();
+            }
+        }
+    });
 
 
     @Override
@@ -296,8 +311,10 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                         case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
                         case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
                         case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
+                        case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY: {
                             tabsPagerAdapter.showNotificationDot(INVITATIONS_TAB);
                             return;
+                        }
                     }
                 }
             }
@@ -437,10 +454,29 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         } else {
             bytesOwnedIdentityToSelect = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA);
         }
-        if (bytesOwnedIdentityToSelect != null) {
+        if (bytesOwnedIdentityToSelect != null && !Arrays.equals(bytesOwnedIdentityToSelect, AppSingleton.getBytesCurrentIdentity())) {
             // if a profile switch is required, execute only once the identity is switched
+            intent.removeExtra(HEX_STRING_BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA);
             intent.removeExtra(BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA);
-            AppSingleton.getInstance().selectIdentity(bytesOwnedIdentityToSelect, (OwnedIdentity ownedIdentity) -> executeIntentAction(intent));
+
+            // check if identity is hidden before selecting it
+            byte[] finalBytesOwnedIdentityToSelect = bytesOwnedIdentityToSelect;
+            App.runThread(() -> {
+                OwnedIdentity ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(finalBytesOwnedIdentityToSelect);
+                if (ownedIdentity.isHidden()) {
+                    runOnUiThread(() -> new OpenHiddenProfileDialog(this) {
+                        @Override
+                        protected void onHiddenIdentityPasswordEntered(AlertDialog dialog, byte[] byteOwnedIdentity) {
+                            if (Arrays.equals(finalBytesOwnedIdentityToSelect, byteOwnedIdentity)) {
+                                dialog.dismiss();
+                                AppSingleton.getInstance().selectIdentity(finalBytesOwnedIdentityToSelect, (OwnedIdentity oid) -> executeIntentAction(intent));
+                            }
+                        }
+                    });
+                } else {
+                    AppSingleton.getInstance().selectIdentity(finalBytesOwnedIdentityToSelect, (OwnedIdentity oid) -> executeIntentAction(intent));
+                }
+            });
         } else {
             // otherwise execute intent action instantly
             executeIntentAction(intent);
@@ -449,6 +485,14 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         byte[] ownedIdentityRequiringAuthentication = intent.getByteArrayExtra(KEYCLOAK_AUTHENTICATION_NEEDED_EXTRA);
         if (ownedIdentityRequiringAuthentication != null) {
             AppSingleton.getInstance().selectIdentity(ownedIdentityRequiringAuthentication, (OwnedIdentity ownedIdentity) -> KeycloakManager.forceSelfTestAndReauthentication(ownedIdentityRequiringAuthentication));
+        }
+
+        if (intent.hasExtra(BLOCKED_CERTIFICATE_ID_EXTRA)) {
+            long blockedCertificateId = intent.getLongExtra(BLOCKED_CERTIFICATE_ID_EXTRA, -1);
+            long lastTrustedCertificateId = intent.getLongExtra(LAST_TRUSTED_CERTIFICATE_ID_EXTRA, -1);
+            if (blockedCertificateId != -1) {
+                App.openAppDialogCertificateChanged(blockedCertificateId, (lastTrustedCertificateId == -1) ? null : lastTrustedCertificateId);
+            }
         }
 
         int tabToShow = intent.getIntExtra(TAB_TO_SHOW_INTENT_EXTRA, -1);
@@ -485,7 +529,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                             // detect if it is a licence or a keycloak
                             ConfigurationPojo configurationPojo = AppSingleton.getJsonObjectMapper().readValue(ObvBase64.decode(configurationMatcher.group(2)), ConfigurationPojo.class);
                             final int dialogTitleResourceId;
-                            if (configurationPojo.getKeycloak() != null) {
+                            if (configurationPojo.keycloak != null) {
                                 // offer to chose a profile or create a new one for profile binding
                                 dialogTitleResourceId = R.string.dialog_title_chose_profile_keycloak_configuration;
                             } else {
@@ -511,6 +555,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                                     startActivity(onboardingIntent);
                                 }
                             });
+                            ownedIdentitySelectionDialogFragment.setShowAddProfileButtonAsOpenHiddenProfile(false);
                             ownedIdentitySelectionDialogFragment.show(getSupportFragmentManager(), "ownedIdentitySelectionDialogFragment");
                         } catch (Exception e) {
                             // nothing to do
@@ -536,6 +581,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                                 startActivity(onboardingIntent);
                             }
                         });
+                        ownedIdentitySelectionDialogFragment.setShowAddProfileButtonAsOpenHiddenProfile(true);
                         ownedIdentitySelectionDialogFragment.show(getSupportFragmentManager(), "ownedIdentitySelectionDialogFragment");
                     } else if (ObvLinkActivity.WEB_CLIENT_PATTERN.matcher(uri).find()) {
                         // offer to chose a profile
@@ -557,6 +603,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                                 App.toast(R.string.toast_message_create_new_profile_then_reopen_this_link, Toast.LENGTH_SHORT);
                             }
                         });
+                        ownedIdentitySelectionDialogFragment.setShowAddProfileButtonAsOpenHiddenProfile(true);
                         ownedIdentitySelectionDialogFragment.show(getSupportFragmentManager(), "ownedIdentitySelectionDialogFragment");
                     }
                 }
@@ -752,8 +799,6 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                 }
             } else if (viewPager.getCurrentItem() == DISCUSSIONS_TAB) {
                 getMenuInflater().inflate(R.menu.menu_main_discussion_list, menu);
-            } else if (viewPager.getCurrentItem() == GROUPS_TAB) {
-                getMenuInflater().inflate(R.menu.menu_main_group_list, menu);
             }
         }
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -776,9 +821,6 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
             return true;
         } else if (itemId == R.id.action_call_log) {
             startActivity(new Intent(this, CallLogActivity.class));
-            return true;
-        } else if (itemId == R.id.action_add) {
-            App.openGroupCreationActivity(this);
             return true;
         } else if (itemId == R.id.action_search) {
             if (viewPager.getCurrentItem() == DISCUSSIONS_TAB) {

@@ -157,6 +157,14 @@ public interface ContactDao {
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
     LiveData<List<Contact>> getAllForOwnedIdentityWithChannel(byte[] ownedIdentityBytes);
 
+    @Query("SELECT * FROM " + Contact.TABLE_NAME +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
+            " AND " + Contact.ACTIVE + " = 1 " +
+            " AND " + Contact.CAPABILITY_GROUPS_V2 + " = 1 " +
+            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
+    LiveData<List<Contact>> getAllForOwnedIdentityWithChannelAndGroupV2Capability(byte[] ownedIdentityBytes);
+
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " != :bytesExcludedContactIdentity " +
@@ -176,6 +184,12 @@ public interface ContactDao {
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME)
     List<Contact> getAllSync();
+
+    @Query("SELECT * FROM " + Contact.TABLE_NAME +
+            " WHERE " + Contact.ACTIVE + " = 1 " +
+            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 ")
+    List<Contact> getAllWithChannel();
+
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " WHERE " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity AND " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
     Contact get(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);

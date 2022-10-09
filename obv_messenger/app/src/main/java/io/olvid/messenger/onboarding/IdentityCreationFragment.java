@@ -45,6 +45,7 @@ import androidx.navigation.Navigation;
 
 import java.util.UUID;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.App;
@@ -218,7 +219,7 @@ public class IdentityCreationFragment extends Fragment {
                     sb.append("\n");
                 }
                 hasOption = true;
-                sb.append(getString(R.string.text_option_license_code, viewModel.getApiKey().toString()));
+                sb.append(getString(R.string.text_option_license_code, Logger.getUuidString(viewModel.getApiKey())));
             }
 
             if (hasOption) {

@@ -43,4 +43,7 @@ public interface KnownCertificateDao {
 
     @Query("DELETE FROM " + KnownCertificate.TABLE_NAME + " WHERE " + KnownCertificate.DOMAIN_NAME + " = :domainName AND " + KnownCertificate.EXPIRATION_TIMESTAMP + " < :currentTimestamp")
     void deleteExpired(String domainName, long currentTimestamp);
+
+    @Query("SELECT * FROM " + KnownCertificate.TABLE_NAME)
+    List<KnownCertificate> getAll();
 }

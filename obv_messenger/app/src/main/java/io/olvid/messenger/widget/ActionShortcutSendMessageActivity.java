@@ -61,7 +61,7 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
                     ActionShortcutConfiguration.JsonConfiguration configuration = actionShortcutConfiguration.getJsonConfiguration();
                     if (configuration != null) {
                         Discussion discussion = AppDatabase.getInstance().discussionDao().getById(actionShortcutConfiguration.discussionId);
-                        if (discussion != null && discussion.active && !discussion.isLocked()) {
+                        if (discussion != null && discussion.active && discussion.canPostMessages()) {
                             if (configuration.confirmBeforeSend) {
                                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                                         .setTitle(R.string.dialog_title_send_predefined_message)
@@ -141,7 +141,7 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
             // save the messageId for the vibrate observer
             messageId = message.id;
 
-            message.post(false, false);
+            message.post(false, null);
         });
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null) {
@@ -156,8 +156,10 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
                 LiveData<Message> messageLiveData = db.messageDao().getLive(messageId);
                 Observer<Message> messageObserver = new Observer<Message>() {
                     @Override
-                    public void onChanged(Message message) {
-                        if (message.status == Message.STATUS_SENT || message.status == Message.STATUS_DELIVERED || message.status == Message.STATUS_DELIVERED_AND_READ) {
+                    public void onChanged(@Nullable Message message) {
+                        if (message == null) {
+                            messageLiveData.removeObserver(this);
+                        } else if (message.status == Message.STATUS_SENT || message.status == Message.STATUS_DELIVERED || message.status == Message.STATUS_DELIVERED_AND_READ) {
                             long[] pattern = new long[]{0, 50, 100, 50};
                             vibrator.vibrate(pattern, -1);
                             messageLiveData.removeObserver(this);

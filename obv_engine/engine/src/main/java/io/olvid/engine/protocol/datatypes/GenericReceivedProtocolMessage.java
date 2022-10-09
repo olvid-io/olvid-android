@@ -40,7 +40,6 @@ public class GenericReceivedProtocolMessage {
     private final int protocolMessageId;
     private final int protocolId;
     private final ReceptionChannelInfo receptionChannelInfo;
-    private final Identity associatedOwnedIdentity;
     private final long serverTimestamp;
 
     public Identity getToIdentity() {
@@ -75,16 +74,12 @@ public class GenericReceivedProtocolMessage {
         return userDialogUuid;
     }
 
-    public Identity getAssociatedOwnedIdentity() {
-        return associatedOwnedIdentity;
-    }
-
     public long getServerTimestamp() {
         return serverTimestamp;
     }
 
     private GenericReceivedProtocolMessage(Identity toIdentity, Encoded[] inputs, UUID userDialogUuid, Encoded encodedResponse, UID protocolInstanceUid,
-                                           int protocolMessageId, int protocolId, ReceptionChannelInfo receptionChannelInfo, Identity associatedOwnedIdentity, long serverTimestamp) {
+                                           int protocolMessageId, int protocolId, ReceptionChannelInfo receptionChannelInfo, long serverTimestamp) {
         this.toIdentity = toIdentity;
         this.inputs = inputs;
         this.userDialogUuid = userDialogUuid;
@@ -93,11 +88,10 @@ public class GenericReceivedProtocolMessage {
         this.protocolMessageId = protocolMessageId;
         this.protocolId = protocolId;
         this.receptionChannelInfo = receptionChannelInfo;
-        this.associatedOwnedIdentity = associatedOwnedIdentity;
         this.serverTimestamp = serverTimestamp;
     }
 
-    public static GenericReceivedProtocolMessage of(ProtocolReceivedMessage protocolReceivedMessage, Identity associatedOwnedIdentity) {
+    public static GenericReceivedProtocolMessage of(ProtocolReceivedMessage protocolReceivedMessage) {
         try {
             Encoded[] listOfEncoded = protocolReceivedMessage.getEncodedElements().decodeList();
             if (listOfEncoded.length != 4) {
@@ -116,14 +110,13 @@ public class GenericReceivedProtocolMessage {
                     protocolMessageId,
                     protocolId,
                     protocolReceivedMessage.getReceptionChannelInfo(),
-                    associatedOwnedIdentity,
                     protocolReceivedMessage.getServerTimestamp());
         } catch (DecodingException e) {
             return null;
         }
     }
 
-    public static GenericReceivedProtocolMessage of(ProtocolReceivedDialogResponse protocolReceivedDialogResponse, Identity associatedOwnedIdentity) {
+    public static GenericReceivedProtocolMessage of(ProtocolReceivedDialogResponse protocolReceivedDialogResponse) {
         try {
             Encoded[] listOfEncoded = protocolReceivedDialogResponse.getEncodedElements().decodeList();
             if (listOfEncoded.length != 4) {
@@ -142,14 +135,13 @@ public class GenericReceivedProtocolMessage {
                     protocolMessageId,
                     protocolId,
                     protocolReceivedDialogResponse.getReceptionChannelInfo(),
-                    associatedOwnedIdentity,
                     0);
         } catch (DecodingException e) {
             return null;
         }
     }
 
-    public static GenericReceivedProtocolMessage of(ProtocolReceivedServerResponse protocolReceivedServerResponse, Identity associatedOwnedIdentity) {
+    public static GenericReceivedProtocolMessage of(ProtocolReceivedServerResponse protocolReceivedServerResponse) {
         try {
             Encoded[] listOfEncoded = protocolReceivedServerResponse.getEncodedElements().decodeList();
             if (listOfEncoded.length != 4) {
@@ -168,7 +160,6 @@ public class GenericReceivedProtocolMessage {
                     protocolMessageId,
                     protocolId,
                     protocolReceivedServerResponse.getReceptionChannelInfo(),
-                    associatedOwnedIdentity,
                     0);
         } catch (DecodingException e) {
             return null;

@@ -20,8 +20,10 @@
 package io.olvid.engine.datatypes;
 
 
+import java.nio.charset.StandardCharsets;
+
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 31;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 32;
     public static final int SERVER_API_VERSION = 13;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
@@ -76,7 +78,8 @@ public abstract class Constants {
 
     public static final int RETURN_RECEIPT_NONCE_LENGTH = 16;
 
-    public static final byte[] MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX = "mutualScan".getBytes();
+    public static final int GROUP_V2_INVITATION_NONCE_LENGTH = 16;
+    public static final int GROUP_V2_LOCK_NONCE_LENGTH = 32;
 
     public static final int DEFAULT_ATTACHMENT_CHUNK_LENGTH = 4*2048*1024;
     public static final int MAX_MESSAGE_EXTENDED_CONTENT_LENGTH = 50 * 1024;
@@ -87,11 +90,74 @@ public abstract class Constants {
 
     public static final int DEFAULT_NUMBER_OF_DIGITS_FOR_SAS = 4;
 
-    // TrustLevel threshold
-    public static final TrustLevel AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD = new TrustLevel(3,0);
 
     public static final long BASE_RESCHEDULING_TIME = 250L;
 
     // Keycloak
     public static final long KEYCLOAK_SIGNATURE_VALIDITY_MILLIS = 60 * 86_400_000L;
+
+
+    // prefixes for various types of signature
+
+    public static final int SIGNATURE_PADDING_LENGTH = 16;
+
+    public enum SignatureContext {
+        SERVER_AUTHENTICATION,
+        MUTUAL_SCAN,
+        MUTUAL_INTRODUCTION,
+        CHANNEL_CREATION,
+        GROUP_ADMINISTRATORS_CHAIN,
+        GROUP_BLOB,
+        GROUP_LEAVE_NONCE,
+        GROUP_LOCK_ON_SERVER,
+        GROUP_DELETE_ON_SERVER,
+        GROUP_JOIN_NONCE,
+        GROUP_UPDATE_ON_SERVER,
+        GROUP_KICK,
+    }
+
+    public static final byte[] SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX = "authentChallenge".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX = "mutualScan".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] MUTUAL_INTRODUCTION_SIGNATURE_CHALLENGE_PREFIX = "mutualIntroduction".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] CHANNEL_CREATION_SIGNATURE_CHALLENGE_PREFIX = "channelCreation".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] GROUP_ADMINISTRATORS_CHAIN_SIGNATURE_CHALLENGE_PREFIX = "groupAdministratorsChain".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] GROUP_BLOB_SIGNATURE_CHALLENGE_PREFIX = "groupBlob".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] GROUP_LEAVE_NONCE_SIGNATURE_CHALLENGE_PREFIX = "groupLeave".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] GROUP_LOCK_SIGNATURE_CHALLENGE_PREFIX = "lockNonce".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] GROUP_DELETE_ON_SERVER_SIGNATURE_CHALLENGE_PREFIX = "deleteGroup".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] GROUP_JOIN_NONCE_SIGNATURE_CHALLENGE_PREFIX = "joinGroup".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] GROUP_UPDATE_ON_SERVER_SIGNATURE_CHALLENGE_PREFIX = "updateGroup".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] GROUP_KICK_SIGNATURE_CHALLENGE_PREFIX = "groupKick".getBytes(StandardCharsets.UTF_8);
+
+
+    public static byte[] getSignatureChallengePrefix(SignatureContext signatureContext) {
+        switch (signatureContext) {
+            case SERVER_AUTHENTICATION:
+                return SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX;
+            case MUTUAL_SCAN:
+                return MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX;
+            case MUTUAL_INTRODUCTION:
+                return MUTUAL_INTRODUCTION_SIGNATURE_CHALLENGE_PREFIX;
+            case CHANNEL_CREATION:
+                return CHANNEL_CREATION_SIGNATURE_CHALLENGE_PREFIX;
+            case GROUP_ADMINISTRATORS_CHAIN:
+                return GROUP_ADMINISTRATORS_CHAIN_SIGNATURE_CHALLENGE_PREFIX;
+            case GROUP_BLOB:
+                return GROUP_BLOB_SIGNATURE_CHALLENGE_PREFIX;
+            case GROUP_LEAVE_NONCE:
+                return GROUP_LEAVE_NONCE_SIGNATURE_CHALLENGE_PREFIX;
+            case GROUP_LOCK_ON_SERVER:
+                return GROUP_LOCK_SIGNATURE_CHALLENGE_PREFIX;
+            case GROUP_DELETE_ON_SERVER:
+                return GROUP_DELETE_ON_SERVER_SIGNATURE_CHALLENGE_PREFIX;
+            case GROUP_JOIN_NONCE:
+                return GROUP_JOIN_NONCE_SIGNATURE_CHALLENGE_PREFIX;
+            case GROUP_UPDATE_ON_SERVER:
+                return GROUP_UPDATE_ON_SERVER_SIGNATURE_CHALLENGE_PREFIX;
+            case GROUP_KICK:
+                return GROUP_KICK_SIGNATURE_CHALLENGE_PREFIX;
+            default:
+                return null;
+        }
+    }
 }

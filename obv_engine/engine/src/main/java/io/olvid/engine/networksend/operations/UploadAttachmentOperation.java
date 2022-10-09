@@ -34,6 +34,7 @@ import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
+import io.olvid.engine.datatypes.EtaEstimator;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.PriorityOperation;
 import io.olvid.engine.datatypes.ServerMethodForS3;
@@ -123,6 +124,8 @@ public class UploadAttachmentOperation extends PriorityOperation {
                     AuthEnc authEnc = Suite.getAuthEnc(outboxAttachment.getKey());
                     PRNGService prng = Suite.getPRNGService(PRNG.PRNG_HMAC_SHA256);
 
+                    final EtaEstimator etaEstimator = new EtaEstimator((long) outboxAttachment.getCiphertextChunkLength() * (long) outboxAttachment.getAcknowledgedChunkCount(), outboxAttachment.getCiphertextLength());
+
                     while (outboxAttachment != null && !outboxAttachment.isAcknowledged()) {
                         if (cancelWasRequested()) {
                             return;
@@ -169,6 +172,10 @@ public class UploadAttachmentOperation extends PriorityOperation {
                             public void onProgress(long byteCount) {
                                 float progress = (float) (outboxAttachment.getAcknowledgedChunkCount()*chunkLength + byteCount)/totalLength;
                                 userInfo.put(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_PROGRESS_KEY, progress);
+                                etaEstimator.update(outboxAttachment.getAcknowledgedChunkCount()*chunkLength + byteCount);
+                                EtaEstimator.SpeedAndEta speedAndEta = etaEstimator.getSpeedAndEta();
+                                userInfo.put(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_SPEED_BPS_KEY, speedAndEta.speedBps);
+                                userInfo.put(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_ETA_SECONDS_KEY, speedAndEta.etaSeconds);
                                 sendManagerSession.notificationPostingDelegate.postNotification(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS, userInfo);
                             }
                         });

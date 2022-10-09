@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
@@ -377,7 +378,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public AliceSendStep(InitialProtocolState startState, InitialMessage receivedMessage, TrustEstablishmentWithMutualScanProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -388,7 +389,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
 
             {
                 // verify the signature
-                if (!protocolManagerSession.identityDelegate.verifyIdentitiesSignature(Constants.MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX, new Identity[]{getOwnedIdentity(), receivedMessage.contactIdentity}, receivedMessage.contactIdentity, receivedMessage.signature)) {
+                if (!Signature.verify(Constants.SignatureContext.MUTUAL_SCAN, new Identity[]{getOwnedIdentity(), receivedMessage.contactIdentity}, receivedMessage.contactIdentity, receivedMessage.signature)) {
                     return new FinishedState();
                 }
             }
@@ -425,7 +426,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
         private final AlicePropagatesQrCodeMessage receivedMessage;
 
         public AliceHandlesPropagatedQRCodeStep(InitialProtocolState startState, AlicePropagatesQrCodeMessage receivedMessage, TrustEstablishmentWithMutualScanProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -436,7 +437,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
 
             {
                 // verify the signature
-                if (!protocolManagerSession.identityDelegate.verifyIdentitiesSignature(Constants.MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX, new Identity[]{getOwnedIdentity(), receivedMessage.bobIdentity}, receivedMessage.bobIdentity, receivedMessage.signature)) {
+                if (!Signature.verify(Constants.SignatureContext.MUTUAL_SCAN, new Identity[]{getOwnedIdentity(), receivedMessage.bobIdentity}, receivedMessage.bobIdentity, receivedMessage.signature)) {
                     return new FinishedState();
                 }
             }
@@ -453,7 +454,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
         private final AliceSendsSignatureToBobMessage receivedMessage;
 
         public BobAddsContactAndConfirmsStep(InitialProtocolState startState, AliceSendsSignatureToBobMessage receivedMessage, TrustEstablishmentWithMutualScanProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -464,7 +465,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
 
             {
                 // verify the signature
-                if (!protocolManagerSession.identityDelegate.verifyIdentitiesSignature(Constants.MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX, new Identity[]{receivedMessage.aliceIdentity, getOwnedIdentity()}, getOwnedIdentity(), receivedMessage.signature)) {
+                if (!Signature.verify(Constants.SignatureContext.MUTUAL_SCAN, new Identity[]{receivedMessage.aliceIdentity, getOwnedIdentity()}, getOwnedIdentity(), receivedMessage.signature)) {
                     return new FinishedState();
                 }
             }
@@ -520,8 +521,8 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 // send a notification so the app can automatically open the contact discussion
                 protocolManagerSession.session.addSessionCommitListener(() -> {
                     HashMap<String, Object> userInfo = new HashMap<>();
-                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_OWNED_IDENTITIY_KEY, getOwnedIdentity());
-                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_CONTACT_IDENTITIY_KEY, receivedMessage.aliceIdentity);
+                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_OWNED_IDENTITY_KEY, getOwnedIdentity());
+                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_CONTACT_IDENTITY_KEY, receivedMessage.aliceIdentity);
                     userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_SIGNATURE_KEY, receivedMessage.signature);
                     protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED, userInfo);
                 });
@@ -538,7 +539,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
         private final BobPropagatesSignatureMessage receivedMessage;
 
         public BobHandlesPropagatedSignatureStep(InitialProtocolState startState, BobPropagatesSignatureMessage receivedMessage, TrustEstablishmentWithMutualScanProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -549,7 +550,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
 
             {
                 // verify the signature
-                if (!protocolManagerSession.identityDelegate.verifyIdentitiesSignature(Constants.MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX, new Identity[]{receivedMessage.aliceIdentity, getOwnedIdentity()}, getOwnedIdentity(), receivedMessage.signature)) {
+                if (!Signature.verify(Constants.SignatureContext.MUTUAL_SCAN, new Identity[]{receivedMessage.aliceIdentity, getOwnedIdentity()}, getOwnedIdentity(), receivedMessage.signature)) {
                     return new FinishedState();
                 }
             }
@@ -584,8 +585,8 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 // send a notification so the app can automatically open the contact discussion
                 protocolManagerSession.session.addSessionCommitListener(() -> {
                     HashMap<String, Object> userInfo = new HashMap<>();
-                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_OWNED_IDENTITIY_KEY, getOwnedIdentity());
-                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_CONTACT_IDENTITIY_KEY, receivedMessage.aliceIdentity);
+                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_OWNED_IDENTITY_KEY, getOwnedIdentity());
+                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_CONTACT_IDENTITY_KEY, receivedMessage.aliceIdentity);
                     userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_SIGNATURE_KEY, receivedMessage.signature);
                     protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED, userInfo);
                 });
@@ -600,7 +601,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
         private final BobSendsConfirmationAndDetailsToAliceMessage receivedMessage;
 
         public AliceAddsContactStep(WaitingForConfirmationState startState, BobSendsConfirmationAndDetailsToAliceMessage receivedMessage, TrustEstablishmentWithMutualScanProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

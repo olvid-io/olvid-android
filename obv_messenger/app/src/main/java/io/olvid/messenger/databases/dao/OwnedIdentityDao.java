@@ -135,7 +135,8 @@ public interface OwnedIdentityDao {
             ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY +
+            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY +
             ") GROUP BY inv." + Discussion.BYTES_OWNED_IDENTITY +
             " ) as unreadinv " +
             " ON unreadinv.boi = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
@@ -194,7 +195,7 @@ public interface OwnedIdentityDao {
             " ON disc.id = mess." + Message.DISCUSSION_ID +
             " JOIN " + OwnedIdentity.TABLE_NAME + " AS oi " +
             " ON disc." + Discussion.BYTES_OWNED_IDENTITY + " = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
-            " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD +
+            " WHERE mess." + Message.STATUS + " = " + Message.STATUS_UNREAD +
             " AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
             " UNION " +
@@ -207,7 +208,8 @@ public interface OwnedIdentityDao {
             ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
             ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY +
+            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY +
             ") AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
             " UNION " +
@@ -223,20 +225,13 @@ public interface OwnedIdentityDao {
     @Query("SELECT oi.*, disc.id AS discussionId FROM " + OwnedIdentity.TABLE_NAME + " AS oi " +
             " JOIN " + Discussion.TABLE_NAME + " AS disc " +
             " ON oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " = disc." + Discussion.BYTES_OWNED_IDENTITY +
-            " WHERE disc." + Discussion.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
+            " WHERE disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesDiscussionIdentifier " +
+            " AND disc." + Discussion.DISCUSSION_TYPE + " = :discussionType " +
             " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :bytesOwnedIdentity " +
             " AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " ORDER BY CASE WHEN " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " IS NULL THEN " + OwnedIdentity.DISPLAY_NAME + " ELSE " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " END ASC ")
-    LiveData<List<OwnedIdentityAndDiscussionId>> getOtherNonHiddenOwnedIdentitiesForContactDiscussion(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    LiveData<List<OwnedIdentityAndDiscussionId>> getOtherNonHiddenOwnedIdentitiesForDiscussion(byte[] bytesOwnedIdentity, int discussionType, byte[] bytesDiscussionIdentifier);
 
-    @Query("SELECT oi.*, disc.id AS discussionId FROM " + OwnedIdentity.TABLE_NAME + " AS oi " +
-            " JOIN " + Discussion.TABLE_NAME + " AS disc " +
-            " ON oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " = disc." + Discussion.BYTES_OWNED_IDENTITY +
-            " WHERE disc." + Discussion.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid " +
-            " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :bytesOwnedIdentity " +
-            " AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
-            " ORDER BY CASE WHEN " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " IS NULL THEN " + OwnedIdentity.DISPLAY_NAME + " ELSE " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " END ASC ")
-    LiveData<List<OwnedIdentityAndDiscussionId>> getOtherNonHiddenOwnedIdentitiesForGroupDiscussion(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NOT NULL ")

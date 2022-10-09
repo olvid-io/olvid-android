@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/message_root_constraint_layout"
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/message_root_constraint_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -60,14 +61,12 @@
         android:layout_width="32dp"
         android:layout_height="1dp"
         app:layout_constraintStart_toStartOf="@id/message_cell_barrier"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <View
         android:id="@+id/message_checkbox_compensator"
         android:layout_width="32dp"
         android:layout_height="5dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="2dp"
         app:layout_constraintEnd_toEndOf="@id/compensator_spacer"
         app:layout_constraintTop_toTopOf="parent"
@@ -76,8 +75,9 @@
 
     <TextView
         android:id="@+id/missing_message_textview"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constrainedWidth="true"
         android:textSize="12sp"
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
@@ -93,7 +93,6 @@
         android:layout_marginEnd="32dp"
         android:visibility="gone"
         tools:visibility="visible"
-        app:layout_constraintWidth_max="wrap"
         app:layout_constraintHorizontal_bias="0"
         app:drawableStartCompat="@drawable/ic_question_mark"
         android:drawablePadding="4dp" />
@@ -103,17 +102,17 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
-        app:layout_goneMarginTop="0dp"
         android:clickable="true"
         android:focusable="true"
+        android:layout_marginTop="4dp"
+        app:layout_goneMarginTop="0dp"
         android:foreground="?attr/selectableItemBackground"
         android:theme="@style/SubtleGreyRipple"
         app:cardBackgroundColor="@color/lighterGrey"
         app:cardCornerRadius="8dp"
         app:cardElevation="0dp"
-        app:layout_constraintEnd_toStartOf="@+id/message_checkbox_compensator"
         app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintEnd_toStartOf="@+id/message_checkbox_compensator"
         app:layout_constraintStart_toEndOf="@+id/initial_view_barrier"
         app:layout_constraintTop_toBottomOf="@id/missing_message_textview"
         app:layout_constraintWidth_max="wrap">
@@ -125,6 +124,7 @@
     </io.olvid.messenger.customClasses.SizeAwareCardView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/reactions_constraint_layout"
         android:layout_marginTop="-4dp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -146,7 +146,6 @@
             android:background="@drawable/background_reaction"
             app:flow_wrapMode="chain" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     <TextView
         android:id="@+id/message_timer_textview"

@@ -154,7 +154,7 @@ public class PeriodicTasksScheduler {
         boolean append = !logFile.exists() || logFile.length() <= PERIODIC_TASKS_DEBUG_LOG_MAX_SIZE;
 
         try (FileWriter fileWriter = new FileWriter(logFile, append)) {
-            String logLine = Calendar.getInstance().getTime().toString() + " - executing task " + clazz.getSimpleName() + "\n";
+            String logLine = Calendar.getInstance().getTime() + " - executing task " + clazz.getSimpleName() + "\n";
             fileWriter.append(logLine);
         } catch (IOException e) {
             e.printStackTrace();

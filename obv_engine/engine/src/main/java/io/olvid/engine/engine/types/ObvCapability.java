@@ -32,9 +32,8 @@ public enum ObvCapability {
     GROUPS_V2;
 
     public static List<ObvCapability> currentCapabilities = new ArrayList<>(Arrays.asList(
-            // add Engine capabilities here, once there are some
-            ONE_TO_ONE_CONTACTS
-//            GROUPS_V2
+            ONE_TO_ONE_CONTACTS,
+            GROUPS_V2
     ));
 
     public static ObvCapability fromString(String stringRepresentation) {

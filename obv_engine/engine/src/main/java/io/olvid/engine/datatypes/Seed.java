@@ -20,6 +20,8 @@
 package io.olvid.engine.datatypes;
 
 
+import java.util.Arrays;
+
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.Hash;
@@ -90,5 +92,18 @@ public class Seed {
     @Override
     public String toString() {
         return Logger.toHexString(seed);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(seed);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof  Seed)) {
+            return false;
+        }
+        return Arrays.equals(seed, ((Seed) obj).seed);
     }
 }

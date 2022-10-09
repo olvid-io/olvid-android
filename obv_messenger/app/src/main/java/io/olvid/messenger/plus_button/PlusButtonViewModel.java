@@ -28,10 +28,10 @@ import org.jose4j.jwk.JsonWebKeySet;
 
 import java.util.List;
 
-import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
+import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.identities.ObvMutualScanUrl;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
+import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
 
 public class PlusButtonViewModel extends ViewModel {
     public enum SEARCH_STATUS {

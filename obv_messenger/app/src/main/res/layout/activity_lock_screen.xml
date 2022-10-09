@@ -80,6 +80,44 @@
         android:background="@drawable/background_circular_ripple"
         android:theme="@style/AlwaysWhiteRipple"/>
 
+    <LinearLayout
+        android:id="@+id/pin_unlock_timer_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_always_white_rounded"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/pin_input"
+        app:layout_constraintBottom_toBottomOf="@id/pin_input"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+        <TextView
+            android:layout_marginTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/red"
+            android:text="@string/message_too_many_attempts"
+            android:textSize="16sp"
+            android:textAlignment="center"/>
+
+        <TextView
+            android:id="@+id/pin_unlock_timer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/red"
+            android:fontFamily="monospace"
+            android:textAlignment="center"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textSize="20sp"
+            tools:text="18s" />
+    </LinearLayout>
+
+
     <ImageButton
         android:id="@+id/fingerprint_icon"
         android:layout_width="96dp"

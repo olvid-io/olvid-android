@@ -19,12 +19,13 @@
 
 package io.olvid.messenger.viewModels;
 
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
+
+import java.util.List;
+
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;

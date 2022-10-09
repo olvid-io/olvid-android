@@ -27,8 +27,6 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
-import io.olvid.messenger.App;
-import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.entity.Contact;
@@ -36,19 +34,19 @@ import io.olvid.messenger.databases.entity.Invitation;
 
 
 public class ContactDetailsViewModel extends ViewModel {
-    private LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> groupDiscussions;
+    private LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> groupDiscussions;
     private LiveData<ContactAndInvitation> contactAndInvitation;
 
 
     public void setContactBytes(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) {
-        this.groupDiscussions = AppDatabase.getInstance().discussionDao().getContactActiveGroupDiscussionsWithContactNames(bytesContactIdentity, bytesOwnedIdentity, App.getContext().getString(R.string.text_contact_names_separator));
+        this.groupDiscussions = AppDatabase.getInstance().discussionDao().getContactNotLockedGroupDiscussionsWithGroupMembersNames(bytesContactIdentity, bytesOwnedIdentity);
         this.contactAndInvitation = new ContactAndInvitationLiveData(
                 AppDatabase.getInstance().contactDao().getAsync(bytesOwnedIdentity, bytesContactIdentity),
                 AppDatabase.getInstance().invitationDao().getContactOneToOneInvitation(bytesOwnedIdentity, bytesContactIdentity)
         );
     }
 
-    public LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> getGroupDiscussions() {
+    public LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> getGroupDiscussions() {
         return groupDiscussions;
     }
 

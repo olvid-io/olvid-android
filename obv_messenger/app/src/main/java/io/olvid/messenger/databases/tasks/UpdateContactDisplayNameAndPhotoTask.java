@@ -50,6 +50,8 @@ public class UpdateContactDisplayNameAndPhotoTask implements Runnable {
             try {
                 contact.setIdentityDetailsAndDisplayName(identityDetails.getIdentityDetails());
                 db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
+
+                new UpdateAllGroupMembersNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity).run();
             } catch (Exception e) {
                 // do nothing
             }

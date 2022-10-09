@@ -56,9 +56,10 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.settings.SettingsActivity;
-import io.olvid.messenger.customClasses.InitialView;
 
 
 public class OwnedGroupDetailsFragment extends Fragment {
@@ -71,12 +72,10 @@ public class OwnedGroupDetailsFragment extends Fragment {
     private OwnedGroupDetailsViewModel viewModel;
 
     private TextInputLayout groupNameLayout;
-    private EditText groupNameEditText;
-    private EditText groupDescriptionEditText;
     private InitialView initialView;
-    private ImageView cameraIcon;
 
     private boolean useDialogBackground = false;
+    private boolean hidePersonalDetails = false;
 
     @Nullable
     @Override
@@ -91,17 +90,22 @@ public class OwnedGroupDetailsFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(OwnedGroupDetailsViewModel.class);
 
         groupNameLayout = view.findViewById(R.id.group_details_group_name_layout);
-        groupNameEditText = view.findViewById(R.id.group_details_group_name);
-        groupDescriptionEditText = view.findViewById(R.id.group_details_group_description);
-        cameraIcon = view.findViewById(R.id.camera_icon);
+        EditText groupNameEditText = view.findViewById(R.id.group_details_group_name);
+        EditText groupDescriptionEditText = view.findViewById(R.id.group_details_group_description);
+        EditText personalNoteEditText = view.findViewById(R.id.personal_note_edit_text);
+        ImageView cameraIcon = view.findViewById(R.id.camera_icon);
         if (useDialogBackground) {
             cameraIcon.setImageResource(R.drawable.ic_camera_bordered_dialog);
+        }
+        if (hidePersonalDetails) {
+            view.findViewById(R.id.personal_note_group).setVisibility(View.GONE);
         }
         initialView = view.findViewById(R.id.group_details_initial_view);
 
         if (SettingsActivity.useKeyboardIncognitoMode()) {
             groupNameEditText.setImeOptions(groupNameEditText.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
             groupDescriptionEditText.setImeOptions(groupDescriptionEditText.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
+            personalNoteEditText.setImeOptions(groupDescriptionEditText.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
         }
 
         viewModel.getValid().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
@@ -134,6 +138,14 @@ public class OwnedGroupDetailsFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
                 viewModel.setGroupDescription(s.toString());
+            }
+        });
+
+        personalNoteEditText.setText(viewModel.getPersonalNote());
+        personalNoteEditText.addTextChangedListener(new TextChangeListener() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                viewModel.setPersonalNote(s.toString());
             }
         });
 
@@ -205,7 +217,9 @@ public class OwnedGroupDetailsFragment extends Fragment {
         switch (requestCode) {
             case REQUEST_CODE_CHOOSE_IMAGE: {
                 if (resultCode == Activity.RESULT_OK && data != null) {
-                    startActivityForResult(new Intent(null, data.getData(), App.getContext(), SelectDetailsPhotoActivity.class), REQUEST_CODE_SELECT_ZONE);
+                    if (StringUtils.validateUri(data.getData())) {
+                        startActivityForResult(new Intent(null, data.getData(), App.getContext(), SelectDetailsPhotoActivity.class), REQUEST_CODE_SELECT_ZONE);
+                    }
                 }
                 break;
             }
@@ -252,12 +266,16 @@ public class OwnedGroupDetailsFragment extends Fragment {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                 App.startActivityForResult(this, takePictureIntent, REQUEST_CODE_TAKE_PICTURE);
             } catch (IOException e) {
-                Logger.w("Error creating photo capture file " + photoFile.toString());
+                Logger.w("Error creating photo capture file " + photoFile);
             }
         }
     }
 
     public void setUseDialogBackground(boolean useDialogBackground) {
         this.useDialogBackground = useDialogBackground;
+    }
+
+    public void setHidePersonalDetails(boolean hidePersonalDetails) {
+        this.hidePersonalDetails = hidePersonalDetails;
     }
 }

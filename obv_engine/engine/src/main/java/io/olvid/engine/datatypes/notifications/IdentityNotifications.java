@@ -159,4 +159,28 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_CONTACT_IDENTITY_KEY = "contact_identity"; // Identity
     public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
     public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY = "one_to_one"; // boolean
+
+    public static final String NOTIFICATION_GROUP_V2_CREATED = "identity_manager_notification_group_v2_created";
+    public static final String NOTIFICATION_GROUP_V2_CREATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_GROUP_V2_CREATED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
+    public static final String NOTIFICATION_GROUP_V2_CREATED_NEW_GROUP_KEY = "new_group"; // boolean
+
+    public static final String NOTIFICATION_GROUP_V2_DELETED = "identity_manager_notification_group_v2_deleted";
+    public static final String NOTIFICATION_GROUP_V2_DELETED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_GROUP_V2_DELETED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
+
+    public static final String NOTIFICATION_GROUP_V2_FROZEN_CHANGED = "identity_manager_notification_group_v2_frozen_changed";
+    public static final String NOTIFICATION_GROUP_V2_FROZEN_CHANGED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_GROUP_V2_FROZEN_CHANGED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
+    public static final String NOTIFICATION_GROUP_V2_FROZEN_CHANGED_FROZEN_KEY = "frozen"; // boolean
+    public static final String NOTIFICATION_GROUP_V2_FROZEN_CHANGED_NEW_GROUP_KEY = "new_group"; // boolean
+
+    public static final String NOTIFICATION_GROUP_V2_UPDATED = "identity_manager_notification_group_v2_updated";
+    public static final String NOTIFICATION_GROUP_V2_UPDATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_GROUP_V2_UPDATED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
+    public static final String NOTIFICATION_GROUP_V2_UPDATED_BY_ME_KEY = "by_me"; // boolean
+
+    public static final String NOTIFICATION_GROUP_V2_PHOTO_UPDATED = "identity_manager_notification_group_v2_photo_updated";
+    public static final String NOTIFICATION_GROUP_V2_PHOTO_UPDATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_GROUP_V2_PHOTO_UPDATED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
 }

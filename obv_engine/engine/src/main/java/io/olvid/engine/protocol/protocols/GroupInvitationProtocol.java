@@ -443,7 +443,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public SendInvitationStep(InitialProtocolState startState, InitialMessage receivedMessage, GroupInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -485,7 +485,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         private final GroupInvitationMessage receivedMessage;
 
         public ProcessInvitationStep(InitialProtocolState startState, GroupInvitationMessage receivedMessage, GroupInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -574,7 +574,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         private final DialogAcceptGroupInvitationMessage receivedMessage;
 
         public ProcessInvitationDialogResponseStep(InvitationReceivedState startState, DialogAcceptGroupInvitationMessage receivedMessage, GroupInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -660,7 +660,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         private final PropagateInvitationResponseMessage receivedMessage;
 
         public ProcessPropagatedInvitationResponseStep(InvitationReceivedState startState, PropagateInvitationResponseMessage receivedMessage, GroupInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -716,7 +716,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         private final InvitationResponseMessage receivedMessage;
 
         public ProcessResponseStep(InitialProtocolState startState, InvitationResponseMessage receivedMessage, GroupInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

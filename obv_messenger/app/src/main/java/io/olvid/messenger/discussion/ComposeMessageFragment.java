@@ -111,6 +111,7 @@ import io.olvid.messenger.customClasses.JpegUtils;
 import io.olvid.messenger.customClasses.MessageAttachmentAdapter;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -121,6 +122,8 @@ import io.olvid.messenger.databases.tasks.ClearDraftReplyTask;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.databases.tasks.PostMessageInDiscussionTask;
 import io.olvid.messenger.databases.tasks.SaveDraftTask;
+import io.olvid.messenger.discussion.location.SendLocationBasicDialogFragment;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class ComposeMessageFragment extends Fragment implements View.OnClickListener, MessageAttachmentAdapter.AttachmentLongClickListener, PopupMenu.OnMenuItemClickListener {
@@ -130,8 +133,9 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     public static final int ICON_TAKE_PICTURE = 4;
     public static final int ICON_TAKE_VIDEO = 5;
     public static final int ICON_EMOJI = 6;
+    public static final int ICON_SEND_LOCATION = 7;
 
-    public static final Integer[] DEFAULT_ICON_ORDER = {ICON_EMOJI, ICON_EPHEMERAL_SETTINGS, ICON_ATTACH_FILE, ICON_ATTACH_PICTURE, ICON_TAKE_PICTURE, ICON_TAKE_VIDEO};
+    public static final Integer[] DEFAULT_ICON_ORDER = {ICON_EMOJI, ICON_EPHEMERAL_SETTINGS, ICON_ATTACH_FILE, ICON_ATTACH_PICTURE, ICON_TAKE_PICTURE, ICON_TAKE_VIDEO, ICON_SEND_LOCATION};
 
 
     private FragmentActivity activity;
@@ -182,119 +186,139 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         }
     };
 
-    private final ActivityResultLauncher<String> requestPermissionForPictureLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-                if (isGranted) {
-                    takePicture();
-                } else {
-                    App.toast(R.string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT);
-                }
-            });
 
-    private final ActivityResultLauncher<String> requestPermissionForVideoLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-                if (isGranted) {
-                    takeVideo();
-                } else {
-                    App.toast(R.string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT);
-                }
-            });
+    private ActivityResultLauncher<String> requestPermissionForPictureLauncher;
+    private ActivityResultLauncher<String> requestPermissionForVideoLauncher;
+    private ActivityResultLauncher<String> requestPermissionForAudioLauncher;
+    private ActivityResultLauncher<String> requestPermissionForAudioAfterRationaleLauncher;
+    private ActivityResultLauncher<Intent> attachFileLauncher;
+    private ActivityResultLauncher<Intent> takePictureLauncher;
+    private ActivityResultLauncher<Intent> takeVideoLauncher;
 
-    private final ActivityResultLauncher<String> requestPermissionForAudioLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-                if (isGranted) {
-                    voiceMessageRecorder.setRecordPermission(true);
-                } else {
-                    AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
-                            .setTitle(R.string.dialog_title_voice_message_explanation)
-                            .setMessage(R.string.dialog_message_voice_message_explanation_blocked)
-                            .setNegativeButton(R.string.button_label_cancel, null)
-                            .setNeutralButton(R.string.button_label_app_settings, (DialogInterface dialog, int which) -> {
-                                Intent intent = new Intent();
-                                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
-                                intent.setData(uri);
-                                startActivity(intent);
-                            });
-                    builder.create().show();
-                }
-            });
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
 
+        requestPermissionForPictureLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        takePicture();
+                    } else {
+                        App.toast(R.string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT);
+                    }
+                });
 
-    private final ActivityResultLauncher<String> requestPermissionForAudioAfterRationaleLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-                if (isGranted) {
-                    voiceMessageRecorder.setRecordPermission(true);
-                } else {
-                    App.toast(R.string.toast_message_audio_permission_denied, Toast.LENGTH_SHORT);
-                }
-            });
+        requestPermissionForVideoLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        takeVideo();
+                    } else {
+                        App.toast(R.string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT);
+                    }
+                });
 
+        requestPermissionForAudioLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        voiceMessageRecorder.setRecordPermission(true);
+                        voiceMessageRecorder.startRecord();
+                    } else {
+                        AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                                .setTitle(R.string.dialog_title_voice_message_explanation)
+                                .setMessage(R.string.dialog_message_voice_message_explanation_blocked)
+                                .setNegativeButton(R.string.button_label_cancel, null)
+                                .setNeutralButton(R.string.button_label_app_settings, (DialogInterface dialog, int which) -> {
+                                    Intent intent = new Intent();
+                                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+                                    intent.setData(uri);
+                                    startActivity(intent);
+                                });
+                        builder.create().show();
+                    }
+                });
 
-    private final ActivityResultLauncher<Intent> attachFileLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            (ActivityResult activityResult) -> {
-                if (activityResult == null || activityResult.getData() == null || activityResult.getResultCode() != Activity.RESULT_OK || discussionViewModel == null) {
-                    return;
-                }
-                Uri dataUri = activityResult.getData().getData();
-                final Long discussionId = discussionViewModel.getDiscussionId();
-                if (discussionId == null) {
-                    return;
-                }
-                if (dataUri != null) {
-                    App.runThread(new AddFyleToDraftFromUriTask(dataUri, discussionId));
-                } else {
-                    ClipData clipData = activityResult.getData().getClipData();
-                    if (clipData != null) {
-                        Set<Uri> uris = new HashSet<>();
-                        // Samsung Android 7.0 bug --> different files may return the same uri!
-                        for (int i = 0; i < clipData.getItemCount(); i++) {
-                            ClipData.Item item = clipData.getItemAt(i);
-                            final Uri uri = item.getUri();
-                            uris.add(uri);
+        requestPermissionForAudioAfterRationaleLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        voiceMessageRecorder.setRecordPermission(true);
+                        voiceMessageRecorder.startRecord();
+                    } else {
+                        App.toast(R.string.toast_message_audio_permission_denied, Toast.LENGTH_SHORT);
+                    }
+                });
+
+        attachFileLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                (ActivityResult activityResult) -> {
+                    if (activityResult == null || activityResult.getData() == null || activityResult.getResultCode() != Activity.RESULT_OK || discussionViewModel == null) {
+                        return;
+                    }
+                    Uri dataUri = activityResult.getData().getData();
+                    final Long discussionId = discussionViewModel.getDiscussionId();
+                    if (discussionId == null) {
+                        return;
+                    }
+                    if (dataUri != null) {
+                        if (StringUtils.validateUri(dataUri)) {
+                            App.runThread(new AddFyleToDraftFromUriTask(dataUri, discussionId));
                         }
-                        if (uris.size() != clipData.getItemCount()) {
-                            App.toast(R.string.toast_message_android_bug_attach_duplicate_uri, Toast.LENGTH_LONG);
-                        }
-                        for (Uri uri : uris) {
-                            App.runThread(new AddFyleToDraftFromUriTask(uri, discussionId));
+                    } else {
+                        ClipData clipData = activityResult.getData().getClipData();
+                        if (clipData != null) {
+                            Set<Uri> uris = new HashSet<>();
+                            // Samsung Android 7.0 bug --> different files may return the same uri!
+                            for (int i = 0; i < clipData.getItemCount(); i++) {
+                                ClipData.Item item = clipData.getItemAt(i);
+                                final Uri uri = item.getUri();
+                                uris.add(uri);
+                            }
+
+                            if (uris.size() != clipData.getItemCount()) {
+                                App.toast(R.string.toast_message_android_bug_attach_duplicate_uri, Toast.LENGTH_LONG);
+                            }
+                            for (Uri uri : uris) {
+                                if (StringUtils.validateUri(uri)) {
+                                    App.runThread(new AddFyleToDraftFromUriTask(uri, discussionId));
+                                }
+                            }
                         }
                     }
-                }
-            });
+                });
 
-    private final ActivityResultLauncher<Intent> takePictureLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            (ActivityResult activityResult) -> {
-                if (activityResult == null || activityResult.getResultCode() != Activity.RESULT_OK || discussionViewModel == null || composeMessageViewModel == null) {
-                    return;
-                }
-                final Uri photoUri = composeMessageViewModel.getPhotoOrVideoUri();
-                final File photoFile = composeMessageViewModel.getPhotoOrVideoFile();
-                final Long discussionId = discussionViewModel.getDiscussionId();
-                if (photoUri != null && photoFile != null && discussionId != null) {
-                    App.runThread(() -> {
-                        int cameraResolutionSetting = SettingsActivity.getCameraResolution();
-                        if (cameraResolutionSetting != -1) {
-                            JpegUtils.resize(photoFile, cameraResolutionSetting);
-                        }
-                        new AddFyleToDraftFromUriTask(photoUri, photoFile, discussionId).run();
-                    });
-                }
-            });
+        takePictureLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                (ActivityResult activityResult) -> {
+                    if (activityResult == null || activityResult.getResultCode() != Activity.RESULT_OK || discussionViewModel == null || composeMessageViewModel == null) {
+                        return;
+                    }
+                    final Uri photoUri = composeMessageViewModel.getPhotoOrVideoUri();
+                    final File photoFile = composeMessageViewModel.getPhotoOrVideoFile();
+                    final Long discussionId = discussionViewModel.getDiscussionId();
+                    if (photoUri != null && photoFile != null && discussionId != null) {
+                        App.runThread(() -> {
+                            int cameraResolutionSetting = SettingsActivity.getCameraResolution();
+                            if (cameraResolutionSetting != -1) {
+                                JpegUtils.resize(photoFile, cameraResolutionSetting);
+                            }
+                            new AddFyleToDraftFromUriTask(photoUri, photoFile, discussionId).run();
+                        });
+                    }
+                });
 
-    private final ActivityResultLauncher<Intent> takeVideoLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            (ActivityResult activityResult) -> {
-                if (activityResult == null ||activityResult.getResultCode() != Activity.RESULT_OK || discussionViewModel == null || composeMessageViewModel == null) {
-                    return;
-                }
-                final Uri videoUri = composeMessageViewModel.getPhotoOrVideoUri();
-                final File videoFile = composeMessageViewModel.getPhotoOrVideoFile();
-                final long discussionId = discussionViewModel.getDiscussionId();
-                if (videoUri != null && videoFile != null) {
-                    App.runThread(new AddFyleToDraftFromUriTask(videoUri, videoFile, discussionId));
-                }
-            });
+        takeVideoLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                (ActivityResult activityResult) -> {
+                    if (activityResult == null || activityResult.getResultCode() != Activity.RESULT_OK || discussionViewModel == null || composeMessageViewModel == null) {
+                        return;
+                    }
+                    final Uri videoUri = composeMessageViewModel.getPhotoOrVideoUri();
+                    final File videoFile = composeMessageViewModel.getPhotoOrVideoFile();
+                    final long discussionId = discussionViewModel.getDiscussionId();
+                    if (videoUri != null && videoFile != null) {
+                        App.runThread(new AddFyleToDraftFromUriTask(videoUri, videoFile, discussionId));
+                    }
+                });
+    }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -332,14 +356,14 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 }
             }
         });
-        newMessageEditText.setOnClickListener(v -> {
-            setShowAttachIcons(false, true);
-        });
+        newMessageEditText.setOnClickListener(v -> setShowAttachIcons(false, true));
         newMessageEditText.requestFocus();
         activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         newMessageEditText.setImeContentCommittedHandler((contentUri, fileName, mimeType, callMeWhenDone) -> {
-            new SaveDraftTask(discussionViewModel.getDiscussionId(), composeMessageViewModel.getTrimmedNewMessageText(), composeMessageViewModel.getDraftMessage().getValue()).run();
+            if (composeMessageViewModel.getTrimmedNewMessageText() != null) {
+                new SaveDraftTask(discussionViewModel.getDiscussionId(), composeMessageViewModel.getTrimmedNewMessageText(), composeMessageViewModel.getDraftMessage().getValue()).run();
+            }
             new AddFyleToDraftFromUriTask(contentUri, fileName, mimeType, discussionViewModel.getDiscussionId()).run();
             if (callMeWhenDone != null) {
                 callMeWhenDone.run();
@@ -379,7 +403,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 if (imm != null) {
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
-                DiscussionOwnedIdentityPopupWindow discussionOwnedIdentityPopupWindow = new DiscussionOwnedIdentityPopupWindow(activity, ownedIdentityInitialView, discussion.bytesContactIdentity, discussion.bytesGroupOwnerAndUid);
+                DiscussionOwnedIdentityPopupWindow discussionOwnedIdentityPopupWindow = new DiscussionOwnedIdentityPopupWindow(activity, ownedIdentityInitialView, discussion.discussionType, discussion.bytesDiscussionIdentifier);
                 new Handler(Looper.getMainLooper()).postDelayed(discussionOwnedIdentityPopupWindow::open, 100);
             }
         });
@@ -640,6 +664,21 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             }
         } else if (id == R.id.attach_emoji) {
             showEmojiKeyboard();
+        } else if (id == R.id.attach_location) {
+            // if currently sharing location: stop sharing location
+            if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.getDiscussionId())) {
+                new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                        .setTitle(R.string.title_stop_sharing_location)
+                        .setMessage(R.string.label_stop_sharing_location)
+                        .setPositiveButton(R.string.button_label_stop, (dialogInterface, i) -> UnifiedForegroundService.LocationSharingSubService.stopSharingLocation(this.activity, discussionViewModel.getDiscussionId()))
+                        .setNegativeButton(R.string.button_label_cancel, null)
+                        .create()
+                        .show();
+            } else {
+                // show send location dialog
+                SendLocationBasicDialogFragment dialogFragment = new SendLocationBasicDialogFragment(discussionViewModel.getDiscussionId());
+                dialogFragment.show(getChildFragmentManager(), "send-location-fragment-basic");
+            }
         } else if (id == R.id.attach_stuff_plus) {
             if (showAttachIcons || neverOverflow) {
                 InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -679,7 +718,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 App.prepareForStartActivityForResult(this);
                 takePictureLauncher.launch(takePictureIntent);
             } catch (IOException e) {
-                Logger.w("Error creating photo capture file " + photoFile.toString());
+                Logger.w("Error creating photo capture file " + photoFile);
             }
         }
     }
@@ -710,7 +749,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 App.prepareForStartActivityForResult(this);
                 takeVideoLauncher.launch(takeVideoIntent);
             } catch (IOException e) {
-                Logger.w("Error creating video capture file " + videoFile.toString());
+                Logger.w("Error creating video capture file " + videoFile);
             }
         }
     }
@@ -976,6 +1015,9 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         } else {
             adapterIcons.add(-1);
         }
+        if (!SettingsActivity.getBetaFeaturesEnabled()) {
+            adapterIcons.remove((Integer) ICON_SEND_LOCATION);
+        }
         adapter.submitList(adapterIcons);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.CustomAlertDialog)
@@ -1072,8 +1114,11 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         }
 
         if (!hasCamera) {
-            icons.remove(ICON_TAKE_PICTURE);
-            icons.remove(ICON_TAKE_VIDEO);
+            icons.remove((Integer) ICON_TAKE_PICTURE);
+            icons.remove((Integer) ICON_TAKE_VIDEO);
+        }
+        if (!SettingsActivity.getBetaFeaturesEnabled()) {
+            icons.remove((Integer) ICON_SEND_LOCATION);
         }
 
         // Compose area layout
@@ -1098,6 +1143,10 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                     iconsOverflow.add(icon);
                 }
             }
+        }
+
+        if (!SettingsActivity.getBetaFeaturesEnabled()) {
+            iconsOverflow.remove((Integer) ICON_SEND_LOCATION);
         }
 
         attachIconsGroup.removeAllViews();
@@ -1236,6 +1285,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         };
 
         LinearLayout popupAttachList = popupView.findViewById(R.id.popup_attach_list);
+        popupAttachList.setClipToOutline(true);
         TextView attachConfigure = popupAttachList.findViewById(R.id.attach_configure);
         attachConfigure.setOnClickListener(onClickListener);
 
@@ -1289,6 +1339,8 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 return R.drawable.ic_attach_video;
             case ICON_EMOJI:
                 return R.drawable.ic_attach_emoji;
+            case ICON_SEND_LOCATION:
+                return R.drawable.ic_attach_location;
             default:
                 return 0;
         }
@@ -1308,6 +1360,8 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 return R.id.attach_video;
             case ICON_EMOJI:
                 return R.id.attach_emoji;
+            case ICON_SEND_LOCATION:
+                return R.id.attach_location;
             default:
                 return 0;
         }
@@ -1327,6 +1381,8 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 return R.string.label_attach_video;
             case ICON_EMOJI:
                 return R.string.label_attach_emoji;
+            case ICON_SEND_LOCATION:
+                return R.string.label_send_location;
             default:
                 return 0;
         }

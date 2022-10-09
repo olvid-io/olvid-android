@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/popup_action_location_message_copy"
+        android:orderInCategory="1"
+        android:title="@string/menu_action_location_message_copy" />
+    <item
+        android:id="@+id/popup_action_location_message_open"
+        android:orderInCategory="2"
+        android:title="@string/menu_action_location_message_open" />
+    <item
+        android:id="@+id/popup_action_location_message_stop_sharing"
+        android:orderInCategory="3"
+        android:visible="false"
+        android:title="@string/menu_action_location_message_stop_sharing" />
+</menu>

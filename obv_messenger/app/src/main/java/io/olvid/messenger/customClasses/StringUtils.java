@@ -19,20 +19,30 @@
 
 package io.olvid.messenger.customClasses;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.icu.lang.UCharacter;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 
+import androidx.annotation.NonNull;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.text.BreakIterator;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
+import io.olvid.engine.Logger;
+import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 
 public class StringUtils {
@@ -210,5 +220,62 @@ public class StringUtils {
         } else {
             return unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFD)).replaceAll("").toLowerCase(Locale.getDefault());
         }
+    }
+
+    public static boolean isASubstringOfB(@NonNull String a, @NonNull String b) {
+        byte[] aBytes = a.getBytes(StandardCharsets.UTF_8);
+        byte[] bBytes = b.getBytes(StandardCharsets.UTF_8);
+        int aIndex = 0;
+        int bIndex = 0;
+        while (aIndex < aBytes.length && bIndex < bBytes.length) {
+            if (aBytes[aIndex] == bBytes[bIndex]) {
+                aIndex++;
+            }
+            bIndex++;
+        }
+
+        return aIndex == aBytes.length;
+    }
+
+    @NonNull
+    public static String joinGroupMemberNames(String[] groupMembersNames) {
+        if (groupMembersNames == null || groupMembersNames.length == 0) {
+            return "";
+        } else if (groupMembersNames.length == 1) {
+            return groupMembersNames[0];
+        } else {
+            String joiner = App.getContext().getString(R.string.text_contact_names_separator);
+            String lastJoiner = App.getContext().getString(R.string.text_contact_names_last_separator);
+            StringBuilder sb = new StringBuilder(groupMembersNames[0]);
+            for (int i = 1; i < groupMembersNames.length - 1; i++) {
+                sb.append(joiner);
+                sb.append(groupMembersNames[i]);
+            }
+            sb.append(lastJoiner);
+            sb.append(groupMembersNames[groupMembersNames.length - 1]);
+            return sb.toString();
+        }
+    }
+
+
+    private static final String DATA_DIR = Environment.getDataDirectory().toString();
+
+    // used to validate an externally received Uri and make sure it does not point to an internal file
+    public static boolean validateUri(Uri uri) {
+        boolean valid = false;
+        if (uri != null && uri.getPath() != null) {
+            try {
+                if (Objects.equals(ContentResolver.SCHEME_FILE, uri.getScheme())) {
+                    String filePath = new File(uri.getPath()).getCanonicalPath();
+                    valid = !filePath.startsWith(DATA_DIR);
+                } else {
+                    valid = true;
+                }
+            } catch (Exception ignored) { }
+        }
+        if (!valid) {
+            Logger.w("Filtered out potentially harmful Uri: " + uri);
+        }
+        return valid;
     }
 }

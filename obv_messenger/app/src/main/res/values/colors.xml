@@ -38,6 +38,7 @@
     <color name="transparent">#00000000</color>
 
     <color name="attachmentBorder">#33000000</color>
+    <color name="locationBorder">#c4c4c4</color>
 
 
     <!-- New color -->

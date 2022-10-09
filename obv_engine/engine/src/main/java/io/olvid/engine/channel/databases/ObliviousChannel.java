@@ -469,6 +469,23 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         }
     }
 
+    public static int countConfirmedWithContact(ChannelManagerSession channelManagerSession, UID currentDeviceUid, Identity remoteIdentity) throws SQLException {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT count(*) FROM " + TABLE_NAME +
+                " WHERE " + CONFIRMED + " = 1" +
+                " AND " + CURRENT_DEVICE_UID + " = ? " +
+                " AND " + REMOTE_IDENTITY + " = ?;")) {
+            statement.setBytes(1, currentDeviceUid.getBytes());
+            statement.setBytes(2, remoteIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                if (res.next()) {
+                    return res.getInt(1);
+                }
+                return 0;
+            }
+        }
+    }
+
+
 
     public static ObliviousChannel[] getMany(ChannelManagerSession channelManagerSession, UID currentDeviceUid, UID[] remoteDeviceUids, Identity remoteIdentity, boolean necessarilyConfirmed) {
         if ((currentDeviceUid == null) || (remoteDeviceUids == null) || (remoteDeviceUids.length == 0) || (remoteIdentity == null)) {
@@ -590,6 +607,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             channelManagerSession.identityDelegate.refreshMembersOfGroupsOwnedByGroupOwner(currentDeviceUid, remoteIdentity);
             // reinvite members of groups owned (useful after a backup restore)
             channelManagerSession.identityDelegate.pushMembersOfOwnedGroupsToContact(currentDeviceUid, remoteIdentity);
+            // resend a batch of all keys for common groups V2
+            channelManagerSession.identityDelegate.initiateGroupV2BatchKeysResend(currentDeviceUid, remoteIdentity, remoteDeviceUid);
 
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_CONFIRMED_CURRENT_DEVICE_UID_KEY, currentDeviceUid);

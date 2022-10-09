@@ -30,11 +30,13 @@ import java.util.HashSet;
 import java.util.List;
 
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.dao.MessageDao;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 
@@ -50,12 +52,14 @@ public class DiscussionViewModel extends ViewModel {
 
 
     @NonNull private final LiveData<Discussion> discussionLiveData;
+    @NonNull private final LiveData<DiscussionDao.DiscussionAndGroupMembersCount> discussionGroupMemberCountLiveData;
     @NonNull private final LiveData<List<Message>> messages;
     @NonNull private final LiveData<List<Contact>> discussionContacts;
     @NonNull private final LiveData<MessageDao.UnreadCountAndFirstMessage> unreadCountAndFirstMessage;
     @NonNull private final LiveData<DiscussionCustomization> discussionCustomization;
-    @NonNull private final LiveData<Integer>  newDetailsUpdate;
+    @NonNull private final LiveData<Integer> newDetailsUpdate;
     @NonNull private final LiveData<OwnedIdentity> forwardMessageOwnedIdentityLiveData;
+    @NonNull private final LiveData<List<Message>> currentlySharingLocationMessagesLiveData;
 
     public DiscussionViewModel() {
         db = AppDatabase.getInstance();
@@ -80,17 +84,28 @@ public class DiscussionViewModel extends ViewModel {
             return db.discussionDao().getByIdAsync(discussionId);
         });
 
+        discussionGroupMemberCountLiveData = Transformations.switchMap(discussionIdLiveData, discussionId -> {
+            if (discussionId == null) {
+                return null;
+            }
+            return db.discussionDao().getWithGroupMembersCount(discussionId);
+        });
+
         discussionContacts = Transformations.switchMap(discussionLiveData, discussion -> {
-            if (discussion == null) {
-                return null;
+            if (discussion == null || discussion.isLocked()) {
+                return new MutableLiveData<>(null);
             }
-            if (discussion.bytesGroupOwnerAndUid != null) {
-                return db.contactGroupJoinDao().getGroupContacts(discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid);
-            } else if (discussion.bytesContactIdentity != null) {
-                return db.contactDao().getAsList(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity);
-            } else {
-                return null;
+            if (discussion.canPostMessages()) {
+                switch (discussion.discussionType) {
+                    case Discussion.TYPE_CONTACT:
+                        return db.contactDao().getAsList(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    case Discussion.TYPE_GROUP:
+                        return db.contactGroupJoinDao().getGroupContacts(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    case Discussion.TYPE_GROUP_V2:
+                        return db.group2MemberDao().getGroupMemberContacts(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                }
             }
+            return null;
         });
 
         unreadCountAndFirstMessage = Transformations.switchMap(discussionIdLiveData, discussionId -> {
@@ -108,23 +123,32 @@ public class DiscussionViewModel extends ViewModel {
         });
 
         newDetailsUpdate = Transformations.switchMap(discussionLiveData, discussion -> {
-            if (discussion != null && discussion.bytesGroupOwnerAndUid != null) {
-                return Transformations.map(AppDatabase.getInstance().groupDao().getLiveData(discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid), (Group group) -> {
-                    if (group != null) {
-                        return group.newPublishedDetails;
-                    }
-                    return null;
-                });
-            } else if (discussion != null && discussion.bytesContactIdentity != null) {
-                return Transformations.map(AppDatabase.getInstance().contactDao().getAsync(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity), (Contact contact) -> {
-                    if (contact != null) {
-                        return contact.newPublishedDetails;
-                    }
-                    return null;
-                });
-            } else {
-                return new MutableLiveData<>(Contact.PUBLISHED_DETAILS_NOTHING_NEW);
+            if (discussion != null && discussion.canPostMessages()) {
+                switch (discussion.discussionType) {
+                    case Discussion.TYPE_CONTACT:
+                        return Transformations.map(AppDatabase.getInstance().contactDao().getAsync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier), (Contact contact) -> {
+                            if (contact != null) {
+                                return contact.newPublishedDetails;
+                            }
+                            return null;
+                        });
+                    case Discussion.TYPE_GROUP:
+                        return Transformations.map(AppDatabase.getInstance().groupDao().getLiveData(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier), (Group group) -> {
+                            if (group != null) {
+                                return group.newPublishedDetails;
+                            }
+                            return null;
+                        });
+                    case Discussion.TYPE_GROUP_V2:
+                        return Transformations.map(AppDatabase.getInstance().group2Dao().getLiveData(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier), (Group2 group2) -> {
+                            if (group2 != null) {
+                                return group2.newPublishedDetails;
+                            }
+                            return null;
+                        });
+                }
             }
+            return new MutableLiveData<>(Contact.PUBLISHED_DETAILS_NOTHING_NEW);
         });
 
         forwardMessageOwnedIdentityLiveData = Transformations.switchMap(forwardMessageBytesOwnedIdentityLiveData, (byte[] bytesOwnedIdentity) -> {
@@ -132,6 +156,13 @@ public class DiscussionViewModel extends ViewModel {
                 return null;
             }
             return AppDatabase.getInstance().ownedIdentityDao().getLiveData(bytesOwnedIdentity);
+        });
+
+        currentlySharingLocationMessagesLiveData = Transformations.switchMap(discussionIdLiveData, discussionId -> {
+            if (discussionId == null) {
+                return null;
+            }
+            return db.messageDao().getCurrentlySharingLocationMessagesInDiscussionLiveData(discussionId);
         });
     }
 
@@ -147,6 +178,11 @@ public class DiscussionViewModel extends ViewModel {
     @NonNull
     public LiveData<Discussion> getDiscussion() {
         return discussionLiveData;
+    }
+
+    @NonNull
+    public LiveData<DiscussionDao.DiscussionAndGroupMembersCount> getDiscussionGroupMemberCountLiveData() {
+        return discussionGroupMemberCountLiveData;
     }
 
     @NonNull
@@ -172,6 +208,11 @@ public class DiscussionViewModel extends ViewModel {
     @NonNull
     public LiveData<Integer> getNewDetailsUpdate() {
         return newDetailsUpdate;
+    }
+
+    @NonNull
+    public LiveData<List<Message>> getCurrentlySharingLocationMessagesLiveData() {
+        return currentlySharingLocationMessagesLiveData;
     }
 
     // region select for deletion

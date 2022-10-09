@@ -8,7 +8,8 @@
     android:animateLayoutChanges="true"
     android:background="@drawable/background_gradient_olvid"
     app:layoutDescription="@xml/motion_scene_activity_webrtc_call"
-    tools:context=".webrtc.WebrtcCallActivity">
+    tools:context=".webrtc.WebrtcCallActivity"
+    tools:ignore="InconsistentLayout">
 
     <ImageView
         android:id="@+id/toggle_speakerphone_dropdown"
@@ -28,7 +29,7 @@
         android:layout_height="64dp"
         android:contentDescription="@string/content_description_toggle_mute_microphone_button"
         android:foreground="@drawable/background_circular_ripple"
-        android:src="@drawable/button_no_micro"
+        android:src="@drawable/button_micro"
         android:theme="@style/AlwaysWhiteRipple"
         app:layout_constraintBottom_toBottomOf="@+id/toggle_speakerphone_button"
         app:layout_constraintEnd_toStartOf="@+id/toggle_speakerphone_button"
@@ -189,7 +190,8 @@
             app:layout_constraintHorizontal_weight="2"
             app:layout_constraintBottom_toBottomOf="@+id/contact_initial_view"
             app:layout_constraintEnd_toStartOf="@+id/peer_is_muted_image_view"
-            app:layout_constraintStart_toStartOf="@+id/guideline" />
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            tools:ignore="InconsistentLayout" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"

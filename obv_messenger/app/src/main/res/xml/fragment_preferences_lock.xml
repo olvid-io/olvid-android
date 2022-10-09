@@ -28,6 +28,22 @@
             android:dialogTitle="@string/pref_lock_grace_time_dialog_message"
             android:order="30"/>
         <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_unlock_failed_wipe_messages"
+            android:summary="@string/pref_unlock_failed_wipe_messages_summary"
+            android:title="@string/pref_unlock_failed_wipe_messages_title"
+            android:icon="@drawable/ic_pref_unlock_failed_wipe"
+            android:dependency="pref_key_use_lock_screen"
+            android:order="35" />
+        <io.olvid.messenger.customClasses.NoClickSwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_use_emergency_pin"
+            android:summary="@string/pref_use_emergency_pin_summary"
+            android:title="@string/pref_use_emergency_pin_title"
+            android:icon="@drawable/ic_pref_emergency"
+            android:dependency="pref_key_use_lock_screen"
+            android:order="36" />
+        <SwitchPreference
             android:defaultValue="true"
             android:key="pref_key_keep_lock_service_open"
             android:summaryOn="@string/pref_keep_lock_service_open_summary_on"

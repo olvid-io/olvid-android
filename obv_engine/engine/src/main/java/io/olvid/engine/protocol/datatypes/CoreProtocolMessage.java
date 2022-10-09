@@ -33,7 +33,6 @@ public class CoreProtocolMessage {
     private final int protocolId;
     private final UID protocolInstanceUid;
     private final boolean partOfFullRatchetProtocolOfTheSendSeed;
-    private final Identity associatedOwnedIdentity;
     private final long serverTimestamp;
 
     public CoreProtocolMessage(ReceivedMessage message) {
@@ -43,7 +42,6 @@ public class CoreProtocolMessage {
         this.protocolId = message.getProtocolId();
         this.protocolInstanceUid = message.getProtocolInstanceUid();
         this.partOfFullRatchetProtocolOfTheSendSeed = false;
-        this.associatedOwnedIdentity = message.getAssociatedOwnedIdentity();
         this.serverTimestamp = message.getServerTimestamp();
     }
 
@@ -54,7 +52,6 @@ public class CoreProtocolMessage {
         this.protocolId = protocolId;
         this.protocolInstanceUid = protocolInstanceUid;
         this.partOfFullRatchetProtocolOfTheSendSeed = partOfFullRatchetProtocolOfTheSendSeed;
-        this.associatedOwnedIdentity = null;
         this.serverTimestamp = System.currentTimeMillis();
     }
 
@@ -80,10 +77,6 @@ public class CoreProtocolMessage {
 
     public boolean isPartOfFullRatchetProtocolOfTheSendSeed() {
         return partOfFullRatchetProtocolOfTheSendSeed;
-    }
-
-    public Identity getAssociatedOwnedIdentity() {
-        return associatedOwnedIdentity;
     }
 
     public long getServerTimestamp() {

@@ -25,6 +25,8 @@ public abstract class UploadNotifications {
     public static final String NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_MESSAGE_UID_KEY = "messageUid";
     public static final String NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY = "attachmentNumber";
     public static final String NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_PROGRESS_KEY = "progress";
+    public static final String NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_SPEED_BPS_KEY = "speed";
+    public static final String NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_ETA_SECONDS_KEY = "eta";
 
     public static final String NOTIFICATION_ATTACHMENT_UPLOAD_FINISHED = "network_send_notification_attachment_upload_finished";
     public static final String NOTIFICATION_ATTACHMENT_UPLOAD_FINISHED_OWNED_IDENTITY_KEY = "ownedIdentity";

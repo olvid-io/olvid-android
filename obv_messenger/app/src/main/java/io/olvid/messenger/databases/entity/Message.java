@@ -20,8 +20,10 @@
 package io.olvid.messenger.databases.entity;
 
 import android.content.Context;
+import android.location.Location;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -29,28 +31,35 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
-import androidx.annotation.NonNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.ObvPostMessageOutput;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
@@ -73,7 +82,7 @@ import io.olvid.messenger.services.UnifiedForegroundService;
                 @Index(Message.TIMESTAMP),
                 @Index(value = {Message.MESSAGE_TYPE, Message.STATUS}),
                 @Index(value = {Message.DISCUSSION_ID, Message.STATUS}),
-                @Index(value = {Message.SENDER_SEQUENCE_NUMBER, Message.SENDER_THREAD_IDENTIFIER, Message.SENDER_IDENTIFIER, Message.DISCUSSION_ID})
+                @Index(value = {Message.SENDER_SEQUENCE_NUMBER, Message.SENDER_THREAD_IDENTIFIER, Message.SENDER_IDENTIFIER, Message.DISCUSSION_ID}),
         }
 )
 public class Message {
@@ -84,6 +93,8 @@ public class Message {
     public static final String JSON_REPLY = "json_reply";
     public static final String JSON_EXPIRATION = "json_expiration"; // for inbound messages, this is null unless it is an ephemeral message
     public static final String JSON_RETURN_RECEIPT = "json_return_receipt";
+    public static final String JSON_LOCATION = "json_location"; // for location messages, this is null if message is not a location message
+    public static final String LOCATION_TYPE = "location_type";
     public static final String SORT_INDEX = "sort_index";
     public static final String TIMESTAMP = "timestamp";
     public static final String STATUS = "status";
@@ -101,12 +112,13 @@ public class Message {
     public static final String REACTIONS = "reactions";
     public static final String IMAGE_RESOLUTIONS = "image_resolutions"; // null or "" = no images, "102x234;a340x445" = 2 images, second one is animated
     public static final String MISSED_MESSAGE_COUNT = "missed_message_count"; // only used in inbound messages: the number of missing sequence numbers when this message is received. 0 --> everything is fine
-
+    public static final String EXPIRATION_START_TIMESTAMP = "expiration_start_timestamp"; // set when the message is first marked as sent --> this is when expirations are started. Only set for message with an expiration
+    public static final String LIMITED_VISIBILITY = "limited_visibility"; // true for read_once messages and messages with a visibility_duration
 
     // This enum is used in protobuf for webclient, please send notification if you modify anything
-    public static final int STATUS_UNPROCESSED = 0; // message not passed to the engine yes
-    public static final int STATUS_PROCESSING = 1; // message passed to the Engine (at least for some recipients)
-    public static final int STATUS_SENT = 2; // message (and all attachments) uploaded for ALL recipients
+    public static final int STATUS_UNPROCESSED = 0; // MessageRecipientInfos not created yet
+    public static final int STATUS_PROCESSING = 1; // MessageRecipientInfos were created for all recipients (we know exactly who will receive the message)
+    public static final int STATUS_SENT = 2; // message (and all attachments) uploaded for all recipients for which the message was sent to the engine
     public static final int STATUS_UNREAD = 3;
     public static final int STATUS_READ = 4;
     public static final int STATUS_DRAFT = 5;
@@ -136,11 +148,21 @@ public class Message {
     public static final int TYPE_PHONE_CALL = 9;
     public static final int TYPE_NEW_PUBLISHED_DETAILS = 10;
     public static final int TYPE_CONTACT_INACTIVE_REASON = 11;
+    public static final int TYPE_CONTACT_RE_ADDED = 12;
+    public static final int TYPE_RE_JOINED_GROUP = 13;
+    public static final int TYPE_JOINED_GROUP = 14;
+    public static final int TYPE_GAINED_GROUP_ADMIN = 15;
+    public static final int TYPE_LOST_GROUP_ADMIN = 16;
 
 
     public static final int EDITED_NONE = 0;
     public static final int EDITED_UNSEEN = 1;
     public static final int EDITED_SEEN = 2;
+
+    public static final int LOCATION_TYPE_NONE = 0; // not a location message
+    public static final int LOCATION_TYPE_SEND = 1; // send location one time
+    public static final int LOCATION_TYPE_SHARE = 2; // sharing location still in progress
+    public static final int LOCATION_TYPE_SHARE_FINISHED = 3; // sharing location ended
 
     public static final String NOT_ACTIVE_REASON_REVOKED = "revoked";
 
@@ -165,6 +187,13 @@ public class Message {
     @ColumnInfo(name = JSON_RETURN_RECEIPT)
     @Nullable
     public String jsonReturnReceipt;
+
+    @ColumnInfo(name = JSON_LOCATION)
+    @Nullable
+    public String jsonLocation;
+
+    @ColumnInfo(name = LOCATION_TYPE)
+    public int locationType;
 
     @ColumnInfo(name = SORT_INDEX)
     public double sortIndex;
@@ -221,17 +250,25 @@ public class Message {
     @ColumnInfo(name = MISSED_MESSAGE_COUNT)
     public long missedMessageCount;
 
+    @ColumnInfo(name = EXPIRATION_START_TIMESTAMP)
+    public long expirationStartTimestamp;
+
+    @ColumnInfo(name = LIMITED_VISIBILITY)
+    public boolean limitedVisibility;
+
     public boolean hasAttachments() {
         return totalAttachmentCount != 0;
     }
 
     // default constructor required by Room
-    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, byte[] engineMessageIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount) {
+    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, byte[] engineMessageIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility) {
         this.senderSequenceNumber = senderSequenceNumber;
         this.contentBody = contentBody;
         this.jsonReply = jsonReply;
         this.jsonExpiration = jsonExpiration;
         this.jsonReturnReceipt = jsonReturnReceipt;
+        this.jsonLocation = jsonLocation;
+        this.locationType = locationType;
         this.sortIndex = sortIndex;
         this.timestamp = timestamp;
         this.status = status;
@@ -249,6 +286,8 @@ public class Message {
         this.reactions = reactions;
         this.imageResolutions = imageResolutions;
         this.missedMessageCount = missedMessageCount;
+        this.expirationStartTimestamp = expirationStartTimestamp;
+        this.limitedVisibility = limitedVisibility;
     }
 
 
@@ -282,6 +321,7 @@ public class Message {
         this.reactions = null;
         this.imageResolutions = null;
         this.missedMessageCount = 0;
+        this.expirationStartTimestamp = 0;
 
         if (messageType == TYPE_OUTBOUND_MESSAGE) {
             computeOutboundSortIndex(db);
@@ -338,6 +378,8 @@ public class Message {
                 null,
                 null,
                 null,
+                null,
+                LOCATION_TYPE_NONE,
                 System.currentTimeMillis(),
                 System.currentTimeMillis(),
                 STATUS_DRAFT,
@@ -352,16 +394,21 @@ public class Message {
                 false,
                 null,
                 null,
-                0);
+                0,
+                0,
+                false
+        );
     }
 
-    private static Message createInfoMessage(int messageType, long discussionId, byte[] senderIdentity, long timestamp) {
-        return new Message(
+    private static Message createInfoMessage(AppDatabase db, int messageType, long discussionId, byte[] senderIdentity, long timestamp, boolean useActualTimestampForSorting) {
+        Message message = new Message(
                 0,
                 null,
                 null,
                 null,
                 null,
+                null,
+                LOCATION_TYPE_NONE,
                 timestamp,
                 timestamp,
                 STATUS_READ,
@@ -376,38 +423,64 @@ public class Message {
                 false,
                 null,
                 null,
-                0
+                0,
+                0,
+                false
         );
+        if (!useActualTimestampForSorting) {
+            message.computeOutboundSortIndex(db);
+        }
+        return message;
     }
 
-    public static Message createMemberJoinedGroupMessage(long discussionId, byte[] bytesMemberIdentity) {
-        return createInfoMessage(TYPE_GROUP_MEMBER_JOINED, discussionId, bytesMemberIdentity, System.currentTimeMillis());
+    public static Message createMemberJoinedGroupMessage(AppDatabase db, long discussionId, byte[] bytesMemberIdentity) {
+        return createInfoMessage(db, TYPE_GROUP_MEMBER_JOINED, discussionId, bytesMemberIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createMemberLeftGroupMessage(long discussionId, byte[] bytesMemberIdentity) {
-        return createInfoMessage(TYPE_GROUP_MEMBER_LEFT, discussionId, bytesMemberIdentity, System.currentTimeMillis());
+    public static Message createMemberLeftGroupMessage(AppDatabase db, long discussionId, byte[] bytesMemberIdentity) {
+        return createInfoMessage(db, TYPE_GROUP_MEMBER_LEFT, discussionId, bytesMemberIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createLeftGroupMessage(long discussionId, byte[] bytesOwnedIdentity) {
-        return createInfoMessage(TYPE_LEFT_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis());
+    public static Message createLeftGroupMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+        return createInfoMessage(db, TYPE_LEFT_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createContactDeletedMessage(long discussionId, byte[] bytesContactIdentity) {
-        return createInfoMessage(TYPE_CONTACT_DELETED, discussionId, bytesContactIdentity, System.currentTimeMillis());
+    public static Message createContactDeletedMessage(AppDatabase db, long discussionId, byte[] bytesContactIdentity) {
+        return createInfoMessage(db, TYPE_CONTACT_DELETED, discussionId, bytesContactIdentity, System.currentTimeMillis(), false);
+    }
+
+    public static Message createContactReAddedMessage(AppDatabase db, long discussionId, byte[] bytesContactIdentity) {
+        return createInfoMessage(db, TYPE_CONTACT_RE_ADDED, discussionId, bytesContactIdentity, System.currentTimeMillis(), false);
+    }
+
+    public static Message createReJoinedGroupMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+        return createInfoMessage(db, TYPE_RE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    }
+
+    public static Message createJoinedGroupMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+        return createInfoMessage(db, TYPE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    }
+
+    public static Message createGainedGroupAdminMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+        return createInfoMessage(db, TYPE_GAINED_GROUP_ADMIN, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    }
+
+    public static Message createLostGroupAdminMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+        return createInfoMessage(db, TYPE_LOST_GROUP_ADMIN, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
     ///////
     // phoneCallStatus uses the call statuses from CallLogItem
-    public static Message createPhoneCallMessage(long discussionId, byte[] bytesContactIdentity, CallLogItem callLogItem) {
+    public static Message createPhoneCallMessage(AppDatabase db, long discussionId, byte[] bytesContactIdentity, CallLogItem callLogItem) {
         boolean unread = (callLogItem.callType == CallLogItem.TYPE_INCOMING) && (callLogItem.callStatus == CallLogItem.STATUS_MISSED || callLogItem.callStatus == CallLogItem.STATUS_BUSY);
 
-        Message message = createInfoMessage(TYPE_PHONE_CALL, discussionId, bytesContactIdentity, callLogItem.timestamp);
+        Message message = createInfoMessage(db, TYPE_PHONE_CALL, discussionId, bytesContactIdentity, callLogItem.timestamp, true);
         message.contentBody = ((callLogItem.callType == CallLogItem.TYPE_INCOMING) ? callLogItem.callStatus : -callLogItem.callStatus) + ":" + callLogItem.id;
         message.status = unread ? STATUS_UNREAD : STATUS_READ;
         return message;
     }
 
-    public static Message createDiscussionSettingsUpdateMessage(long discussionId, DiscussionCustomization.JsonSharedSettings jsonSharedSettings, byte[] bytesIdentityOfInitiator, boolean outbound, Long messageTimestamp) {
+    public static Message createDiscussionSettingsUpdateMessage(AppDatabase db, long discussionId, DiscussionCustomization.JsonSharedSettings jsonSharedSettings, byte[] bytesIdentityOfInitiator, boolean outbound, Long messageTimestamp) {
         try {
             double sortIndex;
             long timestamp;
@@ -425,7 +498,7 @@ public class Message {
 
             String serializedSharedSettings = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonSharedSettings);
 
-            Message message = createInfoMessage(TYPE_DISCUSSION_SETTINGS_UPDATE, discussionId, bytesIdentityOfInitiator, timestamp);
+            Message message = createInfoMessage(db, TYPE_DISCUSSION_SETTINGS_UPDATE, discussionId, bytesIdentityOfInitiator, timestamp, true);
             message.contentBody = serializedSharedSettings;
             message.sortIndex = sortIndex;
             message.status = outbound ? STATUS_UNPROCESSED : STATUS_READ;
@@ -435,18 +508,18 @@ public class Message {
         }
     }
 
-    public static Message createDiscussionRemotelyDeletedMessage(long discussionId, byte[] remoteIdentity, long serverTimestamp) {
-        return createInfoMessage(TYPE_DISCUSSION_REMOTELY_DELETED, discussionId, remoteIdentity, serverTimestamp);
+    public static Message createDiscussionRemotelyDeletedMessage(AppDatabase db, long discussionId, byte[] remoteIdentity, long serverTimestamp) {
+        return createInfoMessage(db, TYPE_DISCUSSION_REMOTELY_DELETED, discussionId, remoteIdentity, serverTimestamp, false);
     }
 
-    public static Message createNewPublishedDetailsMessage(long discussionId, byte[] bytesContactIdentity) {
-        Message message = createInfoMessage(TYPE_NEW_PUBLISHED_DETAILS, discussionId, bytesContactIdentity, System.currentTimeMillis());
+    public static Message createNewPublishedDetailsMessage(AppDatabase db, long discussionId, byte[] bytesContactIdentity) {
+        Message message = createInfoMessage(db, TYPE_NEW_PUBLISHED_DETAILS, discussionId, bytesContactIdentity, System.currentTimeMillis(), true);
         message.status = STATUS_UNREAD;
         return message;
     }
 
-    public static Message createContactInactiveReasonMessage(long discussionId, byte[] bytesContactIdentity, @NonNull ObvContactActiveOrInactiveReason notActiveReason) {
-        Message message = createInfoMessage(TYPE_CONTACT_INACTIVE_REASON, discussionId, bytesContactIdentity, System.currentTimeMillis());
+    public static Message createContactInactiveReasonMessage(AppDatabase db, long discussionId, byte[] bytesContactIdentity, @NonNull ObvContactActiveOrInactiveReason notActiveReason) {
+        Message message = createInfoMessage(db, TYPE_CONTACT_INACTIVE_REASON, discussionId, bytesContactIdentity, System.currentTimeMillis(), false);
         switch (notActiveReason) {
             case REVOKED:
                 message.contentBody = NOT_ACTIVE_REASON_REVOKED;
@@ -461,14 +534,26 @@ public class Message {
     public static boolean postDeleteMessagesEverywhereMessage(long discussionId, List<Message> messages) {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(discussionId);
-        List<Contact> contacts;
-        if (discussion.bytesGroupOwnerAndUid != null) {
-            contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid);
-        } else if (discussion.bytesContactIdentity != null) {
-            contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity));
-        } else {
+
+        if (!discussion.canPostMessages()) {
             Logger.e("Trying to delete everywhere in a locked discussion!!! --> locally deleting instead");
             return true;
+        }
+
+        List<Contact> contacts;
+        switch (discussion.discussionType) {
+            case Discussion.TYPE_CONTACT:
+                contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier));
+                break;
+            case Discussion.TYPE_GROUP:
+                contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                break;
+            case Discussion.TYPE_GROUP_V2:
+                contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                break;
+            default:
+                Logger.e("Unknown discussion type!!! --> locally deleting instead");
+                return true;
         }
 
         // for group discussions with no members (or discussion with self)
@@ -506,14 +591,26 @@ public class Message {
     public static boolean postDeleteDiscussionEverywhereMessage(long discussionId) {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(discussionId);
-        List<Contact> contacts;
-        if (discussion.bytesGroupOwnerAndUid != null) {
-            contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid);
-        } else if (discussion.bytesContactIdentity != null) {
-            contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity));
-        } else {
+
+        if (!discussion.canPostMessages()) {
             Logger.e("Trying to delete everywhere a locked discussion!!! --> locally deleting instead");
             return true;
+        }
+
+        List<Contact> contacts;
+        switch (discussion.discussionType) {
+            case Discussion.TYPE_CONTACT:
+                contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier));
+                break;
+            case Discussion.TYPE_GROUP:
+                contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                break;
+            case Discussion.TYPE_GROUP_V2:
+                contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                break;
+            default:
+                Logger.e("Unknown discussion type!!! --> locally deleting instead");
+                return true;
         }
 
         // for group discussions with no members (or discussion with self)
@@ -551,14 +648,26 @@ public class Message {
     public static boolean postUpdateMessageMessage(Message updatedMessage) {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(updatedMessage.discussionId);
-        List<Contact> contacts;
-        if (discussion.bytesGroupOwnerAndUid != null) {
-            contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid);
-        } else if (discussion.bytesContactIdentity != null) {
-            contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity));
-        } else {
-            Logger.e("Trying to update a message in a locked discussion!!! --> locally deleting instead");
+
+        if (!discussion.canPostMessages()) {
+            Logger.e("Trying to update a message in a locked discussion!!! --> locally updating instead");
             return true;
+        }
+
+        List<Contact> contacts;
+        switch (discussion.discussionType) {
+            case Discussion.TYPE_CONTACT:
+                contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier));
+                break;
+            case Discussion.TYPE_GROUP:
+                contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                break;
+            case Discussion.TYPE_GROUP_V2:
+                contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                break;
+            default:
+                Logger.e("Unknown discussion type!!! --> locally updating instead");
+                return true;
         }
 
         // for group discussions with no members (or discussion with self)
@@ -574,6 +683,7 @@ public class Message {
         try {
             JsonUpdateMessage jsonUpdateMessage = JsonUpdateMessage.of(discussion, updatedMessage);
             jsonUpdateMessage.setBody(updatedMessage.contentBody);
+            jsonUpdateMessage.setJsonLocation(updatedMessage.getJsonLocation());
             JsonPayload jsonPayload = new JsonPayload();
             jsonPayload.setJsonUpdateMessage(jsonUpdateMessage);
 
@@ -597,14 +707,26 @@ public class Message {
     public static boolean postReactionMessage(Message message, @Nullable String emoji) {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(message.discussionId);
-        List<Contact> contacts;
-        if (discussion.bytesGroupOwnerAndUid != null) {
-            contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid);
-        } else if (discussion.bytesContactIdentity != null) {
-            contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity));
-        } else {
+
+        if (!discussion.canPostMessages()) {
             Logger.e("Trying to react a message in a locked discussion!!!");
             return true;
+        }
+
+        List<Contact> contacts;
+        switch (discussion.discussionType) {
+            case Discussion.TYPE_CONTACT:
+                contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier));
+                break;
+            case Discussion.TYPE_GROUP:
+                contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                break;
+            case Discussion.TYPE_GROUP_V2:
+                contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                break;
+            default:
+                Logger.e("Unknown discussion type for reaction!!!");
+                return true;
         }
 
         // for group discussions with no members (or discussion with self)
@@ -640,108 +762,49 @@ public class Message {
         return false;
     }
 
-
-
-
-
-
-    public void post(boolean showToasts, boolean messageNotInDb) {
+    public void postSettingsMessage(boolean messageNotInDb, byte[] bytesTargetContactIdentity) {
+        if (messageType != TYPE_DISCUSSION_SETTINGS_UPDATE) {
+            Logger.e("Called Message.postSettingsMessage for a message of type " + messageType);
+            return;
+        }
         try {
             AppDatabase db = AppDatabase.getInstance();
             Discussion discussion = db.discussionDao().getById(discussionId);
+
+            if (!discussion.canPostMessages()) {
+                Logger.e("Trying to post settings message in a locked discussion!!!");
+                return;
+            }
+
             List<Contact> contacts;
-            if (discussion.bytesGroupOwnerAndUid != null) {
-                contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesGroupOwnerAndUid);
-            } else if (discussion.bytesContactIdentity != null) {
-                contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesContactIdentity));
-            } else {
-                Logger.e("Trying to post in a locked discussion!!!");
-                return;
-            }
-            // only post the message to contacts with channel --> other will wait
-            // we start building the list of messageRecipientInfos with contacts with no channel yet
-            ArrayList<MessageRecipientInfo> messageRecipientInfos = new ArrayList<>();
-            ArrayList<byte[]> byteContactIdentities = new ArrayList<>(contacts.size());
-            boolean hasContactsWithChannel = false;
-            List<FyleMessageJoinWithStatusDao.FyleAndStatus> attachmentFyles = messageNotInDb ? new ArrayList<>() : db.fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(id);
-            for (Contact contact : contacts) {
-                if (contact.establishedChannelCount > 0) {
-                    hasContactsWithChannel = true;
-                    byteContactIdentities.add(contact.bytesContactIdentity);
-                } else if (contact.active) {
-                    MessageRecipientInfo messageRecipientInfo = new MessageRecipientInfo(id, attachmentFyles.size(), contact.bytesContactIdentity);
-                    messageRecipientInfos.add(messageRecipientInfo);
-                } else {
-                    Logger.i("Posting a message for an inactive contact --> not creating the MessageRecipientInfo");
-                }
-            }
-            if (!hasContactsWithChannel) {
-                if (contacts.size() == 0) {
-                    // message was posted to a group discussion with no members --> mark it as sent
-                    status = STATUS_SENT;
-                    db.messageDao().updateStatus(id, status);
-                    for (FyleMessageJoinWithStatusDao.FyleAndStatus attachmentFyleAndStatus: attachmentFyles) {
-                        attachmentFyleAndStatus.fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                        db.fyleMessageJoinWithStatusDao().updateStatus(attachmentFyleAndStatus.fyleMessageJoinWithStatus.messageId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.fyleId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.status);
-                    }
-                } else {
-                    if (showToasts) {
-                        App.toast(R.string.toast_message_no_channel_message_delayed, Toast.LENGTH_SHORT);
-                    }
-                }
-                return;
-            }
-            ObvOutboundAttachment[] attachments = new ObvOutboundAttachment[attachmentFyles.size()];
-            boolean hasAttachmentWithPreview = false;
-            for (int i = 0; i < attachments.length; i++) {
-                Fyle fyle = attachmentFyles.get(i).fyle;
-                FyleMessageJoinWithStatus fyleMessageJoinWithStatus = attachmentFyles.get(i).fyleMessageJoinWithStatus;
-                attachments[i] = new ObvOutboundAttachment(fyle.filePath, fyleMessageJoinWithStatus.size, attachmentFyles.get(i).getMetadata());
-
-                hasAttachmentWithPreview |= PreviewUtils.mimeTypeIsSupportedImageOrVideo(fyleMessageJoinWithStatus.getNonNullMimeType());
-
-                if (attachmentFyles.get(i).fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_COPYING) {
-                    // attachment is still being imported in the App --> do not send yet
-                    if (showToasts) {
-                        App.toast(R.string.toast_message_attachment_being_copied, Toast.LENGTH_LONG);
-                    }
+            switch (discussion.discussionType) {
+                case Discussion.TYPE_CONTACT:
+                    contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier));
+                    break;
+                case Discussion.TYPE_GROUP:
+                    contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    break;
+                case Discussion.TYPE_GROUP_V2:
+                    contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    break;
+                default:
+                    Logger.e("Unknown discussion type for settings message post!!!");
                     return;
-                }
             }
 
-            if (hasAttachmentWithPreview) {
-                try {
-                    ComputeAttachmentPreviewsAndPostMessageTask computeAttachmentPreviewsAndPostMessageTask = new ComputeAttachmentPreviewsAndPostMessageTask(id, null);
-                    App.runThread(computeAttachmentPreviewsAndPostMessageTask);
-                } catch (Exception e) {
-                    // nothing to do, this happens if another preview task is already running for this message
+            boolean hasChannels = false;
+            ArrayList<byte[]> byteContactIdentities = new ArrayList<>(contacts.size());
+            for (Contact contact : contacts) {
+                if (bytesTargetContactIdentity != null && !Arrays.equals(bytesTargetContactIdentity, contact.bytesContactIdentity)) {
+                    continue;
                 }
-                return;
+                byteContactIdentities.add(contact.bytesContactIdentity);
+                hasChannels |= contact.establishedChannelCount > 0;
             }
 
-            final ObvPostMessageOutput postMessageOutput;
-            final byte[] returnReceiptNonce;
-            final byte[] returnReceiptKey;
-            if (messageType == TYPE_OUTBOUND_MESSAGE) {
-                returnReceiptNonce = AppSingleton.getEngine().getReturnReceiptNonce();
-                returnReceiptKey = AppSingleton.getEngine().getReturnReceiptKey();
-
-                postMessageOutput = AppSingleton.getEngine().post(
-                        getMessagePayloadAsBytes(discussion.bytesGroupOwnerAndUid, returnReceiptNonce, returnReceiptKey),
-                        null,
-                        attachments,
-                        byteContactIdentities,
-                        discussion.bytesOwnedIdentity,
-                        true,
-                        false
-                );
-
-                UnifiedForegroundService.processPostMessageOutput(postMessageOutput);
-            } else if (messageType == TYPE_DISCUSSION_SETTINGS_UPDATE) {
-                returnReceiptNonce = null;
-                returnReceiptKey = null;
-                postMessageOutput = AppSingleton.getEngine().post(
-                        getDiscussionSettingsUpdatePayloadAsBytes(discussion.bytesGroupOwnerAndUid),
+            if (hasChannels) {
+                ObvPostMessageOutput postMessageOutput = AppSingleton.getEngine().post(
+                        getDiscussionSettingsUpdatePayloadAsBytes(discussion.discussionType, discussion.bytesDiscussionIdentifier),
                         null,
                         new ObvOutboundAttachment[0],
                         byteContactIdentities,
@@ -749,59 +812,244 @@ public class Message {
                         false,
                         false
                 );
-            } else {
-                return;
-            }
 
-            if (!postMessageOutput.isMessageSent()) {
-                // sending failed for all contacts, do nothing, at next restart it will try again...
-                return;
-            } else if (messageType == TYPE_OUTBOUND_MESSAGE) {
-                // update the list of messageRecipientInfos with the engine output
-                byte[] firstEngineMessageIdentifier = null;
-                for (ObvPostMessageOutput.BytesKey bytesKeyContactIdentity : postMessageOutput.getMessageIdentifierByContactIdentity().keySet()) {
-                    byte[] engineMessageIdentifier = postMessageOutput.getMessageIdentifierByContactIdentity().get(bytesKeyContactIdentity);
-                    MessageRecipientInfo messageRecipientInfo = new MessageRecipientInfo(id, attachments.length, bytesKeyContactIdentity.getBytes(), engineMessageIdentifier, returnReceiptNonce, returnReceiptKey);
-                    messageRecipientInfos.add(messageRecipientInfo);
-                    if (firstEngineMessageIdentifier == null && engineMessageIdentifier != null) {
-                        firstEngineMessageIdentifier = engineMessageIdentifier;
-                    }
+                if (!postMessageOutput.isMessageSent()) {
+                    // sending failed for all contacts, do nothing
+                    return;
                 }
-                for (int i = 0; i < attachments.length; i++) {
-                    FyleMessageJoinWithStatus fyleMessageJoinWithStatus = attachmentFyles.get(i).fyleMessageJoinWithStatus;
-                    fyleMessageJoinWithStatus.engineMessageIdentifier = firstEngineMessageIdentifier;
-                    fyleMessageJoinWithStatus.engineNumber = i;
-                    db.fyleMessageJoinWithStatusDao().updateEngineIdentifier(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
-                }
-                // insert all messageRecipientInfos (whether passed to the engine or not)
-                db.messageRecipientInfoDao().insert(messageRecipientInfos.toArray(new MessageRecipientInfo[0]));
             }
 
             if (!messageNotInDb) {
-                for (int i = 0; i < attachments.length; i++) {
-                    FyleMessageJoinWithStatus fyleMessageJoinWithStatus = attachmentFyles.get(i).fyleMessageJoinWithStatus;
-                    fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_UPLOADING;
-                    db.fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
-                }
-                if (messageType == TYPE_OUTBOUND_MESSAGE) {
-                    status = STATUS_PROCESSING;
-                } else {
-                    status = STATUS_SENT;
-                }
+                status = STATUS_SENT;
                 db.messageDao().updateStatus(id, status);
             }
-        } catch (Exception e) {
+        }  catch (Exception e) {
             e.printStackTrace();
-            Logger.w("Error posting a message to the engine;");
         }
     }
 
-    public void repost(MessageRecipientInfo messageRecipientInfo) {
+
+
+    public void post(boolean showToasts, byte[] extendedPayload) {
+        if (messageType != TYPE_OUTBOUND_MESSAGE) {
+            Logger.e("Called Message.post for a message of type " + messageType);
+            return;
+        }
+
         try {
             AppDatabase db = AppDatabase.getInstance();
             Discussion discussion = db.discussionDao().getById(discussionId);
-            if (discussion.bytesGroupOwnerAndUid == null && discussion.bytesContactIdentity == null) {
-                // discussion is locked, simply mark the MessageRecipientInfo as processed
+
+            if (!db.inTransaction()) {
+                Logger.e("Called Message.post() outside a transaction");
+            }
+
+            if (!discussion.canPostMessages()) {
+                Logger.e("Trying to post in a locked discussion!!!");
+                return;
+            }
+
+
+            //////////////////
+            // first get all attachments
+            List<FyleMessageJoinWithStatusDao.FyleAndStatus> attachmentFylesAndStatuses = db.fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(id);
+
+            // check for still COPYING files --> posting will be retried once copied
+            for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : attachmentFylesAndStatuses) {
+                if (fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_COPYING) {
+                    if (showToasts) {
+                        App.toast(R.string.toast_message_attachment_being_copied, Toast.LENGTH_LONG);
+                    }
+                    return;
+                }
+            }
+
+
+            ////////////////////
+            // compute the contacts to which the message should be sent (the MessageRecipientInfo)
+            // compute the contacts to which the message can be send NOW (byteContactIdentitiesToWhichMessageCanBeSentNow)
+            HashMap<BytesKey, MessageRecipientInfo> messageRecipientInfoHashMap = new HashMap<>();
+            List<byte[]> byteContactIdentitiesToWhichMessageCanBeSentNow = new ArrayList<>();
+            boolean markMessageSent = true;
+
+            switch (discussion.discussionType) {
+                case Discussion.TYPE_CONTACT: {
+                    Contact contact = db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    if (contact != null && contact.active) { // this should almost always be true
+                        markMessageSent = false;
+                        messageRecipientInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new MessageRecipientInfo(id, attachmentFylesAndStatuses.size(), contact.bytesContactIdentity));
+                        if (contact.establishedChannelCount > 0) {
+                            byteContactIdentitiesToWhichMessageCanBeSentNow.add(contact.bytesContactIdentity);
+                        } else if (showToasts) {
+                            App.toast(R.string.toast_message_no_channel_message_delayed, Toast.LENGTH_SHORT);
+                        }
+                    }
+                    break;
+                }
+                case Discussion.TYPE_GROUP: {
+                    List<Contact> contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    for (Contact contact : contacts) {
+                        if (contact.active) {
+                            markMessageSent = false;
+                            messageRecipientInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new MessageRecipientInfo(id, attachmentFylesAndStatuses.size(), contact.bytesContactIdentity));
+                            if (contact.establishedChannelCount > 0) {
+                                byteContactIdentitiesToWhichMessageCanBeSentNow.add(contact.bytesContactIdentity);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case Discussion.TYPE_GROUP_V2: {
+                    List<Contact> contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    for (Contact contact : contacts) {
+                        if (contact.active) {
+                            markMessageSent = false;
+                            messageRecipientInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new MessageRecipientInfo(id, attachmentFylesAndStatuses.size(), contact.bytesContactIdentity));
+                            if (contact.establishedChannelCount > 0) {
+                                byteContactIdentitiesToWhichMessageCanBeSentNow.add(contact.bytesContactIdentity);
+                            }
+                        }
+                    }
+                    for (Group2PendingMember group2PendingMember : db.group2PendingMemberDao().getGroupPendingMembers(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier)) {
+                        messageRecipientInfoHashMap.put(new BytesKey(group2PendingMember.bytesContactIdentity), new MessageRecipientInfo(id, attachmentFylesAndStatuses.size(), group2PendingMember.bytesContactIdentity));
+                    }
+                    break;
+                }
+                default:
+                    Logger.e("Unknown discussion type for message post!!!");
+                    return;
+            }
+
+
+
+            /////////////////
+            // if markMessageSent, the message has no active contact recipient yet, so it can be marked as sent
+            if (markMessageSent) {
+                status = STATUS_SENT;
+                db.messageDao().updateStatus(id, status);
+                for (FyleMessageJoinWithStatusDao.FyleAndStatus attachmentFyleAndStatus : attachmentFylesAndStatuses) {
+                    attachmentFyleAndStatus.fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
+                    db.fyleMessageJoinWithStatusDao().updateStatus(attachmentFyleAndStatus.fyleMessageJoinWithStatus.messageId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.fyleId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.status);
+                }
+
+                // still create the MessageRecipientInfo for GroupV2 pending members
+                if (!messageRecipientInfoHashMap.isEmpty()) {
+                    db.messageRecipientInfoDao().insert(messageRecipientInfoHashMap.values().toArray(new MessageRecipientInfo[0]));
+                }
+
+                // start the expiration timers
+                new ExpiringOutboundMessageSent(this).run();
+                return;
+            }
+
+            ///////////////
+            // there are at least some of our contacts to whom we can send the message --> send it
+            boolean attachmentsMarkedAsUploading = false;
+            if (!byteContactIdentitiesToWhichMessageCanBeSentNow.isEmpty()) {
+
+                // first build the attachment list
+                ObvOutboundAttachment[] attachments = new ObvOutboundAttachment[attachmentFylesAndStatuses.size()];
+                boolean hasAttachmentWithPreview = false;
+                for (int i = 0; i < attachments.length; i++) {
+                    Fyle fyle = attachmentFylesAndStatuses.get(i).fyle;
+                    FyleMessageJoinWithStatus fyleMessageJoinWithStatus = attachmentFylesAndStatuses.get(i).fyleMessageJoinWithStatus;
+                    attachments[i] = new ObvOutboundAttachment(fyle.filePath, fyleMessageJoinWithStatus.size, attachmentFylesAndStatuses.get(i).getMetadata());
+
+                    hasAttachmentWithPreview |= PreviewUtils.mimeTypeIsSupportedImageOrVideo(fyleMessageJoinWithStatus.getNonNullMimeType());
+                }
+
+                if (hasAttachmentWithPreview && extendedPayload == null) {
+                    try {
+                        ComputeAttachmentPreviewsAndPostMessageTask computeAttachmentPreviewsAndPostMessageTask = new ComputeAttachmentPreviewsAndPostMessageTask(id, null);
+                        App.runThread(computeAttachmentPreviewsAndPostMessageTask);
+                    } catch (Exception e) {
+                        // nothing to do, this happens if another preview task is already running for this message
+                    }
+                    return;
+                }
+
+                final byte[] returnReceiptNonce = AppSingleton.getEngine().getReturnReceiptNonce();
+                final byte[] returnReceiptKey = AppSingleton.getEngine().getReturnReceiptKey();
+                final ObvPostMessageOutput postMessageOutput = AppSingleton.getEngine().post(
+                        getMessagePayloadAsBytes(discussion.discussionType, discussion.bytesDiscussionIdentifier, returnReceiptNonce, returnReceiptKey, null),
+                        (hasAttachmentWithPreview && extendedPayload.length > 0) ? extendedPayload : null,
+                        attachments,
+                        byteContactIdentitiesToWhichMessageCanBeSentNow,
+                        discussion.bytesOwnedIdentity,
+                        true,
+                        false
+                );
+
+
+                if (postMessageOutput.isMessageSent()) {
+                    // "sending" successful at least for some contacts --> start the sending service
+                    UnifiedForegroundService.processPostMessageOutput(postMessageOutput);
+
+                    // update the list of MessageRecipientInfo with the engine output
+                    byte[] firstEngineMessageIdentifier = null;
+                    for (ObvBytesKey obvBytesKeyContactIdentity : postMessageOutput.getMessageIdentifierByContactIdentity().keySet()) {
+                        byte[] engineMessageIdentifier = postMessageOutput.getMessageIdentifierByContactIdentity().get(obvBytesKeyContactIdentity);
+                        MessageRecipientInfo messageRecipientInfo = messageRecipientInfoHashMap.get(new BytesKey(obvBytesKeyContactIdentity.getBytes()));
+
+                        if (messageRecipientInfo != null) {
+                            messageRecipientInfo.engineMessageIdentifier = engineMessageIdentifier;
+                            messageRecipientInfo.returnReceiptNonce = returnReceiptNonce;
+                            messageRecipientInfo.returnReceiptKey = returnReceiptKey;
+                        }
+
+                        if (firstEngineMessageIdentifier == null && engineMessageIdentifier != null) {
+                            firstEngineMessageIdentifier = engineMessageIdentifier;
+                        }
+                    }
+
+                    // update the engine identifier for the attachments to track upload progress
+                    attachmentsMarkedAsUploading = true;
+                    for (int i = 0; i < attachments.length; i++) {
+                        FyleMessageJoinWithStatus fyleMessageJoinWithStatus = attachmentFylesAndStatuses.get(i).fyleMessageJoinWithStatus;
+                        fyleMessageJoinWithStatus.engineMessageIdentifier = firstEngineMessageIdentifier;
+                        fyleMessageJoinWithStatus.engineNumber = i;
+                        db.fyleMessageJoinWithStatusDao().updateEngineIdentifier(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
+
+                        fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_UPLOADING;
+                        db.fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
+                    }
+                }
+            }
+
+            // if attachments were not marked as STATUS_UPLOADING, mark the attachments as STATUS_COMPLETE
+            if (!attachmentsMarkedAsUploading) {
+                for (FyleMessageJoinWithStatusDao.FyleAndStatus attachmentFyleAndStatus : attachmentFylesAndStatuses) {
+                    attachmentFyleAndStatus.fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
+                    db.fyleMessageJoinWithStatusDao().updateStatus(attachmentFyleAndStatus.fyleMessageJoinWithStatus.messageId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.fyleId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.status);
+                }
+            }
+
+            /////////////
+            // - insert all MessageRecipientInfo (whether passed to the engine or not)
+            // - update message status as STATUS_PROCESSING
+            db.messageRecipientInfoDao().insert(messageRecipientInfoHashMap.values().toArray(new MessageRecipientInfo[0]));
+
+            status = STATUS_PROCESSING;
+            db.messageDao().updateStatus(id, status);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void repost(MessageRecipientInfo messageRecipientInfo, byte[] extendedPayload) {
+        if (messageType != TYPE_OUTBOUND_MESSAGE) {
+            Logger.e("Called Message.repost for a message of type " + messageType);
+            return;
+        }
+
+        try {
+            AppDatabase db = AppDatabase.getInstance();
+            Discussion discussion = db.discussionDao().getById(discussionId);
+            if (discussion == null
+                    || !discussion.canPostMessages()
+                    || wipeStatus == WIPE_STATUS_WIPED
+                    || wipeStatus == WIPE_STATUS_REMOTE_DELETED) {
+                // message cannot be reposted, simply mark the MessageRecipientInfo as processed
                 if (messageRecipientInfo.engineMessageIdentifier == null) {
                     messageRecipientInfo.engineMessageIdentifier = new byte[0];
                 }
@@ -815,6 +1063,30 @@ public class Message {
                 return;
             }
 
+            // for groupV2, check the recipient is indeed a member
+            // also get the "original server timestamp" at which the message was first sent
+            Long originalServerTimestamp = null;
+            if (discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                Group2Member group2Member = db.group2MemberDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier, messageRecipientInfo.bytesContactIdentity);
+                if (group2Member == null) {
+                    // not yet a member of the group, do nothing
+                    return;
+                }
+                if (jsonLocation != null && (locationType == LOCATION_TYPE_SHARE || locationType == LOCATION_TYPE_SHARE_FINISHED)) {
+                    try {
+                        JsonLocation location = AppSingleton.getJsonObjectMapper().readValue(jsonLocation, JsonLocation.class);
+                        originalServerTimestamp = location.timestamp;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        originalServerTimestamp = db.messageRecipientInfoDao().getOriginalServerTimestampForMessage(messageRecipientInfo.messageId);
+                    }
+                } else {
+                    originalServerTimestamp = db.messageRecipientInfoDao().getOriginalServerTimestampForMessage(messageRecipientInfo.messageId);
+                }
+            }
+
+            //////////////////
+            // first get all attachments
             List<FyleMessageJoinWithStatusDao.FyleAndStatus> attachmentFyles = db.fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(id);
             ObvOutboundAttachment[] attachments = new ObvOutboundAttachment[attachmentFyles.size()];
             boolean hasAttachmentWithPreview = false;
@@ -826,7 +1098,7 @@ public class Message {
                 hasAttachmentWithPreview |= PreviewUtils.mimeTypeIsSupportedImageOrVideo(fyleMessageJoinWithStatus.getNonNullMimeType());
             }
 
-            if (hasAttachmentWithPreview) {
+            if (hasAttachmentWithPreview && extendedPayload == null) {
                 try {
                     ComputeAttachmentPreviewsAndPostMessageTask computeAttachmentPreviewsAndPostMessageTask = new ComputeAttachmentPreviewsAndPostMessageTask(id, messageRecipientInfo);
                     App.runThread(computeAttachmentPreviewsAndPostMessageTask);
@@ -836,69 +1108,43 @@ public class Message {
                 return;
             }
 
-            List<byte[]> bytesContactIdentities = new ArrayList<>();
-            bytesContactIdentities.add(messageRecipientInfo.bytesContactIdentity);
+            final byte[] returnReceiptNonce = AppSingleton.getEngine().getReturnReceiptNonce();
+            final byte[] returnReceiptKey = AppSingleton.getEngine().getReturnReceiptKey();
+            final ObvPostMessageOutput postMessageOutput = AppSingleton.getEngine().post(
+                    getMessagePayloadAsBytes(discussion.discussionType, discussion.bytesDiscussionIdentifier, returnReceiptNonce, returnReceiptKey, originalServerTimestamp),
+                    (hasAttachmentWithPreview && extendedPayload.length > 0) ? extendedPayload : null,
+                    attachments,
+                    Collections.singletonList(messageRecipientInfo.bytesContactIdentity),
+                    discussion.bytesOwnedIdentity,
+                    true,
+                    false
+            );
 
-            final ObvPostMessageOutput postMessageOutput;
-            final byte[] returnReceiptNonce;
-            final byte[] returnReceiptKey;
-            if (messageType == TYPE_OUTBOUND_MESSAGE) {
-                returnReceiptNonce = AppSingleton.getEngine().getReturnReceiptNonce();
-                returnReceiptKey = AppSingleton.getEngine().getReturnReceiptKey();
 
-                postMessageOutput = AppSingleton.getEngine().post(
-                        getMessagePayloadAsBytes(discussion.bytesGroupOwnerAndUid, returnReceiptNonce, returnReceiptKey),
-                        null,
-                        attachments,
-                        bytesContactIdentities,
-                        discussion.bytesOwnedIdentity,
-                        true,
-                        false
-                );
-
+            if (postMessageOutput.isMessageSent()) {
                 UnifiedForegroundService.processPostMessageOutput(postMessageOutput);
-            } else if (messageType == TYPE_DISCUSSION_SETTINGS_UPDATE) {
-                returnReceiptNonce = null;
-                returnReceiptKey = null;
 
-                postMessageOutput = AppSingleton.getEngine().post(
-                        getDiscussionSettingsUpdatePayloadAsBytes(discussion.bytesGroupOwnerAndUid),
-                        null,
-                        new ObvOutboundAttachment[0],
-                        bytesContactIdentities,
-                        discussion.bytesOwnedIdentity,
-                        false,
-                        false
-                );
-            } else {
-                return;
-            }
+                // update the MessageRecipientInfo with the engine output
+                byte[] messageIdentifier = postMessageOutput.getMessageIdentifierByContactIdentity().get(new ObvBytesKey(messageRecipientInfo.bytesContactIdentity));
+                if (messageIdentifier != null) {
+                    messageRecipientInfo.engineMessageIdentifier = messageIdentifier;
+                    messageRecipientInfo.returnReceiptNonce = returnReceiptNonce;
+                    messageRecipientInfo.returnReceiptKey = returnReceiptKey;
+                    db.messageRecipientInfoDao().update(messageRecipientInfo);
 
-            if (!postMessageOutput.isMessageSent()) {
-                // sending failed for all contacts, do nothing, at next restart it will try again...
-                return;
-            } else {
-                // update the list of messageRecipientInfos with the engine output
-                byte[] messageIdentifier = postMessageOutput.getMessageIdentifierByContactIdentity().get(new ObvPostMessageOutput.BytesKey(messageRecipientInfo.bytesContactIdentity));
-                messageRecipientInfo.engineMessageIdentifier = messageIdentifier;
-                messageRecipientInfo.returnReceiptNonce = returnReceiptNonce;
-                messageRecipientInfo.returnReceiptKey = returnReceiptKey;
-                db.messageRecipientInfoDao().update(messageRecipientInfo);
-                for (int i = 0; i < attachments.length; i++) {
-                    FyleMessageJoinWithStatus fyleMessageJoinWithStatus = attachmentFyles.get(i).fyleMessageJoinWithStatus;
-                    fyleMessageJoinWithStatus.engineMessageIdentifier = messageIdentifier;
-                    fyleMessageJoinWithStatus.engineNumber = i;
-                    db.fyleMessageJoinWithStatusDao().updateEngineIdentifier(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
+                    for (int i = 0; i < attachments.length; i++) {
+                        FyleMessageJoinWithStatus fyleMessageJoinWithStatus = attachmentFyles.get(i).fyleMessageJoinWithStatus;
+                        fyleMessageJoinWithStatus.engineMessageIdentifier = messageIdentifier;
+                        fyleMessageJoinWithStatus.engineNumber = i;
+                        db.fyleMessageJoinWithStatusDao().updateEngineIdentifier(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
+
+                        fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_UPLOADING;
+                        db.fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
+                    }
+                    if (refreshOutboundStatus()) {
+                        db.messageDao().updateStatus(id, status);
+                    }
                 }
-            }
-
-            for (int i = 0; i < attachments.length; i++) {
-                FyleMessageJoinWithStatus fyleMessageJoinWithStatus = attachmentFyles.get(i).fyleMessageJoinWithStatus;
-                fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_UPLOADING;
-                db.fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
-            }
-            if (refreshOutboundStatus()) {
-                db.messageDao().updateStatus(id, status);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -930,7 +1176,12 @@ public class Message {
             return false;
         }
         int newStatus = 100000;
+        boolean passedToEngineForEveryone = true;
         for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
+            if (messageRecipientInfo.engineMessageIdentifier == null) {
+                passedToEngineForEveryone = false;
+                continue;
+            }
             if (messageRecipientInfo.timestampSent == null) {
                 newStatus = STATUS_PROCESSING;
                 break;
@@ -942,11 +1193,18 @@ public class Message {
                 newStatus = Math.min(newStatus, STATUS_DELIVERED_AND_READ);
             }
         }
-        if (newStatus != status) {
-            boolean wasSent = (status == STATUS_UNPROCESSED || status == STATUS_PROCESSING || status == STATUS_COMPUTING_PREVIEW)
+
+        // never mark a message as delivered/read if not delivered to all recipients
+        if (!passedToEngineForEveryone && newStatus != 100000 && newStatus > STATUS_SENT) {
+            newStatus = STATUS_SENT;
+        }
+
+        if (newStatus != 100000 && newStatus != status) {
+            boolean shouldStartExpiration =
+                    (status == STATUS_UNPROCESSED || status == STATUS_PROCESSING || status == STATUS_COMPUTING_PREVIEW)
                     && (newStatus == STATUS_SENT || newStatus == STATUS_DELIVERED || newStatus == STATUS_DELIVERED_AND_READ);
             status = newStatus;
-            if (wasSent && jsonExpiration != null) {
+            if (shouldStartExpiration && jsonExpiration != null) {
                 App.runThread(new ExpiringOutboundMessageSent(this));
             }
             return true;
@@ -967,6 +1225,23 @@ public class Message {
             return context.getString(R.string.text_message_content_wiped);
         } else if (wipeStatus == WIPE_STATUS_REMOTE_DELETED) {
             return context.getString(R.string.text_message_content_remote_deleted);
+        } else if (isLocationMessage()) {
+            // location sharing
+            if (locationType == LOCATION_TYPE_SHARE_FINISHED) {
+                return context.getString(R.string.text_message_sharing_location_finished);
+            } else if (locationType == LOCATION_TYPE_SHARE) {
+                if (messageType == TYPE_OUTBOUND_MESSAGE) {
+                    return context.getString(R.string.text_message_sharing_location);
+                } else {
+                    return context.getString(R.string.text_message_receiving_shared_location);
+                }
+            }
+            // location sending
+            if (messageType == TYPE_OUTBOUND_MESSAGE) {
+                return context.getString(R.string.text_message_location_sent);
+            } else {
+                return context.getString(R.string.text_message_location_received);
+            }
         } else if (contentBody == null) {
             return "";
         } else {
@@ -998,24 +1273,71 @@ public class Message {
         return messageType == TYPE_INBOUND_MESSAGE || messageType == TYPE_INBOUND_EPHEMERAL_MESSAGE;
     }
 
-    public byte[] getMessagePayloadAsBytes(byte[] bytesGroupOwnerAndUid, byte[] returnReceiptNonce, byte[] returnReceiptKey) throws Exception {
-        JsonMessage jsonMessage = getJsonMessage();
-        if (bytesGroupOwnerAndUid != null) {
-            jsonMessage.setGroupOwnerAndUid(bytesGroupOwnerAndUid);
+    public boolean isLocationMessage() {
+        return jsonLocation != null;
+    }
+
+    // return true if message expired and update locationType field
+    public boolean isSharingExpired() {
+        if (this.jsonLocation != null && this.locationType == LOCATION_TYPE_SHARE) {
+            Long expiration = getJsonLocation().sharingExpiration;
+            if (expiration != null) {
+                return expiration < System.currentTimeMillis();
+            }
         }
+        return false;
+    }
+
+    public byte[] getMessagePayloadAsBytes(int discussionType, byte[] bytesDiscussionIdentifier, byte[] returnReceiptNonce, byte[] returnReceiptKey, Long originalServerTimestamp) throws Exception {
+        JsonMessage jsonMessage = getJsonMessage();
+        switch (discussionType) {
+            case Discussion.TYPE_GROUP:
+                jsonMessage.setGroupOwnerAndUid(bytesDiscussionIdentifier);
+                break;
+            case Discussion.TYPE_GROUP_V2:
+                jsonMessage.groupV2Identifier = bytesDiscussionIdentifier;
+                break;
+            case Discussion.TYPE_CONTACT:
+            default:
+                break;
+        }
+        jsonMessage.setOriginalServerTimestamp(originalServerTimestamp);
         JsonReturnReceipt jsonReturnReceipt = new JsonReturnReceipt(returnReceiptNonce, returnReceiptKey);
         JsonPayload jsonPayload = new JsonPayload(jsonMessage, jsonReturnReceipt);
         return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
     }
 
-    public byte[] getDiscussionSettingsUpdatePayloadAsBytes(byte[] bytesGroupOwnerAndUid) throws Exception {
+    public byte[] getDiscussionSettingsUpdatePayloadAsBytes(int discussionType, byte[] bytesDiscussionIdentifier) throws Exception {
         DiscussionCustomization.JsonSharedSettings jsonSharedSettings = AppSingleton.getJsonObjectMapper().readValue(contentBody, DiscussionCustomization.JsonSharedSettings.class);
-        if (bytesGroupOwnerAndUid != null) {
-            jsonSharedSettings.setGroupOwnerAndUid(bytesGroupOwnerAndUid);
+        switch (discussionType) {
+            case Discussion.TYPE_GROUP:
+                jsonSharedSettings.setGroupOwnerAndUid(bytesDiscussionIdentifier);
+                break;
+            case Discussion.TYPE_GROUP_V2:
+                jsonSharedSettings.groupV2Identifier = bytesDiscussionIdentifier;
+                break;
+            case Discussion.TYPE_CONTACT:
+            default:
+                break;
         }
         JsonPayload jsonPayload = new JsonPayload();
         jsonPayload.setJsonSharedSettings(jsonSharedSettings);
         return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
+    }
+
+    public static byte[] getGroupV2DiscussionQuerySharedSettingsPayloadAsBytes(byte[] bytesGroupIdentifier, Integer knownSharedSettingsVersion, JsonExpiration knownSharedExpiration) throws Exception {
+        JsonPayload jsonPayload = new JsonPayload();
+        jsonPayload.setJsonQuerySharedSettings(new JsonQuerySharedSettings(bytesGroupIdentifier, knownSharedSettingsVersion, knownSharedExpiration));
+        return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
+    }
+
+    public JsonLocation getJsonLocation() {
+        try {
+            return AppSingleton.getJsonObjectMapper().readValue(this.jsonLocation, JsonLocation.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public JsonMessage getJsonMessage() {
@@ -1036,6 +1358,29 @@ public class Message {
         if (jsonExpiration != null) {
             try {
                 jsonMessage.jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(jsonExpiration, JsonExpiration.class);
+                // if message was already sent once and has an existence duration, compensate the original existence duration with the elapsed time
+                if (expirationStartTimestamp != 0 && jsonMessage.jsonExpiration.existenceDuration != null) {
+                    jsonMessage.jsonExpiration.existenceDuration = jsonMessage.jsonExpiration.existenceDuration - (System.currentTimeMillis() - expirationStartTimestamp) / 1000L;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (jsonLocation != null) {
+            try {
+                switch (locationType) {
+                    case LOCATION_TYPE_NONE:
+                        break;
+                    case LOCATION_TYPE_SEND:
+                    case LOCATION_TYPE_SHARE:
+                    default:
+                        jsonMessage.jsonLocation = AppSingleton.getJsonObjectMapper().readValue(jsonLocation, JsonLocation.class);
+                        break;
+                    case LOCATION_TYPE_SHARE_FINISHED:
+                        JsonLocation location = AppSingleton.getJsonObjectMapper().readValue(jsonLocation, JsonLocation.class);
+                        jsonMessage.jsonLocation = new JsonLocation(JsonLocation.TYPE_END_SHARING, null, null, null, location.latitude, location.longitude, location.altitude, location.precision, location.timestamp);
+                        break;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -1056,9 +1401,35 @@ public class Message {
         if (jsonMessage.jsonExpiration != null) {
             try {
                 jsonExpiration = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonMessage.jsonExpiration);
+                limitedVisibility = (jsonMessage.jsonExpiration.readOnce != null && jsonMessage.jsonExpiration.readOnce) || (jsonMessage.jsonExpiration.visibilityDuration != null);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
                 jsonExpiration = null;
+                limitedVisibility = false;
+            }
+        } else {
+            limitedVisibility = false;
+        }
+        if (jsonMessage.jsonLocation != null) {
+            try {
+                jsonLocation = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonMessage.jsonLocation);
+                switch (jsonMessage.jsonLocation.getType()) {
+                    case JsonLocation.TYPE_SEND:
+                        this.locationType = LOCATION_TYPE_SEND;
+                        break;
+                    case JsonLocation.TYPE_SHARING:
+                        this.locationType = LOCATION_TYPE_SHARE;
+                        break;
+                    case JsonLocation.TYPE_END_SHARING:
+                        this.locationType = LOCATION_TYPE_SHARE_FINISHED;
+                        break;
+                    default:
+                        this.locationType = LOCATION_TYPE_NONE;
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                jsonLocation = null;
+                locationType = LOCATION_TYPE_NONE;
             }
         }
     }
@@ -1109,6 +1480,12 @@ public class Message {
             Logger.e("WARNING: Calling Message.delete() outside a transaction");
         }
         deleteAttachments(db);
+
+        // stop sharing location if needed
+        if (locationType == LOCATION_TYPE_SHARE) {
+            UnifiedForegroundService.LocationSharingSubService.stopSharingLocation(App.getContext(), discussionId);
+        }
+
         db.messageDao().delete(this);
     }
 
@@ -1153,11 +1530,14 @@ public class Message {
         } else {
             contentBody = null;
             jsonReply = null;
+            jsonLocation = null;
+            locationType = LOCATION_TYPE_NONE;
             edited = EDITED_NONE;
             forwarded = false;
             wipeStatus = WIPE_STATUS_WIPED;
             reactions = null;
             imageResolutions = null;
+            limitedVisibility = false;
             db.messageDao().updateWipe(id, WIPE_STATUS_WIPED);
             db.reactionDao().deleteAllForMessage(id);
             db.messageMetadataDao().insert(new MessageMetadata(id, MessageMetadata.KIND_WIPED, System.currentTimeMillis()));
@@ -1165,13 +1545,17 @@ public class Message {
         }
     }
 
-    public void remoteDelete(AppDatabase db, byte[] bytesRemoteIdentity, long serverTimestamp) {
+    public void remoteDelete(AppDatabase db, @NonNull byte[] bytesRemoteIdentity, long serverTimestamp) {
         contentBody = null;
         jsonReply = null;
+        jsonLocation = null;
+        locationType = LOCATION_TYPE_NONE;
         edited = EDITED_NONE;
         forwarded = false;
         wipeStatus = WIPE_STATUS_REMOTE_DELETED;
         reactions = null;
+        imageResolutions = null;
+        limitedVisibility = false;
         db.messageDao().updateWipe(id, WIPE_STATUS_REMOTE_DELETED);
         db.reactionDao().deleteAllForMessage(id);
         if (messageType == TYPE_INBOUND_EPHEMERAL_MESSAGE) {
@@ -1188,6 +1572,7 @@ public class Message {
         JsonReturnReceipt jsonReturnReceipt;
         JsonWebrtcMessage jsonWebrtcMessage;
         DiscussionCustomization.JsonSharedSettings jsonSharedSettings;
+        JsonQuerySharedSettings jsonQuerySharedSettings;
         JsonUpdateMessage jsonUpdateMessage;
         JsonDeleteMessages jsonDeleteMessages;
         JsonDeleteDiscussion jsonDeleteDiscussion;
@@ -1241,6 +1626,16 @@ public class Message {
             this.jsonSharedSettings = jsonSharedSettings;
         }
 
+        @JsonProperty("qss")
+        public JsonQuerySharedSettings getJsonQuerySharedSettings() {
+            return jsonQuerySharedSettings;
+        }
+
+        @JsonProperty("qss")
+        public void setJsonQuerySharedSettings(JsonQuerySharedSettings jsonQuerySharedSettings) {
+            this.jsonQuerySharedSettings = jsonQuerySharedSettings;
+        }
+
         @JsonProperty("upm")
         public JsonUpdateMessage getJsonUpdateMessage() {
             return jsonUpdateMessage;
@@ -1290,9 +1685,12 @@ public class Message {
         UUID senderThreadIdentifier;
         byte[] groupUid;
         byte[] groupOwner;
+        byte[] groupV2Identifier;
         Boolean forwarded;
+        Long originalServerTimestamp;
         JsonMessageReference jsonReply;
         JsonExpiration jsonExpiration;
+        JsonLocation jsonLocation;
 
         public JsonMessage(String body) {
             this.body = body;
@@ -1349,6 +1747,16 @@ public class Message {
             this.groupOwner = groupOwner;
         }
 
+        @JsonProperty("gid2")
+        public byte[] getGroupV2Identifier() {
+            return groupV2Identifier;
+        }
+
+        @JsonProperty("gid2")
+        public void setGroupV2Identifier(byte[] groupV2Identifier) {
+            this.groupV2Identifier = groupV2Identifier;
+        }
+
         @JsonProperty("fw")
         public Boolean isForwarded() {
             return forwarded;
@@ -1357,6 +1765,16 @@ public class Message {
         @JsonProperty("fw")
         public void setForwarded(Boolean forwarded) {
             this.forwarded = forwarded;
+        }
+
+        @JsonProperty("ost")
+        public Long getOriginalServerTimestamp() {
+            return originalServerTimestamp;
+        }
+
+        @JsonProperty("ost")
+        public void setOriginalServerTimestamp(Long originalServerTimestamp) {
+            this.originalServerTimestamp = originalServerTimestamp;
         }
 
         @JsonProperty("re")
@@ -1379,9 +1797,19 @@ public class Message {
             this.jsonExpiration = jsonExpiration;
         }
 
+        @JsonProperty("loc")
+        public JsonLocation getJsonLocation() {
+            return jsonLocation;
+        }
+
+        @JsonProperty("loc")
+        public void setJsonLocation(JsonLocation jsonLocation) {
+            this.jsonLocation = jsonLocation;
+        }
+
         @JsonIgnore
         public boolean isEmpty() {
-            return (body == null || body.trim().length() == 0) && jsonReply == null;
+            return (body == null || body.trim().length() == 0) && jsonReply == null && jsonLocation == null;
         }
 
         @JsonIgnore
@@ -1516,6 +1944,7 @@ public class Message {
             return Objects.equals(existenceDuration, other.existenceDuration);
         }
 
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
         public boolean likeNull() {
             return (readOnce == null || !readOnce) && (visibilityDuration == null) && (existenceDuration == null);
         }
@@ -1593,17 +2022,74 @@ public class Message {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class JsonQuerySharedSettings {
+        byte[] groupV2Identifier;
+        Integer knownSharedSettingsVersion;
+        JsonExpiration knownSharedExpiration;
+
+        public JsonQuerySharedSettings() {
+        }
+
+        public JsonQuerySharedSettings(byte[] groupV2Identifier, Integer knownSharedSettingsVersion, JsonExpiration knownSharedExpiration) {
+            this.groupV2Identifier = groupV2Identifier;
+            this.knownSharedSettingsVersion = knownSharedSettingsVersion;
+            this.knownSharedExpiration = knownSharedExpiration;
+        }
+
+        @JsonProperty("gid2")
+        public byte[] getGroupV2Identifier() {
+            return groupV2Identifier;
+        }
+
+        @JsonProperty("gid2")
+        public void setGroupV2Identifier(byte[] groupV2Identifier) {
+            this.groupV2Identifier = groupV2Identifier;
+        }
+
+        @JsonProperty("ksv")
+        public Integer getKnownSharedSettingsVersion() {
+            return knownSharedSettingsVersion;
+        }
+
+        @JsonProperty("ksv")
+        public void setKnownSharedSettingsVersion(Integer knownSharedSettingsVersion) {
+            this.knownSharedSettingsVersion = knownSharedSettingsVersion;
+        }
+
+        @JsonProperty("exp")
+        public JsonExpiration getKnownSharedExpiration() {
+            return knownSharedExpiration;
+        }
+
+        @JsonProperty("exp")
+        public void setKnownSharedExpiration(JsonExpiration knownSharedExpiration) {
+            this.knownSharedExpiration = knownSharedExpiration;
+        }
+    }
+
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class JsonUpdateMessage {
         String body;
         byte[] groupUid;
         byte[] groupOwner;
+        byte[] groupV2Identifier;
         JsonMessageReference messageReference;
+        JsonLocation jsonLocation;
 
         public static JsonUpdateMessage of(Discussion discussion, Message message) throws Exception {
             JsonUpdateMessage jsonUpdateMessage = new JsonUpdateMessage();
             jsonUpdateMessage.messageReference = JsonMessageReference.of(message);
-            if (discussion.bytesGroupOwnerAndUid != null) {
-                jsonUpdateMessage.setGroupOwnerAndUid(discussion.bytesGroupOwnerAndUid);
+            switch (discussion.discussionType) {
+                case Discussion.TYPE_GROUP:
+                    jsonUpdateMessage.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
+                    break;
+                case Discussion.TYPE_GROUP_V2:
+                    jsonUpdateMessage.groupV2Identifier = discussion.bytesDiscussionIdentifier;
+                    break;
+                case Discussion.TYPE_CONTACT:
+                default:
+                    break;
             }
             return jsonUpdateMessage;
         }
@@ -1614,6 +2100,16 @@ public class Message {
 
         public void setBody(String body) {
             this.body = body;
+        }
+
+        @JsonProperty("loc")
+        public JsonLocation getJsonLocation() {
+            return jsonLocation;
+        }
+
+        @JsonProperty("loc")
+        public void setJsonLocation(JsonLocation jsonLocation) {
+            this.jsonLocation = jsonLocation;
         }
 
         @JsonProperty("guid")
@@ -1634,6 +2130,16 @@ public class Message {
         @JsonProperty("go")
         public void setGroupOwner(byte[] groupOwner) {
             this.groupOwner = groupOwner;
+        }
+
+        @JsonProperty("gid2")
+        public byte[] getGroupV2Identifier() {
+            return groupV2Identifier;
+        }
+
+        @JsonProperty("gid2")
+        public void setGroupV2Identifier(byte[] groupV2Identifier) {
+            this.groupV2Identifier = groupV2Identifier;
         }
 
         @JsonProperty("ref")
@@ -1659,18 +2165,209 @@ public class Message {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class JsonLocation {
+        @JsonIgnore
+        public static final int TYPE_SEND = 1;
+        @JsonIgnore
+        public static final int TYPE_SHARING = 2;
+        @JsonIgnore
+        public static final int TYPE_END_SHARING = 3;
+
+        // -- message metadata --
+        int type;
+        long timestamp; // location timestamp
+        // -- sharing message fields --
+        Long count; // null if not sharing
+        Long sharingInterval; // null if not sharing (else in ms)
+        Long sharingExpiration; // can be null if endless sharing (else in ms)
+        // -- location --
+        double latitude;
+        double longitude;
+        // -- optional metadata --
+        Double altitude; // meters (default value null)
+        Float precision; // meters (default value null)
+        String address; // (default value empty string or null)
+
+        public JsonLocation() {}
+
+        private JsonLocation(int type, @Nullable Long sharingExpiration, @Nullable Long sharingInterval, @Nullable Long count, double latitude, double longitude, Double altitude, Float precision, long timestamp) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.altitude = altitude;
+            this.precision = precision;
+            this.timestamp = timestamp;
+            this.type = type;
+            this.count = count;
+            this.sharingExpiration = sharingExpiration;
+            this.sharingInterval = sharingInterval;
+        }
+
+        public static JsonLocation startSharingLocationMessage(@Nullable Long sharingExpiration, @NotNull Long interval, @NotNull Location location) {
+            return new JsonLocation(
+                    TYPE_SHARING,
+                    sharingExpiration,
+                    interval,
+                    1L,
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    location.hasAltitude() ? location.getAltitude() : null,
+                    location.hasAccuracy() ? location.getAccuracy() : null,
+                    location.getTime()
+            );
+        }
+
+        public static JsonLocation updateSharingLocationMessage(@NotNull JsonLocation originalJsonLocation, @NotNull Location location) {
+            return new JsonLocation(
+                    TYPE_SHARING,
+                    originalJsonLocation.getSharingExpiration(),
+                    originalJsonLocation.getSharingInterval(),
+                    originalJsonLocation.getCount() + 1,
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    location.hasAltitude() ? location.getAltitude() : null,
+                    location.hasAccuracy() ? location.getAccuracy() : null,
+                    location.getTime()
+            );
+        }
+
+        public static JsonLocation endOfSharingLocationMessage(@NotNull Long count) {
+            JsonLocation endOfSharingJsonLocation = new JsonLocation();
+            endOfSharingJsonLocation.type = TYPE_END_SHARING;
+            endOfSharingJsonLocation.count = count;
+            return endOfSharingJsonLocation;
+        }
+
+        public static JsonLocation sendLocationMessage(@NotNull Location location) {
+            return new JsonLocation(
+                    TYPE_SEND,
+                    null,
+                    null,
+                    null,
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    location.hasAltitude() ? location.getAltitude() : null,
+                    location.hasAccuracy() ? location.getAccuracy() : null,
+                    location.getTime()
+            );
+        }
+
+        // ----- sharing message metadata -----
+        @JsonProperty("c")
+        public Long getCount() { return count; }
+        @JsonProperty("c")
+        public void setCount(Long count) { this.count = count; }
+
+        @JsonProperty("se")
+        public Long getSharingExpiration() { return sharingExpiration; }
+        @JsonProperty("se")
+        public void setSharingExpiration(Long sharingExpiration) { this.sharingExpiration = sharingExpiration; }
+
+        @JsonProperty("i")
+        public Long getSharingInterval() { return sharingInterval; }
+        @JsonProperty("i")
+        public void setSharingInterval(Long sharingInterval) { this.sharingInterval = sharingInterval; }
+
+        // -- message metadata --
+        @JsonProperty("t")
+        public int getType() { return type; }
+        @JsonProperty("t")
+        public void setType(int type) { this.type = type; }
+
+        @JsonProperty("ts")
+        public long getTimestamp() { return timestamp; }
+        @JsonProperty("ts")
+        public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+        // ----- location -----
+        @JsonProperty("long")
+        public double getLongitude() { return longitude; }
+        @JsonProperty("long")
+        public void setLongitude(double longitude) { this.longitude = longitude; }
+
+        @JsonProperty("lat")
+        public double getLatitude() { return latitude; }
+        @JsonProperty("lat")
+        public void setLatitude(double latitude) { this.latitude = latitude; }
+
+        // ----- optional metadata -----
+        @JsonProperty("alt")
+        public Double getAltitude() { return altitude; }
+        @JsonProperty("alt")
+        public void setAltitude(Double altitude) { this.altitude = altitude; }
+
+        @JsonProperty("prec")
+        public Float getPrecision() { return precision; }
+        @JsonProperty("prec")
+        public void setPrecision(Float accuracy) { this.precision = accuracy; }
+
+        @JsonProperty("add")
+        public String getAddress() { return address; }
+        @JsonProperty("add")
+        public void setAddress(String address) { this.address = address; }
+
+
+        ////////////
+        // formatters
+
+        private final static DecimalFormatSymbols decimalSymbols = new DecimalFormatSymbols(Locale.US);
+        private final static DecimalFormat truncated5 = new DecimalFormat("#0.00000", decimalSymbols);
+        private final static DecimalFormat truncated1 = new DecimalFormat("#0.0", decimalSymbols);
+        private final static DecimalFormat truncated0 = new DecimalFormat("#0", decimalSymbols);
+
+        @JsonIgnore
+        public String getLocationMessageBody() {
+            return "https://maps.google.com/?q=" + this.getTruncatedLatitudeString() + "+" + this.getTruncatedLongitudeString();
+        }
+
+        @JsonIgnore
+        public String getTruncatedLatitudeString() {
+            return truncated5.format(latitude);
+        }
+
+        @JsonIgnore
+        public String getTruncatedLongitudeString() {
+            return truncated5.format(longitude);
+        }
+
+        @JsonIgnore
+        public String getTruncatedPrecisionString(Context context) {
+            if (precision == null) {
+                return "-";
+            }
+            return context.getString(R.string.xx_meters, truncated1.format(precision));
+        }
+
+        @JsonIgnore
+        public String getTruncatedAltitudeString(Context context) {
+            if (altitude == null) {
+                return "-";
+            }
+            return context.getString(R.string.xx_meters, truncated0.format(altitude));
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class JsonReaction {
         @Nullable String reaction; // reaction is null to remove previous reaction
         byte[] groupUid;
         byte[] groupOwner;
+        byte[] groupV2Identifier;
         JsonMessageReference messageReference;
 
         public static JsonReaction of(Discussion discussion, Message message) throws Exception {
             JsonReaction jsonReaction = new JsonReaction();
 
             jsonReaction.messageReference = JsonMessageReference.of(message);
-            if (discussion.bytesGroupOwnerAndUid != null) {
-                jsonReaction.setGroupOwnerAndUid(discussion.bytesGroupOwnerAndUid);
+            switch (discussion.discussionType) {
+                case Discussion.TYPE_GROUP:
+                    jsonReaction.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
+                    break;
+                case Discussion.TYPE_GROUP_V2:
+                    jsonReaction.groupV2Identifier = discussion.bytesDiscussionIdentifier;
+                    break;
+                case Discussion.TYPE_CONTACT:
+                default:
+                    break;
             }
             return jsonReaction;
         }
@@ -1706,6 +2403,16 @@ public class Message {
             this.groupOwner = groupOwner;
         }
 
+        @JsonProperty("gid2")
+        public byte[] getGroupV2Identifier() {
+            return groupV2Identifier;
+        }
+
+        @JsonProperty("gid2")
+        public void setGroupV2Identifier(byte[] groupV2Identifier) {
+            this.groupV2Identifier = groupV2Identifier;
+        }
+
         @JsonProperty("ref")
         public JsonMessageReference getMessageReference() {
             return messageReference;
@@ -1732,6 +2439,7 @@ public class Message {
     public static class JsonDeleteMessages {
         byte[] groupUid;
         byte[] groupOwner;
+        byte[] groupV2Identifier;
         List<JsonMessageReference> messageReferences;
 
         public static JsonDeleteMessages of(Discussion discussion, List<Message> messages) throws Exception {
@@ -1746,8 +2454,16 @@ public class Message {
                         break;
                 }
             }
-            if (discussion.bytesGroupOwnerAndUid != null) {
-                jsonDeleteMessages.setGroupOwnerAndUid(discussion.bytesGroupOwnerAndUid);
+            switch (discussion.discussionType) {
+                case Discussion.TYPE_GROUP:
+                    jsonDeleteMessages.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
+                    break;
+                case Discussion.TYPE_GROUP_V2:
+                    jsonDeleteMessages.groupV2Identifier = discussion.bytesDiscussionIdentifier;
+                    break;
+                case Discussion.TYPE_CONTACT:
+                default:
+                    break;
             }
             return jsonDeleteMessages;
         }
@@ -1770,6 +2486,16 @@ public class Message {
         @JsonProperty("go")
         public void setGroupOwner(byte[] groupOwner) {
             this.groupOwner = groupOwner;
+        }
+
+        @JsonProperty("gid2")
+        public byte[] getGroupV2Identifier() {
+            return groupV2Identifier;
+        }
+
+        @JsonProperty("gid2")
+        public void setGroupV2Identifier(byte[] groupV2Identifier) {
+            this.groupV2Identifier = groupV2Identifier;
         }
 
         @JsonProperty("refs")
@@ -1799,11 +2525,20 @@ public class Message {
     public static class JsonDeleteDiscussion {
         byte[] groupUid;
         byte[] groupOwner;
+        byte[] groupV2Identifier;
 
         public static JsonDeleteDiscussion of(Discussion discussion) throws Exception {
             JsonDeleteDiscussion jsonDeleteDiscussion = new JsonDeleteDiscussion();
-            if (discussion.bytesGroupOwnerAndUid != null) {
-                jsonDeleteDiscussion.setGroupOwnerAndUid(discussion.bytesGroupOwnerAndUid);
+            switch (discussion.discussionType) {
+                case Discussion.TYPE_GROUP:
+                    jsonDeleteDiscussion.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
+                    break;
+                case Discussion.TYPE_GROUP_V2:
+                    jsonDeleteDiscussion.groupV2Identifier = discussion.bytesDiscussionIdentifier;
+                    break;
+                case Discussion.TYPE_CONTACT:
+                default:
+                    break;
             }
             return jsonDeleteDiscussion;
         }
@@ -1826,6 +2561,16 @@ public class Message {
         @JsonProperty("go")
         public void setGroupOwner(byte[] groupOwner) {
             this.groupOwner = groupOwner;
+        }
+
+        @JsonProperty("gid2")
+        public byte[] getGroupV2Identifier() {
+            return groupV2Identifier;
+        }
+
+        @JsonProperty("gid2")
+        public void setGroupV2Identifier(byte[] groupV2Identifier) {
+            this.groupV2Identifier = groupV2Identifier;
         }
 
         @JsonIgnore

@@ -20,6 +20,7 @@
 package io.olvid.messenger.main;
 
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
@@ -34,12 +35,12 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
@@ -73,16 +74,18 @@ public class Utils {
     private static boolean dialogShowing = false;
     private static final Deque<String> dialogsToShow = new ArrayDeque<>();
 
+    private static final String USER_DIALOG_ALLOW_NOTIFICATIONS = "allow_notifications";
     private static final String USER_DIALOG_GOOGLE_APIS = "google_apis";
     private static final String USER_DIALOG_BACKGROUND_RESTRICTED = "background_restricted";
     private static final String USER_DIALOG_BATTERY_OPTIMIZATION = "battery_optimization";
     private static final String USER_DIALOG_ALARM_SCHEDULING = "alarm_scheduling";
 
-    static void showDialogs(FragmentActivity activity) {
+    static void showDialogs(MainActivity activity) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
 
         if (!dialogsLoaded) {
             dialogsLoaded = true;
+
             if (ConnectionResult.SUCCESS != GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity)
                     && !SettingsActivity.usePermanentWebSocket()) {
                 boolean hideDialog = prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_GOOGLE_APIS, false);
@@ -117,6 +120,13 @@ public class Utils {
                     }
                 }
             }
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            if (!notificationManager.areNotificationsEnabled()) {
+                boolean hideDialog = prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS, false);
+                if (!hideDialog) {
+                    dialogsToShow.offerLast(USER_DIALOG_ALLOW_NOTIFICATIONS);
+                }
+            }
         }
 
         if (dialogShowing) {
@@ -144,8 +154,8 @@ public class Utils {
                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
                 builder.setTitle(R.string.dialog_title_google_apis_missing)
                         .setView(dialogView)
-                        .setPositiveButton(R.string.button_label_ok, null)
-                        .setNeutralButton(R.string.button_label_enable_permanent_websocket, (DialogInterface dialogInterface, int which) -> {
+                        .setNeutralButton(R.string.button_label_skip, null)
+                        .setPositiveButton(R.string.button_label_enable_permanent_websocket, (DialogInterface dialogInterface, int which) -> {
                             SettingsActivity.setUsePermanentWebSocket(true);
                             activity.startService(new Intent(activity, UnifiedForegroundService.class));
                         })
@@ -170,28 +180,21 @@ public class Utils {
                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
                 builder.setTitle(R.string.dialog_title_background_restricted)
                         .setView(dialogView)
-                        .setPositiveButton(R.string.button_label_ok, null)
-                        .setNeutralButton(R.string.button_label_app_settings, null)
-                        .setOnDismissListener((DialogInterface dialog) -> {
-                            dialogShowing = false;
-                            showDialogs(activity);
-                        });
-
-                AlertDialog dialog = builder.create();
-                dialog.setOnShowListener(alertDialog -> {
-                    Button button = ((AlertDialog) alertDialog).getButton(DialogInterface.BUTTON_NEUTRAL);
-                    if (button != null) {
-                        button.setOnClickListener(v -> {
+                        .setNeutralButton(R.string.button_label_skip, null)
+                        .setPositiveButton(R.string.button_label_app_settings, (DialogInterface dialog, int which) -> {
                             Intent intent = new Intent();
                             intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
                             intent.setData(uri);
                             activity.startActivity(intent);
+                        })
+                        .setOnDismissListener((DialogInterface dialog) -> {
+                            dialogShowing = false;
+                            showDialogs(activity);
                         });
-                    }
-                });
-                dialog.show();
+
+                builder.create().show();
                 break;
             }
             case USER_DIALOG_BATTERY_OPTIMIZATION: {
@@ -209,26 +212,19 @@ public class Utils {
                     AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
                     builder.setTitle(R.string.dialog_title_battery_optimization)
                             .setView(dialogView)
-                            .setPositiveButton(R.string.button_label_ok, null)
-                            .setNeutralButton(R.string.button_label_battery_optimization_settings, null)
+                            .setNeutralButton(R.string.button_label_skip, null)
+                            .setPositiveButton(R.string.button_label_battery_optimization_settings, (DialogInterface dialog, int which) -> {
+                                Intent intent = new Intent();
+                                intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                activity.startActivity(intent);
+                            })
                             .setOnDismissListener((DialogInterface dialog) -> {
                                 dialogShowing = false;
                                 showDialogs(activity);
                             });
 
-                    AlertDialog dialog = builder.create();
-                    dialog.setOnShowListener(alertDialog -> {
-                        Button button = ((AlertDialog) alertDialog).getButton(DialogInterface.BUTTON_NEUTRAL);
-                        if (button != null) {
-                            button.setOnClickListener(v -> {
-                                Intent intent = new Intent();
-                                intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                activity.startActivity(intent);
-                            });
-                        }
-                    });
-                    dialog.show();
+                    builder.create().show();
                 }
                 break;
             }
@@ -247,36 +243,87 @@ public class Utils {
                     AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
                     builder.setTitle(R.string.dialog_title_alarm_scheduling_forbidden)
                             .setView(dialogView)
-                            .setPositiveButton(R.string.button_label_ok, null)
-                            .setNeutralButton(R.string.button_label_app_settings, null)
-                            .setOnDismissListener((DialogInterface dialog) -> {
-                                dialogShowing = false;
-                                showDialogs(activity);
-                            });
-
-                    AlertDialog dialog = builder.create();
-                    dialog.setOnShowListener(alertDialog -> {
-                        Button button = ((AlertDialog) alertDialog).getButton(DialogInterface.BUTTON_NEUTRAL);
-                        if (button != null) {
-                            button.setOnClickListener(v -> {
+                            .setNeutralButton(R.string.button_label_skip, null)
+                            .setPositiveButton(R.string.button_label_app_settings, (DialogInterface dialog, int which) -> {
                                 Intent intent = new Intent();
                                 intent.setAction(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
                                 intent.setData(uri);
                                 activity.startActivity(intent);
+                            })
+                            .setOnDismissListener((DialogInterface dialog) -> {
+                                dialogShowing = false;
+                                showDialogs(activity);
                             });
-                        }
-                    });
-                    dialog.show();
 
+                    builder.create().show();
+                }
+                break;
+            }
+            case USER_DIALOG_ALLOW_NOTIFICATIONS: {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                        AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
+                        builder.setTitle(R.string.dialog_title_alarm_scheduling_forbidden)
+                                .setTitle(R.string.dialog_title_get_notified)
+                                .setMessage(R.string.dialog_message_get_notified)
+                                .setPositiveButton(R.string.button_label_ok, (DialogInterface dialog, int which) -> activity.requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS))
+                                .setNeutralButton(R.string.button_label_skip, null)
+                                .setOnDismissListener((DialogInterface dialog) -> {
+                                    dialogShowing = false;
+                                    showDialogs(activity);
+                                });
+                        builder.create().show();
+                    } else {
+                        activity.requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS);
+                        dialogShowing = false;
+                        showDialogs(activity);
+                    }
+                } else {
+                    AlertDialog.Builder builder = getNotificationDisabledDialogBuilder(activity, prefs);
+                    builder.setOnDismissListener((DialogInterface dialog) -> {
+                        dialogShowing = false;
+                        showDialogs(activity);
+                    });
+                    builder.create().show();
                 }
                 break;
             }
         }
     }
 
+    static AlertDialog.Builder getNotificationDisabledDialogBuilder(FragmentActivity activity, SharedPreferences prefs) {
+        View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_view_message_and_checkbox, null);
+        TextView message = dialogView.findViewById(R.id.dialog_message);
+        message.setText(R.string.dialog_message_notifications_disabled);
+        CheckBox checkBox = dialogView.findViewById(R.id.checkbox);
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS, isChecked);
+            editor.apply();
+        });
 
+        AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
+        builder.setTitle(R.string.dialog_title_notifications_disabled)
+                .setView(dialogView)
+                .setNeutralButton(R.string.button_label_skip, null)
+                .setPositiveButton(R.string.button_label_open_settings, (DialogInterface dialog, int which) -> {
+                    try {
+                        Intent intent = new Intent();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                            intent.putExtra(Settings.EXTRA_APP_PACKAGE, activity.getPackageName());
+                        } else {
+                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+                            intent.setData(uri);
+                        }
+                        activity.startActivity(intent);
+                    } catch (Exception ignored) { }
+                });
+        return builder;
+    }
 
     static void verifyPurchases(byte[] bytesOwnedIdentity, Context context) {
         try {

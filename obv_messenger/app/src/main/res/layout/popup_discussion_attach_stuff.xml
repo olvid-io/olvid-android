@@ -14,47 +14,40 @@
         app:layout_constraintStart_toStartOf="parent"
         android:background="@drawable/ic_popup_window_bubble_triangle"/>
 
-    <androidx.cardview.widget.CardView
+    <LinearLayout
+        android:id="@+id/popup_attach_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@null"
-        app:cardCornerRadius="12sp"
-        app:cardElevation="0dp"
-        android:layout_marginBottom="8dp">
+        android:orientation="vertical"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/background_popup_transparent"
+        android:gravity="start">
 
-        <LinearLayout
-            android:id="@+id/popup_attach_list"
+        <TextView
+            android:id="@+id/attach_configure"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="start">
+            app:drawableStartCompat="@drawable/ic_attach_configure"
+            android:text="@string/label_configure_shortcuts"
+            android:textColor="@color/mediumGrey"
+            style="@style/SubtleGreyRipple"
+            android:gravity="center_vertical"
+            android:drawablePadding="4dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="32dp"
+            android:paddingVertical="2dp"
+            android:background="?attr/selectableItemBackground" />
 
-            <TextView
-                android:id="@+id/attach_configure"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:drawableStartCompat="@drawable/ic_attach_configure"
-                android:text="@string/label_configure_shortcuts"
-                android:textColor="@color/mediumGrey"
-                style="@style/SubtleGreyRipple"
-                android:gravity="center_vertical"
-                android:drawablePadding="4dp"
-                android:paddingStart="4dp"
-                android:paddingEnd="32dp"
-                android:paddingVertical="2dp"
-                android:background="?attr/selectableItemBackground" />
+        <View
+            android:id="@+id/separator"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightGrey" />
 
-            <View
-                android:id="@+id/separator"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/lightGrey" />
-
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

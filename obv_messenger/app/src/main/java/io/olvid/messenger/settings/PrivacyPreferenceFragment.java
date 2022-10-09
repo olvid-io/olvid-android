@@ -60,6 +60,13 @@ public class PrivacyPreferenceFragment extends PreferenceFragmentCompat {
             return;
         }
 
+        SwitchPreference allowSuggestedActionsPreference = screen.findPreference(SettingsActivity.PREF_KEY_DISABLE_NOTIFICATION_SUGGESTIONS);
+        if (allowSuggestedActionsPreference != null) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                screen.removePreference(allowSuggestedActionsPreference);
+            }
+        }
+
         SwitchPreference screenCapturePreference = screen.findPreference(SettingsActivity.PREF_KEY_PREVENT_SCREEN_CAPTURE);
         if (screenCapturePreference != null) {
             screenCapturePreference.setOnPreferenceChangeListener((Preference pref, Object checked) -> {

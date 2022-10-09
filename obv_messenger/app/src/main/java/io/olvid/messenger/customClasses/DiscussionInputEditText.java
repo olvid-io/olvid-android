@@ -101,7 +101,7 @@ public class DiscussionInputEditText extends AppCompatEditText {
                     ClipData.Item item = clip.getItemAt(i);
                     if (item.getText() != null) {
                         insertTextAtSelection(item.getText());
-                    } else if (item.getUri() != null) {
+                    } else if (StringUtils.validateUri(item.getUri())) {
                         Uri uri = item.getUri();
                         String mimeType = clip.getDescription().getMimeTypeCount() > i ? clip.getDescription().getMimeType(i) : null;
                         App.runThread(() -> {

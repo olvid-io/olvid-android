@@ -49,6 +49,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.main.Utils;
 import io.olvid.messenger.services.UnifiedForegroundService;
@@ -68,15 +69,17 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
         if (resetDialogsPreference != null) {
             resetDialogsPreference.setOnPreferenceClickListener((Preference preference) -> {
                 SharedPreferences.Editor editor = getPreferenceManager().getSharedPreferences().edit();
-                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_GOOGLE_APIS, false);
-                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_BACKGROUND_RESTRICTED, false);
-                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_BATTERY_OPTIMIZATION, false);
-                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_ALARM_SCHEDULING, false);
-                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP, false);
-                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION, false);
-                editor.putBoolean(SettingsActivity.PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED, false);
-                editor.putBoolean(SettingsActivity.PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED, false);
-                editor.putLong(SettingsActivity.PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP, 0);
+                editor.remove(SettingsActivity.USER_DIALOG_HIDE_GOOGLE_APIS);
+                editor.remove(SettingsActivity.USER_DIALOG_HIDE_BACKGROUND_RESTRICTED);
+                editor.remove(SettingsActivity.USER_DIALOG_HIDE_BATTERY_OPTIMIZATION);
+                editor.remove(SettingsActivity.USER_DIALOG_HIDE_ALARM_SCHEDULING);
+                editor.remove(SettingsActivity.USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS);
+                editor.remove(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP);
+                editor.remove(SettingsActivity.USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION);
+                editor.remove(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION);
+                editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED);
+                editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED);
+                editor.remove(SettingsActivity.PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP);
                 editor.apply();
                 App.toast(R.string.toast_message_dialogs_restored, Toast.LENGTH_SHORT);
                 Utils.dialogsLoaded = false;
@@ -93,6 +96,22 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                 } else {
                     AppSingleton.getEngine().connectWebsocket(null, null, 0, null);
                 }
+                return true;
+            });
+        }
+
+        SwitchPreference permanentForegroundPreference = screen.findPreference(SettingsActivity.PREF_KEY_PERMANENT_FOREGROUND_SERVICE);
+        if (permanentForegroundPreference != null) {
+            permanentForegroundPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
+                App.runThread(() -> {
+                    try {
+                        // wait 1 second for the setting to actually be updated
+                        Thread.sleep(1_000);
+                    } catch (InterruptedException e) {
+                        // do nothing
+                    }
+                    activity.startService(new Intent(activity, UnifiedForegroundService.class));
+                });
                 return true;
             });
         }
@@ -142,7 +161,10 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                             .setTitle(R.string.dialog_title_export_app_databases)
                             .setMessage(R.string.dialog_message_export_app_databases)
                             .setNegativeButton(R.string.button_label_cancel, null)
-                            .setPositiveButton(R.string.button_label_export, (DialogInterface dialogInterface, int which) -> exportAppDbLauncher.launch("olvid_databases.zip"))
+                            .setPositiveButton(R.string.button_label_export, (DialogInterface dialogInterface, int which) -> {
+                                App.prepareForStartActivityForResult(this);
+                                exportAppDbLauncher.launch("olvid_databases.zip");
+                            })
                             .create();
                     dialog.show();
                     return true;
@@ -164,7 +186,7 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
 
 
     private void onExportAppDbFileSelected(Uri uri) {
-        if (uri == null) {
+        if (!StringUtils.validateUri(uri)) {
             return;
         }
 

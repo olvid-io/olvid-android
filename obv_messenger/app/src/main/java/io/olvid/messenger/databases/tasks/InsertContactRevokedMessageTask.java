@@ -40,7 +40,7 @@ public class InsertContactRevokedMessageTask implements Runnable {
         try {
             Discussion discussion = db.discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
             if (discussion != null) {
-                Message message = Message.createContactInactiveReasonMessage(discussion.id, bytesContactIdentity, ObvContactActiveOrInactiveReason.REVOKED);
+                Message message = Message.createContactInactiveReasonMessage(db, discussion.id, bytesContactIdentity, ObvContactActiveOrInactiveReason.REVOKED);
                 message.id = db.messageDao().insert(message);
                 if (discussion.updateLastMessageTimestamp(message.timestamp)) {
                     db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);

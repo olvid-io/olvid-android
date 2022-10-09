@@ -27,12 +27,12 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import java.io.IOException;
-
 import androidx.annotation.NonNull;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+
+import java.io.IOException;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;

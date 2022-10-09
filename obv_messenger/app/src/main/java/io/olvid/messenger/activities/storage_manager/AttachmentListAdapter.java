@@ -190,7 +190,12 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
 
         if (fyleAndOrigin.fyleAndStatus.fyle.isComplete()) {
             holder.progressBar.setVisibility(View.GONE);
+            holder.failedImageView.setVisibility(View.GONE);
+        } else if (fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_FAILED) {
+            holder.progressBar.setVisibility(View.GONE);
+            holder.failedImageView.setVisibility(View.VISIBLE);
         } else {
+            holder.failedImageView.setVisibility(View.GONE);
             holder.progressBar.setVisibility(View.VISIBLE);
             holder.progressBar.setProgress((int) (fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.progress * 100));
         }
@@ -309,6 +314,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         final ImageView attachmentImageView;
         final ImageView attachmentOverlay;
         final ProgressBar progressBar;
+        final ImageView failedImageView;
         final TextView senderTextView;
         final TextView timestampTextView;
         final TextView filenameTextView;
@@ -329,6 +335,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
             attachmentImageView.setClipToOutline(true);
             attachmentOverlay = itemView.findViewById(R.id.attachment_overlay);
             progressBar = itemView.findViewById(R.id.attachment_progress);
+            failedImageView = itemView.findViewById(R.id.attachment_failed);
             senderTextView = itemView.findViewById(R.id.attachment_sender);
             timestampTextView = itemView.findViewById(R.id.attachment_timestamp);
             filenameTextView = itemView.findViewById(R.id.attachment_file_name);

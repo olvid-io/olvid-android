@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.databases.AppDatabase;

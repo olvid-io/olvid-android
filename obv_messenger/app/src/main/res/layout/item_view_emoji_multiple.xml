@@ -21,7 +21,6 @@
         tools:ignore="SpUsage" />
 
     <ImageView
-        android:id="@+id/emoji_variants_corner"
         android:layout_width="8dp"
         android:layout_height="8dp"
         android:src="@drawable/emoji_variants_corner"

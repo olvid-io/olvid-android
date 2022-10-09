@@ -69,6 +69,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.App;
@@ -379,7 +380,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         }
     }
 
-    private void bindDiscussion(DiscussionDao.DiscussionAndContactDisplayNames discussionAndContactNames) {
+    private void bindDiscussion(DiscussionDao.DiscussionAndGroupMembersNames discussionAndContactNames) {
         if (discussionEmptyTextView == null || discussionInitialView == null || discussionTitleTextView == null || discussionGroupMembersTextView == null) {
             return;
         }
@@ -398,18 +399,42 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         discussionInitialView.setDiscussion(discussionAndContactNames.discussion);
 
         discussionTitleTextView.setVisibility(View.VISIBLE);
-        discussionTitleTextView.setText(discussionAndContactNames.discussion.title);
-        if (discussionAndContactNames.discussion.bytesGroupOwnerAndUid != null) {
+        if (discussionAndContactNames.discussion.title.length() == 0) {
+            SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_discussion));
+            spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            discussionTitleTextView.setText(spannableString);
+        } else {
+            discussionTitleTextView.setText(discussionAndContactNames.discussion.title);
+        }
+        if (discussionAndContactNames.discussion.discussionType == Discussion.TYPE_GROUP) {
+            discussionTitleTextView.setMaxLines(1);
             discussionGroupMembersTextView.setVisibility(View.VISIBLE);
-            if (discussionAndContactNames.groupContactDisplayNames == null || discussionAndContactNames.groupContactDisplayNames.length() == 0) {
+            if (discussionAndContactNames.groupMemberNames == null || discussionAndContactNames.groupMemberNames.length() == 0) {
                 StyleSpan sp = new StyleSpan(Typeface.ITALIC);
                 SpannableString ss = new SpannableString(getString(R.string.text_nobody));
                 ss.setSpan(sp, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 discussionGroupMembersTextView.setText(ss);
             } else {
-                discussionGroupMembersTextView.setText(discussionAndContactNames.groupContactDisplayNames);
+                discussionGroupMembersTextView.setText(discussionAndContactNames.groupMemberNames);
+            }
+        } else if (discussionAndContactNames.discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+            if (Objects.equals(discussionAndContactNames.discussion.title, discussionAndContactNames.groupMemberNames)) {
+                discussionTitleTextView.setMaxLines(2);
+                discussionGroupMembersTextView.setVisibility(View.GONE);
+            } else {
+                discussionTitleTextView.setMaxLines(1);
+                discussionGroupMembersTextView.setVisibility(View.VISIBLE);
+                if (discussionAndContactNames.groupMemberNames == null || discussionAndContactNames.groupMemberNames.length() == 0) {
+                    StyleSpan sp = new StyleSpan(Typeface.ITALIC);
+                    SpannableString ss = new SpannableString(getString(R.string.text_nobody));
+                    ss.setSpan(sp, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    discussionGroupMembersTextView.setText(ss);
+                } else {
+                    discussionGroupMembersTextView.setText(discussionAndContactNames.groupMemberNames);
+                }
             }
         } else {
+            discussionTitleTextView.setMaxLines(2);
             discussionGroupMembersTextView.setVisibility(View.GONE);
         }
     }

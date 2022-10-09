@@ -33,6 +33,12 @@ public interface MessageMetadataDao {
     @Insert
     long insert(MessageMetadata messageMetadata);
 
+    @Query("UPDATE " + MessageMetadata.TABLE_NAME +
+            " SET " + MessageMetadata.TIMESTAMP + " = :timestamp " +
+            " WHERE id = :messageMetadataId"
+    )
+    void updateTimestamp(long messageMetadataId, long timestamp);
+
     @Query("SELECT EXISTS(SELECT * FROM " + MessageMetadata.TABLE_NAME +
             " WHERE " + MessageMetadata.MESSAGE_ID + " = :messageId " +
             " AND " + MessageMetadata.KIND + " = :kind)")

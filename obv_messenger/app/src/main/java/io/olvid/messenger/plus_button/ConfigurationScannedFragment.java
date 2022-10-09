@@ -63,12 +63,10 @@ import io.olvid.engine.datatypes.ObvBase64;
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
-import io.olvid.messenger.BuildConfig;
-import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
-import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ObvLinkActivity;
 import io.olvid.messenger.customClasses.ConfigurationKeycloakPojo;
@@ -80,7 +78,8 @@ import io.olvid.messenger.openid.KeycloakAuthenticationStartFragment;
 import io.olvid.messenger.openid.KeycloakBrowserChooserDialog;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.openid.KeycloakTasks;
-import io.olvid.messenger.settings.SettingsActivity;
+import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
+import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
 
 public class ConfigurationScannedFragment extends Fragment implements View.OnClickListener, EngineNotificationListener {
     AppCompatActivity activity;
@@ -228,6 +227,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
                 configurationPojo = AppSingleton.getJsonObjectMapper().readValue(ObvBase64.decode(matcher.group(2)), ConfigurationPojo.class);
             } catch (Exception e) {
                 // nothing to do
+                e.printStackTrace();
             }
         }
         if (configurationPojo == null) {
@@ -236,14 +236,14 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
         }
 
         this.configurationPojo = configurationPojo;
-        if (configurationPojo.getServer() != null && configurationPojo.getApikey() != null) {
-            displayConfiguration(viewModel.getCurrentIdentity(), this.configurationPojo);
-        }
-        if (configurationPojo.getSettings() != null) {
-            displaySettings(this.configurationPojo.getSettings());
-        }
-        if (configurationPojo.getKeycloak() != null) {
-            displayKeycloak(this.configurationPojo.getKeycloak());
+        if (configurationPojo.server != null && configurationPojo.apikey != null) {
+            displayLicense(viewModel.getCurrentIdentity(), this.configurationPojo);
+        } else if (configurationPojo.settings != null) {
+            displaySettings(this.configurationPojo.settings);
+        } else if (configurationPojo.keycloak != null) {
+            displayKeycloak(this.configurationPojo.keycloak);
+        } else {
+            activity.finish();
         }
     }
 
@@ -254,7 +254,10 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
         AppSingleton.getEngine().removeNotificationListener(EngineNotifications.API_KEY_STATUS_QUERY_FAILED, this);
     }
 
-    private void displayConfiguration(OwnedIdentity ownedIdentity, @NonNull ConfigurationPojo configurationPojo) {
+    private void displayLicense(OwnedIdentity ownedIdentity, @NonNull ConfigurationPojo configurationPojo) {
+        // set correct title
+        titleTextView.setText(R.string.activity_title_license_activation);
+
         if (ownedIdentity == null) {
             activity.finish();
             return;
@@ -267,7 +270,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
             return;
         }
 
-        if (configurationPojo.getServer() == null || configurationPojo.getApikey() == null) {
+        if (configurationPojo.server == null || configurationPojo.apikey == null) {
             invalidCardView.setVisibility(View.VISIBLE);
             invalidMalformedLayout.setVisibility(View.VISIBLE);
             invalidMalformedExplanationTextView.setText(R.string.text_explanation_malformed_activation_link);
@@ -275,7 +278,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
         }
 
         try {
-            configurationApiKeyUuid = UUID.fromString(configurationPojo.getApikey());
+            configurationApiKeyUuid = UUID.fromString(configurationPojo.apikey);
         } catch (Exception e) {
             invalidCardView.setVisibility(View.VISIBLE);
             invalidMalformedLayout.setVisibility(View.VISIBLE);
@@ -289,10 +292,10 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
             return;
         }
 
-        if (!configurationPojo.getServer().equals(ownServer)) {
+        if (!configurationPojo.server.equals(ownServer)) {
             invalidCardView.setVisibility(View.VISIBLE);
             invalidBadServerLayout.setVisibility(View.VISIBLE);
-            licenseServerUrlTextView.setText(configurationPojo.getServer());
+            licenseServerUrlTextView.setText(configurationPojo.server);
             ownServerUrlTextView.setText(ownServer);
             return;
         }
@@ -320,10 +323,12 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
     }
 
     private void displaySettings(ConfigurationSettingsPojo settingsPojo) {
+        // set correct title
+        titleTextView.setText(R.string.activity_title_settings_update);
+
         settingsCardView.setVisibility(View.VISIBLE);
         try {
-            String settingsString = AppSingleton.getJsonObjectMapper().writeValueAsString(settingsPojo);
-            settingsDetailsTextView.setText(settingsString);
+            settingsDetailsTextView.setText(settingsPojo.prettyPrint(activity));
         } catch (Exception e) {
             e.printStackTrace();
             App.toast(R.string.toast_message_error_parsing_settings_update_link, Toast.LENGTH_SHORT);
@@ -332,12 +337,8 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
     }
 
     private void updateSettings() {
-        ConfigurationSettingsPojo settingsPojo = configurationPojo.getSettings();
-        if (settingsPojo == null) {
-            return;
-        }
-        if (settingsPojo.beta != null) {
-            SettingsActivity.setBetaFeaturesEnabled(settingsPojo.beta);
+        if (configurationPojo.settings != null) {
+            configurationPojo.settings.toBackupPojo().restore();
         }
     }
 

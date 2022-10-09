@@ -21,11 +21,6 @@ package io.olvid.messenger.fragments.dialog;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,12 +29,17 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentTransaction;
+
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.fragments.FilteredDiscussionListFragment;
+import io.olvid.messenger.settings.SettingsActivity;
 
 
 public class DiscussionSearchDialogFragment extends DialogFragment {
@@ -94,7 +94,7 @@ public class DiscussionSearchDialogFragment extends DialogFragment {
         FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
         filteredDiscussionListFragment.removeBottomPadding();
         if (AppSingleton.getBytesCurrentIdentity() != null) {
-            filteredDiscussionListFragment.setUnfilteredDiscussions(AppDatabase.getInstance().discussionDao().getAllWithContactNames(AppSingleton.getBytesCurrentIdentity(), getString(R.string.text_contact_names_separator)));
+            filteredDiscussionListFragment.setUnfilteredDiscussions(AppDatabase.getInstance().discussionDao().getAllWithGroupMembersNames(AppSingleton.getBytesCurrentIdentity()));
         }
         filteredDiscussionListFragment.setDiscussionFilterEditText(dialogContactNameFilter);
         filteredDiscussionListFragment.setOnClickDelegate((view, searchableDiscussion) -> {

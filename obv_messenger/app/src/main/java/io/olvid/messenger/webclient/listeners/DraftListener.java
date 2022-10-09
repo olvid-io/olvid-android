@@ -29,6 +29,7 @@ import com.google.protobuf.ByteString;
 
 import java.util.Arrays;
 import java.util.HashMap;
+
 import io.olvid.engine.Logger;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;

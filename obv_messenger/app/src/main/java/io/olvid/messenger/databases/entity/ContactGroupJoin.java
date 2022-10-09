@@ -19,12 +19,12 @@
 
 package io.olvid.messenger.databases.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
-import androidx.annotation.NonNull;
 
 @Entity(
         tableName = ContactGroupJoin.TABLE_NAME,
@@ -70,7 +70,7 @@ public class ContactGroupJoin {
     @ColumnInfo(name = TIMESTAMP)
     public final long timestamp;
 
-    // default constructor used by Room only
+    // default constructor used by Room
     public ContactGroupJoin(@NonNull byte[] bytesGroupUid, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, long timestamp) {
         this.bytesGroupUid = bytesGroupUid;
         this.bytesContactIdentity = bytesContactIdentity;

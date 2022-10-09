@@ -54,6 +54,7 @@ import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockScreenOrNotActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
+import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.ReplaceDiscussionDraftTask;
 import io.olvid.messenger.discussion.DiscussionActivity;
@@ -148,12 +149,12 @@ public class ShareActivity extends LockScreenOrNotActivity {
                 return true;
             });
 
-            LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> unfilteredDiscussions = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
+            LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
                 bindOwnedIdentity(ownedIdentity);
                 if (ownedIdentity == null) {
                     return null;
                 } else {
-                    return AppDatabase.getInstance().discussionDao().getAllActiveWithContactNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity, getString(R.string.text_contact_names_separator));
+                    return AppDatabase.getInstance().discussionDao().getAllNotLockedWithGroupMembersNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity);
                 }
             });
 
@@ -271,12 +272,18 @@ public class ShareActivity extends LockScreenOrNotActivity {
 
     private void proceed(long discussionId) {
         App.runThread(new ReplaceDiscussionDraftTask(discussionId, sharedText, sharedFiles));
-        Intent intent = new Intent(App.getContext(), MainActivity.class);
-        intent.setAction(MainActivity.FORWARD_ACTION);
-        intent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
-        intent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
-        startActivity(intent);
-        finish();
+        App.runThread(() -> {
+            Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);
+            if (discussion != null) {
+                Intent intent = new Intent(App.getContext(), MainActivity.class);
+                intent.setAction(MainActivity.FORWARD_ACTION);
+                intent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
+                intent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
+                intent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, discussion.bytesOwnedIdentity);
+                startActivity(intent);
+            }
+            finish();
+        });
     }
 
 }

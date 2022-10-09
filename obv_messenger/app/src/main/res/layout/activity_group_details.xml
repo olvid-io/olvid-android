@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".activities.ContactDetailsActivity">
+    tools:context=".activities.GroupDetailsActivity">
 
     <ScrollView
         android:id="@+id/group_details_scroll_view"
@@ -504,7 +504,8 @@
         app:layout_anchorGravity="right|bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_message"/>
+        app:srcCompat="@drawable/ic_message"
+        android:contentDescription="@string/content_description_open_discussion" />
 
     <FrameLayout
         android:id="@+id/overlay"

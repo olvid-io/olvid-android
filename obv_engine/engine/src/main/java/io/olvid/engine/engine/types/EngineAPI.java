@@ -22,12 +22,16 @@ package io.olvid.engine.engine.types;
 import org.jose4j.jwk.JsonWebKey;
 
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroup;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.identities.ObvMutualScanUrl;
@@ -111,7 +115,6 @@ public interface EngineAPI {
     void trustPublishedContactDetails(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
     ObvTrustOrigin[] getContactTrustOrigins(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     int getContactTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
-//    boolean doesContactHaveAutoAcceptTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     List<ObvCapability> getContactCapabilities(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity); // returns null in case of error, empty list if there are no capabilities
 
 
@@ -124,6 +127,17 @@ public interface EngineAPI {
     void discardLatestGroupDetails(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
     void publishLatestGroupDetails(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
     void updateOwnedGroupPhoto(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String photoUrl) throws Exception;
+
+    // Group V2
+    List<ObvGroupV2> getGroupsV2OfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception;
+    void trustGroupV2PublishedDetails(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
+    ObvGroupV2.ObvGroupV2DetailsAndPhotos getGroupV2DetailsAndPhotos(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    void initiateGroupV2Update(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, ObvGroupV2.ObvGroupV2ChangeSet changeSet) throws Exception;
+    void leaveGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
+    void disbandGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
+    void reDownloadGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
+    int getGroupV2Version(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
+    boolean isGroupV2UpdateInProgress(byte[] bytesOwnedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
 
 
 
@@ -141,6 +155,7 @@ public interface EngineAPI {
     void startMutualScanTrustEstablishmentProtocol(byte[] bytesOwnedIdentity, byte[] bytesRemoteIdentity, byte[] signature) throws Exception;
     void startContactMutualIntroductionProtocol(byte[] bytesOwnedIdentity, byte[] bytesContactIdentityA, byte[][] bytesContactIdentities) throws Exception;
     void startGroupCreationProtocol(String serializedGroupDetailsWithVersionAndPhoto, String absolutePhotoUrl, byte[] bytesOwnedIdentity, byte[][] bytesRemoteIdentities) throws Exception;
+    void startGroupV2CreationProtocol(String serializedGroupDetails, String absolutePhotoUrl, byte[] bytesOwnedIdentity, HashSet<GroupV2.Permission> ownPermissions, HashMap<ObvBytesKey, HashSet<GroupV2.Permission>> otherGroupMembers) throws Exception;
     void restartAllOngoingChannelEstablishmentProtocols(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void recreateAllChannels(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void inviteContactsToGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, byte[][] bytesNewMemberIdentities) throws Exception;
@@ -185,7 +200,7 @@ public interface EngineAPI {
     void initiateBackup(boolean forExport);
     ObvBackupKeyInformation getBackupKeyInformation() throws Exception;
     void generateBackupKey();
-    void setAutoBackupEnabled(boolean enabled);
+    void setAutoBackupEnabled(boolean enabled, boolean doNotInitiateBackupNow);
     void markBackupExported(byte[] backupKeyUid, int version);
     void markBackupUploaded(byte[] backupKeyUid, int version);
     void discardBackup(byte[] backupKeyUid, int version);

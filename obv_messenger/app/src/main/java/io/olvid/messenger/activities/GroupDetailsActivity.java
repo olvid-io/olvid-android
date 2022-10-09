@@ -19,13 +19,6 @@
 
 package io.olvid.messenger.activities;
 
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -33,15 +26,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.text.SpannableString;
@@ -60,13 +44,28 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
-import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
@@ -75,8 +74,10 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.BytesKey;
+import io.olvid.messenger.customClasses.EmptyRecyclerView;
+import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockableActivity;
-import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
@@ -84,16 +85,16 @@ import io.olvid.messenger.databases.dao.ContactGroupJoinDao;
 import io.olvid.messenger.databases.dao.PendingGroupMemberDao;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.tasks.GroupCloningTasks;
 import io.olvid.messenger.fragments.FullScreenImageFragment;
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment;
 import io.olvid.messenger.fragments.dialog.GroupMemberAdditionDialogFragment;
 import io.olvid.messenger.fragments.dialog.GroupMemberSuppressionDialogFragment;
-import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.owneddetails.EditOwnedGroupDetailsDialogFragment;
+import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.viewModels.GroupDetailsViewModel;
-import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment;
 
 
 public class GroupDetailsActivity extends LockableActivity implements View.OnClickListener, EngineNotificationListener {
@@ -193,7 +194,7 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
         groupMembersAdapter = new GroupMembersAdapter();
         groupMembersRecyclerView.setEmptyView(groupMembersEmptyView);
         groupMembersRecyclerView.setAdapter(groupMembersAdapter);
-        groupMembersRecyclerView.addItemDecoration(new RecyclerViewDividerDecoration(this, 68, 12));
+        groupMembersRecyclerView.addItemDecoration(new ItemDecorationSimpleDivider(this, 68, 12));
 
         TextView pendingGroupMembersEmptyView = findViewById(R.id.pending_group_members_empty_view);
         EmptyRecyclerView pendingGroupMembersRecyclerView = findViewById(R.id.pending_group_members_recycler_view);
@@ -202,7 +203,7 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
         pendingGroupMembersAdapter = new PendingGroupMembersAdapter();
         pendingGroupMembersRecyclerView.setEmptyView(pendingGroupMembersEmptyView);
         pendingGroupMembersRecyclerView.setAdapter(pendingGroupMembersAdapter);
-        pendingGroupMembersRecyclerView.addItemDecoration(new RecyclerViewDividerDecoration(this, 68, 12));
+        pendingGroupMembersRecyclerView.addItemDecoration(new ItemDecorationSimpleDivider(this, 68, 12));
 
         primary700 = ContextCompat.getColor(this, R.color.primary700);
 
@@ -662,6 +663,10 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
                 deleteItem.setTitle(spannableString);
             }
         }
+        if (!GroupCreationActivity.groupV2 && !SettingsActivity.getBetaFeaturesEnabled()) {
+            menu.removeItem(R.id.action_clone_group);
+        }
+
         if (showEditDetails) {
             showEditDetails = false;
             menu.performIdentifierAction(R.id.action_rename, 0);
@@ -685,9 +690,9 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
             }
             List<ContactGroupJoinDao.ContactAndTimestamp> contactAndTimestamps = groupDetailsViewModel.getGroupMembers().getValue();
             if (contactAndTimestamps != null) {
-                List<byte[]> bytesContactIdentities = new ArrayList<>(contactAndTimestamps.size());
+                ArrayList<BytesKey> bytesContactIdentities = new ArrayList<>(contactAndTimestamps.size());
                 for (ContactGroupJoinDao.ContactAndTimestamp contactAndTimestamp : contactAndTimestamps) {
-                    bytesContactIdentities.add(contactAndTimestamp.contact.bytesContactIdentity);
+                    bytesContactIdentities.add(new BytesKey(contactAndTimestamp.contact.bytesContactIdentity));
                 }
                 MultiCallStartDialogFragment multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, bytesContactIdentities);
                 multiCallStartDialogFragment.show(getSupportFragmentManager(), "dialog");
@@ -703,7 +708,7 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
             }
 
             if (group.bytesGroupOwnerIdentity == null) {
-                EditOwnedGroupDetailsDialogFragment dialogFragment = EditOwnedGroupDetailsDialogFragment.newInstance(this, group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, latestDetails, () -> runOnUiThread(() -> displayGroupDetails(group)));
+                EditOwnedGroupDetailsDialogFragment dialogFragment = EditOwnedGroupDetailsDialogFragment.newInstance(this, group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, latestDetails, group.personalNote, () -> runOnUiThread(() -> displayGroupDetails(group)));
                 dialogFragment.show(getSupportFragmentManager(), "dialog");
             } else {
                 EditNameAndPhotoDialogFragment editNameAndPhotoDialogFragment = EditNameAndPhotoDialogFragment.newInstance(this, group);
@@ -784,6 +789,16 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
                         .setNegativeButton(R.string.button_label_cancel, null);
                 builder.create().show();
             }
+            return true;
+        } else if (itemId == R.id.action_clone_group) {
+            final Group group = groupDetailsViewModel.getGroup().getValue();
+            if (group == null) {
+                return true;
+            }
+            App.runThread(() -> {
+                GroupCloningTasks.ClonabilityOutput clonabilityOutput = GroupCloningTasks.getClonability(group);
+                new Handler(Looper.getMainLooper()).post(() -> GroupCloningTasks.initiateGroupCloningOrWarnUser(this, clonabilityOutput));
+            });
             return true;
         }
         return super.onOptionsItemSelected(item);

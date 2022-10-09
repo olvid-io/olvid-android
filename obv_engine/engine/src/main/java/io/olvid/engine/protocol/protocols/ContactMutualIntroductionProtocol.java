@@ -25,6 +25,8 @@ import java.util.UUID;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.crypto.Signature;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -54,8 +56,6 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
     public int getProtocolId() {
         return CONTACT_MUTUAL_INTRODUCTION_PROTOCOL_ID;
     }
-
-    private static final byte[] SIGNATURE_CHALLENGE_PREFIX = "mutualIntroduction".getBytes();
 
 
 
@@ -621,7 +621,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public IntroduceContactsStep(InitialProtocolState startState, InitialMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -667,7 +667,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final MediatorInvitationMessage receivedMessage;
 
         public CheckTrustLevelsAndShowDialogStep(InitialProtocolState startState, MediatorInvitationMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -687,28 +687,28 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             boolean contactAlreadyOneToOne = protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity);
             if (contactAlreadyOneToOne) {
                 // auto-accept
+                UID[] deviceUids = protocolManagerSession.identityDelegate.getDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
+
+                byte[] signature = protocolManagerSession.identityDelegate.signIdentities(
+                        protocolManagerSession.session,
+                        Constants.SignatureContext.MUTUAL_INTRODUCTION,
+                        new Identity[]{mediatorIdentity, receivedMessage.contactIdentity, getOwnedIdentity()},
+                        getOwnedIdentity(),
+                        getPrng()
+                );
+
+                // notify contact and send him the deviceUids to send ACK to
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
+                ChannelMessageToSend messageToSend = new NotifyContactOfAcceptedInvitationMessage(coreProtocolMessage, deviceUids, signature).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
                 UUID dialogUuid = UUID.randomUUID();
 
-                {
-                    UID[] deviceUids = protocolManagerSession.identityDelegate.getDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
-
-                    byte[] signature = protocolManagerSession.identityDelegate.signIdentities(
-                            protocolManagerSession.session,
-                            SIGNATURE_CHALLENGE_PREFIX,
-                            new Identity[]{ mediatorIdentity, receivedMessage.contactIdentity, getOwnedIdentity()},
-                            getOwnedIdentity(),
-                            getPrng()
-                    );
-
-                    // notify contact and send him the deviceUids to send ACK to
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new NotifyContactOfAcceptedInvitationMessage(coreProtocolMessage, deviceUids, signature).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                }
                 return new InvitationAcceptedState(receivedMessage.contactIdentity, receivedMessage.contactSerializedDetails, mediatorIdentity, dialogUuid, ACCEPT_TYPE_ALREADY_TRUSTED);
             } else {
                 // prompt user to accept
                 UUID dialogUuid = UUID.randomUUID();
+
                 {
                     // display mediator invite dialog
                     CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createAcceptMediatorInviteDialog(receivedMessage.contactSerializedDetails, receivedMessage.contactIdentity, mediatorIdentity, receivedMessage.getServerTimestamp()), dialogUuid));
@@ -736,7 +736,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final TrustLevelIncreasedMessage receivedMessage;
 
         public ReCheckTrustLevelsAfterTrustLevelIncreaseStep(InvitationReceivedState startState, TrustLevelIncreasedMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -754,7 +754,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
 
                     byte[] signature = protocolManagerSession.identityDelegate.signIdentities(
                             protocolManagerSession.session,
-                            SIGNATURE_CHALLENGE_PREFIX,
+                            Constants.SignatureContext.MUTUAL_INTRODUCTION,
                             new Identity[]{ startState.mediatorIdentity, startState.contactIdentity, getOwnedIdentity()},
                             getOwnedIdentity(),
                             getPrng()
@@ -813,7 +813,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final DialogAcceptMediatorInviteMessage receivedMessage;
 
         public PropagateInviteResponseStep(InvitationReceivedState startState, DialogAcceptMediatorInviteMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -850,7 +850,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
 
                     byte[] signature = protocolManagerSession.identityDelegate.signIdentities(
                             protocolManagerSession.session,
-                            SIGNATURE_CHALLENGE_PREFIX,
+                            Constants.SignatureContext.MUTUAL_INTRODUCTION,
                             new Identity[]{startState.mediatorIdentity, startState.contactIdentity, getOwnedIdentity()},
                             getOwnedIdentity(),
                             getPrng()
@@ -883,7 +883,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final PropagateConfirmationMessage receivedMessage;
 
         public ProcessPropagatedInviteResponseStep(InvitationReceivedState startState, PropagateConfirmationMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -922,7 +922,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final NotifyContactOfAcceptedInvitationMessage receivedMessage;
 
         public PropagateNotificationAddTrustAndSendAckStep(InvitationAcceptedState startState, NotifyContactOfAcceptedInvitationMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -931,8 +931,8 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            boolean signatureIsValid = protocolManagerSession.identityDelegate.verifyIdentitiesSignature(
-                    SIGNATURE_CHALLENGE_PREFIX,
+            boolean signatureIsValid = Signature.verify(
+                    Constants.SignatureContext.MUTUAL_INTRODUCTION,
                     new Identity[]{startState.mediatorIdentity, getOwnedIdentity(), startState.contactIdentity},
                     startState.contactIdentity,
                     receivedMessage.signature
@@ -981,7 +981,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final PropagateNotificationMessage receivedMessage;
 
         public ProcessPropagatedNotificationAndAddTrustStep(InvitationAcceptedState startState, PropagateNotificationMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1011,7 +1011,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final AckMessage receivedMessage;
 
         public NotifyMutualTrustEstablishedStep(WaitingForAckState startState, AckMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

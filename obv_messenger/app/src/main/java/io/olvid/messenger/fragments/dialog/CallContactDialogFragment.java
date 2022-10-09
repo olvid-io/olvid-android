@@ -153,7 +153,7 @@ public class CallContactDialogFragment extends DialogFragment implements View.On
             if (selectedContacts == null || selectedContacts.size() == 0) {
                 return;
             }
-            App.startWebrtcMultiCall(view.getContext(), selectedContacts.get(0).bytesOwnedIdentity, selectedContacts, null);
+            App.startWebrtcMultiCall(view.getContext(), selectedContacts.get(0).bytesOwnedIdentity, selectedContacts, null, false);
         }
     }
 

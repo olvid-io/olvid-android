@@ -49,29 +49,27 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.backup.BackupManager;
 import io.olvid.engine.channel.ChannelManager;
 import io.olvid.engine.crypto.AuthEnc;
+import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.TrustLevel;
+import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
-import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
+import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesMDCKeyPair;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaMDCKeyPair;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
-import io.olvid.engine.datatypes.notifications.BackupNotifications;
-import io.olvid.engine.datatypes.notifications.ChannelNotifications;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Identity;
-import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelApplicationMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelDialogMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelDialogResponseMessageToSend;
 import io.olvid.engine.datatypes.containers.DialogType;
-import io.olvid.engine.datatypes.notifications.ProtocolNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.databases.EngineDbSchemaVersion;
@@ -87,35 +85,31 @@ import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.ObvAttachment;
 import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvBackupKeyVerificationOutput;
+import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
-import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvMutualScanUrl;
 import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.ObvPostMessageOutput;
 import io.olvid.engine.engine.types.ObvReturnReceipt;
 import io.olvid.engine.engine.types.identities.ObvTrustOrigin;
-import io.olvid.engine.engine.types.ObvTurnCredentialsFailedReason;
 import io.olvid.engine.engine.types.identities.ObvGroup;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.identity.IdentityManager;
-import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
 import io.olvid.engine.metamanager.MetaManager;
 import io.olvid.engine.networkfetch.FetchManager;
-import io.olvid.engine.networkfetch.databases.ServerSession;
 import io.olvid.engine.networkfetch.datatypes.DownloadAttachmentPriorityCategory;
-import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.networksend.SendManager;
-import io.olvid.engine.datatypes.notifications.UploadNotifications;
 import io.olvid.engine.notification.NotificationManager;
 import io.olvid.engine.protocol.ProtocolManager;
 
-public class Engine implements NotificationListener, UserInterfaceDialogListener, EngineSessionFactory, EngineAPI {
+public class Engine implements UserInterfaceDialogListener, EngineSessionFactory, EngineAPI {
     // region fields
 
     private long instanceCounter;
@@ -124,7 +118,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     private final BlockingQueue<EngineNotification> notificationQueue;
 
     private final PRNGService prng;
-    private final ObjectMapper jsonObjectMapper;
+    final ObjectMapper jsonObjectMapper;
 
 
     private final String dbPath;
@@ -132,14 +126,14 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     private final String dbKey;
     private final CreateSessionDelegate createSessionDelegate;
 
-    private final ChannelManager channelManager;
-    private final IdentityManager identityManager;
-    private final FetchManager fetchManager;
-    private final SendManager sendManager;
-    private final NotificationManager notificationManager;
-    private final ProtocolManager protocolManager;
-    private final BackupManager backupManager;
-    private final NotificationWorker notificationWorker;
+    final ChannelManager channelManager;
+    final IdentityManager identityManager;
+    final FetchManager fetchManager;
+    final SendManager sendManager;
+    final NotificationManager notificationManager;
+    final ProtocolManager protocolManager;
+    final BackupManager backupManager;
+    final NotificationWorker notificationWorker;
 
     // endregion
 
@@ -305,7 +299,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     }
 
 
-    private void postEngineNotification(String notificationName, HashMap<String, Object> userInfo) {
+    void postEngineNotification(String notificationName, HashMap<String, Object> userInfo) {
         Logger.d("Posting engine notification with name " + notificationName);
         try {
             notificationQueue.put(new EngineNotification(notificationName, userInfo));
@@ -386,1242 +380,45 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     // endregion
 
     // region Internal Notifications Listener
+    @SuppressWarnings("FieldCanBeLocal")
+    private NotificationListenerChannelsAndProtocols notificationListenerChannelsAndProtocols;
+    @SuppressWarnings("FieldCanBeLocal")
+    private NotificationListenerDownloads notificationListenerDownloads;
+    @SuppressWarnings("FieldCanBeLocal")
+    private NotificationListenerIdentity notificationListenerIdentity;
+    @SuppressWarnings("FieldCanBeLocal")
+    private NotificationListenerGroups notificationListenerGroups;
+    @SuppressWarnings("FieldCanBeLocal")
+    private NotificationListenerGroupsV2 notificationListenerGroupsV2;
+    @SuppressWarnings("FieldCanBeLocal")
+    private NotificationListenerUploads notificationListenerUploads;
+    @SuppressWarnings("FieldCanBeLocal")
+    private NotificationListenerBackups notificationListenerBackups;
 
     private void registerToInternalNotifications() {
-        for (String notificationName : new String[]{
-                ChannelNotifications.NOTIFICATION_NEW_UI_DIALOG,
-                ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_CONFIRMED,
-                ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_DELETED,
-                DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED,
-                DownloadNotifications.NOTIFICATION_MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED,
-                DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED,
-                DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FINISHED,
-                DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS,
-                DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED,
-                DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED,
-//                DownloadNotifications.NOTIFICATION_API_KEY_REJECTED_BY_SERVER,
-                DownloadNotifications.NOTIFICATION_SERVER_POLLED,
-                DownloadNotifications.NOTIFICATION_RETURN_RECEIPT_RECEIVED,
-                DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED,
-                DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_FAILED,
-                DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_SUCCESS,
-                DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_FAILED,
-                DownloadNotifications.NOTIFICATION_FREE_TRIAL_QUERY_SUCCESS,
-                DownloadNotifications.NOTIFICATION_FREE_TRIAL_QUERY_FAILED,
-                DownloadNotifications.NOTIFICATION_FREE_TRIAL_RETRIEVE_SUCCESS,
-                DownloadNotifications.NOTIFICATION_FREE_TRIAL_RETRIEVE_FAILED,
-                DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS,
-                DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED,
-                DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_SUCCESS,
-                DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_FAILED,
-                DownloadNotifications.NOTIFICATION_PING_LOST,
-                DownloadNotifications.NOTIFICATION_PING_RECEIVED,
-                DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED,
-                IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_LIST_UPDATED,
-                IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_PUBLISHED_DETAILS_UPDATED,
-                IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY,
-                IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED,
-                IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED,
-                IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE,
-                IdentityNotifications.NOTIFICATION_GROUP_CREATED,
-                IdentityNotifications.NOTIFICATION_GROUP_DELETED,
-                IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_TRUSTED,
-                IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_UPDATED,
-                IdentityNotifications.NOTIFICATION_NEW_GROUP_PUBLISHED_DETAILS,
-                IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED,
-                IdentityNotifications.NOTIFICATION_GROUP_MEMBER_REMOVED,
-                IdentityNotifications.NOTIFICATION_GROUP_PHOTO_SET,
-                IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_ADDED,
-                IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_REMOVED,
-                IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_DECLINED_TOGGLED,
-                IdentityNotifications.NOTIFICATION_NEW_CONTACT_PUBLISHED_DETAILS,
-                IdentityNotifications.NOTIFICATION_CONTACT_PHOTO_SET,
-                IdentityNotifications.NOTIFICATION_CONTACT_PUBLISHED_DETAILS_TRUSTED,
-                IdentityNotifications.NOTIFICATION_CONTACT_KEYCLOAK_MANAGED_CHANGED,
-                IdentityNotifications.NOTIFICATION_CONTACT_ACTIVE_CHANGED,
-                IdentityNotifications.NOTIFICATION_CONTACT_REVOKED,
-                IdentityNotifications.NOTIFICATION_LATEST_OWNED_IDENTITY_DETAILS_UPDATED,
-                IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS,
-                IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED,
-                IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED,
-                IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED,
-                UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS,
-                UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_FINISHED,
-                UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_CANCELLED,
-                UploadNotifications.NOTIFICATION_MESSAGE_UPLOADED,
-                UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED,
-                BackupNotifications.NOTIFICATION_NEW_BACKUP_SEED_GENERATED,
-                BackupNotifications.NOTIFICATION_BACKUP_SEED_GENERATION_FAILED,
-                BackupNotifications.NOTIFICATION_BACKUP_FOR_EXPORT_FINISHED,
-                BackupNotifications.NOTIFICATION_BACKUP_FINISHED,
-                BackupNotifications.NOTIFICATION_BACKUP_VERIFICATION_SUCCESSFUL,
-                BackupNotifications.NOTIFICATION_BACKUP_FOR_EXPORT_FAILED,
-                BackupNotifications.NOTIFICATION_APP_BACKUP_INITIATION_REQUEST,
-                BackupNotifications.NOTIFICATION_BACKUP_RESTORATION_FINISHED,
-                ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED,
-        }) {
-            this.notificationManager.addListener(notificationName, this);
-        }
-    }
+        notificationListenerChannelsAndProtocols = new NotificationListenerChannelsAndProtocols(this);
+        notificationListenerChannelsAndProtocols.registerToNotifications(this.notificationManager);
 
-    @Override
-    public void callback(String notificationName, HashMap<String, Object> userInfo) {
-        switch (notificationName) {
-            case ChannelNotifications.NOTIFICATION_NEW_UI_DIALOG: {
-                try {
-                    Session session = (Session) userInfo.get(ChannelNotifications.NOTIFICATION_NEW_UI_DIALOG_SESSION_KEY);
-                    ChannelDialogMessageToSend channelDialogMessageToSend = (ChannelDialogMessageToSend) userInfo.get(ChannelNotifications.NOTIFICATION_NEW_UI_DIALOG_CHANNEL_DIALOG_MESSAGE_TO_SEND_KEY);
-                    if (channelDialogMessageToSend == null) {
-                        break;
-                    }
-                    // check whether it is a new/updated dialog, or a delete dialog
-                    if (channelDialogMessageToSend.getSendChannelInfo().getDialogType().id == DialogType.DELETE_DIALOG_ID) {
-                        UserInterfaceDialog userInterfaceDialog = UserInterfaceDialog.get(wrapSession(session), channelDialogMessageToSend.getSendChannelInfo().getDialogUuid());
-                        if (userInterfaceDialog != null) {
-                            userInterfaceDialog.delete();
-                        }
-                    } else {
-                        UserInterfaceDialog.createOrReplace(wrapSession(session), createDialog(channelDialogMessageToSend));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_UID_KEY);
+        notificationListenerDownloads = new NotificationListenerDownloads(this);
+        notificationListenerDownloads.registerToNotifications(this.notificationManager);
 
-                ObvMessage message = new ObvMessage(fetchManager, ownedIdentity, messageUid);
+        notificationListenerIdentity = new NotificationListenerIdentity(this);
+        notificationListenerIdentity.registerToNotifications(this.notificationManager);
 
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.NEW_MESSAGE_RECEIVED_MESSAGE_KEY, message);
+        notificationListenerIdentity = new NotificationListenerIdentity(this);
+        notificationListenerIdentity.registerToNotifications(this.notificationManager);
 
-                postEngineNotification(EngineNotifications.NEW_MESSAGE_RECEIVED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED_MESSAGE_UID_KEY);
-                byte[] extendedPayload = (byte[]) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED_EXTENDED_PAYLOAD_KEY);
+        notificationListenerGroups = new NotificationListenerGroups(this);
+        notificationListenerGroups.registerToNotifications(this.notificationManager);
 
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED_MESSAGE_IDENTIFIER_KEY, messageUid.getBytes());
-                engineInfo.put(EngineNotifications.MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED_EXTENDED_PAYLOAD_KEY, extendedPayload);
-                postEngineNotification(EngineNotifications.MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED:
-                // nothing to do, attachment status is already updated in app
-                break;
-            case DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_MESSAGE_UID_KEY);
-                int attachmentNumber = (int) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_ATTACHMENT_NUMBER_KEY);
+        notificationListenerGroupsV2 = new NotificationListenerGroupsV2(this);
+        notificationListenerGroupsV2.registerToNotifications(this.notificationManager);
 
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.ATTACHMENT_DOWNLOAD_FAILED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_DOWNLOAD_FAILED_MESSAGE_IDENTIFIER_KEY, messageUid.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_DOWNLOAD_FAILED_ATTACHMENT_NUMBER_KEY, attachmentNumber);
+        notificationListenerUploads = new NotificationListenerUploads(this);
+        notificationListenerUploads.registerToNotifications(this.notificationManager);
 
-                postEngineNotification(EngineNotifications.ATTACHMENT_DOWNLOAD_FAILED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FINISHED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FINISHED_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FINISHED_MESSAGE_UID_KEY);
-                int attachmentNumber = (int) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FINISHED_ATTACHMENT_NUMBER_KEY);
-
-                ObvAttachment attachment = ObvAttachment.create(fetchManager, ownedIdentity, messageUid, attachmentNumber);
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.ATTACHMENT_DOWNLOADED_ATTACHMENT_KEY, attachment);
-
-                postEngineNotification(EngineNotifications.ATTACHMENT_DOWNLOADED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_MESSAGE_UID_KEY);
-                int attachmentNumber = (int) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY);
-                float progress = (float) userInfo.get(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY);
-                if (messageUid == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY, messageUid.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY, attachmentNumber);
-                engineInfo.put(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY, progress);
-
-                postEngineNotification(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS, engineInfo);
-                break;
-            }
-//            case DownloadNotifications.NOTIFICATION_API_KEY_REJECTED_BY_SERVER: {
-//                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_API_KEY_REJECTED_BY_SERVER_IDENTITY_KEY);
-//                if (ownedIdentity == null) {
-//                    break;
-//                }
-//
-//                HashMap<String, Object> engineInfo = new HashMap<>();
-//                engineInfo.put(EngineNotifications.API_KEY_REJECTED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-//                postEngineNotification(EngineNotifications.API_KEY_REJECTED, engineInfo);
-//                break;
-//            }
-            case DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_IDENTITY_KEY);
-                ServerSession.ApiKeyStatus apiKeyStatus = (ServerSession.ApiKeyStatus) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_API_KEY_STATUS_KEY);
-                //noinspection unchecked
-                List<ServerSession.Permission> permissions = (List<ServerSession.Permission>) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_PERMISSIONS_KEY);
-                long apiKeyExpirationTimestamp = (long) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_API_KEY_EXPIRATION_TIMESTAMP_KEY);
-                if (ownedIdentity == null || apiKeyStatus == null || permissions == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                switch (apiKeyStatus) {
-                    case VALID:
-                        engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_STATUS_KEY, ApiKeyStatus.VALID);
-                        break;
-                    case UNKNOWN:
-                        engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_STATUS_KEY, ApiKeyStatus.UNKNOWN);
-                        break;
-                    case LICENSES_EXHAUSTED:
-                        engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_STATUS_KEY, ApiKeyStatus.LICENSES_EXHAUSTED);
-                        break;
-                    case EXPIRED:
-                        engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_STATUS_KEY, ApiKeyStatus.EXPIRED);
-                        break;
-                    case OPEN_BETA_KEY:
-                        engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_STATUS_KEY, ApiKeyStatus.OPEN_BETA_KEY);
-                        break;
-                    case FREE_TRIAL_KEY:
-                        engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_STATUS_KEY, ApiKeyStatus.FREE_TRIAL_KEY);
-                        break;
-                    case AWAITING_PAYMENT_GRACE_PERIOD:
-                        engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_STATUS_KEY, ApiKeyStatus.AWAITING_PAYMENT_GRACE_PERIOD);
-                        break;
-                    case AWAITING_PAYMENT_ON_HOLD:
-                        engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_STATUS_KEY, ApiKeyStatus.AWAITING_PAYMENT_ON_HOLD);
-                        break;
-                    case FREE_TRIAL_KEY_EXPIRED:
-                        engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_STATUS_KEY, ApiKeyStatus.FREE_TRIAL_KEY_EXPIRED);
-                        break;
-                }
-                List<ApiKeyPermission> enginePermissions = new ArrayList<>();
-                for (ServerSession.Permission permission: permissions) {
-                    switch (permission) {
-                        case CALL:
-                            enginePermissions.add(ApiKeyPermission.CALL);
-                            break;
-                        case WEB_CLIENT:
-                            enginePermissions.add(ApiKeyPermission.WEB_CLIENT);
-                            break;
-                    }
-                }
-                engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_PERMISSIONS_KEY, enginePermissions);
-                if (apiKeyExpirationTimestamp != 0) {
-                    engineInfo.put(EngineNotifications.API_KEY_ACCEPTED_API_KEY_EXPIRATION_TIMESTAMP_KEY, apiKeyExpirationTimestamp);
-                }
-                postEngineNotification(EngineNotifications.API_KEY_ACCEPTED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_SERVER_POLLED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY);
-                boolean success = (boolean) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_POLLED_SUCCESS_KEY);
-                if (ownedIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.SERVER_POLLED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.SERVER_POLLED_SUCCESS_KEY, success);
-                postEngineNotification(EngineNotifications.SERVER_POLLED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_RETURN_RECEIPT_RECEIVED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_RETURN_RECEIPT_RECEIVED_OWNED_IDENTITY_KEY);
-                byte[] serverUid = (byte[]) userInfo.get(DownloadNotifications.NOTIFICATION_RETURN_RECEIPT_RECEIVED_SERVER_UID_KEY);
-                byte[] nonce = (byte[]) userInfo.get(DownloadNotifications.NOTIFICATION_RETURN_RECEIPT_RECEIVED_NONCE_KEY);
-                byte[] encryptedPayload = (byte[]) userInfo.get(DownloadNotifications.NOTIFICATION_RETURN_RECEIPT_RECEIVED_ENCRYPTED_PAYLOAD_KEY);
-                long timestamp = (long) userInfo.get(DownloadNotifications.NOTIFICATION_RETURN_RECEIPT_RECEIVED_TIMESTAMP_KEY);
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.RETURN_RECEIPT_RECEIVED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.RETURN_RECEIPT_RECEIVED_SERVER_UID_KEY, serverUid);
-                engineInfo.put(EngineNotifications.RETURN_RECEIPT_RECEIVED_NONCE_KEY, nonce);
-                engineInfo.put(EngineNotifications.RETURN_RECEIPT_RECEIVED_ENCRYPTED_PAYLOAD_KEY, encryptedPayload);
-                engineInfo.put(EngineNotifications.RETURN_RECEIPT_RECEIVED_TIMESTAMP_KEY, timestamp);
-                postEngineNotification(EngineNotifications.RETURN_RECEIPT_RECEIVED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED_OWNED_IDENTITY_KEY);
-                UUID callUuid = (UUID) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED_CALL_UUID_KEY);
-                String username1 = (String) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED_USERNAME_1_KEY);
-                String password1 = (String) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED_PASSWORD_1_KEY);
-                String username2 = (String) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED_USERNAME_2_KEY);
-                String password2 = (String) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED_PASSWORD_2_KEY);
-                //noinspection unchecked
-                List<String> turnServers = (List<String>) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED_SERVERS_KEY);
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.TURN_CREDENTIALS_RECEIVED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.TURN_CREDENTIALS_RECEIVED_CALL_UUID_KEY, callUuid);
-                engineInfo.put(EngineNotifications.TURN_CREDENTIALS_RECEIVED_USERNAME_1_KEY, username1);
-                engineInfo.put(EngineNotifications.TURN_CREDENTIALS_RECEIVED_PASSWORD_1_KEY, password1);
-                engineInfo.put(EngineNotifications.TURN_CREDENTIALS_RECEIVED_USERNAME_2_KEY, username2);
-                engineInfo.put(EngineNotifications.TURN_CREDENTIALS_RECEIVED_PASSWORD_2_KEY, password2);
-                engineInfo.put(EngineNotifications.TURN_CREDENTIALS_RECEIVED_SERVERS_KEY, turnServers);
-                postEngineNotification(EngineNotifications.TURN_CREDENTIALS_RECEIVED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_FAILED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_FAILED_OWNED_IDENTITY_KEY);
-                UUID callUuid = (UUID) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_FAILED_CALL_UUID_KEY);
-                DownloadNotifications.TurnCredentialsFailedReason rfc = (DownloadNotifications.TurnCredentialsFailedReason) userInfo.get(DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_FAILED_REASON_KEY);
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.TURN_CREDENTIALS_FAILED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.TURN_CREDENTIALS_FAILED_CALL_UUID_KEY, callUuid);
-                switch (rfc) {
-                    case PERMISSION_DENIED:
-                        engineInfo.put(EngineNotifications.TURN_CREDENTIALS_FAILED_REASON_KEY, ObvTurnCredentialsFailedReason.PERMISSION_DENIED);
-                        break;
-                    case BAD_SERVER_SESSION:
-                        engineInfo.put(EngineNotifications.TURN_CREDENTIALS_FAILED_REASON_KEY, ObvTurnCredentialsFailedReason.BAD_SERVER_SESSION);
-                        break;
-                    case UNABLE_TO_CONTACT_SERVER:
-                        engineInfo.put(EngineNotifications.TURN_CREDENTIALS_FAILED_REASON_KEY, ObvTurnCredentialsFailedReason.UNABLE_TO_CONTACT_SERVER);
-                        break;
-                    case CALLS_NOT_SUPPORTED_ON_SERVER:
-                        engineInfo.put(EngineNotifications.TURN_CREDENTIALS_FAILED_REASON_KEY, ObvTurnCredentialsFailedReason.CALLS_NOT_SUPPORTED_ON_SERVER);
-                        break;
-                }
-                postEngineNotification(EngineNotifications.TURN_CREDENTIALS_FAILED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_SUCCESS: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_SUCCESS_OWNED_IDENTITY_KEY);
-                UUID apiKey = (UUID) userInfo.get(DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_SUCCESS_API_KEY_KEY);
-                ServerSession.ApiKeyStatus apiKeyStatus = (ServerSession.ApiKeyStatus) userInfo.get(DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY);
-                //noinspection unchecked
-                List<ServerSession.Permission> permissions = (List<ServerSession.Permission>) userInfo.get(DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_SUCCESS_PERMISSIONS_KEY);
-                long apiKeyExpirationTimestamp = (long) userInfo.get(DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_SUCCESS_API_KEY_EXPIRATION_TIMESTAMP_KEY);
-                if (ownedIdentity == null || apiKey == null || apiKeyStatus == null || permissions == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_KEY, apiKey);
-                switch (apiKeyStatus) {
-                    case VALID:
-                        engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY, ApiKeyStatus.VALID);
-                        break;
-                    case UNKNOWN:
-                        engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY, ApiKeyStatus.UNKNOWN);
-                        break;
-                    case LICENSES_EXHAUSTED:
-                        engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY, ApiKeyStatus.LICENSES_EXHAUSTED);
-                        break;
-                    case EXPIRED:
-                        engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY, ApiKeyStatus.EXPIRED);
-                        break;
-                    case OPEN_BETA_KEY:
-                        engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY, ApiKeyStatus.OPEN_BETA_KEY);
-                        break;
-                    case FREE_TRIAL_KEY:
-                        engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY, ApiKeyStatus.FREE_TRIAL_KEY);
-                        break;
-                    case AWAITING_PAYMENT_GRACE_PERIOD:
-                        engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY, ApiKeyStatus.AWAITING_PAYMENT_GRACE_PERIOD);
-                        break;
-                    case AWAITING_PAYMENT_ON_HOLD:
-                        engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY, ApiKeyStatus.AWAITING_PAYMENT_ON_HOLD);
-                        break;
-                    case FREE_TRIAL_KEY_EXPIRED:
-                        engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY, ApiKeyStatus.FREE_TRIAL_KEY_EXPIRED);
-                        break;
-                }
-                List<ApiKeyPermission> enginePermissions = new ArrayList<>();
-                for (ServerSession.Permission permission: permissions) {
-                    switch (permission) {
-                        case CALL:
-                            enginePermissions.add(ApiKeyPermission.CALL);
-                            break;
-                        case WEB_CLIENT:
-                            enginePermissions.add(ApiKeyPermission.WEB_CLIENT);
-                            break;
-                    }
-                }
-                engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_PERMISSIONS_KEY, enginePermissions);
-                if (apiKeyExpirationTimestamp != 0) {
-                    engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_EXPIRATION_TIMESTAMP_KEY, apiKeyExpirationTimestamp);
-                }
-                postEngineNotification(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_FAILED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_FAILED_OWNED_IDENTITY_KEY);
-                UUID apiKey = (UUID) userInfo.get(DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_FAILED_API_KEY_KEY);
-                if (ownedIdentity == null || apiKey == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_FAILED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_FAILED_API_KEY_KEY, apiKey);
-                postEngineNotification(EngineNotifications.API_KEY_STATUS_QUERY_FAILED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_FREE_TRIAL_QUERY_SUCCESS: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_FREE_TRIAL_QUERY_SUCCESS_OWNED_IDENTITY_KEY);
-                boolean available = (boolean) userInfo.get(DownloadNotifications.NOTIFICATION_FREE_TRIAL_QUERY_SUCCESS_AVAILABLE_KEY);
-                if (ownedIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.FREE_TRIAL_QUERY_SUCCESS_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.FREE_TRIAL_QUERY_SUCCESS_AVAILABLE_KEY, available);
-                postEngineNotification(EngineNotifications.FREE_TRIAL_QUERY_SUCCESS, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_FREE_TRIAL_QUERY_FAILED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_FREE_TRIAL_QUERY_FAILED_OWNED_IDENTITY_KEY);
-                if (ownedIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.FREE_TRIAL_QUERY_FAILED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                postEngineNotification(EngineNotifications.FREE_TRIAL_QUERY_FAILED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_FREE_TRIAL_RETRIEVE_SUCCESS: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_FREE_TRIAL_RETRIEVE_SUCCESS_OWNED_IDENTITY_KEY);
-                if (ownedIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.FREE_TRIAL_RETRIEVE_SUCCESS_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                postEngineNotification(EngineNotifications.FREE_TRIAL_RETRIEVE_SUCCESS, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_FREE_TRIAL_RETRIEVE_FAILED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_FREE_TRIAL_RETRIEVE_FAILED_OWNED_IDENTITY_KEY);
-                if (ownedIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.FREE_TRIAL_RETRIEVE_FAILED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                postEngineNotification(EngineNotifications.FREE_TRIAL_RETRIEVE_FAILED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS_OWNED_IDENTITY_KEY);
-                String storeToken = (String) userInfo.get(DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS_STORE_TOKEN_KEY);
-                if (ownedIdentity == null || storeToken == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.VERIFY_RECEIPT_SUCCESS_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.VERIFY_RECEIPT_SUCCESS_STORE_TOKEN_KEY, storeToken);
-                postEngineNotification(EngineNotifications.VERIFY_RECEIPT_SUCCESS, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED: {
-                String server = (String) userInfo.get(DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED_SERVER_KEY);
-                //noinspection unchecked
-                Map<String, Integer> appInfo = (Map<String, Integer>) userInfo.get(DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED_APP_INFO_KEY);
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS_SERVER_KEY, server);
-                engineInfo.put(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS_APP_INFO_KEY, appInfo);
-                engineInfo.put(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS_UPDATED_KEY, true);
-                postEngineNotification(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_SUCCESS: {
-                String server = (String) userInfo.get(DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_SUCCESS_SERVER_KEY);
-                //noinspection unchecked
-                Map<String, Integer> appInfo = (Map<String, Integer>) userInfo.get(DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_SUCCESS_APP_INFO_KEY);
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS_SERVER_KEY, server);
-                engineInfo.put(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS_APP_INFO_KEY, appInfo);
-                engineInfo.put(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS_UPDATED_KEY, false);
-                postEngineNotification(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_FAILED: {
-                String server = (String) userInfo.get(DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_FAILED_SERVER_KEY);
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.WELL_KNOWN_DOWNLOAD_FAILED_SERVER_KEY, server);
-                postEngineNotification(EngineNotifications.WELL_KNOWN_DOWNLOAD_FAILED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_PING_LOST: {
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                postEngineNotification(EngineNotifications.PING_LOST, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_PING_RECEIVED: {
-                Long delay = (Long) userInfo.get(DownloadNotifications.NOTIFICATION_PING_RECEIVED_DELAY_KEY);
-                if (delay == null) {
-                    break;
-                }
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.PING_RECEIVED_DELAY_KEY, delay);
-
-                postEngineNotification(EngineNotifications.PING_RECEIVED, engineInfo);
-                break;
-            }
-            case DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED: {
-                Integer state = (Integer) userInfo.get(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY);
-                if (state == null) {
-                    break;
-                }
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, state);
-
-                postEngineNotification(EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY: {
-                try (EngineSession engineSession = getSession()) {
-                    Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_CONTACT_IDENTITY_KEY);
-                    Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_OWNED_IDENTITY_KEY);
-                    boolean keycloakManaged = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_KEYCLOAK_MANAGED_KEY);
-                    boolean active = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_ACTIVE_KEY);
-                    boolean oneToOne = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_ONE_TO_ONE_KEY);
-                    int trustLevel = (int) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_TRUST_LEVEL_KEY);
-                    if (contactIdentity == null || ownedIdentity == null) {
-                        break;
-                    }
-
-                    protocolManager.startDeviceDiscoveryProtocol(ownedIdentity, contactIdentity);
-
-                    HashMap<String, Object> engineInfo = new HashMap<>();
-                    JsonIdentityDetails contactDetails = identityManager.getContactIdentityTrustedDetails(engineSession.session, ownedIdentity, contactIdentity);
-
-                    engineInfo.put(EngineNotifications.NEW_CONTACT_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                    engineInfo.put(EngineNotifications.NEW_CONTACT_CONTACT_IDENTITY_KEY, new ObvIdentity(contactIdentity, contactDetails, keycloakManaged, active));
-                    engineInfo.put(EngineNotifications.NEW_CONTACT_ONE_TO_ONE_KEY, oneToOne);
-                    engineInfo.put(EngineNotifications.NEW_CONTACT_TRUST_LEVEL_KEY, trustLevel);
-                    engineInfo.put(EngineNotifications.NEW_CONTACT_HAS_UNTRUSTED_PUBLISHED_DETAILS_KEY, identityManager.contactHasUntrustedPublishedDetails(engineSession.session, ownedIdentity, contactIdentity));
-                    postEngineNotification(EngineNotifications.NEW_CONTACT, engineInfo);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED: {
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED_CONTACT_IDENTITY_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED_OWNED_IDENTITY_KEY);
-                TrustLevel trustLevel = (TrustLevel) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED_TRUST_LEVEL_KEY);
-                if (contactIdentity == null || ownedIdentity == null || trustLevel == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED_TRUST_LEVEL_KEY, trustLevel.major);
-
-                postEngineNotification(EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED: {
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED_CONTACT_IDENTITY_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED_OWNED_IDENTITY_KEY);
-                if (contactIdentity == null || ownedIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.CONTACT_DELETED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_DELETED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-
-                postEngineNotification(EngineNotifications.CONTACT_DELETED, engineInfo);
-                break;
-            }
-            case ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_CONFIRMED:
-                try (EngineSession engineSession = getSession()) {
-                    Identity contactIdentity = (Identity) userInfo.get(ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_CONFIRMED_REMOTE_IDENTITY_KEY);
-                    UID currentDeviceUid = (UID) userInfo.get(ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_CONFIRMED_CURRENT_DEVICE_UID_KEY);
-                    if (contactIdentity == null || currentDeviceUid == null) {
-                        break;
-                    }
-
-                    HashMap<String, Object> engineInfo = new HashMap<>();
-                    Identity ownedIdentity = identityManager.getOwnedIdentityForDeviceUid(engineSession.session, currentDeviceUid);
-                    engineInfo.put(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                    engineInfo.put(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-
-                    postEngineNotification(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED, engineInfo);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            case ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_DELETED:
-                try (EngineSession engineSession = getSession()) {
-                    Identity contactIdentity = (Identity) userInfo.get(ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_DELETED_REMOTE_IDENTITY_KEY);
-                    UID currentDeviceUid = (UID) userInfo.get(ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_DELETED_CURRENT_DEVICE_UID_KEY);
-                    if (contactIdentity == null || currentDeviceUid == null) {
-                        break;
-                    }
-
-                    HashMap<String, Object> engineInfo = new HashMap<>();
-                    Identity ownedIdentity = identityManager.getOwnedIdentityForDeviceUid(engineSession.session, currentDeviceUid);
-                    if (ownedIdentity == null) {
-                        break;
-                    }
-                    engineInfo.put(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                    engineInfo.put(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-
-                    postEngineNotification(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED, engineInfo);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            case IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_CONTACT_IDENTITY_KEY);
-                if (contactIdentity == null || ownedIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.NEW_CONTACT_DEVICE_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-
-                postEngineNotification(EngineNotifications.NEW_CONTACT_DEVICE, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_LIST_UPDATED: {
-                postEngineNotification(EngineNotifications.OWNED_IDENTITY_LIST_UPDATED, new HashMap<>());
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_PUBLISHED_DETAILS_UPDATED: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_PUBLISHED_DETAILS_UPDATED_OWNED_IDENTITY_KEY);
-                JsonIdentityDetailsWithVersionAndPhoto identityDetails = (JsonIdentityDetailsWithVersionAndPhoto) userInfo.get(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_PUBLISHED_DETAILS_UPDATED_IDENTITY_DETAILS_KEY);
-                if (ownedIdentity == null || identityDetails == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.OWNED_IDENTITY_DETAILS_CHANGED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.OWNED_IDENTITY_DETAILS_CHANGED_IDENTITY_DETAILS_KEY, identityDetails.getIdentityDetails());
-                engineInfo.put(EngineNotifications.OWNED_IDENTITY_DETAILS_CHANGED_PHOTO_URL_KEY, identityDetails.getPhotoUrl());
-
-                postEngineNotification(EngineNotifications.OWNED_IDENTITY_DETAILS_CHANGED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_GROUP_CREATED:
-                try (EngineSession engineSession = getSession()) {
-                    byte[] groupOwnerAndUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_CREATED_GROUP_OWNER_AND_UID_KEY);
-                    Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_CREATED_OWNED_IDENTITY_KEY);
-                    if (groupOwnerAndUid == null || ownedIdentity == null) {
-                        break;
-                    }
-
-                    HashMap<String, Object> engineInfo = new HashMap<>();
-                    GroupWithDetails group = identityManager.getGroupWithDetails(engineSession.session, ownedIdentity, groupOwnerAndUid);
-                    if (group == null) {
-                        break;
-                    }
-
-                    byte[][] bytesContactIdentities = new byte[group.getGroupMembers().length][];
-                    for (int j = 0; j < bytesContactIdentities.length; j++) {
-                        bytesContactIdentities[j] = group.getGroupMembers()[j].getBytes();
-                    }
-                    ObvIdentity[] pendingMembers = new ObvIdentity[group.getPendingGroupMembers().length];
-                    for (int j = 0; j < pendingMembers.length; j++) {
-                        try {
-                            JsonIdentityDetails identityDetails = identityManager.getJsonObjectMapper().readValue(group.getPendingGroupMembers()[j].serializedDetails, JsonIdentityDetails.class);
-                            pendingMembers[j] = new ObvIdentity(group.getPendingGroupMembers()[j].identity, identityDetails, false, true);
-                        } catch (IOException e) {
-                            pendingMembers[j] = new ObvIdentity(group.getPendingGroupMembers()[j].identity, null, false, true);
-                        }
-                    }
-                    byte[][] bytesDeclinesPendingMembers = new byte[group.getDeclinedPendingMembers().length][];
-                    for (int j = 0; j < bytesDeclinesPendingMembers.length; j++) {
-                        bytesDeclinesPendingMembers[j] = group.getDeclinedPendingMembers()[j].getBytes();
-                    }
-                    ObvGroup obvGroup;
-                    if (group.getGroupOwner() == null) {
-                        obvGroup = new ObvGroup(
-                                group.getGroupOwnerAndUid(),
-                                group.getPublishedGroupDetails(),
-                                ownedIdentity.getBytes(),
-                                bytesContactIdentities,
-                                pendingMembers,
-                                bytesDeclinesPendingMembers,
-                                null
-                        );
-                    } else {
-                        obvGroup = new ObvGroup(
-                                group.getGroupOwnerAndUid(),
-                                group.getLatestOrTrustedGroupDetails(),
-                                ownedIdentity.getBytes(),
-                                bytesContactIdentities,
-                                pendingMembers,
-                                bytesDeclinesPendingMembers,
-                                group.getGroupOwner().getBytes()
-                        );
-                    }
-
-                    String photoUrl = identityManager.getGroupPhotoUrl(engineSession.session, ownedIdentity, groupOwnerAndUid);
-
-                    engineInfo.put(EngineNotifications.GROUP_CREATED_GROUP_KEY, obvGroup);
-                    engineInfo.put(EngineNotifications.GROUP_CREATED_HAS_MULTIPLE_DETAILS_KEY, group.hasMultipleDetails());
-                    engineInfo.put(EngineNotifications.GROUP_CREATED_PHOTO_URL_KEY, photoUrl);
-                    postEngineNotification(EngineNotifications.GROUP_CREATED, engineInfo);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            case IdentityNotifications.NOTIFICATION_GROUP_DELETED: {
-                byte[] groupUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_DELETED_GROUP_OWNER_AND_UID_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_DELETED_OWNED_IDENTITY_KEY);
-                if (groupUid == null || ownedIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.GROUP_DELETED_BYTES_GROUP_OWNER_AND_UID_KEY, groupUid);
-                engineInfo.put(EngineNotifications.GROUP_DELETED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-
-                postEngineNotification(EngineNotifications.GROUP_DELETED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_TRUSTED: {
-                byte[] groupUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_TRUSTED_GROUP_OWNER_AND_UID_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_TRUSTED_OWNED_IDENTITY_KEY);
-                JsonGroupDetailsWithVersionAndPhoto groupDetailsWithVersionAndPhoto = (JsonGroupDetailsWithVersionAndPhoto) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_TRUSTED_GROUP_DETAILS_KEY);
-                if (groupUid == null || ownedIdentity == null || groupDetailsWithVersionAndPhoto == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.GROUP_PUBLISHED_DETAILS_TRUSTED_BYTES_GROUP_UID_KEY, groupUid);
-                engineInfo.put(EngineNotifications.GROUP_PUBLISHED_DETAILS_TRUSTED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.GROUP_PUBLISHED_DETAILS_TRUSTED_GROUP_DETAILS_KEY, groupDetailsWithVersionAndPhoto);
-
-                postEngineNotification(EngineNotifications.GROUP_PUBLISHED_DETAILS_TRUSTED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED: {
-                byte[] groupUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_GROUP_UID_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_CONTACT_IDENTITY_KEY);
-                if (groupUid == null || ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_GROUP_UID_KEY, groupUid);
-                engineInfo.put(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-
-                postEngineNotification(EngineNotifications.GROUP_MEMBER_ADDED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_GROUP_MEMBER_REMOVED: {
-                byte[] groupUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_REMOVED_GROUP_UID_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_REMOVED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_REMOVED_CONTACT_IDENTITY_KEY);
-                if (groupUid == null || ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.GROUP_MEMBER_REMOVED_BYTES_GROUP_UID_KEY, groupUid);
-                engineInfo.put(EngineNotifications.GROUP_MEMBER_REMOVED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.GROUP_MEMBER_REMOVED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-
-                postEngineNotification(EngineNotifications.GROUP_MEMBER_REMOVED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_UPDATED: {
-                byte[] groupUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_UPDATED_GROUP_OWNER_AND_UID_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_UPDATED_OWNED_IDENTITY_KEY);
-                JsonGroupDetailsWithVersionAndPhoto groupDetails = (JsonGroupDetailsWithVersionAndPhoto) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PUBLISHED_DETAILS_UPDATED_GROUP_DETAILS_KEY);
-                if (groupUid == null || ownedIdentity == null || groupDetails == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.GROUP_PUBLISHED_DETAILS_UPDATED_BYTES_GROUP_UID_KEY, groupUid);
-                engineInfo.put(EngineNotifications.GROUP_PUBLISHED_DETAILS_UPDATED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.GROUP_PUBLISHED_DETAILS_UPDATED_GROUP_DETAILS_KEY, groupDetails);
-                postEngineNotification(EngineNotifications.GROUP_PUBLISHED_DETAILS_UPDATED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_ADDED: {
-                byte[] groupUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_ADDED_GROUP_UID_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_ADDED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_ADDED_CONTACT_IDENTITY_KEY);
-                String contactSerializedDetails = (String) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_ADDED_CONTACT_SERIALIZED_DETAILS_KEY);
-                if (groupUid == null || ownedIdentity == null || contactIdentity == null || contactSerializedDetails == null) {
-                    break;
-                }
-
-                JsonIdentityDetails identityDetails;
-                try {
-                    identityDetails = jsonObjectMapper.readValue(contactSerializedDetails, JsonIdentityDetails.class);
-                } catch (Exception e) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_ADDED_BYTES_GROUP_UID_KEY, groupUid);
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_ADDED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_ADDED_CONTACT_IDENTITY_KEY, new ObvIdentity(contactIdentity, identityDetails, false, true));
-
-                postEngineNotification(EngineNotifications.PENDING_GROUP_MEMBER_ADDED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_REMOVED: {
-                byte[] groupUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_REMOVED_GROUP_UID_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_REMOVED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_REMOVED_CONTACT_IDENTITY_KEY);
-                String contactSerializedDetails = (String) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_REMOVED_CONTACT_SERIALIZED_DETAILS_KEY);
-                if (groupUid == null || ownedIdentity == null || contactIdentity == null || contactSerializedDetails == null) {
-                    break;
-                }
-
-                JsonIdentityDetails identityDetails;
-                try {
-                    identityDetails = jsonObjectMapper.readValue(contactSerializedDetails, JsonIdentityDetails.class);
-                } catch (Exception e) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_REMOVED_BYTES_GROUP_UID_KEY, groupUid);
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_REMOVED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_REMOVED_CONTACT_IDENTITY_KEY, new ObvIdentity(contactIdentity, identityDetails, false, true));
-
-                postEngineNotification(EngineNotifications.PENDING_GROUP_MEMBER_REMOVED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_DECLINED_TOGGLED: {
-                byte[] groupUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_DECLINED_TOGGLED_GROUP_UID_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_DECLINED_TOGGLED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_DECLINED_TOGGLED_CONTACT_IDENTITY_KEY);
-                boolean declined = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_PENDING_GROUP_MEMBER_DECLINED_TOGGLED_DECLINED_KEY);
-                if (groupUid == null || ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_DECLINE_TOGGLED_BYTES_GROUP_UID_KEY, groupUid);
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_DECLINE_TOGGLED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_DECLINE_TOGGLED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-                engineInfo.put(EngineNotifications.PENDING_GROUP_MEMBER_DECLINE_TOGGLED_DECLINED_KEY, declined);
-
-                postEngineNotification(EngineNotifications.PENDING_GROUP_MEMBER_DECLINE_TOGGLED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_NEW_CONTACT_PUBLISHED_DETAILS: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_PUBLISHED_DETAILS_CONTACT_IDENTITY_KEY);
-                if (ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-
-                postEngineNotification(EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_GROUP_PHOTO_SET: {
-                byte[] groupOwnerAndUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PHOTO_SET_GROUP_OWNER_AND_UID_KEY);
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PHOTO_SET_OWNED_IDENTITY_KEY);
-                int version = (int) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PHOTO_SET_VERSION_KEY);
-                boolean isTrusted = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_PHOTO_SET_IS_TRUSTED_KEY);
-                if (ownedIdentity == null || groupOwnerAndUid == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.NEW_GROUP_PHOTO_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.NEW_GROUP_PHOTO_BYTES_GROUP_OWNER_AND_UID_KEY, groupOwnerAndUid);
-                engineInfo.put(EngineNotifications.NEW_GROUP_PHOTO_VERSION_KEY, version);
-                engineInfo.put(EngineNotifications.NEW_GROUP_PHOTO_IS_TRUSTED_KEY, isTrusted);
-
-                postEngineNotification(EngineNotifications.NEW_GROUP_PHOTO, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_CONTACT_PHOTO_SET: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_PHOTO_SET_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_PHOTO_SET_CONTACT_IDENTITY_KEY);
-                int version = (int) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_PHOTO_SET_VERSION_KEY);
-                boolean isTrusted = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_PHOTO_SET_IS_TRUSTED_KEY);
-                if (ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.NEW_CONTACT_PHOTO_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.NEW_CONTACT_PHOTO_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-                engineInfo.put(EngineNotifications.NEW_CONTACT_PHOTO_VERSION_KEY, version);
-                engineInfo.put(EngineNotifications.NEW_CONTACT_PHOTO_IS_TRUSTED_KEY, isTrusted);
-
-                postEngineNotification(EngineNotifications.NEW_CONTACT_PHOTO, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_CONTACT_PUBLISHED_DETAILS_TRUSTED: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_PUBLISHED_DETAILS_TRUSTED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_PUBLISHED_DETAILS_TRUSTED_CONTACT_IDENTITY_KEY);
-                JsonIdentityDetailsWithVersionAndPhoto identityDetails = (JsonIdentityDetailsWithVersionAndPhoto) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_PUBLISHED_DETAILS_TRUSTED_IDENTITY_DETAILS_KEY);
-                if (ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.CONTACT_PUBLISHED_DETAILS_TRUSTED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_PUBLISHED_DETAILS_TRUSTED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_PUBLISHED_DETAILS_TRUSTED_IDENTITY_DETAILS_KEY, identityDetails);
-
-                postEngineNotification(EngineNotifications.CONTACT_PUBLISHED_DETAILS_TRUSTED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_CONTACT_KEYCLOAK_MANAGED_CHANGED: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_KEYCLOAK_MANAGED_CHANGED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_KEYCLOAK_MANAGED_CHANGED_CONTACT_IDENTITY_KEY);
-                boolean keycloakManaged = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_KEYCLOAK_MANAGED_CHANGED_KEYCLOAK_MANAGED_KEY);
-                if (ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.CONTACT_KEYCLOAK_MANAGED_CHANGED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_KEYCLOAK_MANAGED_CHANGED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_KEYCLOAK_MANAGED_CHANGED_KEYCLOAK_MANAGED_KEY, keycloakManaged);
-
-                postEngineNotification(EngineNotifications.CONTACT_KEYCLOAK_MANAGED_CHANGED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_CONTACT_ACTIVE_CHANGED: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ACTIVE_CHANGED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ACTIVE_CHANGED_CONTACT_IDENTITY_KEY);
-                boolean active = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ACTIVE_CHANGED_ACTIVE_KEY);
-                if (ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-
-                if (active) {
-                    try {
-                        protocolManager.startDeviceDiscoveryProtocol(ownedIdentity, contactIdentity);
-                    } catch (Exception ignored) {}
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.CONTACT_ACTIVE_CHANGED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_ACTIVE_CHANGED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_ACTIVE_CHANGED_ACTIVE_KEY, active);
-
-                postEngineNotification(EngineNotifications.CONTACT_ACTIVE_CHANGED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_CONTACT_REVOKED: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_REVOKED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_REVOKED_CONTACT_IDENTITY_KEY);
-                if (ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.CONTACT_REVOKED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_REVOKED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-                postEngineNotification(EngineNotifications.CONTACT_REVOKED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_LATEST_OWNED_IDENTITY_DETAILS_UPDATED: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_LATEST_OWNED_IDENTITY_DETAILS_UPDATED_OWNED_IDENTITY_KEY);
-                boolean hasUnpublished = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_LATEST_OWNED_IDENTITY_DETAILS_UPDATED_HAS_UNPUBLISHED_KEY);
-                if (ownedIdentity == null) {
-                    break;
-                }
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.OWNED_IDENTITY_LATEST_DETAILS_UPDATED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.OWNED_IDENTITY_LATEST_DETAILS_UPDATED_HAS_UNPUBLISHED_KEY, hasUnpublished);
-
-                postEngineNotification(EngineNotifications.OWNED_IDENTITY_LATEST_DETAILS_UPDATED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_OWNED_IDENTITY_KEY);
-                boolean active = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_ACTIVE_KEY);
-                if (ownedIdentity == null) {
-                    break;
-                }
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED_ACTIVE_KEY, active);
-
-                postEngineNotification(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED_CONTACT_IDENTITY_KEY);
-                if (ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-                try {
-                    List<ObvCapability> capabilities = identityManager.getContactCapabilities(ownedIdentity, contactIdentity);
-
-                    HashMap<String, Object> engineInfo = new HashMap<>();
-                    engineInfo.put(EngineNotifications.CONTACT_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                    engineInfo.put(EngineNotifications.CONTACT_CAPABILITIES_UPDATED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-                    engineInfo.put(EngineNotifications.CONTACT_CAPABILITIES_UPDATED_CAPABILITIES, capabilities);
-
-                    postEngineNotification(EngineNotifications.CONTACT_CAPABILITIES_UPDATED, engineInfo);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED_OWNED_IDENTITY_KEY);
-                if (ownedIdentity == null) {
-                    break;
-                }
-                try {
-                    List<ObvCapability> capabilities = identityManager.getOwnCapabilities(ownedIdentity);
-
-                    HashMap<String, Object> engineInfo = new HashMap<>();
-                    engineInfo.put(EngineNotifications.OWN_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                    engineInfo.put(EngineNotifications.OWN_CAPABILITIES_UPDATED_CAPABILITIES, capabilities);
-
-                    postEngineNotification(EngineNotifications.OWN_CAPABILITIES_UPDATED, engineInfo);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_OWNED_IDENTITY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_CONTACT_IDENTITY_KEY);
-                boolean oneToOne = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY);
-
-                if (ownedIdentity == null || contactIdentity == null) {
-                    break;
-                }
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
-                engineInfo.put(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY, oneToOne);
-
-                postEngineNotification(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED, engineInfo);
-                break;
-            }
-            case UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS: {
-                Identity ownedIdentity = (Identity) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_MESSAGE_UID_KEY);
-                int attachmentNumber = (int) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY);
-                float progress = (float) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_PROGRESS_KEY);
-                if (ownedIdentity == null || messageUid == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY, messageUid.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY, attachmentNumber);
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_PROGRESS_KEY, progress);
-
-                postEngineNotification(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS, engineInfo);
-                break;
-            }
-            case UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_FINISHED: {
-                Identity ownedIdentity = (Identity) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_FINISHED_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_FINISHED_MESSAGE_UID_KEY);
-                int attachmentNumber = (int) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_FINISHED_ATTACHMENT_NUMBER_KEY);
-                if (ownedIdentity == null || messageUid == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOADED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOADED_MESSAGE_IDENTIFIER_KEY, messageUid.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOADED_ATTACHMENT_NUMBER_KEY, attachmentNumber);
-
-                postEngineNotification(EngineNotifications.ATTACHMENT_UPLOADED, engineInfo);
-                break;
-            }
-            case UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_CANCELLED: {
-                Identity ownedIdentity = (Identity) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_CANCELLED_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_CANCELLED_MESSAGE_UID_KEY);
-                int attachmentNumber = (int) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_CANCELLED_ATTACHMENT_NUMBER_KEY);
-                if (ownedIdentity == null || messageUid == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_MESSAGE_IDENTIFIER_KEY, messageUid.getBytes());
-                engineInfo.put(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_ATTACHMENT_NUMBER_KEY, attachmentNumber);
-
-                postEngineNotification(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED, engineInfo);
-                break;
-            }
-            case UploadNotifications.NOTIFICATION_MESSAGE_UPLOADED: {
-                Identity ownedIdentity = (Identity) userInfo.get(UploadNotifications.NOTIFICATION_MESSAGE_UPLOADED_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(UploadNotifications.NOTIFICATION_MESSAGE_UPLOADED_UID_KEY);
-                Long timestampFromServer = (Long) userInfo.get(UploadNotifications.NOTIFICATION_MESSAGE_UPLOADED_TIMESTAMP_FROM_SERVER);
-                if (ownedIdentity == null || messageUid == null || timestampFromServer == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.MESSAGE_UPLOADED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.MESSAGE_UPLOADED_IDENTIFIER_KEY, messageUid.getBytes());
-                engineInfo.put(EngineNotifications.MESSAGE_UPLOADED_TIMESTAMP_FROM_SERVER, timestampFromServer);
-
-                postEngineNotification(EngineNotifications.MESSAGE_UPLOADED, engineInfo);
-                break;
-            }
-            case UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED: {
-                Identity ownedIdentity = (Identity) userInfo.get(UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(UploadNotifications.NOTIFICATION_MESSAGE_UPLOAD_FAILED_UID_KEY);
-                if (ownedIdentity == null || messageUid == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.MESSAGE_UPLOAD_FAILED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.MESSAGE_UPLOAD_FAILED_IDENTIFIER_KEY, messageUid.getBytes());
-
-                postEngineNotification(EngineNotifications.MESSAGE_UPLOAD_FAILED, engineInfo);
-                break;
-            }
-            case IdentityNotifications.NOTIFICATION_NEW_GROUP_PUBLISHED_DETAILS: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_GROUP_PUBLISHED_DETAILS_OWNED_IDENTITY_KEY);
-                byte[] groupOwnerAndUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_GROUP_PUBLISHED_DETAILS_GROUP_OWNER_AND_UID_KEY);
-                if (ownedIdentity == null || groupOwnerAndUid == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.NEW_GROUP_PUBLISHED_DETAILS_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.NEW_GROUP_PUBLISHED_DETAILS_BYTES_GROUP_OWNER_AND_UID_KEY, groupOwnerAndUid);
-
-                postEngineNotification(EngineNotifications.NEW_GROUP_PUBLISHED_DETAILS, engineInfo);
-                break;
-            }
-            case BackupNotifications.NOTIFICATION_NEW_BACKUP_SEED_GENERATED: {
-                String seed = (String) userInfo.get(BackupNotifications.NOTIFICATION_NEW_BACKUP_SEED_GENERATED_SEED_KEY);
-                if (seed == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.NEW_BACKUP_SEED_GENERATED_SEED_KEY, seed);
-
-                postEngineNotification(EngineNotifications.NEW_BACKUP_SEED_GENERATED, engineInfo);
-                break;
-            }
-            case BackupNotifications.NOTIFICATION_BACKUP_SEED_GENERATION_FAILED: {
-                postEngineNotification(EngineNotifications.BACKUP_SEED_GENERATION_FAILED, new HashMap<>());
-                break;
-            }
-            case BackupNotifications.NOTIFICATION_BACKUP_FOR_EXPORT_FINISHED: {
-                UID backupKeyUid = (UID) userInfo.get(BackupNotifications.NOTIFICATION_BACKUP_FOR_EXPORT_FINISHED_BACKUP_KEY_UID_KEY);
-                int version = (int) userInfo.get(BackupNotifications.NOTIFICATION_BACKUP_FOR_EXPORT_FINISHED_VERSION_KEY);
-                byte[] encryptedContent = (byte[]) userInfo.get(BackupNotifications.NOTIFICATION_BACKUP_FOR_EXPORT_FINISHED_ENCRYPTED_CONTENT_KEY);
-
-                if (backupKeyUid == null || encryptedContent == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.BACKUP_FOR_EXPORT_FINISHED_BYTES_BACKUP_KEY_UID_KEY, backupKeyUid.getBytes());
-                engineInfo.put(EngineNotifications.BACKUP_FOR_EXPORT_FINISHED_VERSION_KEY, version);
-                engineInfo.put(EngineNotifications.BACKUP_FOR_EXPORT_FINISHED_ENCRYPTED_CONTENT_KEY, encryptedContent);
-
-                postEngineNotification(EngineNotifications.BACKUP_FOR_EXPORT_FINISHED, engineInfo);
-                break;
-            }
-            case BackupNotifications.NOTIFICATION_BACKUP_FINISHED: {
-                UID backupKeyUid = (UID) userInfo.get(BackupNotifications.NOTIFICATION_BACKUP_FINISHED_BACKUP_KEY_UID_KEY);
-                int version = (int) userInfo.get(BackupNotifications.NOTIFICATION_BACKUP_FINISHED_VERSION_KEY);
-                byte[] encryptedContent = (byte[]) userInfo.get(BackupNotifications.NOTIFICATION_BACKUP_FINISHED_ENCRYPTED_CONTENT_KEY);
-
-                if (backupKeyUid == null || encryptedContent == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.BACKUP_FINISHED_BYTES_BACKUP_KEY_UID_KEY, backupKeyUid.getBytes());
-                engineInfo.put(EngineNotifications.BACKUP_FINISHED_VERSION_KEY, version);
-                engineInfo.put(EngineNotifications.BACKUP_FINISHED_ENCRYPTED_CONTENT_KEY, encryptedContent);
-
-                postEngineNotification(EngineNotifications.BACKUP_FINISHED, engineInfo);
-                break;
-            }
-            case BackupNotifications.NOTIFICATION_BACKUP_VERIFICATION_SUCCESSFUL: {
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                postEngineNotification(EngineNotifications.BACKUP_KEY_VERIFICATION_SUCCESSFUL, engineInfo);
-                break;
-            }
-            case BackupNotifications.NOTIFICATION_BACKUP_FOR_EXPORT_FAILED: {
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                postEngineNotification(EngineNotifications.BACKUP_FOR_EXPORT_FAILED, engineInfo);
-                break;
-            }
-            case BackupNotifications.NOTIFICATION_APP_BACKUP_INITIATION_REQUEST: {
-                UID backupKeyUid = (UID) userInfo.get(BackupNotifications.NOTIFICATION_APP_BACKUP_INITIATION_REQUEST_BACKUP_KEY_UID_KEY);
-                int version = (int) userInfo.get(BackupNotifications.NOTIFICATION_APP_BACKUP_INITIATION_REQUEST_VERSION_KEY);
-                if (backupKeyUid == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.APP_BACKUP_REQUESTED_BYTES_BACKUP_KEY_UID_KEY, backupKeyUid.getBytes());
-                engineInfo.put(EngineNotifications.APP_BACKUP_REQUESTED_VERSION_KEY, version);
-
-                postEngineNotification(EngineNotifications.APP_BACKUP_REQUESTED, engineInfo);
-                break;
-            }
-            case BackupNotifications.NOTIFICATION_BACKUP_RESTORATION_FINISHED: {
-                postEngineNotification(EngineNotifications.ENGINE_BACKUP_RESTORATION_FINISHED, new HashMap<>());
-                break;
-            }
-            case ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED: {
-                Identity ownedIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_OWNED_IDENTITIY_KEY);
-                Identity contactIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_CONTACT_IDENTITIY_KEY);
-                byte[] nonce = (byte[]) userInfo.get(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_SIGNATURE_KEY);
-
-                if (ownedIdentity == null || contactIdentity == null || nonce == null) {
-                    break;
-                }
-
-                HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_BYTES_OWNED_IDENTITIY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_BYTES_CONTACT_IDENTITIY_KEY, contactIdentity.getBytes());
-                engineInfo.put(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_NONCE_KEY, nonce);
-
-                postEngineNotification(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED, engineInfo);
-                break;
-            }
-            default:
-                Logger.w("Received notification " + notificationName + " but no handler is set.");
-        }
+        notificationListenerBackups = new NotificationListenerBackups(this);
+        notificationListenerBackups.registerToNotifications(this.notificationManager);
     }
 
     // endregion
@@ -1633,7 +430,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
         return new EngineSession(createSessionDelegate.getSession(), this, jsonObjectMapper);
     }
 
-    private EngineSession wrapSession(Session session) {
+    EngineSession wrapSession(Session session) {
         return new EngineSession(session, this, jsonObjectMapper);
     }
 
@@ -1657,7 +454,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
         postEngineNotification(EngineNotifications.UI_DIALOG_DELETED, userInfo);
     }
 
-    private ObvDialog createDialog(ChannelDialogMessageToSend channelDialogMessageToSend) {
+    ObvDialog createDialog(ChannelDialogMessageToSend channelDialogMessageToSend) {
         ObvDialog.Category category;
         Identity ownedIdentity = channelDialogMessageToSend.getSendChannelInfo().getToIdentity();
 
@@ -1726,6 +523,14 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
             }
             case DialogType.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_ID: {
                 category = ObvDialog.Category.createAcceptOneToOneInvitation(dialogType.contactIdentity.getBytes(), dialogType.serverTimestamp);
+                break;
+            }
+            case DialogType.ACCEPT_GROUP_V2_INVITATION_DIALOG_ID: {
+                category = ObvDialog.Category.createGroupV2Invitation(dialogType.mediatorOrGroupOwnerIdentity.getBytes(), dialogType.obvGroupV2);
+                break;
+            }
+            case DialogType.GROUP_V2_FROZEN_INVITATION_DIALOG_ID: {
+                category = ObvDialog.Category.createGroupV2FrozenInvitation(dialogType.mediatorOrGroupOwnerIdentity.getBytes(), dialogType.obvGroupV2);
                 break;
             }
             default:
@@ -2268,15 +1073,6 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
         }
     }
 
-//    @Override
-//    public boolean doesContactHaveAutoAcceptTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
-//        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-//        Identity contactIdentity = Identity.of(bytesContactIdentity);
-//        try (EngineSession engineSession = getSession()) {
-//            return (identityManager.getContactIdentityTrustLevel(engineSession.session, ownedIdentity, contactIdentity).compareTo(Constants.AUTO_ACCEPT_TRUST_LEVEL_THRESHOLD)) >= 0;
-//        }
-//    }
-
     // returns null in case of error, empty list if there are no capabilities
     @Override
     public List<ObvCapability> getContactCapabilities(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) {
@@ -2421,6 +1217,116 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     }
 
     // endregion
+    // region Groups V2
+
+
+    @Override
+    public List<ObvGroupV2> getGroupsV2OfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception {
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        return identityManager.getObvGroupsV2ForOwnedIdentity(ownedIdentity);
+    }
+
+    @Override
+    public void trustGroupV2PublishedDetails(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception {
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+        try (EngineSession engineSession = getSession()) {
+            identityManager.trustGroupV2PublishedDetails(engineSession.session, ownedIdentity, groupIdentifier);
+            engineSession.session.commit();
+        }
+    }
+
+    @Override
+    public ObvGroupV2.ObvGroupV2DetailsAndPhotos getGroupV2DetailsAndPhotos(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) {
+        if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
+            return null;
+        }
+
+        try {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+
+            try (EngineSession engineSession = getSession()) {
+                return identityManager.getGroupV2DetailsAndPhotos(engineSession.session, ownedIdentity, groupIdentifier);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+
+    @Override
+    public void initiateGroupV2Update(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, ObvGroupV2.ObvGroupV2ChangeSet changeSet) throws Exception {
+        if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
+            throw new Exception();
+        }
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+
+        protocolManager.initiateGroupV2Update(ownedIdentity, groupIdentifier, changeSet);
+    }
+
+    @Override
+    public void leaveGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception {
+        if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
+            throw new Exception();
+        }
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+
+        protocolManager.initiateGroupV2Leave(ownedIdentity, groupIdentifier);
+    }
+
+    @Override
+    public void disbandGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception {
+        if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
+            throw new Exception();
+        }
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+
+        protocolManager.initiateGroupV2Disband(ownedIdentity, groupIdentifier);
+    }
+
+    @Override
+    public void reDownloadGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception {
+        if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
+            throw new Exception();
+        }
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+
+        protocolManager.initiateGroupV2ReDownload(ownedIdentity, groupIdentifier);
+    }
+
+    @Override
+    public int getGroupV2Version(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception {
+        if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
+            throw new Exception();
+        }
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+
+        try (EngineSession engineSession = getSession()) {
+            return identityManager.getGroupV2Version(engineSession.session, ownedIdentity, groupIdentifier);
+        }
+    }
+
+    @Override
+    public boolean isGroupV2UpdateInProgress(byte[] bytesOwnedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if (bytesOwnedIdentity == null || groupIdentifier == null) {
+            throw new Exception();
+        }
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+
+        try (EngineSession engineSession = getSession()) {
+            return identityManager.isGroupV2Frozen(engineSession.session, ownedIdentity, groupIdentifier);
+        }
+    }
+
+    // endregion
     // region ObvDialog
 
     @Override
@@ -2505,7 +1411,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
 
         try (EngineSession engineSession = getSession()) {
-            byte[] signature = identityManager.signIdentities(engineSession.session, Constants.MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX, new Identity[]{contactIdentity, ownedIdentity}, ownedIdentity, prng);
+            byte[] signature = identityManager.signIdentities(engineSession.session, Constants.SignatureContext.MUTUAL_SCAN, new Identity[]{contactIdentity, ownedIdentity}, ownedIdentity, prng);
             return new ObvMutualScanUrl(ownedIdentity, ownDisplayName, signature);
         }
     }
@@ -2514,7 +1420,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
         try {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
 
-            return identityManager.verifyIdentitiesSignature(Constants.MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX, new Identity[]{ownedIdentity, mutualScanUrl.identity}, mutualScanUrl.identity, mutualScanUrl.signature);
+            return Signature.verify(Constants.SignatureContext.MUTUAL_SCAN, new Identity[]{ownedIdentity, mutualScanUrl.identity}, mutualScanUrl.identity, mutualScanUrl.signature);
         } catch (Exception e) {
             return false;
         }
@@ -2547,6 +1453,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
         if (bytesOwnedIdentity == null || bytesRemoteIdentities == null) {
             throw new Exception();
         }
+
         HashSet<IdentityWithSerializedDetails> groupMemberIdentitiesAndDisplayNames = new HashSet<>();
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
 
@@ -2557,8 +1464,21 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 groupMemberIdentitiesAndDisplayNames.add(new IdentityWithSerializedDetails(remoteIdentity, serializedDetails));
             }
         }
-
         protocolManager.startGroupCreationProtocol(ownedIdentity, serializedGroupDetailsWithVersionAndPhoto, absolutePhotoUrl, groupMemberIdentitiesAndDisplayNames);
+    }
+
+
+    @Override
+    public void startGroupV2CreationProtocol(String serializedGroupDetails, String absolutePhotoUrl, byte[] bytesOwnedIdentity, HashSet<GroupV2.Permission> ownPermissions, HashMap<ObvBytesKey, HashSet<GroupV2.Permission>> otherGroupMembers) throws Exception {
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+
+        HashSet<GroupV2.IdentityAndPermissions> otherGroupMembersSet = new HashSet<>();
+        for (Map.Entry<ObvBytesKey, HashSet<GroupV2.Permission>> entry : otherGroupMembers.entrySet()) {
+            Identity remoteIdentity = Identity.of(entry.getKey().getBytes());
+            otherGroupMembersSet.add(new GroupV2.IdentityAndPermissions(remoteIdentity, entry.getValue()));
+        }
+
+        protocolManager.startGroupV2CreationProtocol(ownedIdentity, serializedGroupDetails, absolutePhotoUrl, ownPermissions, otherGroupMembersSet);
     }
 
     @Override
@@ -2769,7 +1689,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
             }
         }
 
-        HashMap<ObvPostMessageOutput.BytesKey, byte[]> messageIdentifierByContactIdentity = new HashMap<>();
+        HashMap<ObvBytesKey, byte[]> messageIdentifierByContactIdentity = new HashMap<>();
         boolean messageSent = false;
 
         for (String server: contactServersHashMap.keySet()) {
@@ -2816,11 +1736,11 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
 
                 if (messageUid != null) {
                     for (Identity contactIdentity : contactIdentities) {
-                        messageIdentifierByContactIdentity.put(new ObvPostMessageOutput.BytesKey(contactIdentity.getBytes()), messageUid.getBytes());
+                        messageIdentifierByContactIdentity.put(new ObvBytesKey(contactIdentity.getBytes()), messageUid.getBytes());
                     }
                 } else {
                     for (Identity contactIdentity : contactIdentities) {
-                        messageIdentifierByContactIdentity.put(new ObvPostMessageOutput.BytesKey(contactIdentity.getBytes()), null);
+                        messageIdentifierByContactIdentity.put(new ObvBytesKey(contactIdentity.getBytes()), null);
                     }
                     continue;
                 }
@@ -2829,7 +1749,7 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
                 messageSent = true;
             } catch (Exception e) {
                 for (Identity contactIdentity : contactIdentities) {
-                    messageIdentifierByContactIdentity.put(new ObvPostMessageOutput.BytesKey(contactIdentity.getBytes()), null);
+                    messageIdentifierByContactIdentity.put(new ObvBytesKey(contactIdentity.getBytes()), null);
                 }
                 e.printStackTrace();
             }
@@ -3047,8 +1967,8 @@ public class Engine implements NotificationListener, UserInterfaceDialogListener
     }
 
     @Override
-    public void setAutoBackupEnabled(boolean enabled) {
-        backupManager.setAutoBackupEnabled(enabled);
+    public void setAutoBackupEnabled(boolean enabled, boolean initiateBackupNowIfNeeded) {
+        backupManager.setAutoBackupEnabled(enabled, initiateBackupNowIfNeeded);
     }
 
     @Override

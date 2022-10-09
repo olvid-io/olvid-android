@@ -60,6 +60,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.PreviewUtilsWithDrawables;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
+import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryImageViewHolder> implements Observer<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> {
     static final int STATUS_CHANGE_MASK = 1;
@@ -135,13 +136,19 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
         final FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = fyleAndStatuses.get(position);
         holder.fyleAndStatus = fyleAndStatus;
         if (holder.imageView != null) {
+            if (fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_FAILED) {
+                holder.attachmentFailedTextView.setVisibility(View.VISIBLE);
+            } else {
+                holder.attachmentFailedTextView.setVisibility(View.GONE);
+            }
+
             App.runThread(() -> {
                 try {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
                         Drawable drawable = PreviewUtilsWithDrawables.getDrawablePreview(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus, PreviewUtils.MAX_SIZE);
                         if (holder.fyleAndStatus.equals(fyleAndStatus)) {
                             new Handler(Looper.getMainLooper()).post(() -> {
-                                if (drawable == null) {
+                                if (drawable == null && fyleAndStatus.fyleMessageJoinWithStatus.status != FyleMessageJoinWithStatus.STATUS_FAILED) {
                                     holder.previewErrorTextView.setVisibility(View.VISIBLE);
                                 } else {
                                     holder.previewErrorTextView.setVisibility(View.GONE);
@@ -161,7 +168,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
                 Bitmap bitmap = PreviewUtils.getBitmapPreview(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus, PreviewUtils.MAX_SIZE);
                 if (holder.fyleAndStatus.equals(fyleAndStatus)) {
                     new Handler(Looper.getMainLooper()).post(() -> {
-                        if (bitmap == null) {
+                        if (bitmap == null && fyleAndStatus.fyleMessageJoinWithStatus.status != FyleMessageJoinWithStatus.STATUS_FAILED) {
                             holder.previewErrorTextView.setVisibility(View.VISIBLE);
                         } else {
                             holder.previewErrorTextView.setVisibility(View.GONE);
@@ -172,6 +179,15 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
             });
         } else if (holder.mediaPlayer != null) {
             try {
+                if (fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_FAILED) {
+                    holder.videoView.setVisibility(View.GONE);
+                    holder.attachmentFailedTextView.setVisibility(View.VISIBLE);
+                    return;
+                }
+
+                holder.videoView.setVisibility(View.VISIBLE);
+                holder.attachmentFailedTextView.setVisibility(View.GONE);
+
                 String filePath = App.absolutePathFromRelative(fyleAndStatus.fyle.filePath);
                 if (filePath == null) {
                     filePath = fyleAndStatus.fyleMessageJoinWithStatus.getAbsoluteFilePath();
@@ -343,6 +359,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
         final GalleryImageView imageView;
         final VideoView videoView;
         final TextView previewErrorTextView;
+        final TextView attachmentFailedTextView;
         final MediaPlayer mediaPlayer;
         ListenableFuture<SessionPlayer.PlayerResult> prepareResult;
         FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus;
@@ -352,6 +369,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
             imageView = itemView.findViewById(R.id.image_view);
             videoView = itemView.findViewById(R.id.video_view);
             previewErrorTextView = itemView.findViewById(R.id.preview_error_text_view);
+            attachmentFailedTextView = itemView.findViewById(R.id.attachment_failed_text_view);
             if (imageView != null) {
                 imageView.setParentViewPagerUserInputController(galleryAdapterCallbacks::setViewPagerUserInputEnabled);
                 imageView.setSingleTapUpCallback(galleryAdapterCallbacks::singleTapUp);

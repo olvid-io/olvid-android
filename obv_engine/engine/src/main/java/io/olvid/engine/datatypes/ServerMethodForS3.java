@@ -107,6 +107,7 @@ public abstract class ServerMethodForS3 {
                                 }
                                 os.write(dataToSend, offset, Math.min(BLOCK_SIZE, dataToSend.length - offset));
                             }
+                            progressListener.onProgress(dataToSend.length);
                         } else {
                             os.write(dataToSend);
                         }
@@ -136,6 +137,7 @@ public abstract class ServerMethodForS3 {
                                             nextReport = System.currentTimeMillis() + progressListenerIntervalMs;
                                         }
                                     }
+                                    progressListener.onProgress(progress);
                                 } else {
                                     while ((numberOfBytesRead = bis.read(buffer)) != -1) {
                                         byteArrayOutputStream.write(buffer, 0, numberOfBytesRead);

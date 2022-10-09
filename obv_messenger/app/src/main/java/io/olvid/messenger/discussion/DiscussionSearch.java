@@ -199,72 +199,77 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
             }
 
             if (patterns.size() > 0) {
-                List<Message> messages = messageListAdapter.messages;
+                final List<Message> messages = messageListAdapter.messages;
+                if (messages != null) {
 
-                int firstVisible = Math.max(0, messageListLinearLayoutManager.findFirstVisibleItemPosition() - 1);
-                int lastVisible = messageListLinearLayoutManager.findLastVisibleItemPosition() - 1;
+                    int firstVisible = Math.max(0, messageListLinearLayoutManager.findFirstVisibleItemPosition() - 1);
+                    int lastVisible = messageListLinearLayoutManager.findLastVisibleItemPosition() - 1;
 
-                final int searchStart;
-                if (currentPosition != null && currentPosition >= firstVisible && currentPosition <= lastVisible) {
-                    // start from currentPosition
-                    searchStart = currentPosition;
-                } else {
-                    // start from firstVisible
-                    searchStart = firstVisible;
-                }
-                prevPosition = null;
-                currentPosition = null;
-                nextPosition = null;
-
-                for (int i = searchStart; i < messages.size(); i++) {
-                    if (find(messages.get(i), patterns)) {
-                        currentPosition = i;
-                        break;
+                    final int searchStart;
+                    if (currentPosition != null && currentPosition >= firstVisible && currentPosition <= lastVisible) {
+                        // start from currentPosition
+                        searchStart = currentPosition;
+                    } else {
+                        // start from firstVisible
+                        searchStart = firstVisible;
                     }
-                }
+                    prevPosition = null;
+                    currentPosition = null;
+                    nextPosition = null;
 
-                if (currentPosition == null) {
-                    // we could not find a "forward" match --> start searching backwards
-                    for (int i = searchStart - 1; i >= 0; i--) {
+                    for (int i = searchStart; i < messages.size(); i++) {
                         if (find(messages.get(i), patterns)) {
                             currentPosition = i;
                             break;
                         }
                     }
-                } else {
-                    // search the next position
-                    for (int i = currentPosition + 1; i < messages.size(); i++) {
-                        if (find(messages.get(i), patterns)) {
-                            nextPosition = i;
-                            break;
+
+                    if (currentPosition == null) {
+                        // we could not find a "forward" match --> start searching backwards
+                        for (int i = searchStart - 1; i >= 0; i--) {
+                            if (find(messages.get(i), patterns)) {
+                                currentPosition = i;
+                                break;
+                            }
+                        }
+                    } else {
+                        // search the next position
+                        for (int i = currentPosition + 1; i < messages.size(); i++) {
+                            if (find(messages.get(i), patterns)) {
+                                nextPosition = i;
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (currentPosition != null) {
-                    // search for previous position
-                    for (int i = currentPosition - 1; i >= 0; i--) {
-                        if (find(messages.get(i), patterns)) {
-                            prevPosition = i;
-                            break;
+                    if (currentPosition != null) {
+                        // search for previous position
+                        for (int i = currentPosition - 1; i >= 0; i--) {
+                            if (find(messages.get(i), patterns)) {
+                                prevPosition = i;
+                                break;
+                            }
                         }
                     }
-                }
 
 
-                if (currentPosition != null) {
-                    activity.runOnUiThread(() -> {
-                        messageListAdapter.setMessageHighlightInfo(new MessageHighlightInfo(messages.get(currentPosition).id, patterns));
-                        messageListAdapter.notifyItemChanged(currentPosition + 1, DiscussionActivity.MessageListAdapter.BODY_OR_HIGHLIGHT_CHANGE_MASK);
-                        messageListLinearLayoutManager.scrollToPosition(currentPosition + 1);
-                        if (menuPrev != null) {
-                            menuPrev.setEnabled(prevPosition != null);
-                        }
-                        if (menuNext != null) {
-                            menuNext.setEnabled(nextPosition != null);
-                        }
-                    });
-                    return;
+                    if (currentPosition != null) {
+                        activity.runOnUiThread(() -> {
+                            Message message = messages.get(currentPosition);
+                            if (message != null) {
+                                messageListAdapter.setMessageHighlightInfo(new MessageHighlightInfo(message.id, patterns));
+                            }
+                            messageListAdapter.notifyItemChanged(currentPosition + 1, DiscussionActivity.MessageListAdapter.BODY_OR_HIGHLIGHT_CHANGE_MASK);
+                            messageListLinearLayoutManager.scrollToPosition(currentPosition + 1);
+                            if (menuPrev != null) {
+                                menuPrev.setEnabled(prevPosition != null);
+                            }
+                            if (menuNext != null) {
+                                menuNext.setEnabled(nextPosition != null);
+                            }
+                        });
+                        return;
+                    }
                 }
             }
         }

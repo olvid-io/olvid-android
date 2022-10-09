@@ -61,6 +61,7 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.Reaction;
 import io.olvid.messenger.databases.tasks.CopySelectedMessageTask;
@@ -164,7 +165,7 @@ public class MessageLongPressPopUp {
         if ((message.messageType != Message.TYPE_OUTBOUND_MESSAGE && message.messageType != Message.TYPE_INBOUND_MESSAGE)
                 || message.wipeStatus == Message.WIPE_STATUS_WIPED
                 || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
-                || discussion.isLocked()) {
+                || !discussion.canPostMessages()) {
             // no reactions in this case
             reactionsPopUpLinearLayout.setVisibility(View.GONE);
         } else {
@@ -192,7 +193,7 @@ public class MessageLongPressPopUp {
         boolean twoLines = false;
 
         View replyView = popUpView.findViewById(R.id.swipe_menu_reply);
-        if (discussion.isLocked() ||
+        if (!discussion.canPostMessages() ||
                 (message.messageType != Message.TYPE_INBOUND_MESSAGE
                         && message.messageType != Message.TYPE_OUTBOUND_MESSAGE)) {
             replyView.setVisibility(View.GONE);
@@ -207,7 +208,8 @@ public class MessageLongPressPopUp {
         View forwardView = popUpView.findViewById(R.id.swipe_menu_forward);
         View copyView = popUpView.findViewById(R.id.swipe_menu_copy);
         if ((message.messageType != Message.TYPE_INBOUND_MESSAGE && message.messageType != Message.TYPE_OUTBOUND_MESSAGE)
-                || message.wipeStatus != Message.WIPE_STATUS_NONE) {
+                || message.wipeStatus != Message.WIPE_STATUS_NONE
+                || message.limitedVisibility) {
             shareView.setVisibility(View.GONE);
             forwardView.setVisibility(View.GONE);
             copyView.setVisibility(View.GONE);
@@ -276,10 +278,11 @@ public class MessageLongPressPopUp {
             });
         }
         View editView = popUpView.findViewById(R.id.swipe_menu_edit);
-        if (discussion.isLocked()
+        if (!discussion.canPostMessages()
                 || message.messageType != Message.TYPE_OUTBOUND_MESSAGE
                 || message.wipeStatus == Message.WIPE_STATUS_WIPED
-                || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
+                || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
+                || message.isLocationMessage()) {
             editView.setVisibility(View.GONE);
         } else {
             editView.setOnClickListener(v -> {
@@ -289,23 +292,41 @@ public class MessageLongPressPopUp {
         }
         View deleteView = popUpView.findViewById(R.id.swipe_menu_delete);
         deleteView.setOnClickListener(v -> {
-            if ((message.messageType == Message.TYPE_OUTBOUND_MESSAGE || message.messageType == Message.TYPE_INBOUND_MESSAGE || message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE)
-                    && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
-                    && !discussion.isLocked()) {
-                final SecureDeleteEverywhereDialogBuilder builder = new SecureDeleteEverywhereDialogBuilder(activity, R.style.CustomAlertDialog)
-                        .setTitle(R.string.dialog_title_confirm_deletion)
-                        .setType(SecureDeleteEverywhereDialogBuilder.TYPE.SINGLE_MESSAGE)
-                        .setMessage(activity.getResources().getQuantityString(R.plurals.dialog_message_delete_messages, 1, 1))
-                        .setDeleteCallback(deleteEverywhere -> App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(messageId), deleteEverywhere)));
-                builder.create().show();
-            } else {
-                final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
-                        .setTitle(R.string.dialog_title_confirm_deletion)
-                        .setMessage(activity.getResources().getQuantityString(R.plurals.dialog_message_delete_messages, 1, 1))
-                        .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(messageId), false)))
-                        .setNegativeButton(R.string.button_label_cancel, null);
-                builder.create().show();
-            }
+            App.runThread(() -> {
+                boolean canRemoteDelete;
+                boolean canRemoteDeleteOwn;
+                if (discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                    Group2 group2 = AppDatabase.getInstance().group2Dao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    if (group2 != null) {
+                        canRemoteDelete = group2.ownPermissionRemoteDeleteAnything;
+                        canRemoteDeleteOwn = group2.ownPermissionEditOrRemoteDeleteOwnMessages;
+                    } else {
+                        canRemoteDelete = false;
+                        canRemoteDeleteOwn = false;
+                    }
+                } else {
+                    canRemoteDelete = discussion.canPostMessages();
+                    canRemoteDeleteOwn = discussion.canPostMessages();
+                }
+                final AlertDialog.Builder builder;
+                if (((canRemoteDeleteOwn && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                        || (canRemoteDelete && ((message.messageType == Message.TYPE_INBOUND_MESSAGE) || (message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE))))
+                        && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED) {
+                    builder = new SecureDeleteEverywhereDialogBuilder(activity, R.style.CustomAlertDialog)
+                            .setTitle(R.string.dialog_title_confirm_deletion)
+                            .setType(SecureDeleteEverywhereDialogBuilder.TYPE.SINGLE_MESSAGE)
+                            .setMessage(activity.getResources().getQuantityString(R.plurals.dialog_message_delete_messages, 1, 1))
+                            .setDeleteCallback(deleteEverywhere -> App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(messageId), deleteEverywhere)));
+                } else {
+                    builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                            .setTitle(R.string.dialog_title_confirm_deletion)
+                            .setMessage(activity.getResources().getQuantityString(R.plurals.dialog_message_delete_messages, 1, 1))
+                            .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(messageId), false)))
+                            .setNegativeButton(R.string.button_label_cancel, null);
+                }
+                new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
+            });
+
             popupWindow.dismiss();
         });
 

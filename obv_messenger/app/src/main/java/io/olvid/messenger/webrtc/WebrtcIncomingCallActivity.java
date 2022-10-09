@@ -24,24 +24,29 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
 
 import java.util.List;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class WebrtcIncomingCallActivity extends AppCompatActivity implements View.OnClickListener {
@@ -50,8 +55,10 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
     WebrtcCallService webrtcCallService = null;
     CallParticipantsObserver callParticipantsObserver;
     CallStatusObserver callStatusObserver;
+    DiscussionCustomizationObserver discussionCustomizationObserver;
 
     InitialView contactInitialView;
+    ImageView contactColorCircleImageView;
     TextView contactNameTextView;
     TextView othersCountTextView;
     TextView bigCountTextView;
@@ -60,18 +67,7 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
 
     @Override
     protected void attachBaseContext(Context baseContext) {
-        final Context newContext;
-        float customFontScale = SettingsActivity.getFontScale();
-        float fontScale = baseContext.getResources().getConfiguration().fontScale;
-        if (customFontScale != 1.0f) {
-            Configuration configuration = new Configuration();
-            configuration.fontScale = fontScale * customFontScale;
-            newContext = baseContext.createConfigurationContext(configuration);
-        } else {
-            newContext = baseContext;
-        }
-
-        super.attachBaseContext(newContext);
+        super.attachBaseContext(SettingsActivity.overrideContextScales(baseContext));
     }
 
     @Override
@@ -88,6 +84,7 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
 
         callParticipantsObserver = new CallParticipantsObserver();
         callStatusObserver = new CallStatusObserver();
+        discussionCustomizationObserver = new DiscussionCustomizationObserver();
 
         setContentView(R.layout.activity_webrtc_incoming_call);
 
@@ -98,6 +95,7 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
         answerCallButton.setOnClickListener(this);
 
         contactInitialView = findViewById(R.id.contact_initial_view);
+        contactColorCircleImageView = findViewById(R.id.portrait_color_circle_image_view);
         contactNameTextView = findViewById(R.id.contact_name_text_view);
         othersCountTextView = findViewById(R.id.others_count_text_view);
         bigCountTextView = findViewById(R.id.big_count_text_view);
@@ -118,7 +116,7 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
             if (webrtcCallService != null) {
                 Intent answerCallIntent = new Intent(this, WebrtcCallActivity.class);
                 answerCallIntent.setAction(WebrtcCallActivity.ANSWER_CALL_ACTION);
-                answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER, webrtcCallService.callIdentifier.toString());
+                answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER, Logger.getUuidString(webrtcCallService.callIdentifier));
                 answerCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(answerCallIntent);
             }
@@ -181,6 +179,22 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
         }
     }
 
+    private class DiscussionCustomizationObserver implements Observer<DiscussionCustomization> {
+        @Override
+        public void onChanged(DiscussionCustomization discussionCustomization) {
+            if (discussionCustomization != null) {
+                DiscussionCustomization.ColorJson colorJson = discussionCustomization.getColorJson();
+                if (colorJson != null) {
+                    contactColorCircleImageView.setVisibility(View.VISIBLE);
+                    contactColorCircleImageView.setColorFilter(0xff000000 + colorJson.color, android.graphics.PorterDuff.Mode.SRC_IN);
+                    return;
+                }
+            }
+
+            contactColorCircleImageView.setVisibility(View.GONE);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -202,10 +216,19 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
             this.webrtcCallService = webrtcCallService;
             this.webrtcCallService.getCallParticipantsLiveData().observe(this, callParticipantsObserver);
             this.webrtcCallService.getState().observe(this, callStatusObserver);
-            if (this.webrtcCallService.getCallParticipantsLiveData().getValue() == null || this.webrtcCallService.getCallParticipantsLiveData().getValue().size() == 0) {
-                // no participants --> hang up the call
-                closeActivity();
-            }
+            LiveData<DiscussionCustomization> discussionCustomizationLiveData = Transformations.switchMap(this.webrtcCallService.getCallParticipantsLiveData(), (List<WebrtcCallService.CallParticipantPojo> callParticipants) -> {
+                final Contact callParticipantContact = (callParticipants == null || callParticipants.size() == 0) ? null : callParticipants.get(0).contact;
+                if (callParticipantContact == null) {
+                    return null;
+                }
+                return Transformations.switchMap(AppDatabase.getInstance().discussionDao().getByContactLiveData(callParticipantContact.bytesOwnedIdentity, callParticipantContact.bytesContactIdentity), (Discussion discussion) -> {
+                    if (discussion == null) {
+                        return null;
+                    }
+                    return AppDatabase.getInstance().discussionCustomizationDao().getLiveData(discussion.id);
+                });
+            });
+            discussionCustomizationLiveData.observe(this, discussionCustomizationObserver);
         } else {
             if (this.webrtcCallService != null) {
                 // remove observers

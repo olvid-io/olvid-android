@@ -24,22 +24,22 @@ import android.app.RemoteInput;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+
 import java.util.List;
 import java.util.UUID;
 
-import androidx.annotation.Nullable;
-
 import io.olvid.engine.engine.types.ObvDialog;
-import io.olvid.messenger.databases.tasks.CreateReadMessageMetadata;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
-import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.tasks.CreateReadMessageMetadata;
+import io.olvid.messenger.settings.SettingsActivity;
 
 
 public class NotificationActionService extends IntentService {
@@ -82,6 +82,7 @@ public class NotificationActionService extends IntentService {
                                 invitation.associatedDialog.setResponseToAcceptMediatorInvite(true);
                                 break;
                             case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
+                            case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY:
                                 invitation.associatedDialog.setResponseToAcceptGroupInvite(true);
                                 break;
                             case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
@@ -111,6 +112,8 @@ public class NotificationActionService extends IntentService {
                                 invitation.associatedDialog.setResponseToAcceptMediatorInvite(false);
                                 break;
                             case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
+                            case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY:
+                            case ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY:
                                 invitation.associatedDialog.setResponseToAcceptGroupInvite(false);
                                 break;
                             case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
@@ -201,7 +204,7 @@ public class NotificationActionService extends IntentService {
                                                 0
                                         );
                                         message.id = db.messageDao().insert(message);
-                                        message.post(false, false);
+                                        message.post(false, null);
 
                                         OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(discussion.bytesOwnedIdentity);
                                         AndroidNotificationManager.displayReceivedMessageNotification(discussion, message, null, ownedIdentity);
@@ -263,7 +266,7 @@ public class NotificationActionService extends IntentService {
                                                 0
                                         );
                                         message.id = db.messageDao().insert(message);
-                                        message.post(false, false);
+                                        message.post(false, null);
                                     });
                                 }
                             } else {

@@ -26,7 +26,7 @@ import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.key.symmetric.SymmetricKey;
 
 public interface KDF {
-    // WARNING: all KDF implementation must rely on a PRNG behaving as a random oracle. This is required for the security proof of ECIES.
+    // WARNING: all KDF implementations must rely on a PRNG behaving as a random oracle. This is required for the security proof of ECIES.
     String KDF_SHA256 = "kdf_sha-256";
 
     SymmetricKey[] gen(Seed seed, KDF.Delegate delegate) throws InvalidParameterException;

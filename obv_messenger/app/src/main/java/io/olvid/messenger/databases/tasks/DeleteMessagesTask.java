@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.tasks;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.services.UnifiedForegroundService;
 
 public class DeleteMessagesTask implements Runnable {
     private static final int BATCH_SIZE = 100;
@@ -47,9 +49,9 @@ public class DeleteMessagesTask implements Runnable {
     private final List<Long> selectedMessageIds;
     private final boolean deleteEverywhere;
     private final boolean processingRemoteDeleteRequest;
-    private final @NonNull
-    byte[] bytesOwnedIdentity;
+    private final byte[] bytesOwnedIdentity;
 
+    // Used to delete all messages in a discussion
     public DeleteMessagesTask(@NonNull byte[] bytesOwnedIdentity, long discussionId, boolean deleteEverywhere, boolean processingRemoteDeleteRequest) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.wholeDiscussion = true;
@@ -59,7 +61,9 @@ public class DeleteMessagesTask implements Runnable {
         this.processingRemoteDeleteRequest = processingRemoteDeleteRequest;
     }
 
-    public DeleteMessagesTask(@NonNull byte[] bytesOwnedIdentity, List<Long> selectedMessageIds, boolean deleteEverywhere) {
+    // Used to delete a specific set of messages. If deleteEverywhere is true, all messages have to be in the same discussion
+    // bytesOwnedIdentity should never be null if deleteEverywhere
+    public DeleteMessagesTask(@Nullable byte[] bytesOwnedIdentity, List<Long> selectedMessageIds, boolean deleteEverywhere) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.wholeDiscussion = false;
         this.discussionId = null;
@@ -89,12 +93,24 @@ public class DeleteMessagesTask implements Runnable {
             } else {
                 messages = db.messageDao().getAllDiscussionMessagesSync(discussionId);
             }
+            // if deleting all discussion stop sharing location if currently sharing
+            if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussionId)) {
+                UnifiedForegroundService.LocationSharingSubService.stopSharingLocationSync(discussionId);
+            }
         } else {
             //noinspection ConstantConditions
             int size = selectedMessageIds.size();
             messages = new ArrayList<>(size);
             for (int i = 0; i < size; i += BATCH_SIZE) {
                 messages.addAll(db.messageDao().getMany(selectedMessageIds.subList(i, Math.min(i + BATCH_SIZE, size))));
+            }
+            for (Message message : messages) {
+                // we found an outbound sharing location message, stop sharing in this discussion
+                if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
+                        && message.jsonLocation != null
+                        && message.locationType == Message.LOCATION_TYPE_SHARE) {
+                    UnifiedForegroundService.LocationSharingSubService.stopSharingLocationSync(message.discussionId);
+                }
             }
         }
 
@@ -163,10 +179,19 @@ public class DeleteMessagesTask implements Runnable {
                     case Message.TYPE_PHONE_CALL:
                     case Message.TYPE_NEW_PUBLISHED_DETAILS:
                     case Message.TYPE_CONTACT_INACTIVE_REASON:
+                    case Message.TYPE_CONTACT_RE_ADDED:
+                    case Message.TYPE_RE_JOINED_GROUP:
+                    case Message.TYPE_JOINED_GROUP:
+                    case Message.TYPE_GAINED_GROUP_ADMIN:
+                    case Message.TYPE_LOST_GROUP_ADMIN:
                         infoMessages.add(message);
                         break;
                     default:
-                        message.remoteDelete(db, bytesOwnedIdentity, timestamp);
+                        if (bytesOwnedIdentity == null) {
+                            Logger.e("Error: called DeleteMessagesTask with null bytesOwnedIdentity and deleteEverywhere!");
+                        } else {
+                            message.remoteDelete(db, bytesOwnedIdentity, timestamp);
+                        }
                         if (message.wipedAttachmentCount == 0 && message.totalAttachmentCount != 0) {
                             message.wipedAttachmentCount = message.totalAttachmentCount;
                             message.totalAttachmentCount = 0;

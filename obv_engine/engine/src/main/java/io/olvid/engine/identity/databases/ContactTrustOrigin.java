@@ -33,6 +33,7 @@ import java.util.List;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
+import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
@@ -61,11 +62,14 @@ public class ContactTrustOrigin implements ObvDatabase {
     static final String MEDIATOR_OR_GROUP_OWNER_TRUST_LEVEL_MAJOR = "mediator_or_group_owner_trust_level_major";
     private String identityServer;
     static final String IDENTITY_SERVER = "identity_server";
+    private byte[] serializedGroupIdentifier;
+    static final String SERIALIZED_GROUP_IDENTIFIER = "serialized_group_identifier";
 
     private static final int TRUST_TYPE_DIRECT = 1;
     private static final int TRUST_TYPE_INTRODUCTION = 2;
     private static final int TRUST_TYPE_GROUP = 3;
     private static final int TRUST_TYPE_IDENTITY_SERVER = 4;
+    private static final int TRUST_TYPE_SERVER_GROUP_V2 = 5;
 
     // region computed properties
 
@@ -78,6 +82,8 @@ public class ContactTrustOrigin implements ObvDatabase {
                 return TrustLevel.createIndirect(mediatorOrGroupOwnerTrustLevelMajor);
             case TRUST_TYPE_IDENTITY_SERVER:
                 return TrustLevel.createServer();
+            case TRUST_TYPE_SERVER_GROUP_V2:
+                return TrustLevel.createServerGroupV2();
             default:
                 return null;
         }
@@ -93,6 +99,12 @@ public class ContactTrustOrigin implements ObvDatabase {
                 return TrustOrigin.createIntroductionTrustOrigin(timestamp, mediatorOrGroupOwnerIdentity);
             case TRUST_TYPE_IDENTITY_SERVER:
                 return TrustOrigin.createKeycloakTrustOrigin(timestamp, identityServer);
+            case TRUST_TYPE_SERVER_GROUP_V2:
+                try {
+                    return TrustOrigin.createServerGroupV2TrustOrigin(timestamp, GroupV2.Identifier.of(serializedGroupIdentifier));
+                } catch (Exception e) {
+                    return null;
+                }
             default:
                 return null;
         }
@@ -113,6 +125,7 @@ public class ContactTrustOrigin implements ObvDatabase {
                     MEDIATOR_OR_GROUP_OWNER_IDENTITY + " BLOB, " +
                     MEDIATOR_OR_GROUP_OWNER_TRUST_LEVEL_MAJOR + " INTEGER, " +
                     IDENTITY_SERVER + " TEXT, " +
+                    SERIALIZED_GROUP_IDENTIFIER + " BLOB, " +
                     " FOREIGN KEY (" + CONTACT_IDENTITY + ", " + OWNED_IDENTITY + ") REFERENCES " + ContactIdentity.TABLE_NAME + " (" + ContactIdentity.CONTACT_IDENTITY + ", " + ContactIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE);");
         }
     }
@@ -129,6 +142,14 @@ public class ContactTrustOrigin implements ObvDatabase {
             }
             oldVersion = 12;
         }
+        if (oldVersion < 32 && newVersion >= 32) {
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE contact_trust_origin " +
+                        " ADD COLUMN serialized_group_identifier BLOB DEFAULT NULL");
+            }
+            oldVersion = 32;
+        }
+
     }
 
 
@@ -141,8 +162,9 @@ public class ContactTrustOrigin implements ObvDatabase {
                 TRUST_TYPE + ", " +
                 MEDIATOR_OR_GROUP_OWNER_IDENTITY + ", " +
                 MEDIATOR_OR_GROUP_OWNER_TRUST_LEVEL_MAJOR + ", " +
-                IDENTITY_SERVER + ") " +
-                " VALUES (?,?,?,?,?, ?,?);", Statement.RETURN_GENERATED_KEYS)) {
+                IDENTITY_SERVER +  ", " +
+                SERIALIZED_GROUP_IDENTIFIER + ") " +
+                " VALUES (?,?,?,?,?, ?,?,?);", Statement.RETURN_GENERATED_KEYS)) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setLong(3, timestamp);
@@ -158,6 +180,7 @@ public class ContactTrustOrigin implements ObvDatabase {
                 statement.setInt(6, mediatorOrGroupOwnerTrustLevelMajor);
             }
             statement.setString(7, identityServer);
+            statement.setBytes(8, serializedGroupIdentifier);
             statement.executeUpdate();
             ResultSet res = statement.getGeneratedKeys();
             if (res.next()) {
@@ -187,26 +210,37 @@ public class ContactTrustOrigin implements ObvDatabase {
             int trustType;
             Identity mediatorOrGroupOwnerIdentity;
             String identityServer;
+            byte[] serializedGroupIdentifier;
             switch (trustOrigin.getType()) {
                 case DIRECT:
                     trustType = TRUST_TYPE_DIRECT;
                     mediatorOrGroupOwnerIdentity = null;
                     identityServer = null;
+                    serializedGroupIdentifier = null;
                     break;
                 case GROUP:
                     trustType = TRUST_TYPE_GROUP;
                     mediatorOrGroupOwnerIdentity = trustOrigin.getMediatorOrGroupOwnerIdentity();
                     identityServer = null;
+                    serializedGroupIdentifier = null;
                     break;
                 case INTRODUCTION:
                     trustType = TRUST_TYPE_INTRODUCTION;
                     mediatorOrGroupOwnerIdentity = trustOrigin.getMediatorOrGroupOwnerIdentity();
                     identityServer = null;
+                    serializedGroupIdentifier = null;
                     break;
                 case KEYCLOAK:
                     trustType = TRUST_TYPE_IDENTITY_SERVER;
                     mediatorOrGroupOwnerIdentity = null;
                     identityServer = trustOrigin.getKeycloakServer();
+                    serializedGroupIdentifier = null;
+                    break;
+                case SERVER_GROUP_V2:
+                    trustType = TRUST_TYPE_SERVER_GROUP_V2;
+                    mediatorOrGroupOwnerIdentity = null;
+                    identityServer = null;
+                    serializedGroupIdentifier = trustOrigin.getGroupIdentifier().getBytes();
                     break;
                 default:
                     return null;
@@ -220,15 +254,16 @@ public class ContactTrustOrigin implements ObvDatabase {
                 mediatorOrGroupOwnerTrustLevelMajor = mediatorOrGroupOwner.getTrustLevel().major;
             }
 
-            ContactTrustOrigin contactTrustOrigin = new ContactTrustOrigin(identityManagerSession, contactIdentity, ownedIdentity, trustOrigin.getTimestamp(), trustType, mediatorOrGroupOwnerIdentity, mediatorOrGroupOwnerTrustLevelMajor, identityServer);
+            ContactTrustOrigin contactTrustOrigin = new ContactTrustOrigin(identityManagerSession, contactIdentity, ownedIdentity, trustOrigin.getTimestamp(), trustType, mediatorOrGroupOwnerIdentity, mediatorOrGroupOwnerTrustLevelMajor, identityServer, serializedGroupIdentifier);
             contactTrustOrigin.insert();
             return contactTrustOrigin;
         } catch (SQLException e) {
+            e.printStackTrace();
             return null;
         }
     }
 
-    private ContactTrustOrigin(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, long timestamp, int trustType, Identity mediatorOrGroupOwnerIdentity, Integer mediatorOrGroupOwnerTrustLevelMajor, String identityServer) {
+    private ContactTrustOrigin(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, long timestamp, int trustType, Identity mediatorOrGroupOwnerIdentity, Integer mediatorOrGroupOwnerTrustLevelMajor, String identityServer, byte[] serializedGroupIdentifier) {
         this.identityManagerSession = identityManagerSession;
         this.contactIdentity = contactIdentity;
         this.ownedIdentity = ownedIdentity;
@@ -237,6 +272,7 @@ public class ContactTrustOrigin implements ObvDatabase {
         this.mediatorOrGroupOwnerIdentity = mediatorOrGroupOwnerIdentity;
         this.mediatorOrGroupOwnerTrustLevelMajor = mediatorOrGroupOwnerTrustLevelMajor;
         this.identityServer = identityServer;
+        this.serializedGroupIdentifier = serializedGroupIdentifier;
     }
 
 
@@ -262,6 +298,7 @@ public class ContactTrustOrigin implements ObvDatabase {
             this.mediatorOrGroupOwnerTrustLevelMajor = null;
         }
         this.identityServer = res.getString(IDENTITY_SERVER);
+        this.serializedGroupIdentifier = res.getBytes(SERIALIZED_GROUP_IDENTIFIER);
     }
 
     // endregion
@@ -329,6 +366,7 @@ public class ContactTrustOrigin implements ObvDatabase {
             pojo.mediator_or_group_owner_trust_level_major = mediatorOrGroupOwnerTrustLevelMajor;
         }
         pojo.identity_server = identityServer;
+        pojo.raw_obv_group_v2_identifier = serializedGroupIdentifier;
         return pojo;
     }
 
@@ -341,7 +379,7 @@ public class ContactTrustOrigin implements ObvDatabase {
         } catch (DecodingException e) {
             e.printStackTrace();
         }
-        ContactTrustOrigin contactTrustOrigin = new ContactTrustOrigin(identityManagerSession, contactIdentity, ownedIdentity, pojo.timestamp, pojo.readTrust_type(), mediatorOrGroupOwnerIdentity, pojo.mediator_or_group_owner_trust_level_major, pojo.identity_server);
+        ContactTrustOrigin contactTrustOrigin = new ContactTrustOrigin(identityManagerSession, contactIdentity, ownedIdentity, pojo.timestamp, pojo.readTrust_type(), mediatorOrGroupOwnerIdentity, pojo.mediator_or_group_owner_trust_level_major, pojo.identity_server, pojo.raw_obv_group_v2_identifier);
         contactTrustOrigin.insert();
     }
 
@@ -351,12 +389,14 @@ public class ContactTrustOrigin implements ObvDatabase {
         private static final int TYPE_GROUP = 1;
         private static final int TYPE_INTRODUCTION = 2;
         private static final int TYPE_IDENTITY_SERVER = 3;
+        private static final int TYPE_SERVER_GROUP_V2 = 4;
 
         public long timestamp;
         private int trust_type;
         public byte[] mediator_or_group_owner_identity;
         public Integer mediator_or_group_owner_trust_level_major;
         public String identity_server;
+        public byte[] raw_obv_group_v2_identifier;
 
         public Pojo_0() {
         }
@@ -378,6 +418,8 @@ public class ContactTrustOrigin implements ObvDatabase {
                     return TRUST_TYPE_INTRODUCTION;
                 case TYPE_IDENTITY_SERVER:
                     return TRUST_TYPE_IDENTITY_SERVER;
+                case TYPE_SERVER_GROUP_V2:
+                    return TRUST_TYPE_SERVER_GROUP_V2;
                 case TYPE_DIRECT:
                 default:
                     return TRUST_TYPE_DIRECT;
@@ -395,6 +437,9 @@ public class ContactTrustOrigin implements ObvDatabase {
                     break;
                 case TRUST_TYPE_IDENTITY_SERVER:
                     this.trust_type = TYPE_IDENTITY_SERVER;
+                    break;
+                case TRUST_TYPE_SERVER_GROUP_V2:
+                    this.trust_type = TYPE_SERVER_GROUP_V2;
                     break;
                 case TRUST_TYPE_DIRECT:
                 default:

@@ -31,11 +31,11 @@ import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.android.material.textfield.TextInputEditText;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -44,9 +44,9 @@ import java.util.regex.Pattern;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.TextChangeListener;
-import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
+import io.olvid.messenger.settings.SettingsActivity;
 
 
 public class ColorPickerDialogFragment extends DialogFragment implements View.OnClickListener {

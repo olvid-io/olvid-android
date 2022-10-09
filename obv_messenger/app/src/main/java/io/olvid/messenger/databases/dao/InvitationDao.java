@@ -23,6 +23,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import java.util.List;
@@ -31,11 +32,9 @@ import java.util.UUID;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.databases.entity.Invitation;
 
-import static androidx.room.OnConflictStrategy.REPLACE;
-
 @Dao
 public interface InvitationDao {
-    @Insert(onConflict = REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Invitation... invitations);
 
     @Delete
@@ -54,7 +53,8 @@ public interface InvitationDao {
     Invitation getByDialogUuid(UUID dialogUuid);
 
     @Query("SELECT * FROM " + Invitation.TABLE_NAME +
-            " WHERE " + Invitation.CATEGORY_ID + " = " + ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY)
+            " WHERE " + Invitation.CATEGORY_ID + " = " + ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY +
+            " OR " + Invitation.CATEGORY_ID + " = " + ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY)
     List<Invitation> getAllGroupInvites();
 
     @Query("SELECT * FROM " + Invitation.TABLE_NAME +

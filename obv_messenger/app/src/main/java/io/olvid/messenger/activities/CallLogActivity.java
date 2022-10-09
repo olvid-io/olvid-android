@@ -47,22 +47,23 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.olvid.messenger.customClasses.StringUtils;
-import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.customClasses.InitialView;
-import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
+import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.CallLogItemDao;
 import io.olvid.messenger.databases.entity.CallLogItem;
 import io.olvid.messenger.databases.entity.CallLogItemContactJoin;
 import io.olvid.messenger.fragments.dialog.CallContactDialogFragment;
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 
 public class CallLogActivity extends LockableActivity implements PopupMenu.OnMenuItemClickListener, View.OnClickListener {
     private CallLogAdapter adapter;
@@ -104,7 +105,7 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
 
         AndroidNotificationManager.clearAllMissedCallNotifications();
 
-        recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(this, 68, 12));
+        recyclerView.addItemDecoration(new ItemDecorationSimpleDivider(this, 68, 12));
     }
 
     @Override
@@ -140,11 +141,11 @@ public class CallLogActivity extends LockableActivity implements PopupMenu.OnMen
             if (callLogItem.contacts.size() == 1) {
                 App.startWebrtcCall(this, callLogItem.oneContact.bytesOwnedIdentity, callLogItem.oneContact.bytesContactIdentity);
             } else {
-                List<byte[]> bytesContactIdentities = new ArrayList<>(callLogItem.contacts.size());
+                ArrayList<BytesKey> bytesContactIdentities = new ArrayList<>(callLogItem.contacts.size());
                 for (CallLogItemContactJoin callLogItemContactJoin : callLogItem.contacts) {
-                    bytesContactIdentities.add(callLogItemContactJoin.bytesContactIdentity);
+                    bytesContactIdentities.add(new BytesKey(callLogItemContactJoin.bytesContactIdentity));
                 }
-                MultiCallStartDialogFragment multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(callLogItem.callLogItem.bytesOwnedIdentity, callLogItem.callLogItem.bytesGroupOwnerAndUid, bytesContactIdentities);
+                MultiCallStartDialogFragment multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(callLogItem.callLogItem.bytesOwnedIdentity, callLogItem.callLogItem.bytesGroupOwnerAndUidOrIdentifier, bytesContactIdentities);
                 multiCallStartDialogFragment.show(getSupportFragmentManager(), "dialog");
             }
         }

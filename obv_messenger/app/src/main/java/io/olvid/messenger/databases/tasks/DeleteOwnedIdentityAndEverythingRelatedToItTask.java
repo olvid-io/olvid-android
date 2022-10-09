@@ -29,6 +29,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 
 public class DeleteOwnedIdentityAndEverythingRelatedToItTask implements Runnable {
     final byte[] bytesOwnedIdentity;
@@ -69,6 +70,7 @@ public class DeleteOwnedIdentityAndEverythingRelatedToItTask implements Runnable
             }
         }
 
+        AndroidNotificationManager.clearKeycloakAuthenticationRequiredNotification(bytesOwnedIdentity);
         AppSingleton.getInstance().ownedIdentityWasDeleted(bytesOwnedIdentity);
     }
 }

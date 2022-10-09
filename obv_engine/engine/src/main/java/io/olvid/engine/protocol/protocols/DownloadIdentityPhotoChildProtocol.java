@@ -260,7 +260,7 @@ public class DownloadIdentityPhotoChildProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public QueryServerStep(InitialProtocolState startState, InitialMessage receivedMessage, DownloadIdentityPhotoChildProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -288,7 +288,7 @@ public class DownloadIdentityPhotoChildProtocol extends ConcreteProtocol {
         private final ServerGetPhotoMessage receivedMessage;
 
         public ProcessPhotoStep(DownloadingPhotoState startState, ServerGetPhotoMessage receivedMessage, DownloadIdentityPhotoChildProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

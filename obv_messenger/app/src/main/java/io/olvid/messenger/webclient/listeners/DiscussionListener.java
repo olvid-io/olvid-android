@@ -38,10 +38,10 @@ import io.olvid.messenger.webclient.WebClientManager;
 import io.olvid.messenger.webclient.datatypes.Constants;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.Colissimo;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.ColissimoType;
-import io.olvid.messenger.webclient.protobuf.notifications.NotifDeleteDiscussionOuterClass;
 import io.olvid.messenger.webclient.protobuf.RequestDiscussionsOuterClass.RequestDiscussionsResponse;
 import io.olvid.messenger.webclient.protobuf.datatypes.DiscussionOuterClass.Discussion;
 import io.olvid.messenger.webclient.protobuf.datatypes.MessageOuterClass.Message;
+import io.olvid.messenger.webclient.protobuf.notifications.NotifDeleteDiscussionOuterClass;
 import io.olvid.messenger.webclient.protobuf.notifications.NotifNewDiscussionOuterClass.NotifNewDiscussion;
 
 public class DiscussionListener {
@@ -172,7 +172,7 @@ public class DiscussionListener {
             } else if (element1.discussion.lastMessageTimestamp != element2.discussion.lastMessageTimestamp
                     || !element1.discussion.title.equals(element2.discussion.title)
                     || !Objects.equals(element1.discussion.photoUrl, element2.discussion.photoUrl)
-                    || element1.discussion.isLocked() != element2.discussion.isLocked()) {
+                    || element1.discussion.status != element2.discussion.status) {
                 return false;
             }
 
@@ -239,10 +239,15 @@ public class DiscussionListener {
             if(discussionAndLastMessage.discussion.photoUrl != null){
                 discussionBuilder.setPhotoURL(discussionAndLastMessage.discussion.photoUrl);
             }
-            if (discussionAndLastMessage.discussion.bytesContactIdentity != null)
-                discussionBuilder.setContactIdentity(ByteString.copyFrom(discussionAndLastMessage.discussion.bytesContactIdentity));
-            if (discussionAndLastMessage.discussion.bytesGroupOwnerAndUid != null)
-                discussionBuilder.setGroupOwnerAndUid(ByteString.copyFrom(discussionAndLastMessage.discussion.bytesGroupOwnerAndUid));
+            switch (discussionAndLastMessage.discussion.discussionType) {
+                case io.olvid.messenger.databases.entity.Discussion.TYPE_CONTACT:
+                    discussionBuilder.setContactIdentity(ByteString.copyFrom(discussionAndLastMessage.discussion.bytesDiscussionIdentifier));
+                    break;
+                case io.olvid.messenger.databases.entity.Discussion.TYPE_GROUP:
+                case io.olvid.messenger.databases.entity.Discussion.TYPE_GROUP_V2:
+                    discussionBuilder.setGroupOwnerAndUid(ByteString.copyFrom(discussionAndLastMessage.discussion.bytesDiscussionIdentifier));
+                    break;
+            }
             discussionBuilder.setUnreadMessagesCount(discussionAndLastMessage.unreadCount);
             discussionBuilder.setDiscussionTimestamp(discussionAndLastMessage.discussion.lastMessageTimestamp);
             //set last message fields

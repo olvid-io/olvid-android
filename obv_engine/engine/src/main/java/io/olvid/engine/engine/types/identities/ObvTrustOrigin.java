@@ -23,7 +23,6 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
-import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.metamanager.IdentityDelegate;
 
 
@@ -33,12 +32,14 @@ public class ObvTrustOrigin {
         INTRODUCTION,
         GROUP,
         KEYCLOAK,
+        SERVER_GROUP_V2,
     }
 
     private final TYPE type;
     private final long timestamp;
     private final ObvIdentity mediatorOrGroupOwner;
     private final String keycloakServer;
+    private final byte[] bytesGroupIdentifier;
 
     public TYPE getType() {
         return type;
@@ -56,6 +57,10 @@ public class ObvTrustOrigin {
         return keycloakServer;
     }
 
+    public byte[] getBytesGroupIdentifier() {
+        return bytesGroupIdentifier;
+    }
+
     public ObvTrustOrigin(Session session, IdentityDelegate identityDelegate, TrustOrigin trustOrigin, Identity ownedIdentity) throws Exception {
         switch (trustOrigin.getType()) {
             case DIRECT:
@@ -69,6 +74,9 @@ public class ObvTrustOrigin {
                 break;
             case KEYCLOAK:
                 this.type = TYPE.KEYCLOAK;
+                break;
+            case SERVER_GROUP_V2:
+                this.type = TYPE.SERVER_GROUP_V2;
                 break;
             default:
                 throw new Exception("Unknown TrustOrigin type " + trustOrigin.getType());
@@ -85,5 +93,6 @@ public class ObvTrustOrigin {
         }
         this.mediatorOrGroupOwner = mediatorOrGroupOwner;
         this.keycloakServer = trustOrigin.getKeycloakServer();
+        this.bytesGroupIdentifier = trustOrigin.getGroupIdentifier() == null ? null : trustOrigin.getGroupIdentifier().getBytes();
     }
 }

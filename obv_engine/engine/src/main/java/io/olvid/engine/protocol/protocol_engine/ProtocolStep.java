@@ -38,14 +38,10 @@ public abstract class ProtocolStep extends Operation {
         return endState;
     }
 
-    public ProtocolStep(Identity expectedToIdentity, ReceptionChannelInfo expectedReceptionChannelInfo, ConcreteProtocolMessage receivedMessage, ConcreteProtocol protocol) throws Exception {
-        if (!receivedMessage.getToIdentity().equals(expectedToIdentity)) {
-            Logger.d("Protocol expected toIdentity mismatch.");
-            throw new Exception();
-        }
+    public ProtocolStep(ReceptionChannelInfo expectedReceptionChannelInfo, ConcreteProtocolMessage receivedMessage, ConcreteProtocol protocol) throws Exception {
         if (expectedReceptionChannelInfo.getChannelType() == ReceptionChannelInfo.ANY_OBLIVIOUS_CHANNEL_WITH_OWNED_DEVICE_TYPE) {
             if ((receivedMessage.getReceptionChannelInfo().getChannelType() != ReceptionChannelInfo.OBLIVIOUS_CHANNEL_TYPE) ||
-                    (receivedMessage.getReceptionChannelInfo().getRemoteIdentity() != expectedToIdentity)) {
+                    (receivedMessage.getReceptionChannelInfo().getRemoteIdentity() != getOwnedIdentity())) {
                 Logger.d("Protocol expected ReceptionChannelInfo mismatch.");
                 throw new Exception();
             }

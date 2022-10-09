@@ -96,7 +96,7 @@ public final class ProtocolOperation extends Operation {
                 int protocolId = message.getProtocolId();
                 // Set this for use in the onFinishCallback
                 this.protocolInstanceUid = message.getProtocolInstanceUid();
-                this.protocolOwnedIdentity = message.getAssociatedOwnedIdentity();
+                this.protocolOwnedIdentity = message.getToIdentity();
 
                 protocolManagerSession.session.startTransaction();
 

@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/message_root_constraint_layout"
-                                                   xmlns:android="http://schemas.android.com/apk/res/android"
-                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                   xmlns:tools="http://schemas.android.com/tools"
-                                                   android:layout_width="match_parent"
-                                                   android:layout_height="wrap_content"
-                                                   android:animateLayoutChanges="true"
-                                                   android:clickable="true"
-                                                   android:focusable="true"
-                                                   android:foreground="?attr/selectableItemBackground"
-                                                   android:paddingBottom="2dp"
-                                                   android:paddingTop="2dp"
-                                                   android:theme="@style/SubtleGreyRipple">
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/message_root_constraint_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:paddingBottom="2dp"
+    android:paddingTop="2dp"
+    android:theme="@style/SubtleGreyRipple">
 
     <CheckBox
         android:id="@+id/message_selection_checkbox"
@@ -66,17 +67,17 @@
         android:id="@+id/message_checkbox_compensator"
         android:layout_width="32dp"
         android:layout_height="5dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="2dp"
         app:layout_constraintEnd_toEndOf="@id/compensator_spacer"
         app:layout_constraintTop_toTopOf="parent"
         android:visibility="visible"
-        tools:visibility="gone"/>
+        tools:visibility="gone" />
 
     <TextView
         android:id="@+id/missing_message_textview"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constrainedWidth="true"
         android:textSize="12sp"
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
@@ -92,7 +93,6 @@
         android:layout_marginEnd="32dp"
         android:visibility="gone"
         tools:visibility="visible"
-        app:layout_constraintWidth_max="wrap"
         app:layout_constraintHorizontal_bias="0"
         app:drawableStartCompat="@drawable/ic_question_mark"
         android:drawablePadding="4dp" />

@@ -19,21 +19,28 @@
 
 package io.olvid.messenger.webclient.listeners;
 
+import java.util.Arrays;
+
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.webclient.WebClientManager;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass;
 
 public class OwnedIdentityObserver implements androidx.lifecycle.Observer<OwnedIdentity> {
     private final WebClientManager manager;
+    private byte[] bytesCurrentOwnedIdentity;
 
-    public OwnedIdentityObserver(WebClientManager manager) {
+    public OwnedIdentityObserver(WebClientManager manager, byte[] bytesCurrentOwnedIdentity) {
         this.manager = manager;
+        this.bytesCurrentOwnedIdentity = bytesCurrentOwnedIdentity;
     }
 
     @Override
     public void onChanged(OwnedIdentity ownedIdentity) {
-        // send a message to webclient to tell him to start a refresh protocol
-        // (do not update owned identity it will be done in refresh protocol to avoid breaking currently working listeners)
-        this.manager.sendColissimo(ColissimoOuterClass.Colissimo.newBuilder().setType(ColissimoOuterClass.ColissimoType.REFRESH).build());
+        if (!Arrays.equals(bytesCurrentOwnedIdentity, ownedIdentity.bytesOwnedIdentity)) {
+            this.bytesCurrentOwnedIdentity = ownedIdentity.bytesOwnedIdentity;
+            // send a message to webclient to tell him to start a refresh protocol
+            // (do not update owned identity it will be done in refresh protocol to avoid breaking currently working listeners)
+            this.manager.sendColissimo(ColissimoOuterClass.Colissimo.newBuilder().setType(ColissimoOuterClass.ColissimoType.REFRESH).build());
+        }
     }
 }

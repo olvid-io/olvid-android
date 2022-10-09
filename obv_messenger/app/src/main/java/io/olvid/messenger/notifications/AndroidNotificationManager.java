@@ -22,6 +22,7 @@ package io.olvid.messenger.notifications;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -34,15 +35,13 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -53,6 +52,9 @@ import androidx.core.app.Person;
 import androidx.core.app.RemoteInput;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.IconCompat;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -69,37 +71,42 @@ import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvDialog;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ContactDetailsActivity;
+import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.StringUtils;
-import io.olvid.messenger.discussion.DiscussionActivity;
-import io.olvid.messenger.main.MainActivity;
-import io.olvid.messenger.databases.entity.DiscussionCustomization;
-import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.discussion.DiscussionActivity;
+import io.olvid.messenger.main.MainActivity;
+import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.webrtc.WebrtcCallActivity;
 
+@SuppressLint("UnspecifiedImmutableFlag")
 public class AndroidNotificationManager {
     private static final String DISCUSSION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "discussion_";
     private static final String GROUP_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "group_";
     private static final String MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "message_reaction_";
     private static final String DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "discussion_reaction_";
     private static final String KEY_MESSAGE_NOTIFICATION_CHANNEL_VERSION = "message_channel_version";
+    private static final String KEY_DISCUSSION_NOTIFICATION_CHANNEL_VERSION_PREFIX = "discussion_channel_version_";
 
     public static final String MESSAGE_NOTIFICATION_CHANNEL_ID = "message";
     public static final String UNIFIED_SERVICE_NOTIFICATION_CHANNEL_ID = "unified";
-
     public static final String WEBRTC_CALL_SERVICE_NOTIFICATION_CHANNEL_ID = "calls";
     public static final String MEDIA_PLAYER_SERVICE_NOTIFICATION_CHANNEL_ID = "media_player";
+
+    public static final String DISCUSSION_NOTIFICATION_CHANNELS_GROUP_ID = "discussions";
+    public static final String DISCUSSION_NOTIFICATION_CHANNEL_ID_PREFIX = "discussion_";
 
     public static final String KEYCLOAK_NOTIFICATION_CHANNEL_ID = "keycloak";
 
@@ -198,7 +205,7 @@ public class AndroidNotificationManager {
         ));
 
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-            validateSoundForAndroidPie();
+            validateSoundForAndroidPie(null);
         }
     }
 
@@ -216,16 +223,31 @@ public class AndroidNotificationManager {
 
             if (validateSoundForAndroidPie
                     && Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-                validateSoundForAndroidPie();
+                validateSoundForAndroidPie(null);
             }
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.P)
-    private static void validateSoundForAndroidPie() {
+    private static void validateSoundForAndroidPie(Long discussionId) {
         // test if the notification sound works --> bug on Android 9 (Pie) with sounds on SD card
         try {
-            displayNeutralNotification();
+            NotificationCompat.Builder builder;
+            if (discussionId == null) {
+                builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion());
+            } else {
+                builder = new NotificationCompat.Builder(App.getContext(), DISCUSSION_NOTIFICATION_CHANNEL_ID_PREFIX + discussionId + "_" + getCurrentDiscussionChannelVersion(discussionId));
+            }
+            builder.setSmallIcon(R.drawable.ic_o)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                    .setContentTitle(App.getContext().getString(R.string.text_neutral_notification))
+                    .setContentText(App.getContext().getString(R.string.text_neutral_notification_click_to_open));
+
+            int notificationId = getNeutralNotificationId();
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.notify(notificationId, builder.build());
+
             clearNeutralNotification();
         } catch (Exception e) {
             e.printStackTrace();
@@ -288,6 +310,105 @@ public class AndroidNotificationManager {
         editor.apply();
     }
 
+    public static void updateDiscussionChannel(long discussionId, boolean validateSoundForAndroidPie) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return;
+        }
+        NotificationManager notificationManager = App.getContext().getSystemService(NotificationManager.class);
+        if (notificationManager != null) {
+            DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussionId);
+            int currentVersion = getCurrentDiscussionChannelVersion(discussionId);
+            if (discussionCustomization != null && discussionCustomization.prefUseCustomMessageNotification) {
+                NotificationChannelGroup notificationGroup = new NotificationChannelGroup(DISCUSSION_NOTIFICATION_CHANNELS_GROUP_ID, App.getContext().getString(R.string.notification_channel_discussion_group_name));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    notificationGroup.setDescription(App.getContext().getString(R.string.notification_channel_discussion_group_description));
+                }
+                notificationManager.createNotificationChannelGroup(notificationGroup);
+                NotificationChannel discussionChannel = buildDiscussionNotificationChannel(discussionId, currentVersion + 1, discussionCustomization);
+                notificationManager.createNotificationChannel(discussionChannel);
+                setCurrentDiscussionChannelVersion(discussionId, currentVersion + 1);
+
+                if (validateSoundForAndroidPie
+                        && Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+                    validateSoundForAndroidPie(discussionId);
+                }
+            }
+            deleteDiscussionNotificationChannel(notificationManager, discussionId, currentVersion);
+        }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private static NotificationChannel buildDiscussionNotificationChannel(long discussionId, int version, @NonNull DiscussionCustomization discussionCustomization) {
+        NotificationChannel discussionChannel = new NotificationChannel(
+                DISCUSSION_NOTIFICATION_CHANNEL_ID_PREFIX + discussionId + "_" + version,
+                App.getContext().getString(R.string.notification_channel_discussion_name, discussionId),
+                NotificationManager.IMPORTANCE_HIGH);
+        discussionChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        discussionChannel.setShowBadge(true);
+        discussionChannel.setGroup(DISCUSSION_NOTIFICATION_CHANNELS_GROUP_ID);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            discussionChannel.setAllowBubbles(true);
+        }
+
+        if (discussionCustomization.prefMessageNotificationLedColor == null) {
+            discussionChannel.enableLights(false);
+        } else {
+            int color = 0xff000000 + Integer.parseInt(discussionCustomization.prefMessageNotificationLedColor.substring(1), 16);
+            discussionChannel.setLightColor(color);
+            discussionChannel.enableLights(true);
+        }
+
+        long[] pattern = null;
+        if (discussionCustomization.prefMessageNotificationVibrationPattern != null) {
+            try {
+                pattern = SettingsActivity.intToVibrationPattern(Integer.parseInt(discussionCustomization.prefMessageNotificationVibrationPattern));
+            } catch (Exception ignored) {}
+        }
+        if (pattern == null) {
+            discussionChannel.enableVibration(false);
+        } else {
+            discussionChannel.setVibrationPattern(pattern);
+        }
+
+        Uri uri = Settings.System.DEFAULT_NOTIFICATION_URI;
+        if (discussionCustomization.prefMessageNotificationRingtone != null) {
+            try {
+                uri = Uri.parse(discussionCustomization.prefMessageNotificationRingtone);
+            } catch (Exception ignored) {}
+        }
+        discussionChannel.setSound(uri, new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
+
+        return discussionChannel;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private static void deleteDiscussionNotificationChannel(NotificationManager notificationManager, long discussionId, int version) {
+        notificationManager.deleteNotificationChannel(DISCUSSION_NOTIFICATION_CHANNEL_ID_PREFIX + discussionId + "_" + version);
+    }
+
+    private static int getCurrentDiscussionChannelVersion(long discussionId) {
+        return App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE).getInt(KEY_DISCUSSION_NOTIFICATION_CHANNEL_VERSION_PREFIX + discussionId, 0);
+    }
+
+    private static void setCurrentDiscussionChannelVersion(long discussionId, int value) {
+        SharedPreferences.Editor editor = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE).edit();
+        editor.putInt(KEY_DISCUSSION_NOTIFICATION_CHANNEL_VERSION_PREFIX + discussionId, value);
+        editor.apply();
+    }
+
+    private static String getChannelId(@NonNull NotificationManagerCompat notificationManager, @Nullable DiscussionCustomization discussionCustomization) {
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && discussionCustomization != null && discussionCustomization.prefUseCustomMessageNotification) {
+            String channelId = DISCUSSION_NOTIFICATION_CHANNEL_ID_PREFIX + discussionCustomization.discussionId + "_" + getCurrentDiscussionChannelVersion(discussionCustomization.discussionId);
+            if (notificationManager.getNotificationChannel(channelId) != null) {
+                return channelId;
+            }
+        }
+        return MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion();
+    }
+
     // endregion
 
     private static Long currentShowingDiscussionId;
@@ -338,7 +459,7 @@ public class AndroidNotificationManager {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
         notificationManager.notify(notificationId, builder.build());
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            vibrate();
+            vibrate(null);
         }
     }
 
@@ -360,6 +481,8 @@ public class AndroidNotificationManager {
             if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
                 return;
             }
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            String channelId = getChannelId(notificationManager, discussionCustomization);
             OwnedIdentity ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(group.bytesOwnedIdentity);
             if (ownedIdentity == null || ownedIdentity.shouldMuteNotifications()) {
                 if (ownedIdentity != null && ownedIdentity.shouldShowNeutralNotification()) {
@@ -386,11 +509,11 @@ public class AndroidNotificationManager {
             saveGroupNotification(discussionId, groupNotification);
 
 
-            NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
+            NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), channelId)
                     .setSmallIcon(R.drawable.ic_o)
                     .setContentTitle(App.getContext().getString(R.string.notification_public_title_group_member));
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), channelId)
                     .setSmallIcon(R.drawable.ic_o)
                     .setColor(ContextCompat.getColor(App.getContext(), R.color.olvid_gradient_dark))
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -400,10 +523,24 @@ public class AndroidNotificationManager {
                     .setVibrate(new long[0]);
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                builder.setSound(SettingsActivity.getMessageRingtone());
+                if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
+                    builder.setSound(SettingsActivity.getMessageRingtone());
+                } else {
+                    try {
+                        Uri uri = Uri.parse(discussionCustomization.prefMessageNotificationRingtone);
+                        builder.setSound(uri);
+                    } catch (Exception e) {
+                        builder.setSound(SettingsActivity.getMessageRingtone());
+                    }
+                }
             }
 
-            String colorString = SettingsActivity.getMessageLedColor();
+            String colorString;
+            if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
+                colorString = SettingsActivity.getMessageLedColor();
+            } else {
+                colorString = discussionCustomization.prefMessageNotificationLedColor;
+            }
             if (colorString != null) {
                 int color = 0xff000000 + Integer.parseInt(colorString.substring(1), 16);
                 builder.setLights(color, 500, 2000);
@@ -472,10 +609,9 @@ public class AndroidNotificationManager {
                 hiddenIdentityNotificationDiscussionIdsToClear.add(discussionId);
             }
 
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             notificationManager.notify(notificationId, builder.build());
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                vibrate();
+                vibrate(discussionCustomization);
             }
         });
     }
@@ -563,6 +699,11 @@ public class AndroidNotificationManager {
     }
 
     private static void displayMissedCallNotificationInternal(@NonNull Discussion discussion, boolean ownedIdentityIsHidden, String message) {
+        // this kind of notification only makes sense for one to one discussions
+        if (!discussion.canPostMessages() || discussion.discussionType != Discussion.TYPE_CONTACT) {
+            return;
+        }
+
         NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
                 .setSmallIcon(R.drawable.ic_phone_busy_in)
                 .setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_missed_call));
@@ -630,7 +771,7 @@ public class AndroidNotificationManager {
             }
             NotificationCompat.Action sendMessageAction = new NotificationCompat.Action.Builder(R.drawable.ic_send, App.getContext().getString(R.string.notification_action_send_message), sendMessagePendingIntent)
                     .addRemoteInput(remoteInput)
-                    .setAllowGeneratedReplies(true)
+                    .setAllowGeneratedReplies(SettingsActivity.isNotificationSuggestionAllowed())
                     .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
                     .setShowsUserInterface(false)
                     .build();
@@ -641,7 +782,7 @@ public class AndroidNotificationManager {
         Intent callBackIntent = new Intent(App.getContext(), WebrtcCallActivity.class);
         callBackIntent.setAction(WebrtcCallActivity.CALL_BACK_ACTION);
         callBackIntent.putExtra(WebrtcCallActivity.CALL_BACK_EXTRA_BYTES_OWNED_IDENTITY, discussion.bytesOwnedIdentity);
-        callBackIntent.putExtra(WebrtcCallActivity.CALL_BACK_EXTRA_BYTES_CONTACT_IDENTITY, discussion.bytesContactIdentity);
+        callBackIntent.putExtra(WebrtcCallActivity.CALL_BACK_EXTRA_BYTES_CONTACT_IDENTITY, discussion.bytesDiscussionIdentifier);
         callBackIntent.putExtra(WebrtcCallActivity.CALL_BACK_EXTRA_DISCUSSION_ID, discussion.id);
         callBackIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent callBackPendingIntent;
@@ -666,7 +807,7 @@ public class AndroidNotificationManager {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
         notificationManager.notify(notificationId, builder.build());
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            vibrate();
+            vibrate(null);
         }
     }
 
@@ -735,7 +876,8 @@ public class AndroidNotificationManager {
                 return;
             }
 
-            NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(discussion, discussionNotification, contact != null);
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(notificationManager, discussion, discussionCustomization, discussionNotification, contact != null);
 
             populateMessageNotificationBuilder(builder, discussion, discussionNotification);
 
@@ -745,20 +887,19 @@ public class AndroidNotificationManager {
 
             int notificationId = getMessageNotificationId(discussion.id);
 
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             notificationManager.notify(notificationId, builder.build());
             if (contact != null) {
                 if (messageLastVibrationTimestamp.containsKey(notificationId)) {
                     Long timestamp = messageLastVibrationTimestamp.get(notificationId);
                     if (timestamp == null || timestamp < (System.currentTimeMillis() - DELAY_BETWEEN_SAME_CHANNEL_VIBRATE)) {
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                            vibrate();
+                            vibrate(discussionCustomization);
                         }
                         messageLastVibrationTimestamp.put(notificationId, System.currentTimeMillis());
                     }
                 } else {
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                        vibrate();
+                        vibrate(discussionCustomization);
                     }
                     messageLastVibrationTimestamp.put(notificationId, System.currentTimeMillis());
                 }
@@ -785,9 +926,9 @@ public class AndroidNotificationManager {
             if (modified) {
                 saveDiscussionNotification(discussion.id, discussionNotification);
 
-                NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(discussion, discussionNotification, false);
-                populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+                NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(notificationManager, discussion, null, discussionNotification, false);
+                populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 notificationManager.notify(getMessageNotificationId(discussion.id), builder.build());
             }
         });
@@ -816,9 +957,9 @@ public class AndroidNotificationManager {
                     return;
                 }
 
-                NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(discussion, discussionNotification, false);
-                populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+                NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(notificationManager, discussion, null, discussionNotification, false);
+                populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 notificationManager.notify(getMessageNotificationId(discussionId), builder.build());
             }
         });
@@ -841,9 +982,9 @@ public class AndroidNotificationManager {
             if (modified) {
                 saveDiscussionNotification(discussion.id, discussionNotification);
 
-                NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(discussion, discussionNotification, false);
-                populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+                NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(notificationManager, discussion, null, discussionNotification, false);
+                populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 notificationManager.notify(getMessageNotificationId(discussion.id), builder.build());
             }
         });
@@ -885,8 +1026,8 @@ public class AndroidNotificationManager {
                 return null;
             }
             discussionNotification = new JsonPojoDiscussionNotification();
-            if (discussion.bytesGroupOwnerAndUid != null) {
-                discussionNotification.discussionInitialBytes = discussion.bytesGroupOwnerAndUid;
+            if (discussion.canPostMessages() && discussion.discussionType != Discussion.TYPE_CONTACT) {
+                discussionNotification.discussionInitialBytes = discussion.bytesDiscussionIdentifier;
                 discussionNotification.isGroup = true;
             } else {
                 if (contact == null) {
@@ -965,24 +1106,32 @@ public class AndroidNotificationManager {
         builder.setStyle(messagingStyle);
     }
 
-    private static NotificationCompat.Builder getEmptyMessageNotificationBuilder(@NonNull Discussion discussion, JsonPojoDiscussionNotification discussionNotification, boolean withSound) {
+    private static NotificationCompat.Builder getEmptyMessageNotificationBuilder(@NonNull NotificationManagerCompat notificationManager, @NonNull Discussion discussion, DiscussionCustomization discussionCustomization, JsonPojoDiscussionNotification discussionNotification, boolean withSound) {
         int messageCount = discussionNotification.messageNotifications.size();
 
-        NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
+        String channelId = getChannelId(notificationManager, discussionCustomization);
+
+        NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), channelId)
                 .setSmallIcon(R.drawable.ic_o)
                 .setContentTitle(App.getContext().getResources().getQuantityString(R.plurals.notification_public_title_new_messages, messageCount, messageCount));
 
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), channelId)
                 .setSmallIcon(R.drawable.ic_o)
                 .setColor(ContextCompat.getColor(App.getContext(), R.color.olvid_gradient_dark))
+                .setAllowSystemGeneratedContextualActions(SettingsActivity.isNotificationSuggestionAllowed())
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setPublicVersion(publicBuilder.build())
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setNumber(messageCount)
                 .setVibrate(new long[0]);
 
-        String colorString = SettingsActivity.getMessageLedColor();
+        String colorString;
+        if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
+            colorString = SettingsActivity.getMessageLedColor();
+        } else {
+            colorString = discussionCustomization.prefMessageNotificationLedColor;
+        }
         if (colorString != null) {
             int color = 0xff000000 + Integer.parseInt(colorString.substring(1), 16);
             builder.setLights(color, 500, 2000);
@@ -990,7 +1139,16 @@ public class AndroidNotificationManager {
 
         if (withSound) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                builder.setSound(SettingsActivity.getMessageRingtone());
+                if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
+                    builder.setSound(SettingsActivity.getMessageRingtone());
+                } else {
+                    try {
+                        Uri uri = Uri.parse(discussionCustomization.prefMessageNotificationRingtone);
+                        builder.setSound(uri);
+                    } catch (Exception e) {
+                        builder.setSound(SettingsActivity.getMessageRingtone());
+                    }
+                }
             }
         } else {
             builder.setOnlyAlertOnce(true);
@@ -1047,7 +1205,7 @@ public class AndroidNotificationManager {
             }
             NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(R.drawable.ic_send, App.getContext().getString(R.string.notification_action_reply), replyPendingIntent)
                     .addRemoteInput(remoteInput)
-                    .setAllowGeneratedReplies(true)
+                    .setAllowGeneratedReplies(SettingsActivity.isNotificationSuggestionAllowed())
                     .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
                     .setShowsUserInterface(false)
                     .build();
@@ -1182,13 +1340,15 @@ public class AndroidNotificationManager {
             } catch (Exception ignored) { }
 
 
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            String channelId = getChannelId(notificationManager, discussionCustomization);
 
-            NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
+            NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), channelId)
                     .setSmallIcon(R.drawable.ic_o)
                     .setContentTitle(App.getContext().getString(R.string.notification_public_title_new_reaction));
 
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), channelId)
                     .setSmallIcon(R.drawable.ic_o)
                     .setColor(ContextCompat.getColor(App.getContext(), R.color.olvid_gradient_dark))
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -1196,14 +1356,28 @@ public class AndroidNotificationManager {
                     .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                     .setVibrate(new long[0]);
 
-            String colorString = SettingsActivity.getMessageLedColor();
+            String colorString;
+            if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
+                colorString = SettingsActivity.getMessageLedColor();
+            } else {
+                colorString = discussionCustomization.prefMessageNotificationLedColor;
+            }
             if (colorString != null) {
                 int color = 0xff000000 + Integer.parseInt(colorString.substring(1), 16);
                 builder.setLights(color, 500, 2000);
             }
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                builder.setSound(SettingsActivity.getMessageRingtone());
+                if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
+                    builder.setSound(SettingsActivity.getMessageRingtone());
+                } else {
+                    try {
+                        Uri uri = Uri.parse(discussionCustomization.prefMessageNotificationRingtone);
+                        builder.setSound(uri);
+                    } catch (Exception e) {
+                        builder.setSound(SettingsActivity.getMessageRingtone());
+                    }
+                }
             }
 
             InitialView initialView = new InitialView(App.getContext());
@@ -1278,10 +1452,9 @@ public class AndroidNotificationManager {
                 hiddenIdentityNotificationIdsToClear.add(notificationId);
             }
 
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             notificationManager.notify(notificationId, builder.build());
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                vibrate();
+                vibrate(discussionCustomization);
             }
         });
     }
@@ -1430,8 +1603,7 @@ public class AndroidNotificationManager {
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_new_invitation));
                     break;
                 }
-                case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
-                {
+                case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY: {
                     Contact groupOwner = AppDatabase.getInstance().contactDao().get(invitation.associatedDialog.getBytesOwnedIdentity(), invitation.associatedDialog.getCategory().getBytesMediatorOrGroupOwnerIdentity());
                     if (groupOwner == null) {
                         return;
@@ -1475,6 +1647,44 @@ public class AndroidNotificationManager {
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_one_to_one_invitation));
                     break;
                 }
+                case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY: {
+                    Contact inviter = AppDatabase.getInstance().contactDao().get(invitation.associatedDialog.getBytesOwnedIdentity(), invitation.associatedDialog.getCategory().getBytesMediatorOrGroupOwnerIdentity());
+                    if (inviter == null) {
+                        return;
+                    }
+                    ObvGroupV2 groupV2 = invitation.associatedDialog.getCategory().getObvGroupV2();
+                    initialView.setGroup(groupV2.groupIdentifier.getBytes());
+                    try {
+                        JsonGroupDetails groupDetails = AppSingleton.getJsonObjectMapper().readValue(groupV2.detailsAndPhotos.serializedGroupDetails, JsonGroupDetails.class);
+                        if (groupDetails.getName() == null) {
+                            builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_unnamed_group_invitation));
+                        } else {
+                            builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_group_invitation, groupDetails.getName()));
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    builder.setContentText(App.getContext().getResources().getString(R.string.notification_content_group_invite, inviter.getCustomDisplayName()));
+                    publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_group_invitation));
+                    break;
+                }
+                case ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY: {
+                    ObvGroupV2 groupV2 = invitation.associatedDialog.getCategory().getObvGroupV2();
+                    initialView.setGroup(groupV2.groupIdentifier.getBytes());
+                    try {
+                        JsonGroupDetails groupDetails = AppSingleton.getJsonObjectMapper().readValue(groupV2.detailsAndPhotos.serializedGroupDetails, JsonGroupDetails.class);
+                        if (groupDetails.getName() == null) {
+                            builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_unnamed_group_invitation));
+                        } else {
+                            builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_group_invitation, groupDetails.getName()));
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    builder.setContentText(App.getContext().getResources().getString(R.string.notification_content_group_v2_frozen_invite));
+                    publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_group_invitation));
+                    break;
+                }
                 default:
                     return;
             }
@@ -1485,9 +1695,10 @@ public class AndroidNotificationManager {
                 case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
                 case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
                 case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
+                case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY: {
                     Intent acceptIntent = new Intent(App.getContext(), NotificationActionService.class);
                     acceptIntent.setAction(NotificationActionService.ACTION_ACCEPT_INVITATION);
-                    acceptIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, invitation.dialogUuid.toString());
+                    acceptIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, Logger.getUuidString(invitation.dialogUuid));
                     PendingIntent acceptPendingIntent;
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                         acceptPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), acceptIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -1498,7 +1709,7 @@ public class AndroidNotificationManager {
 
                     Intent rejectIntent = new Intent(App.getContext(), NotificationActionService.class);
                     rejectIntent.setAction(NotificationActionService.ACTION_REJECT_INVITATION);
-                    rejectIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, invitation.dialogUuid.toString());
+                    rejectIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, Logger.getUuidString(invitation.dialogUuid));
                     PendingIntent rejectPendingIntent;
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                         rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -1506,6 +1717,21 @@ public class AndroidNotificationManager {
                         rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                     }
                     builder.addAction(R.drawable.ic_close, App.getContext().getString(R.string.notification_action_reject), rejectPendingIntent);
+                    break;
+                }
+                case ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY: {
+                    Intent rejectIntent = new Intent(App.getContext(), NotificationActionService.class);
+                    rejectIntent.setAction(NotificationActionService.ACTION_REJECT_INVITATION);
+                    rejectIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, Logger.getUuidString(invitation.dialogUuid));
+                    PendingIntent rejectPendingIntent;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    } else {
+                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    }
+                    builder.addAction(R.drawable.ic_close, App.getContext().getString(R.string.notification_action_reject), rejectPendingIntent);
+                    break;
+                }
             }
 
             int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
@@ -1524,7 +1750,7 @@ public class AndroidNotificationManager {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             notificationManager.notify(notificationId, builder.build());
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                vibrate();
+                vibrate(null);
             }
         });
     }
@@ -1564,7 +1790,7 @@ public class AndroidNotificationManager {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             notificationManager.notify(notificationId, builder.build());
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                vibrate();
+                vibrate(null);
             }
         });
     }
@@ -1593,7 +1819,7 @@ public class AndroidNotificationManager {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             notificationManager.notify(notificationId, builder.build());
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                vibrate();
+                vibrate(null);
             }
         });
     }
@@ -1690,6 +1916,57 @@ public class AndroidNotificationManager {
 
     // endregion
 
+    // region blocked certificate
+
+    public static void displayConnectionBlockedNotification(long untrustedCertificateId, @Nullable Long lastTrustedCertificateId) {
+        executor.execute(() -> {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID  + getCurrentMessageChannelVersion())
+                    .setSmallIcon(R.drawable.ic_warning_outline)
+                    .setColor(ContextCompat.getColor(App.getContext(), R.color.red))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_ERROR)
+                    .setOnlyAlertOnce(true)
+                    .setContentTitle(App.getContext().getString(R.string.text_notification_connection_blocked_title))
+                    .setContentText(App.getContext().getString(R.string.text_notification_connection_blocked_message))
+                    .setVibrate(new long[0]);
+
+            int notificationId = getCertificateBlockedNotificationId(untrustedCertificateId);
+
+            // CONTENT INTENT
+            Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
+            contentIntent.putExtra(MainActivity.BLOCKED_CERTIFICATE_ID_EXTRA, untrustedCertificateId);
+            if (lastTrustedCertificateId != null) {
+                contentIntent.putExtra(MainActivity.LAST_TRUSTED_CERTIFICATE_ID_EXTRA, lastTrustedCertificateId);
+            }
+            PendingIntent contentPendingIntent;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            } else {
+                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            }
+            builder.setContentIntent(contentPendingIntent);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.notify(notificationId, builder.build());
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                Vibrator v = (Vibrator) App.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                if (v != null) {
+                    v.vibrate(new long[]{0, 100}, -1);
+                }
+            }
+        });
+    }
+
+    public static void clearConnectionBlockedNotification(long untrustedCertificateId) {
+        executor.execute(() -> {
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.cancel(getCertificateBlockedNotificationId(untrustedCertificateId));
+        });
+    }
+
+    // endregion
+
 
     private static int getMessageNotificationId(long discussionId) {
         return (int) (0xffffff & discussionId);
@@ -1715,10 +1992,19 @@ public class AndroidNotificationManager {
         return (int) (0xffffff & messageId) | 0x5000000;
     }
 
-    private static void vibrate() {
+    private static int getCertificateBlockedNotificationId(long untrustedCertificateId) {
+        return (int) (0xffffff & untrustedCertificateId) | 0x6000000;
+    }
+
+    private static void vibrate(@Nullable DiscussionCustomization discussionCustomization) {
         Vibrator v = (Vibrator) App.getContext().getSystemService(Context.VIBRATOR_SERVICE);
         if (v != null) {
-            long[] pattern = SettingsActivity.getMessageVibrationPattern();
+            long[] pattern;
+            if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification || discussionCustomization.prefMessageNotificationVibrationPattern == null) {
+                pattern = SettingsActivity.getMessageVibrationPattern();
+            } else {
+                pattern = SettingsActivity.intToVibrationPattern(Integer.parseInt(discussionCustomization.prefMessageNotificationVibrationPattern));
+            }
             if (pattern != null) {
                 v.vibrate(pattern, -1);
             }

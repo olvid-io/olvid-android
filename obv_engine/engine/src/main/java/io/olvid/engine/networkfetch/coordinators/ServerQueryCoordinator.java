@@ -227,7 +227,8 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
                 break;
             }
             case ServerQueryOperation.RFC_INVALID_SERVER_SESSION: {
-                if (serverQuery.getType().getId() == ServerQuery.Type.PUT_USER_DATA_QUERY_ID) {
+                if (serverQuery.getType().getId() == ServerQuery.Type.PUT_USER_DATA_QUERY_ID
+                        || serverQuery.getType().getId() == ServerQuery.Type.CREATE_GROUP_BLOB_QUERY_ID) {
                     waitForServerSession(serverQuery.getOwnedIdentity(), serverQueryUid);
                     createServerSessionDelegate.createServerSession(serverQuery.getOwnedIdentity());
                 }

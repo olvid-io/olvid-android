@@ -35,13 +35,11 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.ColorUtils;
@@ -53,12 +51,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
+import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel;
@@ -95,6 +95,7 @@ public class InitialView extends View {
         super(context, attrs);
         if (isInEditMode()) {
             setInitial(new byte[]{0,1,35}, "A");
+            setKeycloakCertified(true);
         }
     }
 
@@ -102,7 +103,6 @@ public class InitialView extends View {
         super(context, attrs, defStyleAttr);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public InitialView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
@@ -201,9 +201,9 @@ public class InitialView extends View {
             initial = null;
             changed = true;
         }
-        String contactPhotoUrl = App.absolutePathFromRelative(group.getCustomPhotoUrl());
-        if (!Objects.equals(photoUrl, contactPhotoUrl)) {
-            photoUrl = contactPhotoUrl;
+        String groupPhotoUrl = App.absolutePathFromRelative(group.getCustomPhotoUrl());
+        if (!Objects.equals(photoUrl, groupPhotoUrl)) {
+            photoUrl = groupPhotoUrl;
             changed = true;
         }
         if (keycloakCertified) {
@@ -232,61 +232,102 @@ public class InitialView extends View {
         }
     }
 
+    public void setGroup2(Group2 group) {
+        boolean changed = false;
+        if (!Arrays.equals(group.bytesGroupIdentifier, bytes)) {
+            bytes = group.bytesGroupIdentifier;
+            changed = true;
+        }
+        if (initial != null) {
+            initial = null;
+            changed = true;
+        }
+        String groupPhotoUrl = App.absolutePathFromRelative(group.getCustomPhotoUrl());
+        if (!Objects.equals(photoUrl, groupPhotoUrl)) {
+            photoUrl = groupPhotoUrl;
+            changed = true;
+        }
+        if (keycloakCertified != group.keycloakManaged) {
+            keycloakCertified = group.keycloakManaged;
+            changed = true;
+        }
+        if (inactive) {
+            inactive = false;
+            changed = true;
+        }
+        if (locked) {
+            locked = false;
+            changed = true;
+        }
+        if (notOneToOne) {
+            notOneToOne = false;
+            changed = true;
+        }
+        if (contactTrustLevel != null) {
+            contactTrustLevel = null;
+            changed = true;
+        }
+        if (changed) {
+            bitmap = null;
+            init();
+        }
+    }
+
+
     public void setDiscussion(Discussion discussion) {
         boolean changed = false;
-        if (discussion.bytesContactIdentity != null) {
-            if (!Arrays.equals(bytes, discussion.bytesContactIdentity)) {
-                bytes = discussion.bytesContactIdentity;
-                changed = true;
+        switch (discussion.status) {
+            case Discussion.STATUS_LOCKED: {
+                if (!locked) {
+                    locked = true;
+                    changed = true;
+                }
+                if (bytes == null || bytes.length != 0) {
+                    bytes = new byte[0];
+                    changed = true;
+                }
+                if (initial == null || initial.length() != 0) {
+                    initial = "";
+                    changed = true;
+                }
+                break;
             }
-            String discussionInitial = StringUtils.getInitial(discussion.title);
-            if (!Objects.equals(initial, discussionInitial)) {
-                initial = discussionInitial;
-                changed = true;
-            }
-            if (locked) {
-                locked = false;
-                changed = true;
-            }
-            if (!Objects.equals(contactTrustLevel, discussion.trustLevel)) {
-                contactTrustLevel = discussion.trustLevel;
-                changed = true;
-            }
-        } else if (discussion.bytesGroupOwnerAndUid != null) {
-            if (!Arrays.equals(bytes, discussion.bytesGroupOwnerAndUid)) {
-                bytes = discussion.bytesGroupOwnerAndUid;
-                changed = true;
-            }
-            if (initial != null) {
-                initial = null;
-                changed = true;
-            }
-            if (locked) {
-                locked = false;
-                changed = true;
-            }
-            if (contactTrustLevel != null) {
-                contactTrustLevel = null;
-                changed = true;
-            }
-        } else {
-            if (bytes == null || bytes.length != 0) {
-                bytes = new byte[0];
-                changed = true;
-            }
-            if (initial == null || initial.length() != 0) {
-                initial = "";
-                changed = true;
-            }
-            if (!locked) {
-                locked = true;
-                changed = true;
-            }
-            if (contactTrustLevel != null) {
-                contactTrustLevel = null;
-                changed = true;
+            case Discussion.STATUS_NORMAL:
+            default: {
+                if (locked) {
+                    locked = false;
+                    changed = true;
+                }
+                switch (discussion.discussionType) {
+                    case Discussion.TYPE_CONTACT: {
+                        String discussionInitial = StringUtils.getInitial(discussion.title);
+                        if (!Objects.equals(initial, discussionInitial)) {
+                            initial = discussionInitial;
+                            changed = true;
+                        }
+
+                        break;
+                    }
+                    case Discussion.TYPE_GROUP:
+                    case Discussion.TYPE_GROUP_V2: {
+                        if (initial != null) {
+                            initial = null;
+                            changed = true;
+                        }
+                        break;
+                    }
+                    default:
+                        Logger.e("Unknown discussion type");
+                        return;
+                }
+                if (!Arrays.equals(bytes, discussion.bytesDiscussionIdentifier)) {
+                    bytes = discussion.bytesDiscussionIdentifier;
+                    changed = true;
+                }
+                break;
             }
         }
+
         String discussionPhotoUrl = App.absolutePathFromRelative(discussion.photoUrl);
         if (!Objects.equals(photoUrl, discussionPhotoUrl)) {
             photoUrl = discussionPhotoUrl;
@@ -298,6 +339,10 @@ public class InitialView extends View {
         }
         if (inactive == discussion.active) { // We are indeed checking that the value changed ;)
             inactive = !discussion.active;
+            changed = true;
+        }
+        if (!Objects.equals(contactTrustLevel, discussion.trustLevel)) {
+            contactTrustLevel = discussion.trustLevel;
             changed = true;
         }
         if (notOneToOne) {
@@ -376,7 +421,17 @@ public class InitialView extends View {
 
     public void setFromCache(@NonNull byte[] bytesIdentifier) {
         boolean changed = false;
-        String displayName = AppSingleton.getContactCustomDisplayName(bytesIdentifier);
+        String displayName;
+        if (Arrays.equals(bytesIdentifier, AppSingleton.getBytesCurrentIdentity())) {
+            OwnedIdentity ownedIdentity = AppSingleton.getCurrentIdentityLiveData().getValue();
+            if (ownedIdentity != null) {
+                displayName = ownedIdentity.getCustomDisplayName();
+            } else {
+                displayName = AppSingleton.getContactCustomDisplayName(bytesIdentifier);
+            }
+        } else {
+            displayName = AppSingleton.getContactCustomDisplayName(bytesIdentifier);
+        }
         String contactInitial;
         byte[] bytes;
         if (displayName == null) {
@@ -741,6 +796,7 @@ public class InitialView extends View {
                 paint.setColor(ContextCompat.getColor(context, R.color.olvid_gradient_light));
                 break;
             case 2:
+            case 1:
                 paint.setColor(ContextCompat.getColor(context, R.color.orange));
                 break;
             default:

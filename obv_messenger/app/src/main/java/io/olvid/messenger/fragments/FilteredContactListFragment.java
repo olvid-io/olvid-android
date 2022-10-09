@@ -37,12 +37,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -54,21 +48,26 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
-import io.olvid.messenger.customClasses.LoadAwareAdapter;
-import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
-import io.olvid.messenger.customClasses.StringUtils;
-import io.olvid.messenger.settings.SettingsActivity;
-import io.olvid.messenger.databases.entity.Contact;
-import io.olvid.messenger.viewModels.FilteredContactListViewModel;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.LoadAwareAdapter;
+import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
+import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.settings.SettingsActivity;
+import io.olvid.messenger.viewModels.FilteredContactListViewModel;
 
 public class FilteredContactListFragment extends Fragment implements TextWatcher {
     private EditText contactFilterEditText;
@@ -129,7 +128,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
             recyclerView.setPadding(0,0,0,0);
         }
 
-        recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(rootView.getContext(), selectable ? 100 : 68, 12));
+        recyclerView.addItemDecoration(new ItemDecorationSimpleDivider(rootView.getContext(), selectable ? 100 : 68, 12));
 
         return rootView;
     }

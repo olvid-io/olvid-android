@@ -44,7 +44,6 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -59,12 +58,18 @@ public class OwnedIdentitySelectionDialogFragment extends DialogFragment {
     private FragmentActivity activity;
     private DialogViewModel dialogViewModel;
 
+    private boolean showAddProfileButtonAsOpenHiddenProfile = false;
+
     public static OwnedIdentitySelectionDialogFragment newInstance(AppCompatActivity activity, int dialogTitleResourceId, OnOwnedIdentitySelectedListener onOwnedIdentitySelectedListener) {
         DialogViewModel dialogViewModel = new ViewModelProvider(activity).get(DialogViewModel.class);
         dialogViewModel.dialogTitleResourceId = dialogTitleResourceId;
         dialogViewModel.onOwnedIdentitySelectedListener = onOwnedIdentitySelectedListener;
 
         return new OwnedIdentitySelectionDialogFragment();
+    }
+
+    public void setShowAddProfileButtonAsOpenHiddenProfile(boolean showAddProfileButtonAsOpenHiddenProfile) {
+        this.showAddProfileButtonAsOpenHiddenProfile = showAddProfileButtonAsOpenHiddenProfile;
     }
 
     @NonNull
@@ -124,17 +129,29 @@ public class OwnedIdentitySelectionDialogFragment extends DialogFragment {
         dialogTitleTextView.setText(dialogViewModel.dialogTitleResourceId);
 
         final TextView addProfileButton = dialogView.findViewById(R.id.button_add_profile);
-        addProfileButton.setOnClickListener(v -> {
-            dismiss();
-            if (dialogViewModel.onOwnedIdentitySelectedListener != null) {
-                dialogViewModel.onOwnedIdentitySelectedListener.onNewProfileCreationSelected();
-            }
-        });
-        addProfileButton.setOnLongClickListener(v -> {
-            dismiss();
-            new OpenHiddenProfileDialog(activity);
-            return true;
-        });
+        final TextView hiddenProfileButton = dialogView.findViewById(R.id.button_open_hidden_profile);
+        if (showAddProfileButtonAsOpenHiddenProfile) {
+            hiddenProfileButton.setOnClickListener(v -> {
+                dismiss();
+                new OpenHiddenProfileDialog(activity);
+            });
+            hiddenProfileButton.setVisibility(View.VISIBLE);
+            addProfileButton.setVisibility(View.GONE);
+        } else {
+            addProfileButton.setOnClickListener(v -> {
+                dismiss();
+                if (dialogViewModel.onOwnedIdentitySelectedListener != null) {
+                    dialogViewModel.onOwnedIdentitySelectedListener.onNewProfileCreationSelected();
+                }
+            });
+            addProfileButton.setOnLongClickListener(v -> {
+                dismiss();
+                new OpenHiddenProfileDialog(activity);
+                return true;
+            });
+            hiddenProfileButton.setVisibility(View.GONE);
+            addProfileButton.setVisibility(View.VISIBLE);
+        }
 
         return dialogView;
     }

@@ -2,6 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <Preference
         android:title="@string/pref_category_notifications_title"
+        android:key="pref_header_key_notifications"
         android:fragment="io.olvid.messenger.settings.NotificationPreferenceFragment"
         android:icon="@drawable/ic_pref_vibrator"
         android:widgetLayout="@layout/preference_widget_header_chevron" />

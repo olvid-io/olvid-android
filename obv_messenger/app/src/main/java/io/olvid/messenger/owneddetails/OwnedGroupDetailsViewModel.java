@@ -25,18 +25,24 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.Objects;
+
 import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.messenger.App;
 
 
 public class OwnedGroupDetailsViewModel extends ViewModel {
-    private JsonGroupDetailsWithVersionAndPhoto oldDetails = null;
+    private JsonGroupDetails oldDetails = null;
+    private String oldPhotoUrl = null;
+    private String oldPersonalNote = null;
+    private boolean groupV2;
     private byte[] bytesOwnedIdentity;
-    private byte[] bytesGroupOwnerAndUid;
+    private byte[] bytesGroupOwnerAndUidOrIdentifier;
 
     private String groupName;
     private String groupDescription;
+    private String personalNote;
 
     private String absolutePhotoUrl; // absolute path photoUrl
     private Uri takePictureUri;
@@ -61,21 +67,45 @@ public class OwnedGroupDetailsViewModel extends ViewModel {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
     }
 
-    public byte[] getBytesGroupOwnerAndUid() {
-        return bytesGroupOwnerAndUid;
+    public byte[] getBytesGroupOwnerAndUidOrIdentifier() {
+        return bytesGroupOwnerAndUidOrIdentifier;
     }
 
-    public void setBytesGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) {
-        this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
-        initialViewContent.postValue(new InitialViewContent(bytesGroupOwnerAndUid, absolutePhotoUrl));
+    public void setBytesGroupOwnerAndUidOrIdentifier(byte[] bytesGroupOwnerAndUidOrIdentifier) {
+        this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier;
+        initialViewContent.postValue(new InitialViewContent(bytesGroupOwnerAndUidOrIdentifier, absolutePhotoUrl));
     }
 
-    public void setOwnedGroupDetails(JsonGroupDetailsWithVersionAndPhoto groupDetails) {
-        oldDetails = groupDetails;
+    public boolean isGroupV2() {
+        return groupV2;
+    }
+
+    public void setGroupV2(boolean groupV2) {
+        this.groupV2 = groupV2;
+        checkValid();
+    }
+
+    public void setOwnedGroupDetails(JsonGroupDetailsWithVersionAndPhoto groupDetails, String personalNote) {
+        oldDetails = groupDetails.getGroupDetails();
+        oldPhotoUrl = groupDetails.getPhotoUrl();
+        oldPersonalNote = personalNote;
 
         setAbsolutePhotoUrl(App.absolutePathFromRelative(groupDetails.getPhotoUrl()));
         setGroupName(groupDetails.getGroupDetails().getName());
         setGroupDescription(groupDetails.getGroupDetails().getDescription());
+        setPersonalNote(personalNote);
+        checkValid();
+    }
+
+    public void setOwnedGroupDetailsV2(JsonGroupDetails groupDetails, String photoUrl, String personalNote) {
+        oldDetails = groupDetails;
+        oldPhotoUrl = photoUrl;
+        oldPersonalNote = personalNote;
+
+        setAbsolutePhotoUrl(App.absolutePathFromRelative(photoUrl));
+        setGroupName(groupDetails.getName());
+        setGroupDescription(groupDetails.getDescription());
+        setPersonalNote(personalNote);
         checkValid();
     }
 
@@ -110,15 +140,23 @@ public class OwnedGroupDetailsViewModel extends ViewModel {
 
     public void setAbsolutePhotoUrl(String absolutePhotoUrl) {
         if (absolutePhotoUrl != null) {
-            initialViewContent.postValue(new InitialViewContent(bytesGroupOwnerAndUid, absolutePhotoUrl));
+            initialViewContent.postValue(new InitialViewContent(bytesGroupOwnerAndUidOrIdentifier, absolutePhotoUrl));
         } else if (this.absolutePhotoUrl != null){
-            initialViewContent.postValue(new InitialViewContent(bytesGroupOwnerAndUid, null));
+            initialViewContent.postValue(new InitialViewContent(bytesGroupOwnerAndUidOrIdentifier, null));
         }
         this.absolutePhotoUrl = absolutePhotoUrl;
     }
 
+    public String getPersonalNote() {
+        return personalNote;
+    }
+
+    public void setPersonalNote(String personalNote) {
+        this.personalNote = personalNote;
+    }
+
     private void checkValid() {
-        boolean newValid = groupName != null && groupName.trim().length() > 0;
+        boolean newValid = groupV2 || (groupName != null && groupName.trim().length() > 0);
         Boolean oldValid = valid.getValue();
         if (oldValid == null || (oldValid ^ newValid)) {
             valid.postValue(newValid);
@@ -126,22 +164,19 @@ public class OwnedGroupDetailsViewModel extends ViewModel {
     }
 
     public boolean detailsChanged() {
-        if (oldDetails == null) {
-            return true;
-        }
-        return !getJsonGroupDetails().equals(oldDetails.getGroupDetails());
+        return !Objects.equals(getJsonGroupDetails(), oldDetails);
     }
 
     public boolean photoChanged() {
-        if (absolutePhotoUrl == null) {
-            return oldDetails != null && oldDetails.getPhotoUrl() != null;
-        } else {
-            return oldDetails == null || !absolutePhotoUrl.equals(App.absolutePathFromRelative(oldDetails.getPhotoUrl()));
-        }
+        return !Objects.equals(absolutePhotoUrl, App.absolutePathFromRelative(oldPhotoUrl));
+    }
+
+    public boolean personalNoteChanged() {
+        return !Objects.equals(personalNote, oldPersonalNote);
     }
 
     public JsonGroupDetails getJsonGroupDetails() {
-        return new JsonGroupDetails(groupName.trim(), groupDescription);
+        return new JsonGroupDetails(groupName == null ? null : groupName.trim(), groupDescription);
     }
 
     static class InitialViewContent {

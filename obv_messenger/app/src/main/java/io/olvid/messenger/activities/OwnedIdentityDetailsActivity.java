@@ -46,11 +46,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -62,12 +57,20 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.identities.ObvUrlIdentity;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.MuteNotificationDialog;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
@@ -75,7 +78,6 @@ import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.tasks.DeleteOwnedIdentityAndEverythingRelatedToItTask;
 import io.olvid.messenger.fragments.FullScreenImageFragment;
 import io.olvid.messenger.fragments.SubscriptionStatusFragment;
@@ -274,6 +276,11 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             OwnedIdentity ownedIdentity = AppSingleton.getCurrentIdentityLiveData().getValue();
             if (ownedIdentity != null) {
                 StringBuilder sb = new StringBuilder();
+                try {
+                    Identity ownIdentity = Identity.of(ownedIdentity.bytesOwnedIdentity);
+                    sb.append(getString(R.string.debug_label_server)).append(" ");
+                    sb.append(ownIdentity.getServer()).append("\n\n");
+                } catch (DecodingException ignored) {}
                 sb.append(getString(R.string.debug_label_identity_link)).append("\n");
                 sb.append(new ObvUrlIdentity(ownedIdentity.bytesOwnedIdentity, ownedIdentity.displayName).getUrlRepresentation()).append("\n\n");
                 sb.append(getString(R.string.debug_label_capabilities)).append("\n");

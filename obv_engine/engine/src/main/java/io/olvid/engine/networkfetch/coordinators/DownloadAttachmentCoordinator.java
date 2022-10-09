@@ -329,7 +329,6 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
         userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY, attachmentNumber);
         userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY, progress);
         notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS, userInfo);
-
     }
 
     @Override

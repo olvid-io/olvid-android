@@ -51,6 +51,10 @@ public class TrustLevel implements Comparable<TrustLevel> {
         return new TrustLevel(2, indirectTrustLevelMajor);
     }
 
+    public static TrustLevel createServerGroupV2() {
+        return new TrustLevel(1, 0);
+    }
+
     @Override
     public int compareTo(TrustLevel other) {
         if (major < other.major) {

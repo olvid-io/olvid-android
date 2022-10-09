@@ -27,7 +27,9 @@ import java.sql.SQLException;
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.PublicKeyEncryption;
+import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.crypto.Suite;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Seed;
@@ -63,7 +65,6 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         return CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID;
     }
 
-    private static final byte[] SIGNATURE_CHALLENGE_PREFIX = "channelCreation".getBytes();
 
 
 
@@ -647,7 +648,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public SendPingStep(InitialProtocolState startState, InitialMessage receivedMessage, ChannelCreationWithContactDeviceProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -685,21 +686,18 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                     receivedMessage.contactIdentity);
 
             // send a signed ping proving you trust the contact and have no channel with him
-            byte[] prefix = new byte[SIGNATURE_CHALLENGE_PREFIX.length + UID.UID_LENGTH*2];
-            System.arraycopy(SIGNATURE_CHALLENGE_PREFIX, 0, prefix, 0, SIGNATURE_CHALLENGE_PREFIX.length);
-            System.arraycopy(receivedMessage.contactDeviceUid.getBytes(), 0, prefix, SIGNATURE_CHALLENGE_PREFIX.length, UID.UID_LENGTH);
             UID currentDeviceUid = protocolManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
             if (currentDeviceUid == null) {
                 return new CancelledState();
             }
-            System.arraycopy(currentDeviceUid.getBytes(), 0, prefix, SIGNATURE_CHALLENGE_PREFIX.length+UID.UID_LENGTH, UID.UID_LENGTH);
 
-
-            byte[] signature = protocolManagerSession.identityDelegate.signIdentities(
+            byte[] signature = protocolManagerSession.identityDelegate.signChannel(
                     protocolManagerSession.session,
-                    prefix,
-                    new Identity[]{ receivedMessage.contactIdentity, getOwnedIdentity()},
+                    Constants.SignatureContext.CHANNEL_CREATION,
+                    receivedMessage.contactIdentity,
+                    receivedMessage.contactDeviceUid,
                     getOwnedIdentity(),
+                    currentDeviceUid,
                     getPrng()
             );
 
@@ -719,7 +717,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         private final PingMessage receivedMessage;
 
         public SendPingOrEphemeralKeyStep(InitialProtocolState startState, PingMessage receivedMessage, ChannelCreationWithContactDeviceProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -735,18 +733,17 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
             }
 
             // verify the signature in the PingMessage
-            byte[] prefix = new byte[SIGNATURE_CHALLENGE_PREFIX.length + UID.UID_LENGTH*2];
-            System.arraycopy(SIGNATURE_CHALLENGE_PREFIX, 0, prefix, 0, SIGNATURE_CHALLENGE_PREFIX.length);
             UID currentDeviceUid = protocolManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
             if (currentDeviceUid == null) {
                 return new CancelledState();
             }
-            System.arraycopy(currentDeviceUid.getBytes(), 0, prefix, SIGNATURE_CHALLENGE_PREFIX.length, UID.UID_LENGTH);
-            System.arraycopy(receivedMessage.contactDeviceUid.getBytes(), 0, prefix, SIGNATURE_CHALLENGE_PREFIX.length+UID.UID_LENGTH, UID.UID_LENGTH);
 
-            boolean signatureIsValid = protocolManagerSession.identityDelegate.verifyIdentitiesSignature(
-                    prefix,
-                    new Identity[]{getOwnedIdentity(), receivedMessage.contactIdentity},
+            boolean signatureIsValid = Signature.verify(
+                    Constants.SignatureContext.CHANNEL_CREATION,
+                    currentDeviceUid,
+                    receivedMessage.contactDeviceUid,
+                    getOwnedIdentity(),
+                    receivedMessage.contactIdentity,
                     receivedMessage.contactIdentity,
                     receivedMessage.signature
             );
@@ -793,14 +790,13 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
             // Compute a signature to prove we trust the contact and don't have any channel/ongoing protocol with him
 
             // only rewrite the end of the prefix
-            System.arraycopy(receivedMessage.contactDeviceUid.getBytes(), 0, prefix, SIGNATURE_CHALLENGE_PREFIX.length, UID.UID_LENGTH);
-            System.arraycopy(currentDeviceUid.getBytes(), 0, prefix, SIGNATURE_CHALLENGE_PREFIX.length+UID.UID_LENGTH, UID.UID_LENGTH);
-
-            byte[] signature = protocolManagerSession.identityDelegate.signIdentities(
+            byte[] signature = protocolManagerSession.identityDelegate.signChannel(
                     protocolManagerSession.session,
-                    prefix,
-                    new Identity[]{ receivedMessage.contactIdentity, getOwnedIdentity()},
+                    Constants.SignatureContext.CHANNEL_CREATION,
+                    receivedMessage.contactIdentity,
+                    receivedMessage.contactDeviceUid,
                     getOwnedIdentity(),
+                    currentDeviceUid,
                     getPrng()
             );
 
@@ -856,7 +852,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         private final AliceIdentityAndEphemeralKeyMessage receivedMessage;
 
         public SendEphemeralKeyAndK1Step(InitialProtocolState startState, AliceIdentityAndEphemeralKeyMessage receivedMessage, ChannelCreationWithContactDeviceProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -873,18 +869,17 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 }
 
                 // verify the signature in the AliceIdentityAndEphemeralKeyMessage
-                byte[] prefix = new byte[SIGNATURE_CHALLENGE_PREFIX.length + UID.UID_LENGTH * 2];
-                System.arraycopy(SIGNATURE_CHALLENGE_PREFIX, 0, prefix, 0, SIGNATURE_CHALLENGE_PREFIX.length);
                 UID currentDeviceUid = protocolManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
                 if (currentDeviceUid == null) {
                     return new CancelledState();
                 }
-                System.arraycopy(currentDeviceUid.getBytes(), 0, prefix, SIGNATURE_CHALLENGE_PREFIX.length, UID.UID_LENGTH);
-                System.arraycopy(receivedMessage.contactDeviceUid.getBytes(), 0, prefix, SIGNATURE_CHALLENGE_PREFIX.length + UID.UID_LENGTH, UID.UID_LENGTH);
 
-                boolean signatureIsValid = protocolManagerSession.identityDelegate.verifyIdentitiesSignature(
-                        prefix,
-                        new Identity[]{getOwnedIdentity(), receivedMessage.contactIdentity},
+                boolean signatureIsValid = Signature.verify(
+                        Constants.SignatureContext.CHANNEL_CREATION,
+                        currentDeviceUid,
+                        receivedMessage.contactDeviceUid,
+                        getOwnedIdentity(),
+                        receivedMessage.contactIdentity,
                         receivedMessage.contactIdentity,
                         receivedMessage.signature
                 );
@@ -971,7 +966,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         private final BobEphemeralKeyAndK1Message receivedMessage;
 
         public RecoverK1AndSendK2AndCreateChannelStep(WaitingForK1State startState, BobEphemeralKeyAndK1Message receivedMessage, ChannelCreationWithContactDeviceProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1041,7 +1036,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         private final K2Message receivedMessage;
 
         public RecoverK2CreateChannelAndSendAckStep(WaitingForK2State startState, K2Message receivedMessage, ChannelCreationWithContactDeviceProtocol protocol) throws Exception {
-            super(protocol.ownedIdentity, ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1116,7 +1111,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         private final FirstAckMessage receivedMessage;
 
         public ConfirmChannelAndSendAckStep(WaitForFirstAckState startState, FirstAckMessage receivedMessage, ChannelCreationWithContactDeviceProtocol protocol) throws Exception {
-            super(protocol.ownedIdentity, ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1226,7 +1221,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         private final SecondAckMessage receivedMessage;
 
         public ConfirmChannelStep(WaitForSecondAckState startState, SecondAckMessage receivedMessage, ChannelCreationWithContactDeviceProtocol protocol) throws Exception {
-            super(protocol.ownedIdentity, ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createObliviousChannelInfo(startState.contactDeviceUid, startState.contactIdentity), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

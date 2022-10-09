@@ -21,7 +21,6 @@ package io.olvid.messenger.fragments.dialog;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.LayoutInflater;
@@ -38,7 +37,6 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.lang.ref.WeakReference;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,44 +47,23 @@ import io.olvid.messenger.settings.SettingsActivity;
 
 
 public class LedColorPickerDialogFragment extends DialogFragment implements View.OnClickListener {
-    private static final String REQUEST_CODE = "request_code";
-    private int requestCode;
-
     private String initialColor = null;
-    private WeakReference<OnLedColorSelectedListener> onLedColorSelectedWeakReference;
+    private OnLedColorSelectedListener onLedColorSelectedListener;
     private Integer color;
 
     private TextInputEditText colorEditText;
     private ImageView fullPreview;
 
-    public static LedColorPickerDialogFragment newInstance(int requestCode) {
-        LedColorPickerDialogFragment fragment = new LedColorPickerDialogFragment();
-        Bundle args = new Bundle();
-        args.putInt(REQUEST_CODE, requestCode);
-        fragment.setArguments(args);
-        return fragment;
+    public static LedColorPickerDialogFragment newInstance() {
+        return new LedColorPickerDialogFragment();
     }
 
     public void setInitialColor(String initialColor) {
         this.initialColor = initialColor;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            requestCode = arguments.getInt(REQUEST_CODE);
-        }
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-
-        if (context instanceof OnLedColorSelectedListener) {
-            onLedColorSelectedWeakReference = new WeakReference<>((OnLedColorSelectedListener) context);
-        }
+    public void setOnLedColorSelectedListener(OnLedColorSelectedListener onLedColorSelectedListener) {
+        this.onLedColorSelectedListener = onLedColorSelectedListener;
     }
 
     @NonNull
@@ -121,7 +98,7 @@ public class LedColorPickerDialogFragment extends DialogFragment implements View
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View dialogView = inflater.inflate(R.layout.dialog_fragment_led_color_picker, container, false);
 
-        ((TextView) dialogView.findViewById(R.id.dialog_title)).setText(R.string.dialog_title_pick_discussion_color);
+        ((TextView) dialogView.findViewById(R.id.dialog_title)).setText(R.string.dialog_title_pick_led_color);
 
         colorEditText = dialogView.findViewById(R.id.color_input);
         colorEditText.addTextChangedListener(new TextChangeListener() {
@@ -133,6 +110,7 @@ public class LedColorPickerDialogFragment extends DialogFragment implements View
                 if (matcher.find()) {
                     String colorString = matcher.group(2);
                     try {
+                        //noinspection ConstantConditions
                         int color = Integer.parseInt(colorString, 16);
                         setColor(color);
                     } catch (Exception e) {
@@ -250,19 +228,16 @@ public class LedColorPickerDialogFragment extends DialogFragment implements View
     }
 
     private void save() {
-        if (onLedColorSelectedWeakReference != null) {
-            OnLedColorSelectedListener onLedColorSelectedListener = onLedColorSelectedWeakReference.get();
-            if (onLedColorSelectedListener != null) {
-                if (color == null) {
-                    onLedColorSelectedListener.onLedColorSelected(requestCode, null);
-                } else {
-                    onLedColorSelectedListener.onLedColorSelected(requestCode, String.format(Locale.ENGLISH, "#%06x", color));
-                }
+        if (onLedColorSelectedListener != null) {
+            if (color == null) {
+                onLedColorSelectedListener.onLedColorSelected(null);
+            } else {
+                onLedColorSelectedListener.onLedColorSelected(String.format(Locale.ENGLISH, "#%06x", color));
             }
         }
     }
 
     public interface OnLedColorSelectedListener {
-        void onLedColorSelected(int requestCode, String color);
+        void onLedColorSelected(String color);
     }
 }

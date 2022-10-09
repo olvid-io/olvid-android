@@ -19,15 +19,18 @@
 
 package io.olvid.messenger.settings;
 
+import android.app.LocaleManager;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.LocaleList;
 import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.emoji2.bundled.BundledEmojiCompatConfig;
 import androidx.emoji2.text.EmojiCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.DropDownPreference;
 import androidx.preference.ListPreference;
@@ -40,12 +43,61 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 
 public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
+    FragmentActivity activity;
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.fragment_preferences_customization, rootKey);
+        activity = requireActivity();
         PreferenceScreen screen = getPreferenceScreen();
         if (screen == null) {
             return;
+        }
+
+        {
+            final ListPreference languagePreference = screen.findPreference(SettingsActivity.PREF_KEY_APP_LANGUAGE);
+            if (languagePreference != null) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    screen.removePreference(languagePreference);
+                } else {
+                    LocaleManager localeManager = activity.getSystemService(LocaleManager.class);
+                    LocaleList localeList = localeManager.getApplicationLocales();
+                    if (!localeList.isEmpty()) {
+                        String lang = localeList.get(0).getLanguage();
+                        switch (lang) {
+                            case "fr":
+                                languagePreference.setValue("fr");
+                                break;
+                            case "en":
+                                languagePreference.setValue("en");
+                                break;
+                            default:
+                                languagePreference.setValue("default");
+                                break;
+                        }
+                    } else {
+                        languagePreference.setValue("default");
+                    }
+
+
+                    languagePreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
+                        if (newValue instanceof String) {
+                            switch ((String) newValue) {
+                                case "fr":
+                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("fr"));
+                                    break;
+                                case "en":
+                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("en"));
+                                    break;
+                                default:
+                                    localeManager.setApplicationLocales(LocaleList.getEmptyLocaleList());
+                                    break;
+                            }
+                        }
+                        return false;
+                    });
+                }
+            }
         }
 
         {
@@ -94,17 +146,24 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
         }
 
         {
+            Preference.OnPreferenceChangeListener listener = (Preference preference, Object newValue) -> {
+                Intent scaleChangedIntent = new Intent(SettingsActivity.ACTIVITY_RECREATE_REQUIRED_ACTION);
+                scaleChangedIntent.setPackage(App.getContext().getPackageName());
+                // we delay sending this intent so we are sure the setting is updated when activities are recreated
+                new Handler(Looper.getMainLooper()).postDelayed(() -> LocalBroadcastManager.getInstance(App.getContext()).sendBroadcast(scaleChangedIntent), 200);
+                return true;
+            };
+
             final DropDownPreference fontScalePreference = screen.findPreference(SettingsActivity.PREF_KEY_FONT_SCALE);
             if (fontScalePreference != null) {
-                fontScalePreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
-                    Intent scaleChangedIntent = new Intent(SettingsActivity.ACTIVITY_RECREATE_REQUIRED_ACTION);
-                    scaleChangedIntent.setPackage(App.getContext().getPackageName());
-                    // we delay sending this intent so we are sure the setting is updated when activities are recreated
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> LocalBroadcastManager.getInstance(App.getContext()).sendBroadcast(scaleChangedIntent), 200);
-                    return true;
-                });
+                fontScalePreference.setOnPreferenceChangeListener(listener);
+            }
+            final DropDownPreference screenScalePreference = screen.findPreference(SettingsActivity.PREF_KEY_SCREEN_SCALE);
+            if (screenScalePreference != null) {
+                screenScalePreference.setOnPreferenceChangeListener(listener);
             }
         }
+
 
         {
             final SwitchPreference useSystemEmojisPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_SYSTEM_EMOJIS);

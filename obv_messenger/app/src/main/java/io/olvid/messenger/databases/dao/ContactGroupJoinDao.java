@@ -47,8 +47,8 @@ public interface ContactGroupJoinDao {
             " ON contact." + Contact.BYTES_CONTACT_IDENTITY + " = CGjoin." + ContactGroupJoin.BYTES_CONTACT_IDENTITY +
             " AND contact." + Contact.BYTES_OWNED_IDENTITY + " = CGjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
             " WHERE CGjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND CGjoin." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :groupId")
-    List<Contact> getGroupContactsSync(final byte[] bytesOwnedIdentity, final byte[] groupId);
+            " AND CGjoin." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :groupOwnedAndUid")
+    List<Contact> getGroupContactsSync(final byte[] bytesOwnedIdentity, final byte[] groupOwnedAndUid);
 
     @Query("SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
             " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS CGjoin " +
@@ -95,12 +95,13 @@ public interface ContactGroupJoinDao {
     @Query("SELECT COUNT(*) FROM " + ContactGroupJoin.TABLE_NAME +
             " WHERE " + ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND " + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    Long countContactGroups(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    int countContactGroups(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
 
     @Query("SELECT disc.id FROM " + Discussion.TABLE_NAME + " AS disc " +
             " INNER JOIN " + Group.TABLE_NAME + " AS g " +
-            " ON disc." + Discussion.BYTES_GROUP_OWNER_AND_UID + " = g." + Group.BYTES_GROUP_OWNER_AND_UID +
-            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = g." + Group.BYTES_OWNED_IDENTITY +
+            " ON disc." + Discussion.BYTES_OWNED_IDENTITY + " = g." + Group.BYTES_OWNED_IDENTITY +
+            " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP +
+            " AND disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = g." + Group.BYTES_GROUP_OWNER_AND_UID +
             " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS cgj " +
             " ON cgj." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = g." + Group.BYTES_GROUP_OWNER_AND_UID +
             " AND cgj." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = g." + Group.BYTES_OWNED_IDENTITY +

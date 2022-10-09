@@ -56,7 +56,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.LoadAwareAdapter;
-import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.fragments.dialog.CloudProviderSignInDialogFragment;
@@ -140,7 +140,7 @@ public class ManageCloudBackupsDialogFragment extends DialogFragment implements 
         backupsRecyclerView.setEmptyView(emptyView);
         View loadingSpinner = dialogView.findViewById(R.id.loading_spinner);
         backupsRecyclerView.setLoadingSpinner(loadingSpinner, 0, 150);
-        backupsRecyclerView.addItemDecoration(new RecyclerViewDividerDecoration(activity, 52, 8, R.color.dialogBackground));
+        backupsRecyclerView.addItemDecoration(new ItemDecorationSimpleDivider(activity, 52, 8, R.color.dialogBackground));
 
         adapter = new BackupsManagerAdapter();
         backupsRecyclerView.setAdapter(adapter);
@@ -392,7 +392,8 @@ public class ManageCloudBackupsDialogFragment extends DialogFragment implements 
 
         if (requestCode == REQUEST_CODE_SAVE_BACKUP
                 && resultCode == Activity.RESULT_OK
-                && data != null && data.getData() != null
+                && data != null
+                && StringUtils.validateUri(data.getData())
                 && activity != null
                 && backupItemContent != null) {
             final byte[] bytesToWrite = backupItemContent;

@@ -24,6 +24,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -58,12 +60,14 @@ public class MessageDateItemDecoration extends RecyclerView.ItemDecoration {
 
     @NonNull private final FragmentActivity activity;
     @NonNull private final DiscussionActivity.MessageListAdapter messageListAdapter;
+    @NonNull private final EmptyRecyclerView messageRecyclerView;
     private final ValueAnimator headerAppearingAnimator;
     private final ValueAnimator headerDisappearingAnimator;
 
     MessageDateItemDecoration(@NonNull FragmentActivity activity, @NonNull EmptyRecyclerView messageRecyclerView, @NonNull DiscussionActivity.MessageListAdapter messageListAdapter) {
         this.activity = activity;
         this.messageListAdapter = messageListAdapter;
+        this.messageRecyclerView = messageRecyclerView;
         DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
         headerHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, metrics);
 
@@ -84,7 +88,10 @@ public class MessageDateItemDecoration extends RecyclerView.ItemDecoration {
     void resetHeaderBitmapCache() {
         DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
         headerHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, metrics);
-        headerBitmaps.clear();
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            headerBitmaps.clear();
+            messageRecyclerView.invalidate();
+        }, 100);
     }
 
     @Override

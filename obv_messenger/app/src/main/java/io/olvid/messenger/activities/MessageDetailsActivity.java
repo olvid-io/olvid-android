@@ -52,17 +52,10 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -74,14 +67,24 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding;
+import io.olvid.messenger.customClasses.EmptyRecyclerView;
+import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockableActivity;
+import io.olvid.messenger.customClasses.MessageAttachmentAdapter;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.SizeAwareCardView;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -89,12 +92,8 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageExpiration;
 import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter;
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel;
 import io.olvid.messenger.viewModels.MessageDetailsViewModel;
-import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.InitialView;
-import io.olvid.messenger.customClasses.SizeAwareCardView;
 
 
 public class MessageDetailsActivity extends LockableActivity {
@@ -237,7 +236,7 @@ public class MessageDetailsActivity extends LockableActivity {
         }
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        statusWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 26, metrics);
+        statusWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, metrics) + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 18, metrics);
         messageCardView.setSizeChangeListener((w, h, oldw, oldh) -> recomputeMessageLayout());
 
 
@@ -522,6 +521,13 @@ public class MessageDetailsActivity extends LockableActivity {
             messageContentTextView.setMinWidth((int) (getResources().getDimensionPixelSize(R.dimen.single_line_emoji_size) * 1.25));
             messageContentTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             messageContentTextView.setText(body);
+        } else if (message.isLocationMessage()) {
+            // do nothing
+            messageContentTextView.setVisibility(View.VISIBLE);
+            messageContentTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            messageContentTextView.setMinWidth(0);
+            messageContentTextView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+            messageContentTextView.setText(message.contentBody);
         } else {
             messageContentTextView.setVisibility(View.VISIBLE);
             messageContentTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
@@ -827,8 +833,8 @@ public class MessageDetailsActivity extends LockableActivity {
                 }
                 if (position == 0 || (recipientInfosAdapter.messageRecipientInfos.get(position).status() != recipientInfosAdapter.messageRecipientInfos.get(position-1).status())) {
                     int status = recipientInfosAdapter.messageRecipientInfos.get(position).status();
-                    if (status == MessageRecipientInfo.RECIPIENT_STATUS_PROCESSING && MessageDetailsActivity.this.messageIsUndelivered) {
-                        status = 4;
+                    if (status < MessageRecipientInfo.RECIPIENT_STATUS_SENT && MessageDetailsActivity.this.messageIsUndelivered) {
+                        status = 5;
                     }
                     // check the cache, and compute it if needed
                     if (bitmapCache[status] == null) {
@@ -836,6 +842,10 @@ public class MessageDetailsActivity extends LockableActivity {
                         TextView textView = headerView.findViewById(R.id.header_status_text);
                         ImageView imageView = headerView.findViewById(R.id.header_status_image);
                         switch (status) {
+                            case MessageRecipientInfo.RECIPIENT_STATUS_NOT_SENT_YET:
+                                textView.setText(R.string.text_not_sent_yet);
+                                imageView.setImageResource(R.drawable.ic_message_status_not_sent_yet);
+                                break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_PROCESSING:
                                 textView.setText(R.string.text_processing);
                                 imageView.setImageResource(R.drawable.ic_sync);
@@ -852,7 +862,7 @@ public class MessageDetailsActivity extends LockableActivity {
                                 textView.setText(R.string.text_read);
                                 imageView.setImageResource(R.drawable.ic_message_status_delivered_and_read);
                                 break;
-                            case 4: // 4 is for undelivered message
+                            case 5: // 4 is for undelivered message
                                 textView.setText(R.string.text_undelivered);
                                 imageView.setImageResource(R.drawable.ic_message_status_undelivered);
                                 break;
@@ -957,6 +967,14 @@ public class MessageDetailsActivity extends LockableActivity {
                     }
                     case MessageMetadata.KIND_EDITED: {
                         holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_edited);
+                        break;
+                    }
+                    case MessageMetadata.KIND_LOCATION_SHARING_LATEST_UPDATE: {
+                        holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_location_sharing_latest_update);
+                        break;
+                    }
+                    case MessageMetadata.KIND_LOCATION_SHARING_END: {
+                        holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_location_sharing_end);
                         break;
                     }
                     case MessageMetadata.KIND_REMOTE_DELETED: {

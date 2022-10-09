@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 
 public class ObvDialog {
@@ -111,7 +112,9 @@ public class ObvDialog {
     }
 
     public void setResponseToAcceptGroupInvite(boolean acceptInvite) throws Exception {
-        if (this.category.id == Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY) {
+        if (this.category.id == Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY
+                || this.category.id == Category.GROUP_V2_INVITATION_DIALOG_CATEGORY
+                || (this.category.id == Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY && !acceptInvite)) {
             encodedResponse = Encoded.of(acceptInvite);
         } else {
             throw new Exception();
@@ -156,6 +159,8 @@ public class ObvDialog {
 //        public static final int GROUP_JOINED_DIALOG_CATEGORY = 12;
         public static final int ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY = 13;
         public static final int ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY = 14;
+        public static final int GROUP_V2_INVITATION_DIALOG_CATEGORY = 15;
+        public static final int GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY = 16;
 
         private final int id;
         private final byte[] bytesContactIdentity;
@@ -167,9 +172,10 @@ public class ObvDialog {
         private final byte[] bytesGroupUid;
         private final ObvIdentity[] pendingGroupMemberIdentities;
         public final Long serverTimestamp;
+        private final ObvGroupV2 obvGroupV2;
 
 
-        private Category(int id, byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] sasToDisplay, byte[] sasEntered, byte[] bytesMediatorOrGroupOwnerIdentity, String serializedGroupDetails, byte[] bytesGroupUid, ObvIdentity[] pendingGroupMemberIdentities, Long serverTimestamp) {
+        public Category(int id, byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] sasToDisplay, byte[] sasEntered, byte[] bytesMediatorOrGroupOwnerIdentity, String serializedGroupDetails, byte[] bytesGroupUid, ObvIdentity[] pendingGroupMemberIdentities, Long serverTimestamp, ObvGroupV2 obvGroupV2) {
             this.id = id;
             this.bytesContactIdentity = bytesContactIdentity;
             this.contactDisplayNameOrSerializedDetails = contactDisplayNameOrSerializedDetails;
@@ -180,6 +186,7 @@ public class ObvDialog {
             this.bytesGroupUid = bytesGroupUid;
             this.pendingGroupMemberIdentities = pendingGroupMemberIdentities;
             this.serverTimestamp = serverTimestamp;
+            this.obvGroupV2 = obvGroupV2;
         }
 
         public int getId() {
@@ -222,6 +229,10 @@ public class ObvDialog {
             return pendingGroupMemberIdentities;
         }
 
+        public ObvGroupV2 getObvGroupV2() {
+            return obvGroupV2;
+        }
+
         private static Category of(Encoded encoded, ObjectMapper jsonObjectMapper) throws Exception {
             Encoded[] list = encoded.decodeList();
             if (list.length != 2) {
@@ -237,6 +248,7 @@ public class ObvDialog {
             byte[] bytesGroupUid = null;
             ObvIdentity[] pendingGroupMemberIdentities = null;
             Long serverTimestamp = null;
+            ObvGroupV2 obvGroupV2 = null;
 
             Encoded[] vars = list[1].decodeList();
             switch (id) {
@@ -321,6 +333,15 @@ public class ObvDialog {
                     serverTimestamp = vars[1].decodeLong();
                     break;
                 }
+                case GROUP_V2_INVITATION_DIALOG_CATEGORY:
+                case GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY: {
+                    if (vars.length != 2) {
+                        throw new DecodingException();
+                    }
+                    bytesMediatorOrGroupOwnerIdentity = vars[0].decodeBytes();
+                    obvGroupV2 = ObvGroupV2.of(vars[1]);
+                    break;
+                }
                 default:
                     if (vars.length != 2) {
                         throw new DecodingException();
@@ -329,7 +350,7 @@ public class ObvDialog {
                     contactDisplayNameOrSerializedDetails = vars[1].decodeString();
                     break;
             }
-            return new Category(id, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, bytesMediatorOrGroupOwnerIdentity, serializedGroupDetails, bytesGroupUid, pendingGroupMemberIdentities, serverTimestamp);
+            return new Category(id, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, bytesMediatorOrGroupOwnerIdentity, serializedGroupDetails, bytesGroupUid, pendingGroupMemberIdentities, serverTimestamp, obvGroupV2);
         }
 
         private Encoded encode(ObjectMapper jsonObjectMapper) {
@@ -420,6 +441,13 @@ public class ObvDialog {
                             Encoded.of(serverTimestamp),
                     });
                     break;
+                case GROUP_V2_INVITATION_DIALOG_CATEGORY:
+                case GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY:
+                    encodedVars = Encoded.of(new Encoded[]{
+                            Encoded.of(bytesMediatorOrGroupOwnerIdentity),
+                            obvGroupV2.encode(),
+                    });
+                    break;
             }
             return Encoded.of(new Encoded[]{
                     Encoded.of(id),
@@ -428,47 +456,55 @@ public class ObvDialog {
         }
 
         public static Category createInviteSent(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails) {
-            return new Category(INVITE_SENT_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, null);
+            return new Category(INVITE_SENT_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, null, null);
         }
 
         public static Category createAcceptInvite(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, long serverTimestamp) {
-            return new Category(ACCEPT_INVITE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, serverTimestamp);
+            return new Category(ACCEPT_INVITE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, serverTimestamp, null);
         }
 
         public static Category createSasExchange(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] sasToDisplay, long serverTimestamp) {
-            return new Category(SAS_EXCHANGE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, null, null, null, null, null, serverTimestamp);
+            return new Category(SAS_EXCHANGE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, null, null, null, null, null, serverTimestamp, null);
         }
 
         public static Category createSasConfirmed(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] sasToDisplay, byte[] sasEntered) {
-            return new Category(SAS_CONFIRMED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, null, null, null, null, null);
+            return new Category(SAS_CONFIRMED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, null, null, null, null, null, null);
         }
 
         public static Category createMutualTrustConfirmed(byte[] bytesContactIdentity, String contactSerializedDetails) {
-            return new Category(MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY, bytesContactIdentity, contactSerializedDetails, null, null, null, null, null, null, null);
+            return new Category(MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY, bytesContactIdentity, contactSerializedDetails, null, null, null, null, null, null, null, null);
         }
 
         public static Category createInviteAccepted(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails) {
-            return new Category(INVITE_ACCEPTED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, null);
+            return new Category(INVITE_ACCEPTED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, null, null);
         }
 
         public static Category createAcceptMediatorInvite(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] bytesMediatorIdentity, long serverTimestamp) {
-            return new Category(ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, serverTimestamp);
+            return new Category(ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, serverTimestamp, null);
         }
 
         public static Category createMediatorInviteAccepted(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] bytesMediatorIdentity) {
-            return new Category(MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, null);
+            return new Category(MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, null, null);
         }
 
         public static Category createAcceptGroupInvite(String serializedGroupDetails, byte[] groupId, byte[] bytesGroupOwnerIdentity, ObvIdentity[] pendingGroupMemberIdentities, long serverTimestamp) {
-            return new Category(ACCEPT_GROUP_INVITE_DIALOG_CATEGORY, null, null, null, null, bytesGroupOwnerIdentity, serializedGroupDetails, groupId, pendingGroupMemberIdentities, serverTimestamp);
+            return new Category(ACCEPT_GROUP_INVITE_DIALOG_CATEGORY, null, null, null, null, bytesGroupOwnerIdentity, serializedGroupDetails, groupId, pendingGroupMemberIdentities, serverTimestamp, null);
         }
 
         public static Category createOneToOneInvitationSent(byte[] bytesContactIdentity) {
-            return new Category(ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, null);
+            return new Category(ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, null, null);
         }
 
         public static Category createAcceptOneToOneInvitation(byte[] bytesContactIdentity, Long serverTimestamp) {
-            return new Category(ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, serverTimestamp);
+            return new Category(ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, serverTimestamp, null);
+        }
+
+        public static Category createGroupV2Invitation(byte[] bytesInviterIdentity, ObvGroupV2 obvGroupV2) {
+            return new Category(GROUP_V2_INVITATION_DIALOG_CATEGORY, null, null, null, null, bytesInviterIdentity, null, null, null, null, obvGroupV2);
+        }
+
+        public static Category createGroupV2FrozenInvitation(byte[] bytesInviterIdentity, ObvGroupV2 obvGroupV2) {
+            return new Category(GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY, null, null, null, null, bytesInviterIdentity, null, null, null, null, obvGroupV2);
         }
     }
 }

@@ -52,7 +52,7 @@ import java.util.List;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.ActionShortcutConfiguration;
@@ -79,7 +79,7 @@ public class WidgetListFragment extends Fragment {
         recyclerView.setHideIfEmpty(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(activity, 60, 8));
+        recyclerView.addItemDecoration(new ItemDecorationSimpleDivider(activity, 60, 8));
 
         WidgetListAdapter adapter = new WidgetListAdapter();
         recyclerView.setAdapter(adapter);

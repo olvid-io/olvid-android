@@ -249,9 +249,9 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
     }
 
     @Override
-    public void setAutoBackupEnabled(boolean enabled) {
+    public void setAutoBackupEnabled(boolean enabled, boolean initiateBackupNowIfNeeded) {
         autoBackupEnabled = enabled;
-        if (!enabled) {
+        if (!enabled || !initiateBackupNowIfNeeded) {
             return;
         }
 

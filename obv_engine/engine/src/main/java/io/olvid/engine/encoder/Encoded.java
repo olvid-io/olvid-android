@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
@@ -155,7 +156,7 @@ public class Encoded {
     }
 
     public static Encoded of(UUID uuid) {
-        return Encoded.of(uuid.toString());
+        return Encoded.of(Logger.getUuidString(uuid));
     }
 
     public static Encoded of(long i) {

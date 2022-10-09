@@ -23,10 +23,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -36,9 +39,11 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -50,8 +55,14 @@ import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.LockScreenActivity;
+import io.olvid.messenger.databases.tasks.DeleteAllHiddenProfilesAndLimitedVisibilityMessages;
 import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -65,23 +76,25 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
     private EditText pinInput;
     private ImageButton fingerprintButton;
     private TextView biometryDisabledTextview;
+    private TextView pinUnlockTimer;
+    private LinearLayout pinUnlockTimerGroup;
+
+    private InputMethodManager imm;
+
     private UnlockEventBroadcastReceiver unlockEventBroadcastReceiver = null;
     private boolean openBiometricsOnNextWindowFocus = false;
 
+    private final Timer timer = new Timer("LockScreenOrNot pin timeout timer");
+    private TimerTask timerTask = null;
+
+    private boolean pinLocked = true;
+    private String previousPin = "";
+    private int failedPinCount = 0;
+    private boolean deleting = false;
+
     @Override
     protected void attachBaseContext(Context baseContext) {
-        final Context newContext;
-        float customFontScale = SettingsActivity.getFontScale();
-        float fontScale = baseContext.getResources().getConfiguration().fontScale;
-        if (customFontScale != 1.0f) {
-            Configuration configuration = new Configuration();
-            configuration.fontScale = fontScale * customFontScale;
-            newContext = baseContext.createConfigurationContext(configuration);
-        } else {
-            newContext = baseContext;
-        }
-
-        super.attachBaseContext(newContext);
+        super.attachBaseContext(SettingsActivity.overrideContextScales(baseContext));
     }
 
     @Override
@@ -103,10 +116,15 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
             unlockEventBroadcastReceiver = new UnlockEventBroadcastReceiver();
             LocalBroadcastManager.getInstance(this).registerReceiver(unlockEventBroadcastReceiver, new IntentFilter(UnifiedForegroundService.LockSubService.APP_UNLOCKED_BROADCAST_ACTION));
 
+            imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
             pinInput = findViewById(R.id.pin_input);
+            pinInput.setEnabled(false);
             fingerprintButton = findViewById(R.id.fingerprint_icon);
             ImageView okButton = findViewById(R.id.button_ok);
             biometryDisabledTextview = findViewById(R.id.biometry_disabled_textview);
+            pinUnlockTimer = findViewById(R.id.pin_unlock_timer);
+            pinUnlockTimerGroup = findViewById(R.id.pin_unlock_timer_group);
 
             TextWatcher textWatcher = new TextChangeListener() {
                 @Override
@@ -128,6 +146,10 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
             });
             fingerprintButton.setOnClickListener(v -> openBiometricPrompt());
             okButton.setOnClickListener(v -> {
+                if (pinLocked) {
+                    return;
+                }
+
                 if (!validatePIN()) {
                     Animation shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake);
                     pinInput.startAnimation(shakeAnimation);
@@ -200,8 +222,49 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
     }
 
     private boolean validatePIN() {
+        if (pinLocked) {
+            return false;
+        }
+
         String PIN = pinInput.getText().toString();
-        if (SettingsActivity.verifyPIN(PIN)) {
+        if (!Objects.equals(previousPin, PIN)) {
+            if (StringUtils.isASubstringOfB(previousPin, PIN)) {
+                deleting = false;
+                LockScreenActivity.storeFailedPinCount(failedPinCount + 1); // already store a failed PIN count to avoid free validations on activity kill/restart
+            } else if (StringUtils.isASubstringOfB(PIN, previousPin)) {
+                if (!deleting) {
+                    deleting = true;
+                    failedPinCount++;
+                    LockScreenActivity.storeFailedPinCount(failedPinCount);
+                }
+            } else {
+                deleting = false;
+                failedPinCount++;
+                LockScreenActivity.storeFailedPinCount(failedPinCount);
+            }
+        }
+
+        if (failedPinCount >= LockScreenActivity.PIN_FAIL_COUNT_BEFORE_TIME_OUT) {
+            LockScreenActivity.storeLockTimestamps();
+            disablePinInput();
+
+            previousPin = "";
+            deleting = false;
+            failedPinCount = 0;
+
+            return false;
+        }
+
+        boolean unlock = SettingsActivity.verifyPIN(PIN);
+        if (!unlock && SettingsActivity.useEmergencyPIN()) {
+            if (SettingsActivity.verifyEmergencyPIN(PIN)) {
+                unlock = true;
+                App.runThread(new DeleteAllHiddenProfilesAndLimitedVisibilityMessages());
+            }
+        }
+
+        if (unlock) {
+            LockScreenActivity.storeFailedPinCount(0);
             if (keyWiped) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     LockScreenActivity.generateFingerprintAdditionDetectionKey();
@@ -210,8 +273,75 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
             unlock();
             return true;
         }
+        previousPin = PIN;
         return false;
     }
+
+    private void disablePinInput() {
+        pinLocked = true;
+        pinInput.setEnabled(false);
+        pinInput.setText("");
+
+        tryToEnablePinInput();
+    }
+
+    private void tryToEnablePinInput() {
+        SharedPreferences preference = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_lock), Context.MODE_PRIVATE);
+        failedPinCount = preference.getInt(LockScreenActivity.FAILED_PINS_PREFERENCE_KEY, 0);
+        long currentTimestamp = SystemClock.elapsedRealtime();
+        long unlockTimestamp = preference.getLong(LockScreenActivity.PIN_LOCK_END_TIMESTAMP_PREFERENCE_KEY, 0);
+
+        if (currentTimestamp < unlockTimestamp) {
+            // check if we are not in the past (in case of reboot)
+            long lockTimestamp = preference.getLong(LockScreenActivity.PIN_LOCK_TIMESTAMP_PREFERENCE_KEY, -1);
+            if (lockTimestamp != -1 && lockTimestamp < currentTimestamp) {
+                if (timerTask != null) {
+                    timerTask.cancel();
+                    timerTask = null;
+                }
+
+                timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(() -> {
+                            timerTask = null;
+                            tryToEnablePinInput();
+                        });
+                    }
+                };
+                timer.schedule(timerTask, 1_000);
+
+                int remainingSeconds = 1 + (int) ((unlockTimestamp - currentTimestamp - 1) / 1000);
+                if (pinUnlockTimerGroup != null && pinUnlockTimer != null) {
+                    if (pinUnlockTimerGroup.getVisibility() != View.VISIBLE) {
+                        pinUnlockTimerGroup.setAlpha(0);
+                        pinUnlockTimerGroup.setVisibility(View.VISIBLE);
+                        pinUnlockTimerGroup.animate().alpha(1);
+                    }
+                    pinUnlockTimer.setText(getString(R.string.x_seconds, remainingSeconds));
+                }
+
+                return;
+            }
+        }
+
+        if (pinUnlockTimerGroup != null) {
+            if (pinUnlockTimerGroup.getVisibility() != View.GONE) {
+                pinUnlockTimerGroup.animate().alpha(0);
+                pinUnlockTimerGroup.setVisibility(View.GONE);
+            }
+        }
+
+        // we can enable the PIN input
+        pinLocked = false;
+        pinInput.setEnabled(true);
+        pinInput.requestFocus();
+        if (imm != null) {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> imm.showSoftInput(pinInput, InputMethodManager.SHOW_IMPLICIT), 200);
+        }
+    }
+
+
 
     private void unlock() {
         Intent unlockIntent = new Intent(this, UnifiedForegroundService.class);
@@ -225,7 +355,7 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (UnifiedForegroundService.LockSubService.isApplicationLocked()) {
-            if (pinInput == null || fingerprintButton == null || biometryDisabledTextview == null) {
+            if (pinInput == null || fingerprintButton == null || biometryDisabledTextview == null || pinUnlockTimerGroup == null || pinUnlockTimer == null) {
                 // may happen if onCreate was called while app was unlocked but onResume is called after it was locked
                 recreate();
                 return;
@@ -250,7 +380,8 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
                 fingerprintButton.setVisibility(View.GONE);
                 biometryDisabledTextview.setVisibility(View.GONE);
             }
-            pinInput.requestFocus();
+
+            tryToEnablePinInput();
         }
     }
 

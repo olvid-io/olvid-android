@@ -66,6 +66,7 @@ import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockScreenOrNotActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -107,7 +108,7 @@ public class StorageManagerActivity extends LockScreenOrNotActivity {
                     return;
                 }
                 Uri folderUri = activityResult.getData().getData();
-                if (folderUri != null && viewModel != null && !viewModel.selectedFyles.isEmpty()) {
+                if (StringUtils.validateUri(folderUri) && viewModel != null && !viewModel.selectedFyles.isEmpty()) {
                     ArrayList<FyleMessageJoinWithStatusDao.FyleAndStatus> selectedAttachments = new ArrayList<>(viewModel.selectedFyles);
                     viewModel.clearSelectedFyles();
                     App.runThread(new SaveMultipleAttachmentsTask(this, folderUri, selectedAttachments));
@@ -279,7 +280,10 @@ public class StorageManagerActivity extends LockScreenOrNotActivity {
                     final AlertDialog.Builder builder = new SecureAlertDialogBuilder(StorageManagerActivity.this, R.style.CustomAlertDialog)
                             .setTitle(R.string.dialog_title_save_selected_attachments)
                             .setMessage(getResources().getQuantityString(R.plurals.dialog_message_save_selected_attachments, count, count))
-                            .setPositiveButton(R.string.button_label_ok, (DialogInterface dialog, int which) -> saveSelectedAttachmentsLauncher.launch(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)))
+                            .setPositiveButton(R.string.button_label_ok, (DialogInterface dialog, int which) -> {
+                                App.prepareForStartActivityForResult(StorageManagerActivity.this);
+                                saveSelectedAttachmentsLauncher.launch(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE));
+                            })
                             .setNegativeButton(R.string.button_label_cancel, null);
                     builder.create().show();
                 } else if (item.getItemId() == R.id.action_select_all) {

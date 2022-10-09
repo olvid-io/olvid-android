@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    
+    <io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory
+        app:iconSpaceReserved="false"
+        android:key="pref_key_discussion_category_retention_policy"
+        android:title="@string/pref_discussion_category_retention_policy_title"
+        android:summary="@string/pref_discussion_category_retention_policy_summary">
+        <EditTextPreference
+            android:order="1"
+            android:defaultValue=""
+            android:icon="@drawable/ic_pref_count"
+            android:key="pref_key_discussion_retention_count"
+            android:title="@string/pref_discussion_retention_count_title"
+            tools:summary="@string/pref_text_app_default" />
+        <ListPreference
+            android:order="2"
+            android:defaultValue="null"
+            android:icon="@drawable/ic_pref_date"
+            android:key="pref_key_discussion_retention_duration"
+            android:title="@string/pref_discussion_retention_duration_title"
+            tools:summary="@string/pref_text_app_default"
+            android:entries="@array/discussion_retention_duration"
+            android:entryValues="@array/discussion_retention_duration_values"/>
+    </io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory>
+</PreferenceScreen>

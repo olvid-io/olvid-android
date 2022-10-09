@@ -27,7 +27,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_min="wrap"
-        app:layout_goneMarginBottom="4dp"
         tools:visibility="visible">
 
         <TextView
@@ -122,7 +121,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintWidth_min="wrap"
-        app:layout_goneMarginTop="4dp"
         tools:text="Message content on several lines to show that the text can wrap around." />
 
     <androidx.constraintlayout.widget.Barrier
@@ -158,7 +156,6 @@
         android:layout_width="1dp"
         android:layout_height="wrap_content"
         android:textSize="12sp"
-        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@id/message_timestamp_bottom_text_view"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -217,8 +214,8 @@
 
     <ImageView
         android:id="@+id/message_status_image_view"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
+        android:layout_width="18sp"
+        android:layout_height="18sp"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="1dp"

@@ -76,7 +76,7 @@ public class DiscussionOwnedIdentityPopupWindow {
     @NonNull private final Observer<List<OwnedIdentityDao.OwnedIdentityAndDiscussionId>> separatorAndHeightObserver;
 
 
-    public DiscussionOwnedIdentityPopupWindow(@NonNull FragmentActivity activity, @NonNull View anchorView, @Nullable byte[] bytesContactIdentity, @Nullable byte[] bytesGroupOwnerAndUid) {
+    public DiscussionOwnedIdentityPopupWindow(@NonNull FragmentActivity activity, @NonNull View anchorView, int discussionType, @NonNull byte[] bytesDiscussionIdentifier) {
         this.activity = activity;
         this.anchorView = anchorView;
 
@@ -162,23 +162,12 @@ public class DiscussionOwnedIdentityPopupWindow {
             }
         };
 
-        if (bytesContactIdentity != null) {
-            otherOwnedIdentitiesAndDiscussionId = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
-                if (ownedIdentity == null) {
-                    return null;
-                }
-                return AppDatabase.getInstance().ownedIdentityDao().getOtherNonHiddenOwnedIdentitiesForContactDiscussion(ownedIdentity.bytesOwnedIdentity, bytesContactIdentity);
-            });
-        } else if (bytesGroupOwnerAndUid != null) {
-            otherOwnedIdentitiesAndDiscussionId = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
-                if (ownedIdentity == null) {
-                    return null;
-                }
-                return AppDatabase.getInstance().ownedIdentityDao().getOtherNonHiddenOwnedIdentitiesForGroupDiscussion(ownedIdentity.bytesOwnedIdentity, bytesGroupOwnerAndUid);
-            });
-        } else {
-            otherOwnedIdentitiesAndDiscussionId = null;
-        }
+        otherOwnedIdentitiesAndDiscussionId = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
+            if (ownedIdentity == null) {
+                return null;
+            }
+            return AppDatabase.getInstance().ownedIdentityDao().getOtherNonHiddenOwnedIdentitiesForDiscussion(ownedIdentity.bytesOwnedIdentity, discussionType, bytesDiscussionIdentifier);
+        });
 
         this.globalLayoutListener = this::readjustWindowSize;
     }

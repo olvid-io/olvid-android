@@ -354,7 +354,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
       private final InitialForAddingOwnCapabilitiesMessage receivedMessage;
 
       public AddOwnCapabilitiesAndSendThemToAllContactsAndOwnedDevicesStep(InitialProtocolState startState, InitialForAddingOwnCapabilitiesMessage receivedMessage, DeviceCapabilitiesDiscoveryProtocol protocol) throws Exception {
-         super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+         super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
          this.startState = startState;
          this.receivedMessage = receivedMessage;
       }
@@ -438,7 +438,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
       private final InitialSingleContactDeviceMessage receivedMessage;
 
       public SendOwnCapabilitiesToContactDeviceStep(InitialProtocolState startState, InitialSingleContactDeviceMessage receivedMessage, DeviceCapabilitiesDiscoveryProtocol protocol) throws Exception {
-         super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+         super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
          this.startState = startState;
          this.receivedMessage = receivedMessage;
       }
@@ -466,7 +466,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
       private final InitialSingleOwnedDeviceMessage receivedMessage;
 
       public SendOwnCapabilitiesToOtherOwnedDeviceStep(InitialProtocolState startState, InitialSingleOwnedDeviceMessage receivedMessage, DeviceCapabilitiesDiscoveryProtocol protocol) throws Exception {
-         super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+         super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
          this.startState = startState;
          this.receivedMessage = receivedMessage;
       }
@@ -495,7 +495,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
       private final OwnCapabilitiesToContactMessage receivedMessage;
 
       public ProcessReceivedContactDeviceCapabilitiesStep(InitialProtocolState startState, OwnCapabilitiesToContactMessage receivedMessage, DeviceCapabilitiesDiscoveryProtocol protocol) throws Exception {
-         super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+         super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
          this.startState = startState;
          this.receivedMessage = receivedMessage;
       }
@@ -535,7 +535,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
       private final OwnCapabilitiesToSelfMessage receivedMessage;
 
       public ProcessReceivedOwnedDeviceCapabilitiesStep(InitialProtocolState startState, OwnCapabilitiesToSelfMessage receivedMessage, DeviceCapabilitiesDiscoveryProtocol protocol) throws Exception {
-         super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+         super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
          this.startState = startState;
          this.receivedMessage = receivedMessage;
       }

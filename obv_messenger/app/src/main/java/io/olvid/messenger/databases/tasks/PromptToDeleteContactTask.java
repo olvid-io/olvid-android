@@ -21,13 +21,16 @@ package io.olvid.messenger.databases.tasks;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-
-import java.util.List;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
@@ -70,7 +73,8 @@ public class PromptToDeleteContactTask implements Runnable {
 
                 new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
             } else {
-                if (db.contactGroupJoinDao().countContactGroups(bytesOwnedIdentity, bytesContactIdentity) == 0) {
+                int groupCount = db.contactGroupJoinDao().countContactGroups(bytesOwnedIdentity, bytesContactIdentity) + db.group2MemberDao().countContactGroups(bytesOwnedIdentity, bytesContactIdentity);
+                if (groupCount == 0) {
                     final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
                             .setTitle(R.string.dialog_title_delete_user)
                             .setPositiveButton(R.string.button_label_ok, (DialogInterface dialog, int which) -> {
@@ -86,17 +90,23 @@ public class PromptToDeleteContactTask implements Runnable {
                             })
                             .setNegativeButton(R.string.button_label_cancel, null);
 
-                    List<byte[]> bytesGroupOwnerAndUidList = AppDatabase.getInstance().groupDao().getBytesGroupOwnerAndUidOfJoinedGroupWithPendingMember(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                    if (bytesGroupOwnerAndUidList.size() == 0) {
+                    int pendingGroupCount = db.groupDao().getBytesGroupOwnerAndUidOfJoinedGroupWithPendingMember(contact.bytesOwnedIdentity, contact.bytesContactIdentity).size() + db.group2PendingMemberDao().countContactGroups(bytesOwnedIdentity, bytesContactIdentity);
+                    if (pendingGroupCount == 0) {
                         builder.setMessage(context.getString(R.string.dialog_message_delete_user, contact.getCustomDisplayName()));
                     } else {
-                        builder.setMessage(context.getString(R.string.dialog_message_delete_user_with_pending_groups, contact.getCustomDisplayName(), bytesGroupOwnerAndUidList.size()));
+                        builder.setMessage(context.getResources().getQuantityString(R.plurals.dialog_message_delete_user_with_pending_groups, pendingGroupCount, contact.getCustomDisplayName(), pendingGroupCount));
                     }
                     new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
                 } else {
+                    SpannableStringBuilder ssb = new SpannableStringBuilder(context.getString(R.string.dialog_message_delete_user_impossible_start, contact.getCustomDisplayName()));
+                    SpannableString spannableString = new SpannableString(context.getResources().getQuantityString(R.plurals.dialog_message_delete_user_impossible_count, groupCount, groupCount));
+                    spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.append(spannableString);
+                    ssb.append(context.getResources().getQuantityString(R.plurals.dialog_message_delete_user_impossible_end, groupCount));
+
                     final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
                             .setTitle(R.string.dialog_title_delete_user_impossible)
-                            .setMessage(context.getString(R.string.dialog_message_delete_user_impossible, contact.getCustomDisplayName()))
+                            .setMessage(ssb)
                             .setPositiveButton(R.string.button_label_ok, null);
                     new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
                 }

@@ -197,7 +197,7 @@ public class DownloadGroupPhotoChildProtocol extends ConcreteProtocol {
                 throw new Exception();
             }
             this.photoPathToDelete = receivedMessage.getEncodedResponse().decodeString();
-            if (this.photoPathToDelete.equals("")) {
+            if ("".equals(this.photoPathToDelete)) {
                 // if the photo was deleted from the server, the GetUserDataServerMethod return an empty String
                 encryptedPhoto = null;
             } else {
@@ -253,7 +253,7 @@ public class DownloadGroupPhotoChildProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public QueryServerStep(InitialProtocolState startState, InitialMessage receivedMessage, DownloadGroupPhotoChildProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -281,7 +281,7 @@ public class DownloadGroupPhotoChildProtocol extends ConcreteProtocol {
         private final ServerGetPhotoMessage receivedMessage;
 
         public ProcessPhotoStep(DownloadingPhotoState startState, ServerGetPhotoMessage receivedMessage, DownloadGroupPhotoChildProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

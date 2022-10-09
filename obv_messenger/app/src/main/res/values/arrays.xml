@@ -57,6 +57,7 @@
         <item>@string/pref_text_autodownload_size_10M</item>
         <item>@string/pref_text_autodownload_size_20M</item>
         <item>@string/pref_text_autodownload_size_50M</item>
+        <item>@string/pref_text_autodownload_size_100M</item>
         <item>@string/pref_text_autodownload_size_unlimited</item>
     </string-array>
     <string-array name="autodownload_sizes_values">
@@ -67,6 +68,7 @@
         <item>10000000</item>
         <item>20000000</item>
         <item>50000000</item>
+        <item>100000000</item>
         <item>-1</item>
     </string-array>
 
@@ -333,5 +335,59 @@
         <item>everyone</item>
         <item>contacts</item>
         <item>nobody</item>
+    </string-array>
+
+    <integer-array name="share_location_duration_values">
+        <item>3600</item>
+        <item>10800</item>
+        <item>-1</item>
+    </integer-array>
+    <string-array name="share_location_duration_short_strings">
+        <item>@string/location_sharing_duration_one_hour_short_string</item>
+        <item>@string/location_sharing_duration_three_hours_short_string</item>
+        <item>@string/location_sharing_duration_endless_short_string</item>
+    </string-array>
+    <string-array name="share_location_duration_long_strings">
+        <item>@string/location_sharing_duration_one_hour_full_string</item>
+        <item>@string/location_sharing_duration_three_hours_full_string</item>
+        <item>@string/location_sharing_duration_endless_full_string</item>
+    </string-array>
+
+    <integer-array name="share_location_interval_values">
+        <item>60</item>
+        <item>300</item>
+        <item>3600</item>
+    </integer-array>
+    <string-array name="share_location_interval_short_strings">
+        <item>@string/location_sharing_interval_one_minute_short_string</item>
+        <item>@string/location_sharing_interval_five_minutes_short_string</item>
+        <item>@string/location_sharing_interval_one_hour_short_string</item>
+    </string-array>
+    <string-array name="share_location_interval_long_strings">
+        <item>@string/location_sharing_interval_one_minute_full_string</item>
+        <item>@string/location_sharing_interval_five_minutes_full_string</item>
+        <item>@string/location_sharing_interval_one_hour_full_string</item>
+    </string-array>
+
+    <string-array name="app_language_choice">
+        <item>@string/pref_text_default_device_language</item>
+        <item>@string/pref_text_english</item>
+        <item>@string/pref_text_francais</item>
+    </string-array>
+    <string-array name="app_language_choice_values">
+        <item>default</item>
+        <item>en</item>
+        <item>fr</item>
+    </string-array>
+
+    <string-array name="block_untrusted_certificate">
+        <item>@string/pref_text_never</item>
+        <item>@string/pref_text_issuer_changed</item>
+        <item>@string/pref_text_always</item>
+    </string-array>
+    <string-array name="block_untrusted_certificate_values">
+        <item>never</item>
+        <item>issuer</item>
+        <item>always</item>
     </string-array>
 </resources>

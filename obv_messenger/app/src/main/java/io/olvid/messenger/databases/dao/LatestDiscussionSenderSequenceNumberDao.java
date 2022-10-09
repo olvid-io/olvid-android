@@ -44,4 +44,8 @@ public interface LatestDiscussionSenderSequenceNumberDao {
             " AND " + LatestDiscussionSenderSequenceNumber.SENDER_IDENTIFIER + " = :senderIdentifier " +
             " AND " + LatestDiscussionSenderSequenceNumber.SENDER_THREAD_IDENTIFIER + " = :senderThreadIdentifier " )
     LatestDiscussionSenderSequenceNumber get(long discussionId, byte[] senderIdentifier, UUID senderThreadIdentifier);
+
+    @Query("DELETE FROM " + LatestDiscussionSenderSequenceNumber.TABLE_NAME +
+            " WHERE " + LatestDiscussionSenderSequenceNumber.DISCUSSION_ID + " = :discussionId")
+    void deleteForDiscussion(long discussionId);
 }

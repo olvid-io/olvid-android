@@ -45,9 +45,9 @@ import io.olvid.messenger.webclient.WebClientManager;
 import io.olvid.messenger.webclient.datatypes.Constants;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass;
 import io.olvid.messenger.webclient.protobuf.RequestMessageOuterClass.RequestMessageResponse;
+import io.olvid.messenger.webclient.protobuf.datatypes.MessageOuterClass;
 import io.olvid.messenger.webclient.protobuf.notifications.NotifDeleteMessageOuterClass;
 import io.olvid.messenger.webclient.protobuf.notifications.NotifNewMessageOuterClass;
-import io.olvid.messenger.webclient.protobuf.datatypes.MessageOuterClass;
 import io.olvid.messenger.webclient.protobuf.notifications.NotifUpdateMessageOuterClass;
 
 public class MessageListener {
@@ -213,7 +213,9 @@ public class MessageListener {
         boolean equals(Message element1, Message element2) {
             boolean sameContent = Objects.equals(element1.contentBody, element2.contentBody);
             boolean sameReactions = Objects.equals(element1.reactions, element2.reactions);
-            return sameContent && sameReactions
+            boolean sameLocation = Objects.equals(element1.jsonLocation, element2.jsonLocation)
+                    && element1.locationType == element2.locationType;
+            return sameContent && sameReactions && sameLocation
                     && element1.id == element2.id
                     && element1.status == element2.status
                     && element1.wipeStatus == element2.wipeStatus
@@ -364,6 +366,7 @@ public class MessageListener {
                         Logger.e("Unable to parse jsonExpiration in MessageListener", e);
                     }
                 }
+
                 // if message is read once have a limited visibility duration, do not send more info to web client
                 // warning TYPE_DISCUSSION_SETTINGS_UPDATE have to be filled
                 if  (message.messageType != Message.TYPE_DISCUSSION_SETTINGS_UPDATE &&
@@ -374,7 +377,27 @@ public class MessageListener {
                 // fill other data needed for messages shown in webclient
                 messageBuilder.setEdited(message.edited);
                 messageBuilder.setWipeOnRead(message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ);
-                messageBuilder.setContentBody(message.getStringContent(context)); //using getStringContent returns correct string for ephemeral messages, remotely deleted messages and wiped messages
+                //set content (handle location message manually)
+                if (message.isLocationMessage()) {
+                    StringBuilder sb = new StringBuilder();
+                    // if sharing message add getStringContent to specify it is sharing
+                    if (message.locationType == Message.LOCATION_TYPE_SHARE || message.locationType == Message.LOCATION_TYPE_SHARE_FINISHED) {
+                        sb.append(message.getStringContent(context)).append("\n");
+                    }
+                    // add address if possible
+                    String address = message.getJsonLocation().getAddress();
+                    if (address != null && !address.isEmpty()) {
+                        sb.append(address).append("\n");
+                    }
+                    // add contentBody to get a link to google maps
+                    sb.append(message.contentBody);
+                    messageBuilder.setContentBody(sb.toString());
+                }
+                else {
+                    //using getStringContent returns correct string for ephemeral messages, remotely deleted messages and wiped messages
+                    messageBuilder.setContentBody(message.getStringContent(context));
+                }
+
                 if (message.isContentHidden()) {
                     messageBuilder.setTotalAttachmentCount(0);
                     messageBuilder.setImageCount(0);

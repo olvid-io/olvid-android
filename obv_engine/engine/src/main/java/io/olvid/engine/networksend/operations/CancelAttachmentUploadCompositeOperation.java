@@ -34,6 +34,7 @@ public class CancelAttachmentUploadCompositeOperation extends Operation {
     public static final int RFC_ATTACHMENT_NOT_FOUND_IN_DATABASE = 1;
     public static final int RFC_NETWORK_ERROR = 2;
     public static final int RFC_IDENTITY_IS_INACTIVE = 3;
+    public static final int RFC_MESSAGE_NOT_UPLOADED_YET = 4;
 
     private final Identity ownedIdentity;
     private final UID messageUid;

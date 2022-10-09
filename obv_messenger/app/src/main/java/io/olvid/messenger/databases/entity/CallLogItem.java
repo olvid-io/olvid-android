@@ -38,20 +38,20 @@ import androidx.room.PrimaryKey;
                         onDelete = ForeignKey.CASCADE),
                 @ForeignKey(entity = Group.class,
                         parentColumns = {Group.BYTES_GROUP_OWNER_AND_UID, Group.BYTES_OWNED_IDENTITY},
-                        childColumns = {CallLogItem.BYTES_GROUP_OWNER_AND_UID, CallLogItem.BYTES_OWNED_IDENTITY},
+                        childColumns = {CallLogItem.BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER, CallLogItem.BYTES_OWNED_IDENTITY},
                         onDelete = ForeignKey.CASCADE),
         },
         indices = {
                 @Index(value = {CallLogItem.BYTES_OWNED_IDENTITY}),
                 @Index(value = {CallLogItem.TIMESTAMP}),
-                @Index(value = {CallLogItem.BYTES_GROUP_OWNER_AND_UID, CallLogItem.BYTES_OWNED_IDENTITY}),
+                @Index(value = {CallLogItem.BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER, CallLogItem.BYTES_OWNED_IDENTITY}),
         }
 )
 public class CallLogItem {
     public static final String TABLE_NAME = "call_log_table";
 
     public static final String BYTES_OWNED_IDENTITY = "bytes_owned_identity";
-    public static final String BYTES_GROUP_OWNER_AND_UID = "bytes_group_owner_and_uid";
+    public static final String BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER = "bytes_group_owner_and_uid";
     public static final String TIMESTAMP = "timestamp";
     public static final String CALL_TYPE = "call_type";
     public static final String CALL_STATUS = "call_status";
@@ -73,9 +73,9 @@ public class CallLogItem {
     @NonNull
     public byte[] bytesOwnedIdentity;
 
-    @ColumnInfo(name = BYTES_GROUP_OWNER_AND_UID)
+    @ColumnInfo(name = BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER)
     @Nullable
-    public byte[] bytesGroupOwnerAndUid;
+    public byte[] bytesGroupOwnerAndUidOrIdentifier;
 
     @ColumnInfo(name = TIMESTAMP)
     public long timestamp;
@@ -91,9 +91,9 @@ public class CallLogItem {
 
 
     // default constructor required by Room
-    public CallLogItem(@NonNull byte[] bytesOwnedIdentity, @Nullable byte[] bytesGroupOwnerAndUid, long timestamp, int callType, int callStatus, int duration) {
+    public CallLogItem(@NonNull byte[] bytesOwnedIdentity, @Nullable byte[] bytesGroupOwnerAndUidOrIdentifier, long timestamp, int callType, int callStatus, int duration) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
-        this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
+        this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier;
         this.timestamp = timestamp;
         this.callType = callType;
         this.callStatus = callStatus;
@@ -102,9 +102,9 @@ public class CallLogItem {
 
 
     @Ignore
-    public CallLogItem(@NonNull byte[] bytesOwnedIdentity, @Nullable byte[] bytesGroupOwnerAndUid, int callType, int callStatus) {
+    public CallLogItem(@NonNull byte[] bytesOwnedIdentity, @Nullable byte[] bytesGroupOwnerAndUidOrIdentifier, int callType, int callStatus) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
-        this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
+        this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier;
         this.timestamp = System.currentTimeMillis();
         this.callType = callType;
         this.callStatus = callStatus;
@@ -114,7 +114,7 @@ public class CallLogItem {
     @Ignore
     public CallLogItem(@NonNull byte[] bytesOwnedIdentity, int callType, int callStatus, long timestamp) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
-        this.bytesGroupOwnerAndUid = null;
+        this.bytesGroupOwnerAndUidOrIdentifier = null;
         this.timestamp = timestamp;
         this.callType = callType;
         this.callStatus = callStatus;

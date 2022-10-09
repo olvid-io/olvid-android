@@ -64,6 +64,7 @@ public class HandleReceiveReturnReceipt  implements Runnable {
             }
         }
 
+
         if (obvReturnReceipt != null) {
             List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getFromReturnReceipt(bytesOwnedIdentity, obvReturnReceipt.getBytesContactIdentity(), returnReceiptNonce, goodReturnReceiptKey);
             for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {

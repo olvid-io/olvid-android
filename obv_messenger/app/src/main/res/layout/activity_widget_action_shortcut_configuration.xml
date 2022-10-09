@@ -143,7 +143,6 @@
             app:layout_constraintTop_toBottomOf="@id/current_owned_identity_group" />
 
         <ScrollView
-            android:id="@+id/scroll_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constrainedHeight="true"
@@ -403,8 +402,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
+                        android:maxLines="1"
                         android:ellipsize="end"
-                        android:singleLine="true"
                         android:textAppearance="@style/RobotoMedium"
                         android:textColor="@color/primary700"
                         android:textSize="16sp"
@@ -420,8 +419,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="16dp"
+                        android:maxLines="1"
                         android:ellipsize="end"
-                        android:singleLine="true"
                         android:textColor="@color/grey"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"

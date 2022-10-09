@@ -149,6 +149,7 @@ public class KeycloakBrowserChooserDialog {
         map.put("com.kiwibrowser.browser", "Kiwi Browser");
         map.put("com.UCMobile.intl", "UC Browser");
         map.put("org.chromium.webview_shell", "Chromium WebView Shell");
+        map.put("org.lineageos.jelly", "LineageOS Jelly Browser");
         return map;
     }
 

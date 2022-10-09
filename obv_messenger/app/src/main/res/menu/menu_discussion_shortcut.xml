@@ -3,7 +3,7 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_shortcut"
-        android:orderInCategory="1000"
+        android:orderInCategory="190"
         android:title="@string/menu_action_create_shortcut"
         app:showAsAction="never"/>
 </menu>

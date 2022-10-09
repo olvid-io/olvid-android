@@ -36,7 +36,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -48,51 +50,47 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.fragments.FilteredContactListFragment;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MultiCallStartDialogFragment extends DialogFragment {
-    private static final String BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity";
-    private static final String BYTES_GROUP_OWNER_AND_UID_KEY = "bytes_group_owner_and_uid_key";
-    private static final String CONTACT_IDENTITIES_BUNDLE_KEY = "bytes_contact_identities";
+    private static final String BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity_key";
+    private static final String BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER_KEY = "bytes_group_owner_and_uid_or_identifier_key";
+    private static final String BYTES_KEY_CONTACT_IDENTITIES_KEY = "bytes_key_contact_identities_key";
 
     private FilteredContactListFragment filteredContactListFragment;
     private byte[] bytesOwnedIdentity;
-    private byte[] bytesGroupOwnerAndUidKey;
-    private final Set<BytesKey> bytesContactIdentities = new HashSet<>();
+    private byte[] bytesGroupOwnerAndUidOrIdentifier;
+    private boolean groupV2;
+    private final Set<BytesKey> bytesContactIdentitiesHashSet = new HashSet<>();
 
     private List<Contact> selectedContacts = null;
 
-    public static MultiCallStartDialogFragment newInstance(@NonNull byte[] bytesOwnedIdentity, @Nullable byte[] groupOwnerAndUid, @NonNull List<byte[]> bytesContactIdentities) {
+    public static MultiCallStartDialogFragment newInstance(@NonNull byte[] bytesOwnedIdentity, @Nullable byte[] bytesGroupOwnerAndUidOrIdentifier, @NonNull ArrayList<BytesKey> bytesKeysContactIdentities) {
         MultiCallStartDialogFragment fragment = new MultiCallStartDialogFragment();
         Bundle args = new Bundle();
         args.putByteArray(BYTES_OWNED_IDENTITY_KEY, bytesOwnedIdentity);
-        if (groupOwnerAndUid != null) {
-            args.putByteArray(BYTES_GROUP_OWNER_AND_UID_KEY, groupOwnerAndUid);
+        if (bytesGroupOwnerAndUidOrIdentifier != null) {
+            args.putByteArray(BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER_KEY, bytesGroupOwnerAndUidOrIdentifier);
         }
-        Bundle bytesContactIdentitiesBundle = new Bundle();
-        int count = 0;
-        for (byte[] bytesContactIdentity : bytesContactIdentities) {
-            bytesContactIdentitiesBundle.putByteArray(Integer.toString(count), bytesContactIdentity);
-            count++;
-        }
-        args.putBundle(CONTACT_IDENTITIES_BUNDLE_KEY, bytesContactIdentitiesBundle);
+        args.putParcelableArrayList(BYTES_KEY_CONTACT_IDENTITIES_KEY, bytesKeysContactIdentities);
         fragment.setArguments(args);
 
         return fragment;
     }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             bytesOwnedIdentity = getArguments().getByteArray(BYTES_OWNED_IDENTITY_KEY);
-            bytesGroupOwnerAndUidKey = getArguments().getByteArray(BYTES_GROUP_OWNER_AND_UID_KEY);
-            Bundle bytesContactIdentitiesBundle = getArguments().getBundle(CONTACT_IDENTITIES_BUNDLE_KEY);
-            if (bytesContactIdentitiesBundle != null) {
-                for (String key : bytesContactIdentitiesBundle.keySet()) {
-                    bytesContactIdentities.add(new BytesKey(bytesContactIdentitiesBundle.getByteArray(key)));
-                }
+            bytesGroupOwnerAndUidOrIdentifier = getArguments().getByteArray(BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER_KEY);
+            groupV2 = false;
+            ArrayList<BytesKey> bytesKeysContactIdentities = getArguments().getParcelableArrayList(BYTES_KEY_CONTACT_IDENTITIES_KEY);
+            if (bytesKeysContactIdentities != null) {
+                bytesContactIdentitiesHashSet.addAll(bytesKeysContactIdentities);
             }
         }
     }
@@ -143,19 +141,32 @@ public class MultiCallStartDialogFragment extends DialogFragment {
                 return;
             }
 
-            App.startWebrtcMultiCall(context, bytesOwnedIdentity, selectedContacts, bytesGroupOwnerAndUidKey);
+            App.startWebrtcMultiCall(context, bytesOwnedIdentity, selectedContacts, bytesGroupOwnerAndUidOrIdentifier, groupV2);
         });
 
         filteredContactListFragment = new FilteredContactListFragment();
         filteredContactListFragment.setContactFilterEditText(dialogContactNameFilter);
         filteredContactListFragment.setSelectable(true);
         LiveData<List<Contact>> contactListLivedata;
-        List<byte[]> bytesIdentities = new ArrayList<>(bytesContactIdentities.size());
-        for (BytesKey bytesKey : bytesContactIdentities) {
+        List<byte[]> bytesIdentities = new ArrayList<>(bytesContactIdentitiesHashSet.size());
+        for (BytesKey bytesKey : bytesContactIdentitiesHashSet) {
             bytesIdentities.add(bytesKey.bytes);
         }
-        if (bytesGroupOwnerAndUidKey != null) {
-            contactListLivedata = AppDatabase.getInstance().contactGroupJoinDao().getGroupContactsAndMore(bytesOwnedIdentity, bytesGroupOwnerAndUidKey, bytesIdentities);
+
+        if (bytesGroupOwnerAndUidOrIdentifier != null) {
+            contactListLivedata = Transformations.switchMap(AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUidOrIdentifierLiveData(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier), (Discussion discussion) -> {
+                if (discussion != null) {
+                    switch (discussion.discussionType) {
+                        case Discussion.TYPE_GROUP:
+                            groupV2 = false;
+                            return AppDatabase.getInstance().contactGroupJoinDao().getGroupContactsAndMore(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier, bytesIdentities);
+                        case Discussion.TYPE_GROUP_V2:
+                            groupV2 = true;
+                            return AppDatabase.getInstance().group2MemberDao().getGroupMemberContactsAndMore(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier, bytesIdentities);
+                    }
+                }
+                return new MutableLiveData<>(new ArrayList<>());
+            });
         } else {
             contactListLivedata = AppDatabase.getInstance().contactDao().getWithChannelAsList(bytesOwnedIdentity, bytesIdentities);
         }
@@ -165,9 +176,9 @@ public class MultiCallStartDialogFragment extends DialogFragment {
             @Override
             public void onChanged(List<Contact> contacts) {
                 if (!initialized && contacts != null) {
-                    List<Contact> initialContacts = new ArrayList<>(bytesContactIdentities.size());
+                    List<Contact> initialContacts = new ArrayList<>(bytesContactIdentitiesHashSet.size());
                     for (Contact contact: contacts) {
-                        if (bytesContactIdentities.contains(new BytesKey(contact.bytesContactIdentity))) {
+                        if (bytesContactIdentitiesHashSet.contains(new BytesKey(contact.bytesContactIdentity))) {
                             initialContacts.add(contact);
                         }
                     }

@@ -32,9 +32,11 @@ public abstract class DownloadNotifications {
 
     public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS = "network_fetch_notification_attachment_download_progress";
     public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
-    public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_MESSAGE_UID_KEY = "messageUid";
-    public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY = "attachmentNumber";
-    public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY = "progress";
+    public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_MESSAGE_UID_KEY = "messageUid"; // UID
+    public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY = "attachmentNumber"; // int
+    public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY = "progress"; // float
+    public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_SPEED_BPS_KEY = "speed"; // float
+    public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS_ETA_SECONDS_KEY = "eta"; // int
 
     public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_FINISHED = "network_fetch_notification_attachment_download_finished";
     public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_FINISHED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity

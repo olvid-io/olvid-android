@@ -34,15 +34,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
+import android.os.Parcelable;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -51,6 +43,23 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.emoji2.bundled.BundledEmojiCompatConfig;
+import androidx.emoji2.text.EmojiCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -62,6 +71,7 @@ import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,48 +80,40 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import androidx.emoji2.bundled.BundledEmojiCompatConfig;
-import androidx.emoji2.text.EmojiCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.DefaultLifecycleObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ProcessLifecycleOwner;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.preference.PreferenceManager;
-
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.messenger.activities.ContactDetailsActivity;
-import io.olvid.messenger.discussion.DiscussionActivity;
+import io.olvid.messenger.activities.GroupV2DetailsActivity;
 import io.olvid.messenger.activities.GroupCreationActivity;
 import io.olvid.messenger.activities.GroupDetailsActivity;
 import io.olvid.messenger.activities.LockScreenActivity;
-import io.olvid.messenger.appdialogs.AppDialogTag;
-import io.olvid.messenger.customClasses.BytesKey;
-import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.activities.MessageDetailsActivity;
 import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.activities.ShortcutActivity;
+import io.olvid.messenger.appdialogs.AppDialogShowActivity;
+import io.olvid.messenger.appdialogs.AppDialogTag;
+import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.CallLogItem;
 import io.olvid.messenger.databases.entity.CallLogItemContactJoin;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.gallery.GalleryActivity;
+import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.services.AvailableSpaceHelper;
 import io.olvid.messenger.services.MessageExpirationService;
-import io.olvid.messenger.services.UnifiedForegroundService;
-import io.olvid.messenger.webrtc.WebrtcCallActivity;
-import io.olvid.messenger.appdialogs.AppDialogShowActivity;
-import io.olvid.messenger.services.PeriodicTasksScheduler;
 import io.olvid.messenger.services.NetworkStateMonitorReceiver;
+import io.olvid.messenger.services.PeriodicTasksScheduler;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
-import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
-import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.webrtc.WebrtcCallActivity;
 import io.olvid.messenger.webrtc.WebrtcCallService;
 
 
@@ -208,7 +210,7 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     // call this before launching an intent that will put the app in background so that the lock screen does not kill running activities
     // typically, when attaching a file to a discussion :)
-    public static void prepareForStartActivityForResult(AppCompatActivity activity) {
+    public static void prepareForStartActivityForResult(FragmentActivity activity) {
         killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
         Intent lockIntent = new Intent(activity, LockScreenActivity.class);
         activity.startActivity(lockIntent);
@@ -260,6 +262,14 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
+    public static void openGroupV2DiscussionActivity(Context activityContext, byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) {
+        Intent intent = new Intent(getContext(), DiscussionActivity.class);
+        intent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
+        intent.putExtra(DiscussionActivity.BYTES_GROUP_IDENTIFIER_INTENT_EXTRA, bytesGroupIdentifier);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        activityContext.startActivity(intent);
+    }
+
     public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
@@ -297,7 +307,43 @@ public class App extends Application implements DefaultLifecycleObserver {
 
 
     public static void openGroupCreationActivity(Context activityContext) {
+        if (!GroupCreationActivity.groupV2 && SettingsActivity.getBetaFeaturesEnabled()) {
+            // groupV2 are not the default and we use beta --> prompt the user to choose the group type
+            AlertDialog.Builder builder = new SecureAlertDialogBuilder(activityContext, R.style.CustomAlertDialog);
+            builder.setTitle(R.string.dialog_title_new_group_beta_choice)
+                    .setMessage(R.string.dialog_message_new_group_beta_choice)
+                    .setNeutralButton(R.string.button_label_legacy_group, (dialog, which) -> {
+                        Intent intent = new Intent(getContext(), GroupCreationActivity.class);
+                        activityContext.startActivity(intent);
+                    })
+                    .setPositiveButton(R.string.button_label_group_v2_beta, (dialog, which) -> {
+                        Intent intent = new Intent(getContext(), GroupCreationActivity.class);
+                        intent.putExtra(GroupCreationActivity.FORCE_GROUP_V2_INTENT_EXTRA, true);
+                        activityContext.startActivity(intent);
+                    });
+            builder.create().show();
+        } else {
+            Intent intent = new Intent(getContext(), GroupCreationActivity.class);
+            activityContext.startActivity(intent);
+        }
+    }
+
+    public static void openGroupCreationActivityForCloning(Context activityContext, String absolutePhotoUrl, String serializedGroupDetails, List<Contact> preselectedGroupMembers) {
         Intent intent = new Intent(getContext(), GroupCreationActivity.class);
+        intent.putExtra(GroupCreationActivity.FORCE_GROUP_V2_INTENT_EXTRA, true);
+        if (absolutePhotoUrl != null) {
+            intent.putExtra(GroupCreationActivity.ABSOLUTE_PHOTO_URL_INTENT_EXTRA, absolutePhotoUrl);
+        }
+        if (serializedGroupDetails != null) {
+            intent.putExtra(GroupCreationActivity.SERIALIZED_GROUP_DETAILS_INTENT_EXTRA, serializedGroupDetails);
+        }
+        if (preselectedGroupMembers != null) {
+            ArrayList<Parcelable> parcelables = new ArrayList<>(preselectedGroupMembers.size());
+            for (Contact contact : preselectedGroupMembers) {
+                parcelables.add(new BytesKey(contact.bytesContactIdentity));
+            }
+            intent.putParcelableArrayListExtra(GroupCreationActivity.PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA, parcelables);
+        }
         activityContext.startActivity(intent);
     }
 
@@ -336,7 +382,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         context.startActivity(activityIntent);
     }
 
-    public static void startWebrtcMultiCall(Context context, byte[] bytesOwnedIdentity, List<Contact> contacts, byte[] bytesGroupOwnerAndUid) {
+    public static void startWebrtcMultiCall(Context context, byte[] bytesOwnedIdentity, List<Contact> contacts, byte[] bytesGroupOwnerAndUid, boolean groupV2) {
         Intent serviceIntent = new Intent(getContext(), WebrtcCallService.class);
         serviceIntent.setAction(WebrtcCallService.ACTION_START_CALL);
         serviceIntent.putExtra(WebrtcCallService.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
@@ -349,6 +395,9 @@ public class App extends Application implements DefaultLifecycleObserver {
         serviceIntent.putExtra(WebrtcCallService.CONTACT_IDENTITIES_BUNDLE_INTENT_EXTRA, bytesContactIdentitiesBundle);
         if (bytesGroupOwnerAndUid != null) {
             serviceIntent.putExtra(WebrtcCallService.BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA, bytesGroupOwnerAndUid);
+            if (groupV2) {
+                serviceIntent.putExtra(WebrtcCallService.GROUP_V2_INTENT_EXTRA, true);
+            }
         }
         context.startService(serviceIntent);
 
@@ -375,7 +424,7 @@ public class App extends Application implements DefaultLifecycleObserver {
 
                     Discussion discussion = AppDatabase.getInstance().discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
                     if (discussion != null) {
-                        Message missedCallMessage = Message.createPhoneCallMessage(discussion.id, bytesContactIdentity, callLogItem);
+                        Message missedCallMessage = Message.createPhoneCallMessage(AppDatabase.getInstance(), discussion.id, bytesContactIdentity, callLogItem);
                         AppDatabase.getInstance().messageDao().insert(missedCallMessage);
                         if (discussion.updateLastMessageTimestamp(missedCallMessage.timestamp)) {
                             AppDatabase.getInstance().discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -391,7 +440,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         intent.setAction(WebrtcCallService.ACTION_MESSAGE);
         intent.putExtra(WebrtcCallService.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         intent.putExtra(WebrtcCallService.BYTES_CONTACT_IDENTITY_INTENT_EXTRA, bytesContactIdentity);
-        intent.putExtra(WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA, jsonWebrtcMessage.getCallIdentifier().toString());
+        intent.putExtra(WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(jsonWebrtcMessage.getCallIdentifier()));
         intent.putExtra(WebrtcCallService.MESSAGE_TYPE_INTENT_EXTRA, messageType);
         intent.putExtra(WebrtcCallService.SERIALIZED_MESSAGE_PAYLOAD_INTENT_EXTRA, jsonWebrtcMessage.getSerializedMessagePayload());
 
@@ -419,6 +468,21 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
+    public static void openGroupV2DetailsActivity(Context activityContext, byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) {
+        Intent intent = new Intent(getContext(), GroupV2DetailsActivity.class);
+        intent.putExtra(GroupV2DetailsActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
+        intent.putExtra(GroupV2DetailsActivity.BYTES_GROUP_IDENTIFIER_INTENT_EXTRA, bytesGroupIdentifier);
+        activityContext.startActivity(intent);
+    }
+
+    public static void openGroupV2DetailsActivityForEditDetails(Context activityContext, byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) {
+        Intent intent = new Intent(getContext(), GroupV2DetailsActivity.class);
+        intent.putExtra(GroupV2DetailsActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
+        intent.putExtra(GroupV2DetailsActivity.BYTES_GROUP_IDENTIFIER_INTENT_EXTRA, bytesGroupIdentifier);
+        intent.putExtra(GroupV2DetailsActivity.EDIT_DETAILS_INTENT_EXTRA, true);
+        activityContext.startActivity(intent);
+    }
+
     public static void openMessageDetails(Context activityContext, long messageId, boolean hasAttachments, boolean isInbound) {
         Intent intent = new Intent(getContext(), MessageDetailsActivity.class);
         intent.putExtra(MessageDetailsActivity.MESSAGE_ID_INTENT_EXTRA, messageId);
@@ -431,6 +495,65 @@ public class App extends Application implements DefaultLifecycleObserver {
         Intent intent = new Intent(getContext(), MainActivity.class);
         intent.putExtra(MainActivity.TAB_TO_SHOW_INTENT_EXTRA, tabId);
         activityContext.startActivity(intent);
+    }
+
+    public static void openLocationInMapApplication(Activity activity, String latitude, String longitude, String fallbackUri, Runnable onOpenCallback) {
+        try {
+            Intent geoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("geo:%s,%s?q=%s,%s&z=17", latitude, longitude, latitude, longitude)));
+            geoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (getContext().getPackageManager().queryIntentActivities(geoIntent, PackageManager.MATCH_DEFAULT_ONLY).size() > 0) {
+                openLocationIntent(activity, geoIntent, onOpenCallback);
+                return;
+            } else {
+                Intent fallbackIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUri));
+                fallbackIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                if (getContext().getPackageManager().queryIntentActivities(fallbackIntent, PackageManager.MATCH_DEFAULT_ONLY).size() > 0) {
+                    openLocationIntent(activity, fallbackIntent, onOpenCallback);
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        App.toast(R.string.toast_message_impossible_to_open_map, Toast.LENGTH_SHORT, Gravity.BOTTOM);
+    }
+
+    private static void openLocationIntent(Activity activity, Intent geoIntent, Runnable onOpenCallback) {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+        if (prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION, false)) {
+            if (onOpenCallback != null) {
+                onOpenCallback.run();
+            }
+            killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
+            Intent lockIntent = new Intent(activity, LockScreenActivity.class);
+            activity.startActivity(lockIntent);
+            activity.startActivity(geoIntent);
+        } else {
+            View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_view_message_and_checkbox, null);
+            TextView message = dialogView.findViewById(R.id.dialog_message);
+            message.setText(R.string.dialog_message_open_external_app_location_warning);
+            CheckBox checkBox = dialogView.findViewById(R.id.checkbox);
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION, isChecked);
+                editor.apply();
+            });
+
+            AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
+            builder.setTitle(R.string.dialog_title_open_external_app_location_warning)
+                    .setView(dialogView)
+                    .setNegativeButton(R.string.button_label_cancel, null)
+                    .setPositiveButton(R.string.button_label_proceed, (dialog, which) -> {
+                        if (onOpenCallback != null) {
+                            onOpenCallback.run();
+                        }
+                        killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
+                        Intent lockIntent = new Intent(activity, LockScreenActivity.class);
+                        activity.startActivity(lockIntent);
+                        activity.startActivity(geoIntent);
+                    });
+            builder.create().show();
+        }
     }
 
     public static void openFyleInExternalViewer(Activity activity, FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Runnable onOpenCallback) {
@@ -698,7 +821,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         if (lastTrustedCertificateId != null) {
             dialogParameters.put(AppDialogShowActivity.DIALOG_CERTIFICATE_CHANGED_LAST_TRUSTED_CERTIFICATE_ID_KEY, lastTrustedCertificateId);
         }
-        // we add a prefix to the dialog name so that multiple dialogs can be opened for multiple new certificates
+        // we add a suffix to the dialog name so that multiple dialogs can be opened for multiple new certificates
         showDialog(null, AppDialogShowActivity.DIALOG_CERTIFICATE_CHANGED + "_" + untrustedCertificateId, dialogParameters);
     }
 
@@ -893,7 +1016,7 @@ public class App extends Application implements DefaultLifecycleObserver {
             //////////////////////////
             // notify Engine whether autobackup is on or not
             //////////////////////////
-            AppSingleton.getEngine().setAutoBackupEnabled(SettingsActivity.useAutomaticBackup());
+            AppSingleton.getEngine().setAutoBackupEnabled(SettingsActivity.useAutomaticBackup(), true);
 
 
             //////////////////////////
@@ -931,8 +1054,12 @@ public class App extends Application implements DefaultLifecycleObserver {
             if (files != null) {
                 for (File file : files) {
                     if (!file.isDirectory()) {
-                        //noinspection ResultOfMethodCallIgnored
-                        file.delete();
+                        long modificationTime = file.lastModified();
+                        // only delete files modified more than 1 day ago (this should leave enough time for the group v2 protocol to run!)
+                        if (modificationTime < System.currentTimeMillis() - 86_400_000L) {
+                            //noinspection ResultOfMethodCallIgnored
+                            file.delete();
+                        }
                     }
                 }
             }
@@ -951,6 +1078,19 @@ public class App extends Application implements DefaultLifecycleObserver {
                         file.delete();
                     }
                 }
+            }
+
+            ///////////////////////
+            // check if there are any sharing message in db, and ask LocationSharing service to handle them if needed
+            ///////////////////////
+            int count = AppDatabase.getInstance().messageDao().countOutboundSharingLocationMessages();
+            if (count > 0) {
+                try {
+                    Intent syncSharingLocationIntent = new Intent(App.getContext(), UnifiedForegroundService.class);
+                    syncSharingLocationIntent.putExtra(UnifiedForegroundService.SUB_SERVICE_INTENT_EXTRA, UnifiedForegroundService.SUB_SERVICE_LOCATION_SHARING);
+                    syncSharingLocationIntent.setAction(UnifiedForegroundService.LocationSharingSubService.SYNC_SHARING_MESSAGES_ACTION);
+                    App.getContext().startService(syncSharingLocationIntent);
+                } catch (Exception ignored) { }
             }
         }
     }

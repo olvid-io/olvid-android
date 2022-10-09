@@ -53,7 +53,7 @@ public interface CallLogItemDao {
 
     String PREFIX_CALL_LOG_COLUMNS = "log.id AS log_id, " +
             " log." + CallLogItem.BYTES_OWNED_IDENTITY + " AS log_" + CallLogItem.BYTES_OWNED_IDENTITY + ", " +
-            " log." + CallLogItem.BYTES_GROUP_OWNER_AND_UID + " AS log_" + CallLogItem.BYTES_GROUP_OWNER_AND_UID + ", " +
+            " log." + CallLogItem.BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER + " AS log_" + CallLogItem.BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER + ", " +
             " log." + CallLogItem.TIMESTAMP + " AS log_" + CallLogItem.TIMESTAMP + ", " +
             " log." + CallLogItem.CALL_TYPE + " AS log_" + CallLogItem.CALL_TYPE + ", " +
             " log." + CallLogItem.CALL_STATUS + " AS log_" + CallLogItem.CALL_STATUS + ", " +
@@ -73,7 +73,7 @@ public interface CallLogItemDao {
             " ON log." + CallLogItem.BYTES_OWNED_IDENTITY + " = contact." + Contact.BYTES_OWNED_IDENTITY +
             " AND clicj.contactBytes " + " = contact." + Contact.BYTES_CONTACT_IDENTITY +
             " LEFT JOIN " + Group.TABLE_NAME + " AS groop " +
-            " ON groop." + Group.BYTES_GROUP_OWNER_AND_UID + " = log." + CallLogItem.BYTES_GROUP_OWNER_AND_UID +
+            " ON groop." + Group.BYTES_GROUP_OWNER_AND_UID + " = log." + CallLogItem.BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER +
             " AND groop." + Group.BYTES_OWNED_IDENTITY + " = log." + CallLogItem.BYTES_OWNED_IDENTITY +
             " WHERE log." + CallLogItem.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " ORDER BY log." + CallLogItem.TIMESTAMP + " DESC")
@@ -96,7 +96,7 @@ public interface CallLogItemDao {
             " ON log." + CallLogItem.BYTES_OWNED_IDENTITY + " = contact." + Contact.BYTES_OWNED_IDENTITY +
             " AND clicj.contactBytes " + " = contact." + Contact.BYTES_CONTACT_IDENTITY +
             " LEFT JOIN " + Group.TABLE_NAME + " AS groop " +
-            " ON groop." + Group.BYTES_GROUP_OWNER_AND_UID + " = log." + CallLogItem.BYTES_GROUP_OWNER_AND_UID +
+            " ON groop." + Group.BYTES_GROUP_OWNER_AND_UID + " = log." + CallLogItem.BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER +
             " AND groop." + Group.BYTES_OWNED_IDENTITY + " = log." + CallLogItem.BYTES_OWNED_IDENTITY +
             " WHERE log.id = :callLogItemId ")
     CallLogItemAndContacts get(Long callLogItemId);

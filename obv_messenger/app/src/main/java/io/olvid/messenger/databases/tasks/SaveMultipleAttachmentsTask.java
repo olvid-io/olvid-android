@@ -40,7 +40,7 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 
 public class SaveMultipleAttachmentsTask implements Runnable {
     private final Context context;
-    private final Uri folderUri;
+    private final Uri folderUri; // already validated Uri, no need to validate it again here
     @Nullable private final Long messageId;
     @Nullable private final ArrayList<FyleMessageJoinWithStatusDao.FyleAndStatus> selectedFyleAndStatuses;
 

@@ -28,7 +28,7 @@ import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
-import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 
 public class BackupAppDataForEngineTask implements Runnable {
@@ -62,6 +62,7 @@ public class BackupAppDataForEngineTask implements Runnable {
                 ownedIdentityPojo.show_neutral_notification_when_hidden = ownedIdentity.prefShowNeutralNotificationWhenHidden;
                 ownedIdentityPojo.contacts = new ArrayList<>();
                 ownedIdentityPojo.groups = new ArrayList<>();
+                ownedIdentityPojo.groups2 = new ArrayList<>();
 
                 for (Contact contact : db.contactDao().getAllForOwnedIdentitySync(ownedIdentity.bytesOwnedIdentity)) {
                     ContactPojo_0 contactPojo = new ContactPojo_0();
@@ -73,29 +74,7 @@ public class BackupAppDataForEngineTask implements Runnable {
                     Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                     if (discussion != null) {
                         DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-                        if (discussionCustomization != null) {
-                            DiscussionCustomizationPojo_0 discussionCustomizationPojo = new DiscussionCustomizationPojo_0();
-                            discussionCustomizationPojo.serialized_color_json = discussionCustomization.serializedColorJson;
-                            discussionCustomizationPojo.send_read_receipt = discussionCustomization.prefSendReadReceipt;
-                            if (discussionCustomization.shouldMuteNotifications()) {
-                                discussionCustomizationPojo.mute_notifications = true;
-                                discussionCustomizationPojo.mute_notification_timestamp = discussionCustomization.prefMuteNotificationsTimestamp;
-                            }
-                            discussionCustomizationPojo.auto_open_limited_visibility = discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages;
-                            discussionCustomizationPojo.retain_wiped_outbound = discussionCustomization.prefRetainWipedOutboundMessages;
-                            discussionCustomizationPojo.retention_count = discussionCustomization.prefDiscussionRetentionCount;
-                            discussionCustomizationPojo.retention_duration = discussionCustomization.prefDiscussionRetentionDuration;
-                            Message.JsonExpiration expiration = discussionCustomization.getExpirationJson();
-                            if (expiration != null) {
-                                discussionCustomizationPojo.settings_existence_duration = expiration.getExistenceDuration();
-                                discussionCustomizationPojo.settings_visibility_duration = expiration.getVisibilityDuration();
-                                discussionCustomizationPojo.settings_read_once = expiration.getReadOnce();
-                            }
-
-                            if (!discussionCustomizationPojo.isEmpty()) {
-                                contactPojo.discussion_customization = discussionCustomizationPojo;
-                            }
-                        }
+                        contactPojo.discussion_customization = DiscussionCustomizationPojo_0.of(discussion, discussionCustomization, true);
                     }
 
                     if (!contactPojo.isEmpty()) {
@@ -111,31 +90,7 @@ public class BackupAppDataForEngineTask implements Runnable {
                     Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(ownedGroup.bytesOwnedIdentity, ownedGroup.bytesGroupOwnerAndUid);
                     if (discussion != null) {
                         DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-                        if (discussionCustomization != null) {
-                            DiscussionCustomizationPojo_0 discussionCustomizationPojo = new DiscussionCustomizationPojo_0();
-                            discussionCustomizationPojo.serialized_color_json = discussionCustomization.serializedColorJson;
-                            discussionCustomizationPojo.send_read_receipt = discussionCustomization.prefSendReadReceipt;
-                            if (discussionCustomization.shouldMuteNotifications()) {
-                                discussionCustomizationPojo.mute_notifications = true;
-                                discussionCustomizationPojo.mute_notification_timestamp = discussionCustomization.prefMuteNotificationsTimestamp;
-                            }
-                            discussionCustomizationPojo.auto_open_limited_visibility = discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages;
-                            discussionCustomizationPojo.retain_wiped_outbound = discussionCustomization.prefRetainWipedOutboundMessages;
-                            discussionCustomizationPojo.retention_count = discussionCustomization.prefDiscussionRetentionCount;
-                            discussionCustomizationPojo.retention_duration = discussionCustomization.prefDiscussionRetentionDuration;
-
-                            discussionCustomizationPojo.shared_settings_version = discussionCustomization.sharedSettingsVersion;
-                            Message.JsonExpiration expiration = discussionCustomization.getExpirationJson();
-                            if (expiration != null) {
-                                discussionCustomizationPojo.settings_existence_duration = expiration.getExistenceDuration();
-                                discussionCustomizationPojo.settings_visibility_duration = expiration.getVisibilityDuration();
-                                discussionCustomizationPojo.settings_read_once = expiration.getReadOnce();
-                            }
-
-                            if (!discussionCustomizationPojo.isEmpty()) {
-                                groupPojo.discussion_customization = discussionCustomizationPojo;
-                            }
-                        }
+                        groupPojo.discussion_customization = DiscussionCustomizationPojo_0.of(discussion, discussionCustomization, true);
                     }
 
                     if (!groupPojo.isEmpty()) {
@@ -153,27 +108,28 @@ public class BackupAppDataForEngineTask implements Runnable {
                     Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(joinedGroup.bytesOwnedIdentity, joinedGroup.bytesGroupOwnerAndUid);
                     if (discussion != null) {
                         DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-                        if (discussionCustomization != null) {
-                            DiscussionCustomizationPojo_0 discussionCustomizationPojo = new DiscussionCustomizationPojo_0();
-                            discussionCustomizationPojo.serialized_color_json = discussionCustomization.serializedColorJson;
-                            discussionCustomizationPojo.send_read_receipt = discussionCustomization.prefSendReadReceipt;
-                            if (discussionCustomization.shouldMuteNotifications()) {
-                                discussionCustomizationPojo.mute_notifications = true;
-                                discussionCustomizationPojo.mute_notification_timestamp = discussionCustomization.prefMuteNotificationsTimestamp;
-                            }
-                            discussionCustomizationPojo.auto_open_limited_visibility = discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages;
-                            discussionCustomizationPojo.retain_wiped_outbound = discussionCustomization.prefRetainWipedOutboundMessages;
-                            discussionCustomizationPojo.retention_count = discussionCustomization.prefDiscussionRetentionCount;
-                            discussionCustomizationPojo.retention_duration = discussionCustomization.prefDiscussionRetentionDuration;
-
-                            if (!discussionCustomizationPojo.isEmpty()) {
-                                groupPojo.discussion_customization = discussionCustomizationPojo;
-                            }
-                        }
+                        groupPojo.discussion_customization = DiscussionCustomizationPojo_0.of(discussion, discussionCustomization, false);
                     }
 
                     if (!groupPojo.isEmpty()) {
                         ownedIdentityPojo.groups.add(groupPojo);
+                    }
+                }
+
+                for (Group2 group2 : db.group2Dao().getAllForOwnedIdentity(ownedIdentity.bytesOwnedIdentity)) {
+                    Group2Pojo_0 group2Pojo = new Group2Pojo_0();
+                    group2Pojo.group_identifier = group2.bytesGroupIdentifier;
+                    group2Pojo.custom_name = group2.customName;
+                    group2Pojo.personal_note = group2.personalNote;
+
+                    Discussion discussion = db.discussionDao().getByGroupIdentifier(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
+                    if (discussion != null) {
+                        DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
+                        group2Pojo.discussion_customization = DiscussionCustomizationPojo_0.of(discussion, discussionCustomization, false);
+                    }
+
+                    if (!group2Pojo.isEmpty()) {
+                        ownedIdentityPojo.groups2.add(group2Pojo);
                     }
                 }
 

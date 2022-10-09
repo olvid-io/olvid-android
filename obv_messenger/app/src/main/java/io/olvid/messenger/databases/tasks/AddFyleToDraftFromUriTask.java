@@ -207,7 +207,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                 // --> copy the file locally before computing its hash
                 // there is a bug with some phone (Oppo Find X2 Lite) where the input stream given by openInputStream is not always the same
                 File photoDir = new File(App.getContext().getCacheDir(), App.CAMERA_PICTURE_FOLDER);
-                localFile = new File(photoDir, UUID.randomUUID().toString());
+                localFile = new File(photoDir, Logger.getUuidString(UUID.randomUUID()));
 
 
                 nullFyle = new Fyle();
@@ -380,12 +380,14 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                         }
 
                         // re-post the message if it was put on hold
-                        Message reDraftMessage = db.messageDao().get(draftMessage.id);
-                        if (reDraftMessage != null && reDraftMessage.status == Message.STATUS_UNPROCESSED) {
-                            reDraftMessage.recomputeAttachmentCount(db);
-                            db.messageDao().updateAttachmentCount(reDraftMessage.id, reDraftMessage.totalAttachmentCount, reDraftMessage.imageCount, 0, reDraftMessage.imageResolutions);
-                            reDraftMessage.post(false, false);
-                        }
+                        db.runInTransaction(() -> {
+                            Message reDraftMessage = db.messageDao().get(draftMessage.id);
+                            if (reDraftMessage != null && reDraftMessage.status == Message.STATUS_UNPROCESSED) {
+                                reDraftMessage.recomputeAttachmentCount(db);
+                                db.messageDao().updateAttachmentCount(reDraftMessage.id, reDraftMessage.totalAttachmentCount, reDraftMessage.imageCount, 0, reDraftMessage.imageResolutions);
+                                reDraftMessage.post(false, null);
+                            }
+                        });
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
@@ -426,12 +428,14 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                     db.fyleMessageJoinWithStatusDao().updateFilePath(draftMessage.id, fyle.id, fyle.filePath);
 
                     // re-post the message if it was put on hold
-                    Message reDraftMessage = db.messageDao().get(draftMessage.id);
-                    if (reDraftMessage != null && reDraftMessage.status == Message.STATUS_UNPROCESSED) {
-                        reDraftMessage.recomputeAttachmentCount(db);
-                        db.messageDao().updateAttachmentCount(reDraftMessage.id, reDraftMessage.totalAttachmentCount, reDraftMessage.imageCount, 0, reDraftMessage.imageResolutions);
-                        reDraftMessage.post(false, false);
-                    }
+                    db.runInTransaction(() -> {
+                        Message reDraftMessage = db.messageDao().get(draftMessage.id);
+                        if (reDraftMessage != null && reDraftMessage.status == Message.STATUS_UNPROCESSED) {
+                            reDraftMessage.recomputeAttachmentCount(db);
+                            db.messageDao().updateAttachmentCount(reDraftMessage.id, reDraftMessage.totalAttachmentCount, reDraftMessage.imageCount, 0, reDraftMessage.imageResolutions);
+                            reDraftMessage.post(false, null);
+                        }
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -469,7 +473,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
 
     private File removeJpegMetadata(@Nullable Uri uri, @Nullable File localFile, ContentResolver contentResolver) throws IOException {
         File photoDir = new File(App.getContext().getCacheDir(), App.CAMERA_PICTURE_FOLDER);
-        File photoFile = new File(photoDir, UUID.randomUUID().toString());
+        File photoFile = new File(photoDir, Logger.getUuidString(UUID.randomUUID()));
         //noinspection ResultOfMethodCallIgnored
         photoDir.mkdirs();
         if (!photoFile.createNewFile()) {

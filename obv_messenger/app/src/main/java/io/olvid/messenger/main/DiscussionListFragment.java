@@ -19,26 +19,12 @@
 
 package io.olvid.messenger.main;
 
-import androidx.core.content.ContextCompat;
-import androidx.exifinterface.media.ExifInterface;
-import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.text.SpannableString;
@@ -54,6 +40,19 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.exifinterface.media.ExifInterface;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,27 +65,28 @@ import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.activities.DiscussionSettingsActivity;
+import io.olvid.messenger.customClasses.EmptyRecyclerView;
+import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LoadAwareAdapter;
 import io.olvid.messenger.customClasses.PreviewUtils;
-import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
+import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
-import io.olvid.messenger.databases.entity.CallLogItem;
-import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment;
-import io.olvid.messenger.notifications.NotificationActionService;
-import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel;
-import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
+import io.olvid.messenger.databases.entity.CallLogItem;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask;
-import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity;
+import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment;
+import io.olvid.messenger.notifications.NotificationActionService;
+import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel;
 
 public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenuItemClickListener, SwipeRefreshLayout.OnRefreshListener, EngineNotificationListener {
     DiscussionListAdapter adapter;
@@ -130,7 +130,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
         }
         recyclerView.setAdapter(adapter);
 
-        recyclerView.addItemDecoration(new RecyclerViewDividerDecoration(rootView.getContext(), 84, 12));
+        recyclerView.addItemDecoration(new ItemDecorationSimpleDivider(rootView.getContext(), 84, 12));
 
         swipeRefreshLayout = rootView.findViewById(R.id.discussion_list_swipe_refresh_layout);
         swipeRefreshLayout.setProgressBackgroundColorSchemeColor(getResources().getColor(R.color.dialogBackground));
@@ -205,17 +205,28 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
         this.longClickedDiscussion = discussion;
         PopupMenu popup = new PopupMenu(view.getContext(), view);
 
+        // inflate pin or unpin button depending on discussion state
+        if (discussion.discussion.pinned) {
+            popup.inflate(R.menu.popup_discussion_unpin);
+        } else {
+            popup.inflate(R.menu.popup_discussion_pin);
+        }
         // inflate mark as read or unread button depending on discussion state
         if (discussion.discussion.unread || discussion.unreadCount > 0) {
             popup.inflate(R.menu.popup_discussion_mark_as_read);
-        }
-        else {
+        } else {
             popup.inflate(R.menu.popup_discussion_mark_as_unread);
         }
-        if (discussion.discussion.bytesContactIdentity != null) {
-            popup.inflate(R.menu.popup_discussion_one_to_one);
-        } else if (discussion.discussion.bytesGroupOwnerAndUid != null){
-            popup.inflate(R.menu.popup_discussion_group);
+        if (discussion.discussion.canPostMessages()) {
+            switch (discussion.discussion.discussionType) {
+                case Discussion.TYPE_CONTACT:
+                    popup.inflate(R.menu.popup_discussion_one_to_one);
+                    break;
+                case Discussion.TYPE_GROUP:
+                case Discussion.TYPE_GROUP_V2:
+                    popup.inflate(R.menu.popup_discussion_group);
+                    break;
+            }
         } else {
             popup.inflate(R.menu.popup_discussion_locked);
         }
@@ -239,66 +250,106 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
             App.runThread(() -> NotificationActionService.markAllDiscussionMessagesRead(longClickedDiscussion.discussion.id));
         } else if (itemId == R.id.popup_action_discussion_mark_as_unread) {
             App.runThread(() -> AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(longClickedDiscussion.discussion.id, true));
-        }
-        else if (itemId == R.id.popup_action_delete_discussion) {
-            if (!longClickedDiscussion.discussion.isLocked()) {
-                final SecureDeleteEverywhereDialogBuilder builder = new SecureDeleteEverywhereDialogBuilder(activity, R.style.CustomAlertDialog)
-                        .setTitle(R.string.dialog_title_delete_discussion)
-                        .setMessage(getString(R.string.dialog_message_delete_discussion, longClickedDiscussion.discussion.title))
-                        .setType(SecureDeleteEverywhereDialogBuilder.TYPE.DISCUSSION)
-                        .setDeleteCallback(deleteEverywhere -> App.runThread(new DeleteMessagesTask(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.id, deleteEverywhere, false)));
-                builder.create().show();
-            } else {
-                final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
-                        .setTitle(R.string.dialog_title_delete_discussion)
-                        .setMessage(getString(R.string.dialog_message_delete_discussion, longClickedDiscussion.discussion.title))
-                        .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(new DeleteMessagesTask(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.id, false, false)))
-                        .setNegativeButton(R.string.button_label_cancel, null);
-                builder.create().show();
-            }
+        } else if (itemId == R.id.popup_action_discussion_pin) {
+            // mark as read implies: change discussion unread, mark message as read, send read receipts if needed
+            App.runThread(() -> AppDatabase.getInstance().discussionDao().updatePinned(longClickedDiscussion.discussion.id, true));
+        } else if (itemId == R.id.popup_action_discussion_unpin) {
+            App.runThread(() -> AppDatabase.getInstance().discussionDao().updatePinned(longClickedDiscussion.discussion.id, false));
+        } else if (itemId == R.id.popup_action_delete_discussion) {
+            App.runThread(() -> {
+                final String title;
+                if (longClickedDiscussion.discussion.title.length() == 0) {
+                    title = getString(R.string.text_unnamed_discussion);
+                } else {
+                    title = longClickedDiscussion.discussion.title;
+                }
+                boolean canRemoteDelete;
+                if (longClickedDiscussion.discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                    Group2 group2 = AppDatabase.getInstance().group2Dao().get(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.bytesDiscussionIdentifier);
+                    if (group2 != null) {
+                        canRemoteDelete = group2.ownPermissionRemoteDeleteAnything;
+                    } else {
+                        canRemoteDelete = false;
+                    }
+                } else {
+                    canRemoteDelete = longClickedDiscussion.discussion.canPostMessages();
+                }
+                final AlertDialog.Builder builder;
+                if (canRemoteDelete) {
+                    builder = new SecureDeleteEverywhereDialogBuilder(activity, R.style.CustomAlertDialog)
+                            .setTitle(R.string.dialog_title_delete_discussion)
+                            .setMessage(getString(R.string.dialog_message_delete_discussion, title))
+                            .setType(SecureDeleteEverywhereDialogBuilder.TYPE.DISCUSSION)
+                            .setDeleteCallback(deleteEverywhere -> App.runThread(new DeleteMessagesTask(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.id, deleteEverywhere, false)));
+                } else {
+                    builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                            .setTitle(R.string.dialog_title_delete_discussion)
+                            .setMessage(getString(R.string.dialog_message_delete_discussion, title))
+                            .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(new DeleteMessagesTask(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.id, false, false)))
+                            .setNegativeButton(R.string.button_label_cancel, null);
+                }
+                new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
+            });
             return true;
         } else if (itemId == R.id.popup_action_rename_discussion) {
-            if (longClickedDiscussion.discussion.isLocked()) {
+            if (longClickedDiscussion.discussion.canPostMessages()) {
+                switch (longClickedDiscussion.discussion.discussionType) {
+                    case Discussion.TYPE_CONTACT: {
+                        App.runThread(() -> {
+                            final Contact contact = AppDatabase.getInstance().contactDao().get(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.bytesDiscussionIdentifier);
+                            if (contact != null) {
+                                new Handler(Looper.getMainLooper()).post(() -> {
+                                    EditNameAndPhotoDialogFragment editNameAndPhotoDialogFragment = EditNameAndPhotoDialogFragment.newInstance(activity, contact);
+                                    editNameAndPhotoDialogFragment.show(getChildFragmentManager(), "dialog");
+                                });
+                            }
+                        });
+                        break;
+                    }
+                    case Discussion.TYPE_GROUP: {
+                        App.runThread(() -> {
+                            final Group group = AppDatabase.getInstance().groupDao().get(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.bytesDiscussionIdentifier);
+                            if (group != null) {
+                                if (group.bytesGroupOwnerIdentity == null) {
+                                    // you own the group --> show group details and open edit details
+                                    App.openGroupDetailsActivityForEditDetails(activity, longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.bytesDiscussionIdentifier);
+                                } else {
+                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                        EditNameAndPhotoDialogFragment editNameAndPhotoDialogFragment = EditNameAndPhotoDialogFragment.newInstance(activity, group);
+                                        editNameAndPhotoDialogFragment.show(getChildFragmentManager(), "dialog");
+                                    });
+                                }
+                            }
+                        });
+                        break;
+                    }
+                    case Discussion.TYPE_GROUP_V2: {
+                        App.runThread(() -> {
+                            final Group2 group2 = AppDatabase.getInstance().group2Dao().get(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.bytesDiscussionIdentifier);
+                            if (group2 != null) {
+                                if (group2.ownPermissionAdmin) {
+                                    // you own the group --> show group details and open edit details
+                                    App.openGroupV2DetailsActivityForEditDetails(activity, longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.bytesDiscussionIdentifier);
+                                } else {
+                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                        EditNameAndPhotoDialogFragment editNameAndPhotoDialogFragment = EditNameAndPhotoDialogFragment.newInstance(activity, group2);
+                                        editNameAndPhotoDialogFragment.show(getChildFragmentManager(), "dialog");
+                                    });
+                                }
+                            }
+                        });
+                        break;
+                    }
+                }
+            } else {
                 // locked discussion
                 EditNameAndPhotoDialogFragment editNameAndPhotoDialogFragment = EditNameAndPhotoDialogFragment.newInstance(activity, longClickedDiscussion.discussion);
                 editNameAndPhotoDialogFragment.show(getChildFragmentManager(), "dialog");
-            } else if (longClickedDiscussion.discussion.bytesGroupOwnerAndUid != null) {
-                // group discussion
-                App.runThread(() -> {
-                    final Group group = AppDatabase.getInstance().groupDao().get(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.bytesGroupOwnerAndUid);
-                    if (group != null) {
-                        if (group.bytesGroupOwnerIdentity == null) {
-                            // you own the group --> show group details and open edit details
-                            App.openGroupDetailsActivityForEditDetails(activity, longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.bytesGroupOwnerAndUid);
-                        } else {
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                EditNameAndPhotoDialogFragment editNameAndPhotoDialogFragment = EditNameAndPhotoDialogFragment.newInstance(activity, group);
-                                editNameAndPhotoDialogFragment.show(getChildFragmentManager(), "dialog");
-                            });
-                        }
-                    }
-                });
-            } else {
-                // one-to-one discussion
-                App.runThread(() -> {
-                    final Contact contact = AppDatabase.getInstance().contactDao().get(longClickedDiscussion.discussion.bytesOwnedIdentity, longClickedDiscussion.discussion.bytesContactIdentity);
-                    if (contact != null) {
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            EditNameAndPhotoDialogFragment editNameAndPhotoDialogFragment = EditNameAndPhotoDialogFragment.newInstance(activity, contact);
-                            editNameAndPhotoDialogFragment.show(getChildFragmentManager(), "dialog");
-                        });
-                    }
-                });
             }
             return true;
         } else if (itemId == R.id.popup_action_discussion_settings) {
             Intent intent = new Intent(getContext(), DiscussionSettingsActivity.class);
             intent.putExtra(DiscussionSettingsActivity.DISCUSSION_ID_INTENT_EXTRA, longClickedDiscussion.discussion.id);
-            intent.putExtra(DiscussionSettingsActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, longClickedDiscussion.discussion.bytesOwnedIdentity);
-            intent.putExtra(DiscussionSettingsActivity.LOCKED_INTENT_EXTRA, longClickedDiscussion.discussion.isLocked());
-            if (longClickedDiscussion.discussion.bytesGroupOwnerAndUid != null) {
-                intent.putExtra(DiscussionSettingsActivity.BYTES_GROUP_OWNED_AND_UID_INTENT_EXTRA, longClickedDiscussion.discussion.bytesGroupOwnerAndUid);
-            }
             startActivity(intent);
             return true;
         }
@@ -336,8 +387,12 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
         public int getItemViewType(int position) {
             if (discussionsAndLastMessages != null) {
                 DiscussionDao.DiscussionAndLastMessage discussion = discussionsAndLastMessages.get(position);
-                if (discussion.discussion.isLocked()) {
-                    return LOCKED_VIEWTYPE;
+                switch (discussion.discussion.status) {
+                    case Discussion.STATUS_LOCKED:
+                        return LOCKED_VIEWTYPE;
+                    case Discussion.STATUS_NORMAL:
+                    default:
+                        return NORMAL_VIEWTYPE;
                 }
             }
             return NORMAL_VIEWTYPE;
@@ -366,7 +421,13 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                 return;
             }
             final DiscussionDao.DiscussionAndLastMessage discussionAndLastMessage = discussionsAndLastMessages.get(position);
-            holder.nameTextView.setText(discussionAndLastMessage.discussion.title);
+            if (discussionAndLastMessage.discussion.title.length() == 0) {
+                SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_discussion));
+                spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                holder.nameTextView.setText(spannableString);
+            } else {
+                holder.nameTextView.setText(discussionAndLastMessage.discussion.title);
+            }
 
             if (discussionAndLastMessage.message != null) {
                 switch (discussionAndLastMessage.message.messageType) {
@@ -384,7 +445,14 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                             text.setSpan(styleSpan, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             holder.lastMessageContentTextView.setText(text);
                         } else {
-                            holder.lastMessageContentTextView.setText(getString(R.string.text_outbound_message_prefix, body));
+                            if (discussionAndLastMessage.message.isLocationMessage()) {
+                                SpannableString text = new SpannableString(getString(R.string.text_outbound_message_prefix, body));
+                                StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
+                                text.setSpan(styleSpan, text.length() - body.length(), text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                holder.lastMessageContentTextView.setText(text);
+                            } else {
+                                holder.lastMessageContentTextView.setText(getString(R.string.text_outbound_message_prefix, body));
+                            }
                         }
                         break;
                     }
@@ -493,10 +561,10 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                     }
                     case Message.TYPE_NEW_PUBLISHED_DETAILS: {
                         final SpannableString spannableString;
-                        if (discussionAndLastMessage.discussion.bytesGroupOwnerAndUid != null) {
-                            spannableString = new SpannableString(getString(R.string.text_group_details_updated));
-                        } else {
+                        if (discussionAndLastMessage.discussion.discussionType == Discussion.TYPE_CONTACT) {
                             spannableString = new SpannableString(getString(R.string.text_contact_details_updated));
+                        } else {
+                            spannableString = new SpannableString(getString(R.string.text_group_details_updated));
                         }
                         spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         holder.lastMessageContentTextView.setText(spannableString);
@@ -514,6 +582,36 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                         holder.lastMessageContentTextView.setText(spannableString);
                         break;
                     }
+                    case Message.TYPE_CONTACT_RE_ADDED: {
+                        SpannableString spannableString = new SpannableString(getString(R.string.text_user_added_to_contacts));
+                        spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        holder.lastMessageContentTextView.setText(spannableString);
+                        break;
+                    }
+                    case Message.TYPE_RE_JOINED_GROUP: {
+                        SpannableString spannableString = new SpannableString(getString(R.string.text_group_re_joined));
+                        spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        holder.lastMessageContentTextView.setText(spannableString);
+                        break;
+                    }
+                    case Message.TYPE_JOINED_GROUP: {
+                        SpannableString spannableString = new SpannableString(getString(R.string.text_group_joined));
+                        spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        holder.lastMessageContentTextView.setText(spannableString);
+                        break;
+                    }
+                    case Message.TYPE_GAINED_GROUP_ADMIN: {
+                        SpannableString spannableString = new SpannableString(getString(R.string.text_you_became_admin));
+                        spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        holder.lastMessageContentTextView.setText(spannableString);
+                        break;
+                    }
+                    case Message.TYPE_LOST_GROUP_ADMIN: {
+                        SpannableString spannableString = new SpannableString(getString(R.string.text_you_are_no_longer_admin));
+                        spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        holder.lastMessageContentTextView.setText(spannableString);
+                        break;
+                    }
                     case Message.TYPE_INBOUND_EPHEMERAL_MESSAGE:
                         SpannableString spannableString = new SpannableString(discussionAndLastMessage.message.getStringContent(activity));
                         spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -523,7 +621,8 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                     default: {
                         String body = discussionAndLastMessage.message.getStringContent(activity);
                         if (discussionAndLastMessage.message.wipeStatus == Message.WIPE_STATUS_WIPED
-                                || discussionAndLastMessage.message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
+                                || discussionAndLastMessage.message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
+                                || discussionAndLastMessage.message.isLocationMessage()) {
                             SpannableString text = new SpannableString(body);
                             StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
                             text.setSpan(styleSpan, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -556,14 +655,18 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                 holder.lastMessageUnreadImageView.setVisibility(View.VISIBLE);
                 holder.unreadMessageCountTextView.setVisibility(View.VISIBLE);
                 holder.unreadMessageCountTextView.setText(String.format(Locale.ENGLISH, "%d", discussionAndLastMessage.unreadCount));
-            }
-            else if (discussionAndLastMessage.discussion.unread) {
+            } else if (discussionAndLastMessage.discussion.unread) {
                 holder.lastMessageUnreadImageView.setVisibility(View.VISIBLE);
                 holder.unreadMessageCountTextView.setVisibility(View.GONE);
-            }
-            else {
+            } else {
                 holder.lastMessageUnreadImageView.setVisibility(View.GONE);
                 holder.unreadMessageCountTextView.setVisibility(View.GONE);
+            }
+
+            if (discussionAndLastMessage.discussion.pinned) {
+                holder.pinnedImageView.setVisibility(View.VISIBLE);
+            } else {
+                holder.pinnedImageView.setVisibility(View.GONE);
             }
 
             if (discussionAndLastMessage.discussionCustomization != null) {
@@ -636,6 +739,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
             final TextView attachmentCountTextView;
             final ImageView notificationsMutedImageView;
             final View customColorView;
+            final ImageView pinnedImageView;
 
             DiscussionViewHolder(View discussionRootView) {
                 super(discussionRootView);
@@ -649,6 +753,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                 initialView = discussionRootView.findViewById(R.id.initial_view);
                 lastMessageUnreadImageView = discussionRootView.findViewById(R.id.last_message_unread_image_view);
                 unreadMessageCountTextView = discussionRootView.findViewById(R.id.discussion_unread_message_count_text_view);
+                pinnedImageView = discussionRootView.findViewById(R.id.discussion_pinned_image_view);
                 attachmentCountTextView = discussionRootView.findViewById(R.id.discussion_last_message_attachment_count_text_view);
                 notificationsMutedImageView = discussionRootView.findViewById(R.id.notifications_muted_image_view);
             }

@@ -78,7 +78,8 @@ public class ForwardMessagesTask implements Runnable {
       for (Message message : messagesToForward) {
          if ((message.messageType != Message.TYPE_OUTBOUND_MESSAGE
                  && message.messageType != Message.TYPE_INBOUND_MESSAGE)
-                 || message.wipeStatus != Message.WIPE_STATUS_NONE) {
+                 || message.wipeStatus != Message.WIPE_STATUS_NONE
+                 || message.limitedVisibility) {
             // this kind of message should never be forwarded
             Logger.w("ForwardMessagesTask: trying to forward a message that cannot be forwarded");
             continue;
@@ -130,11 +131,20 @@ public class ForwardMessagesTask implements Runnable {
             }
 
             final Message.JsonMessage jsonMessage = new Message.JsonMessage(body);
+            if (message.isLocationMessage()) {
+               // manually copy location data to forwarded message (to be sure it becomes a send location message and not a sharing location)
+               Message.JsonLocation jsonLocation = message.getJsonLocation();
+               if (jsonLocation == null) {
+                  continue;
+               }
+               jsonLocation.setType(Message.JsonLocation.TYPE_SEND);
+               jsonMessage.setJsonLocation(jsonLocation);
+            }
             if (jsonExpiration != null) {
                jsonMessage.setJsonExpiration(jsonExpiration);
             }
 
-            Message forwardedMessage = db.runInTransaction(() -> {
+            db.runInTransaction(() -> {
                discussion.lastOutboundMessageSequenceNumber++;
                db.discussionDao().updateLastOutboundMessageSequenceNumber(discussion.id, discussion.lastOutboundMessageSequenceNumber);
                discussion.updateLastMessageTimestamp(System.currentTimeMillis());
@@ -171,9 +181,8 @@ public class ForwardMessagesTask implements Runnable {
                newMessage.recomputeAttachmentCount(db);
                db.messageDao().updateAttachmentCount(newMessage.id, newMessage.totalAttachmentCount, newMessage.imageCount, 0, newMessage.imageResolutions);
 
-               return newMessage;
+               newMessage.post(false, null);
             });
-            forwardedMessage.post(false, false);
          }
       }
    }

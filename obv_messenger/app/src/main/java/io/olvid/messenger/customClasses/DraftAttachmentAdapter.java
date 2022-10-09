@@ -19,8 +19,6 @@
 
 package io.olvid.messenger.customClasses;
 
-import androidx.lifecycle.Observer;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -29,11 +27,6 @@ import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
-
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -43,6 +36,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;

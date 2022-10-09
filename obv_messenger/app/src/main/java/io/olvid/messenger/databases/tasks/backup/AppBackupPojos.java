@@ -19,10 +19,17 @@
 
 package io.olvid.messenger.databases.tasks.backup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
+
+import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.DiscussionCustomization;
+import io.olvid.messenger.databases.entity.Message;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class AppBackupPojo_0 {
@@ -41,11 +48,18 @@ class OwnedIdentityPojo_0 {
     public boolean show_neutral_notification_when_hidden;
     public List<ContactPojo_0> contacts;
     public List<GroupPojo_0> groups;
+    public List<Group2Pojo_0> groups2;
 
     @JsonIgnore
     boolean isEmpty() {
         return (contacts == null || contacts.isEmpty()) &&
-                (groups == null || groups.isEmpty());
+                (groups == null || groups.isEmpty()) &&
+                (groups2 == null || groups2.isEmpty()) &&
+                custom_name == null &&
+                unlock_password == null &&
+                unlock_salt == null &&
+                !mute_notifications &&
+                !show_neutral_notification_when_hidden;
     }
 }
 
@@ -84,6 +98,22 @@ class GroupPojo_0 {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+class Group2Pojo_0 {
+    public byte[] group_identifier;
+    public String custom_name;
+    public String personal_note;
+    public DiscussionCustomizationPojo_0 discussion_customization;
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    @JsonIgnore
+    boolean isEmpty() {
+        return custom_name == null &&
+                personal_note == null &&
+                discussion_customization == null;
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 class DiscussionCustomizationPojo_0 {
     public String serialized_color_json;
     public Boolean send_read_receipt;
@@ -97,11 +127,16 @@ class DiscussionCustomizationPojo_0 {
     public Long settings_existence_duration;
     public Long settings_visibility_duration;
     public boolean settings_read_once;
+    public boolean pinned;
+
+    public DiscussionCustomizationPojo_0() {
+    }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @JsonIgnore
     boolean isEmpty() {
-        return serialized_color_json == null &&
+        return !pinned &&
+                serialized_color_json == null &&
                 send_read_receipt == null &&
                 !mute_notifications &&
                 auto_open_limited_visibility == null &&
@@ -109,5 +144,62 @@ class DiscussionCustomizationPojo_0 {
                 retention_count == null &&
                 retention_duration == null &&
                 (shared_settings_version == null || (settings_existence_duration == null && settings_visibility_duration == null && !settings_read_once));
+    }
+
+    @JsonIgnore
+    public static DiscussionCustomizationPojo_0 of(@NonNull Discussion discussion, @Nullable DiscussionCustomization discussionCustomization, boolean backupSharedSettings) {
+        DiscussionCustomizationPojo_0 discussionCustomizationPojo = new DiscussionCustomizationPojo_0();
+        if (discussionCustomization != null) {
+            discussionCustomizationPojo.serialized_color_json = discussionCustomization.serializedColorJson;
+            discussionCustomizationPojo.send_read_receipt = discussionCustomization.prefSendReadReceipt;
+            if (discussionCustomization.shouldMuteNotifications()) {
+                discussionCustomizationPojo.mute_notifications = true;
+                discussionCustomizationPojo.mute_notification_timestamp = discussionCustomization.prefMuteNotificationsTimestamp;
+            }
+            discussionCustomizationPojo.auto_open_limited_visibility = discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages;
+            discussionCustomizationPojo.retain_wiped_outbound = discussionCustomization.prefRetainWipedOutboundMessages;
+            discussionCustomizationPojo.retention_count = discussionCustomization.prefDiscussionRetentionCount;
+            discussionCustomizationPojo.retention_duration = discussionCustomization.prefDiscussionRetentionDuration;
+            if (backupSharedSettings) {
+                Message.JsonExpiration expiration = discussionCustomization.getExpirationJson();
+                if (expiration != null) {
+                    discussionCustomizationPojo.settings_existence_duration = expiration.getExistenceDuration();
+                    discussionCustomizationPojo.settings_visibility_duration = expiration.getVisibilityDuration();
+                    discussionCustomizationPojo.settings_read_once = expiration.getReadOnce();
+                }
+            }
+        }
+        discussionCustomizationPojo.pinned = discussion.pinned;
+
+        if (discussionCustomizationPojo.isEmpty()) {
+            return null;
+        }
+        return discussionCustomizationPojo;
+    }
+
+    // returns true if some shared settings were restored
+    public boolean applyTo(@NonNull DiscussionCustomization discussionCustomization, @NonNull Discussion discussion, boolean restoreSharedSettings) {
+        boolean sharedSettingsRestored = false;
+        discussionCustomization.serializedColorJson = serialized_color_json;
+        discussionCustomization.prefSendReadReceipt = send_read_receipt;
+        discussionCustomization.prefMuteNotifications = mute_notifications;
+        if (discussionCustomization.prefMuteNotifications) {
+            discussionCustomization.prefMuteNotificationsTimestamp = mute_notification_timestamp;
+        }
+        discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages = auto_open_limited_visibility;
+        discussionCustomization.prefRetainWipedOutboundMessages = retain_wiped_outbound;
+        discussionCustomization.prefDiscussionRetentionCount = retention_count;
+        discussionCustomization.prefDiscussionRetentionDuration = retention_duration;
+        if (restoreSharedSettings &&
+                shared_settings_version != null &&
+                (discussionCustomization.sharedSettingsVersion == null || shared_settings_version > discussionCustomization.sharedSettingsVersion)) {
+            sharedSettingsRestored = true;
+            discussionCustomization.sharedSettingsVersion = shared_settings_version;
+            discussionCustomization.settingExistenceDuration = settings_existence_duration;
+            discussionCustomization.settingVisibilityDuration = settings_visibility_duration;
+            discussionCustomization.settingReadOnce = settings_read_once;
+        }
+        discussion.pinned = pinned;
+        return sharedSettingsRestored;
     }
 }

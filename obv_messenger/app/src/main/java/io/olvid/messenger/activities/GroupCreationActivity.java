@@ -19,26 +19,11 @@
 
 package io.olvid.messenger.activities;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.AppCompatEditText;
-import androidx.appcompat.widget.SearchView;
-import androidx.core.view.inputmethod.EditorInfoCompat;
-import androidx.lifecycle.Transformations;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.tabs.TabLayout;
-
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.ActionBar;
-
 import android.text.InputType;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,21 +31,42 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.view.inputmethod.EditorInfoCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.identities.ObvGroup;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
@@ -82,9 +88,16 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
     private Button confirmationButton;
     private ActionBar actionBar;
 
+    // this boolean controls whether groups are created in v2 format or not
+    public static final boolean groupV2 = false;
+
     public static final int CONTACTS_SELECTION_TAB = 0;
     public static final int GROUP_NAME_TAB = 1;
 
+    public static final String FORCE_GROUP_V2_INTENT_EXTRA = "force_v2"; // boolean, to force creation of a group v2, even if not the default (only available in beta)
+    public static final String ABSOLUTE_PHOTO_URL_INTENT_EXTRA = "photo_url"; // String with absolute path to photo
+    public static final String SERIALIZED_GROUP_DETAILS_INTENT_EXTRA = "serialized_group_details"; // String with serialized JsonGroupDetails
+    public static final String PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA = "preselected_group_members"; // Array of BytesKey
 
     ContactsSelectionFragment contactsSelectionFragment;
 
@@ -105,11 +118,78 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
             }
         });
 
-        groupDetailsViewModel.setBytesGroupOwnerAndUid(new byte[0]);
 
+        if (savedInstanceState == null) {
+            groupDetailsViewModel.setBytesGroupOwnerAndUidOrIdentifier(new byte[0]);
+
+            // only look at intent when first creating the activity
+            Intent intent = getIntent();
+            if (intent.hasExtra(FORCE_GROUP_V2_INTENT_EXTRA)) {
+                boolean forceV2 = intent.getBooleanExtra(FORCE_GROUP_V2_INTENT_EXTRA, false);
+                groupDetailsViewModel.setGroupV2(groupV2 || forceV2);
+            } else {
+                groupDetailsViewModel.setGroupV2(groupV2);
+            }
+
+            if (intent.hasExtra(SERIALIZED_GROUP_DETAILS_INTENT_EXTRA)) {
+                try {
+                    JsonGroupDetails groupDetails = AppSingleton.getJsonObjectMapper().readValue(intent.getStringExtra(SERIALIZED_GROUP_DETAILS_INTENT_EXTRA), JsonGroupDetails.class);
+                    if (groupDetails.getName() != null && groupDetails.getName().length() > 0) {
+                        groupDetailsViewModel.setGroupName(getString(R.string.text_copy_of_prefix) + groupDetails.getName());
+                    }
+                    groupDetailsViewModel.setGroupDescription(groupDetails.getDescription());
+                } catch (Exception ignored) {
+                }
+            }
+            if (intent.hasExtra(ABSOLUTE_PHOTO_URL_INTENT_EXTRA)) {
+                groupDetailsViewModel.setAbsolutePhotoUrl(intent.getStringExtra(ABSOLUTE_PHOTO_URL_INTENT_EXTRA));
+            }
+            if (intent.hasExtra(PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA)) {
+                ArrayList<BytesKey> preselectedContactBytesKeys = intent.getParcelableArrayListExtra(PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA);
+                if (preselectedContactBytesKeys != null) {
+                    App.runThread(() -> {
+                        List<Contact> preselectedContacts = new ArrayList<>();
+                        for (BytesKey bytesKey : preselectedContactBytesKeys) {
+                            Contact contact = AppDatabase.getInstance().contactDao().get(AppSingleton.getBytesCurrentIdentity(), bytesKey.bytes);
+                            if (contact != null) {
+                                preselectedContacts.add(contact);
+                            }
+                        }
+
+                        if (!preselectedContacts.isEmpty()) {
+                            runOnUiThread(() -> {
+                                groupCreationViewModel.setSelectedContacts(preselectedContacts);
+                                if (contactsSelectionFragment != null) {
+                                    contactsSelectionFragment.setInitiallySelectedContacts(preselectedContacts);
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        }
         setContentView(R.layout.activity_group_creation);
         setTitle(getString(R.string.activity_title_create_group));
 
+        groupCreationViewModel.getSubtitleLiveData().observe(this, (Pair<Integer, Integer> tabAndSelectedContactCount) -> {
+            if (actionBar == null || tabAndSelectedContactCount == null || tabAndSelectedContactCount.first == null || tabAndSelectedContactCount.second == null) {
+                return;
+            }
+            switch (tabAndSelectedContactCount.first) {
+                case CONTACTS_SELECTION_TAB:
+                    if (tabAndSelectedContactCount.second == 0) {
+                        actionBar.setSubtitle(getString(R.string.subtitle_select_group_members));
+                    } else {
+                        actionBar.setSubtitle(getResources().getQuantityString(R.plurals.other_members_count, tabAndSelectedContactCount.second, tabAndSelectedContactCount.second));
+                    }
+                    break;
+                case GROUP_NAME_TAB:
+                    actionBar.setSubtitle(getString(R.string.subtitle_choose_group_name));
+                    break;
+            }
+        });
+
+        //noinspection deprecation
         FragmentPagerAdapter fragmentPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             @Override
             @NonNull
@@ -130,7 +210,8 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
                 switch (position) {
                     case CONTACTS_SELECTION_TAB:
                         contactsSelectionFragment = (ContactsSelectionFragment) fragment;
-                        contactsSelectionFragment.setInitiallySelectedContacts(groupCreationViewModel.getSelectedContacts().getValue());
+                        contactsSelectionFragment.setGroupV2(groupDetailsViewModel.isGroupV2());
+                        contactsSelectionFragment.setInitiallySelectedContacts(groupCreationViewModel.getSelectedContacts());
                         break;
                     case GROUP_NAME_TAB:
                         break;
@@ -144,8 +225,10 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
             }
         };
 
+
         viewPager = findViewById(R.id.group_creation_view_pager);
         viewPager.setAdapter(fragmentPagerAdapter);
+        viewPager.setOffscreenPageLimit(2);
 
         TabLayout tabLayout = findViewById(R.id.group_creation_tab_dots);
         tabLayout.setupWithViewPager(viewPager, true);
@@ -171,19 +254,14 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
 
             @Override
             public void onPageSelected(int position) {
+                groupCreationViewModel.setSelectedTab(position);
                 switch (position) {
                     case CONTACTS_SELECTION_TAB:
-                        if (actionBar != null) {
-                            actionBar.setSubtitle(getString(R.string.subtitle_select_group_members));
-                        }
                         previousButton.setVisibility(View.GONE);
                         nextButton.setVisibility(View.VISIBLE);
                         confirmationButton.setVisibility(View.GONE);
                         break;
                     case GROUP_NAME_TAB:
-                        if (actionBar != null) {
-                            actionBar.setSubtitle(getString(R.string.subtitle_choose_group_name));
-                        }
                         previousButton.setVisibility(View.VISIBLE);
                         nextButton.setVisibility(View.GONE);
                         confirmationButton.setVisibility(View.VISIBLE);
@@ -261,7 +339,7 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
                 viewPager.setCurrentItem(position - 1);
             }
         } else if (id == R.id.button_confirmation) {
-            if (groupCreationViewModel.getSelectedContacts().getValue() == null || groupCreationViewModel.getSelectedContacts().getValue().size() == 0) {
+            if (groupCreationViewModel.getSelectedContacts() == null || groupCreationViewModel.getSelectedContacts().size() == 0) {
                 final AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_create_empty_group)
                         .setMessage(R.string.dialog_message_create_empty_group)
@@ -279,101 +357,193 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
     }
 
     private void initiateGroupCreationProtocol() {
-        byte[] bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
-        if (bytesOwnedIdentity == null) {
-            return;
-        }
-        List<Contact> selectedContacts = groupCreationViewModel.getSelectedContacts().getValue();
-        if (selectedContacts == null) {
-            selectedContacts = new ArrayList<>();
-        }
-        String groupAbsolutePhotoUrl = groupDetailsViewModel.getAbsolutePhotoUrl();
-        String groupName = groupDetailsViewModel.getGroupName();
-        String groupDescription = groupDetailsViewModel.getGroupDescription();
-        if (groupName == null || groupName.trim().length() == 0) {
-            return;
-        }
-        if (groupDescription != null) {
-            groupDescription = groupDescription.trim();
-        }
+        if (groupDetailsViewModel.isGroupV2()) {
+            byte[] bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
+            if (bytesOwnedIdentity == null) {
+                return;
+            }
+            List<Contact> selectedContacts = groupCreationViewModel.getSelectedContacts();
+            if (selectedContacts == null) {
+                selectedContacts = new ArrayList<>();
+            }
+            String groupAbsolutePhotoUrl = groupDetailsViewModel.getAbsolutePhotoUrl();
+            String groupName = groupDetailsViewModel.getGroupName();
+            String groupDescription = groupDetailsViewModel.getGroupDescription();
+            if (groupName == null) {
+                groupName = "";
+            }
+            if (groupDescription != null) {
+                groupDescription = groupDescription.trim();
+            }
 
-        JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto = new JsonGroupDetailsWithVersionAndPhoto();
-        jsonGroupDetailsWithVersionAndPhoto.setVersion(0);
-        jsonGroupDetailsWithVersionAndPhoto.setGroupDetails(new JsonGroupDetails(groupName.trim(), groupDescription));
+            JsonGroupDetails jsonGroupDetails = new JsonGroupDetails(groupName.trim(), groupDescription);
+            HashMap<ObvBytesKey, HashSet<GroupV2.Permission>> otherGroupMembers = new HashMap<>();
+            for (Contact contact : selectedContacts) {
+                HashSet<GroupV2.Permission> permissions = new HashSet<>(Arrays.asList(GroupV2.Permission.DEFAULT_MEMBER_PERMISSIONS));
+                otherGroupMembers.put(new ObvBytesKey(contact.bytesContactIdentity), permissions);
+            }
 
-        byte[][] bytesContactIdentities = new byte[selectedContacts.size()][];
-        int i=0;
-        for (Contact contact: selectedContacts) {
-            bytesContactIdentities[i] = contact.bytesContactIdentity;
-            i++;
-        }
+            try {
+                String serializedGroupDetails = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonGroupDetails);
+                AppSingleton.getEngine().startGroupV2CreationProtocol(serializedGroupDetails, groupAbsolutePhotoUrl, bytesOwnedIdentity, new HashSet<>(Arrays.asList(GroupV2.Permission.DEFAULT_ADMIN_PERMISSIONS)), otherGroupMembers);
 
-        try {
-            String serializedGroupDetailsWithVersionAndPhoto = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonGroupDetailsWithVersionAndPhoto);
-            AppSingleton.getEngine().startGroupCreationProtocol(serializedGroupDetailsWithVersionAndPhoto, groupAbsolutePhotoUrl, bytesOwnedIdentity, bytesContactIdentities);
-            App.toast(R.string.toast_message_group_creation_started, Toast.LENGTH_SHORT);
+                AppSingleton.getEngine().addNotificationListener(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, new EngineNotificationListener() {
+                    private Long registrationNumber = null;
+                    private final EngineNotificationListener _this = this;
 
-            AppSingleton.getEngine().addNotificationListener(EngineNotifications.GROUP_CREATED, new EngineNotificationListener() {
-                private Long registrationNumber = null;
-                private final EngineNotificationListener _this = this;
-                {
-                    new Thread(() -> {
-                        try {
-                            Thread.sleep(3000);
-                        } catch (InterruptedException e) {
-                            Logger.i("Group creation listener timer interrupted");
-                        }
-                        AppSingleton.getEngine().removeNotificationListener(EngineNotifications.GROUP_CREATED, _this);
-                    }).start();
-                }
-
-                @Override
-                public void callback(String notificationName, HashMap<String, Object> userInfo) {
-                    AppSingleton.getEngine().removeNotificationListener(EngineNotifications.GROUP_CREATED, this);
-                    final ObvGroup group = (ObvGroup) userInfo.get(EngineNotifications.GROUP_CREATED_GROUP_KEY);
-                    if (group != null) {
-                        runOnUiThread(() -> {
-                            App.openGroupDetailsActivity(GroupCreationActivity.this, group.getBytesOwnedIdentity(), group.getBytesGroupOwnerAndUid());
-                            finish();
-                        });
+                    {
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException e) {
+                                Logger.i("Group creation listener timer interrupted");
+                            }
+                            AppSingleton.getEngine().removeNotificationListener(EngineNotifications.GROUP_CREATED, _this);
+                        }).start();
                     }
-                }
 
-                @Override
-                public void setEngineNotificationListenerRegistrationNumber(long registrationNumber) {
-                    this.registrationNumber = registrationNumber;
-                }
+                    @Override
+                    public void callback(String notificationName, HashMap<String, Object> userInfo) {
+                        AppSingleton.getEngine().removeNotificationListener(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, this);
+                        final ObvGroupV2 group = (ObvGroupV2) userInfo.get(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY);
+                        if (group != null) {
+                            runOnUiThread(() -> {
+                                App.openGroupV2DetailsActivity(GroupCreationActivity.this, group.bytesOwnedIdentity, group.groupIdentifier.getBytes());
+                                finish();
+                            });
+                        }
+                    }
 
-                @Override
-                public long getEngineNotificationListenerRegistrationNumber() {
-                    return registrationNumber;
-                }
+                    @Override
+                    public void setEngineNotificationListenerRegistrationNumber(long registrationNumber) {
+                        this.registrationNumber = registrationNumber;
+                    }
 
-                @Override
-                public boolean hasEngineNotificationListenerRegistrationNumber() {
-                    return registrationNumber != null;
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+                    @Override
+                    public long getEngineNotificationListenerRegistrationNumber() {
+                        return registrationNumber;
+                    }
+
+                    @Override
+                    public boolean hasEngineNotificationListenerRegistrationNumber() {
+                        return registrationNumber != null;
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            byte[] bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
+            if (bytesOwnedIdentity == null) {
+                return;
+            }
+            List<Contact> selectedContacts = groupCreationViewModel.getSelectedContacts();
+            if (selectedContacts == null) {
+                selectedContacts = new ArrayList<>();
+            }
+            String groupAbsolutePhotoUrl = groupDetailsViewModel.getAbsolutePhotoUrl();
+            String groupName = groupDetailsViewModel.getGroupName();
+            String groupDescription = groupDetailsViewModel.getGroupDescription();
+            if (groupName == null || groupName.trim().length() == 0) {
+                return;
+            }
+            if (groupDescription != null) {
+                groupDescription = groupDescription.trim();
+            }
+
+            JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto = new JsonGroupDetailsWithVersionAndPhoto();
+            jsonGroupDetailsWithVersionAndPhoto.setVersion(0);
+            jsonGroupDetailsWithVersionAndPhoto.setGroupDetails(new JsonGroupDetails(groupName.trim(), groupDescription));
+
+            byte[][] bytesContactIdentities = new byte[selectedContacts.size()][];
+            int i = 0;
+            for (Contact contact : selectedContacts) {
+                bytesContactIdentities[i] = contact.bytesContactIdentity;
+                i++;
+            }
+
+            try {
+                String serializedGroupDetailsWithVersionAndPhoto = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonGroupDetailsWithVersionAndPhoto);
+                AppSingleton.getEngine().startGroupCreationProtocol(serializedGroupDetailsWithVersionAndPhoto, groupAbsolutePhotoUrl, bytesOwnedIdentity, bytesContactIdentities);
+
+                AppSingleton.getEngine().addNotificationListener(EngineNotifications.GROUP_CREATED, new EngineNotificationListener() {
+                    private Long registrationNumber = null;
+                    private final EngineNotificationListener _this = this;
+
+                    {
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException e) {
+                                Logger.i("Group creation listener timer interrupted");
+                            }
+                            AppSingleton.getEngine().removeNotificationListener(EngineNotifications.GROUP_CREATED, _this);
+                        }).start();
+                    }
+
+                    @Override
+                    public void callback(String notificationName, HashMap<String, Object> userInfo) {
+                        AppSingleton.getEngine().removeNotificationListener(EngineNotifications.GROUP_CREATED, this);
+                        final ObvGroup group = (ObvGroup) userInfo.get(EngineNotifications.GROUP_CREATED_GROUP_KEY);
+                        if (group != null) {
+                            runOnUiThread(() -> {
+                                App.openGroupDetailsActivity(GroupCreationActivity.this, group.getBytesOwnedIdentity(), group.getBytesGroupOwnerAndUid());
+                                finish();
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void setEngineNotificationListenerRegistrationNumber(long registrationNumber) {
+                        this.registrationNumber = registrationNumber;
+                    }
+
+                    @Override
+                    public long getEngineNotificationListenerRegistrationNumber() {
+                        return registrationNumber;
+                    }
+
+                    @Override
+                    public boolean hasEngineNotificationListenerRegistrationNumber() {
+                        return registrationNumber != null;
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public static class ContactsSelectionFragment extends Fragment {
         FilteredContactListFragment filteredContactListFragment;
+        private List<Contact> initiallySelectedContacts;
+        private boolean groupV2 = false;
 
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
             filteredContactListFragment = new FilteredContactListFragment();
+            if (initiallySelectedContacts != null) {
+                filteredContactListFragment.setInitiallySelectedContacts(initiallySelectedContacts);
+                initiallySelectedContacts = null;
+            }
             filteredContactListFragment.setSelectable(true);
-            filteredContactListFragment.setUnfilteredContacts(Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
-                if (ownedIdentity == null) {
-                    return null;
-                }
-                return AppDatabase.getInstance().contactDao().getAllForOwnedIdentityWithChannel(ownedIdentity.bytesOwnedIdentity);
-            }));
+            if (groupV2) {
+                filteredContactListFragment.setUnfilteredContacts(Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
+                    if (ownedIdentity == null) {
+                        return null;
+                    }
+                    return AppDatabase.getInstance().contactDao().getAllForOwnedIdentityWithChannelAndGroupV2Capability(ownedIdentity.bytesOwnedIdentity);
+                }));
+            } else {
+                filteredContactListFragment.setUnfilteredContacts(Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
+                    if (ownedIdentity == null) {
+                        return null;
+                    }
+                    return AppDatabase.getInstance().contactDao().getAllForOwnedIdentityWithChannel(ownedIdentity.bytesOwnedIdentity);
+                }));
+            }
             filteredContactListFragment.setSelectedContactsObserver(contacts -> {
                 GroupCreationActivity activity = (GroupCreationActivity) getActivity();
                 if (activity != null) {
@@ -396,11 +566,17 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
         void setInitiallySelectedContacts(List<Contact> selectedContacts) {
             if (selectedContacts != null && filteredContactListFragment != null) {
                 filteredContactListFragment.setInitiallySelectedContacts(selectedContacts);
+            } else {
+                initiallySelectedContacts = selectedContacts;
             }
         }
 
         void setContactFilterEditText(EditText contactNameFilter) {
             filteredContactListFragment.setContactFilterEditText(contactNameFilter);
+        }
+
+        public void setGroupV2(boolean groupV2) {
+            this.groupV2 = groupV2;
         }
     }
 
@@ -413,6 +589,7 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
             View rootView = inflater.inflate(R.layout.fragment_group_creation_group_name, container, false);
 
             OwnedGroupDetailsFragment ownedGroupDetailsFragment = new OwnedGroupDetailsFragment();
+            ownedGroupDetailsFragment.setHidePersonalDetails(true);
 
             FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_group_details_placeholder, ownedGroupDetailsFragment);

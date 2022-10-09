@@ -410,10 +410,8 @@ public class ContactGroupDetails implements ObvDatabase {
         Pojo_0 pojo = new Pojo_0();
         pojo.version = version;
         pojo.serialized_details = serializedJsonDetails;
-        if (photoServerLabel != null) {
+        if (photoServerLabel != null && photoServerKey != null) {
             pojo.photo_server_label = photoServerLabel.getBytes();
-        }
-        if (photoServerKey != null) {
             pojo.photo_server_key = Encoded.of(photoServerKey).getBytes();
         }
         return pojo;

@@ -39,6 +39,7 @@ import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ServerQuery;
+import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPublicKey;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.networkfetch.databases.PendingServerQuery;
@@ -104,6 +105,8 @@ public class ServerQueryOperation extends Operation {
                     return;
                 }
 
+                Logger.d("?? Starting server query operation of type " + serverQuery.getType().getId());
+
                 ServerQueryServerMethod serverMethod;
                 switch (serverQuery.getType().getId()) {
                     case ServerQuery.Type.DEVICE_DISCOVERY_QUERY_ID: {
@@ -117,7 +120,13 @@ public class ServerQueryOperation extends Operation {
                             return;
                         }
                         // encrypt the photo
-                        File photoFile = new File(fetchManagerSession.engineBaseDirectory, serverQuery.getType().getDataUrl());
+                        String absoluteOrNotPhotoUrl = serverQuery.getType().getDataUrl();
+                        File photoFile;
+                        if (absoluteOrNotPhotoUrl.startsWith(File.separator)) {
+                            photoFile = new File(absoluteOrNotPhotoUrl);
+                        } else {
+                            photoFile = new File(fetchManagerSession.engineBaseDirectory, absoluteOrNotPhotoUrl);
+                        }
                         byte[] buffer;
                         try {
                             buffer = new byte[(int) photoFile.length()];
@@ -156,6 +165,35 @@ public class ServerQueryOperation extends Operation {
                         serverMethod = new CheckKeycloakRevocationServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getSignedContactDetails());
                         break;
                     }
+                    case ServerQuery.Type.CREATE_GROUP_BLOB_QUERY_ID: {
+                        byte[] serverSessionToken = ServerSession.getToken(fetchManagerSession, serverQuery.getOwnedIdentity());
+                        if (serverSessionToken == null) {
+                            cancel(RFC_INVALID_SERVER_SESSION);
+                            return;
+                        }
+                        serverMethod = new CreateGroupBlobServerMethod(serverQuery.getOwnedIdentity(), serverSessionToken, serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getEncodedGroupAdminPublicKey(), serverQuery.getType().getEncryptedBlob());
+                        break;
+                    }
+                    case ServerQuery.Type.GET_GROUP_BLOB_QUERY_ID: {
+                        serverMethod = new GetGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getNonce());
+                        break;
+                    }
+                    case ServerQuery.Type.LOCK_GROUP_BLOB_QUERY_ID: {
+                        serverMethod = new LockGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getNonce(), serverQuery.getType().getQuerySignature());
+                        break;
+                    }
+                    case ServerQuery.Type.UPDATE_GROUP_BLOB_QUERY_ID: {
+                        serverMethod = new UpdateGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getNonce(), serverQuery.getType().getEncryptedBlob(), serverQuery.getType().getEncodedGroupAdminPublicKey(), serverQuery.getType().getQuerySignature());
+                        break;
+                    }
+                    case ServerQuery.Type.PUT_GROUP_LOG_QUERY_ID: {
+                        serverMethod = new PutGroupLogServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getQuerySignature());
+                        break;
+                    }
+                    case ServerQuery.Type.DELETE_GROUP_BLOB_QUERY_ID: {
+                        serverMethod = new DeleteGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getQuerySignature());
+                        break;
+                    }
                     default:
                         cancel(RFC_BAD_ENCODED_SERVER_QUERY);
                         return;
@@ -163,11 +201,11 @@ public class ServerQueryOperation extends Operation {
                 serverMethod.setSslSocketFactory(sslSocketFactory);
 
                 byte returnStatus = serverMethod.execute(fetchManagerSession.identityDelegate.isActiveOwnedIdentity(fetchManagerSession.session, serverQuery.getOwnedIdentity()));
+                Logger.d("?? Server query return status (after parse): " + returnStatus);
 
                 switch (returnStatus) {
                     case ServerMethod.OK:
-                    case ServerMethod.DELETED_FROM_SERVER:
-                        // in case it is deleted from server, we finish normally with an empty file name --> this way the protocol can chose how to handle this case
+                        // some parseReceivedData methods change the actual returnStatus to OK --> this way the protocol can properly finish/abort
                         serverResponse = serverMethod.getServerResponse();
                         finished = true;
                         return;
@@ -188,22 +226,30 @@ public class ServerQueryOperation extends Operation {
                                     serverResponse = Encoded.of(new Encoded[0]); // return an empty deviceUid list
                                     finished = true;
                                     return;
-                                case ServerQuery.Type.CHECK_KEYCLOAK_REVOCATION_QUERY_ID:
-                                    serverResponse = Encoded.of(true); // consider the user is not revoked (rationale: another protocol has probably been run since then, we do not want to delete the user)
-                                    finished = true;
-                                    return;
                                 case ServerQuery.Type.PUT_USER_DATA_QUERY_ID:
-                                    serverResponse = null; // pretend the data was properly uploaded
+                                case ServerQuery.Type.GET_GROUP_BLOB_QUERY_ID:
+                                case ServerQuery.Type.PUT_GROUP_LOG_QUERY_ID:
+                                case ServerQuery.Type.LOCK_GROUP_BLOB_QUERY_ID:
+                                    serverResponse = null;
                                     finished = true;
                                     return;
                                 case ServerQuery.Type.GET_USER_DATA_QUERY_ID:
                                     serverResponse = Encoded.of(""); // as if it was deleted from the server
                                     finished = true;
                                     return;
+                                case ServerQuery.Type.CHECK_KEYCLOAK_REVOCATION_QUERY_ID:
+                                    serverResponse = Encoded.of(true); // consider the user is not revoked (rationale: another protocol has probably been run since then, we do not want to delete the user)
+                                    finished = true;
+                                    return;
+                                case ServerQuery.Type.CREATE_GROUP_BLOB_QUERY_ID:
+                                case ServerQuery.Type.UPDATE_GROUP_BLOB_QUERY_ID:
+                                case ServerQuery.Type.DELETE_GROUP_BLOB_QUERY_ID:
+                                    serverResponse = Encoded.of(false); // consider the query failed
+                                    finished = true;
+                                    return;
                             }
                         }
                         cancel(RFC_NETWORK_ERROR);
-                        return;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -229,6 +275,11 @@ abstract class ServerQueryServerMethod extends ServerMethod {
     @Override
     protected boolean isActiveIdentityRequired() {
         return true;
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        Logger.d("?? Server query return status (before parse): " + returnStatus);
     }
 }
 
@@ -264,6 +315,7 @@ class DeviceDiscoveryServerMethod extends ServerQueryServerMethod {
 
     @Override
     protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
         if (returnStatus == ServerMethod.OK) {
             try {
                 // check that decoding works properly
@@ -323,6 +375,7 @@ class PutUserDataServerMethod extends ServerQueryServerMethod {
 
     @Override
     protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
         if (returnStatus == ServerMethod.OK) {
             if (receivedData.length == 0) {
                 // check that decoding works properly
@@ -376,6 +429,7 @@ class GetUserDataServerMethod extends ServerQueryServerMethod {
 
     @Override
     protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
         if (returnStatus == ServerMethod.OK) {
             try {
                 // write the result to a file
@@ -391,6 +445,7 @@ class GetUserDataServerMethod extends ServerQueryServerMethod {
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER) {
+            returnStatus = ServerMethod.OK;
             serverResponse = Encoded.of("");
         }
     }
@@ -437,6 +492,7 @@ class CheckKeycloakRevocationServerMethod extends ServerQueryServerMethod {
 
     @Override
     protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
         if (returnStatus == ServerMethod.OK) {
             try {
                 boolean verificationSuccessful = receivedData[0].decodeBoolean();
@@ -454,3 +510,363 @@ class CheckKeycloakRevocationServerMethod extends ServerQueryServerMethod {
         return serverResponse;
     }
 }
+
+class CreateGroupBlobServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "groupBlobCreate";
+
+    private final Identity ownedIdentity;
+    private final byte[] token;
+    private final String server;
+    private final UID groupUid;
+    private final Encoded encodedGroupAdminPublicKey;
+    private final EncryptedBytes encryptedBlob;
+
+    private Encoded serverResponse;
+
+    public CreateGroupBlobServerMethod(Identity ownedIdentity, byte[] token, String server, UID groupUid, Encoded encodedGroupAdminPublicKey, EncryptedBytes encryptedBlob) {
+        this.ownedIdentity = ownedIdentity;
+        this.token = token;
+        this.server = server;
+        this.groupUid = groupUid;
+        this.encodedGroupAdminPublicKey = encodedGroupAdminPublicKey;
+        this.encryptedBlob = encryptedBlob;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(ownedIdentity),
+                Encoded.of(token),
+                Encoded.of(groupUid),
+                encodedGroupAdminPublicKey,
+                Encoded.of(encryptedBlob),
+        }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        if (returnStatus == ServerMethod.OK) {
+            serverResponse = Encoded.of(0); // success
+        } else if (returnStatus == ServerMethod.GROUP_UID_ALREADY_USED) {
+            returnStatus = ServerMethod.OK;
+            serverResponse = Encoded.of(2); // definitive fail
+        }
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return serverResponse;
+    }
+}
+
+class GetGroupBlobServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "groupBlobGet";
+
+    private final String server;
+    private final UID groupUid;
+    private final byte[] nonce;
+
+    private Encoded serverResponse;
+
+    public GetGroupBlobServerMethod(String server, UID groupUid, byte[] nonce) {
+        this.server = server;
+        this.groupUid = groupUid;
+        this.nonce = nonce;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(groupUid),
+        }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        if (returnStatus == ServerMethod.OK) {
+            try {
+                if (receivedData.length != 3) {
+                    throw new DecodingException();
+                }
+                //noinspection unused
+                EncryptedBytes encryptedBlob = receivedData[0].decodeEncryptedData();
+                Encoded[] encodedLogItems = receivedData[1].decodeList();
+                for (Encoded encodedLogItem : encodedLogItems) {
+                    encodedLogItem.decodeBytes();
+                }
+                //noinspection unused
+                ServerAuthenticationPublicKey groupAdminPublicKey = (ServerAuthenticationPublicKey) receivedData[2].decodePublicKey();
+                serverResponse = Encoded.of(new Encoded[]{
+                        receivedData[0],
+                        receivedData[1],
+                        receivedData[2],
+                        Encoded.of(nonce),
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                returnStatus = ServerMethod.MALFORMED_SERVER_RESPONSE;
+            }
+        } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER) {
+            // if the blob is not found on the server, behave as a success to let the protocol know the blob was deleted
+            returnStatus = ServerMethod.OK;
+            serverResponse = Encoded.of(new Encoded[]{
+                    Encoded.of(true),
+            });
+        }
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return serverResponse;
+    }
+}
+
+class LockGroupBlobServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "groupBlobLock";
+
+    private final String server;
+    private final UID groupUid;
+    private final byte[] lockNonce;
+    private final byte[] signature;
+
+    private Encoded serverResponse;
+
+    public LockGroupBlobServerMethod(String server, UID groupUid, byte[] lockNonce, byte[] signature) {
+        this.server = server;
+        this.groupUid = groupUid;
+        this.lockNonce = lockNonce;
+        this.signature = signature;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(groupUid),
+                Encoded.of(lockNonce),
+                Encoded.of(signature),
+        }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        if (returnStatus == ServerMethod.OK) {
+            try {
+                if (receivedData.length != 3) {
+                    throw new DecodingException();
+                }
+                //noinspection unused
+                EncryptedBytes encryptedBlob = receivedData[0].decodeEncryptedData();
+                Encoded[] encodedLogItems = receivedData[1].decodeList();
+                for (Encoded encodedLogItem : encodedLogItems) {
+                    encodedLogItem.decodeBytes();
+                }
+                //noinspection unused
+                ServerAuthenticationPublicKey groupAdminPublicKey = (ServerAuthenticationPublicKey) receivedData[2].decodePublicKey();
+                serverResponse = Encoded.of(new Encoded[]{
+                        receivedData[0],
+                        receivedData[1],
+                        receivedData[2],
+                        Encoded.of(lockNonce),
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                returnStatus = ServerMethod.MALFORMED_SERVER_RESPONSE;
+            }
+        } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER
+                || returnStatus == ServerMethod.INVALID_SIGNATURE) {
+            // if the blob is not found on the server, or the signature is invalid, behave as a success to let the protocol properly abort
+            returnStatus = ServerMethod.OK;
+            serverResponse = null;
+        }
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return serverResponse;
+    }
+}
+
+class UpdateGroupBlobServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "groupBlobUpdate";
+
+    private final String server;
+    private final UID groupUid;
+    private final byte[] lockNonce;
+    private final EncryptedBytes encryptedBlob;
+    private final Encoded encodedGroupAdminPublicKey;
+    private final byte[] signature;
+
+    private Encoded serverResponse;
+
+    public UpdateGroupBlobServerMethod(String server, UID groupUid, byte[] lockNonce, EncryptedBytes encryptedBlob, Encoded encodedGroupAdminPublicKey, byte[] signature) {
+        this.server = server;
+        this.groupUid = groupUid;
+        this.lockNonce = lockNonce;
+        this.encryptedBlob = encryptedBlob;
+        this.encodedGroupAdminPublicKey = encodedGroupAdminPublicKey;
+        this.signature = signature;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(groupUid),
+                Encoded.of(lockNonce),
+                Encoded.of(encryptedBlob),
+                encodedGroupAdminPublicKey,
+                Encoded.of(signature),
+        }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        if (returnStatus == ServerMethod.OK) {
+            serverResponse = Encoded.of(0); // success
+        } else if (returnStatus == ServerMethod.GROUP_NOT_LOCKED) {
+            returnStatus = ServerMethod.OK;
+            serverResponse = Encoded.of(1); // retry-able fail
+        } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER
+                || returnStatus == ServerMethod.INVALID_SIGNATURE) {
+            returnStatus = ServerMethod.OK;
+            serverResponse = Encoded.of(2); // definitive fail
+        }
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return serverResponse;
+    }
+}
+
+class PutGroupLogServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "groupLogPut";
+
+    private final String server;
+    private final UID groupUid;
+    private final byte[] signature;
+
+    public PutGroupLogServerMethod(String server, UID groupUid, byte[] signature) {
+        this.server = server;
+        this.groupUid = groupUid;
+        this.signature = signature;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(groupUid),
+                Encoded.of(signature),
+        }).getBytes();
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return null;
+    }
+}
+
+
+class DeleteGroupBlobServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "groupBlobDelete";
+
+    private final String server;
+    private final UID groupUid;
+    private final byte[] signature;
+
+    private Encoded serverResponse;
+
+    public DeleteGroupBlobServerMethod(String server, UID groupUid, byte[] signature) {
+        this.server = server;
+        this.groupUid = groupUid;
+        this.signature = signature;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(groupUid),
+                Encoded.of(signature),
+        }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        serverResponse = Encoded.of(returnStatus == ServerMethod.OK);
+
+        if (returnStatus == ServerMethod.INVALID_SIGNATURE) {
+            // if the signature is invalid, still mark the query as successful
+            returnStatus = ServerMethod.OK;
+        }
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return serverResponse;
+    }
+}
+

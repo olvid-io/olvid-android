@@ -41,7 +41,7 @@ public class PostMessageInDiscussionTask implements Runnable {
     @Override
     public void run() {
         final Discussion discussion = db.discussionDao().getById(discussionId);
-        if (discussion.isLocked()) {
+        if (!discussion.canPostMessages()) {
             Logger.w("A message was posted in a locked discussion!!!");
             return;
         }
@@ -85,7 +85,7 @@ public class PostMessageInDiscussionTask implements Runnable {
                         0, 0
                 );
                 message.id = db.messageDao().insert(message);
-                message.post(showToast, false);
+                message.post(showToast, null);
             });
         } else {
             final Message.JsonMessage jsonMessage = draftMessage.getJsonMessage();
@@ -112,7 +112,7 @@ public class PostMessageInDiscussionTask implements Runnable {
                 draftMessage.computeOutboundSortIndex(db);
                 draftMessage.recomputeAttachmentCount(db);
                 db.messageDao().update(draftMessage);
-                draftMessage.post(showToast, false);
+                draftMessage.post(showToast, null);
             });
         }
     }

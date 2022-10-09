@@ -21,6 +21,7 @@ package io.olvid.messenger.databases.tasks;
 
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.text.Collator;
 
@@ -67,16 +68,18 @@ public class ContactDisplayNameFormatChangedTask implements Runnable {
                 ShortcutActivity.updateShortcut(discussion);
             }
 
+            new UpdateAllGroupMembersNames().run();
+
             AppSingleton.reloadCachedDisplayNamesAndHues();
         }
     }
 
 
-    public static byte[] computeSortDisplayName(@NonNull JsonIdentityDetails identityDetails, String customDisplayName, boolean sortContactsByLastName) {
+    public static byte[] computeSortDisplayName(@NonNull JsonIdentityDetails identityDetails, @Nullable String customDisplayName, boolean sortContactsByLastName) {
         return computeSortDisplayName(Collator.getInstance(), identityDetails, customDisplayName, sortContactsByLastName);
     }
 
-    private static byte[] computeSortDisplayName(Collator collator, @NonNull JsonIdentityDetails identityDetails, String customDisplayName, boolean sortContactsByLastName) {
+    private static byte[] computeSortDisplayName(Collator collator, @NonNull JsonIdentityDetails identityDetails, @Nullable String customDisplayName, boolean sortContactsByLastName) {
         if (customDisplayName != null) {
             return collator.getCollationKey(customDisplayName).toByteArray();
         } else {

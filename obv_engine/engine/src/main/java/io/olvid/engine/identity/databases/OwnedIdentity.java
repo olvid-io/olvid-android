@@ -182,19 +182,19 @@ public class OwnedIdentity implements ObvDatabase {
         return null;
     }
 
-    public JsonWebKeySet getKeycloakJwks() throws SQLException {
-        if (keycloakServerUrl != null) {
-            KeycloakServer keycloakServer = KeycloakServer.get(identityManagerSession, keycloakServerUrl, ownedIdentity);
-            if (keycloakServer != null) {
-                try {
-                    return keycloakServer.getJwks();
-                } catch (Exception e) {
-                    // nothing
-                }
-            }
-        }
-        return null;
-    }
+//    public JsonWebKeySet getKeycloakJwks() throws SQLException {
+//        if (keycloakServerUrl != null) {
+//            KeycloakServer keycloakServer = KeycloakServer.get(identityManagerSession, keycloakServerUrl, ownedIdentity);
+//            if (keycloakServer != null) {
+//                try {
+//                    return keycloakServer.getJwks();
+//                } catch (Exception e) {
+//                    // nothing
+//                }
+//            }
+//        }
+//        return null;
+//    }
 
     public JsonWebKey getKeycloakSignatureKey() throws SQLException {
         if (keycloakServerUrl != null) {
@@ -418,7 +418,7 @@ public class OwnedIdentity implements ObvDatabase {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + API_KEY + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
-            statement.setString(1, apiKey.toString());
+            statement.setString(1, Logger.getUuidString(apiKey));
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.executeUpdate();
             this.apiKey = apiKey;
@@ -500,7 +500,11 @@ public class OwnedIdentity implements ObvDatabase {
         this.privateIdentity = PrivateIdentity.deserialize(res.getBytes(PRIVATE_IDENTITY));
         this.publishedDetailsVersion = res.getInt(PUBLISHED_DETAILS_VERSION);
         this.latestDetailsVersion = res.getInt(LATEST_DETAILS_VERSION);
-        this.apiKey = UUID.fromString(res.getString(API_KEY));
+        try {
+            this.apiKey = UUID.fromString(res.getString(API_KEY));
+        } catch (Exception e) {
+            this.apiKey = null;
+        }
         this.active = res.getBoolean(ACTIVE);
         this.keycloakServerUrl = res.getString(KEYCLOAK_SERVER_URL);
     }
@@ -629,7 +633,7 @@ public class OwnedIdentity implements ObvDatabase {
             statement.setBytes(2, privateIdentity.serialize());
             statement.setInt(3, publishedDetailsVersion);
             statement.setInt(4, latestDetailsVersion);
-            statement.setString(5, apiKey.toString());
+            statement.setString(5, Logger.getUuidString(apiKey));
             statement.setBoolean(6, active);
             statement.setString(7, keycloakServerUrl);
             statement.executeUpdate();
@@ -807,13 +811,14 @@ public class OwnedIdentity implements ObvDatabase {
         if (latestDetailsVersion != publishedDetailsVersion) {
             pojo.latest_details = getLatestDetails().backup();
         }
-        pojo.api_key = apiKey.toString();
+        pojo.api_key = Logger.getUuidString(apiKey);
         pojo.active = active;
         if (keycloakServerUrl != null) {
             pojo.keycloak = getKeycloakServer().backup();
         }
         pojo.contact_identities = ContactIdentity.backupAll(identityManagerSession, ownedIdentity);
         pojo.owned_groups = ContactGroup.backupAllForOwner(identityManagerSession, ownedIdentity, ownedIdentity);
+        pojo.groups_v2 = ContactGroupV2.backupAll(identityManagerSession, ownedIdentity);
         return pojo;
     }
 
@@ -884,7 +889,6 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
-    @SuppressWarnings({"WeakerAccess"})
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Pojo_0 {
         public byte[] owned_identity;
@@ -896,9 +900,9 @@ public class OwnedIdentity implements ObvDatabase {
         public KeycloakServer.Pojo_0 keycloak;
         public ContactIdentity.Pojo_0[] contact_identities;
         public ContactGroup.Pojo_0[] owned_groups;
+        public ContactGroupV2.Pojo_0[] groups_v2;
     }
 
-    @SuppressWarnings({"WeakerAccess"})
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PrivateIdentityPojo_0 {
         public byte[] server_authentication_private_key;

@@ -20,9 +20,12 @@
 package io.olvid.messenger.customClasses;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Arrays;
 
-public class BytesKey implements Comparable<BytesKey> {
+public class BytesKey implements Comparable<BytesKey>, Parcelable {
     public final byte[] bytes;
 
     public BytesKey(byte[] bytes) {
@@ -53,4 +56,29 @@ public class BytesKey implements Comparable<BytesKey> {
         }
         return 0;
     }
+
+    // region Parcelable
+
+    public static final Parcelable.Creator<BytesKey> CREATOR
+            = new Parcelable.Creator<BytesKey>() {
+        public BytesKey createFromParcel(Parcel in) {
+            return new BytesKey(in.createByteArray());
+        }
+
+        public BytesKey[] newArray(int size) {
+            return new BytesKey[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByteArray(bytes);
+    }
+
+    // endregion
 }

@@ -39,16 +39,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
-import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -62,8 +56,20 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.EngineNotificationListener;
+import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
@@ -240,6 +246,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
         holder.attachmentImageView.setImageDrawable(null);
         holder.musicFailed = false;
         holder.audioInfoBound = false;
+        holder.unregisterProgressNotifications();
 
         if (holder.type == TYPE_BIG_IMAGE || holder.type == TYPE_SMALL_IMAGE) {
             ConstraintSet cloned = new ConstraintSet();
@@ -280,6 +287,14 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
         holder.fyleAndStatus = fyleAndStatus;
 
         if ((changesMask & (STATUS_CHANGE_MASK | MINI_PREVIEW_CHANGE_MASK | RECEPTION_STATUS_CHANGE_MASK)) != 0) {
+            if (fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_UPLOADING) {
+                holder.registerProgressNotifications(true);
+            } else if (fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_DOWNLOADING) {
+                holder.registerProgressNotifications(false);
+            } else {
+                holder.unregisterProgressNotifications();
+            }
+
             switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
                 case FyleMessageJoinWithStatus.STATUS_UPLOADING:
                     holder.hiddenContentGroup.setVisibility(View.GONE);
@@ -846,7 +861,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
     }
 
 
-    class AttachmentViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, SeekBar.OnSeekBarChangeListener, AudioAttachmentServiceBinding.AudioServiceBindableViewHolder {
+    class AttachmentViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, SeekBar.OnSeekBarChangeListener, AudioAttachmentServiceBinding.AudioServiceBindableViewHolder, EngineNotificationListener {
         final ConstraintLayout rootView;
         final int type;
         final ImageView attachmentImageView;
@@ -865,6 +880,10 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
         final TextView audioPlayerTotalTime;
         final TextView audioAttachmentNotPlayed;
         final ImageView speakerOutputImageView;
+        final LinearLayout etaGroup;
+        final TextView etaSpeed;
+        final TextView etaEta;
+
         FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus;
         private boolean musicFailed;
         private boolean audioInfoBound;
@@ -892,6 +911,10 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
             audioPlayerTotalTime = itemView.findViewById(R.id.total_time_text_view);
             audioAttachmentNotPlayed = itemView.findViewById(R.id.audio_attachment_unplayed);
             speakerOutputImageView = itemView.findViewById(R.id.speaker_output_image_view);
+            etaGroup = itemView.findViewById(R.id.eta_group);
+            etaSpeed = itemView.findViewById(R.id.eta_speed);
+            etaEta = itemView.findViewById(R.id.eta_eta);
+
             if (audioPlayerSeekBar != null) {
                 audioPlayerSeekBar.setOnSeekBarChangeListener(this);
                 audioPlayerSeekBar.setOnTouchListener((v, event) -> {
@@ -1046,6 +1069,112 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
         public FyleMessageJoinWithStatusDao.FyleAndStatus getFyleAndStatus() {
             return fyleAndStatus;
         }
+
+
+        // region EngineNotificationListener
+        @Override
+        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+            byte[] ownedIdentity = null;
+            byte[] messageIdentifier = null;
+            Integer attachmentNumber = null;
+            Float speed = null;
+            Integer eta = null;
+            if (notificationName.equals(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS)) {
+                ownedIdentity = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_BYTES_OWNED_IDENTITY_KEY);
+                messageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY);
+                attachmentNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY);
+                speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_SPEED_BPS_KEY);
+                eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ETA_SECONDS_KEY);
+            } else if (notificationName.equals(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS)) {
+                ownedIdentity = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_BYTES_OWNED_IDENTITY_KEY);
+                messageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY);
+                attachmentNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY);
+                speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_SPEED_BPS_KEY);
+                eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ETA_SECONDS_KEY);
+            }
+            if (fyleAndStatus != null && ownedIdentity != null && messageIdentifier != null && attachmentNumber != null && speed != null && eta != null) {
+                if (Arrays.equals(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, ownedIdentity)
+                        && Arrays.equals(fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, messageIdentifier)
+                        && Objects.equals(fyleAndStatus.fyleMessageJoinWithStatus.engineNumber, attachmentNumber)) {
+                    float finalSpeed = speed;
+                    int finalEta = eta;
+                    activity.runOnUiThread(() -> {
+                        if (finalSpeed >= 10_000_000_000f) {
+                            etaSpeed.setText(activity.getString(R.string.xx_gbps, String.format(Locale.ENGLISH, "%d", (int) (finalSpeed / 1_000_000_000f))));
+                        } else if (finalSpeed >= 1_000_000_000f) {
+                            etaSpeed.setText(activity.getString(R.string.xx_gbps, String.format(Locale.ENGLISH, "%1.1f", finalSpeed / 1_000_000_000f)));
+                        } else if (finalSpeed >= 10_000_000f) {
+                            etaSpeed.setText(activity.getString(R.string.xx_mbps, String.format(Locale.ENGLISH, "%d", (int) (finalSpeed / 1_000_000f))));
+                        } else if (finalSpeed >= 1_000_000f) {
+                            etaSpeed.setText(activity.getString(R.string.xx_mbps, String.format(Locale.ENGLISH, "%1.1f", finalSpeed / 1_000_000f)));
+                        } else if (finalSpeed >= 10_000f) {
+                            etaSpeed.setText(activity.getString(R.string.xx_kbps, String.format(Locale.ENGLISH, "%d", (int) (finalSpeed / 1_000f))));
+                        } else if (finalSpeed >= 1_000f) {
+                            etaSpeed.setText(activity.getString(R.string.xx_kbps, String.format(Locale.ENGLISH, "%1.1f", finalSpeed / 1_000f)));
+                        } else {
+                            etaSpeed.setText(activity.getString(R.string.xx_bps, String.format(Locale.ENGLISH, "%d", Math.round(finalSpeed))));
+                        }
+
+                        if (finalEta > 5_940) {
+                            etaEta.setText(activity.getString(R.string.text_timer_h, finalEta/3_600));
+                        } else if (finalEta > 99) {
+                            etaEta.setText(activity.getString(R.string.text_timer_m, finalEta / 60));
+                        } else {
+                            etaEta.setText(activity.getString(R.string.text_timer_s, finalEta));
+                        }
+                        if (etaGroup.getVisibility() != View.VISIBLE) {
+                            etaGroup.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }
+            }
+        }
+
+        @Override
+        public void setEngineNotificationListenerRegistrationNumber(long registrationNumber) {
+            this.registrationNumber = registrationNumber;
+        }
+
+        @Override
+        public long getEngineNotificationListenerRegistrationNumber() {
+            return registrationNumber;
+        }
+
+        @Override
+        public boolean hasEngineNotificationListenerRegistrationNumber() {
+            return registrationNumber != null;
+        }
+
+
+        private boolean upload = false;
+        private Long registrationNumber = null;
+
+        void registerProgressNotifications(boolean upload) {
+            if (hasEngineNotificationListenerRegistrationNumber()) {
+                return;
+            }
+            this.upload = upload;
+            if (upload) {
+                AppSingleton.getEngine().addNotificationListener(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS, this);
+            } else {
+                AppSingleton.getEngine().addNotificationListener(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS, this);
+            }
+        }
+
+        void unregisterProgressNotifications() {
+            if (hasEngineNotificationListenerRegistrationNumber()) {
+                if (upload) {
+                    AppSingleton.getEngine().removeNotificationListener(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS, this);
+                } else {
+                    AppSingleton.getEngine().removeNotificationListener(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS, this);
+                }
+                this.registrationNumber = null;
+            }
+            if (etaGroup.getVisibility() != View.GONE) {
+                etaGroup.setVisibility(View.GONE);
+            }
+        }
+        // endregion
     }
 
     private static class ShowPreviewTask implements Runnable {

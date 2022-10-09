@@ -37,6 +37,7 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.Group;
 import io.olvid.engine.datatypes.containers.GroupInformation;
+import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.ProtocolReceivedDialogResponse;
 import io.olvid.engine.datatypes.containers.ProtocolReceivedMessage;
@@ -46,6 +47,7 @@ import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
@@ -60,8 +62,8 @@ import io.olvid.engine.metamanager.ProtocolDelegate;
 import io.olvid.engine.protocol.coordinators.ProtocolStepCoordinator;
 import io.olvid.engine.protocol.databases.ChannelCreationPingSignatureReceived;
 import io.olvid.engine.protocol.databases.ChannelCreationProtocolInstance;
+import io.olvid.engine.protocol.databases.GroupV2SignatureReceived;
 import io.olvid.engine.protocol.databases.LinkBetweenProtocolInstances;
-//import io.olvid.engine.protocol.databases.PostponedGroupManagementReceivedMessage;
 import io.olvid.engine.protocol.databases.MutualScanSignatureReceived;
 import io.olvid.engine.protocol.databases.ProtocolInstance;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
@@ -79,9 +81,11 @@ import io.olvid.engine.protocol.protocols.ContactMutualIntroductionProtocol;
 import io.olvid.engine.protocol.protocols.DeviceCapabilitiesDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.DeviceDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.DownloadGroupPhotoChildProtocol;
+import io.olvid.engine.protocol.protocols.DownloadGroupV2PhotoProtocol;
 import io.olvid.engine.protocol.protocols.DownloadIdentityPhotoChildProtocol;
 import io.olvid.engine.protocol.protocols.FullRatchetProtocol;
 import io.olvid.engine.protocol.protocols.GroupManagementProtocol;
+import io.olvid.engine.protocol.protocols.GroupsV2Protocol;
 import io.olvid.engine.protocol.protocols.IdentityDetailsPublicationProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakBindingAndUnbindingProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol;
@@ -97,7 +101,6 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     private ChannelDelegate channelDelegate;
     private IdentityDelegate identityDelegate;
     private EncryptionForIdentityDelegate encryptionForIdentityDelegate;
-    private NotificationListeningDelegate notificationListeningDelegate;
     private NotificationPostingDelegate notificationPostingDelegate;
 
     private final ProtocolStepCoordinator protocolStepCoordinator;
@@ -160,6 +163,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             ChannelCreationPingSignatureReceived.createTable(protocolManagerSession.session);
             TrustEstablishmentCommitmentReceived.createTable(protocolManagerSession.session);
             MutualScanSignatureReceived.createTable(protocolManagerSession.session);
+            GroupV2SignatureReceived.createTable(protocolManagerSession.session);
             protocolManagerSession.session.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -176,6 +180,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         ChannelCreationPingSignatureReceived.upgradeTable(session, oldVersion, newVersion);
         TrustEstablishmentCommitmentReceived.upgradeTable(session, oldVersion, newVersion);
         MutualScanSignatureReceived.upgradeTable(session, oldVersion, newVersion);
+        GroupV2SignatureReceived.upgradeTable(session, oldVersion, newVersion);
     }
 
     public void setDelegate(ChannelDelegate channelDelegate) {
@@ -191,10 +196,9 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     public void setDelegate(NotificationListeningDelegate notificationListeningDelegate) {
-        this.notificationListeningDelegate = notificationListeningDelegate;
-        this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE, newContactListener);
-        this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED, contactDeletedListener);
-        this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED, contactTrustLevelListener);
+        notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE, newContactListener);
+        notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED, contactDeletedListener);
+        notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED, contactTrustLevelListener);
     }
 
     public void setDelegate(NotificationPostingDelegate notificationPostingDelegate) {
@@ -283,6 +287,8 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         TrustEstablishmentCommitmentReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete MutualScanNonceReceived
         MutualScanSignatureReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
+        // delete GroupV2SignatureReceived
+        GroupV2SignatureReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete LinkBetweenProtocolInstances
         LinkBetweenProtocolInstances.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete ChannelCreationProtocolInstance
@@ -339,7 +345,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         if (!identityDelegate.isOwnedIdentity(session, message.getOwnedIdentity())) {
             throw new Exception();
         }
-        GenericReceivedProtocolMessage genericReceivedProtocolMessage = GenericReceivedProtocolMessage.of(message, message.getOwnedIdentity());
+        GenericReceivedProtocolMessage genericReceivedProtocolMessage = GenericReceivedProtocolMessage.of(message);
         ReceivedMessage.create(wrapSession(session),
                 genericReceivedProtocolMessage,
                 prng);
@@ -347,11 +353,10 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void process(Session session, ProtocolReceivedDialogResponse message) throws Exception {
-        Identity associatedOwnedIdentity = message.getToIdentity();
-        if (!identityDelegate.isOwnedIdentity(session, associatedOwnedIdentity)) {
+        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity())) {
             throw new Exception();
         }
-        GenericReceivedProtocolMessage genericReceivedProtocolMessage = GenericReceivedProtocolMessage.of(message, associatedOwnedIdentity);
+        GenericReceivedProtocolMessage genericReceivedProtocolMessage = GenericReceivedProtocolMessage.of(message);
         ReceivedMessage.create(wrapSession(session),
                 genericReceivedProtocolMessage,
                 prng);
@@ -359,11 +364,10 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void process(Session session, ProtocolReceivedServerResponse message) throws Exception {
-        Identity associatedOwnedIdentity = message.getToIdentity();
-        if (!identityDelegate.isOwnedIdentity(session, associatedOwnedIdentity)) {
+        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity())) {
             throw new Exception();
         }
-        GenericReceivedProtocolMessage genericReceivedProtocolMessage = GenericReceivedProtocolMessage.of(message, associatedOwnedIdentity);
+        GenericReceivedProtocolMessage genericReceivedProtocolMessage = GenericReceivedProtocolMessage.of(message);
         ReceivedMessage.create(wrapSession(session),
                 genericReceivedProtocolMessage,
                 prng);
@@ -446,7 +450,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     @Override
-    public void startDownloadGroupPhotoWithinTransactionProtocol(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto) throws Exception {
+    public void startDownloadGroupPhotoProtocolWithinTransaction(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto) throws Exception {
         if (ownedIdentity == null || groupOwnerAndUid == null || groupOwnerAndUid.length < UID.UID_LENGTH || jsonGroupDetailsWithVersionAndPhoto == null) {
             return;
         }
@@ -465,10 +469,42 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
     }
 
+    @Override
+    public void startDownloadGroupV2PhotoProtocolWithinTransaction(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerPhotoInfo serverPhotoInfo) throws Exception {
+        if (ownedIdentity == null || groupIdentifier == null || serverPhotoInfo == null) {
+            return;
+        }
+
+        ProtocolManagerSession protocolManagerSession = wrapSession(session);
+        UID protocolInstanceUid = new UID(prng);
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+        ChannelMessageToSend message = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, groupIdentifier, serverPhotoInfo).generateChannelProtocolMessageToSend();
+        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+    }
 
     @Override
     public void startTrustEstablishmentProtocol(Identity ownedIdentity, Identity contactIdentity, String contactDisplayName) throws Exception {
         startTrustEstablishmentWithSasProtocol(contactIdentity, contactDisplayName, ownedIdentity);
+    }
+
+    @Override
+    public void initiateGroupV2ReDownloadWithinTransaction(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if (session == null || ownedIdentity == null || groupIdentifier == null) {
+            throw new Exception();
+        }
+
+        UID protocolInstanceUid = groupIdentifier.computeProtocolInstanceUid();
+
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+
+        ChannelMessageToSend message = new GroupsV2Protocol.GroupReDownloadInitialMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
+        channelDelegate.post(session, message, prng);
     }
 
 
@@ -583,6 +619,132 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
             protocolManagerSession.session.commit();
         }
+    }
+
+
+    public void startGroupV2CreationProtocol(Identity ownedIdentity, String serializedGroupDetails, String absolutePhotoUrl, HashSet<GroupV2.Permission> ownPermissions, HashSet<GroupV2.IdentityAndPermissions> otherGroupMembers) throws Exception {
+        if (serializedGroupDetails == null || ownedIdentity == null || ownPermissions == null || otherGroupMembers == null) {
+            throw new Exception();
+        }
+
+        if (otherGroupMembers.contains(new GroupV2.IdentityAndPermissions(ownedIdentity, null))) {
+            Logger.e("Error in startGroupV2CreationProtocol: ownedIdentity contained in otherGroupMembers");
+            throw new Exception();
+        }
+
+        if (!ownPermissions.contains(GroupV2.Permission.GROUP_ADMIN)) {
+            Logger.e("Error in startGroupV2CreationProtocol: ownedPermissions do not containt GROUP_ADMIN");
+            throw new Exception();
+        }
+
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = new UID(prng);
+
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+
+            ChannelMessageToSend message = new GroupsV2Protocol.GroupCreationInitialMessage(coreProtocolMessage, ownPermissions, otherGroupMembers, serializedGroupDetails, absolutePhotoUrl).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
+    @Override
+    public void initiateGroupV2Update(Identity ownedIdentity, GroupV2.Identifier groupIdentifier, ObvGroupV2.ObvGroupV2ChangeSet changeSet) throws Exception {
+        if (ownedIdentity == null || groupIdentifier == null) {
+            throw new Exception();
+        }
+
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = groupIdentifier.computeProtocolInstanceUid();
+
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+
+            ChannelMessageToSend message = new GroupsV2Protocol.GroupUpdateInitialMessage(coreProtocolMessage, groupIdentifier, changeSet).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
+    @Override
+    public void initiateGroupV2Leave(Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if (ownedIdentity == null || groupIdentifier == null) {
+            throw new Exception();
+        }
+
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = groupIdentifier.computeProtocolInstanceUid();
+
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+
+            ChannelMessageToSend message = new GroupsV2Protocol.GroupLeaveInitialMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
+    @Override
+    public void initiateGroupV2Disband(Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if (ownedIdentity == null || groupIdentifier == null) {
+            throw new Exception();
+        }
+
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = groupIdentifier.computeProtocolInstanceUid();
+
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+
+            ChannelMessageToSend message = new GroupsV2Protocol.GroupDisbandInitialMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
+
+    @Override
+    public void initiateGroupV2ReDownload(Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if (ownedIdentity == null || groupIdentifier == null) {
+            throw new Exception();
+        }
+
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = groupIdentifier.computeProtocolInstanceUid();
+
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+
+            ChannelMessageToSend message = new GroupsV2Protocol.GroupReDownloadInitialMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
+    @Override
+    public void initiateGroupV2BatchKeysResend(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception {
+        if (session == null || ownedIdentity == null || contactIdentity == null) {
+            throw new Exception();
+        }
+
+        UID protocolInstanceUid = new UID(prng);
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+        ChannelMessageToSend message = new GroupsV2Protocol.InitiateBatchKeysResendMessage(coreProtocolMessage, contactIdentity, contactDeviceUid).generateChannelProtocolMessageToSend();
+        channelDelegate.post(session, message, prng);
     }
 
     @Override
@@ -1042,16 +1204,18 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     public void startFullRatchetProtocolForObliviousChannel(UID currentDeviceUid, UID remoteDeviceUid, Identity remoteIdentity) throws Exception {
         try (ProtocolManagerSession protocolManagerSession = getSession()) {
             Identity ownedIdentity = identityDelegate.getOwnedIdentityForDeviceUid(protocolManagerSession.session, currentDeviceUid);
-            UID protocolInstanceUid = FullRatchetProtocol.computeProtocolUid(ownedIdentity, remoteIdentity, currentDeviceUid, remoteDeviceUid);
+            if (ownedIdentity != null) {
+                UID protocolInstanceUid = FullRatchetProtocol.computeProtocolUid(ownedIdentity, remoteIdentity, currentDeviceUid, remoteDeviceUid);
 
-            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
-                    ConcreteProtocol.FULL_RATCHET_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    true);
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                        ConcreteProtocol.FULL_RATCHET_PROTOCOL_ID,
+                        protocolInstanceUid,
+                        true);
 
-            ChannelMessageToSend message = new FullRatchetProtocol.InitialMessage(coreProtocolMessage, remoteIdentity, remoteDeviceUid).generateChannelProtocolMessageToSend();
-            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
-            protocolManagerSession.session.commit();
+                ChannelMessageToSend message = new FullRatchetProtocol.InitialMessage(coreProtocolMessage, remoteIdentity, remoteDeviceUid).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+                protocolManagerSession.session.commit();
+            }
         }
     }
     // endregion

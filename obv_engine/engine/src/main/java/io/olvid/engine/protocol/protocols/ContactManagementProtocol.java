@@ -336,7 +336,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final InitiateContactDeletionMessage receivedMessage;
 
         public DeleteContactStep(InitialProtocolState startState, InitiateContactDeletionMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -400,7 +400,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final PropagateContactDeletionMessage receivedMessage;
 
         public ProcessPropagatedContactDeletionStep(InitialProtocolState startState, PropagateContactDeletionMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -428,7 +428,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final ContactDeletionNotificationMessage receivedMessage;
 
         public ProcessContactDeletionNotificationStep(InitialProtocolState startState, ContactDeletionNotificationMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -482,7 +482,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final InitiateContactDowngradeMessage receivedMessage;
 
         public DowngradeContactStep(InitialProtocolState startState, InitiateContactDowngradeMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -526,7 +526,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final ContactDowngradeNotificationMessage receivedMessage;
 
         public ProcessContactDowngradeNotificationStep(InitialProtocolState startState, ContactDowngradeNotificationMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -551,7 +551,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final PropagateContactDowngradeMessage receivedMessage;
 
         public ProcessPropagatedContactDowngradeStep(InitialProtocolState startState, PropagateContactDowngradeMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

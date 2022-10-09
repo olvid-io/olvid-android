@@ -61,11 +61,11 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.KnownCertificate;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.fragments.dialog.CloudProviderSignInDialogFragment;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.openid.KeycloakTasks;
 import io.olvid.messenger.services.AvailableSpaceHelper;
 import io.olvid.messenger.services.BackupCloudProviderService;
-import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.PrivacyPreferenceFragment;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -475,7 +475,7 @@ public class AppDialogShowActivity extends LockableActivity {
                                     try {
                                         SettingsActivity.setAutomaticBackupConfiguration(configuration);
                                         // notify the engine that auto-backup is set to true to initiate an immediate backup/upload
-                                        AppSingleton.getEngine().setAutoBackupEnabled(true);
+                                        AppSingleton.getEngine().setAutoBackupEnabled(true, true);
                                     } catch (Exception ignored) {
                                         onCloudProviderConfigurationFailed();
                                     }
@@ -529,9 +529,15 @@ public class AppDialogShowActivity extends LockableActivity {
                             || (lastTrustedCertificateIdObject != null && !(lastTrustedCertificateIdObject instanceof Long))) {
                         continueWithNextDialog();
                     } else {
+                        AndroidNotificationManager.clearConnectionBlockedNotification((Long) untrustedCertificateIdObject);
+
                         App.runThread(() -> {
                             KnownCertificate untrustedCertificate = AppDatabase.getInstance().knownCertificateDao().get((Long) untrustedCertificateIdObject);
+                            if (untrustedCertificate == null || untrustedCertificate.isTrusted()) {
+                                return;
+                            }
                             KnownCertificate lastTrustedCertificate = lastTrustedCertificateIdObject == null ? null : AppDatabase.getInstance().knownCertificateDao().get((Long) lastTrustedCertificateIdObject);
+
 
                             View dialogView = getLayoutInflater().inflate(R.layout.dialog_view_untrusted_certificate, null);
                             ((TextView) dialogView.findViewById(R.id.domain_name_text_view)).setText(untrustedCertificate.domainName);
@@ -607,8 +613,7 @@ public class AppDialogShowActivity extends LockableActivity {
                             AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                                     .setView(dialogView)
                                     .setPositiveButton(R.string.button_label_trust_certificate, (DialogInterface dialog, int which) -> App.runThread(() -> {
-                                        AppDatabase.getInstance().knownCertificateDao().updateTrustTimestamp(untrustedCertificate.id, System.currentTimeMillis());
-                                        AppDatabase.getInstance().knownCertificateDao().deleteExpired(untrustedCertificate.domainName, System.currentTimeMillis());
+                                        AppSingleton.getSslSocketFactory().trustCertificateInDb(untrustedCertificate);
                                     }))
                                     .setNegativeButton(R.string.button_label_do_not_trust_yet, null)
                                     .setOnDismissListener(dialog -> continueWithNextDialog());

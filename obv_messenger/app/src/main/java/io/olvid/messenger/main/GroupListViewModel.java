@@ -19,33 +19,31 @@
 
 package io.olvid.messenger.main;
 
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
-import io.olvid.messenger.App;
+
+import java.util.List;
+
 import io.olvid.messenger.AppSingleton;
-import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.dao.GroupDao;
+import io.olvid.messenger.databases.dao.Group2Dao;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 
 
 public class GroupListViewModel extends ViewModel {
-    private final LiveData<List<GroupDao.GroupAndContactDisplayNames>> groups;
+    private final LiveData<List<Group2Dao.GroupOrGroup2>> groups;
 
     public GroupListViewModel() {
-        final String joiner = App.getContext().getString(R.string.text_contact_names_separator);
         groups = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
             if (ownedIdentity == null) {
                 return null;
             }
-            return AppDatabase.getInstance().groupDao().getAllOwnedThenJoined(ownedIdentity.bytesOwnedIdentity, joiner);
+            return AppDatabase.getInstance().group2Dao().getAllGroupOrGroup2(ownedIdentity.bytesOwnedIdentity);
         });
     }
 
-    public LiveData<List<GroupDao.GroupAndContactDisplayNames>> getGroups() {
+    public LiveData<List<Group2Dao.GroupOrGroup2>> getGroups() {
         return groups;
     }
 }

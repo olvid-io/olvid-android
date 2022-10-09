@@ -62,6 +62,7 @@
                 android:gravity="center_horizontal"
                 android:hint="@string/hint_enter_pin"
                 android:inputType="numberPassword"
+                android:importantForAutofill="no"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_pin_explanation"

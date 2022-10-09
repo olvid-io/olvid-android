@@ -67,7 +67,7 @@ public class UserInterfaceDialog implements ObvDatabase {
             long timestamp = System.currentTimeMillis();
             statement.setBytes(1, encodedDialog.getBytes());
             statement.setLong(2, timestamp);
-            statement.setString(3, uuid.toString());
+            statement.setString(3, Logger.getUuidString(uuid));
             statement.executeUpdate();
             this.encodedDialog = encodedDialog;
             this.creationTimestamp = timestamp;
@@ -168,7 +168,7 @@ public class UserInterfaceDialog implements ObvDatabase {
     @Override
     public void insert() throws SQLException {
         try (PreparedStatement statement = engineSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
-            statement.setString(1, uuid.toString());
+            statement.setString(1, Logger.getUuidString(uuid));
             statement.setBytes(2, encodedDialog.getBytes());
             statement.setLong(3, creationTimestamp);
             statement.executeUpdate();
@@ -180,7 +180,7 @@ public class UserInterfaceDialog implements ObvDatabase {
     @Override
     public void delete() throws SQLException {
         try (PreparedStatement statement = engineSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + UUID_  + " = ?;")) {
-            statement.setString(1, uuid.toString());
+            statement.setString(1, Logger.getUuidString(uuid));
             statement.executeUpdate();
             this.commitHookBits |= HOOK_BIT_DELETED;
             engineSession.session.addSessionCommitListener(this);
@@ -193,7 +193,7 @@ public class UserInterfaceDialog implements ObvDatabase {
             return null;
         }
         try (PreparedStatement statement = engineSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + UUID_  + " = ?;")) {
-            statement.setString(1, uuid.toString());
+            statement.setString(1, Logger.getUuidString(uuid));
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
                     return new UserInterfaceDialog(engineSession, res);

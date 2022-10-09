@@ -39,6 +39,12 @@ Compiling and running Olvid should work straight out of the box. If you run into
 > of the main [`build.gradle`](obv_messenger/app/build.gradle) to 
 > avoid overwriting your app. Or at least, test your build on an emulator before overwriting your app 😂
 
+## The WebRTC library
+
+The source code available here on GitHub includes a pre-compiled version of the WebRTC library that we update with (almost) every new stable release. Bundling pre-compiled open-source libraries in an open-source project is not usually considered good practice, but the effort required to compile WebRTC is such that we decided to make your life easier 😊
+
+We do not modify the WebRTC library in any way, but if you have the time for it, we recommend you compile your own version of the WebRTC library. At some point in the future we will detail here the process we use to compile our version of the library.
+
 
 ## Getting Google push notifications
 

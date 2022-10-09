@@ -169,11 +169,11 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
 
         FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
 
-        LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> unfilteredDiscussions = Transformations.switchMap(viewModel.getForwardMessageOwnedIdentityLiveData(), new Function<OwnedIdentity, LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>>>() {
+        LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(viewModel.getForwardMessageOwnedIdentityLiveData(), new Function<OwnedIdentity, LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>>>() {
             byte[] bytesOwnedIdentity = null;
 
             @Override
-            public LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> apply(OwnedIdentity ownedIdentity) {
+            public LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> apply(OwnedIdentity ownedIdentity) {
                 ForwardMessagesDialogFragment.this.bindOwnedIdentity(ownedIdentity);
                 if (ownedIdentity == null) {
                     if (bytesOwnedIdentity != null) {
@@ -186,7 +186,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
                         bytesOwnedIdentity = ownedIdentity.bytesOwnedIdentity;
                         filteredDiscussionListFragment.deselectAll();
                     }
-                    return AppDatabase.getInstance().discussionDao().getAllActiveWithContactNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity, ForwardMessagesDialogFragment.this.getString(R.string.text_contact_names_separator));
+                    return AppDatabase.getInstance().discussionDao().getAllNotLockedWithGroupMembersNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity);
                 }
             }
         });

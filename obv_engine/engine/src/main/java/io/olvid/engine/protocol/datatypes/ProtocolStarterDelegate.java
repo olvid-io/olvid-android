@@ -26,10 +26,12 @@ import java.util.List;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 
 public interface ProtocolStarterDelegate {
@@ -40,6 +42,13 @@ public interface ProtocolStarterDelegate {
     void startChannelCreationWithContactDeviceProtocol(Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception;
     void startContactMutualIntroductionProtocol(Identity ownedIdentity, Identity contactIdentityA, Identity[] contactIdentities) throws Exception;
     void startGroupCreationProtocol(Identity ownedIdentity, String serializedGroupDetailsWithVersionAndPhoto, String photoUrl, HashSet<IdentityWithSerializedDetails> groupMemberIdentitiesAndDisplayNames) throws Exception;
+    void startGroupV2CreationProtocol(Identity ownedIdentity, String serializedGroupDetails, String absolutePhotoUrl, HashSet<GroupV2.Permission> ownPermissions, HashSet<GroupV2.IdentityAndPermissions> otherGroupMembers) throws Exception;
+    void initiateGroupV2Update(Identity ownedIdentity, GroupV2.Identifier groupIdentifier, ObvGroupV2.ObvGroupV2ChangeSet changeSet) throws Exception;
+    void initiateGroupV2Leave(Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
+    void initiateGroupV2Disband(Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
+    void initiateGroupV2ReDownload(Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
+    void initiateGroupV2BatchKeysResend(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception;
+
     void startIdentityDetailsPublicationProtocol(Session session, Identity ownedIdentity, int version) throws Exception;
     void startGroupDetailsPublicationProtocol(Session session, Identity ownedIdentity, byte[] groupUid) throws Exception;
     void startOneToOneInvitationProtocol(Identity ownedIdentity, Identity contactIdentity) throws Exception;
@@ -61,6 +70,7 @@ public interface ProtocolStarterDelegate {
     void reinviteAndPushMembersToContact(byte[] groupOwnerAndUid, Identity ownedIdentity, Identity contactIdentity) throws Exception;
 
     void startDownloadIdentityPhotoProtocolWithinTransaction(Session session, Identity ownedIdentity, Identity contactIdentity, JsonIdentityDetailsWithVersionAndPhoto jsonIdentityDetailsWithVersionAndPhoto) throws Exception;
-    void startDownloadGroupPhotoWithinTransactionProtocol(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto) throws Exception;
-
+    void startDownloadGroupPhotoProtocolWithinTransaction(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto) throws Exception;
+    void startDownloadGroupV2PhotoProtocolWithinTransaction(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerPhotoInfo serverPhotoInfo) throws Exception;
+    void initiateGroupV2ReDownloadWithinTransaction(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
 }

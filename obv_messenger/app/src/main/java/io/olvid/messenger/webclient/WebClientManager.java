@@ -144,10 +144,10 @@ public class WebClientManager {
         this.colissimoMessageQueue = new ColissimoMessageQueue(this);
 
         this.QrCodeBase64Data = QrCodeBase64Data;
-        this.connectionIdentifier = UUID.randomUUID().toString();
+        this.connectionIdentifier = Logger.getUuidString(UUID.randomUUID());
 
         // setup owned identity observer
-        this.ownedIdentityObserver = new OwnedIdentityObserver(this);
+        this.ownedIdentityObserver = new OwnedIdentityObserver(this, bytesCurrentOwnedIdentity);
         new Handler(Looper.getMainLooper()).post(() -> AppSingleton.getCurrentIdentityLiveData().observeForever(this.ownedIdentityObserver));
 
         this.discussionListener = new DiscussionListener(this);
@@ -677,11 +677,11 @@ public class WebClientManager {
     }
 
     public void sendSettingsColissimo() {
-        String language = SettingsActivity.getLanguageWebclient();
-        String theme = SettingsActivity.getThemeWebclient();
-        boolean sendOnEnter = SettingsActivity.sendOnEnterEnabled();
-        boolean notifications = SettingsActivity.notificationsSoundOnWebclient();
-        boolean showNotifications = SettingsActivity.showNotificationsOnBrowser();
+        String language = SettingsActivity.getWebclientLanguage();
+        String theme = SettingsActivity.gWebclientTheme();
+        boolean sendOnEnter = SettingsActivity.getWebclientSendOnEnter();
+        boolean notifications = SettingsActivity.playWebclientNotificationsSoundInBrowser();
+        boolean showNotifications = SettingsActivity.showWebclientNotificationsInBrowser();
         final String defaultTheme;
         if((App.getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES){
             defaultTheme = "dark";

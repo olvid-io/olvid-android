@@ -19,18 +19,34 @@
 
 package io.olvid.messenger.databases.tasks.backup;
 
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.BuildConfig;
+import io.olvid.messenger.activities.ShortcutActivity;
+import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
+import io.olvid.messenger.services.BackupCloudProviderService;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class SettingsPojo_0 {
+public class SettingsPojo_0 {
     public Boolean beta;
 
     public String message_vibration_pattern;
@@ -42,12 +58,9 @@ class SettingsPojo_0 {
     public Boolean dark_mode;
     public Boolean system_emojis;
     public Boolean internal_viewer;
-    public Boolean contact_sort_last_name;
-    public Boolean contact_uppercase_last_name;
-    public String contact_display_name_format;
 
-    public Boolean send_read_receipt;
     public Boolean hide_notification_contents;
+    public Boolean allow_notification_suggestions;
     public Boolean expose_recent_discussions;
     public Boolean incognito_keyboard;
     public Boolean prevent_screen_capture;
@@ -58,8 +71,17 @@ class SettingsPojo_0 {
 
     public String auto_join_groups;
     public Boolean show_trust_level;
+    public Boolean contact_sort_last_name;
+    public Boolean contact_uppercase_last_name;
+    public String contact_display_name_format;
+
+    public Boolean lock_biometry;
+    public Integer lock_delay_s;
+    public Boolean lock_notification;
+    public Boolean lock_wipe_on_fail;
 
     public Long auto_download_size;
+    public Boolean send_read_receipt;
     public Boolean auto_open_limited_visibility;
     public Boolean retain_wiped_outbound;
     public Long default_retention_count;
@@ -71,12 +93,24 @@ class SettingsPojo_0 {
     public Integer camera_resize_resolution;
     public Boolean remove_jpeg_metadata;
 
+    public String automatic_backup_configuration;
+
     public Boolean share_app_version;
     public Boolean notify_certificate_change;
+    public String block_unknown_certificate;
     public Boolean sending_foreground_service;
+    public String connectivity_indicator;
     public String qr_correction_level;
     public Boolean low_bandwidth_calls;
     public Boolean debug_log_level;
+
+    public Boolean wc_send_on_enter;
+    public Boolean wc_browser_notification;
+    public Boolean wc_browser_notification_sound;
+    public Boolean wc_keep_after_close;
+    public Boolean wc_error_notification;
+    public Boolean wc_inactivity_indicator;
+    public Boolean wc_require_unlock;
 
     public List<String> preferred_reactions;
 
@@ -95,12 +129,9 @@ class SettingsPojo_0 {
         settingsPojo.dark_mode = SettingsActivity.getForcedDarkMode();
         settingsPojo.system_emojis = SettingsActivity.useSystemEmojis();
         settingsPojo.internal_viewer = SettingsActivity.useInternalImageViewer();
-        settingsPojo.contact_sort_last_name = SettingsActivity.getSortContactsByLastName();
-        settingsPojo.contact_uppercase_last_name = SettingsActivity.getUppercaseLastName();
-        settingsPojo.contact_display_name_format = SettingsActivity.getContactDisplayNameFormat();
 
-        settingsPojo.send_read_receipt = SettingsActivity.getDefaultSendReadReceipt();
         settingsPojo.hide_notification_contents = SettingsActivity.isNotificationContentHidden();
+        settingsPojo.allow_notification_suggestions = SettingsActivity.isNotificationSuggestionAllowed();
         settingsPojo.expose_recent_discussions = SettingsActivity.exposeRecentDiscussions();
         settingsPojo.incognito_keyboard = SettingsActivity.useKeyboardIncognitoMode();
         settingsPojo.prevent_screen_capture = SettingsActivity.preventScreenCapture();
@@ -122,8 +153,18 @@ class SettingsPojo_0 {
                 settingsPojo.auto_join_groups = "contacts";
                 break;
         }
+        settingsPojo.show_trust_level = SettingsActivity.showTrustLevels();
+        settingsPojo.contact_sort_last_name = SettingsActivity.getSortContactsByLastName();
+        settingsPojo.contact_uppercase_last_name = SettingsActivity.getUppercaseLastName();
+        settingsPojo.contact_display_name_format = SettingsActivity.getContactDisplayNameFormat();
+
+        settingsPojo.lock_biometry = SettingsActivity.useBiometryToUnlock();
+        settingsPojo.lock_delay_s = SettingsActivity.getLockGraceTime();
+        settingsPojo.lock_notification = SettingsActivity.keepLockServiceOpen();
+        settingsPojo.lock_wipe_on_fail = SettingsActivity.wipeMessagesOnUnlockFails();
 
         settingsPojo.auto_download_size = SettingsActivity.getAutoDownloadSize();
+        settingsPojo.send_read_receipt = SettingsActivity.getDefaultSendReadReceipt();
         settingsPojo.auto_open_limited_visibility = SettingsActivity.getDefaultAutoOpenLimitedVisibilityInboundMessages();
         settingsPojo.retain_wiped_outbound = SettingsActivity.getDefaultRetainWipedOutboundMessages();
         settingsPojo.default_retention_count = SettingsActivity.getDefaultDiscussionRetentionCount();
@@ -135,19 +176,63 @@ class SettingsPojo_0 {
         settingsPojo.camera_resize_resolution = SettingsActivity.getCameraResolution();
         settingsPojo.remove_jpeg_metadata = SettingsActivity.getMetadataRemovalPreference();
 
+        BackupCloudProviderService.CloudProviderConfiguration configuration = SettingsActivity.getAutomaticBackupConfiguration();
+        if (configuration != null) {
+            try {
+                settingsPojo.automatic_backup_configuration = AppSingleton.getJsonObjectMapper().writeValueAsString(configuration);
+            } catch (Exception ignored) { }
+        }
+
         settingsPojo.share_app_version = SettingsActivity.shareAppVersion();
         settingsPojo.notify_certificate_change = SettingsActivity.notifyCertificateChange();
+        SettingsActivity.BlockUntrustedCertificate blockUntrustedCertificate = SettingsActivity.getBlockUntrustedCertificate();
+        switch (blockUntrustedCertificate) {
+            case ALWAYS:
+                settingsPojo.block_unknown_certificate = "always";
+                break;
+            case ISSUER_CHANGED:
+                settingsPojo.block_unknown_certificate = "issuer";
+                break;
+            case NEVER:
+                settingsPojo.block_unknown_certificate = "never";
+                break;
+            default:
+                break;
+        }
         settingsPojo.sending_foreground_service = SettingsActivity.useSendingForegroundService();
+        SettingsActivity.PingConnectivityIndicator pingConnectivityIndicator = SettingsActivity.getPingConnectivityIndicator();
+        switch (pingConnectivityIndicator) {
+            case DOT:
+                settingsPojo.connectivity_indicator = "dot";
+                break;
+            case LINE:
+                settingsPojo.connectivity_indicator = "line";
+                break;
+            case FULL:
+                settingsPojo.connectivity_indicator = "full";
+                break;
+            case NONE:
+            default:
+                break;
+        }
         settingsPojo.qr_correction_level = SettingsActivity.getQrCorrectionLevel();
         settingsPojo.low_bandwidth_calls = SettingsActivity.useLowBandwidthInCalls();
         settingsPojo.debug_log_level = SettingsActivity.useDebugLogLevel();
+
+        settingsPojo.wc_send_on_enter = SettingsActivity.getWebclientSendOnEnter();
+        settingsPojo.wc_browser_notification = SettingsActivity.showWebclientNotificationsInBrowser();
+        settingsPojo.wc_browser_notification_sound = SettingsActivity.playWebclientNotificationsSoundInBrowser();
+        settingsPojo.wc_keep_after_close = SettingsActivity.keepWebclientAliveAfterClose();
+        settingsPojo.wc_error_notification = SettingsActivity.showWebclientErrorNotifications();
+        settingsPojo.wc_inactivity_indicator = SettingsActivity.webclientNotifyAfterInactivity();
+        settingsPojo.wc_require_unlock = SettingsActivity.isWebclientUnlockRequired();
 
         settingsPojo.preferred_reactions = SettingsActivity.getPreferredReactions();
         return settingsPojo;
     }
 
     @JsonIgnore
-    void restore() {
+    public void restore() {
         if (beta != null) { SettingsActivity.setBetaFeaturesEnabled(beta); }
 
         if (message_vibration_pattern != null) { SettingsActivity.setMessageVibrationPatternRaw(message_vibration_pattern); }
@@ -159,12 +244,9 @@ class SettingsPojo_0 {
         if (dark_mode != null) { SettingsActivity.setForcedDarkMode(dark_mode); }
         if (system_emojis != null) { SettingsActivity.setUseSystemEmojis(system_emojis); }
         if (internal_viewer != null) { SettingsActivity.setUseInternalImageViewer(internal_viewer); }
-        if (contact_sort_last_name != null) { SettingsActivity.setSortContactsByLastName(contact_sort_last_name); }
-        if (contact_uppercase_last_name != null) { SettingsActivity.setUppercaseLastName(contact_uppercase_last_name); }
-        if (contact_display_name_format != null) { SettingsActivity.setContactDisplayNameFormat(contact_display_name_format); }
 
-        if (send_read_receipt != null) { SettingsActivity.setDefaultSendReadReceipt(send_read_receipt); }
         if (hide_notification_contents != null) { SettingsActivity.setNotificationContentHidden(hide_notification_contents); }
+        if (allow_notification_suggestions != null) { SettingsActivity.setNotificationSuggestionAllowed(allow_notification_suggestions); }
         if (expose_recent_discussions != null) { SettingsActivity.setExposeRecentDiscussions(expose_recent_discussions); }
         if (incognito_keyboard != null) { SettingsActivity.setUseKeyboardIncognitoMode(incognito_keyboard); }
         if (prevent_screen_capture != null) { SettingsActivity.setPreventScreenCapture(prevent_screen_capture); }
@@ -174,10 +256,23 @@ class SettingsPojo_0 {
         if (disable_push_notifications != null) { SettingsActivity.setDisablePushNotifications(disable_push_notifications); }
         if (permanent_websocket != null) { SettingsActivity.setUsePermanentWebSocket(permanent_websocket); }
 
-        if (auto_join_groups != null) { SettingsActivity.setAutoJoinGroups(SettingsActivity.getAutoJoinGroupsFromString(auto_join_groups)); }
+        SettingsActivity.AutoJoinGroupsCategory oldAutoJoinGroupsCategory = null;
+        if (auto_join_groups != null) {
+            oldAutoJoinGroupsCategory = SettingsActivity.getAutoJoinGroups();
+            SettingsActivity.setAutoJoinGroups(SettingsActivity.getAutoJoinGroupsFromString(auto_join_groups));
+        }
         if (show_trust_level != null) { SettingsActivity.setShowTrustLevels(show_trust_level); }
+        if (contact_sort_last_name != null) { SettingsActivity.setSortContactsByLastName(contact_sort_last_name); }
+        if (contact_uppercase_last_name != null) { SettingsActivity.setUppercaseLastName(contact_uppercase_last_name); }
+        if (contact_display_name_format != null) { SettingsActivity.setContactDisplayNameFormat(contact_display_name_format); }
+
+        if (lock_biometry != null) {SettingsActivity.setUseBiometryToUnlock(lock_biometry); }
+        if (lock_delay_s != null) {SettingsActivity.setLockGraceTime(lock_delay_s); }
+        if (lock_notification != null) {SettingsActivity.setKeepLockServiceOpen(lock_notification); }
+        if (lock_wipe_on_fail != null) {SettingsActivity.setWipeMessagesOnUnlockFails(lock_wipe_on_fail); }
 
         if (auto_download_size != null) { SettingsActivity.setAutoDownloadSize(auto_download_size); }
+        if (send_read_receipt != null) { SettingsActivity.setDefaultSendReadReceipt(send_read_receipt); }
         if (auto_open_limited_visibility != null) { SettingsActivity.setDefaultAutoOpenLimitedVisibilityInboundMessages(auto_open_limited_visibility); }
         if (retain_wiped_outbound != null) { SettingsActivity.setDefaultRetainWipedOutboundMessages(retain_wiped_outbound); }
         if (default_retention_count != null) { SettingsActivity.setDefaultDiscussionRetentionCount(default_retention_count); }
@@ -189,17 +284,109 @@ class SettingsPojo_0 {
         if (camera_resize_resolution != null) { SettingsActivity.setCameraResolution(camera_resize_resolution); }
         if (remove_jpeg_metadata != null) { SettingsActivity.setMetadataRemovalPreference(remove_jpeg_metadata); }
 
+        if (automatic_backup_configuration != null) {
+            try {
+                BackupCloudProviderService.CloudProviderConfiguration configuration = AppSingleton.getJsonObjectMapper().readValue(automatic_backup_configuration, BackupCloudProviderService.CloudProviderConfiguration.class);
+                SettingsActivity.setAutomaticBackupConfiguration(configuration);
+                SettingsActivity.setUseAutomaticBackup(true);
+                AppSingleton.getEngine().setAutoBackupEnabled(true, false);
+            } catch (Exception ignored) { }
+        }
+
         if (share_app_version != null) { SettingsActivity.setShareAppVersion(share_app_version); }
         if (notify_certificate_change != null) { SettingsActivity.setNotifyCertificateChange(notify_certificate_change); }
+        if (block_unknown_certificate != null) { SettingsActivity.setBlockUntrustedCertificate(block_unknown_certificate); }
         if (sending_foreground_service != null) { SettingsActivity.setSendingForegroundService(sending_foreground_service); }
+        if (connectivity_indicator != null) { SettingsActivity.setPingConnectivityIndicator(connectivity_indicator); }
         if (qr_correction_level != null) { SettingsActivity.setQrCorrectionLevel(qr_correction_level); }
         if (low_bandwidth_calls != null) { SettingsActivity.setUseLowBandwidthInCalls(low_bandwidth_calls); }
         if (debug_log_level != null) { SettingsActivity.setUseDebugLogLevel(debug_log_level); }
 
+        if (wc_send_on_enter != null) { SettingsActivity.setWebclientSendOnEnter(wc_send_on_enter); }
+        if (wc_browser_notification != null) { SettingsActivity.setShowWebclientNotificationsInBrowser(wc_browser_notification); }
+        if (wc_browser_notification_sound != null) { SettingsActivity.setPlayWebclientNotificationsSoundInBrowser(wc_browser_notification_sound); }
+        if (wc_keep_after_close != null) { SettingsActivity.setKeepWebclientAliveAfterClose(wc_keep_after_close); }
+        if (wc_error_notification != null) { SettingsActivity.setShowWebclientErrorNotifications(wc_error_notification); }
+        if (wc_inactivity_indicator != null) { SettingsActivity.setWebclientNotifyAfterInactivity(wc_inactivity_indicator); }
+        if (wc_require_unlock != null) { SettingsActivity.setWebclientUnlockRequired(wc_require_unlock); }
+
+
         if (preferred_reactions != null) { SettingsActivity.setPreferredReactions(preferred_reactions); }
+
+        //////////////////
+        // various hooks that may be required
+        //////////////////
 
         // run hooks for notification channel and discussion name
         App.runThread(new ContactDisplayNameFormatChangedTask());
         AndroidNotificationManager.updateMessageChannel(false);
+
+        // auto accept relevant group invitations
+        if (oldAutoJoinGroupsCategory != null) {
+            SettingsActivity.AutoJoinGroupsCategory newCategory = SettingsActivity.getAutoJoinGroups();
+            if (newCategory != oldAutoJoinGroupsCategory
+                    && newCategory != SettingsActivity.AutoJoinGroupsCategory.NOBODY
+                    && (newCategory != SettingsActivity.AutoJoinGroupsCategory.CONTACTS || oldAutoJoinGroupsCategory != SettingsActivity.AutoJoinGroupsCategory.EVERYONE)) {
+                App.runThread(() -> {
+                    List<Invitation> groupInvitations = AppDatabase.getInstance().invitationDao().getAllGroupInvites();
+                    final List<Invitation> invitationsToAccept;
+                    if (newCategory == SettingsActivity.AutoJoinGroupsCategory.CONTACTS) {
+                        // filter invitations to keep only those from a oneToOne contact
+                        invitationsToAccept = new ArrayList<>();
+                        for (Invitation groupInvitation : groupInvitations) {
+                            byte[] bytesGroupOwnerIdentity = groupInvitation.associatedDialog.getCategory().getBytesMediatorOrGroupOwnerIdentity();
+                            if (bytesGroupOwnerIdentity != null) {
+                                Contact contact = AppDatabase.getInstance().contactDao().get(groupInvitation.bytesOwnedIdentity, bytesGroupOwnerIdentity);
+                                if (contact != null && contact.oneToOne) {
+                                    invitationsToAccept.add(groupInvitation);
+                                }
+                            }
+                        }
+                    } else {
+                        invitationsToAccept = groupInvitations;
+                    }
+
+                    for (Invitation groupInvitation: invitationsToAccept) {
+                        try {
+                            ObvDialog obvDialog = groupInvitation.associatedDialog;
+                            obvDialog.setResponseToAcceptGroupInvite(true);
+                            AppSingleton.getEngine().respondToDialog(obvDialog);
+                        } catch (Exception ignored) {}
+                    }
+                });
+            }
+        }
+
+        // refresh display if needed
+        if (show_trust_level != null) {
+            Intent recreateRequiredIntent = new Intent(SettingsActivity.ACTIVITY_RECREATE_REQUIRED_ACTION);
+            recreateRequiredIntent.setPackage(App.getContext().getPackageName());
+            // we delay sending this intent so we are sure the setting is updated when activities are recreated
+            new Handler(Looper.getMainLooper()).postDelayed(() -> LocalBroadcastManager.getInstance(App.getContext()).sendBroadcast(recreateRequiredIntent), 200);
+        }
+
+        // restart foreground service
+        if (permanent_foreground_service != null || permanent_websocket != null) {
+            App.getContext().startService(new Intent(App.getContext(), UnifiedForegroundService.class));
+        }
+
+        // update share app version
+        if (share_app_version != null) {
+            if (SettingsActivity.shareAppVersion()) {
+                AppSingleton.getEngine().connectWebsocket("android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME);
+            } else {
+                AppSingleton.getEngine().connectWebsocket(null, null, 0, null);
+            }
+        }
+
+        // recent discussions
+        if (expose_recent_discussions != null) {
+            ShortcutActivity.startPublishingShareTargets(App.getContext());
+        }
+
+        // Google push
+        if (disable_push_notifications != null) {
+            App.runThread(App::refreshRegisterToPushNotification);
+        }
     }
 }

@@ -1,113 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/almostWhite"
+    android:foreground="?attr/selectableItemBackground"
+    android:theme="@style/GreyRipple">
+
+    <io.olvid.messenger.customClasses.InitialView
+        android:id="@+id/initial_view"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ImageView
+        android:id="@+id/admin_indicator_image_view"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:src="@drawable/ic_crown_white_circle"
+        android:layout_marginEnd="-2dp"
+        android:layout_marginTop="-2dp"
+        app:layout_constraintEnd_toEndOf="@id/initial_view"
+        app:layout_constraintTop_toTopOf="@id/initial_view"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <TextView
-        android:id="@+id/group_section_header"
-        android:layout_width="match_parent"
+        android:id="@+id/group_name_text_view"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingBottom="4dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="4dp"
-        android:textAllCaps="true"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/RobotoMedium"
         android:textColor="@color/primary700"
-        tools:text="@string/label_groups_created"/>
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/group_members_text_view"
+        app:layout_constraintEnd_toStartOf="@+id/new_published_details_group"
+        app:layout_constraintStart_toEndOf="@+id/initial_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_goneMarginEnd="16dp"
+        tools:text="Group Name"/>
+
+    <TextView
+        android:id="@+id/group_members_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="2dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/grey"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/new_published_details_group"
+        app:layout_constraintStart_toStartOf="@+id/group_name_text_view"
+        app:layout_constraintTop_toBottomOf="@+id/group_name_text_view"
+        app:layout_goneMarginEnd="16dp"
+        tools:text="Bob, Alice"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+        android:id="@+id/new_published_details_group"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/almostWhite"
-        android:foreground="?attr/selectableItemBackground"
-        android:theme="@style/GreyRipple">
+        android:layout_marginEnd="4dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
 
-        <io.olvid.messenger.customClasses.InitialView
-            android:id="@+id/initial_view"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginBottom="4dp"
-            android:layout_marginStart="16dp"
+
+        <ImageView
+            android:id="@+id/new_published_details_icon"
+            android:layout_width="24dp"
+            android:layout_height="18dp"
             android:layout_marginTop="4dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <TextView
-            android:id="@+id/group_name_text_view"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="2dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textAppearance="@style/RobotoMedium"
-            android:textColor="@color/primary700"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/group_members_text_view"
-            app:layout_constraintEnd_toStartOf="@+id/new_published_details_group"
-            app:layout_constraintStart_toEndOf="@+id/initial_view"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="packed"
-            app:layout_goneMarginEnd="16dp"
-            tools:text="Group Name"/>
-
-        <TextView
-            android:id="@+id/group_members_text_view"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="2dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textColor="@color/grey"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/new_published_details_group"
-            app:layout_constraintStart_toStartOf="@+id/group_name_text_view"
-            app:layout_constraintTop_toBottomOf="@+id/group_name_text_view"
-            app:layout_goneMarginEnd="16dp"
-            tools:text="Bob, Alice"/>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/new_published_details_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
-            android:visibility="gone"
+            android:layout_marginBottom="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible">
+            app:srcCompat="@drawable/ic_olvid_card" />
 
-
-            <ImageView
-                android:id="@+id/new_published_details_icon"
-                android:layout_width="24dp"
-                android:layout_height="18dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="4dp"
-                android:layout_marginBottom="4dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_olvid_card" />
-
-            <ImageView
-                android:id="@+id/new_unseen_published_details_dot"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginBottom="10dp"
-                app:layout_constraintBottom_toBottomOf="@+id/new_published_details_icon"
-                app:layout_constraintStart_toStartOf="@+id/new_published_details_icon"
-                app:srcCompat="@drawable/ic_dot_white_bordered" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/new_unseen_published_details_dot"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintBottom_toBottomOf="@+id/new_published_details_icon"
+            app:layout_constraintStart_toStartOf="@+id/new_published_details_icon"
+            app:srcCompat="@drawable/ic_dot_white_bordered" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

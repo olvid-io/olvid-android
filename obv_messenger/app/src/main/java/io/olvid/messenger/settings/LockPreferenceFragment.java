@@ -19,11 +19,14 @@
 
 package io.olvid.messenger.settings;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.biometric.BiometricManager;
+import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
@@ -33,15 +36,23 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.LockScreenActivity;
 import io.olvid.messenger.customClasses.NoClickSwitchPreference;
+import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.fragments.dialog.EmergencyPINCreationDialogFragment;
 import io.olvid.messenger.fragments.dialog.LockScreenPINCreationDialogFragment;
 import io.olvid.messenger.fragments.dialog.LockScreenPINVerificationDialogFragment;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
 public class LockPreferenceFragment extends PreferenceFragmentCompat {
+    FragmentActivity activity;
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.fragment_preferences_lock, rootKey);
+        activity = requireActivity();
         PreferenceScreen screen = getPreferenceScreen();
+        if (screen == null) {
+            return;
+        }
 
         NoClickSwitchPreference lockScreenPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_LOCK_SCREEN);
         if (lockScreenPreference != null) {
@@ -102,6 +113,42 @@ public class LockPreferenceFragment extends PreferenceFragmentCompat {
                 case BiometricManager.BIOMETRIC_STATUS_UNKNOWN:
                     break;
             }
+        }
+
+        NoClickSwitchPreference emergencyPinPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_EMERGENCY_PIN);
+        if (emergencyPinPreference != null) {
+            emergencyPinPreference.setOnPreferenceClickListener((Preference pref) -> {
+                if (pref instanceof NoClickSwitchPreference) {
+                    NoClickSwitchPreference preference = (NoClickSwitchPreference) pref;
+
+                    if (preference.isChecked()) {
+                        AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                                .setTitle(R.string.dialog_title_disable_emergency_pin)
+                                .setMessage(R.string.dialog_message_disable_emergency_pin)
+                                .setNegativeButton(R.string.button_label_cancel, null)
+                                .setPositiveButton(R.string.button_label_ok, (DialogInterface dialogInterface, int which) -> {
+                                    SettingsActivity.clearEmergencyPIN();
+                                    if (preference.callChangeListener(false)) {
+                                        preference.setChecked(false);
+                                    }
+                                });
+                        builder.create().show();
+                    } else {
+                        LockScreenPINVerificationDialogFragment lockScreenPINVerificationDialogFragment = LockScreenPINVerificationDialogFragment.newInstance();
+                        lockScreenPINVerificationDialogFragment.setOnPINEnteredCallBack(() -> {
+                            EmergencyPINCreationDialogFragment emergencyPINCreationDialogFragment = EmergencyPINCreationDialogFragment.newInstance();
+                            emergencyPINCreationDialogFragment.setOnPINSetCallBack(() -> {
+                                if (preference.callChangeListener(true)) {
+                                    preference.setChecked(true);
+                                }
+                            });
+                            emergencyPINCreationDialogFragment.show(getChildFragmentManager(), "dialog");
+                        });
+                        lockScreenPINVerificationDialogFragment.show(getChildFragmentManager(), "dialog");
+                    }
+                }
+                return true;
+            });
         }
 
         Preference resetPINPreference = screen.findPreference(SettingsActivity.PREF_KEY_RESET_PIN);

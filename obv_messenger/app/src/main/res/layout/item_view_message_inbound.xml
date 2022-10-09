@@ -118,6 +118,7 @@
     </io.olvid.messenger.customClasses.SizeAwareCardView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/reactions_constraint_layout"
         android:layout_marginTop="-4dp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

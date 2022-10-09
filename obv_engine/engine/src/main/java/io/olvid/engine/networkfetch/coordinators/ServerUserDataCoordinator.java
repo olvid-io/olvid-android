@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -40,6 +41,7 @@ import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.GroupInformation;
+import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.IdentityAndUid;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.containers.UserData;
@@ -112,33 +114,51 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
         try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
             UserData[] userDataList = fetchManagerSession.identityDelegate.getAllUserData(fetchManagerSession.session);
             for (UserData userData: userDataList) {
-                if (userData.groupDetailsOwnerAndUid != null) {
-                    GroupInformation groupInformation = fetchManagerSession.identityDelegate.getGroupInformation(fetchManagerSession.session, userData.ownedIdentity, userData.groupDetailsOwnerAndUid);
-                    if (groupInformation == null || // group not found
-                            !groupInformation.groupOwnerIdentity.equals(userData.ownedIdentity)){ // group not owned
-                        queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
-                    } else {
-                        try {
-                            JsonGroupDetailsWithVersionAndPhoto detailsWithVersionAndPhoto = jsonObjectMapper.readValue(groupInformation.serializedGroupDetailsWithVersionAndPhoto, JsonGroupDetailsWithVersionAndPhoto.class);
-                            if (detailsWithVersionAndPhoto == null || !Arrays.equals(detailsWithVersionAndPhoto.getPhotoServerLabel(), userData.label.getBytes())) {
-                                queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
-                            } else if (userData.nextRefreshTimestamp < System.currentTimeMillis()) {
-                                queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label);
-                            } else {
-                                scheduler.schedule(new IdentityAndUid(userData.ownedIdentity, userData.label), () -> queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label), "ServerQueryOperation", userData.nextRefreshTimestamp - System.currentTimeMillis());
-                            }
-                        } catch (Exception e) {
+                switch (userData.type) {
+                    case OWNED_IDENTITY: {
+                        JsonIdentityDetailsWithVersionAndPhoto details = fetchManagerSession.identityDelegate.getOwnedIdentityPublishedDetails(fetchManagerSession.session, userData.ownedIdentity);
+                        if (details == null || !Arrays.equals(details.getPhotoServerLabel(), userData.label.getBytes())) {
                             queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
+                        } else if (userData.nextRefreshTimestamp < System.currentTimeMillis()) {
+                            queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label);
+                        } else {
+                            scheduler.schedule(new IdentityAndUid(userData.ownedIdentity, userData.label), () -> queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label), "ServerQueryOperation", userData.nextRefreshTimestamp - System.currentTimeMillis());
                         }
+                        break;
                     }
-                } else {
-                    JsonIdentityDetailsWithVersionAndPhoto details = fetchManagerSession.identityDelegate.getOwnedIdentityPublishedDetails(fetchManagerSession.session, userData.ownedIdentity);
-                    if (details == null || !Arrays.equals(details.getPhotoServerLabel(), userData.label.getBytes())) {
-                        queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
-                    } else if (userData.nextRefreshTimestamp < System.currentTimeMillis()) {
-                        queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label);
-                    } else {
-                        scheduler.schedule(new IdentityAndUid(userData.ownedIdentity, userData.label), () -> queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label), "ServerQueryOperation", userData.nextRefreshTimestamp - System.currentTimeMillis());
+                    case GROUP: {
+                        GroupInformation groupInformation = fetchManagerSession.identityDelegate.getGroupInformation(fetchManagerSession.session, userData.ownedIdentity, userData.bytesGroupOwnerAndUidOrIdentifier);
+                        if (groupInformation == null || // group not found
+                                !groupInformation.groupOwnerIdentity.equals(userData.ownedIdentity)){ // group not owned
+                            queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
+                        } else {
+                            try {
+                                JsonGroupDetailsWithVersionAndPhoto detailsWithVersionAndPhoto = jsonObjectMapper.readValue(groupInformation.serializedGroupDetailsWithVersionAndPhoto, JsonGroupDetailsWithVersionAndPhoto.class);
+                                if (detailsWithVersionAndPhoto == null || !Arrays.equals(detailsWithVersionAndPhoto.getPhotoServerLabel(), userData.label.getBytes())) {
+                                    queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
+                                } else if (userData.nextRefreshTimestamp < System.currentTimeMillis()) {
+                                    queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label);
+                                } else {
+                                    scheduler.schedule(new IdentityAndUid(userData.ownedIdentity, userData.label), () -> queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label), "ServerQueryOperation", userData.nextRefreshTimestamp - System.currentTimeMillis());
+                                }
+                            } catch (Exception e) {
+                                queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
+                            }
+                        }
+                        break;
+                    }
+                    case GROUP_V2: {
+                        GroupV2.ServerPhotoInfo serverPhotoInfo = fetchManagerSession.identityDelegate.getGroupV2PublishedServerPhotoInfo(fetchManagerSession.session, userData.ownedIdentity, userData.bytesGroupOwnerAndUidOrIdentifier);
+                        if (serverPhotoInfo == null || // group not found
+                                !Objects.equals(userData.ownedIdentity, serverPhotoInfo.serverPhotoIdentity) || // photo not uploaded by us
+                                !Objects.equals(userData.label, serverPhotoInfo.serverPhotoLabel)) { // photo changed
+                            queueNewDeleteUserDataOperation(userData.ownedIdentity, userData.label);
+                        } else if (userData.nextRefreshTimestamp < System.currentTimeMillis()) {
+                            queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label);
+                        } else {
+                            scheduler.schedule(new IdentityAndUid(userData.ownedIdentity, userData.label), () -> queueNewRefreshUserDataOperation(userData.ownedIdentity, userData.label), "ServerQueryOperation", userData.nextRefreshTimestamp - System.currentTimeMillis());
+                        }
+                        break;
                     }
                 }
             }
@@ -240,8 +260,8 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                             String photoUrl;
                             AuthEncKey key;
 
-                            if (userData.groupDetailsOwnerAndUid != null) {
-                                JsonGroupDetailsWithVersionAndPhoto json = fetchManagerSession.identityDelegate.getGroupPublishedAndLatestOrTrustedDetails(fetchManagerSession.session, userData.ownedIdentity, userData.groupDetailsOwnerAndUid)[0];
+                            if (userData.bytesGroupOwnerAndUidOrIdentifier != null) {
+                                JsonGroupDetailsWithVersionAndPhoto json = fetchManagerSession.identityDelegate.getGroupPublishedAndLatestOrTrustedDetails(fetchManagerSession.session, userData.ownedIdentity, userData.bytesGroupOwnerAndUidOrIdentifier)[0];
                                 photoUrl = json.getPhotoUrl();
                                 key = (AuthEncKey) new Encoded(json.getPhotoServerKey()).decodeSymmetricKey();
                             } else {

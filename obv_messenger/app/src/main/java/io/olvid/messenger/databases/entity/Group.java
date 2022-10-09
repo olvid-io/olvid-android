@@ -30,7 +30,6 @@ import androidx.room.Index;
 
 import io.olvid.engine.engine.types.JsonGroupDetails;
 
-@SuppressWarnings("CanBeFinal")
 @Entity(tableName = Group.TABLE_NAME,
         primaryKeys = {Group.BYTES_GROUP_OWNER_AND_UID, Group.BYTES_OWNED_IDENTITY},
         foreignKeys = {
@@ -59,6 +58,7 @@ public class Group {
     public static final String NEW_PUBLISHED_DETAILS = "new_published_details";
     public static final String BYTES_GROUP_OWNER_IDENTITY = "bytes_group_owner_identity"; // null for groups you own
     public static final String PHOTO_URL = "photo_url";
+    public static final String GROUP_MEMBERS_NAMES = "group_members_names";
     public static final String CUSTOM_PHOTO_URL = "custom_photo_url"; // set to "" to remove the default photo_url, null to use the default
     public static final String PERSONAL_NOTE = "personal_note";
 
@@ -94,6 +94,11 @@ public class Group {
     @Nullable
     public String photoUrl;
 
+    @ColumnInfo(name = GROUP_MEMBERS_NAMES)
+    @NonNull
+    public String groupMembersNames;
+
+
     @ColumnInfo(name = CUSTOM_PHOTO_URL)
     @Nullable
     public String customPhotoUrl;
@@ -120,7 +125,7 @@ public class Group {
     }
 
     // default constructor required by Room
-    public Group(@NonNull byte[] bytesGroupOwnerAndUid, @NonNull byte[] bytesOwnedIdentity, @Nullable String customName, @NonNull String name, int newPublishedDetails, @Nullable byte[] bytesGroupOwnerIdentity, @Nullable String photoUrl, @Nullable String customPhotoUrl, @Nullable String personalNote) {
+    public Group(@NonNull byte[] bytesGroupOwnerAndUid, @NonNull byte[] bytesOwnedIdentity, @Nullable String customName, @NonNull String name, int newPublishedDetails, @Nullable byte[] bytesGroupOwnerIdentity, @Nullable String photoUrl, @NonNull String groupMembersNames, @Nullable String customPhotoUrl, @Nullable String personalNote) {
         this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customName = customName;
@@ -128,6 +133,7 @@ public class Group {
         this.newPublishedDetails = newPublishedDetails;
         this.bytesGroupOwnerIdentity = bytesGroupOwnerIdentity;
         this.photoUrl = photoUrl;
+        this.groupMembersNames = groupMembersNames;
         this.customPhotoUrl = customPhotoUrl;
         this.personalNote = personalNote;
     }
@@ -152,6 +158,7 @@ public class Group {
             this.newPublishedDetails = PUBLISHED_DETAILS_NOTHING_NEW;
         }
         this.bytesGroupOwnerIdentity = bytesGroupOwnerIdentity;
+        this.groupMembersNames = "";
         this.personalNote = null;
     }
 }

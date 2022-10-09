@@ -1,4 +1,14 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ListPreference
+        android:key="pref_key_app_language"
+        android:defaultValue="default"
+        android:title="@string/pref_app_language_title"
+        app:useSimpleSummaryProvider="true"
+        android:entries="@array/app_language_choice"
+        android:entryValues="@array/app_language_choice_values"
+        android:icon="@drawable/ic_pref_language"
+        android:order="5" />
     <SwitchPreference
         android:key="pref_key_dark_mode"
         android:defaultValue="false"
@@ -20,11 +30,21 @@
         android:key="pref_key_font_scale"
         android:title="@string/pref_font_scale"
         android:defaultValue="1.0"
-        android:summary="%1$s"
+        app:useSimpleSummaryProvider="true"
         android:entries="@array/font_scale_choice"
         android:entryValues="@array/font_scale_choice_values"
         android:icon="@drawable/ic_pref_font_scale"
         android:order="12"/>
+
+    <DropDownPreference
+        android:key="pref_key_screen_scale"
+        android:title="@string/pref_screen_scale"
+        android:defaultValue="1.0"
+        app:useSimpleSummaryProvider="true"
+        android:entries="@array/font_scale_choice"
+        android:entryValues="@array/font_scale_choice_values"
+        android:icon="@drawable/ic_pref_screen_scale"
+        android:order="13"/>
 
     <SwitchPreference
         android:key="pref_key_use_system_emojis"

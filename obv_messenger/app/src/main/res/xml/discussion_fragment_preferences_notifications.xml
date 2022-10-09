@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_discussion_category_message_notifications_title"
+        android:order="10">
+        <SwitchPreference
+            android:key="pref_key_discussion_message_custom_notification"
+            android:defaultValue="false"
+            android:title="@string/pref_discussion_message_custom_notification_title"
+            android:icon="@drawable/ic_pref_message"
+            android:order="11" />
+        <ListPreference
+            android:key="pref_key_discussion_message_vibration_pattern"
+            android:defaultValue="1"
+            android:title="@string/pref_message_vibration_pattern_title"
+            app:useSimpleSummaryProvider="true"
+            android:entries="@array/vibration_patterns"
+            android:entryValues="@array/vibration_patterns_values"
+            android:icon="@drawable/ic_pref_vibrator"
+            android:dependency="pref_key_discussion_message_custom_notification"
+            android:order="12"/>
+        <Preference
+            android:key="pref_key_discussion_message_ringtone"
+            android:title="@string/pref_message_ringtone_title"
+            android:icon="@drawable/ic_pref_ringtone"
+            android:dependency="pref_key_discussion_message_custom_notification"
+            android:order="13"/>
+        <io.olvid.messenger.customClasses.ImageViewPreference
+            android:key="pref_key_discussion_message_led_color"
+            android:title="@string/pref_message_led_color_title"
+            android:icon="@drawable/ic_pref_color"
+            android:dependency="pref_key_discussion_message_custom_notification"
+            android:order="14" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        android:title="@string/pref_discussion_category_call_notifications_title"
+        app:allowDividerAbove="false"
+        android:order="20">
+        <SwitchPreference
+            android:key="pref_key_discussion_call_custom_notification"
+            android:defaultValue="false"
+            android:title="@string/pref_discussion_call_custom_notification_title"
+            android:icon="@drawable/ic_pref_phone"
+            android:order="21" />
+        <ListPreference
+            android:defaultValue="20"
+            android:key="pref_key_discussion_call_vibration_pattern"
+            android:title="@string/pref_call_vibration_pattern_title"
+            app:useSimpleSummaryProvider="true"
+            android:entries="@array/vibration_patterns"
+            android:entryValues="@array/vibration_patterns_values"
+            android:icon="@drawable/ic_pref_vibrator"
+            android:dependency="pref_key_discussion_call_custom_notification"
+            android:order="22"/>
+        <Preference
+            android:key="pref_key_discussion_call_ringtone"
+            android:title="@string/pref_call_ringtone_title"
+            android:icon="@drawable/ic_pref_ringtone_alt"
+            android:dependency="pref_key_discussion_call_custom_notification"
+            android:order="23"/>
+        <SwitchPreference
+            android:key="pref_key_discussion_call_use_flash"
+            android:defaultValue="false"
+            android:title="@string/pref_call_use_flash_title"
+            android:icon="@drawable/ic_pref_flash"
+            android:dependency="pref_key_discussion_call_custom_notification"
+            android:order="24"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

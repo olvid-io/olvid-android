@@ -19,11 +19,11 @@
 
 package io.olvid.messenger.viewModels;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import io.olvid.messenger.App;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.dao.DiscussionDao;
+import io.olvid.messenger.databases.entity.Discussion;
 
 
 public class FilteredDiscussionListViewModel extends ViewModel {
@@ -169,24 +170,27 @@ public class FilteredDiscussionListViewModel extends ViewModel {
 
         public boolean selected;
 
-        public SearchableDiscussion(@NonNull DiscussionDao.DiscussionAndContactDisplayNames discussionAndContactDisplayNames) {
-            this.discussionId = discussionAndContactDisplayNames.discussion.id;
-            if (discussionAndContactDisplayNames.discussion.bytesGroupOwnerAndUid != null) {
-                this.isGroupDiscussion = true;
-                this.byteIdentifier = discussionAndContactDisplayNames.discussion.bytesGroupOwnerAndUid;
-            } else if (discussionAndContactDisplayNames.discussion.bytesContactIdentity != null) {
-                this.isGroupDiscussion = false;
-                this.byteIdentifier = discussionAndContactDisplayNames.discussion.bytesContactIdentity;
-            } else {
-                this.isGroupDiscussion = false;
-                this.byteIdentifier = new byte[0];
+        public SearchableDiscussion(@NonNull DiscussionDao.DiscussionAndGroupMembersNames discussionAndGroupMembersNames) {
+            this.discussionId = discussionAndGroupMembersNames.discussion.id;
+            switch (discussionAndGroupMembersNames.discussion.status) {
+                case Discussion.STATUS_LOCKED: {
+                    this.byteIdentifier = new byte[0];
+                    this.isGroupDiscussion = false;
+                    break;
+                }
+                case Discussion.STATUS_NORMAL:
+                default: {
+                    this.byteIdentifier = discussionAndGroupMembersNames.discussion.bytesDiscussionIdentifier;
+                    this.isGroupDiscussion = discussionAndGroupMembersNames.discussion.discussionType != Discussion.TYPE_CONTACT;
+                    break;
+                }
             }
-            this.title = discussionAndContactDisplayNames.discussion.title;
-            this.groupMemberNameList = discussionAndContactDisplayNames.groupContactDisplayNames == null ? "" : discussionAndContactDisplayNames.groupContactDisplayNames;
+            this.title = discussionAndGroupMembersNames.discussion.title;
+            this.groupMemberNameList = discussionAndGroupMembersNames.groupMemberNames == null ? "" : discussionAndGroupMembersNames.groupMemberNames;
             this.patternMatchingField = StringUtils.unAccent(title + "\n" + groupMemberNameList);
-            this.photoUrl = discussionAndContactDisplayNames.discussion.photoUrl;
-            this.keycloakManaged = discussionAndContactDisplayNames.discussion.keycloakManaged;
-            this.active = discussionAndContactDisplayNames.discussion.active;
+            this.photoUrl = discussionAndGroupMembersNames.discussion.photoUrl;
+            this.keycloakManaged = discussionAndGroupMembersNames.discussion.keycloakManaged;
+            this.active = discussionAndGroupMembersNames.discussion.active;
 
             this.selected = false;
         }

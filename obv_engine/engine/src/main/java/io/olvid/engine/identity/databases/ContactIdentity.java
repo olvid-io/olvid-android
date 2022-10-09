@@ -154,6 +154,8 @@ public class ContactIdentity implements ObvDatabase {
             return;
         }
 
+        boolean notifyNewDetails = true;
+
         if (allowDowngrade && newDetailsVersion <= publishedDetailsVersion) {
             // check whether anything changed
             ContactIdentityDetails publishedDetails = getPublishedDetails();
@@ -246,6 +248,17 @@ public class ContactIdentity implements ObvDatabase {
                     newPublishedDetails.setPhotoUrl(publishedDetails.getPhotoUrl());
                 }
             }
+            try {
+                // check if any detail actually changed
+                JsonIdentityDetailsWithVersionAndPhoto oldJson = publishedDetails.getJsonIdentityDetailsWithVersionAndPhoto();
+                if (oldJson.getIdentityDetails().fieldsAreTheSame(jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails())
+                        && Arrays.equals(oldJson.getPhotoServerLabel(), jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerLabel())
+                        && Arrays.equals(oldJson.getPhotoServerKey(), jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerKey())) {
+                    // nothing user visible changed --> do not notify
+                    notifyNewDetails = false;
+                }
+            } catch (Exception ignored) { }
+
             try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                     " SET " + PUBLISHED_DETAILS_VERSION + " = ? " +
                     " WHERE " + CONTACT_IDENTITY + " = ? " +
@@ -258,8 +271,10 @@ public class ContactIdentity implements ObvDatabase {
             }
         }
 
-        commitHookBits |= HOOK_BIT_NEW_PUBLISHED_DETAILS;
-        identityManagerSession.session.addSessionCommitListener(this);
+        if (notifyNewDetails) {
+            commitHookBits |= HOOK_BIT_NEW_PUBLISHED_DETAILS;
+            identityManagerSession.session.addSessionCommitListener(this);
+        }
         if (jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails() != null) {
             JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
             if (jsonKeycloakUserDetails != null) {

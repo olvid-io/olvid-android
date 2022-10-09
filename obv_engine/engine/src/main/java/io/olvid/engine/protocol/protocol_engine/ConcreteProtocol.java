@@ -38,10 +38,12 @@ import io.olvid.engine.protocol.protocols.ContactMutualIntroductionProtocol;
 import io.olvid.engine.protocol.protocols.DeviceDiscoveryChildProtocol;
 import io.olvid.engine.protocol.protocols.DeviceDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.DownloadGroupPhotoChildProtocol;
+import io.olvid.engine.protocol.protocols.DownloadGroupV2PhotoProtocol;
 import io.olvid.engine.protocol.protocols.DownloadIdentityPhotoChildProtocol;
 import io.olvid.engine.protocol.protocols.FullRatchetProtocol;
 import io.olvid.engine.protocol.protocols.GroupInvitationProtocol;
 import io.olvid.engine.protocol.protocols.GroupManagementProtocol;
+import io.olvid.engine.protocol.protocols.GroupsV2Protocol;
 import io.olvid.engine.protocol.protocols.IdentityDetailsPublicationProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakBindingAndUnbindingProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol;
@@ -74,6 +76,8 @@ public abstract class ConcreteProtocol {
     public static final int KEYCLOAK_CONTACT_ADDITION_PROTOCOL_ID = 15;
     public static final int DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID = 16;
     public static final int ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID = 17;
+    public static final int GROUPS_V2_PROTOCOL_ID = 18;
+    public static final int DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID = 19;
 
     // internal protocols, Android only
     public static final int KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID = 1000;
@@ -196,6 +200,10 @@ public abstract class ConcreteProtocol {
                 return new OwnedIdentityDeletionWithContactNotificationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID:
                 return new OneToOneContactInvitationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case GROUPS_V2_PROTOCOL_ID:
+                return new GroupsV2Protocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID:
+                return new DownloadGroupV2PhotoProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             default:
                 Logger.w("Unknown protocol id: " + protocolId);
                 return null;

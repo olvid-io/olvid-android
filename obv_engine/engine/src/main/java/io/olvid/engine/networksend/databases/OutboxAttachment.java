@@ -583,9 +583,15 @@ public class OutboxAttachment implements ObvDatabase {
     }
 
     void messageIsAcknowledged() {
-        if (sendManagerSession.outboxAttachmentCanBeSentListener != null) {
-            if (!acknowledged) {
-                sendManagerSession.outboxAttachmentCanBeSentListener.outboxAttachmentCanBeSent(ownedIdentity, messageUid, attachmentNumber, getPriority());
+        if (!acknowledged) {
+            if (cancelExternallyRequested) {
+                if (sendManagerSession.outboxAttachmentCancelRequestedListener != null) {
+                    sendManagerSession.outboxAttachmentCancelRequestedListener.outboxAttachmentCancelRequested(ownedIdentity, messageUid, attachmentNumber);
+                }
+            } else {
+                if (sendManagerSession.outboxAttachmentCanBeSentListener != null) {
+                    sendManagerSession.outboxAttachmentCanBeSentListener.outboxAttachmentCanBeSent(ownedIdentity, messageUid, attachmentNumber, getPriority());
+                }
             }
         }
     }

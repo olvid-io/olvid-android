@@ -27,7 +27,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
@@ -72,12 +71,13 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
-import io.olvid.messenger.customClasses.StringUtils;
-import io.olvid.messenger.discussion.DiscussionActivity;
-import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.discussion.DiscussionActivity;
+import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -129,18 +129,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     protected void attachBaseContext(Context baseContext) {
-        final Context newContext;
-        float customFontScale = SettingsActivity.getFontScale();
-        float fontScale = baseContext.getResources().getConfiguration().fontScale;
-        if (customFontScale != 1.0f) {
-            Configuration configuration = new Configuration();
-            configuration.fontScale = fontScale * customFontScale;
-            newContext = baseContext.createConfigurationContext(configuration);
-        } else {
-            newContext = baseContext;
-        }
-
-        super.attachBaseContext(newContext);
+        super.attachBaseContext(SettingsActivity.overrideContextScales(baseContext));
     }
 
     @Override
@@ -470,22 +459,50 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
                 List<WebrtcCallService.CallParticipantPojo> callParticipants = webrtcCallService.getCallParticipantsLiveData().getValue();
                 if (webrtcCallService.bytesOwnedIdentity != null && callParticipants != null) {
                     @NonNull final Intent discussionIntent;
-                    if (webrtcCallService.bytesGroupOwnerAndUid != null) {
-                        discussionIntent = new Intent(this, MainActivity.class);
-                        discussionIntent.setAction(MainActivity.FORWARD_ACTION);
-                        discussionIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
-                        discussionIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
-                        discussionIntent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
-                        discussionIntent.putExtra(DiscussionActivity.BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA, webrtcCallService.bytesGroupOwnerAndUid);
-                    } else if (callParticipants.size() == 1 && callParticipants.get(0).contact != null) {
-                        discussionIntent = new Intent(this, MainActivity.class);
-                        discussionIntent.setAction(MainActivity.FORWARD_ACTION);
-                        discussionIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
-                        discussionIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
-                        discussionIntent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
-                        discussionIntent.putExtra(DiscussionActivity.BYTES_CONTACT_IDENTITY_INTENT_EXTRA, callParticipants.get(0).bytesContactIdentity);
-                    } else {
-                        return;
+                    switch (webrtcCallService.discussionType) {
+                        case Discussion.TYPE_GROUP: {
+                            if (webrtcCallService.bytesGroupOwnerAndUidOrIdentifier == null) {
+                                return;
+                            }
+
+                            discussionIntent = new Intent(this, MainActivity.class);
+                            discussionIntent.setAction(MainActivity.FORWARD_ACTION);
+                            discussionIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
+                            discussionIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
+                            discussionIntent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
+                            discussionIntent.putExtra(DiscussionActivity.BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA, webrtcCallService.bytesGroupOwnerAndUidOrIdentifier);
+                            break;
+                        }
+                        case Discussion.TYPE_GROUP_V2: {
+                            if (webrtcCallService.bytesGroupOwnerAndUidOrIdentifier == null) {
+                                return;
+                            }
+
+                            discussionIntent = new Intent(this, MainActivity.class);
+                            discussionIntent.setAction(MainActivity.FORWARD_ACTION);
+                            discussionIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
+                            discussionIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
+                            discussionIntent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
+                            discussionIntent.putExtra(DiscussionActivity.BYTES_GROUP_IDENTIFIER_INTENT_EXTRA, webrtcCallService.bytesGroupOwnerAndUidOrIdentifier);
+                            break;
+                        }
+                        default: {
+                            if (callParticipants.size() != 1) {
+                                return;
+                            }
+                            Contact contact = callParticipants.get(0).contact;
+                            if (contact == null || !contact.oneToOne) {
+                                return;
+                            }
+
+                            discussionIntent = new Intent(this, MainActivity.class);
+                            discussionIntent.setAction(MainActivity.FORWARD_ACTION);
+                            discussionIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
+                            discussionIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
+                            discussionIntent.putExtra(DiscussionActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, webrtcCallService.bytesOwnedIdentity);
+                            discussionIntent.putExtra(DiscussionActivity.BYTES_CONTACT_IDENTITY_INTENT_EXTRA, callParticipants.get(0).bytesContactIdentity);
+                            break;
+                        }
                     }
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -577,7 +594,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
         @Override
         public void onChanged(Boolean microphoneMuted) {
             if (microphoneMuted == null || !microphoneMuted) {
-                toggleMicrophoneButton.setImageResource(R.drawable.button_no_micro);
+                toggleMicrophoneButton.setImageResource(R.drawable.button_micro);
             } else {
                 toggleMicrophoneButton.setImageResource(R.drawable.button_no_micro_red_circle);
             }
@@ -696,7 +713,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
                 final boolean show;
                 if (callParticipantPojos == null || callParticipantPojos.size() == 0) {
                     show = false;
-                } else if (webrtcCallService.bytesGroupOwnerAndUid != null) {
+                } else if (webrtcCallService.bytesGroupOwnerAndUidOrIdentifier != null) {
                     show = true;
                 } else if (callParticipantPojos.size() == 1) {
                     Contact contact = callParticipantPojos.get(0).contact;

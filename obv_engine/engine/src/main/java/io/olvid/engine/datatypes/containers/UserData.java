@@ -26,12 +26,20 @@ public class UserData {
     public final Identity ownedIdentity;
     public final UID label;
     public final long nextRefreshTimestamp;
-    public final byte[] groupDetailsOwnerAndUid;
+    public final byte[] bytesGroupOwnerAndUidOrIdentifier;
+    public final Type type;
 
-    public UserData(Identity ownedIdentity, UID label, long nextRefreshTimestamp, byte[] groupDetailsOwnerAndUid) {
+    public enum Type {
+        OWNED_IDENTITY,
+        GROUP,
+        GROUP_V2,
+    }
+
+    public UserData(Identity ownedIdentity, UID label, long nextRefreshTimestamp, Type type, byte[] bytesGroupOwnerAndUidOrIdentifier) {
         this.ownedIdentity = ownedIdentity;
         this.label = label;
         this.nextRefreshTimestamp = nextRefreshTimestamp;
-        this.groupDetailsOwnerAndUid = groupDetailsOwnerAndUid;
+        this.type = type;
+        this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier;
     }
 }

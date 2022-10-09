@@ -827,7 +827,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public SendCommitmentStep(InitialProtocolState startState, InitialMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -887,7 +887,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final PropagateInvitationToAliceDevicesMessage receivedMessage;
 
         public StoreDecommitmentStep(InitialProtocolState startState, PropagateInvitationToAliceDevicesMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -921,7 +921,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final SendCommitmentMessage receivedMessage;
 
         public StoreAndPropagateCommitmentAndAskForConfirmationStep(InitialProtocolState startState, SendCommitmentMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -965,7 +965,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final PropagateCommitmentToBobDevicesMessage receivedMessage;
 
         public StoreCommitmentAndAskForConfirmationStep(InitialProtocolState startState, PropagateCommitmentToBobDevicesMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -998,7 +998,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final BobDialogInvitationConfirmationMessage receivedMessage;
 
         public SendSeedAndPropagateConfirmationStep(WaitingForConfirmationState startState, BobDialogInvitationConfirmationMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1065,7 +1065,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final PropagateConfirmationToBobDevicesMessage receivedMessage;
 
         public ReceivedConfirmationFromOtherDeviceStep(WaitingForConfirmationState startState, PropagateConfirmationToBobDevicesMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1111,7 +1111,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final SendBobSeedMessage receivedMessage;
 
         public ShowSasDialogAndSendDecommitmentStep(WaitingForSeedState startState, SendBobSeedMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1151,7 +1151,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final SendDecommitmentMessage receivedMessage;
 
         public ShowSasDialogStep(WaitingForDecommitmentState startState, SendDecommitmentMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1192,7 +1192,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final DialogForSasExchangeMessage receivedMessage;
 
         public CheckSasAndAddTrustStep(WaitingForUserSasState startState, DialogForSasExchangeMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1262,7 +1262,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final PropagateEnteredSasToOtherDevicesMessage receivedMessage;
 
         public CheckPropagatedSasAndAddTrustStep(WaitingForUserSasState startState, PropagateEnteredSasToOtherDevicesMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1311,7 +1311,7 @@ public class TrustEstablishmentProtocol extends ConcreteProtocol {
         private final MutualTrustConfirmationMessage receivedMessage;
 
         public NotifiedMutualTrustEstablishedStep(ContactIdentityTrustedState startState, MutualTrustConfirmationMessage receivedMessage, TrustEstablishmentProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

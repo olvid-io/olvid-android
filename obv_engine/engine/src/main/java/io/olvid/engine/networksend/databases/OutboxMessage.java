@@ -35,7 +35,6 @@ import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.notifications.UploadNotifications;
 import io.olvid.engine.encoder.DecodingException;
-import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.networksend.datatypes.SendManagerSession;
 
 

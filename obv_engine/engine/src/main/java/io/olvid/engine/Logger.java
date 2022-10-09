@@ -20,6 +20,8 @@
 package io.olvid.engine;
 
 
+import java.util.UUID;
+
 public class Logger {
     public static final int DEBUG = 0;
     public static final int INFO = 1;
@@ -98,6 +100,20 @@ public class Logger {
             data[i/2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4) + Character.digit(hex.charAt(i+1), 16));
         }
         return data;
+    }
+
+
+    public static String getUuidString(UUID uuid) {
+        return (digits(uuid.getMostSignificantBits() >> 32, 8) + "-" +
+                digits(uuid.getMostSignificantBits() >> 16, 4) + "-" +
+                digits(uuid.getMostSignificantBits(), 4) + "-" +
+                digits(uuid.getLeastSignificantBits() >> 48, 4) + "-" +
+                digits(uuid.getLeastSignificantBits(), 12));
+    }
+
+    private static String digits(long val, int digits) {
+        long hi = 1L << (digits * 4);
+        return Long.toHexString(hi | (val & (hi - 1))).substring(1);
     }
 
     public interface LogOutputter {

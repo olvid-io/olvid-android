@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.Arrays;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaPrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaPublicKey;
@@ -161,11 +162,11 @@ public class AsymmetricCryptoUnitTest {
                 byte[] response = serverAuthentication.solveChallenge(challenge, sk, pk, prng);
                 assertArrayEquals(response, expectedResponse);
 
-                byte[] signature = Arrays.copyOfRange(response, ServerAuthenticationECSdsa.PADDING_LENGTH, response.length);
-                byte[] formattedChallenge = new byte[ServerAuthenticationECSdsa.PREFIX.length + challenge.length + ServerAuthenticationECSdsa.PADDING_LENGTH];
-                System.arraycopy(ServerAuthenticationECSdsa.PREFIX, 0, formattedChallenge, 0, ServerAuthenticationECSdsa.PREFIX.length);
-                System.arraycopy(challenge, 0, formattedChallenge, ServerAuthenticationECSdsa.PREFIX.length, challenge.length);
-                System.arraycopy(response, 0, formattedChallenge, ServerAuthenticationECSdsa.PREFIX.length + challenge.length, ServerAuthenticationECSdsa.PADDING_LENGTH);
+                byte[] signature = Arrays.copyOfRange(response, Constants.SIGNATURE_PADDING_LENGTH, response.length);
+                byte[] formattedChallenge = new byte[Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX.length + challenge.length + Constants.SIGNATURE_PADDING_LENGTH];
+                System.arraycopy(Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX, 0, formattedChallenge, 0, Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX.length);
+                System.arraycopy(challenge, 0, formattedChallenge, Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX.length, challenge.length);
+                System.arraycopy(response, 0, formattedChallenge, Constants.SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX.length + challenge.length, Constants.SIGNATURE_PADDING_LENGTH);
                 SignaturePublicKey signaturePublicKey = pk.getSignaturePublicKey();
                 Signature signatureImplem = Suite.getSignature(signaturePublicKey);
                 assertTrue(signatureImplem.verify(signaturePublicKey, formattedChallenge, signature));

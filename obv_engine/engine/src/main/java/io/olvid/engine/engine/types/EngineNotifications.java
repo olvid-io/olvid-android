@@ -45,6 +45,8 @@ public abstract class EngineNotifications {
     public static final String ATTACHMENT_DOWNLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY = "message_identifier"; // byte[]
     public static final String ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY = "attachment_number"; // int
     public static final String ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY = "progress"; // float
+    public static final String ATTACHMENT_DOWNLOAD_PROGRESS_SPEED_BPS_KEY = "speed"; // float
+    public static final String ATTACHMENT_DOWNLOAD_PROGRESS_ETA_SECONDS_KEY = "eta"; // int
 
     public static final String ATTACHMENT_DOWNLOADED = "engine_notification_attachment_downloaded";
     public static final String ATTACHMENT_DOWNLOADED_ATTACHMENT_KEY = "attachment"; // ObvAttachment
@@ -54,6 +56,8 @@ public abstract class EngineNotifications {
     public static final String ATTACHMENT_UPLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY = "message_identifier"; // byte[]
     public static final String ATTACHMENT_UPLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY = "attachment_number"; // int
     public static final String ATTACHMENT_UPLOAD_PROGRESS_PROGRESS_KEY = "progress"; // float
+    public static final String ATTACHMENT_UPLOAD_PROGRESS_SPEED_BPS_KEY = "speed"; // float
+    public static final String ATTACHMENT_UPLOAD_PROGRESS_ETA_SECONDS_KEY = "eta"; // int
 
     public static final String ATTACHMENT_UPLOADED = "engine_notification_attachment_uploaded";
     public static final String ATTACHMENT_UPLOADED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
@@ -69,7 +73,7 @@ public abstract class EngineNotifications {
     public static final String ATTACHMENT_DOWNLOAD_FAILED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
     public static final String ATTACHMENT_DOWNLOAD_FAILED_MESSAGE_IDENTIFIER_KEY = "message_identifier"; // byte[] (message UID)
     public static final String ATTACHMENT_DOWNLOAD_FAILED_ATTACHMENT_NUMBER_KEY = "attachment_number"; // int
-    
+
     public static final String MESSAGE_UPLOADED = "engine_notification_message_uploaded";
     public static final String MESSAGE_UPLOADED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
     public static final String MESSAGE_UPLOADED_IDENTIFIER_KEY = "identifier"; // byte[] (message UID)
@@ -320,4 +324,28 @@ public abstract class EngineNotifications {
     public static final String CONTACT_TRUST_LEVEL_INCREASED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
     public static final String CONTACT_TRUST_LEVEL_INCREASED_BYTES_CONTACT_IDENTITY_KEY = "bytes_contact_identity"; // byte[]
     public static final String CONTACT_TRUST_LEVEL_INCREASED_TRUST_LEVEL_KEY = "trust_level"; // int
+
+    public static final String GROUP_V2_CREATED_OR_UPDATED = "engine_notification_group_v2_created_or_updated";
+    public static final String GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY = "group"; // ObvGroupV2
+    public static final String GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY = "new_group"; // boolean
+    public static final String GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY = "by_me"; // boolean
+
+    public static final String GROUP_V2_PHOTO_CHANGED = "engine_notification_group_v2_photo_changed";
+    public static final String GROUP_V2_PHOTO_CHANGED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String GROUP_V2_PHOTO_CHANGED_BYTES_GROUP_IDENTIFIER_KEY = "bytes_group_identifier"; // byte[]
+
+    public static final String GROUP_V2_UPDATE_IN_PROGRESS_CHANGED = "engine_notification_group_v2_update_in_progress_changed";
+    public static final String GROUP_V2_UPDATE_IN_PROGRESS_CHANGED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String GROUP_V2_UPDATE_IN_PROGRESS_CHANGED_BYTES_GROUP_IDENTIFIER_KEY = "bytes_group_identifier"; // byte[]
+    public static final String GROUP_V2_UPDATE_IN_PROGRESS_CHANGED_UPDATING_KEY = "updating"; // boolean
+    public static final String GROUP_V2_UPDATE_IN_PROGRESS_CHANGED_CREATING_KEY = "creating"; // boolean
+
+    public static final String GROUP_V2_DELETED = "engine_notification_group_v2_deleted";
+    public static final String GROUP_V2_DELETED_BYTES_OWNED_IDENTITY = "bytes_owned_identity"; // byte[]
+    public static final String GROUP_V2_DELETED_BYTES_GROUP_IDENTIFIER_KEY = "bytes_group_identifier"; // byte[]
+
+    public static final String GROUP_V2_UPDATE_FAILED = "engine_notification_group_v2_update_failed";
+    public static final String GROUP_V2_UPDATE_FAILED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String GROUP_V2_UPDATE_FAILED_BYTES_GROUP_IDENTIFIER_KEY = "bytes_group_identifier"; // byte[]
+    public static final String GROUP_V2_UPDATE_FAILED_ERROR_KEY = "error"; // boolean
 }

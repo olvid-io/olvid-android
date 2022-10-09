@@ -19,12 +19,12 @@
 
 package io.olvid.messenger.databases.entity;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;

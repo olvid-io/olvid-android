@@ -27,6 +27,8 @@ import android.hardware.camera2.CameraManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.session.MediaSession;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -35,9 +37,8 @@ import android.os.Vibrator;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-
-import android.media.session.MediaSession;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class IncomingCallRinger {
@@ -66,26 +68,24 @@ public class IncomingCallRinger {
         cameraIdsFlashThreads = new HashMap<>();
         cameraManager = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (SettingsActivity.useFlashOnIncomingCall()) {
-                cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-                if (cameraManager != null) {
-                    try {
-                        for (String cameraId : cameraManager.getCameraIdList()) {
-                            CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
-                            Boolean hasFlash = cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
-                            if (hasFlash != null && hasFlash) {
-                                cameraIdsToFlash.add(cameraId);
-                            }
+            cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+            if (cameraManager != null) {
+                try {
+                    for (String cameraId : cameraManager.getCameraIdList()) {
+                        CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
+                        Boolean hasFlash = cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
+                        if (hasFlash != null && hasFlash) {
+                            cameraIdsToFlash.add(cameraId);
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 
-    public void ring(UUID callIdentifier) {
+    public void ring(UUID callIdentifier, @Nullable DiscussionCustomization discussionCustomization) {
         int ringerMode = AudioManager.RINGER_MODE_NORMAL;
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (audioManager != null) {
@@ -93,10 +93,23 @@ public class IncomingCallRinger {
         }
 
         cleanup();
+        Uri ringtone;
+        long[] vibrationPattern;
+        boolean useFlash;
+        if (discussionCustomization == null || !discussionCustomization.prefUseCustomCallNotification) {
+            ringtone = SettingsActivity.getCallRingtone();
+            vibrationPattern = SettingsActivity.getCallVibrationPattern();
+            useFlash = SettingsActivity.useFlashOnIncomingCall();
+        } else {
+            ringtone = discussionCustomization.prefCallNotificationRingtone == null ? Uri.EMPTY : Uri.parse(discussionCustomization.prefCallNotificationRingtone);
+            vibrationPattern = discussionCustomization.prefCallNotificationVibrationPattern == null ? new long[0] : SettingsActivity.intToVibrationPattern(Integer.parseInt(discussionCustomization.prefCallNotificationVibrationPattern));
+            useFlash = discussionCustomization.prefCallNotificationUseFlash;
+        }
+
 
         try {
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(context, SettingsActivity.getCallRingtone());
+            mediaPlayer.setDataSource(context, ringtone);
             mediaPlayer.setLooping(true);
             mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -124,7 +137,7 @@ public class IncomingCallRinger {
                             || keyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PAUSE)) {
                         Intent answerCallIntent = new Intent(context, WebrtcCallService.class);
                         answerCallIntent.setAction(WebrtcCallService.ACTION_ANSWER_CALL);
-                        answerCallIntent.putExtra(WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA, callIdentifier.toString());
+                        answerCallIntent.putExtra(WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(callIdentifier));
                         context.startService(answerCallIntent);
                         return true;
                     }
@@ -145,7 +158,6 @@ public class IncomingCallRinger {
         }
 
         // vibrate
-        long[] vibrationPattern = SettingsActivity.getCallVibrationPattern();
         if (vibrator != null && vibrationPattern.length > 0 && ringerMode != AudioManager.RINGER_MODE_SILENT) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createWaveform(vibrationPattern, 1));
@@ -160,10 +172,12 @@ public class IncomingCallRinger {
                 thread.interrupt();
             }
             cameraIdsFlashThreads.clear();
-            for (String cameraId : cameraIdsToFlash) {
-                CameraFlashThread cameraFlashThread = new CameraFlashThread(cameraId);
-                cameraFlashThread.start();
-                cameraIdsFlashThreads.put(cameraId, cameraFlashThread);
+            if (useFlash) {
+                for (String cameraId : cameraIdsToFlash) {
+                    CameraFlashThread cameraFlashThread = new CameraFlashThread(cameraId);
+                    cameraFlashThread.start();
+                    cameraIdsFlashThreads.put(cameraId, cameraFlashThread);
+                }
             }
         }
     }

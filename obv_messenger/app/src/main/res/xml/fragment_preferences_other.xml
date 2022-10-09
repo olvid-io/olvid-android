@@ -22,6 +22,17 @@
             android:title="@string/pref_notify_certificate_change_title"
             android:icon="@drawable/ic_pref_certificate"
             android:order="25" />
+        <ListPreference
+            android:key="pref_key_block_untrusted_certificate"
+            android:defaultValue="issuer"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/pref_block_untrusted_certificate_title"
+            android:entries="@array/block_untrusted_certificate"
+            android:entryValues="@array/block_untrusted_certificate_values"
+            android:icon="@drawable/ic_pref_block_untrusted"
+            android:dependency="pref_key_notify_certificate_change"
+            android:shouldDisableView="true"
+            android:order="26" />
         <SwitchPreference
             android:key="pref_key_send_with_hardware_enter"
             android:defaultValue="false"
@@ -36,6 +47,13 @@
             android:summary="@string/pref_sending_foreground_service_summary"
             android:icon="@drawable/ic_pref_sync"
             android:order="28" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_permanent_foreground_service"
+            android:title="@string/pref_permanent_foreground_service_title"
+            android:summary="@string/pref_permanent_foreground_service_summary"
+            android:icon="@drawable/ic_pref_foreground_service"
+            android:order="29"/>
         <DropDownPreference
             android:defaultValue="null"
             android:key="pref_key_ping_connectivity_indicator"
@@ -44,7 +62,7 @@
             android:entries="@array/ping_connectivity_indicator"
             android:entryValues="@array/ping_connectivity_indicator_value"
             android:icon="@drawable/ic_pref_ping_indicator"
-            android:order="29" />
+            android:order="30" />
         <DropDownPreference
             android:defaultValue="M"
             android:entries="@array/QR_correction_levels"
@@ -53,7 +71,7 @@
             android:title="@string/pref_qr_correction_level_title"
             app:useSimpleSummaryProvider="true"
             android:icon="@drawable/ic_pref_qr"
-            android:order="30" />
+            android:order="31" />
         <DropDownPreference
             android:defaultValue="null"
             app:singleLineTitle="false"

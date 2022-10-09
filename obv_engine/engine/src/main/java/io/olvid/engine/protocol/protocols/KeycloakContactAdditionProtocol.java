@@ -505,7 +505,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public VerifyContactAndStartDeviceDiscoveryStep(InitialProtocolState startState, InitialMessage receivedMessage, KeycloakContactAdditionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -573,7 +573,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         private final DeviceDiscoveryDoneMessage receivedMessage;
 
         public AddContactAndSendRequestStep(WaitingForDeviceDiscoveryState startState, DeviceDiscoveryDoneMessage receivedMessage, KeycloakContactAdditionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -652,7 +652,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         private final PropagateContactAdditionToOtherDevicesMessage receivedMessage;
 
         public ProcessPropagatedContactAdditionStep(InitialProtocolState startState, PropagateContactAdditionToOtherDevicesMessage receivedMessage, KeycloakContactAdditionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -685,7 +685,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         private final InviteKeycloakContactMessage receivedMessage;
 
         public ProcessReceivedKeycloakInviteStep(InitialProtocolState startState, InviteKeycloakContactMessage receivedMessage, KeycloakContactAdditionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -740,7 +740,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         private final CheckForRevocationServerQueryMessage receivedMessage;
 
         public AddContactAndSendConfirmationStep(CheckingForRevocationState startState, CheckForRevocationServerQueryMessage receivedMessage, KeycloakContactAdditionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -792,7 +792,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         private final ConfirmationMessage receivedMessage;
 
         public ProcessConfirmationStep(WaitingForConfirmationState startState, ConfirmationMessage receivedMessage, KeycloakContactAdditionProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAsymmetricChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

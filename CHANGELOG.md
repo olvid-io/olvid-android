@@ -1,3 +1,78 @@
+# Build 182 (0.12.6)
+2022-09-22
+
+- Fix for one time ephemeral and Gif keyboard
+
+# ~~Build 181 (0.12.6)~~
+2022-09-19
+
+- possibility to block connection with untrusted certificate
+- added an ETA estimator for attachment upload/downloads
+- fix message sending from widget
+
+# ~~Build 180 (0.12.6)~~
+2022-09-14
+
+- initial support for upcoming "multi-admin" groups
+- possibility to pin a discussion
+- implement anti-bruteforce for PIN and an "emergency PIN" to wipe sensitive data
+- support for new Android 13 features (per app language, notification permission)
+- fix for buggy UUID.toString() implementations (good job Motorola!)
+
+# ~~Build 179 (0.12.5.1)~~
+2022-08-22
+
+- internal tests build
+
+# Build 178 (0.12.5.1)
+2022-07-28
+
+- fix a bug with shared ephemeral settings not working in groups
+
+# ~~Build 177 (0.12.5.1)~~
+2022-07-28
+
+- small fixes
+- better way to import settings from a configuration link
+
+# Build 176 (0.12.5)
+2022-07-10
+
+- [beta] fix a bug with location message containing an attachment
+
+# ~~Build 175 (0.12.5)~~
+2022-07-05
+
+- possibility to configure most settings from a configuration.olvid.io link
+
+# ~~Build 174 (0.12.5)~~
+2022-07-01
+
+- bug fix
+
+# ~~Build 171 (0.12.5)~~
+2022-06-30
+
+- [beta] possibility to share a location within Olvid
+- added a setting to disable automatic reply suggestions and actions
+- added call duration in discussion messages
+
+# Build 170 (0.12.4)
+2022-05-24
+
+- Backward compatiblity for Android API <26
+
+# ~~Build 169 (0.12.4)~~
+2022-05-21
+
+- Added the possibility to use custom notifications for incoming messages/calls for each discussion
+- Added a setting to scale the overall Olvid UI (independently of the existing font scaling)
+
+# Build 168 (0.12.3.1)
+2022-05-19
+
+- Hotfix
+
 # Build 167 (0.12.3)
 2022-05-06
 

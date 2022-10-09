@@ -332,12 +332,12 @@ public class BackupKey implements ObvDatabase {
         return Backup.get(backupManagerSession, uid, uploadedBackupVersion);
     }
 
-    public Backup getLatestBackup() {
-        if (latestBackupVersion == null) {
-            return null;
-        }
-        return Backup.get(backupManagerSession, uid, latestBackupVersion);
-    }
+//    public Backup getLatestBackup() {
+//        if (latestBackupVersion == null) {
+//            return null;
+//        }
+//        return Backup.get(backupManagerSession, uid, latestBackupVersion);
+//    }
 
     public Backup getExportedBackup() {
         if (exportedBackupVersion == null) {

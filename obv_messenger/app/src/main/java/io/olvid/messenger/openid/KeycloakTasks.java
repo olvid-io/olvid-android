@@ -71,9 +71,9 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
-import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder;
 import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
 import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;

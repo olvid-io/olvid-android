@@ -30,8 +30,6 @@ import androidx.lifecycle.ViewModel;
 import java.util.Arrays;
 import java.util.List;
 
-import io.olvid.messenger.App;
-import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.entity.ActionShortcutConfiguration;
@@ -41,8 +39,8 @@ public class ActionShortcutConfigurationViewModel extends ViewModel {
     private final MutableLiveData<byte[]> bytesOwnedIdentityLiveData;
     private final LiveData<OwnedIdentity> ownedIdentityLiveData;
     private final MutableLiveData<Long> actionDiscussionIdLiveData;
-    private final LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> discussionListLiveData;
-    private final LiveData<DiscussionDao.DiscussionAndContactDisplayNames> discussionLiveData;
+    private final LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> discussionListLiveData;
+    private final LiveData<DiscussionDao.DiscussionAndGroupMembersNames> discussionLiveData;
     private String actionMessage = null;
     private boolean actionConfirmBeforeSending = false;
     private boolean actionVibrateAfterSending = true;
@@ -68,14 +66,14 @@ public class ActionShortcutConfigurationViewModel extends ViewModel {
             if (bytesOwnedIdentity == null) {
                 return null;
             }
-            return AppDatabase.getInstance().discussionDao().getAllNotLockedWithContactNames(bytesOwnedIdentity, App.getContext().getString(R.string.text_contact_names_separator));
+            return AppDatabase.getInstance().discussionDao().getAllNotLockedWithGroupMembersNames(bytesOwnedIdentity);
         });
 
         discussionLiveData = Transformations.switchMap(actionDiscussionIdLiveData, (Long discussionId) -> {
             if (discussionId == null) {
                 return new MutableLiveData<>(null);
             }
-            return AppDatabase.getInstance().discussionDao().getWithContactNames(discussionId,  App.getContext().getString(R.string.text_contact_names_separator));
+            return AppDatabase.getInstance().discussionDao().getWithGroupMembersNames(discussionId);
         });
 
         widgetLabelLiveData = new MutableLiveData<>(null);
@@ -117,11 +115,11 @@ public class ActionShortcutConfigurationViewModel extends ViewModel {
         return actionDiscussionIdLiveData;
     }
 
-    public LiveData<List<DiscussionDao.DiscussionAndContactDisplayNames>> getDiscussionListLiveData() {
+    public LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> getDiscussionListLiveData() {
         return discussionListLiveData;
     }
 
-    public LiveData<DiscussionDao.DiscussionAndContactDisplayNames> getDiscussionLiveData() {
+    public LiveData<DiscussionDao.DiscussionAndGroupMembersNames> getDiscussionLiveData() {
         return discussionLiveData;
     }
 

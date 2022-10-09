@@ -24,6 +24,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -58,7 +59,6 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.Purchase;
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 
-import java.lang.ref.WeakReference;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -79,13 +79,13 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.fragments.dialog.LedColorPickerDialogFragment;
 import io.olvid.messenger.services.BackupCloudProviderService;
 
-public class SettingsActivity extends LockableActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, LedColorPickerDialogFragment.OnLedColorSelectedListener {
+public class SettingsActivity extends LockableActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     public static final String SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA = "sub_setting";
     public static final String PREF_HEADER_KEY_BACKUP = "pref_header_key_backup";
+    public static final String PREF_HEADER_KEY_NOTIFICATIONS = "pref_header_key_notifications";
 //    public static final String PREF_HEADER_KEY_PRIVACY = "pref_header_key_privacy";
     public static final String PREF_HEADER_KEY_LOCK_SCREEN = "pref_header_key_lock_screen";
 
@@ -123,19 +123,19 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static final long[] VIBRATION_PATTERN_3_LONG = new long[]{0, 250, 150, 250, 150, 250, 1950};
 
     static final String PREF_KEY_MESSAGE_VIBRATION_PATTERN = "pref_key_message_vibration_pattern";
-    static final String PREF_KEY_MESSAGE_VIBRATION_PATTERN_DEFAULT = "1";
+    public static final String PREF_KEY_MESSAGE_VIBRATION_PATTERN_DEFAULT = "1";
 
     static final String PREF_KEY_MESSAGE_RINGTONE = "pref_key_message_ringtone";
-    static final String PREF_KEY_MESSAGE_RINGTONE_DEFAULT = Settings.System.DEFAULT_NOTIFICATION_URI.toString();
+    public static final String PREF_KEY_MESSAGE_RINGTONE_DEFAULT = Settings.System.DEFAULT_NOTIFICATION_URI.toString();
 
-    static final String PREF_KEY_MESSAGE_LED = "pref_key_message_led_color";
-    static final String PREF_KEY_MESSAGE_LED_DEFAULT = "#2f65f5";
+    static final String PREF_KEY_MESSAGE_LED_COLOR = "pref_key_message_led_color";
+    public static final String PREF_KEY_MESSAGE_LED_COLOR_DEFAULT = "#2f65f5";
 
     static final String PREF_KEY_CALL_VIBRATION_PATTERN = "pref_key_call_vibration_pattern";
-    static final String PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT = "20";
+    public static final String PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT = "20";
 
     static final String PREF_KEY_CALL_RINGTONE = "pref_key_call_ringtone";
-    static final String PREF_KEY_CALL_RINGTONE_DEFAULT = Settings.System.DEFAULT_RINGTONE_URI.toString();
+    public static final String PREF_KEY_CALL_RINGTONE_DEFAULT = Settings.System.DEFAULT_RINGTONE_URI.toString();
 
     static final String PREF_KEY_CALL_USE_FLASH = "pref_key_call_use_flash";
     static final boolean PREF_KEY_CALL_USE_FLASH_DEFAULT = false;
@@ -145,6 +145,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
 
     // CUSTOMIZATION
+    static final String PREF_KEY_APP_LANGUAGE = "pref_key_app_language";
     static final String PREF_KEY_DARK_MODE = "pref_key_dark_mode";
     static final boolean PREF_KEY_DARK_MODE_DEFAULT = false;
     static final String PREF_KEY_DARK_MODE_API29 = "pref_key_dark_mode_api29";
@@ -152,6 +153,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_FONT_SCALE = "pref_key_font_scale";
     static final String PREF_KEY_FONT_SCALE_DEFAULT = "1.0";
+
+    static final String PREF_KEY_SCREEN_SCALE = "pref_key_screen_scale";
+    static final String PREF_KEY_SCREEN_SCALE_DEFAULT = "1.0";
 
     static final String PREF_KEY_USE_SYSTEM_EMOJIS = "pref_key_use_system_emojis";
     static final boolean PREF_KEY_USE_SYSTEM_EMOJIS_DEFAULT = false;
@@ -175,6 +179,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_HIDE_NOTIFICATION_CONTENTS = "pref_key_hide_notification_contents";
     static final boolean PREF_KEY_HIDE_NOTIFICATION_CONTENTS_DEFAULT = false;
+
+    static final String PREF_KEY_DISABLE_NOTIFICATION_SUGGESTIONS = "pref_key_disable_notification_suggestions";
+    static final boolean PREF_KEY_DISABLE_NOTIFICATION_SUGGESTIONS_DEFAULT = true;
 
     static final String PREF_KEY_EXPOSE_RECENT_DISCUSSIONS = "pref_key_expose_recent_discussions";
     static final boolean PREF_KEY_EXPOSE_RECENT_DISCUSSIONS_DEFAULT = false;
@@ -225,13 +232,22 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_LOCK_GRACE_TIME = "pref_key_lock_grace_time";
     static final String PREF_KEY_LOCK_GRACE_TIME_DEFAULT = "30";
 
+    static final String PREF_KEY_UNLOCK_FAILED_WIPE_MESSAGES = "pref_key_unlock_failed_wipe_messages";
+    static final boolean PREF_KEY_UNLOCK_FAILED_WIPE_MESSAGES_DEFAULT = false;
+
+    static final String PREF_KEY_USE_EMERGENCY_PIN = "pref_key_use_emergency_pin";
+    static final boolean PREF_KEY_USE_EMERGENCY_PIN_DEFAULT = false;
+
     static final String PREF_KEY_KEEP_LOCK_SERVICE_OPEN = "pref_key_keep_lock_service_open";
     static final boolean PREF_KEY_KEEP_LOCK_SERVICE_OPEN_DEFAULT = true;
 
-    static final String PREF_KEY_PIN_HASH = "pref_key_pin_hash";
-    static final String PREF_KEY_PLAIN_PIN = "pref_key_plain_pin";
     static final String PREF_KEY_PIN_IS_A_PASSWORD = "pref_key_pin_is_a_password";
     static final boolean PREF_KEY_PIN_IS_A_PASSWORD_DEFAULT = false;
+
+    static final String PREF_KEY_PIN_HASH = "pref_key_pin_hash";
+    static final String PREF_KEY_PLAIN_PIN = "pref_key_plain_pin";
+    static final String PREF_KEY_EMERGENCY_PIN_HASH = "pref_key_emergency_pin_hash";
+    static final String PREF_KEY_EMERGENCY_PLAIN_PIN = "pref_key_emergency_plain_pin";
 
     static final String PREF_KEY_RESET_PIN = "pref_key_reset_pin";
 
@@ -285,12 +301,23 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_NOTIFY_CERTIFICATE_CHANGE = "pref_key_notify_certificate_change";
     static final boolean PREF_KEY_NOTIFY_CERTIFICATE_CHANGE_DEFAULT = false;
 
+    static final String PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE = "pref_key_block_untrusted_certificate";
+    static final BlockUntrustedCertificate PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE_DEFAULT = BlockUntrustedCertificate.ISSUER_CHANGED;
+
+    public enum BlockUntrustedCertificate {
+        ALWAYS,
+        ISSUER_CHANGED,
+        NEVER,
+    }
+
     public static final String USER_DIALOG_HIDE_BATTERY_OPTIMIZATION = "user_dialog_hide_battery_optimization";
     public static final String USER_DIALOG_HIDE_BACKGROUND_RESTRICTED = "user_dialog_hide_background_restricted";
     public static final String USER_DIALOG_HIDE_GOOGLE_APIS = "user_dialog_hide_google_apis";
     public static final String USER_DIALOG_HIDE_ALARM_SCHEDULING = "user_dialog_hide_alarm_scheduling";
+    public static final String USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS = "user_dialog_hide_allow_notifications";
     public static final String USER_DIALOG_HIDE_OPEN_EXTERNAL_APP = "user_dialog_hide_open_external_app";
     public static final String USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION = "user_dialog_hide_forward_message_explanation";
+    public static final String USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION = "user_dialog_hide_open_external_app_location";
 
     static final String PREF_KEY_DEBUG_LOG_LEVEL = "pref_key_debug_log_level";
     static final boolean PREF_KEY_DEBUG_LOG_LEVEL_DEFAULT = false;
@@ -365,7 +392,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     // ACTIVITY VARIABLES
 
-    private WeakReference<LedColorPickerDialogFragment.OnLedColorSelectedListener> onLedColorSelectedListenerWeakReference;
     private HeadersPreferenceFragment headersPreferenceFragment;
 
     @Override
@@ -562,11 +588,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         }
         final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), prefFragmentName);
 
-        if (fragment instanceof LedColorPickerDialogFragment.OnLedColorSelectedListener) {
-            onLedColorSelectedListenerWeakReference = new WeakReference<>((LedColorPickerDialogFragment.OnLedColorSelectedListener) fragment);
-        } else {
-            onLedColorSelectedListenerWeakReference = null;
-        }
         try {
             // Replace the existing Fragment with the new Fragment
             getSupportFragmentManager().beginTransaction()
@@ -583,16 +604,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return true;
     }
 
-
-    @Override
-    public void onLedColorSelected(int requestCode, String color) {
-        if (onLedColorSelectedListenerWeakReference != null) {
-            LedColorPickerDialogFragment.OnLedColorSelectedListener onLedColorSelectedListener = onLedColorSelectedListenerWeakReference.get();
-            if (onLedColorSelectedListener != null) {
-                onLedColorSelectedListener.onLedColorSelected(requestCode, color);
-            }
-        }
-    }
 
     @Override
     public void onBackPressed() {
@@ -671,6 +682,37 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         }
         return 1.0f;
     }
+
+    public static float getScreenScale() {
+        String scaleString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_SCREEN_SCALE, PREF_KEY_SCREEN_SCALE_DEFAULT);
+        if (scaleString != null) {
+            try {
+                return Float.parseFloat(scaleString);
+            } catch (Exception ignored) {
+            }
+        }
+        return 1.0f;
+    }
+
+    public static Context overrideContextScales(Context baseContext) {
+        final Context newContext;
+        float customFontScale = SettingsActivity.getFontScale();
+        float customScreenScale = SettingsActivity.getScreenScale();
+        if (customFontScale != 1.0f || customScreenScale != 1.0f) {
+            Configuration baseConfiguration = baseContext.getResources().getConfiguration();
+            Configuration configuration = new Configuration();
+            configuration.fontScale = baseContext.getResources().getConfiguration().fontScale * customFontScale;
+            configuration.densityDpi = (int) (baseContext.getResources().getConfiguration().densityDpi * customScreenScale);
+            configuration.screenWidthDp = (int) (baseConfiguration.screenWidthDp/customScreenScale);
+            configuration.screenHeightDp = (int) (baseConfiguration.screenHeightDp/customScreenScale);
+            configuration.smallestScreenWidthDp = (int) (baseConfiguration.smallestScreenWidthDp/customScreenScale);
+            newContext = baseContext.createConfigurationContext(configuration);
+        } else {
+            newContext = baseContext;
+        }
+        return newContext;
+    }
+
 
     public static long getLastAvailableSpaceWarningTimestamp() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getLong(PREF_KEY_LAST_AVAILABLE_SPACE_WARNING_TIMESTAMP, 0L);
@@ -806,17 +848,37 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     @NonNull
     public static PingConnectivityIndicator getPingConnectivityIndicator() {
         String pingConnectivityIndicator = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_PING_CONNECTIVITY_INDICATOR, PREF_KEY_PING_CONNECTIVITY_INDICATOR_DEFAULT);
-        if (pingConnectivityIndicator != null) {
-            switch (pingConnectivityIndicator) {
-                case "dot":
-                    return PingConnectivityIndicator.DOT;
-                case "line":
-                    return PingConnectivityIndicator.LINE;
-                case "full":
-                    return PingConnectivityIndicator.FULL;
-            }
+        switch (pingConnectivityIndicator) {
+            case "dot":
+                return PingConnectivityIndicator.DOT;
+            case "line":
+                return PingConnectivityIndicator.LINE;
+            case "full":
+                return PingConnectivityIndicator.FULL;
         }
         return PingConnectivityIndicator.NONE;
+    }
+
+    public static void setPingConnectivityIndicator(String indicatorString) {
+        String pingConnectivityIndicatorString;
+        switch (indicatorString) {
+            case "dot":
+            case "line":
+            case "full":
+                pingConnectivityIndicatorString = indicatorString;
+                break;
+            default:
+                pingConnectivityIndicatorString = null;
+                break;
+        }
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        if (pingConnectivityIndicatorString == null) {
+            editor.remove(PREF_KEY_PING_CONNECTIVITY_INDICATOR);
+        } else {
+            editor.putString(PREF_KEY_PING_CONNECTIVITY_INDICATOR, pingConnectivityIndicatorString);
+        }
+        editor.apply();
+
     }
 
     public static String getQrCorrectionLevel() {
@@ -1048,6 +1110,20 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_USE_LOCK_SCREEN, PREF_KEY_USE_LOCK_SCREEN_DEFAULT);
     }
 
+    public static boolean useEmergencyPIN() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_USE_EMERGENCY_PIN, PREF_KEY_USE_EMERGENCY_PIN_DEFAULT);
+    }
+
+    public static boolean wipeMessagesOnUnlockFails() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_UNLOCK_FAILED_WIPE_MESSAGES, PREF_KEY_UNLOCK_FAILED_WIPE_MESSAGES_DEFAULT);
+    }
+
+    public static void setWipeMessagesOnUnlockFails(boolean wipe) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_UNLOCK_FAILED_WIPE_MESSAGES, wipe);
+        editor.apply();
+    }
+
     public static boolean isNotificationContentHidden() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_HIDE_NOTIFICATION_CONTENTS, PREF_KEY_HIDE_NOTIFICATION_CONTENTS_DEFAULT);
     }
@@ -1055,6 +1131,16 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static void setNotificationContentHidden(boolean contentHidden) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         editor.putBoolean(PREF_KEY_HIDE_NOTIFICATION_CONTENTS, contentHidden);
+        editor.apply();
+    }
+
+    public static boolean isNotificationSuggestionAllowed() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_DISABLE_NOTIFICATION_SUGGESTIONS, PREF_KEY_DISABLE_NOTIFICATION_SUGGESTIONS_DEFAULT);
+    }
+
+    public static void setNotificationSuggestionAllowed(boolean suggestionsAllowed) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_DISABLE_NOTIFICATION_SUGGESTIONS, suggestionsAllowed);
         editor.apply();
     }
 
@@ -1165,6 +1251,42 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
+    public static BlockUntrustedCertificate getBlockUntrustedCertificate() {
+        String value = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE, null);
+        if (value != null) {
+            switch (value) {
+                case "always":
+                    return BlockUntrustedCertificate.ALWAYS;
+                case "never":
+                    return BlockUntrustedCertificate.NEVER;
+                case "issuer":
+                    return BlockUntrustedCertificate.ISSUER_CHANGED;
+            }
+        }
+        return PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE_DEFAULT;
+    }
+
+    public static void setBlockUntrustedCertificate(String untrustedCertificateCategoryString) {
+        String untrustedCertificateCategory;
+        switch (untrustedCertificateCategoryString) {
+            case "always":
+            case "issuer":
+            case "never":
+                untrustedCertificateCategory = untrustedCertificateCategoryString;
+                break;
+            default:
+                untrustedCertificateCategory = null;
+                break;
+        }
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        if (untrustedCertificateCategory == null) {
+            editor.remove(PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE);
+        } else {
+            editor.putString(PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE, untrustedCertificateCategory);
+        }
+        editor.apply();
+    }
+
     public static boolean disablePushNotifications() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_DISABLE_PUSH_NOTIFICATIONS, PREF_KEY_DISABLE_PUSH_NOTIFICATIONS_DEFAULT);
     }
@@ -1198,9 +1320,45 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
+    public static void saveEmergencyPIN(String PIN) {
+        byte[] salt = new byte[PIN_SALT_LENGTH];
+        new SecureRandom().nextBytes(salt);
+        byte[] hash = computePINHash(PIN, salt);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        if (hash == null) {
+            Logger.w("Error computing PIN hash, storing it in clear...");
+            editor.putString(PREF_KEY_EMERGENCY_PLAIN_PIN, PIN);
+            editor.remove(PREF_KEY_EMERGENCY_PIN_HASH);
+        } else {
+            editor.remove(PREF_KEY_EMERGENCY_PLAIN_PIN);
+            byte[] saltAndHash = new byte[PIN_SALT_LENGTH + hash.length];
+            System.arraycopy(salt, 0, saltAndHash, 0, PIN_SALT_LENGTH);
+            System.arraycopy(hash, 0, saltAndHash, PIN_SALT_LENGTH, hash.length);
+            String base64SaltAndHash = Base64.encodeToString(saltAndHash, Base64.NO_PADDING | Base64.NO_WRAP);
+            editor.putString(PREF_KEY_EMERGENCY_PIN_HASH, base64SaltAndHash);
+        }
+        editor.apply();
+    }
+
     public static boolean verifyPIN(String PIN) {
         String plainPIN = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_PLAIN_PIN, null);
         String hashedPIN = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_PIN_HASH, null);
+        if (plainPIN == null && hashedPIN == null) {
+            return true;
+        } else if (plainPIN != null) {
+            return plainPIN.equals(PIN);
+        } else {
+            byte[] saltAndHash = Base64.decode(hashedPIN, Base64.NO_PADDING | Base64.NO_WRAP);
+            byte[] salt = Arrays.copyOfRange(saltAndHash, 0, PIN_SALT_LENGTH);
+            byte[] hash = Arrays.copyOfRange(saltAndHash, PIN_SALT_LENGTH, saltAndHash.length);
+            byte[] hashCheck = computePINHash(PIN, salt);
+            return (hashCheck != null) && Arrays.equals(hash, hashCheck);
+        }
+    }
+
+    public static boolean verifyEmergencyPIN(String PIN) {
+        String plainPIN = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_EMERGENCY_PLAIN_PIN, null);
+        String hashedPIN = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_EMERGENCY_PIN_HASH, null);
         if (plainPIN == null && hashedPIN == null) {
             return true;
         } else if (plainPIN != null) {
@@ -1218,6 +1376,15 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         editor.remove(PREF_KEY_PLAIN_PIN);
         editor.remove(PREF_KEY_PIN_HASH);
+        editor.apply();
+        clearEmergencyPIN();
+    }
+
+    public static void clearEmergencyPIN() {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_USE_EMERGENCY_PIN, false);
+        editor.remove(PREF_KEY_EMERGENCY_PLAIN_PIN);
+        editor.remove(PREF_KEY_EMERGENCY_PIN_HASH);
         editor.apply();
     }
 
@@ -1242,6 +1409,12 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_UNLOCK_BIOMETRY, PREF_KEY_UNLOCK_BIOMETRY_DEFAULT);
     }
 
+    public static void setUseBiometryToUnlock(boolean useBiometry) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_UNLOCK_BIOMETRY, useBiometry);
+        editor.apply();
+    }
+
     public static int getLockGraceTime() {
         String timeString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCK_GRACE_TIME, PREF_KEY_LOCK_GRACE_TIME_DEFAULT);
         if (timeString != null) {
@@ -1250,8 +1423,26 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return -1;
     }
 
+    public static void setLockGraceTime(int graceTime) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putString(PREF_KEY_LOCK_GRACE_TIME, Integer.toString(graceTime));
+        editor.apply();
+    }
+
     public static boolean keepLockServiceOpen() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_KEEP_LOCK_SERVICE_OPEN, PREF_KEY_KEEP_LOCK_SERVICE_OPEN_DEFAULT);
+    }
+
+    public static void setKeepLockServiceOpen(boolean keepOpen) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_KEEP_LOCK_SERVICE_OPEN, keepOpen);
+        editor.apply();
+    }
+
+    public static void setUseAutomaticBackup(boolean useAutomaticBackup) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_ENABLE_AUTOMATIC_BACKUP, useAutomaticBackup);
+        editor.apply();
     }
 
     public static boolean useAutomaticBackup() {
@@ -1337,7 +1528,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         } catch (Exception ignored) {}
     }
 
-    static long[] intToVibrationPattern(int patternIndex) {
+    public static long[] intToVibrationPattern(int patternIndex) {
         switch (patternIndex) {
             case 1:
                 return VIBRATION_PATTERN_1_SHORT;
@@ -1358,7 +1549,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static String getMessageLedColor() {
-        String color = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_MESSAGE_LED, PREF_KEY_MESSAGE_LED_DEFAULT);
+        String color = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_MESSAGE_LED_COLOR, PREF_KEY_MESSAGE_LED_COLOR_DEFAULT);
         if ("".equals(color)) {
             return null;
         }
@@ -1368,9 +1559,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static void setMessageLedColor(String color) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         if (color == null) {
-            editor.putString(PREF_KEY_MESSAGE_LED, "");
+            editor.putString(PREF_KEY_MESSAGE_LED_COLOR, "");
         } else {
-            editor.putString(PREF_KEY_MESSAGE_LED, color);
+            editor.putString(PREF_KEY_MESSAGE_LED_COLOR, color);
         }
         editor.apply();
     }
@@ -1457,63 +1648,57 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
-    public static String getLanguageWebclient() {
+    public static String getWebclientLanguage() {
        String language = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LANGUAGE_WEBCLIENT, PREF_KEY_LANGUAGE_WEBCLIENT_DEFAULT);
-       if(language == null || "".equals(language)){
-           language = getLanguageWebclientDefault();
+       if("".equals(language)){
+           language = PREF_KEY_LANGUAGE_WEBCLIENT_DEFAULT;
        }
        return language;
     }
 
-    public static String getLanguageWebclientDefault() {
-        return PREF_KEY_LANGUAGE_WEBCLIENT_DEFAULT;
+    public static void setWebclientLanguage(String language) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        if(language == null || "".equals(language)){
+            editor.remove(PREF_KEY_LANGUAGE_WEBCLIENT);
+        } else {
+            editor.putString(PREF_KEY_LANGUAGE_WEBCLIENT, language);
+        }
+        editor.apply();
     }
 
-    public static String getThemeWebclient() {
+    public static String gWebclientTheme() {
         String theme = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_THEME_WEBCLIENT, PREF_KEY_THEME_WEBCLIENT_DEFAULT);
-        if(theme == null || "".equals(theme)){
-            theme = getThemeWebclientDefault();
+        if("".equals(theme)){
+            theme = PREF_KEY_THEME_WEBCLIENT_DEFAULT;
         }
         return theme;
     }
 
-    public static String getThemeWebclientDefault() {
-        return PREF_KEY_THEME_WEBCLIENT_DEFAULT;
-    }
-
-    public static boolean sendOnEnterEnabled() {
-        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_SEND_ON_ENTER_WEBCLIENT, PREF_KEY_SEND_ON_ENTER_WEBCLIENT_DEFAULT);
-    }
-
-    public static boolean showNotificationsOnBrowser() {
-        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_NOTIFICATION_SHOW_ON_BROWSER, PREF_KEY_NOTIFICATION_SHOW_ON_BROWSER_DEFAULT);
-    }
-
-    public static boolean notificationsSoundOnWebclient() {
-        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_NOTIFICATION_SOUND_WEBCLIENT, PREF_KEY_NOTIFICATION_SOUND_WEBCLIENT_DEFAULT);
-    }
-
-    public static void setLanguageWebclient(String language) {
-        if(language == null || "".equals(language)){
-            return;
-        }
+    public static void setThemeWebclient(String theme) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
-        editor.putString(PREF_KEY_LANGUAGE_WEBCLIENT, language);
+        if (theme == null) {
+            editor.remove(PREF_KEY_THEME_WEBCLIENT);
+        } else {
+            switch (theme) {
+                case "dark":
+                case "light":
+                case "BrowserDefault":
+                case "AppDefault":
+                    editor.putString(PREF_KEY_THEME_WEBCLIENT, theme);
+                    break;
+                default:
+                    editor.remove(PREF_KEY_THEME_WEBCLIENT);
+                    break;
+            }
+        }
         editor.apply();
     }
 
-    public static void setThemeWebclient(String theme) {
-        if(theme == null || "".equals(theme)){
-            return;
-        }
-        if(theme.equals("dark")|| theme.equals("light")|| theme.equals("BrowserDefault") || theme.equals("AppDefault")){
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
-            editor.putString(PREF_KEY_THEME_WEBCLIENT, theme);
-            editor.apply();
-        }
+    public static boolean getWebclientSendOnEnter() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_SEND_ON_ENTER_WEBCLIENT, PREF_KEY_SEND_ON_ENTER_WEBCLIENT_DEFAULT);
     }
 
-    public static void setSendOnEnterWebClient(Boolean send) {
+    public static void setWebclientSendOnEnter(Boolean send) {
         if(send == null){
             return;
         }
@@ -1522,7 +1707,11 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
-    public static void setShowNotificationsOnBrowser(Boolean show) {
+    public static boolean showWebclientNotificationsInBrowser() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_NOTIFICATION_SHOW_ON_BROWSER, PREF_KEY_NOTIFICATION_SHOW_ON_BROWSER_DEFAULT);
+    }
+
+    public static void setShowWebclientNotificationsInBrowser(Boolean show) {
         if(show == null) {
             return;
         }
@@ -1531,7 +1720,12 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
-    public static void setNotificationsSoundWebclient(Boolean notifications){
+    public static boolean playWebclientNotificationsSoundInBrowser() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_NOTIFICATION_SOUND_WEBCLIENT, PREF_KEY_NOTIFICATION_SOUND_WEBCLIENT_DEFAULT);
+    }
+
+
+    public static void setPlayWebclientNotificationsSoundInBrowser(Boolean notifications){
         if(notifications == null){
             return;
         }
@@ -1544,17 +1738,42 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return  PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_KEEP_WEBCLIENT_ALIVE_AFTER_CLOSE, PREF_KEY_KEEP_WEBCLIENT_ALIVE_AFTER_CLOSE_DEFAULT);
     }
 
-    public static boolean showErrorNotifications() {
+    public static void setKeepWebclientAliveAfterClose(boolean keepAlive) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_KEEP_WEBCLIENT_ALIVE_AFTER_CLOSE, keepAlive);
+        editor.apply();
+    }
+
+    public static boolean showWebclientErrorNotifications() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_SHOW_ERROR_NOTIFICATIONS, PREF_KEY_SHOW_ERROR_NOTIFICATIONS_DEFAULT);
     }
 
-    public static boolean notifyAfterInactivity() {
+    public static void setShowWebclientErrorNotifications(boolean show) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_SHOW_ERROR_NOTIFICATIONS, show);
+        editor.apply();
+    }
+
+    public static boolean webclientNotifyAfterInactivity() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_NOTIFICATION_FOR_MESSAGES_AFTER_INACTIVITY, PREF_KEY_NOTIFICATION_FOR_MESSAGES_AFTER_INACTIVITY_DEFAULT);
     }
 
-    public static boolean isUnlockRequiredForWebclient() {
+    public static void setWebclientNotifyAfterInactivity(boolean notify) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_NOTIFICATION_FOR_MESSAGES_AFTER_INACTIVITY, notify);
+        editor.apply();
+    }
+
+    public static boolean isWebclientUnlockRequired() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_REQUIRE_UNLOCK_BEFORE_CONNECTING_TO_WEBCLIENT, PREF_KEY_REQUIRE_UNLOCK_BEFORE_CONNECTING_TO_WEBCLIENT_DEFAULT);
     }
+
+    public static void setWebclientUnlockRequired(boolean unlockRequired) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_REQUIRE_UNLOCK_BEFORE_CONNECTING_TO_WEBCLIENT, unlockRequired);
+        editor.apply();
+    }
+
 
     public static void setPreferredKeycloakBrowser(String browser) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();

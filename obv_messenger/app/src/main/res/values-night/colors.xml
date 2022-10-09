@@ -30,6 +30,7 @@
     <color name="whiteOverlay">#bb000000</color>
 
     <color name="attachmentBorder">#33ffffff</color>
+    <color name="locationBorder">#3b3b3b</color>
 
     <!-- New color -->
     <color name="dialogBackground">#303030</color>

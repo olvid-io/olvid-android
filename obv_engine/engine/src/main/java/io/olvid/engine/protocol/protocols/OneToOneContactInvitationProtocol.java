@@ -633,7 +633,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final InitialMessage receivedMessage;
 
         public AliceInvitesBobStep(InitialProtocolState startState, InitialMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -695,7 +695,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final OneToOneInvitationMessage receivedMessage;
 
         public BobProcessesAlicesInvitationStep(InitialProtocolState startState, OneToOneInvitationMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -777,7 +777,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final DialogAcceptOneToOneInvitationMessage receivedMessage;
 
         public BobRespondsToAlicesInvitationStep(InvitationReceivedState startState, DialogAcceptOneToOneInvitationMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -829,7 +829,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final OneToOneResponseMessage receivedMessage;
 
         public AliceReceivesBobsResponseStep(InvitationSentState startState, OneToOneResponseMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -866,7 +866,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final DialogInvitationSentMessage receivedMessage;
 
         public AliceAbortsHerInvitationToBobStep(InvitationSentState startState, DialogInvitationSentMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -923,7 +923,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final AbortMessage receivedMessage;
 
         public BobProcessesAbortStep(InvitationReceivedState startState, AbortMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -964,7 +964,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessContactUpgradedToOneToOneStep(InvitationSentState startState, ContactUpgradedToOneToOneMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.contactIdentity = startState.contactIdentity;
             this.dialogUuid = startState.dialogUuid;
@@ -973,7 +973,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessContactUpgradedToOneToOneStep(InvitationReceivedState startState, ContactUpgradedToOneToOneMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.contactIdentity = startState.contactIdentity;
             this.dialogUuid = startState.dialogUuid;
@@ -1011,7 +1011,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final PropagateOneToOneInvitationMessage receivedMessage;
 
         public AliceProcessesPropagatedInvitationStep(InitialProtocolState startState, PropagateOneToOneInvitationMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1050,7 +1050,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final PropagateOneToOneResponseMessage receivedMessage;
 
         public BobProcessesPropagatedResponseStep(InvitationReceivedState startState, PropagateOneToOneResponseMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1083,7 +1083,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final PropagateAbortMessage receivedMessage;
 
         public AliceProcessesPropagatedAbortStep(InvitationSentState startState, PropagateAbortMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1116,7 +1116,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final OneToOneResponseMessage receivedMessage;
 
         public AliceProcessesUnexpectedBobResponseStep(InitialProtocolState startState, OneToOneResponseMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1164,7 +1164,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final InitiateOneToOneStatusSyncWithAllContactsMessage receivedMessage;
 
         public AliceInitiatesOneToOneStatusSyncWithAllContactsStep(InitialProtocolState startState, InitiateOneToOneStatusSyncWithAllContactsMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1203,7 +1203,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final InitiateOneToOneStatusSyncWithOneContactMessage receivedMessage;
 
         public AliceInitiatesOneToOneStatusSyncWithOneContactStep(InitialProtocolState startState, InitiateOneToOneStatusSyncWithOneContactMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1231,7 +1231,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final OneToOneStatusSyncRequestMessage receivedMessage;
 
         public BobProcessesSyncRequestStep(InitialProtocolState startState, OneToOneStatusSyncRequestMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(protocol.getOwnedIdentity(), ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

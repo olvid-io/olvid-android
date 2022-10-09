@@ -61,10 +61,11 @@ public class MessageRecipientInfo {
     public static final String UNDELIVERED_ATTACHMENT_NUMBERS = "undelivered_attachment_numbers"; // null once all attachments are delivered
     public static final String UNREAD_ATTACHMENT_NUMBERS = "unread_attachment_numbers"; // null once all attachments are read
 
-    public static final int RECIPIENT_STATUS_PROCESSING = 0;
-    public static final int RECIPIENT_STATUS_SENT = 1;
-    public static final int RECIPIENT_STATUS_DELIVERED = 2;
-    public static final int RECIPIENT_STATUS_DELIVERED_AND_READ = 3;
+    public static final int RECIPIENT_STATUS_NOT_SENT_YET = 0;
+    public static final int RECIPIENT_STATUS_PROCESSING = 1;
+    public static final int RECIPIENT_STATUS_SENT = 2;
+    public static final int RECIPIENT_STATUS_DELIVERED = 3;
+    public static final int RECIPIENT_STATUS_DELIVERED_AND_READ = 4;
 
     @ColumnInfo(name = MESSAGE_ID)
     public long messageId;
@@ -153,7 +154,7 @@ public class MessageRecipientInfo {
     }
 
     public int status() {
-        return (timestampSent == null?0:1) + (timestampDelivered == null?0:1) + (timestampRead == null?0:1);
+        return (engineMessageIdentifier == null?0:1) + (timestampSent == null?0:1) + (timestampDelivered == null?0:1) + (timestampRead == null?0:1);
     }
 
 

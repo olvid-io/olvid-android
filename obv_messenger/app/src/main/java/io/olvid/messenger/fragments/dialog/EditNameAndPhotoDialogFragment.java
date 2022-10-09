@@ -77,9 +77,11 @@ import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.tasks.UpdateContactCustomDisplayNameAndPhotoTask;
-import io.olvid.messenger.databases.tasks.UpdateLockedDiscussionTitleAndPhotoTask;
 import io.olvid.messenger.databases.tasks.UpdateGroupCustomNameAndPhotoTask;
+import io.olvid.messenger.databases.tasks.UpdateGroupV2CustomNameAndPhotoTask;
+import io.olvid.messenger.databases.tasks.UpdateLockedDiscussionTitleAndPhotoTask;
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoActivity;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -117,6 +119,13 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
         EditNameAndPhotoDialogFragment fragment = new EditNameAndPhotoDialogFragment();
         EditNameAndPhotoViewModel viewModel = new ViewModelProvider(parentActivity).get(EditNameAndPhotoViewModel.class);
         viewModel.setGroup(group);
+        return fragment;
+    }
+
+    public static EditNameAndPhotoDialogFragment newInstance(FragmentActivity parentActivity, Group2 group2) {
+        EditNameAndPhotoDialogFragment fragment = new EditNameAndPhotoDialogFragment();
+        EditNameAndPhotoViewModel viewModel = new ViewModelProvider(parentActivity).get(EditNameAndPhotoViewModel.class);
+        viewModel.setGroupV2(group2);
         return fragment;
     }
 
@@ -177,13 +186,14 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
         okButton = dialogView.findViewById(R.id.button_ok);
         okButton.setOnClickListener(this);
 
-        EditNameAndPhotoViewModel.TYPE type = viewModel.getType();
+        EditNameAndPhotoViewModel.Type type = viewModel.getType();
         if (type == null) {
             return dialogView;
         }
 
         switch (type) {
             case GROUP:
+            case GROUP_V2:
                 resetButton.setVisibility(View.VISIBLE);
                 dialogTitle.setText(R.string.dialog_title_rename_group);
                 dialogView.findViewById(R.id.custom_hue_group).setVisibility(View.GONE);
@@ -194,7 +204,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
                 dialogTitle.setText(R.string.dialog_title_rename_contact);
                 dialogView.findViewById(R.id.custom_hue_group).setVisibility(View.VISIBLE);
                 dialogView.findViewById(R.id.personal_note_group).setVisibility(View.VISIBLE);
-            break;
+                break;
             case LOCKED_DISCUSSION:
                 resetButton.setVisibility(View.GONE);
                 dialogTitle.setText(R.string.dialog_title_rename_discussion);
@@ -253,11 +263,12 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
                 initialView.setUnknown();
             } else {
                 if (initialViewContent.absolutePhotoUrl != null) {
-                    initialView.setLocked(initialViewContent.type == EditNameAndPhotoViewModel.TYPE.LOCKED_DISCUSSION);
+                    initialView.setLocked(initialViewContent.type == EditNameAndPhotoViewModel.Type.LOCKED_DISCUSSION);
                     initialView.setAbsolutePhotoUrl(initialViewContent.bytesInitial, initialViewContent.absolutePhotoUrl);
                 } else {
                     switch (initialViewContent.type) {
                         case GROUP:
+                        case GROUP_V2:
                             initialView.setLocked(false);
                             initialView.setGroup(initialViewContent.bytesInitial);
                             break;
@@ -288,7 +299,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
     }
 
     private void updateAndDismiss() {
-        EditNameAndPhotoViewModel.TYPE type = viewModel.getType();
+        EditNameAndPhotoViewModel.Type type = viewModel.getType();
         if (type == null) {
             return;
         }
@@ -322,6 +333,36 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
                 personalNote = viewModel.getPersonalNote();
 
                 App.runThread(new UpdateGroupCustomNameAndPhotoTask(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, customName, absoluteCustomPhotoUrl, personalNote));
+                break;
+            }
+            case GROUP_V2: {
+                Group2 group = viewModel.getGroup2();
+                if (group == null) {
+                    break;
+                }
+                final String customName;
+                final String absoluteCustomPhotoUrl;
+                final String personalNote;
+                if (Objects.equals(group.name, viewModel.getNickname())) {
+                    // nickname was reset
+                    customName = null;
+                } else {
+                    customName = viewModel.getNickname() == null ? "" : viewModel.getNickname();
+                }
+
+                if (Objects.equals(App.absolutePathFromRelative(group.photoUrl), viewModel.getAbsolutePhotoUrl())) {
+                    // photo was reset
+                    absoluteCustomPhotoUrl = null;
+                } else if (viewModel.getAbsolutePhotoUrl() == null && group.photoUrl != null) {
+                    // photo was removed
+                    absoluteCustomPhotoUrl = "";
+                } else {
+                    // new photo or still the same custom photo
+                    absoluteCustomPhotoUrl = viewModel.getAbsolutePhotoUrl();
+                }
+                personalNote = viewModel.getPersonalNote();
+
+                App.runThread(new UpdateGroupV2CustomNameAndPhotoTask(group.bytesOwnedIdentity, group.bytesGroupIdentifier, customName, absoluteCustomPhotoUrl, personalNote));
                 break;
             }
             case CONTACT: {
@@ -431,17 +472,22 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         switch (requestCode) {
             case REQUEST_CODE_CHOOSE_IMAGE: {
                 if (resultCode == Activity.RESULT_OK && data != null) {
-                    startActivityForResult(new Intent(null, data.getData(), App.getContext(), SelectDetailsPhotoActivity.class), REQUEST_CODE_SELECT_ZONE);
+                    // no need to use App.startActivityForResult as this is an internal activity
+                    if (StringUtils.validateUri(data.getData())) {
+                        startActivityForResult(new Intent(null, data.getData(), App.getContext(), SelectDetailsPhotoActivity.class), REQUEST_CODE_SELECT_ZONE);
+                    }
                 }
                 break;
             }
             case REQUEST_CODE_TAKE_PICTURE: {
                 if (resultCode == Activity.RESULT_OK && viewModel.getTakePictureUri() != null) {
+                    // no need to use App.startActivityForResult as this is an internal activity
                     startActivityForResult(new Intent(null, viewModel.getTakePictureUri(), App.getContext(), SelectDetailsPhotoActivity.class), REQUEST_CODE_SELECT_ZONE);
                 }
                 break;
@@ -455,7 +501,9 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
                         }
                     }
                 }
-                nameEditText.requestFocus();
+                if (nameEditText != null) {
+                    nameEditText.requestFocus();
+                }
                 break;
             }
         }
@@ -492,7 +540,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                 App.startActivityForResult(this, takePictureIntent, REQUEST_CODE_TAKE_PICTURE);
             } catch (IOException e) {
-                Logger.w("Error creating photo capture file " + photoFile.toString());
+                Logger.w("Error creating photo capture file " + photoFile);
             }
         }
     }
@@ -511,11 +559,11 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
 
     private static class InitialViewContent {
         public final byte[] bytesInitial;
-        public final EditNameAndPhotoViewModel.TYPE type;
+        public final EditNameAndPhotoViewModel.Type type;
         public final String initial;
         public final String absolutePhotoUrl;
 
-        public InitialViewContent(@NonNull byte[] bytesInitial, EditNameAndPhotoViewModel.TYPE type, @Nullable String initial, @Nullable String absolutePhotoUrl) {
+        public InitialViewContent(@NonNull byte[] bytesInitial, EditNameAndPhotoViewModel.Type type, @Nullable String initial, @Nullable String absolutePhotoUrl) {
             this.bytesInitial = bytesInitial;
             this.type = type;
             this.initial = initial;
@@ -525,14 +573,16 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
 
 
     public static class EditNameAndPhotoViewModel extends ViewModel {
-        enum TYPE {
+        enum Type {
+            GROUP_V2,
             GROUP,
             CONTACT,
             LOCKED_DISCUSSION,
         }
-        private TYPE type;
+        private Type type;
         private Contact contact;
         private Group group;
+        private Group2 group2;
         private Discussion discussion;
 
         private String nickname;
@@ -547,9 +597,10 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
         private final MutableLiveData<Integer> customNameHueLiveData = new MutableLiveData<>(null);
 
         public void setContact(Contact contact) {
-            this.type = TYPE.CONTACT;
+            this.type = Type.CONTACT;
             this.contact = contact;
             this.group = null;
+            this.group2 = null;
             this.discussion = null;
 
             nickname = contact.getCustomDisplayName();
@@ -562,9 +613,10 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
         }
 
         public void setGroup(Group group) {
-            this.type = TYPE.GROUP;
+            this.type = Type.GROUP;
             this.contact = null;
             this.group = group;
+            this.group2 = null;
             this.discussion = null;
 
             nickname = group.getCustomName();
@@ -576,10 +628,27 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
             updateInitialViewLiveData();
         }
 
-        public void setLockedDiscussion(Discussion discussion) {
-            this.type = TYPE.LOCKED_DISCUSSION;
+        public void setGroupV2(Group2 group2) {
+            this.type = Type.GROUP_V2;
             this.contact = null;
             this.group = null;
+            this.group2 = group2;
+            this.discussion = null;
+
+            nickname = group2.customName == null ? group2.name : group2.customName;
+            initialBytes = group2.bytesGroupIdentifier;
+            absolutePhotoUrl = App.absolutePathFromRelative(group2.getCustomPhotoUrl());
+            setCustomNameHue(null);
+            personalNote = group2.personalNote;
+
+            updateInitialViewLiveData();
+        }
+
+        public void setLockedDiscussion(Discussion discussion) {
+            this.type = Type.LOCKED_DISCUSSION;
+            this.contact = null;
+            this.group = null;
+            this.group2 = null;
             this.discussion = discussion;
 
             nickname = discussion.title;
@@ -596,7 +665,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
             boolean shouldUpdateInitialViewLiveData = !StringUtils.getInitial(nickname).equals(StringUtils.getInitial(this.nickname));
 
             this.nickname = nickname;
-            validLiveData.postValue(nickname != null && nickname.trim().length() > 0);
+            validLiveData.postValue(type == Type.GROUP_V2 || (nickname != null && nickname.trim().length() > 0));
             if (shouldUpdateInitialViewLiveData) {
                 updateInitialViewLiveData();
             }
@@ -620,6 +689,10 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
                 case GROUP:
                     nickname = group.name;
                     absolutePhotoUrl = App.absolutePathFromRelative(group.photoUrl);
+                    break;
+                case GROUP_V2:
+                    nickname = group2.name;
+                    absolutePhotoUrl = App.absolutePathFromRelative(group2.photoUrl);
                     break;
                 case CONTACT:
                     nickname = contact.displayName;
@@ -695,12 +768,16 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
             validLiveData.postValue(false);
         }
 
-        public TYPE getType() {
+        public Type getType() {
             return type;
         }
 
         public Group getGroup() {
             return group;
+        }
+
+        public Group2 getGroup2() {
+            return group2;
         }
 
         public Contact getContact() {

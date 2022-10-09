@@ -118,5 +118,4 @@ public class ObvBase64 {
         }
         return bytes;
     }
-
 }

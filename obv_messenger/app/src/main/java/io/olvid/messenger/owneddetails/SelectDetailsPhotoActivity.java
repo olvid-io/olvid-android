@@ -21,6 +21,7 @@ package io.olvid.messenger.owneddetails;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -75,7 +76,11 @@ public class SelectDetailsPhotoActivity extends LockableActivity implements View
     private int bitmapWidth = 1;
     private int bitmapHeight = 1;
 
-
+    @Override
+    protected void attachBaseContext(Context baseContext) {
+        disableScaling = true;
+        super.attachBaseContext(baseContext);
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override

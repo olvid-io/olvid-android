@@ -249,7 +249,7 @@ public class RestoreChooseFileFragment extends Fragment {
                 && resultCode == Activity.RESULT_OK) {
             viewModel.clearSelectedBackup();
             final Uri backupFileUri = data.getData();
-            if (backupFileUri != null) {
+            if (StringUtils.validateUri(backupFileUri)) {
                 App.runThread(() -> {
                     ContentResolver contentResolver = App.getContext().getContentResolver();
                     String fileName = null;

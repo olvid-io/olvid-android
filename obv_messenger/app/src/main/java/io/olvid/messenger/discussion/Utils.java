@@ -69,7 +69,8 @@ public class Utils {
         if (message != null
                 && message.messageType == Message.TYPE_OUTBOUND_MESSAGE
                 && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
-                && message.wipeStatus != Message.WIPE_STATUS_WIPED) {
+                && message.wipeStatus != Message.WIPE_STATUS_WIPED
+                && !message.isLocationMessage()) {
             View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_view_edit_message, null);
             final TextInputEditText editMessageTextView = dialogView.findViewById(R.id.edit_message_text_view);
             if (SettingsActivity.useKeyboardIncognitoMode()) {
@@ -135,8 +136,8 @@ public class Utils {
                 if (openDialogCallback != null) {
                     openDialogCallback.run();
                 }
-                ForwardMessagesDialogFragment callContactDialogFragment = ForwardMessagesDialogFragment.newInstance();
-                callContactDialogFragment.show(activity.getSupportFragmentManager(), "ForwardMessagesDialogFragment");
+                ForwardMessagesDialogFragment forwardMessagesDialogFragment = ForwardMessagesDialogFragment.newInstance();
+                forwardMessagesDialogFragment.show(activity.getSupportFragmentManager(), "ForwardMessagesDialogFragment");
             } else {
                 View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_view_message_and_checkbox, null);
                 TextView message = dialogView.findViewById(R.id.dialog_message);

@@ -52,7 +52,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/dialog_title"
             android:layout_marginTop="16dp"
-            android:paddingBottom="40dp"
+            android:paddingBottom="80dp"
             android:clipToPadding="false"
             >
 
@@ -62,17 +62,17 @@
 
                 <TextView
                     android:id="@+id/dialog_message"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="307dp"
+                    android:layout_height="116dp"
                     android:layout_marginStart="12dp"
                     android:layout_marginEnd="12dp"
                     android:scrollbarSize="16sp"
-                    tools:text="@string/dialog_message_cloud_provider_sign_in"
                     app:layout_constraintBottom_toTopOf="@id/provider_buttons"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_chainStyle="packed" />
+                    app:layout_constraintVertical_chainStyle="packed"
+                    tools:text="@string/dialog_message_cloud_provider_sign_in" />
 
                 <LinearLayout
                     android:id="@+id/provider_buttons"
@@ -230,7 +230,6 @@
                         android:theme="@style/AppTheme.BlueAccent"/>
 
                     <TextView
-                        android:id="@+id/spinner_text_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@color/dialogBackground"

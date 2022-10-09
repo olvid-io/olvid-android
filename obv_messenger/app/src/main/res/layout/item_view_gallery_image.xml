@@ -31,4 +31,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/attachment_failed_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/label_attachment_download_failed"
+        android:textAlignment="center"
+        android:textColor="@color/alwaysWhite"
+        android:textSize="20sp"
+        android:visibility="gone"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:gravity="center"
+        tools:visibility="visible"
+        android:drawablePadding="8dp"
+        app:drawableStartCompat="@drawable/ic_attachment_status_failed"
+        android:background="@color/blackOverlay"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

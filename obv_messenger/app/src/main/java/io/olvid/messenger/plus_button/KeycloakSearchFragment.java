@@ -62,12 +62,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
+import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
-import io.olvid.messenger.customClasses.RecyclerViewDividerDecoration;
+import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
@@ -75,7 +76,6 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.openid.KeycloakManager;
-import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class KeycloakSearchFragment extends Fragment implements View.OnClickListener {
@@ -140,7 +140,7 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
         searchResultRecyclerView.setAdapter(searchResultAdapter);
         searchResultRecyclerView.setEmptyView(explanationCard);
         searchResultRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        searchResultRecyclerView.addItemDecoration(new RecyclerViewDividerDecoration(activity, 60, 12));
+        searchResultRecyclerView.addItemDecoration(new ItemDecorationSimpleDivider(activity, 60, 12));
 
         keycloakSearchEditText.setOnEditorActionListener((v, actionId, event) -> {
             startSearch();

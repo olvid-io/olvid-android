@@ -21,7 +21,6 @@ package io.olvid.messenger.databases;
 
 
 import java.io.File;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,13 +31,15 @@ import java.util.UUID;
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.ObvCapability;
-import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroup;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.BytesKey;
+import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.databases.dao.MessageRecipientInfoDao;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.ContactGroupJoin;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -46,13 +47,15 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 import io.olvid.messenger.databases.tasks.ApplyDiscussionRetentionPoliciesTask;
-import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
+import io.olvid.messenger.databases.tasks.CreateOrUpdateGroupV2Task;
+import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class AppDatabaseOpenCallback implements Runnable {
@@ -70,7 +73,7 @@ public class AppDatabaseOpenCallback implements Runnable {
         }
 
         try {
-            // defer engine database synchronisation to avoid database overload slowness
+            // defer engine database synchronisation to avoid database overload during startup
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             // do nothing
@@ -80,17 +83,17 @@ public class AppDatabaseOpenCallback implements Runnable {
         syncEngineDatabases();
 
         // Check status of PROCESSING messages
+        //  - query engine to update status of PROCESSING messages
+        //  - post all UNPROCESSED or COMPUTING_PREVIEW messages
+        //  - for all contacts with channels, get all MessageRecipientInfo without an engineMessageIdentifier and repost
+
+        // Query engine to update status of PROCESSING messages
         List<Message> processingMessages = db.messageDao().getProcessingMessages();
         for (Message message: processingMessages) {
             List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllNotSentByMessageId(message.id);
             HashMap<BytesKey, Boolean> sentStatusCache = new HashMap<>();
             for (MessageRecipientInfo messageRecipientInfo: messageRecipientInfos) {
-                if (messageRecipientInfo.engineMessageIdentifier == null) {
-                    Contact contact = db.contactDao().get(message.senderIdentifier, messageRecipientInfo.bytesContactIdentity);
-                    if (contact.establishedChannelCount > 0) {
-                        message.repost(messageRecipientInfo);
-                    }
-                } else {
+                if (messageRecipientInfo.engineMessageIdentifier != null) {
                     Boolean sent = sentStatusCache.get(new BytesKey(messageRecipientInfo.engineMessageIdentifier));
                     if (sent == null) {
                         sent = engine.isOutboxMessageSent(message.getAssociatedBytesOwnedIdentity(), messageRecipientInfo.engineMessageIdentifier);
@@ -107,11 +110,22 @@ public class AppDatabaseOpenCallback implements Runnable {
             }
         }
 
-        // Send UNPROCESSED and COMPUTING_PREVIEW messages
+        // Post UNPROCESSED and COMPUTING_PREVIEW messages
         List<Message> unprocessedMessages = db.messageDao().getUnprocessedAndPreviewingMessages();
         for (Message message: unprocessedMessages) {
-            message.post(false, false);
+            db.runInTransaction(() -> message.post(false, null));
         }
+
+        // Repost messages of all contact with channel
+        for (Contact contact : db.contactDao().getAllWithChannel()) {
+            db.runInTransaction(() -> {
+                for (MessageRecipientInfoDao.MessageRecipientInfoAndMessage messageRecipientInfoAndMessage : db.messageRecipientInfoDao().getAllUnsentForContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity)) {
+                    messageRecipientInfoAndMessage.message.repost(messageRecipientInfoAndMessage.messageRecipientInfo, null);
+                }
+            });
+        }
+
+
 
         // Update Invitation/Dialogs
         try {
@@ -222,9 +236,11 @@ public class AppDatabaseOpenCallback implements Runnable {
         try {
             List<Contact> appContacts = db.contactDao().getAllSync();
             List<OwnedIdentity> appOwnedIdentities = db.ownedIdentityDao().getAll();
-            List<Group> appGroups = db.groupDao().getAllSync();
+            List<Group> appGroups = db.groupDao().getAll();
+            List<Group2> appGroups2 = db.group2Dao().getAll();
             HashMap<BytesKey, HashMap<BytesKey, Contact>> contactsHashMap = new HashMap<>();
             HashMap<BytesKey, HashMap<BytesKey, Group>> groupsHashMap = new HashMap<>();
+            HashMap<BytesKey, HashMap<BytesKey, Group2>> groups2HashMap = new HashMap<>();
             HashMap<BytesKey, OwnedIdentity> identitiesHashMap = new HashMap<>();
             for (Contact appContact: appContacts) {
                 HashMap<BytesKey, Contact> subMap = contactsHashMap.get(new BytesKey(appContact.bytesOwnedIdentity));
@@ -241,6 +257,14 @@ public class AppDatabaseOpenCallback implements Runnable {
                     groupsHashMap.put(new BytesKey(appGroup.bytesOwnedIdentity), subMap);
                 }
                 subMap.put(new BytesKey(appGroup.bytesGroupOwnerAndUid), appGroup);
+            }
+            for (Group2 appGroup2 : appGroups2) {
+                HashMap<BytesKey, Group2> subMap = groups2HashMap.get(new BytesKey(appGroup2.bytesOwnedIdentity));
+                if (subMap == null) {
+                    subMap = new HashMap<>();
+                    groups2HashMap.put(new BytesKey(appGroup2.bytesOwnedIdentity), subMap);
+                }
+                subMap.put(new BytesKey(appGroup2.bytesGroupIdentifier), appGroup2);
             }
             for (OwnedIdentity appOwnedIdentity: appOwnedIdentities) {
                 identitiesHashMap.put(new BytesKey(appOwnedIdentity.bytesOwnedIdentity), appOwnedIdentity);
@@ -319,44 +343,27 @@ public class AppDatabaseOpenCallback implements Runnable {
                         int trustLevel = engine.getContactTrustLevel(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
                         if (contact == null) {
                             Logger.i("Engine -> App sync: Found unknown Contact");
-                            db.runInTransaction(() -> {
-                                try {
-                                    Contact newContact = new Contact(contactIdentity.getBytesIdentity(), ownedIdentity.getBytesIdentity(), contactIdentity.getIdentityDetails(), false, photoUrl, contactIdentity.isKeycloakManaged(), contactIdentity.isActive(), oneToOne, trustLevel);
-                                    db.contactDao().insert(newContact);
+                            try {
+                                db.runInTransaction(() -> {
+                                    Contact newContact;
+                                    try {
+                                        newContact = new Contact(contactIdentity.getBytesIdentity(), ownedIdentity.getBytesIdentity(), contactIdentity.getIdentityDetails(), false, photoUrl, contactIdentity.isKeycloakManaged(), contactIdentity.isActive(), oneToOne, trustLevel);
+                                        db.contactDao().insert(newContact);
+                                    } catch (Exception e) {
+                                        throw new RuntimeException(e);
+                                    }
+
                                     if (oneToOne) {
-                                        Discussion discussion = db.discussionDao().getByContact(newContact.bytesOwnedIdentity, newContact.bytesContactIdentity);
+                                        Discussion discussion = Discussion.createOrReuseOneToOneDiscussion(db, newContact);
+
                                         if (discussion == null) {
-                                            discussion = Discussion.createOneToOneDiscussion(newContact.getCustomDisplayName(), newContact.getCustomPhotoUrl(), ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity(), newContact.keycloakManaged, contactIdentity.isActive(), newContact.trustLevel);
-                                            discussion.id = db.discussionDao().insert(discussion);
-
-
-                                            // set default ephemeral message settings
-                                            Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
-                                            Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
-                                            boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
-                                            if (readOnce || visibilityDuration != null || existenceDuration != null) {
-                                                DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-                                                discussionCustomization.settingExistenceDuration = existenceDuration;
-                                                discussionCustomization.settingVisibilityDuration = visibilityDuration;
-                                                discussionCustomization.settingReadOnce = readOnce;
-                                                discussionCustomization.sharedSettingsVersion = 0;
-                                                db.discussionCustomizationDao().insert(discussionCustomization);
-                                                db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), ownedIdentity.getBytesIdentity(), false, 0L));
-                                            }
-
-                                            // insert revoked message if needed
-                                            if (!contactIdentity.isActive()) {
-                                                EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
-                                                if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
-                                                    App.runThread(new InsertContactRevokedMessageTask(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity()));
-                                                }
-                                            }
+                                            throw new RuntimeException("Unable to create discussion!");
                                         }
                                     }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            });
+                                });
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             contact = db.contactDao().get(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
                             if (contact == null) {
                                 continue;
@@ -374,37 +381,20 @@ public class AppDatabaseOpenCallback implements Runnable {
                             Logger.i("Engine -> App sync: Update contact oneToOne status");
                             contact.oneToOne = oneToOne;
                             db.contactDao().updateOneToOne(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.oneToOne);
+                            Contact finalContact = contact;
                             if (oneToOne) {
-                                Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                                if (discussion == null) {
-                                    discussion = Discussion.createOneToOneDiscussion(contact.getCustomDisplayName(), contact.getCustomPhotoUrl(), contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.keycloakManaged, contact.active, contact.trustLevel);
-                                    discussion.id = db.discussionDao().insert(discussion);
+                                try {
+                                    db.runInTransaction(() -> {
+                                        Discussion discussion = Discussion.createOrReuseOneToOneDiscussion(db, finalContact);
 
-
-                                    // set default ephemeral message settings
-                                    Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
-                                    Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
-                                    boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
-                                    if (readOnce || visibilityDuration != null || existenceDuration != null) {
-                                        DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-                                        discussionCustomization.settingExistenceDuration = existenceDuration;
-                                        discussionCustomization.settingVisibilityDuration = visibilityDuration;
-                                        discussionCustomization.settingReadOnce = readOnce;
-                                        discussionCustomization.sharedSettingsVersion = 0;
-                                        db.discussionCustomizationDao().insert(discussionCustomization);
-                                        db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), contact.bytesOwnedIdentity, false, 0L));
-                                    }
-
-                                    // insert revoked message if needed
-                                    if (!contact.active) {
-                                        EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
-                                        if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
-                                            App.runThread(new InsertContactRevokedMessageTask(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity()));
+                                        if (discussion == null) {
+                                            throw new RuntimeException("Unable to create discussion!");
                                         }
-                                    }
+                                    });
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                             } else {
-                                Contact finalContact = contact;
                                 db.runInTransaction(() -> {
                                     Discussion discussion = db.discussionDao().getByContact(finalContact.bytesOwnedIdentity, finalContact.bytesContactIdentity);
                                     if (discussion != null) {
@@ -445,6 +435,8 @@ public class AppDatabaseOpenCallback implements Runnable {
                                 db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
 
                                 ShortcutActivity.updateShortcut(discussion);
+
+                                new UpdateAllGroupMembersNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity).run();
                             } catch (Exception e) {
                                 // do nothing
                             }
@@ -494,16 +486,15 @@ public class AppDatabaseOpenCallback implements Runnable {
                     for (final ObvGroup obvGroup: obvGroups) {
                         Group group = null;
                         if (subMap != null) {
-                            group = subMap.get(new BytesKey(obvGroup.getBytesGroupOwnerAndUid()));
-                            subMap.remove(new BytesKey(obvGroup.getBytesGroupOwnerAndUid()));
+                            group = subMap.remove(new BytesKey(obvGroup.getBytesGroupOwnerAndUid()));
                         }
                         if (group == null) {
                             Logger.i("Engine -> App sync: Found unknown Group");
                             String photoUrl = engine.getGroupTrustedDetailsPhotoUrl(ownedIdentity.getBytesIdentity(), obvGroup.getBytesGroupOwnerAndUid());
                             // create the group, its discussion and all members and pending members
-                            db.runInTransaction(() -> {
-                                Logger.d("Inserting missing group " + obvGroup.getGroupDetails().getName());
-                                try {
+                            try {
+                                db.runInTransaction(() -> {
+                                    Logger.d("Inserting missing group " + obvGroup.getGroupDetails().getName());
                                     Group newGroup = new Group(
                                             obvGroup.getBytesGroupOwnerAndUid(),
                                             obvGroup.getBytesOwnedIdentity(),
@@ -515,23 +506,10 @@ public class AppDatabaseOpenCallback implements Runnable {
                                     Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid);
                                     if (discussion == null) {
                                         Logger.d("Creating associated group discussion");
-                                        discussion = Discussion.createGroupDiscussion(newGroup.getCustomName(), newGroup.getCustomPhotoUrl(), newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid);
-                                        discussion.id = db.discussionDao().insert(discussion);
+                                        discussion = Discussion.createOrReuseGroupDiscussion(db, newGroup);
 
-                                        // also add default ephemeral settings if you are the group owner
-                                        if (newGroup.bytesGroupOwnerIdentity == null) {
-                                            Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
-                                            Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
-                                            boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
-                                            if (readOnce || visibilityDuration != null || existenceDuration != null) {
-                                                DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-                                                discussionCustomization.settingExistenceDuration = existenceDuration;
-                                                discussionCustomization.settingVisibilityDuration = visibilityDuration;
-                                                discussionCustomization.settingReadOnce = readOnce;
-                                                discussionCustomization.sharedSettingsVersion = 0;
-                                                db.discussionCustomizationDao().insert(discussionCustomization);
-                                                db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), newGroup.bytesOwnedIdentity, false, 0L));
-                                            }
+                                        if (discussion == null) {
+                                            throw new RuntimeException("Unable to create group discussion");
                                         }
                                     }
                                     Logger.d("Adding " + obvGroup.getBytesGroupMembersIdentities().length + " contacts and " + obvGroup.getPendingGroupMembers().length + " pending");
@@ -539,7 +517,8 @@ public class AppDatabaseOpenCallback implements Runnable {
                                     for (byte[] bytesContactIdentity : obvGroup.getBytesGroupMembersIdentities()) {
                                         ContactGroupJoin contactGroupJoin = new ContactGroupJoin(newGroup.bytesGroupOwnerAndUid, newGroup.bytesOwnedIdentity, bytesContactIdentity);
                                         db.contactGroupJoinDao().insert(contactGroupJoin);
-                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(discussion.id, bytesContactIdentity);
+
+                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesContactIdentity);
                                         db.messageDao().insert(groupJoinedMessage);
                                         messageInserted = true;
                                     }
@@ -548,123 +527,125 @@ public class AppDatabaseOpenCallback implements Runnable {
                                             db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                                         }
                                     }
+
+                                    newGroup.groupMembersNames = StringUtils.joinGroupMemberNames(db.groupDao().getGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid));
+                                    db.groupDao().updateGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid, newGroup.groupMembersNames);
+
                                     HashSet<BytesKey> declinedSet = new HashSet<>();
-                                    for (byte[] bytesDeclinedPendingMember: obvGroup.getBytesDeclinedPendingMembers()) {
+                                    for (byte[] bytesDeclinedPendingMember : obvGroup.getBytesDeclinedPendingMembers()) {
                                         declinedSet.add(new BytesKey(bytesDeclinedPendingMember));
                                     }
                                     for (ObvIdentity obvIdentity : obvGroup.getPendingGroupMembers()) {
                                         PendingGroupMember pendingGroupMember = new PendingGroupMember(obvIdentity.getBytesIdentity(), obvIdentity.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()), newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid, declinedSet.contains(new BytesKey(obvIdentity.getBytesIdentity())));
                                         db.pendingGroupMemberDao().insert(pendingGroupMember);
                                     }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            });
+                                });
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         } else {
                             // check if the discussion exists
-                            Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
-                            if (discussion == null) {
-                                Logger.d("Creating missing discussion for existing group !!!");
-                                discussion = Discussion.createGroupDiscussion(group.getCustomName(), group.getCustomPhotoUrl(), group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
-                                discussion.id = db.discussionDao().insert(discussion);
+                            Group finalGroup = group;
+                            try {
+                                db.runInTransaction(() -> {
+                                    Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid);
+                                    if (discussion == null) {
+                                        Logger.d("Creating missing discussion for existing group !!!");
+                                        discussion = Discussion.createOrReuseGroupDiscussion(db, finalGroup);
 
-                                // also add default ephemeral settings if you are the group owner
-                                if (group.bytesGroupOwnerIdentity == null) {
-                                    Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
-                                    Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
-                                    boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
-                                    if (readOnce || visibilityDuration != null || existenceDuration != null) {
-                                        DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-                                        discussionCustomization.settingExistenceDuration = existenceDuration;
-                                        discussionCustomization.settingVisibilityDuration = visibilityDuration;
-                                        discussionCustomization.settingReadOnce = readOnce;
-                                        discussionCustomization.sharedSettingsVersion = 0;
-                                        db.discussionCustomizationDao().insert(discussionCustomization);
-                                        db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(discussion.id, discussionCustomization.getSharedSettingsJson(), group.bytesOwnedIdentity, false, 0L));
+                                        if (discussion == null) {
+                                            throw new RuntimeException("Unable to create group discussion");
+                                        }
                                     }
-                                }
-                            }
 
-                            // only check for different members
-                            final HashSet<BytesKey> contactToRemove = new HashSet<>();
-                            final HashSet<BytesKey> contactToAdd = new HashSet<>();
-                            for (Contact contact: db.contactGroupJoinDao().getGroupContactsSync(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)) {
-                                contactToRemove.add(new BytesKey(contact.bytesContactIdentity));
-                            }
-                            for (byte[] bytesContactIdentity: obvGroup.getBytesGroupMembersIdentities()) {
-                                BytesKey key = new BytesKey(bytesContactIdentity);
-                                if (contactToRemove.contains(key)) {
-                                    contactToRemove.remove(key);
-                                } else {
-                                    contactToAdd.add(key);
-                                }
-                            }
-                            DiscussionCustomization.JsonSharedSettings jsonSharedSettings = null;
-                            if (!contactToAdd.isEmpty() || !contactToRemove.isEmpty()) {
-                                Logger.i("Engine -> App sync: Contact mismatch in group. Remove " + contactToRemove.size() + " and add " + contactToAdd.size());
-                                if (discussion.updateLastMessageTimestamp(System.currentTimeMillis())) {
-                                    db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
-                                }
-                                if (group.bytesGroupOwnerIdentity == null && !contactToAdd.isEmpty()) { // owned group --> check the customization
-                                    DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-                                    if (discussionCustomization != null) {
-                                        jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
+                                    // only check for different members
+                                    final HashSet<BytesKey> contactToRemove = new HashSet<>();
+                                    final HashSet<BytesKey> contactToAdd = new HashSet<>();
+                                    for (Contact contact : db.contactGroupJoinDao().getGroupContactsSync(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid)) {
+                                        contactToRemove.add(new BytesKey(contact.bytesContactIdentity));
                                     }
-                                }
-                            }
-                            for (BytesKey bytesKey: contactToRemove) {
-                                ContactGroupJoin contactGroupJoin = db.contactGroupJoinDao().get(group.bytesGroupOwnerAndUid, group.bytesOwnedIdentity, bytesKey.bytes);
-                                db.contactGroupJoinDao().delete(contactGroupJoin);
-                                Message groupLeftMessage = Message.createMemberLeftGroupMessage(discussion.id, bytesKey.bytes);
-                                db.messageDao().insert(groupLeftMessage);
-                            }
-                            for (BytesKey bytesKey: contactToAdd) {
-                                ContactGroupJoin contactGroupJoin = new ContactGroupJoin(group.bytesGroupOwnerAndUid, group.bytesOwnedIdentity, bytesKey.bytes);
-                                db.contactGroupJoinDao().insert(contactGroupJoin);
-                                Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(discussion.id, bytesKey.bytes);
-                                db.messageDao().insert(groupJoinedMessage);
-                            }
-                            if (jsonSharedSettings != null) {
-                                Message message = Message.createDiscussionSettingsUpdateMessage(discussion.id, jsonSharedSettings, group.bytesOwnedIdentity, true, null);
-                                if (message != null) {
-                                    message.post(false, true);
-                                }
-                            }
-
-                            // now check for different pendingMembers
-                            HashMap<BytesKey, PendingGroupMember> pendingGroupMembersToRemove = new HashMap<>();
-                            HashMap<BytesKey, ObvIdentity> pendingGroupMembersToAdd = new HashMap<>();
-                            HashSet<BytesKey> declinedSet = new HashSet<>();
-                            for (byte[] bytesDeclinedPendingMember: obvGroup.getBytesDeclinedPendingMembers()) {
-                                declinedSet.add(new BytesKey(bytesDeclinedPendingMember));
-                            }
-
-                            for (PendingGroupMember pendingGroupMember: db.pendingGroupMemberDao().getGroupPendingMembers(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)) {
-                                pendingGroupMembersToRemove.put(new BytesKey(pendingGroupMember.bytesIdentity), pendingGroupMember);
-                            }
-                            for (ObvIdentity obvIdentity: obvGroup.getPendingGroupMembers()) {
-                                BytesKey key = new BytesKey(obvIdentity.getBytesIdentity());
-                                if (pendingGroupMembersToRemove.containsKey(key)) {
-                                    PendingGroupMember pendingGroupMember = pendingGroupMembersToRemove.get(key);
-                                    if (pendingGroupMember != null && (pendingGroupMember.declined ^ declinedSet.contains(key))) {
-                                        pendingGroupMember.declined = declinedSet.contains(key);
-                                        db.pendingGroupMemberDao().update(pendingGroupMember);
+                                    for (byte[] bytesContactIdentity : obvGroup.getBytesGroupMembersIdentities()) {
+                                        BytesKey key = new BytesKey(bytesContactIdentity);
+                                        if (!contactToRemove.remove(key)) {
+                                            contactToAdd.add(key);
+                                        }
                                     }
-                                    pendingGroupMembersToRemove.remove(key);
-                                } else {
-                                    pendingGroupMembersToAdd.put(key, obvIdentity);
-                                }
-                            }
+                                    for (BytesKey bytesKey : contactToRemove) {
+                                        ContactGroupJoin contactGroupJoin = db.contactGroupJoinDao().get(finalGroup.bytesGroupOwnerAndUid, finalGroup.bytesOwnedIdentity, bytesKey.bytes);
+                                        db.contactGroupJoinDao().delete(contactGroupJoin);
+                                        Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, bytesKey.bytes);
+                                        db.messageDao().insert(groupLeftMessage);
+                                    }
+                                    for (BytesKey bytesKey : contactToAdd) {
+                                        ContactGroupJoin contactGroupJoin = new ContactGroupJoin(finalGroup.bytesGroupOwnerAndUid, finalGroup.bytesOwnedIdentity, bytesKey.bytes);
+                                        db.contactGroupJoinDao().insert(contactGroupJoin);
+                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesKey.bytes);
+                                        db.messageDao().insert(groupJoinedMessage);
+                                    }
 
-                            if (!pendingGroupMembersToAdd.isEmpty() || !pendingGroupMembersToRemove.isEmpty()) {
-                                Logger.i("Engine -> App sync: Pending group member mismatch in group. Remove " + pendingGroupMembersToRemove.size() + " and add " + pendingGroupMembersToAdd.size());
-                            }
-                            for (PendingGroupMember pendingGroupMember: pendingGroupMembersToRemove.values()) {
-                                db.pendingGroupMemberDao().delete(pendingGroupMember);
-                            }
-                            for (ObvIdentity obvIdentity: pendingGroupMembersToAdd.values()) {
-                                PendingGroupMember pendingGroupMember = new PendingGroupMember(obvIdentity.getBytesIdentity(), obvIdentity.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()), group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, declinedSet.contains(new BytesKey(obvIdentity.getBytesIdentity())));
-                                db.pendingGroupMemberDao().insert(pendingGroupMember);
+                                    if (!contactToAdd.isEmpty() || !contactToRemove.isEmpty()) {
+                                        Logger.i("Engine -> App sync: Contact mismatch in group. Remove " + contactToRemove.size() + " and add " + contactToAdd.size());
+                                        if (discussion.updateLastMessageTimestamp(System.currentTimeMillis())) {
+                                            db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                                        }
+
+                                        finalGroup.groupMembersNames = StringUtils.joinGroupMemberNames(db.groupDao().getGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid));
+                                        db.groupDao().updateGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid, finalGroup.groupMembersNames);
+
+                                        if (finalGroup.bytesGroupOwnerIdentity == null && !contactToAdd.isEmpty()) { // owned group --> check the customization
+                                            DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
+                                            if (discussionCustomization != null) {
+                                                DiscussionCustomization.JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
+
+                                                if (jsonSharedSettings != null) {
+                                                    Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, finalGroup.bytesOwnedIdentity, true, null);
+                                                    if (message != null) {
+                                                        message.postSettingsMessage(true, null);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+
+                                    // now check for different pendingMembers
+                                    HashMap<BytesKey, PendingGroupMember> pendingGroupMembersToRemove = new HashMap<>();
+                                    HashMap<BytesKey, ObvIdentity> pendingGroupMembersToAdd = new HashMap<>();
+                                    HashSet<BytesKey> declinedSet = new HashSet<>();
+                                    for (byte[] bytesDeclinedPendingMember : obvGroup.getBytesDeclinedPendingMembers()) {
+                                        declinedSet.add(new BytesKey(bytesDeclinedPendingMember));
+                                    }
+
+                                    for (PendingGroupMember pendingGroupMember : db.pendingGroupMemberDao().getGroupPendingMembers(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid)) {
+                                        pendingGroupMembersToRemove.put(new BytesKey(pendingGroupMember.bytesIdentity), pendingGroupMember);
+                                    }
+                                    for (ObvIdentity obvIdentity : obvGroup.getPendingGroupMembers()) {
+                                        BytesKey key = new BytesKey(obvIdentity.getBytesIdentity());
+                                        if (pendingGroupMembersToRemove.containsKey(key)) {
+                                            PendingGroupMember pendingGroupMember = pendingGroupMembersToRemove.get(key);
+                                            if (pendingGroupMember != null && (pendingGroupMember.declined ^ declinedSet.contains(key))) {
+                                                pendingGroupMember.declined = declinedSet.contains(key);
+                                                db.pendingGroupMemberDao().update(pendingGroupMember);
+                                            }
+                                            pendingGroupMembersToRemove.remove(key);
+                                        } else {
+                                            pendingGroupMembersToAdd.put(key, obvIdentity);
+                                        }
+                                    }
+
+                                    if (!pendingGroupMembersToAdd.isEmpty() || !pendingGroupMembersToRemove.isEmpty()) {
+                                        Logger.i("Engine -> App sync: Pending group member mismatch in group. Remove " + pendingGroupMembersToRemove.size() + " and add " + pendingGroupMembersToAdd.size());
+                                    }
+                                    for (PendingGroupMember pendingGroupMember : pendingGroupMembersToRemove.values()) {
+                                        db.pendingGroupMemberDao().delete(pendingGroupMember);
+                                    }
+                                    for (ObvIdentity obvIdentity : pendingGroupMembersToAdd.values()) {
+                                        PendingGroupMember pendingGroupMember = new PendingGroupMember(obvIdentity.getBytesIdentity(), obvIdentity.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()), finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid, declinedSet.contains(new BytesKey(obvIdentity.getBytesIdentity())));
+                                        db.pendingGroupMemberDao().insert(pendingGroupMember);
+                                    }
+                                });
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
                         }
                     }
@@ -672,10 +653,42 @@ public class AppDatabaseOpenCallback implements Runnable {
                         groupsHashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
                     }
                 }
+
+
+                // synchronize groups V2
+                {
+                    HashMap<BytesKey, Group2> subMap = groups2HashMap.get(new BytesKey(ownedIdentity.getBytesIdentity()));
+
+                    List<ObvGroupV2> obvGroupsV2 = engine.getGroupsV2OfOwnedIdentity(ownedIdentity.getBytesIdentity());
+                    for (final ObvGroupV2 obvGroupV2 : obvGroupsV2) {
+                        if (subMap != null) {
+                            subMap.remove(new BytesKey(obvGroupV2.groupIdentifier.getBytes()));
+                        }
+                        new CreateOrUpdateGroupV2Task(obvGroupV2, false, false, true).run();
+                    }
+
+                    if (subMap != null && subMap.size() == 0) {
+                        groups2HashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
+                    }
+                }
             }
 
             // now, process all hashmaps to remove app-side-only identities/groups
-            // groups first
+            // groupsV2 first
+            for (HashMap<BytesKey, Group2> subMap: groups2HashMap.values()) {
+                for (Group2 group2: subMap.values()) {
+                    Logger.i("Engine -> App sync: Deleting app-side-only Group2");
+                    db.runInTransaction(() -> {
+                        Discussion discussion = db.discussionDao().getByGroupIdentifier(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
+                        if (discussion != null) {
+                            discussion.lockWithMessage(db);
+                        }
+                        db.group2Dao().delete(group2);
+                        // Group2Member and Group2PendingMember are cascade deleted
+                    });
+                }
+            }
+            // then groups
             for (HashMap<BytesKey, Group> subMap: groupsHashMap.values()) {
                 for (Group group: subMap.values()) {
                     Logger.i("Engine -> App sync: Deleting app-side-only Group");

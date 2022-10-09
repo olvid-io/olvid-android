@@ -68,6 +68,7 @@ import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.Group;
 import io.olvid.engine.datatypes.containers.GroupInformation;
+import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
@@ -86,12 +87,17 @@ import io.olvid.engine.engine.types.JsonKeycloakRevocation;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.identity.databases.ContactDevice;
 import io.olvid.engine.identity.databases.ContactGroup;
 import io.olvid.engine.identity.databases.ContactGroupDetails;
 import io.olvid.engine.identity.databases.ContactGroupMembersJoin;
+import io.olvid.engine.identity.databases.ContactGroupV2;
+import io.olvid.engine.identity.databases.ContactGroupV2Details;
+import io.olvid.engine.identity.databases.ContactGroupV2Member;
+import io.olvid.engine.identity.databases.ContactGroupV2PendingMember;
 import io.olvid.engine.identity.databases.ContactIdentity;
 import io.olvid.engine.identity.databases.ContactIdentityDetails;
 import io.olvid.engine.identity.databases.ContactTrustOrigin;
@@ -245,6 +251,9 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 for (String photoUrl : ContactGroupDetails.getAllPhotoUrl(identityManagerSession)) {
                     photoUrlsToKeep.add(new File(photoUrl).getName());
                 }
+                for (String photoUrl : ContactGroupV2Details.getAllPhotoUrl(identityManagerSession)) {
+                    photoUrlsToKeep.add(new File(photoUrl).getName());
+                }
 
                 for (String listedPhotoUrl : listedPhotoUrls) {
                     if (!photoUrlsToKeep.contains(listedPhotoUrl)) {
@@ -299,6 +308,10 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             ContactGroupMembersJoin.createTable(identityManagerSession.session);
             PendingGroupMember.createTable(identityManagerSession.session);
             ServerUserData.createTable(identityManagerSession.session);
+            ContactGroupV2Details.createTable(identityManagerSession.session);
+            ContactGroupV2.createTable(identityManagerSession.session);
+            ContactGroupV2Member.createTable(identityManagerSession.session);
+            ContactGroupV2PendingMember.createTable(identityManagerSession.session);
             identityManagerSession.session.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -327,6 +340,10 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         ContactGroupMembersJoin.upgradeTable(session, oldVersion, newVersion);
         PendingGroupMember.upgradeTable(session, oldVersion, newVersion);
         ServerUserData.upgradeTable(session, oldVersion, newVersion);
+        ContactGroupV2Details.upgradeTable(session, oldVersion, newVersion);
+        ContactGroupV2.upgradeTable(session, oldVersion, newVersion);
+        ContactGroupV2Member.upgradeTable(session, oldVersion, newVersion);
+        ContactGroupV2PendingMember.upgradeTable(session, oldVersion, newVersion);
     }
 
     public void setDelegate(NotificationPostingDelegate notificationPostingDelegate) {
@@ -369,7 +386,12 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
         List<ContactGroupDetails> contactGroupDetailsList = ContactGroupDetails.getAllWithMissingPhotoUrl(wrapSession(session));
         for (ContactGroupDetails contactGroupDetails : contactGroupDetailsList) {
-            protocolStarterDelegate.startDownloadGroupPhotoWithinTransactionProtocol(session, contactGroupDetails.getOwnedIdentity(), contactGroupDetails.getGroupOwnerAndUid(), contactGroupDetails.getJsonGroupDetailsWithVersionAndPhoto());
+            protocolStarterDelegate.startDownloadGroupPhotoProtocolWithinTransaction(session, contactGroupDetails.getOwnedIdentity(), contactGroupDetails.getGroupOwnerAndUid(), contactGroupDetails.getJsonGroupDetailsWithVersionAndPhoto());
+        }
+
+        List<ContactGroupV2Details> contactGroupV2DetailsList = ContactGroupV2Details.getAllWithMissingPhotoUrl(wrapSession(session));
+        for (ContactGroupV2Details contactGroupV2Details : contactGroupV2DetailsList) {
+            protocolStarterDelegate.startDownloadGroupV2PhotoProtocolWithinTransaction(session, contactGroupV2Details.getOwnedIdentity(), contactGroupV2Details.getGroupIdentifier(), contactGroupV2Details.getServerPhotoInfo());
         }
     }
 
@@ -465,6 +487,14 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             ContactGroup[] contactGroups = ContactGroup.getAllForIdentity(wrapSession(session), ownedIdentity);
             for (ContactGroup contactGroup : contactGroups) {
                 contactGroup.delete();
+            }
+
+            // delete all contact groupsV2 (and associated details)
+            //  - this cascade deletes ContactGroupV2Members
+            //  - this cascade deletes ContactGroupV2PendingMember
+            List<ContactGroupV2> contactGroupsV2 = ContactGroupV2.getAllForIdentity(wrapSession(session), ownedIdentity);
+            for (ContactGroupV2 contactGroupV2 : contactGroupsV2) {
+                contactGroupV2.delete();
             }
 
             // delete all contacts (and associated details)
@@ -1044,8 +1074,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         // set inactive even if it is already deactivated to trigger the notification
         ownedIdentityObject.setActive(false);
         ////////////
-        // After deactivating an identity, we should delete all channels
-        //  - clear all contact device Uid
+        // After deactivating an identity, we must delete all channels
+        //  - clear all contact deviceUid
         //  - delete all channels
         ContactDevice.deleteAll(wrapSession(session), ownedIdentity);
         channelDelegate.deleteAllChannelsForOwnedIdentity(session, ownedIdentity);
@@ -1329,6 +1359,11 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     Logger.w("Attempted to delete a contact still member of some groups.");
                     throw new Exception();
                 }
+
+                if (ContactGroupV2Member.isContactMemberOfAGroupV2(wrapSession(session), ownedIdentity, contactIdentity)) {
+                    Logger.w("Attempted to delete a contact still member of some groups v2.");
+                    throw new Exception();
+                }
             }
 
             // delete the contact
@@ -1495,30 +1530,34 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     public List<ObvCapability> getContactCapabilities(Identity ownedIdentity, Identity contactIdentity) throws SQLException {
         // for now, we compute the intersection of all device capabilities. This may change in the future depending on capabilities we will add
         try (IdentityManagerSession identityManagerSession = getSession()) {
-            ContactDevice[] contactDevices = ContactDevice.getAll(identityManagerSession, contactIdentity, ownedIdentity);
-            HashSet<ObvCapability> contactCapabilities = null;
-            for (ContactDevice contactDevice : contactDevices) {
-                List<ObvCapability> deviceCapabilities = contactDevice.getDeviceCapabilities();
-                if (deviceCapabilities == null) {
-                    continue;
-                }
-                if (deviceCapabilities.size() == 0) {
-                    return new ArrayList<>();
-                }
-                if (contactCapabilities == null) {
-                    contactCapabilities = new HashSet<>(deviceCapabilities);
-                } else {
-                    contactCapabilities.retainAll(deviceCapabilities);
-                    if (contactCapabilities.isEmpty()) {
-                        return new ArrayList<>();
-                    }
-                }
+            return getContactCapabilities(identityManagerSession, ownedIdentity, contactIdentity);
+        }
+    }
+
+    private List<ObvCapability> getContactCapabilities(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+        ContactDevice[] contactDevices = ContactDevice.getAll(identityManagerSession, contactIdentity, ownedIdentity);
+        HashSet<ObvCapability> contactCapabilities = null;
+        for (ContactDevice contactDevice : contactDevices) {
+            List<ObvCapability> deviceCapabilities = contactDevice.getDeviceCapabilities();
+            if (deviceCapabilities == null) {
+                continue;
             }
-            if (contactCapabilities == null) {
+            if (deviceCapabilities.size() == 0) {
                 return new ArrayList<>();
             }
-            return new ArrayList<>(contactCapabilities);
+            if (contactCapabilities == null) {
+                contactCapabilities = new HashSet<>(deviceCapabilities);
+            } else {
+                contactCapabilities.retainAll(deviceCapabilities);
+                if (contactCapabilities.isEmpty()) {
+                    return new ArrayList<>();
+                }
+            }
         }
+        if (contactCapabilities == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(contactCapabilities);
     }
 
     @Override
@@ -1536,17 +1575,22 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (contactDevice == null) {
             throw new Exception();
         }
-        if (contactDevice.setRawDeviceCapabilities(rawDeviceCapabilities)) {
-            // check if this device is capable of handling non-oneToOne contacts
-            List<ObvCapability> contactDeviceCapabilities = contactDevice.getDeviceCapabilities();
-            if (contactDeviceCapabilities != null && !contactDeviceCapabilities.contains(ObvCapability.ONE_TO_ONE_CONTACTS)) {
-                ContactIdentity contact = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
-                if (contact != null && !contact.isOneToOne()) {
-                    // the contact need to be upgraded to oneToOne as he will not understand our non-oneToOne protocols
-                    contact.setOneToOne(true);
-                }
-            }
-        }
+        contactDevice.setRawDeviceCapabilities(rawDeviceCapabilities);
+        // This presents a security risk as a contact could pretend not to have oneToOne capability to automatically gain oneToOne access
+        // We comment this out as all users should be oneToOne capable by now!
+        /*
+               if (contactDevice.setRawDeviceCapabilities(rawDeviceCapabilities)) {
+                   // check if this device is capable of handling non-oneToOne contacts
+                   List<ObvCapability> contactDeviceCapabilities = contactDevice.getDeviceCapabilities();
+                   if (contactDeviceCapabilities != null && !contactDeviceCapabilities.contains(ObvCapability.ONE_TO_ONE_CONTACTS)) {
+                       ContactIdentity contact = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+                       if (contact != null && !contact.isOneToOne()) {
+                           // the contact needs to be upgraded to oneToOne as he will not understand our non-oneToOne protocols
+                           contact.setOneToOne(true);
+                       }
+                   }
+               }
+        */
     }
 
     @Override
@@ -1630,10 +1674,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
 
-    private static final int PADDING_LENGTH = 16;
-
     @Override
-    public byte[] signIdentities(Session session, byte[] prefix, Identity[] identities, Identity ownedIdentity, PRNGService prng) throws Exception {
+    public byte[] signIdentities(Session session, Constants.SignatureContext signatureContext, Identity[] identities, Identity ownedIdentity, PRNGService prng) throws Exception {
         try {
             IdentityManagerSession identityManagerSession = wrapSession(session);
             OwnedIdentity ownedIdentityObject = OwnedIdentity.get(identityManagerSession, ownedIdentity);
@@ -1645,19 +1687,20 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             SignaturePrivateKey signaturePrivateKey = privateIdentity.getServerAuthenticationPrivateKey().getSignaturePrivateKey();
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(prefix);
+            //noinspection ConstantConditions
+            baos.write(Constants.getSignatureChallengePrefix(signatureContext));
             for (Identity identity: identities) {
                 baos.write(identity.getBytes());
             }
-            byte[] padding = prng.bytes(PADDING_LENGTH);
+            byte[] padding = prng.bytes(Constants.SIGNATURE_PADDING_LENGTH);
             baos.write(padding);
             byte[] challenge = baos.toByteArray();
             baos.close();
             Signature signature = Suite.getSignature(signaturePrivateKey);
             byte[] signatureBytes =  signature.sign(signaturePrivateKey, signaturePublicKey, challenge, prng);
-            byte[] output = new byte[PADDING_LENGTH + signatureBytes.length];
-            System.arraycopy(padding, 0, output, 0, PADDING_LENGTH);
-            System.arraycopy(signatureBytes, 0, output, PADDING_LENGTH, signatureBytes.length);
+            byte[] output = new byte[Constants.SIGNATURE_PADDING_LENGTH + signatureBytes.length];
+            System.arraycopy(padding, 0, output, 0, Constants.SIGNATURE_PADDING_LENGTH);
+            System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
             return output;
         } catch (InvalidKeyException e) {
             e.printStackTrace();
@@ -1667,25 +1710,111 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
 
     @Override
-    public boolean verifyIdentitiesSignature(byte[] prefix, Identity[] identities, Identity signerIdentity, byte[] signature) throws Exception {
+    public byte[] signChannel(Session session, Constants.SignatureContext signatureContext, Identity contactIdentity, UID contactDeviceUid, Identity ownedIdentity, UID ownedDeviceUid, PRNGService prng) throws Exception {
         try {
-            SignaturePublicKey signaturePublicKey = signerIdentity.getServerAuthenticationPublicKey().getSignaturePublicKey();
+            IdentityManagerSession identityManagerSession = wrapSession(session);
+            OwnedIdentity ownedIdentityObject = OwnedIdentity.get(identityManagerSession, ownedIdentity);
+            if (ownedIdentityObject == null) {
+                throw new Exception("Unknown owned identity");
+            }
+            PrivateIdentity privateIdentity = ownedIdentityObject.getPrivateIdentity();
+            SignaturePublicKey signaturePublicKey = ownedIdentity.getServerAuthenticationPublicKey().getSignaturePublicKey();
+            SignaturePrivateKey signaturePrivateKey = privateIdentity.getServerAuthenticationPrivateKey().getSignaturePrivateKey();
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(prefix);
-            for (Identity identity: identities) {
-                baos.write(identity.getBytes());
-            }
-            baos.write(Arrays.copyOfRange(signature, 0, PADDING_LENGTH));
+            //noinspection ConstantConditions
+            baos.write(Constants.getSignatureChallengePrefix(signatureContext));
+            baos.write(contactDeviceUid.getBytes());
+            baos.write(ownedDeviceUid.getBytes());
+            baos.write(contactIdentity.getBytes());
+            baos.write(ownedIdentity.getBytes());
+            byte[] padding = prng.bytes(Constants.SIGNATURE_PADDING_LENGTH);
+            baos.write(padding);
             byte[] challenge = baos.toByteArray();
-
-            Signature signatureAlgo = Suite.getSignature(signaturePublicKey);
-            return signatureAlgo.verify(signaturePublicKey, challenge, Arrays.copyOfRange(signature, PADDING_LENGTH, signature.length));
+            baos.close();
+            Signature signature = Suite.getSignature(signaturePrivateKey);
+            byte[] signatureBytes =  signature.sign(signaturePrivateKey, signaturePublicKey, challenge, prng);
+            byte[] output = new byte[Constants.SIGNATURE_PADDING_LENGTH + signatureBytes.length];
+            System.arraycopy(padding, 0, output, 0, Constants.SIGNATURE_PADDING_LENGTH);
+            System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
+            return output;
         } catch (InvalidKeyException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
+
+    @Override
+    public byte[] signBlock(Session session, Constants.SignatureContext signatureContext, byte[] block, Identity ownedIdentity, PRNGService prng) throws Exception {
+        try {
+            IdentityManagerSession identityManagerSession = wrapSession(session);
+            OwnedIdentity ownedIdentityObject = OwnedIdentity.get(identityManagerSession, ownedIdentity);
+            if (ownedIdentityObject == null) {
+                throw new Exception("Unknown owned identity");
+            }
+            PrivateIdentity privateIdentity = ownedIdentityObject.getPrivateIdentity();
+            SignaturePublicKey signaturePublicKey = ownedIdentity.getServerAuthenticationPublicKey().getSignaturePublicKey();
+            SignaturePrivateKey signaturePrivateKey = privateIdentity.getServerAuthenticationPrivateKey().getSignaturePrivateKey();
+
+            byte[] prefix = Constants.getSignatureChallengePrefix(signatureContext);
+            byte[] padding = prng.bytes(Constants.SIGNATURE_PADDING_LENGTH);
+            //noinspection ConstantConditions
+            byte[] challenge = new byte[prefix.length + block.length + Constants.SIGNATURE_PADDING_LENGTH];
+            System.arraycopy(prefix, 0, challenge, 0, prefix.length);
+            System.arraycopy(block, 0, challenge, prefix.length, block.length);
+            System.arraycopy(padding, 0, challenge, prefix.length + block.length, Constants.SIGNATURE_PADDING_LENGTH);
+
+            Signature signature = Suite.getSignature(signaturePrivateKey);
+            byte[] signatureBytes =  signature.sign(signaturePrivateKey, signaturePublicKey, challenge, prng);
+            byte[] output = new byte[Constants.SIGNATURE_PADDING_LENGTH + signatureBytes.length];
+            System.arraycopy(padding, 0, output, 0, Constants.SIGNATURE_PADDING_LENGTH);
+            System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
+            return output;
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public byte[] signGroupInvitationNonce(Session session, Constants.SignatureContext signatureContext, GroupV2.Identifier groupIdentifier, byte[] nonce, Identity contactIdentity, Identity ownedIdentity, PRNGService prng) throws Exception {
+        try {
+            IdentityManagerSession identityManagerSession = wrapSession(session);
+            OwnedIdentity ownedIdentityObject = OwnedIdentity.get(identityManagerSession, ownedIdentity);
+            if (ownedIdentityObject == null) {
+                throw new Exception("Unknown owned identity");
+            }
+            PrivateIdentity privateIdentity = ownedIdentityObject.getPrivateIdentity();
+            SignaturePublicKey signaturePublicKey = ownedIdentity.getServerAuthenticationPublicKey().getSignaturePublicKey();
+            SignaturePrivateKey signaturePrivateKey = privateIdentity.getServerAuthenticationPrivateKey().getSignaturePrivateKey();
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            //noinspection ConstantConditions
+            baos.write(Constants.getSignatureChallengePrefix(signatureContext));
+            baos.write(groupIdentifier.getBytes());
+            baos.write(nonce);
+            if (contactIdentity != null) {
+                baos.write(contactIdentity.getBytes());
+            }
+            byte[] padding = prng.bytes(Constants.SIGNATURE_PADDING_LENGTH);
+            baos.write(padding);
+            byte[] challenge = baos.toByteArray();
+            baos.close();
+
+            Signature signature = Suite.getSignature(signaturePrivateKey);
+            byte[] signatureBytes =  signature.sign(signaturePrivateKey, signaturePublicKey, challenge, prng);
+            byte[] output = new byte[Constants.SIGNATURE_PADDING_LENGTH + signatureBytes.length];
+            System.arraycopy(padding, 0, output, 0, Constants.SIGNATURE_PADDING_LENGTH);
+            System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
+            return output;
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+
 
     // region groups
 
@@ -2150,8 +2279,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public JsonGroupDetailsWithVersionAndPhoto[] getGroupPublishedAndLatestOrTrustedDetails(Session session, Identity ownedIdentity, byte[] groupUid) throws SQLException {
-        ContactGroup contactGroup = ContactGroup.get(wrapSession(session), groupUid, ownedIdentity);
+    public JsonGroupDetailsWithVersionAndPhoto[] getGroupPublishedAndLatestOrTrustedDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException {
+        ContactGroup contactGroup = ContactGroup.get(wrapSession(session), groupOwnerAndUid, ownedIdentity);
         if (contactGroup != null) {
             JsonGroupDetailsWithVersionAndPhoto[] res;
             if (contactGroup.getPublishedDetailsVersion() == contactGroup.getLatestOrTrustedDetailsVersion()) {
@@ -2306,6 +2435,571 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     // endregion
 
+
+
+
+
+    // region Groups v2
+
+    @Override
+    public void createNewGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, String absolutePhotoUrl, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, HashSet<GroupV2.IdentityAndPermissionsAndDetails> otherGroupMembers) throws Exception {
+        for (GroupV2.IdentityAndPermissionsAndDetails groupMember: otherGroupMembers) {
+            if (!isIdentityAContactOfOwnedIdentity(session, ownedIdentity, groupMember.identity)) {
+                Logger.e("Error in createNewContactGroupV2: a groupMember is not a Contact.");
+                throw new Exception();
+            }
+            if (!getContactCapabilities(wrapSession(session), ownedIdentity, groupMember.identity).contains(ObvCapability.GROUPS_V2)) {
+                Logger.e("Error in createNewContactGroupV2: a groupMember does not have groupV2 capability.");
+                throw new Exception();
+            }
+            if (!ownPermissionStrings.contains(GroupV2.Permission.GROUP_ADMIN.getString())) {
+                Logger.e("Error in createNewContactGroupV2: ownPermissions do not contain GROUP_ADMIN.");
+                throw new Exception();
+            }
+        }
+
+        IdentityManagerSession identityManagerSession = wrapSession(session);
+        ContactGroupV2 group = ContactGroupV2.createNew(
+                identityManagerSession,
+                ownedIdentity,
+                groupIdentifier,
+                serializedGroupDetails,
+                absolutePhotoUrl,
+                serverPhotoInfo,
+                verifiedAdministratorsChain,
+                blobKeys,
+                ownGroupInvitationNonce,
+                ownPermissionStrings
+        );
+        if (group == null) {
+            throw new Exception("Unable to create ContactGroupV2");
+        }
+        // if any, add the user data to the ServerUserData
+        if (serverPhotoInfo != null) {
+            if (ServerUserData.createForGroupV2(identityManagerSession, ownedIdentity, serverPhotoInfo.serverPhotoLabel, groupIdentifier.encode().getBytes()) == null) {
+                throw new Exception("Unable to create ServerUserData");
+            }
+        }
+
+        // add pending group members
+        for (GroupV2.IdentityAndPermissionsAndDetails groupMember: otherGroupMembers) {
+            ContactGroupV2PendingMember pendingMember = ContactGroupV2PendingMember.create(
+                    identityManagerSession,
+                    ownedIdentity,
+                    groupIdentifier,
+                    groupMember.identity,
+                    groupMember.serializedIdentityDetails,
+                    groupMember.permissionStrings,
+                    groupMember.groupInvitationNonce
+            );
+
+            if (pendingMember == null) {
+                throw new Exception("Unable to create ContactGroupV2PendingMember");
+            }
+        }
+
+        session.addSessionCommitListener(backupNeededSessionCommitListener);
+    }
+
+    @Override
+    public boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (serverBlob == null)) {
+            throw new Exception();
+        }
+
+        if (!session.isInTransaction()) {
+            throw new SQLException("Called IdentityManager.createJoinedGroupV2 outside of a transaction!");
+        }
+
+        IdentityManagerSession identityManagerSession = wrapSession(session);
+
+        if (ContactGroupV2.get(identityManagerSession, ownedIdentity, groupIdentifier) != null) {
+            Logger.e("Called IdentityManager.createJoinedGroupV2 for an existing group!");
+            return false;
+        }
+
+        if (!serverBlob.administratorsChain.integrityWasChecked) {
+            Logger.e("In IdentityManager.createJoinedGroupV2, serverBlob.administratorsChain has integrityWasChecked false");
+            return false;
+        }
+
+        // check I am member of the group
+        GroupV2.IdentityAndPermissionsAndDetails ownIdentityAndPermissionsAndDetails = null;
+        for (GroupV2.IdentityAndPermissionsAndDetails identityAndPermissionsAndDetails : serverBlob.groupMemberIdentityAndPermissionsAndDetailsList) {
+            if (identityAndPermissionsAndDetails.identity.equals(ownedIdentity)) {
+                ownIdentityAndPermissionsAndDetails = identityAndPermissionsAndDetails;
+                break;
+            }
+        }
+        if (ownIdentityAndPermissionsAndDetails == null) {
+            Logger.e("In IdentityManager.createJoinedGroupV2, ownedIdentity not part of the group");
+            return false;
+        }
+
+        ContactGroupV2 group = ContactGroupV2.createJoined(
+                identityManagerSession,
+                ownedIdentity,
+                groupIdentifier,
+                serverBlob.version,
+                serverBlob.serializedGroupDetails,
+                serverBlob.serverPhotoInfo,
+                serverBlob.administratorsChain.encode().getBytes(),
+                blobKeys,
+                ownIdentityAndPermissionsAndDetails.groupInvitationNonce,
+                ownIdentityAndPermissionsAndDetails.permissionStrings
+        );
+        if (group == null) {
+            throw new Exception("Unable to create joined ContactGroupV2");
+        }
+        for (GroupV2.IdentityAndPermissionsAndDetails groupMember : serverBlob.groupMemberIdentityAndPermissionsAndDetailsList) {
+            if (groupMember.identity.equals(ownedIdentity)) {
+                continue;
+            }
+
+            ContactGroupV2PendingMember pendingMember = ContactGroupV2PendingMember.create(
+                    identityManagerSession,
+                    ownedIdentity,
+                    groupIdentifier,
+                    groupMember.identity,
+                    groupMember.serializedIdentityDetails,
+                    groupMember.permissionStrings,
+                    groupMember.groupInvitationNonce
+            );
+
+            if (pendingMember == null) {
+                throw new Exception("Unable to create ContactGroupV2PendingMember");
+            }
+        }
+
+        session.addSessionCommitListener(backupNeededSessionCommitListener);
+        return true;
+    }
+
+    @Override
+    public GroupV2.ServerBlob getGroupV2ServerBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+
+        return ContactGroupV2.getServerBlob(wrapSession(session), ownedIdentity, groupIdentifier);
+    }
+
+    @Override
+    public String getGroupV2PhotoUrl(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+
+        return ContactGroupV2.getPhotoUrl(wrapSession(session), ownedIdentity, groupIdentifier);
+    }
+
+    @Override
+    public void deleteGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if (groupIdentifier == null) {
+            return;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 != null) {
+            groupV2.delete();
+        }
+
+        session.addSessionCommitListener(backupNeededSessionCommitListener);
+    }
+
+    @Override
+    public void freezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 != null) {
+            groupV2.setFrozen(true);
+        }
+    }
+
+    @Override
+    public void unfreezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 != null) {
+            groupV2.setFrozen(false);
+        }
+    }
+
+    @Override
+    public Integer getGroupV2Version(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return null;
+        }
+        return groupV2.getVersion();
+    }
+
+    @Override
+    public boolean isGroupV2Frozen(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return false;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return false;
+        }
+        return groupV2.isFrozen();
+
+    }
+
+    @Override
+    public GroupV2.BlobKeys getGroupV2BlobKeys(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return null;
+        }
+        return new GroupV2.BlobKeys(groupV2.getBlobMainSeed(), groupV2.getBlobVersionSeed(), groupV2.getGroupAdminServerAuthenticationPrivateKey());
+    }
+
+    @Override
+    public HashSet<GroupV2.IdentityAndPermissions> getGroupV2OtherMembersAndPermissions(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+        return ContactGroupV2.getGroupV2OtherMembersAndPermissions(wrapSession(session), ownedIdentity, groupIdentifier);
+    }
+
+    public boolean getGroupV2HasOtherAdminMember(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            throw new Exception();
+        }
+        return ContactGroupV2.getGroupV2HasOtherAdminMember(wrapSession(session), ownedIdentity, groupIdentifier);
+    }
+
+    @Override
+    public List<Identity> updateGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (serverBlob == null) || (blobKeys == null)) {
+            return null;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return null;
+        }
+
+        session.addSessionCommitListener(backupNeededSessionCommitListener);
+
+        return groupV2.updateWithNewBlob(serverBlob, blobKeys, updatedByMe);
+    }
+
+    @Override
+    public List<Identity> getGroupV2MembersAndPendingMembersFromNonce(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, byte[] groupMemberInvitationNonce) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupMemberInvitationNonce == null)) {
+            return null;
+        }
+        return ContactGroupV2.getGroupV2MembersAndPendingMembersFromNonce(wrapSession(session), ownedIdentity, groupIdentifier, groupMemberInvitationNonce);
+    }
+
+    @Override
+    public byte[] getGroupV2OwnGroupInvitationNonce(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return null;
+        }
+
+        return groupV2.getOwnGroupInvitationNonce();
+    }
+
+    @Override
+    public void moveGroupV2PendingMemberToMembers(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity groupMemberIdentity) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupMemberIdentity == null)) {
+            return;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return;
+        }
+
+        groupV2.movePendingMemberToMembers(groupMemberIdentity);
+
+        session.addSessionCommitListener(backupNeededSessionCommitListener);
+    }
+
+    @Override
+    public void setGroupV2DownloadedPhoto(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] photo) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (serverPhotoInfo == null) || (photo == null)) {
+            return;
+        }
+
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return;
+        }
+
+        groupV2.setDownloadedPhotoUrl(ownedIdentity, serverPhotoInfo, photo);
+    }
+
+    @Override
+    public ObvGroupV2 getObvGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return null;
+        }
+
+        return groupV2toObvGroupV2(wrapSession(session), ownedIdentity, groupIdentifier, groupV2);
+    }
+
+    private static ObvGroupV2 groupV2toObvGroupV2(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, ContactGroupV2 groupV2) throws Exception {
+        HashSet<ObvGroupV2.ObvGroupV2Member> otherGroupMembers = new HashSet<>();
+        List<ContactGroupV2Member> members = ContactGroupV2Member.getAll(identityManagerSession, ownedIdentity, groupIdentifier);
+        for (ContactGroupV2Member member : members) {
+            otherGroupMembers.add(new ObvGroupV2.ObvGroupV2Member(
+                    member.getContactIdentity().getBytes(),
+                    GroupV2.Permission.deserializeKnownPermissions(member.getSerializedPermissions())
+            ));
+        }
+
+        HashSet<ObvGroupV2.ObvGroupV2PendingMember> pendingGroupMembers = new HashSet<>();
+        List<ContactGroupV2PendingMember> pendingMembers = ContactGroupV2PendingMember.getAll(identityManagerSession, ownedIdentity, groupIdentifier);
+        for (ContactGroupV2PendingMember pendingMember : pendingMembers) {
+            pendingGroupMembers.add(new ObvGroupV2.ObvGroupV2PendingMember(
+                    pendingMember.getContactIdentity().getBytes(),
+                    GroupV2.Permission.deserializeKnownPermissions(pendingMember.getSerializedPermissions()),
+                    pendingMember.getSerializedContactDetails()
+            ));
+        }
+
+        ContactGroupV2Details trustedDetails = ContactGroupV2Details.get(identityManagerSession, ownedIdentity, groupIdentifier, groupV2.getTrustedDetailsVersion());
+        if (trustedDetails == null) {
+            return null;
+        }
+
+        String serializedGroupDetails = trustedDetails.getSerializedJsonDetails();
+        String photoUrl = trustedDetails.getPhotoUrl();
+        if (photoUrl == null && trustedDetails.getServerPhotoInfo() != null) { // photo not downloaded yet
+            photoUrl = "";
+        }
+
+        String serializedPublishedDetails;
+        String publishedPhotoUrl;
+        if (groupV2.getVersion() != groupV2.getTrustedDetailsVersion()) {
+            ContactGroupV2Details publishedDetails = ContactGroupV2Details.get(identityManagerSession, ownedIdentity, groupIdentifier, groupV2.getVersion());
+            if (publishedDetails == null) {
+                return null;
+            }
+            serializedPublishedDetails = publishedDetails.getSerializedJsonDetails();
+            publishedPhotoUrl = publishedDetails.getPhotoUrl();
+            if (publishedPhotoUrl == null && publishedDetails.getServerPhotoInfo() != null) { // photo not downloaded yet
+                publishedPhotoUrl = "";
+            }
+        } else {
+            serializedPublishedDetails = null;
+            publishedPhotoUrl = null;
+        }
+
+
+        return new ObvGroupV2(
+                ownedIdentity.getBytes(),
+                groupIdentifier,
+                GroupV2.Permission.fromStrings(groupV2.getOwnPermissionStrings()),
+                otherGroupMembers,
+                pendingGroupMembers,
+                serializedGroupDetails,
+                photoUrl,
+                serializedPublishedDetails,
+                publishedPhotoUrl
+        );
+    }
+
+    @Override
+    public void trustGroupV2PublishedDetails(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return;
+        }
+
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return;
+        }
+        int trustedVersion = groupV2.getTrustedDetailsVersion();
+        if (trustedVersion != groupV2.getVersion()) {
+            groupV2.setTrustedDetailsVersion(groupV2.getVersion());
+            ContactGroupV2Details.cleanup(wrapSession(session), ownedIdentity, groupIdentifier, groupV2.getVersion(), groupV2.getVersion());
+        }
+
+        session.addSessionCommitListener(backupNeededSessionCommitListener);
+    }
+
+    @Override
+    public GroupV2.ServerPhotoInfo getGroupV2PublishedServerPhotoInfo(Session session, Identity ownedIdentity, byte[] bytesGroupIdentifier) {
+        if ((ownedIdentity == null) || (bytesGroupIdentifier == null)) {
+            return null;
+        }
+        try {
+            GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+            return ContactGroupV2.getServerPhotoInfo(wrapSession(session), ownedIdentity, groupIdentifier);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public ObvGroupV2.ObvGroupV2DetailsAndPhotos getGroupV2DetailsAndPhotos(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+        try {
+            ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+            if (groupV2 == null) {
+                return null;
+            }
+
+            ContactGroupV2Details trustedDetails = ContactGroupV2Details.get(wrapSession(session), ownedIdentity, groupIdentifier, groupV2.getTrustedDetailsVersion());
+            if (trustedDetails == null) {
+                return null;
+            }
+
+            String serializedGroupDetails = trustedDetails.getSerializedJsonDetails();
+            String photoUrl = trustedDetails.getPhotoUrl();
+            if (photoUrl == null && trustedDetails.getServerPhotoInfo() != null) { // photo not downloaded yet
+                photoUrl = "";
+            }
+
+            String serializedPublishedDetails;
+            String publishedPhotoUrl;
+            if (groupV2.getVersion() != groupV2.getTrustedDetailsVersion()) {
+                ContactGroupV2Details publishedDetails = ContactGroupV2Details.get(wrapSession(session), ownedIdentity, groupIdentifier, groupV2.getVersion());
+                if (publishedDetails == null) {
+                    return null;
+                }
+                serializedPublishedDetails = publishedDetails.getSerializedJsonDetails();
+                publishedPhotoUrl = publishedDetails.getPhotoUrl();
+                if (publishedPhotoUrl == null && publishedDetails.getServerPhotoInfo() != null) { // photo not downloaded yet
+                    publishedPhotoUrl = "";
+                }
+            } else {
+                serializedPublishedDetails = null;
+                publishedPhotoUrl = null;
+            }
+
+            return new ObvGroupV2.ObvGroupV2DetailsAndPhotos(serializedGroupDetails, photoUrl, serializedPublishedDetails, publishedPhotoUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public void setUpdatedGroupV2PhotoUrl(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String absolutePhotoUrl) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (absolutePhotoUrl == null)) {
+            return;
+        }
+
+        ContactGroupV2Details details = ContactGroupV2Details.get(wrapSession(session), ownedIdentity, groupIdentifier, version);
+        if (details == null) {
+            return;
+        }
+
+        details.setAbsolutePhotoUrl(absolutePhotoUrl);
+    }
+
+    @Override
+    public GroupV2.AdministratorsChain getGroupV2AdministratorsChain(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return null;
+        }
+
+        byte[] serializedAdministratorsChain = groupV2.getVerifiedAdministratorsChain();
+
+        return GroupV2.AdministratorsChain.of(new Encoded(serializedAdministratorsChain));
+    }
+
+    @Override
+    public boolean getGroupV2AdminStatus(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return false;
+        }
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return false;
+        }
+
+        return groupV2.getOwnPermissionStrings().contains(GroupV2.Permission.GROUP_ADMIN.getString());
+    }
+
+    @Override
+    public List<ObvGroupV2> getObvGroupsV2ForOwnedIdentity(Identity ownedIdentity) throws Exception {
+        if (ownedIdentity == null) {
+            throw new Exception();
+        }
+
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            List<ContactGroupV2> groupsV2 = ContactGroupV2.getAllForIdentity(identityManagerSession, ownedIdentity);
+
+            List<ObvGroupV2> obvGroupsV2 = new ArrayList<>();
+            for (ContactGroupV2 groupV2 : groupsV2) {
+                ObvGroupV2 obvGroupV2 = groupV2toObvGroupV2(identityManagerSession, ownedIdentity, groupV2.getGroupIdentifier(), groupV2);
+                if (obvGroupV2 != null) {
+                    obvGroupsV2.add(obvGroupV2);
+                }
+            }
+            return obvGroupsV2;
+        }
+    }
+
+    @Override
+    public GroupV2.IdentifierVersionAndKeys[] getGroupsV2IdentifierVersionAndKeysForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
+        if (ownedIdentity == null || contactIdentity == null) {
+            throw new Exception();
+        }
+
+        return ContactGroupV2.getGroupsV2IdentifierVersionAndKeysForContact(wrapSession(session), ownedIdentity, contactIdentity);
+    }
+
+    @Override
+    public void initiateGroupV2BatchKeysResend(UID currentDeviceUid, Identity contactIdentity, UID contactDeviceUid) {
+        if (contactIdentity == null || contactDeviceUid == null) {
+            return;
+        }
+
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            Identity ownedIdentity = getOwnedIdentityForDeviceUid(identityManagerSession.session, currentDeviceUid);
+            if (ownedIdentity == null) {
+                return;
+            }
+
+            try {
+                protocolStarterDelegate.initiateGroupV2BatchKeysResend(identityManagerSession.session, ownedIdentity, contactIdentity, contactDeviceUid);
+                identityManagerSession.session.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // endregion
+
+
+
+
+
     // region backup
 
     @Override
@@ -2371,6 +3065,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
                 ContactIdentity.restoreAll(identityManagerSession, ownedIdentity, ownedIdentityPojo.contact_identities, backupTimestamp);
                 ContactGroup.restoreAllForOwner(identityManagerSession, ownedIdentity, ownedIdentity, ownedIdentityPojo.owned_groups, backupTimestamp);
+                ContactGroupV2.restoreAll(identityManagerSession, protocolStarterDelegate, ownedIdentity, ownedIdentityPojo.groups_v2);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -2385,7 +3080,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         ServerUserData[] serverUserData = ServerUserData.getAll(wrapSession(session));
         UserData[] userData = new UserData[serverUserData.length];
         for (int i=0; i<serverUserData.length; i++) {
-            userData[i] = new UserData(serverUserData[i].getOwnedIdentity(), serverUserData[i].getLabel(), serverUserData[i].getNextRefreshTimestamp(), serverUserData[i].getGroupDetailsOwnerAndUid());
+            userData[i] = serverUserData[i].getUserData();
         }
         return userData;
     }
@@ -2394,7 +3089,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     public UserData getUserData(Session session, Identity ownedIdentity, UID label) throws Exception {
         ServerUserData serverUserData = ServerUserData.get(wrapSession(session), ownedIdentity, label);
         if (serverUserData != null) {
-            return new UserData(serverUserData.getOwnedIdentity(), serverUserData.getLabel(), serverUserData.getNextRefreshTimestamp(), serverUserData.getGroupDetailsOwnerAndUid());
+            return serverUserData.getUserData();
         }
         return null;
     }

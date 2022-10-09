@@ -64,8 +64,8 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.services.UnifiedForegroundService;
-import io.olvid.messenger.webclient.WebClientManager;
 import io.olvid.messenger.settings.SettingsActivity;
+import io.olvid.messenger.webclient.WebClientManager;
 
 public class WebClientScannedFragment extends Fragment implements View.OnClickListener {
     private final WebClientServiceConnection serviceConnection = new WebClientServiceConnection();
@@ -233,7 +233,7 @@ public class WebClientScannedFragment extends Fragment implements View.OnClickLi
         }
 
         private void launchObservers() {
-            if (SettingsActivity.useApplicationLockScreen() && SettingsActivity.isUnlockRequiredForWebclient()) {
+            if (SettingsActivity.useApplicationLockScreen() && SettingsActivity.isWebclientUnlockRequired()) {
                 UnifiedForegroundService.lockApplication(activity, R.string.message_unlock_before_web_client);
             }
 
