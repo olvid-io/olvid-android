@@ -22,8 +22,8 @@ jobs:
           distribution: 'zulu'
           java-version: 11
 
-      - name: Run Tests
-        run: cd obv_messenger/ && ./gradlew test --stacktrace
+      # - name: Run Tests
+      #   run: cd obv_messenger/ && ./gradlew test --stacktrace
 
       - name: Build Release APK
         run: cd obv_messenger/ && ./gradlew assembleRelease --stacktrace
