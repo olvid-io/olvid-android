@@ -1119,8 +1119,10 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                             etaEta.setText(activity.getString(R.string.text_timer_h, finalEta/3_600));
                         } else if (finalEta > 99) {
                             etaEta.setText(activity.getString(R.string.text_timer_m, finalEta / 60));
-                        } else {
+                        } else if (finalEta > 0) {
                             etaEta.setText(activity.getString(R.string.text_timer_s, finalEta));
+                        } else {
+                            etaEta.setText("-");
                         }
                         if (etaGroup.getVisibility() != View.VISIBLE) {
                             etaGroup.setVisibility(View.VISIBLE);

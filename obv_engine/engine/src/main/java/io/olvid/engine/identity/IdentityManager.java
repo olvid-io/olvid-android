@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -1032,7 +1033,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     public void setOwnedIdentityKeycloakSelfRevocationTestNonce(Session session, Identity ownedIdentity, String serverUrl, String nonce) throws SQLException {
         KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), serverUrl, ownedIdentity);
 
-        if (keycloakServer != null) {
+        if (keycloakServer != null && !Objects.equals(keycloakServer.getSelfRevocationTestNonce(), nonce)) {
             keycloakServer.setSelfRevocationTestNonce(nonce);
             session.addSessionCommitListener(backupNeededSessionCommitListener);
         }

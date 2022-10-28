@@ -167,6 +167,7 @@ public class FilteredDiscussionListViewModel extends ViewModel {
         public final String photoUrl;
         public final boolean keycloakManaged;
         public final boolean active;
+        public final boolean pinned;
 
         public boolean selected;
 
@@ -191,6 +192,7 @@ public class FilteredDiscussionListViewModel extends ViewModel {
             this.photoUrl = discussionAndGroupMembersNames.discussion.photoUrl;
             this.keycloakManaged = discussionAndGroupMembersNames.discussion.keycloakManaged;
             this.active = discussionAndGroupMembersNames.discussion.active;
+            this.pinned = discussionAndGroupMembersNames.discussion.pinned;
 
             this.selected = false;
         }

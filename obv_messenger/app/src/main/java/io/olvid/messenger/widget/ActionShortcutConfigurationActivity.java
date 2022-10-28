@@ -783,6 +783,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
 
             FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
             filteredDiscussionListFragment.removeBottomPadding();
+            filteredDiscussionListFragment.setShowPinned(true);
             filteredDiscussionListFragment.setUnfilteredDiscussions(viewModel.getDiscussionListLiveData());
             filteredDiscussionListFragment.setDiscussionFilterEditText(dialogContactNameFilter);
             filteredDiscussionListFragment.setOnClickDelegate((view, searchableDiscussion) -> {

@@ -143,7 +143,7 @@
     <string name="label_group_card_published">Group Card - Publiée</string>
     <string name="label_group_card_published_update">Group Card - Nouvelle</string>
     <string name="label_group_card_unpublished_draft">Group Card - Brouillon non-publié</string>
-    <string name="label_group_members">Membres du groupe</string>
+    <string name="label_group_members">Autres membres du groupe</string>
     <string name="label_groups">Groupes</string>
     <string name="label_invitation_declined">Invitation\nrefusée</string>
     <string name="label_new_group_card">Détails du group changés</string>
@@ -274,7 +274,7 @@
     <string name="dialog_title_delete_user">Supprimer un utilisateur\u00a0?</string>
     <string name="dialog_message_delete_user">Vous êtes sur le point de retirer %1$s de votre liste d\'autres utilisateurs.\n\nSouhaitez-vous supprimer cet utilisateur\u00a0?</string>
     <string name="dialog_title_delete_user_impossible">Impossible de supprimer cet utilisateur</string>
-    <string name="text_no_members">Aucun membre</string>
+    <string name="text_empty_group">Groupe vide</string>
     <string name="message_error_group_name_empty">Veuillez entrer un nom de groupe</string>
     <string name="hint_search_contact_name">Rechercher un contact…</string>
     <string name="menu_action_search">Recherche</string>
@@ -1288,7 +1288,7 @@
     <string name="dialog_message_other_known_users">Ces utilisateurs d\'Olvid que vous avez rencontrés (typiquement dans un groupe) ne font pas partie de vos contacts. Vous pouvez les y ajouter en les invitant à une discussion privée.</string>
     <string name="button_label_invite">Inviter</string>
     <string name="explanation_contact_not_one_to_one">Pour démarrer une discussion privée avec %1$s et l\'ajouter à vos contacts, appuyez sur «\u00a0Inviter\u00a0».</string>
-    <string name="label_contact_not_one_to_one">Cette utilisateur n\'est pas encore un contact</string>
+    <string name="label_contact_not_one_to_one">Cet utilisateur n\'est pas encore un contact</string>
     <string name="invitation_status_description_one_to_one_invitation_sent">Vous avez invité %1$s à une discussion privée. Veuillez attendre que cette invitation soit acceptée, ou appuyez sur «\u00a0Abandonner\u00a0» pour annuler cette invitation.</string>
     <string name="invitation_status_description_one_to_one_invitation_sent_deleted">L\'utilisateur que vous avez invité à une discussion privée a été retiré de votre liste d\'utilisateurs connus. Vous pouvez appuyer sur «\u00a0Abandonner\u00a0» pour annuler cette invitation.</string>
     <string name="invitation_status_one_to_one_invitation">Invitation à une discussion privée</string>
@@ -1489,10 +1489,6 @@
     <string name="message_discussion_group_v2_updating">La liste des membres du groupe est en cours de synchronisation</string>
     <string name="message_discussion_group_v2_creating">Le groupe est en cours de création</string>
     <string name="button_label_new_group">Nouveau groupe</string>
-    <string name="dialog_title_new_group_beta_choice">Nouveaux groupes Olvid (bêta)</string>
-    <string name="dialog_message_new_group_beta_choice">Un nouveau format de groupe autorisant plusieurs administrateurs est en cours de déploiement sur Olvid. Seuls vos contacts ayant une version d\'Olvid qui supporte ce nouveau format de groupe peuvent y être ajoutés.\n\nSouhaitez-vous créer un groupe au nouveau format (bêta) ou un groupe classique\u00a0?</string>
-    <string name="button_label_legacy_group">Créer un groupe classique</string>
-    <string name="button_label_group_v2_beta">Créer un nouveau groupe (bêta)</string>
     <string name="text_you_became_admin">Vous êtes maintenant un administrateur de ce groupe</string>
     <string name="text_you_are_no_longer_admin">Vous n\'êtes plus administrateur de ce groupe</string>
     <string name="label_pending">En attente</string>
@@ -1563,7 +1559,14 @@
     <string name="xx_mbps">%1$sM/s</string>
     <string name="xx_kbps">%1$sk/s</string>
     <string name="xx_bps">%1$so/s</string>
-
+    <string name="text_you_captured_sensitive_message">Vous avez fait une capture d\'un message sensible</string>
+    <string name="text_unknown_member_captured_sensitive_message">Un utilisateur inconnu a fait une capture d\'un message sensible</string>
+    <string name="text_xxx_captured_sensitive_message">%1$s a fait une capture d\'un message sensible</string>
+    <string name="text_contact_with_outdated_olvid_explanation">Choisissez qui ajouter à ce groupe. Vous ne trouvez pas la personne que vous cherchez\u00a0? Demandez-lui de mettre à jour Olvid\u00a0🚀\u00a0!</string>
+    <string name="text_clone_v1_to_v2_explanation">Ce groupe ne permet pas d\'avoir plusieurs administrateurs. Mais vous pouvez le cloner en un nouveau groupe de dernière génération qui le permettra\u00a0🚀\u00a0!</string>
+    <string name="button_label_clone_this_group">Cloner ce groupe</string>
+    <string name="dialog_title_introducing_groups_v2">Découvrez les nouveaux groupes\u00a0!</string>
+    <string name="dialog_message_introducing_groups_v2">Olvid permet maintenant d\'avoir plusieurs administrateurs par groupe\u00a0👑\u00a0! Cela ne change rien à vos «\u00a0anciens groupes\u00a0», mais fonctionnera pour tous les nouveaux groupes que vous créerez à partir de maintenant. Pour en bénéficier, vos contacts doivent avoir la dernière version d\'Olvid.\n\nVous voulez essayer\u00a0? Rendez vous sur l\'onglet des groupes et créez un nouveau groupe. Une fois créé, vous pourrez le modifier pour accorder les droits d\'administration à autant de participants que vous le voulez\u00a0!</string>
 
 
 

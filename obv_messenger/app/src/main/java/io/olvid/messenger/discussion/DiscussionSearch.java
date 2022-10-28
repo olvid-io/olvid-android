@@ -254,13 +254,14 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
 
 
                     if (currentPosition != null) {
+                        int cPosition = currentPosition;
                         activity.runOnUiThread(() -> {
-                            Message message = messages.get(currentPosition);
+                            Message message = messages.get(cPosition);
                             if (message != null) {
                                 messageListAdapter.setMessageHighlightInfo(new MessageHighlightInfo(message.id, patterns));
                             }
-                            messageListAdapter.notifyItemChanged(currentPosition + 1, DiscussionActivity.MessageListAdapter.BODY_OR_HIGHLIGHT_CHANGE_MASK);
-                            messageListLinearLayoutManager.scrollToPosition(currentPosition + 1);
+                            messageListAdapter.notifyItemChanged(cPosition + 1, DiscussionActivity.MessageListAdapter.BODY_OR_HIGHLIGHT_CHANGE_MASK);
+                            messageListLinearLayoutManager.scrollToPosition(cPosition + 1);
                             if (menuPrev != null) {
                                 menuPrev.setEnabled(prevPosition != null);
                             }

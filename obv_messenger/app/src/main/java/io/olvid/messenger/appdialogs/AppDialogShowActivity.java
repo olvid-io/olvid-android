@@ -127,7 +127,9 @@ public class AppDialogShowActivity extends LockableActivity {
     public static final String DIALOG_BACKUP_REQUIRES_SIGN_IN = "backup_requires_sign_in";
 
     public static final String DIALOG_CONFIGURE_HIDDEN_PROFILE_CLOSE_POLICY = "configure_hidden_profile_close_policy";
+
     public static final String DIALOG_INTRODUCING_MULTI_PROFILE = "introducing_multi_profile";
+    public static final String DIALOG_INTRODUCING_GROUPS_V2 = "introducing_groups_v2";
 
     AppDialogShowViewModel appDialogShowViewModel;
 
@@ -516,6 +518,15 @@ public class AppDialogShowActivity extends LockableActivity {
                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_introducing_multi_profile)
                         .setMessage(R.string.dialog_message_introducing_multi_profile)
+                        .setPositiveButton(R.string.button_label_ok, null)
+                        .setOnDismissListener(dialog -> continueWithNextDialog());
+                builder.create().show();
+                break;
+            }
+            case DIALOG_INTRODUCING_GROUPS_V2: {
+                AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_introducing_groups_v2)
+                        .setMessage(R.string.dialog_message_introducing_groups_v2)
                         .setPositiveButton(R.string.button_label_ok, null)
                         .setOnDismissListener(dialog -> continueWithNextDialog());
                 builder.create().show();

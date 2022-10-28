@@ -159,7 +159,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                             otherFyleMessageJoinWithStatus.size = fyleMessageJoinWithStatus.size;
                                             db.fyleMessageJoinWithStatusDao().update(otherFyleMessageJoinWithStatus);
                                             otherFyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
-                                            engine.deleteAttachment(downloadedAttachment.getBytesOwnedIdentity(), otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
+                                            engine.markAttachmentForDeletion(downloadedAttachment.getBytesOwnedIdentity(), otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
                                             break;
                                     }
                                 }
@@ -168,7 +168,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                             Fyle.releaseLock(sha256);
                         }
                     }
-                    engine.deleteAttachment(downloadedAttachment);
+                    engine.markAttachmentForDeletion(downloadedAttachment);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

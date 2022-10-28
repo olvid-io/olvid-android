@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,6 +39,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -86,15 +88,14 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
     private Button nextButton;
     private Button previousButton;
     private Button confirmationButton;
-    private ActionBar actionBar;
+    private TextView subtitleTextView;
 
     // this boolean controls whether groups are created in v2 format or not
-    public static final boolean groupV2 = false;
+    public static final boolean groupV2 = true;
 
     public static final int CONTACTS_SELECTION_TAB = 0;
     public static final int GROUP_NAME_TAB = 1;
 
-    public static final String FORCE_GROUP_V2_INTENT_EXTRA = "force_v2"; // boolean, to force creation of a group v2, even if not the default (only available in beta)
     public static final String ABSOLUTE_PHOTO_URL_INTENT_EXTRA = "photo_url"; // String with absolute path to photo
     public static final String SERIALIZED_GROUP_DETAILS_INTENT_EXTRA = "serialized_group_details"; // String with serialized JsonGroupDetails
     public static final String PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA = "preselected_group_members"; // Array of BytesKey
@@ -124,12 +125,7 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
 
             // only look at intent when first creating the activity
             Intent intent = getIntent();
-            if (intent.hasExtra(FORCE_GROUP_V2_INTENT_EXTRA)) {
-                boolean forceV2 = intent.getBooleanExtra(FORCE_GROUP_V2_INTENT_EXTRA, false);
-                groupDetailsViewModel.setGroupV2(groupV2 || forceV2);
-            } else {
-                groupDetailsViewModel.setGroupV2(groupV2);
-            }
+            groupDetailsViewModel.setGroupV2(groupV2);
 
             if (intent.hasExtra(SERIALIZED_GROUP_DETAILS_INTENT_EXTRA)) {
                 try {
@@ -169,22 +165,34 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
             }
         }
         setContentView(R.layout.activity_group_creation);
-        setTitle(getString(R.string.activity_title_create_group));
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        subtitleTextView = toolbar.findViewById(R.id.subtitle);
+        View groupV2WarningMessage = findViewById(R.id.group_v2_warning_message);
+        groupCreationViewModel.getShowGroupV2WarningLiveData().observe(this, (Boolean showGroupV2WarningMessage) -> groupV2WarningMessage.setVisibility((showGroupV2WarningMessage != null && showGroupV2WarningMessage) ? View.VISIBLE : View.GONE));
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false);
+        }
 
         groupCreationViewModel.getSubtitleLiveData().observe(this, (Pair<Integer, Integer> tabAndSelectedContactCount) -> {
-            if (actionBar == null || tabAndSelectedContactCount == null || tabAndSelectedContactCount.first == null || tabAndSelectedContactCount.second == null) {
+            if (subtitleTextView == null || tabAndSelectedContactCount == null || tabAndSelectedContactCount.first == null || tabAndSelectedContactCount.second == null) {
                 return;
             }
             switch (tabAndSelectedContactCount.first) {
                 case CONTACTS_SELECTION_TAB:
                     if (tabAndSelectedContactCount.second == 0) {
-                        actionBar.setSubtitle(getString(R.string.subtitle_select_group_members));
+                        subtitleTextView.setText(getString(R.string.subtitle_select_group_members));
                     } else {
-                        actionBar.setSubtitle(getResources().getQuantityString(R.plurals.other_members_count, tabAndSelectedContactCount.second, tabAndSelectedContactCount.second));
+                        subtitleTextView.setText(getResources().getQuantityString(R.plurals.other_members_count, tabAndSelectedContactCount.second, tabAndSelectedContactCount.second));
                     }
                     break;
                 case GROUP_NAME_TAB:
-                    actionBar.setSubtitle(getString(R.string.subtitle_choose_group_name));
+                    subtitleTextView.setText(getString(R.string.subtitle_choose_group_name));
                     break;
             }
         });
@@ -240,11 +248,6 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
         confirmationButton = findViewById(R.id.button_confirmation);
         confirmationButton.setOnClickListener(this);
 
-        actionBar = getSupportActionBar();
-        if (actionBar!= null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
@@ -279,6 +282,17 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
         if (viewPager.getCurrentItem() == CONTACTS_SELECTION_TAB) {
             getMenuInflater().inflate(R.menu.menu_group_creation_contact_selection, menu);
             final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+            searchView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(@NonNull View v) {
+                    groupCreationViewModel.setSearchOpened(true);
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(@NonNull View v) {
+                    groupCreationViewModel.setSearchOpened(false);
+                }
+            });
             searchView.setQueryHint(getString(R.string.hint_search_contact_name));
             if (SettingsActivity.useKeyboardIncognitoMode()) {
                 searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);

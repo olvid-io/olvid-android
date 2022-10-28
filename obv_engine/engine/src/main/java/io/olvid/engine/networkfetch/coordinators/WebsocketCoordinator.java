@@ -619,8 +619,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             Map<String, Object> receivedMessage;
             String action;
             try {
-                receivedMessage = jsonObjectMapper.readValue(message, new TypeReference<>() {
-                });
+                receivedMessage = jsonObjectMapper.readValue(message, new TypeReference<>() {});
                 action = (String) receivedMessage.get("action");
             } catch (Exception e) {
                 Logger.i("Unable to parse websocket JSON message " + message);
@@ -731,6 +730,24 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                                 }
                             } catch (Exception e) {
                                 Logger.d("Error parsing return receipt");
+                                e.printStackTrace();
+                            }
+                        }
+                        break;
+                    }
+                    case "push_topic": {
+                        Object pushTopicObject = receivedMessage.get("topic");
+                        if (pushTopicObject != null) {
+                            try {
+                                String pushTopic = (String) pushTopicObject;
+                                if (notificationPostingDelegate != null) {
+                                    HashMap<String, Object> userInfo = new HashMap<>();
+                                    userInfo.put(DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED_TOPIC_KEY, pushTopic);
+
+                                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED, userInfo);
+                                }
+                            } catch (Exception e) {
+                                Logger.d("Error parsing push topic");
                                 e.printStackTrace();
                             }
                         }

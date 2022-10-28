@@ -348,4 +348,7 @@ public abstract class EngineNotifications {
     public static final String GROUP_V2_UPDATE_FAILED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
     public static final String GROUP_V2_UPDATE_FAILED_BYTES_GROUP_IDENTIFIER_KEY = "bytes_group_identifier"; // byte[]
     public static final String GROUP_V2_UPDATE_FAILED_ERROR_KEY = "error"; // boolean
+
+    public static final String PUSH_TOPIC_NOTIFIED = "engine_notification_push_topic_notified";
+    public static final String PUSH_TOPIC_NOTIFIED_TOPIC_KEY = "topic"; // String
 }

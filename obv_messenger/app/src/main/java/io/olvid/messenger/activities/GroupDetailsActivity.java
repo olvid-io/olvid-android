@@ -93,7 +93,6 @@ import io.olvid.messenger.fragments.dialog.GroupMemberSuppressionDialogFragment;
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.owneddetails.EditOwnedGroupDetailsDialogFragment;
-import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.viewModels.GroupDetailsViewModel;
 
 
@@ -163,6 +162,8 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
         addMembersButton.setOnClickListener(this);
         Button removeMembersButton = findViewById(R.id.group_management_remove_members_button);
         removeMembersButton.setOnClickListener(this);
+        Button cloneGroupButton = findViewById(R.id.clone_to_v2_button);
+        cloneGroupButton.setOnClickListener(this);
 
         // detail cards
         acceptUpdateCardView = findViewById(R.id.group_accept_update_cardview);
@@ -601,6 +602,11 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
         } else if (id == R.id.group_management_remove_members_button) {
             GroupMemberSuppressionDialogFragment groupMemberSuppressionDialogFragment = GroupMemberSuppressionDialogFragment.newInstance(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
             groupMemberSuppressionDialogFragment.show(getSupportFragmentManager(), "dialog");
+        } else if (id == R.id.clone_to_v2_button) {
+            App.runThread(() -> {
+                GroupCloningTasks.ClonabilityOutput clonabilityOutput = GroupCloningTasks.getClonability(group);
+                new Handler(Looper.getMainLooper()).post(() -> GroupCloningTasks.initiateGroupCloningOrWarnUser(this, clonabilityOutput));
+            });
         } else if (view instanceof InitialView) {
             String photoUrl = ((InitialView) view).getPhotoUrl();
             if (photoUrl != null) {
@@ -662,9 +668,6 @@ public class GroupDetailsActivity extends LockableActivity implements View.OnCli
                 spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.red)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 deleteItem.setTitle(spannableString);
             }
-        }
-        if (!GroupCreationActivity.groupV2 && !SettingsActivity.getBetaFeaturesEnabled()) {
-            menu.removeItem(R.id.action_clone_group);
         }
 
         if (showEditDetails) {

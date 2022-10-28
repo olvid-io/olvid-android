@@ -62,7 +62,6 @@ import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.activities.GroupCreationActivity;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
@@ -81,7 +80,6 @@ import io.olvid.messenger.databases.entity.PendingGroupMember;
 import io.olvid.messenger.databases.tasks.GroupCloningTasks;
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment;
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment;
-import io.olvid.messenger.settings.SettingsActivity;
 
 
 public class GroupListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, EngineNotificationListener, PopupMenu.OnMenuItemClickListener {
@@ -199,10 +197,6 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
                 PopupMenu popup = new PopupMenu(view.getContext(), view);
                 popup.inflate(R.menu.popup_group_owned);
                 popup.setOnMenuItemClickListener(this);
-                // remove once group v2 are in production
-                if (!GroupCreationActivity.groupV2 && !SettingsActivity.getBetaFeaturesEnabled()) {
-                    popup.getMenu().removeItem(R.id.popup_action_clone_group);
-                }
 
                 MenuItem disbandGroupItem = popup.getMenu().findItem(R.id.popup_action_disband_group);
                 if (disbandGroupItem != null) {
@@ -217,10 +211,6 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
                 PopupMenu popup = new PopupMenu(view.getContext(), view);
                 popup.inflate(R.menu.popup_group_joined);
                 popup.setOnMenuItemClickListener(this);
-                // remove once group v2 are in production
-                if (!GroupCreationActivity.groupV2 && !SettingsActivity.getBetaFeaturesEnabled()) {
-                    popup.getMenu().removeItem(R.id.popup_action_clone_group);
-                }
 
                 MenuItem leaveGroupItem = popup.getMenu().findItem(R.id.popup_action_leave_group);
                 if (leaveGroupItem != null) {
@@ -238,10 +228,6 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
                 PopupMenu popup = new PopupMenu(view.getContext(), view);
                 popup.inflate(R.menu.popup_group_v2_admin);
                 popup.setOnMenuItemClickListener(this);
-                // remove once group v2 are in production
-                if (!GroupCreationActivity.groupV2 && !SettingsActivity.getBetaFeaturesEnabled()) {
-                    popup.getMenu().removeItem(R.id.popup_action_clone_group);
-                }
 
                 MenuItem leaveGroupItem = popup.getMenu().findItem(R.id.popup_action_leave_group);
                 if (leaveGroupItem != null) {
@@ -262,10 +248,6 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
                 PopupMenu popup = new PopupMenu(view.getContext(), view);
                 popup.inflate(R.menu.popup_group_v2_joined);
                 popup.setOnMenuItemClickListener(this);
-                // remove once group v2 are in production
-                if (!GroupCreationActivity.groupV2 && !SettingsActivity.getBetaFeaturesEnabled()) {
-                    popup.getMenu().removeItem(R.id.popup_action_clone_group);
-                }
 
                 MenuItem leaveGroupItem = popup.getMenu().findItem(R.id.popup_action_leave_group);
                 if (leaveGroupItem != null) {
@@ -566,7 +548,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
                 holder.groupMembers.setVisibility(View.VISIBLE);
                 if (group.groupMembersNames.length() == 0) {
                     StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
-                    SpannableString spannableString = new SpannableString(getString(R.string.text_no_members));
+                    SpannableString spannableString = new SpannableString(getString(R.string.text_empty_group));
                     spannableString.setSpan(styleSpan, 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     holder.groupMembers.setText(spannableString);
                 } else {
@@ -611,7 +593,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
                         holder.groupMembers.setVisibility(View.VISIBLE);
                         if (group2.groupMembersNames.length() == 0) {
                             StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
-                            SpannableString spannableString = new SpannableString(getString(R.string.text_no_members));
+                            SpannableString spannableString = new SpannableString(getString(R.string.text_empty_group));
                             spannableString.setSpan(styleSpan, 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             holder.groupMembers.setText(spannableString);
                         } else {

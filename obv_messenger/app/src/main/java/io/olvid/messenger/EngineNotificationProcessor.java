@@ -41,6 +41,7 @@ import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.backup.BackupAppDataForEngineTask;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
+import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.services.BackupCloudProviderService;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -59,6 +60,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 EngineNotifications.APP_BACKUP_REQUESTED,
                 EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS,
                 EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED,
+                EngineNotifications.PUSH_TOPIC_NOTIFIED,
 
                 EngineNotifications.UI_DIALOG,
                 EngineNotifications.UI_DIALOG_DELETED,
@@ -147,12 +149,20 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
             }
             case EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED: {
                 Integer state = (Integer) userInfo.get(EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY);
-
                 if (state == null) {
                     break;
                 }
 
                 AppSingleton.setWebsocketConnectivityState(state);
+                break;
+            }
+            case EngineNotifications.PUSH_TOPIC_NOTIFIED: {
+                String topic = (String) userInfo.get(EngineNotifications.PUSH_TOPIC_NOTIFIED_TOPIC_KEY);
+                if (topic == null) {
+                    break;
+                }
+
+                KeycloakManager.processPushTopicNotification(topic);
                 break;
             }
 

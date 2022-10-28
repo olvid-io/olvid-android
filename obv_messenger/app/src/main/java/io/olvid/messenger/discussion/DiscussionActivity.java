@@ -204,6 +204,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         INBOUND_EPHEMERAL_LOCATION,
         OUTBOUND_LOCATION,
         OUTBOUND_EPHEMERAL_LOCATION,
+        SCREEN_SHOT_DETECTED,
     }
 
     private DiscussionViewModel discussionViewModel;
@@ -709,9 +710,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     && !discussionAndGroupMembersCount.discussion.isLocked()
                     && discussionAndGroupMembersCount.count != -1) {
                 if (discussionAndGroupMembersCount.count != 0) {
-                    toolBarSubtitle.setText(getResources().getQuantityString(R.plurals.other_members_count, discussionAndGroupMembersCount.count, discussionAndGroupMembersCount.count));
+                    toolBarSubtitle.setText(getResources().getQuantityString(R.plurals.other_members_count, discussionAndGroupMembersCount.count + 1, discussionAndGroupMembersCount.count + 1));
                 } else {
-                    SpannableString text = new SpannableString(getString(R.string.text_no_members));
+                    SpannableString text = new SpannableString(getString(R.string.text_empty_group));
                     StyleSpan styleSpan = new StyleSpan(Typeface.ITALIC);
                     text.setSpan(styleSpan, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     toolBarSubtitle.setText(text);
@@ -1586,7 +1587,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
     private void messageLongClicked(Message message, View messageView) {
         if (discussionViewModel.isSelectingForDeletion()) {
-            discussionViewModel.selectMessageId(message.id, (message.messageType == Message.TYPE_OUTBOUND_MESSAGE || message.messageType == Message.TYPE_INBOUND_MESSAGE) && message.wipeStatus == Message.WIPE_STATUS_NONE);
+            discussionViewModel.selectMessageId(message.id, message.isForwardable());
         } else {
             if (discussionDelegate != null) {
                 int[] posRecyclerView = new int[2];
@@ -1601,7 +1602,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
     private void messageClicked(Message message) {
         if (discussionViewModel.isSelectingForDeletion()) {
-            discussionViewModel.selectMessageId(message.id, (message.messageType == Message.TYPE_OUTBOUND_MESSAGE || message.messageType == Message.TYPE_INBOUND_MESSAGE) && message.wipeStatus == Message.WIPE_STATUS_NONE);
+            discussionViewModel.selectMessageId(message.id, message.isForwardable());
         }
     }
 
@@ -2093,6 +2094,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 case Message.TYPE_GROUP_MEMBER_JOINED:
                 case Message.TYPE_GROUP_MEMBER_LEFT:
                     return ViewType.INFO_GROUP_MEMBER.ordinal();
+                case Message.TYPE_SCREEN_SHOT_DETECTED:
+                    return ViewType.SCREEN_SHOT_DETECTED.ordinal();
                 case Message.TYPE_LEFT_GROUP:
                 case Message.TYPE_CONTACT_DELETED:
                 case Message.TYPE_DISCUSSION_REMOTELY_DELETED:
@@ -2151,6 +2154,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 }
                 case NEW_PUBLISHED_DETAILS: {
                     View view = inflater.inflate(R.layout.item_view_message_new_published_details, parent, false);
+                    return new MessageViewHolder(view, viewType);
+                }
+                case SCREEN_SHOT_DETECTED: {
+                    View view = inflater.inflate(R.layout.item_view_message_screen_shot_detected, parent, false);
                     return new MessageViewHolder(view, viewType);
                 }
                 case INBOUND_EPHEMERAL_LOCATION:
@@ -3191,6 +3198,18 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 } else if (message.messageType == Message.TYPE_LOST_GROUP_ADMIN) {
                     holder.messageInfoTextView.setText(R.string.text_you_are_no_longer_admin);
                     holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
+                } else if (message.messageType == Message.TYPE_SCREEN_SHOT_DETECTED) {
+                    if (Arrays.equals(message.senderIdentifier, AppSingleton.getBytesCurrentIdentity())) {
+                        holder.messageInfoTextView.setText(R.string.text_you_captured_sensitive_message);
+                    } else {
+                        String displayName = AppSingleton.getContactCustomDisplayName(message.senderIdentifier);
+                        if (displayName != null) {
+                            holder.messageInfoTextView.setText(getString(R.string.text_xxx_captured_sensitive_message, displayName));
+                        } else {
+                            holder.messageInfoTextView.setText(R.string.text_unknown_member_captured_sensitive_message);
+                        }
+                    }
+                    holder.messageBottomTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
                 }
             }
         }
@@ -3448,6 +3467,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             return 0;
                         case INFO:
                         case INFO_GROUP_MEMBER:
+                        case SCREEN_SHOT_DETECTED:
                         case PHONE_CALL:
                         case NEW_PUBLISHED_DETAILS:
                         case SETTINGS_UPDATE:

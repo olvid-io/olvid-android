@@ -896,15 +896,6 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public String serverForIdentity(byte[] bytesIdentity) {
-        try {
-            return Identity.of(bytesIdentity).getServer();
-        } catch (DecodingException e) {
-            return null;
-        }
-    }
-
-    @Override
     public byte[] getServerAuthenticationToken(byte[] bytesOwnedIdentity) {
         try {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
@@ -1848,14 +1839,14 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public void deleteAttachment(ObvAttachment attachment) {
-        deleteAttachment(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getNumber());
+    public void markAttachmentForDeletion(ObvAttachment attachment) {
+        markAttachmentForDeletion(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getNumber());
     }
 
     @Override
-    public void deleteAttachment(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber) {
+    public void markAttachmentForDeletion(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber) {
         try {
-            deleteAttachment(Identity.of(bytesOwnedIdentity), new UID(messageIdentifier), attachmentNumber);
+            markAttachmentForDeletion(Identity.of(bytesOwnedIdentity), new UID(messageIdentifier), attachmentNumber);
         } catch (DecodingException e) {
             Logger.e("Error parsing bytesOwnedIdentity in Engine.deleteAttachment");
             e.printStackTrace();
@@ -1882,7 +1873,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public void deleteMessage(byte[] bytesOwnedIdentity, byte[] messageIdentifier) {
+    public void markMessageForDeletion(byte[] bytesOwnedIdentity, byte[] messageIdentifier) {
         UID messageUid = new UID(messageIdentifier);
         Identity ownedIdentity;
         try {
@@ -1900,7 +1891,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
     }
 
-    private void deleteAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber) {
+    private void markAttachmentForDeletion(Identity ownedIdentity, UID messageUid, int attachmentNumber) {
         try (EngineSession engineSession = getSession()) {
             fetchManager.deleteAttachment(engineSession.session, ownedIdentity, messageUid, attachmentNumber);
             engineSession.session.commit();

@@ -286,7 +286,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
             return;
         }
 
-        String ownServer = AppSingleton.getEngine().serverForIdentity(ownedIdentity.bytesOwnedIdentity);
+        String ownServer = AppSingleton.getEngine().getServerOfIdentity(ownedIdentity.bytesOwnedIdentity);
         if (ownServer== null) {
             activity.finish();
             return;

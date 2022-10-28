@@ -31,7 +31,7 @@ public enum ObvCapability {
     ONE_TO_ONE_CONTACTS,
     GROUPS_V2;
 
-    public static List<ObvCapability> currentCapabilities = new ArrayList<>(Arrays.asList(
+    public static final List<ObvCapability> currentCapabilities = new ArrayList<>(Arrays.asList(
             ONE_TO_ONE_CONTACTS,
             GROUPS_V2
     ));

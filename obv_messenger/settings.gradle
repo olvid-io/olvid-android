@@ -1,3 +1,3 @@
-include ':app', ':engine', ':libwebrtc', ':sardine-android'
+include ':app', ':engine', ':libwebrtc', ':sardine-android', ':java-websocket'
 
 project(':engine').projectDir = new File("../obv_engine/engine")

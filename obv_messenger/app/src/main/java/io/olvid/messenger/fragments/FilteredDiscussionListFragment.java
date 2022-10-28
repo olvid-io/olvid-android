@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -74,6 +75,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
 
     private boolean removeBottomPadding = false;
     private boolean useDialogBackground = false;
+    private boolean showPinned = false;
     private boolean selectable = false;
 
     protected FilteredDiscussionListAdapter filteredDiscussionListAdapter;
@@ -200,6 +202,10 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
 
     public void setUseDialogBackground(boolean useDialogBackground) {
         this.useDialogBackground = useDialogBackground;
+    }
+
+    public void setShowPinned(boolean showPinned) {
+        this.showPinned = showPinned;
     }
 
     @Override
@@ -352,6 +358,11 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                 } else {
                     holder.rootView.setBackgroundColor(ContextCompat.getColor(holder.rootView.getContext(), R.color.almostWhite));
                 }
+                if (showPinned && discussion.pinned) {
+                    holder.pinnedIcon.setVisibility(View.VISIBLE);
+                } else {
+                    holder.pinnedIcon.setVisibility(View.GONE);
+                }
                 holder.initialView.setDiscussion(discussion);
 
                 if (selectable) {
@@ -377,6 +388,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
             final TextView discussionGroupMembersTextView;
             final InitialView initialView;
             final CheckBox selectionCheckBox;
+            final ImageView pinnedIcon;
 
             DiscussionViewHolder(View itemView) {
                 super(itemView);
@@ -386,6 +398,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                 discussionGroupMembersTextView = itemView.findViewById(R.id.discussion_group_members_text_view);
                 initialView = itemView.findViewById(R.id.discussion_initial_view);
                 selectionCheckBox = itemView.findViewById(R.id.discussion_selection_check_box);
+                pinnedIcon = itemView.findViewById(R.id.discussion_pinned_image_view);
             }
 
             @Override

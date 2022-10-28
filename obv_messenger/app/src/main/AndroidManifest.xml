@@ -190,7 +190,8 @@
             android:label="@string/activity_title_group_details" />
         <activity android:name=".activities.GroupV2DetailsActivity"
             android:label="@string/activity_title_group_details" />
-        <activity android:name=".activities.GroupCreationActivity" />
+        <activity android:name=".activities.GroupCreationActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".gallery.GalleryActivity"
             android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/AppTheme.NoActionBar"/>

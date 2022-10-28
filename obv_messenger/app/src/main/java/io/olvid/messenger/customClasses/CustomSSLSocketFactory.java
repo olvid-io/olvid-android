@@ -73,21 +73,23 @@ public class CustomSSLSocketFactory extends SSLSocketFactory implements Handshak
     }
 
     public void loadKnownCertificates() {
-        synchronized (knownCertificatesByDomainCache) {
-            List<KnownCertificate> knownCertificates = AppDatabase.getInstance().knownCertificateDao().getAll();
-            for (KnownCertificate knownCertificate : knownCertificates) {
-                List<KnownCertificate> cachedList = knownCertificatesByDomainCache.get(knownCertificate.domainName);
-                if (cachedList == null) {
-                    cachedList = new ArrayList<>();
-                    knownCertificatesByDomainCache.put(knownCertificate.domainName, cachedList);
+        App.runThread(() -> {
+            synchronized (knownCertificatesByDomainCache) {
+                List<KnownCertificate> knownCertificates = AppDatabase.getInstance().knownCertificateDao().getAll();
+                for (KnownCertificate knownCertificate : knownCertificates) {
+                    List<KnownCertificate> cachedList = knownCertificatesByDomainCache.get(knownCertificate.domainName);
+                    if (cachedList == null) {
+                        cachedList = new ArrayList<>();
+                        knownCertificatesByDomainCache.put(knownCertificate.domainName, cachedList);
+                    }
+                    cachedList.add(knownCertificate);
                 }
-                cachedList.add(knownCertificate);
+                for (List<KnownCertificate> cachedList : knownCertificatesByDomainCache.values()) {
+                    sortCertificateList(cachedList);
+                }
+                this.cacheInitialized = true;
             }
-            for (List<KnownCertificate> cachedList : knownCertificatesByDomainCache.values()) {
-                sortCertificateList(cachedList);
-            }
-            this.cacheInitialized = true;
-        }
+        });
     }
 
     private void sortCertificateList(List<KnownCertificate> list) {

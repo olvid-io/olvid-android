@@ -248,6 +248,12 @@ public class DiscussionListener {
                     discussionBuilder.setGroupOwnerAndUid(ByteString.copyFrom(discussionAndLastMessage.discussion.bytesDiscussionIdentifier));
                     break;
             }
+            // TODO this is a hot fix for locked discussion, need to update protobuf to feat app modifications
+            if (discussionAndLastMessage.discussion.isLocked()) {
+                discussionBuilder.clearGroupOwnerAndUid();
+                discussionBuilder.clearContactIdentity();
+            }
+
             discussionBuilder.setUnreadMessagesCount(discussionAndLastMessage.unreadCount);
             discussionBuilder.setDiscussionTimestamp(discussionAndLastMessage.discussion.lastMessageTimestamp);
             //set last message fields

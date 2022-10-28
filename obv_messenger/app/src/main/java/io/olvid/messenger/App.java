@@ -307,30 +307,12 @@ public class App extends Application implements DefaultLifecycleObserver {
 
 
     public static void openGroupCreationActivity(Context activityContext) {
-        if (!GroupCreationActivity.groupV2 && SettingsActivity.getBetaFeaturesEnabled()) {
-            // groupV2 are not the default and we use beta --> prompt the user to choose the group type
-            AlertDialog.Builder builder = new SecureAlertDialogBuilder(activityContext, R.style.CustomAlertDialog);
-            builder.setTitle(R.string.dialog_title_new_group_beta_choice)
-                    .setMessage(R.string.dialog_message_new_group_beta_choice)
-                    .setNeutralButton(R.string.button_label_legacy_group, (dialog, which) -> {
-                        Intent intent = new Intent(getContext(), GroupCreationActivity.class);
-                        activityContext.startActivity(intent);
-                    })
-                    .setPositiveButton(R.string.button_label_group_v2_beta, (dialog, which) -> {
-                        Intent intent = new Intent(getContext(), GroupCreationActivity.class);
-                        intent.putExtra(GroupCreationActivity.FORCE_GROUP_V2_INTENT_EXTRA, true);
-                        activityContext.startActivity(intent);
-                    });
-            builder.create().show();
-        } else {
-            Intent intent = new Intent(getContext(), GroupCreationActivity.class);
-            activityContext.startActivity(intent);
-        }
+        Intent intent = new Intent(getContext(), GroupCreationActivity.class);
+        activityContext.startActivity(intent);
     }
 
     public static void openGroupCreationActivityForCloning(Context activityContext, String absolutePhotoUrl, String serializedGroupDetails, List<Contact> preselectedGroupMembers) {
         Intent intent = new Intent(getContext(), GroupCreationActivity.class);
-        intent.putExtra(GroupCreationActivity.FORCE_GROUP_V2_INTENT_EXTRA, true);
         if (absolutePhotoUrl != null) {
             intent.putExtra(GroupCreationActivity.ABSOLUTE_PHOTO_URL_INTENT_EXTRA, absolutePhotoUrl);
         }
@@ -839,6 +821,10 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     public static void openAppDialogIntroducingMultiProfile() {
         showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_MULTI_PROFILE, new HashMap<>());
+    }
+
+    public static void openAppDialogIntroducingGroupsV2() {
+        showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_GROUPS_V2, new HashMap<>());
     }
 
 

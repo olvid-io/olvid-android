@@ -72,6 +72,7 @@ public class NotificationListenerDownloads implements NotificationListener {
                 DownloadNotifications.NOTIFICATION_PING_LOST,
                 DownloadNotifications.NOTIFICATION_PING_RECEIVED,
                 DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED,
+                DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED,
         }) {
             notificationManager.addListener(notificationName, this);
         }
@@ -494,6 +495,17 @@ public class NotificationListenerDownloads implements NotificationListener {
                 engineInfo.put(EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, state);
 
                 engine.postEngineNotification(EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED, engineInfo);
+                break;
+            }
+            case DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED: {
+                String topic = (String) userInfo.get(DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED_TOPIC_KEY);
+                if (topic == null) {
+                    break;
+                }
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.PUSH_TOPIC_NOTIFIED_TOPIC_KEY, topic);
+
+                engine.postEngineNotification(EngineNotifications.PUSH_TOPIC_NOTIFIED, engineInfo);
                 break;
             }
             default:

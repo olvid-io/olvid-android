@@ -36,7 +36,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="8dp"
+        app:layout_goneMarginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:textAppearance="@style/RobotoMedium"
@@ -44,8 +45,20 @@
         android:textSize="16sp"
         android:textStyle="italic"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/discussion_pinned_image_view"
         app:layout_constraintStart_toEndOf="@+id/discussion_initial_view"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Contact Name" />
+
+    <ImageView
+        android:id="@+id/discussion_pinned_image_view"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_pinned"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

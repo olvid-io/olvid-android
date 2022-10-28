@@ -144,7 +144,7 @@
     <string name="label_group_card_published">Group Card - Published</string>
     <string name="label_group_card_published_update">Group Card - New</string>
     <string name="label_group_card_unpublished_draft">Group Card - Unpublished Draft</string>
-    <string name="label_group_members">Group Members</string>
+    <string name="label_group_members">Other Group Members</string>
     <string name="label_groups">Groups</string>
     <string name="label_invitation_declined">Invitation\ndeclined</string>
     <string name="label_new_group_card">Group details updated</string>
@@ -279,7 +279,7 @@
     <string name="dialog_title_delete_user">Delete user?</string>
     <string name="dialog_message_delete_user">You are about to remove %1$s from your list of other users.\n\nReally delete this user?</string>
     <string name="dialog_title_delete_user_impossible">Impossible to delete this user</string>
-    <string name="text_no_members">No members</string>
+    <string name="text_empty_group">Empty group</string>
     <string name="message_error_group_name_empty">Please enter a group name</string>
     <string name="hint_search_contact_name">Search Contact Name…</string>
     <string name="menu_action_search">Search</string>
@@ -1503,10 +1503,6 @@
     <string name="message_discussion_group_v2_updating">Group members are currently being synchronized</string>
     <string name="message_discussion_group_v2_creating">Group is being created</string>
     <string name="button_label_new_group">New group</string>
-    <string name="dialog_title_new_group_beta_choice">New Olvid groups (beta)</string>
-    <string name="dialog_message_new_group_beta_choice">Olvid is currently rolling out a new group format that allows multiple administrators per group. Only contacts using a version of Olvid that support this new group format can be added to these groups.\n\nDo you wish to create a group with the new format (beta), or a legacy group?</string>
-    <string name="button_label_legacy_group">Create legacy group</string>
-    <string name="button_label_group_v2_beta">Create new group (beta)</string>
     <string name="text_you_became_admin">You are now a group administrator</string>
     <string name="text_you_are_no_longer_admin">You are no longer a group administrator</string>
     <string name="label_pending">Pending</string>
@@ -1579,6 +1575,17 @@
     <string name="xx_mbps">%1$sM/s</string>
     <string name="xx_kbps">%1$sk/s</string>
     <string name="xx_bps">%1$sB/s</string>
+    <string name="text_you_captured_sensitive_message">You took a screenshot of a sensitive message</string>
+    <string name="text_unknown_member_captured_sensitive_message">An unknown user took a screenshot of a sensitive message</string>
+    <string name="text_xxx_captured_sensitive_message">%1$s took a screenshot of a sensitive message</string>
+    <string name="text_contact_with_outdated_olvid_explanation">Please choose who to add to this group. Can\'t find the user you are looking for? Please ask them to upgrade to the latest version of Olvid\u00a0🚀.</string>
+    <string name="text_clone_v1_to_v2_explanation">This group does not support more than one administrator. You can clone it into a new one that will\u00a0🚀!</string>
+    <string name="button_label_clone_this_group">Clone this group</string>
+    <string name="dialog_title_introducing_groups_v2">Introducing new groups!</string>
+    <string name="dialog_message_introducing_groups_v2">Olvid now supports new groups with multiple administrators\u00a0👑! This does not change anything to your existing \"old groups\" but applies to all groups you create from now on. To benefit from this, your contacts need to use the latest version of Olvid.\n\nWant to try this out? Tap on the group tab and create a new group. Once created, you may edit it to grant administrator privilege to as many members as you wish!</string>
+
+
+
 
 
     <plurals name="dialog_message_delete_user_impossible_count">

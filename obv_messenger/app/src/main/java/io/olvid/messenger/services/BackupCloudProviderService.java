@@ -374,7 +374,7 @@ class GoogleDriveProvider {
                 }
 
                 String deviceUniqueId = SettingsActivity.getAutomaticBackupDeviceUniqueId();
-                String fileName = deviceUniqueId + "|" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART;
+                String fileName = deviceUniqueId + "_" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART;
 
                 List<File> fileList = googleDriveService.files().list()
                         .setQ("name = '" + fileName + "' and '" + folderId + "' in parents")
@@ -461,7 +461,7 @@ class GoogleDriveProvider {
 
                 List<BackupCloudProviderService.BackupItem> backupsList = new ArrayList<>();
                 for (File file: fileList) {
-                    String[] parts = file.getName().split("\\|");
+                    String[] parts = file.getName().split("[|_]", 2);
                     if (parts.length == 2) {
                         backupsList.add(new BackupCloudProviderService.BackupItem(parts[1], file.getId(), file.getModifiedTime().getValue()));
                     }
@@ -596,7 +596,7 @@ class WebdavProvider {
                 }
 
                 String deviceUniqueId = SettingsActivity.getAutomaticBackupDeviceUniqueId();
-                String fileName = deviceUniqueId + "|" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART + BACKUP_FILE_EXTENSION;
+                String fileName = deviceUniqueId + "_" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART + BACKUP_FILE_EXTENSION;
                 //noinspection DuplicateExpressions
                 String url = (serverUrl.endsWith("/") ? serverUrl : serverUrl + "/") + URLEncoder.encode(fileName, StandardCharsets.UTF_8.name());
 
@@ -655,7 +655,7 @@ class WebdavProvider {
                         continue;
                     }
                     long timestamp = davResource.getModified().getTime();
-                    String[] parts = URLDecoder.decode(name.substring(0, name.length() - BACKUP_FILE_EXTENSION.length()), StandardCharsets.UTF_8.name()).split("\\|");
+                    String[] parts = URLDecoder.decode(name.substring(0, name.length() - BACKUP_FILE_EXTENSION.length()), StandardCharsets.UTF_8.name()).split("[|_]", 2);
                     if (parts.length == 2) {
                         backupItems.add(new BackupCloudProviderService.BackupItem(parts[1], name, timestamp));
                     }

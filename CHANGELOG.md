@@ -1,7 +1,19 @@
+# Build 184 (0.13.0)
+2022-10-24
+
+- Fix a crash
+
+# ~~Build 183 (0.13.0)~~
+2022-10-20
+
+- make groups v2 the default for new groups
+- update to webRTC 5304
+- sort discussions by pinned first when appropriate (share, forward, etc.)
+
 # Build 182 (0.12.6)
 2022-09-22
 
-- Fix for one time ephemeral and Gif keyboard
+- fix for one time ephemeral and Gif keyboard
 
 # ~~Build 181 (0.12.6)~~
 2022-09-19

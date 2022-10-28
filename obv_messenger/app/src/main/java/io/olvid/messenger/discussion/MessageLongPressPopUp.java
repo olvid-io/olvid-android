@@ -207,9 +207,7 @@ public class MessageLongPressPopUp {
         View shareView = popUpView.findViewById(R.id.swipe_menu_share);
         View forwardView = popUpView.findViewById(R.id.swipe_menu_forward);
         View copyView = popUpView.findViewById(R.id.swipe_menu_copy);
-        if ((message.messageType != Message.TYPE_INBOUND_MESSAGE && message.messageType != Message.TYPE_OUTBOUND_MESSAGE)
-                || message.wipeStatus != Message.WIPE_STATUS_NONE
-                || message.limitedVisibility) {
+        if (!message.isForwardable()) {
             shareView.setVisibility(View.GONE);
             forwardView.setVisibility(View.GONE);
             copyView.setVisibility(View.GONE);
@@ -262,7 +260,7 @@ public class MessageLongPressPopUp {
         }
         View selectView = popUpView.findViewById(R.id.swipe_menu_select);
         selectView.setOnClickListener(v -> {
-            discussionDelegate.selectMessage(messageId, (message.messageType == Message.TYPE_OUTBOUND_MESSAGE || message.messageType == Message.TYPE_INBOUND_MESSAGE) && message.wipeStatus == Message.WIPE_STATUS_NONE);
+            discussionDelegate.selectMessage(messageId, message.isForwardable());
             popupWindow.dismiss();
         });
         View detailsView = popUpView.findViewById(R.id.swipe_menu_details);

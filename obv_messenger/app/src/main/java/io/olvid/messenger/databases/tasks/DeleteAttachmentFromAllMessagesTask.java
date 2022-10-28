@@ -48,7 +48,7 @@ public class DeleteAttachmentFromAllMessagesTask implements Runnable {
             switch (fyleMessageJoinWithStatus.status) {
                 case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
                 case FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE:
-                    AppSingleton.getEngine().deleteAttachment(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
+                    AppSingleton.getEngine().markAttachmentForDeletion(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
                     break;
                 case FyleMessageJoinWithStatus.STATUS_UPLOADING:
                     AppSingleton.getEngine().cancelAttachmentUpload(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);

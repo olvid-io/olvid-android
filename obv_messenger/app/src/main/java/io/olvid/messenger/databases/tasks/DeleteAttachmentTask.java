@@ -44,7 +44,7 @@ public class DeleteAttachmentTask implements Runnable {
         switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
             case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
             case FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE:
-                AppSingleton.getEngine().deleteAttachment(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
+                AppSingleton.getEngine().markAttachmentForDeletion(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
                 break;
             case FyleMessageJoinWithStatus.STATUS_UPLOADING:
                 AppSingleton.getEngine().cancelAttachmentUpload(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);

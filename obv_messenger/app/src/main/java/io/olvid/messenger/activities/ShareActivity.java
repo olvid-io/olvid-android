@@ -169,6 +169,7 @@ public class ShareActivity extends LockScreenOrNotActivity {
 
             FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
             filteredDiscussionListFragment.setUseDialogBackground(true);
+            filteredDiscussionListFragment.setShowPinned(true);
             filteredDiscussionListFragment.setUnfilteredDiscussions(unfilteredDiscussions);
             filteredDiscussionListFragment.setDiscussionFilterEditText(contactNameFilter);
             filteredDiscussionListFragment.setOnClickDelegate((View view, FilteredDiscussionListViewModel.SearchableDiscussion searchableDiscussion) -> App.runThread(() -> proceed(searchableDiscussion.discussionId)));

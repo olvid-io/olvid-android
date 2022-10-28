@@ -37,15 +37,18 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
+import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.fragments.FilteredContactListFragment;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.viewModels.GroupV2DetailsViewModel;
@@ -88,12 +91,16 @@ public class GroupV2MemberAdditionDialogFragment extends DialogFragment {
             bytesAddedMemberIdentities = new ArrayList<>();
             bytesRemovedMemberIdentities = new ArrayList<>();
             ArrayList<BytesKey> addedGroupMembers = arguments.getParcelableArrayList(ADDED_GROUP_MEMBERS);
-            for (BytesKey addedGroupMember: addedGroupMembers) {
-                bytesAddedMemberIdentities.add(addedGroupMember.bytes);
+            if (addedGroupMembers != null) {
+                for (BytesKey addedGroupMember : addedGroupMembers) {
+                    bytesAddedMemberIdentities.add(addedGroupMember.bytes);
+                }
             }
             ArrayList<BytesKey> removedGroupMembers = arguments.getParcelableArrayList(REMOVED_GROUP_MEMBERS);
-            for (BytesKey removedGroupMember: removedGroupMembers) {
-                bytesRemovedMemberIdentities.add(removedGroupMember.bytes);
+            if (removedGroupMembers != null) {
+                for (BytesKey removedGroupMember : removedGroupMembers) {
+                    bytesRemovedMemberIdentities.add(removedGroupMember.bytes);
+                }
             }
         }
     }
@@ -130,15 +137,12 @@ public class GroupV2MemberAdditionDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View dialogView = inflater.inflate(R.layout.dialog_fragment_pick_multiple_contacts, container, false);
+        View dialogView = inflater.inflate(R.layout.dialog_fragment_add_group_v2_members, container, false);
         EditText dialogContactNameFilter = dialogView.findViewById(R.id.dialog_discussion_filter);
-        TextView dialogTitle = dialogView.findViewById(R.id.dialog_title);
-        dialogTitle.setText(R.string.dialog_title_invite_group_members);
+        View v2Warning = dialogView.findViewById(R.id.group_v2_warning_message);
         Button cancelButton = dialogView.findViewById(R.id.button_cancel);
         cancelButton.setOnClickListener(v -> dismiss());
         Button okButton = dialogView.findViewById(R.id.button_ok);
-
-
         okButton.setOnClickListener((View view) -> {
             dismiss();
 
@@ -165,6 +169,8 @@ public class GroupV2MemberAdditionDialogFragment extends DialogFragment {
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.dialog_filtered_contact_list_placeholder, filteredContactListFragment);
         transaction.commit();
+
+        Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().contactDao().nonGroupV2ContactExists(ownedIdentity.bytesOwnedIdentity)).observe(this, (Boolean nonGroupV2Exists) -> v2Warning.setVisibility((nonGroupV2Exists != null && nonGroupV2Exists) ? View.VISIBLE : View.GONE));
 
         return dialogView;
     }

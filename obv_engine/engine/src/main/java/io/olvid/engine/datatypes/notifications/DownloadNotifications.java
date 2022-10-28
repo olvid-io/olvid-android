@@ -150,4 +150,7 @@ public abstract class DownloadNotifications {
 
     public static final String NOTIFICATION_WELL_KNOWN_DOWNLOAD_FAILED = "network_fetch_notification_well_known_download_failed";
     public static final String NOTIFICATION_WELL_KNOWN_DOWNLOAD_FAILED_SERVER_KEY = "server"; // String
+
+    public static final String NOTIFICATION_PUSH_TOPIC_NOTIFIED = "network_fetch_notification_push_topic_notified";
+    public static final String NOTIFICATION_PUSH_TOPIC_NOTIFIED_TOPIC_KEY = "topic"; // String
 }

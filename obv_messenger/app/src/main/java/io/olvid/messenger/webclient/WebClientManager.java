@@ -676,6 +676,10 @@ public class WebClientManager {
         return this.cryptography.decrypt(payload);
     }
 
+    public int getConnectionOutputBufferSize() {
+        return this.webSocketClient.getConnectionOutputBufferSize();
+    }
+
     public void sendSettingsColissimo() {
         String language = SettingsActivity.getWebclientLanguage();
         String theme = SettingsActivity.gWebclientTheme();

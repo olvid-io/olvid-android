@@ -80,7 +80,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
         int count = db.messageDao().getCountForEngineIdentifier(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
         if (count > 0) {
             // content was already inserted in database
-            engine.deleteMessage(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
+            engine.markMessageForDeletion(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
             return;
         }
         try {
@@ -102,6 +102,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             Message.JsonDeleteMessages jsonDeleteMessages = messagePayload.getJsonDeleteMessages();
             Message.JsonUpdateMessage jsonUpdateMessage = messagePayload.getJsonUpdateMessage();
             Message.JsonReaction jsonReaction = messagePayload.getJsonReaction();
+            Message.JsonScreenCaptureDetection jsonScreenCaptureDetection = messagePayload.getJsonScreenCaptureDetection();
 
             if (jsonWebrtcMessage != null) {
                 App.handleWebrtcMessage(obvMessage.getBytesToIdentity(), obvMessage.getBytesFromIdentity(), jsonWebrtcMessage, obvMessage.getDownloadTimestamp(), obvMessage.getServerTimestamp());
@@ -150,6 +151,12 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
             if (jsonReaction != null) {
                 handleReactionMessage(jsonReaction, contact, obvMessage.getServerTimestamp());
+                engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
+                return;
+            }
+
+            if (jsonScreenCaptureDetection != null) {
+                handleScreenCaptureDetectionMessage(jsonScreenCaptureDetection, contact, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
@@ -419,7 +426,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                     );
                                     db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                                     fyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, message);
-                                    engine.deleteAttachment(attachment);
+                                    engine.markAttachmentForDeletion(attachment);
                                 } else {
                                     // the fyle is incomplete, so no need to create the Fyle, but still create a STATUS_DOWNLOADABLE FyleMessageJoinWithStatus
                                     final String imageResolution = PreviewUtils.mimeTypeIsSupportedImageOrVideo(PreviewUtils.getNonNullMimeType(attachmentMetadata.getType(), attachmentMetadata.getFileName())) ? null : "";
@@ -471,13 +478,13 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     } catch (Exception e) {
                         e.printStackTrace();
                         Logger.d("Error reading an attachment or creating the fyle (or message already expired and deleted)");
-                        engine.deleteAttachment(attachment);
+                        engine.markAttachmentForDeletion(attachment);
                     }
                 }
                 OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(contact.bytesOwnedIdentity);
                 AndroidNotificationManager.displayReceivedMessageNotification(discussion, message, contact, ownedIdentity);
 
-                engine.deleteMessage(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
+                engine.markMessageForDeletion(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
 
                 if (fyleMessageJoinWithStatusesToDownload.size() > 0) {
                     AvailableSpaceHelper.refreshAvailableSpace(false);
@@ -910,6 +917,20 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 );
                 db.reactionRequestDao().insert(reactionRequest);
             }
+        }
+    }
+
+    private void handleScreenCaptureDetectionMessage(@NonNull Message.JsonScreenCaptureDetection jsonScreenCaptureDetection, @NonNull Contact contact, long serverTimestamp) {
+        Discussion discussion = getDiscussion(jsonScreenCaptureDetection.getGroupUid(), jsonScreenCaptureDetection.getGroupOwner(), jsonScreenCaptureDetection.getGroupV2Identifier(), contact, null);
+
+        if (discussion == null) {
+            return;
+        }
+
+        Message message = Message.createScreenShotDetectedMessage(db, discussion.id, contact.bytesContactIdentity, serverTimestamp);
+        db.messageDao().insert(message);
+        if (discussion.updateLastMessageTimestamp(message.timestamp)) {
+            db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
         }
     }
 

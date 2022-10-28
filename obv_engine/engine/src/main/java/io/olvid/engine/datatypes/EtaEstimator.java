@@ -51,6 +51,9 @@ public class EtaEstimator {
         Sample end = samples.get(samples.size() - 1);
         long elapsed = end.timestamp - start.timestamp;
         long xferred = end.byteCount - start.byteCount;
+        if (elapsed == 0 || xferred == 0) {
+            return new SpeedAndEta(0, 0);
+        }
         float speed =  1000 * (float) xferred / (float) elapsed;
         int eta = Math.round((totalBytes - end.byteCount) / speed);
         return new SpeedAndEta(speed, eta);

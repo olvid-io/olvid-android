@@ -83,46 +83,93 @@
                 tools:text="This group is for the friends of Pam"/>
 
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/group_management_buttons"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
+                android:layout_marginEnd="16dp"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/group_personal_note_text_view"
                 tools:visibility="visible">
 
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clone_to_v2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:background="@drawable/background_info_message">
+
+                    <TextView
+                        android:id="@+id/clone_to_v2_explanation"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:justificationMode="inter_word"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginHorizontal="8dp"
+                        android:text="@string/text_clone_v1_to_v2_explanation"
+                        android:textColor="@color/grey" />
+
+                    <Button
+                        android:id="@+id/clone_to_v2_button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:stateListAnimator="@null"
+                        android:text="@string/button_label_clone_this_group"
+                        android:theme="@style/AppTheme.BlueAccent"
+                        style="@style/Base.Widget.AppCompat.Button.Colored"
+                        android:drawableStart="@drawable/ic_clone"
+                        android:drawableEnd="@drawable/empty"
+                        app:layout_constraintTop_toBottomOf="@id/clone_to_v2_explanation"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginHorizontal="8dp"
+                        android:layout_marginVertical="4dp"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
                 <Button
                     android:id="@+id/group_management_add_members_button"
                     style="@style/Base.Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
+                    android:drawableStart="@drawable/ic_group_add"
                     android:drawablePadding="8dp"
                     android:stateListAnimator="@null"
+                    android:text="@string/button_label_invite_members"
                     android:theme="@style/AppTheme.BlueAccent"
-                    android:drawableStart="@drawable/ic_group_add"
-                    android:text="@string/button_label_invite_members"/>
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/group_management_remove_members_button"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/clone_to_v2" />
 
                 <Button
                     android:id="@+id/group_management_remove_members_button"
                     style="@style/Base.Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
+                    android:drawableStart="@drawable/ic_group_minus"
                     android:drawablePadding="8dp"
                     android:stateListAnimator="@null"
-                    android:theme="@style/AppTheme.BlueAccent"
-                    android:drawableStart="@drawable/ic_group_minus"
                     android:text="@string/button_label_remove_members"
-                    />
-            </LinearLayout>
+                    android:theme="@style/AppTheme.BlueAccent"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/group_management_add_members_button"
+                    app:layout_constraintTop_toBottomOf="@id/clone_to_v2" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/group_accept_update_cardview"

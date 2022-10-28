@@ -21,10 +21,11 @@ package io.olvid.messenger.webclient;
 
 import com.google.protobuf.ByteString;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
@@ -37,7 +38,6 @@ import io.olvid.messenger.webclient.protobuf.RequestDownloadAttachmentOuterClass
 public class SendAttachmentTask implements Runnable {
     private final long fyleId ;
     private final WebClientManager manager;
-
 
     SendAttachmentTask(WebClientManager manager, long fyleId, long size) {
         this.manager = manager;
@@ -79,13 +79,38 @@ public class SendAttachmentTask implements Runnable {
             sendResult(fyleId, false);
             return;
         }
-        try (InputStream in = new FileInputStream(fyleAbsoluteFilePath)) {
+
+        // start attachment upload
             byte[] buffer = new byte[Constants.CHUNK_SIZE];
+            continueUpload(buffer, 0, 0, fyleAbsoluteFilePath);
+    }
 
-            int index = 0;
-
+    // this function is sending attachments chunks only if websocket connection is not over laoded
+    // if there are more thant 10 frames in connection out buffer we wait 10ms before trying to continue sending process
+    // like this we can continue to use connection for other tasks
+    private void continueUpload(byte[] buffer, int index, int offset, String fyleAbsoluteFilePath) {
+        try (RandomAccessFile in = new RandomAccessFile(fyleAbsoluteFilePath, "r")) {
             boolean eof = false;
+            in.seek(offset);
             while (!eof) {
+                if (manager.getCurrentState() != WebClientManager.State.LISTENING) {
+                    Logger.w("WebClient: SendAttachmentTask: connection state changed, aborting attachment upload");
+                    return;
+                }
+
+                if (manager.getConnectionOutputBufferSize() > 10) {
+                    Logger.w("WebClient: SendAttachmentTask: Connection is blocked, waiting to continue upload");
+                    int finalIndex = index;
+                    int finalOffset = offset;
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            continueUpload(buffer, finalIndex, finalOffset, fyleAbsoluteFilePath);
+                        }
+                    }, 10L);
+                    return;
+                }
+
                 int bufferFullness = 0;
                 while (bufferFullness < buffer.length) {
                     int count = in.read(buffer, bufferFullness, buffer.length - bufferFullness);
@@ -94,6 +119,7 @@ public class SendAttachmentTask implements Runnable {
                         break;
                     }
                     bufferFullness += count;
+                    offset += count;
                 }
                 if (bufferFullness == 0) {
                     Logger.w("SendAttachmentTask : Error in read");
@@ -110,7 +136,7 @@ public class SendAttachmentTask implements Runnable {
             }
             sendResult(fyleId, true);
         } catch (IOException e) {
-            Logger.w("SendAttachmentTask : Error, aborting");
+            Logger.w("SendAttachmentTask.continueUpload : Error, aborting");
             sendResult(fyleId, false);
             e.printStackTrace();
         }

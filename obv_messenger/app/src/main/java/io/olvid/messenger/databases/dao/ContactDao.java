@@ -29,6 +29,7 @@ import java.util.List;
 
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.ContactGroupJoin;
+import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 
 @Dao
@@ -164,6 +165,13 @@ public interface ContactDao {
             " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
     LiveData<List<Contact>> getAllForOwnedIdentityWithChannelAndGroupV2Capability(byte[] ownedIdentityBytes);
+
+    @Query("SELECT COUNT(*) > 0 FROM " + Contact.TABLE_NAME +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Contact.ACTIVE + " = 1 " +
+            " AND " + Contact.CAPABILITY_GROUPS_V2 + " = 0 " +
+            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 ")
+    LiveData<Boolean> nonGroupV2ContactExists(byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +

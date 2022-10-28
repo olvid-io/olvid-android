@@ -364,8 +364,25 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = grpp." + Group2.BYTES_OWNED_IDENTITY +
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
+            " ORDER BY disc." + Discussion.PINNED + " DESC, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
+    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllPinnedFirstWithGroupMembersNames(byte[] ownedIdentityBytes);
+
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
+    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
+            " CASE WHEN grp." + Group.GROUP_MEMBERS_NAMES + " IS NULL THEN grpp." + Group2.GROUP_MEMBERS_NAMES + " ELSE grp." + Group.GROUP_MEMBERS_NAMES + " END AS groupMemberNames, " +
+            " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group " +
+            " FROM " + Discussion.TABLE_NAME + " AS disc " +
+            " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
+            " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grp." + Group.BYTES_GROUP_OWNER_AND_UID +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = grp." + Group.BYTES_OWNED_IDENTITY +
+            " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP +
+            " LEFT JOIN " + Group2.TABLE_NAME + " AS grpp " +
+            " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grpp." + Group2.BYTES_GROUP_IDENTIFIER +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = grpp." + Group2.BYTES_OWNED_IDENTITY +
+            " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND disc." + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL +
-            " ORDER BY is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
+            " ORDER BY disc." + Discussion.PINNED + " DESC, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllNotLockedWithGroupMembersNames(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
@@ -381,7 +398,7 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND disc." + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL +
-            " ORDER BY disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC")
+            " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllNotLockedWithGroupMembersNamesOrderedByActivity(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +

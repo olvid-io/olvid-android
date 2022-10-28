@@ -192,6 +192,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
         });
 
         filteredDiscussionListFragment.setUseDialogBackground(true);
+        filteredDiscussionListFragment.setShowPinned(true);
         filteredDiscussionListFragment.setUnfilteredDiscussions(unfilteredDiscussions);
         filteredDiscussionListFragment.setDiscussionFilterEditText(contactNameFilter);
         filteredDiscussionListFragment.setSelectable(true);

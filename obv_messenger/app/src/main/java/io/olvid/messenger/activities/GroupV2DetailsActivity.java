@@ -569,9 +569,6 @@ public class GroupV2DetailsActivity extends LockableActivity implements EngineNo
             spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.red)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             leaveItem.setTitle(spannableString);
         }
-        if (!GroupCreationActivity.groupV2 && !SettingsActivity.getBetaFeaturesEnabled()) {
-            menu.removeItem(R.id.action_clone_group);
-        }
 
         if (groupAdmin && showEditDetails) {
             showEditDetails = false;

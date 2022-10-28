@@ -153,6 +153,7 @@ public class Message {
     public static final int TYPE_JOINED_GROUP = 14;
     public static final int TYPE_GAINED_GROUP_ADMIN = 15;
     public static final int TYPE_LOST_GROUP_ADMIN = 16;
+    public static final int TYPE_SCREEN_SHOT_DETECTED = 17;
 
 
     public static final int EDITED_NONE = 0;
@@ -467,6 +468,10 @@ public class Message {
 
     public static Message createLostGroupAdminMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
         return createInfoMessage(db, TYPE_LOST_GROUP_ADMIN, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    }
+
+    public static Message createScreenShotDetectedMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity, long serverTimestamp) {
+        return createInfoMessage(db, TYPE_SCREEN_SHOT_DETECTED, discussionId, bytesOwnedIdentity, serverTimestamp, false);
     }
 
     ///////
@@ -1277,6 +1282,12 @@ public class Message {
         return jsonLocation != null;
     }
 
+    public boolean isForwardable() {
+        return (messageType == Message.TYPE_INBOUND_MESSAGE || messageType == Message.TYPE_OUTBOUND_MESSAGE)
+                && wipeStatus == Message.WIPE_STATUS_NONE
+                && !limitedVisibility;
+    }
+
     // return true if message expired and update locationType field
     public boolean isSharingExpired() {
         if (this.jsonLocation != null && this.locationType == LOCATION_TYPE_SHARE) {
@@ -1500,7 +1511,7 @@ public class Message {
             switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
                 case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
                 case FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE:
-                    AppSingleton.getEngine().deleteAttachment(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
+                    AppSingleton.getEngine().markAttachmentForDeletion(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
                     break;
                 case FyleMessageJoinWithStatus.STATUS_UPLOADING:
                     AppSingleton.getEngine().cancelAttachmentUpload(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
@@ -1577,6 +1588,7 @@ public class Message {
         JsonDeleteMessages jsonDeleteMessages;
         JsonDeleteDiscussion jsonDeleteDiscussion;
         JsonReaction jsonReaction;
+        JsonScreenCaptureDetection jsonScreenCaptureDetection;
 
         public JsonPayload(JsonMessage jsonMessage, JsonReturnReceipt jsonReturnReceipt) {
             this.jsonMessage = jsonMessage;
@@ -1674,6 +1686,16 @@ public class Message {
         @JsonProperty("reacm")
         public void setJsonReaction(JsonReaction jsonReaction) {
             this.jsonReaction = jsonReaction;
+        }
+
+        @JsonProperty("scd")
+        public JsonScreenCaptureDetection getJsonScreenCaptureDetection() {
+            return jsonScreenCaptureDetection;
+        }
+
+        @JsonProperty("scd")
+        public void setJsonScreenCaptureDetection(JsonScreenCaptureDetection jsonScreenCaptureDetection) {
+            this.jsonScreenCaptureDetection = jsonScreenCaptureDetection;
         }
     }
 
@@ -2541,6 +2563,70 @@ public class Message {
                     break;
             }
             return jsonDeleteDiscussion;
+        }
+
+        @JsonProperty("guid")
+        public byte[] getGroupUid() {
+            return groupUid;
+        }
+
+        @JsonProperty("guid")
+        public void setGroupUid(byte[] groupUid) {
+            this.groupUid = groupUid;
+        }
+
+        @JsonProperty("go")
+        public byte[] getGroupOwner() {
+            return groupOwner;
+        }
+
+        @JsonProperty("go")
+        public void setGroupOwner(byte[] groupOwner) {
+            this.groupOwner = groupOwner;
+        }
+
+        @JsonProperty("gid2")
+        public byte[] getGroupV2Identifier() {
+            return groupV2Identifier;
+        }
+
+        @JsonProperty("gid2")
+        public void setGroupV2Identifier(byte[] groupV2Identifier) {
+            this.groupV2Identifier = groupV2Identifier;
+        }
+
+        @JsonIgnore
+        public void setGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) throws Exception {
+            if (bytesGroupOwnerAndUid.length < 32) {
+                throw new Exception();
+            }
+            byte[] bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
+            byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
+            setGroupOwner(bytesGroupOwner);
+            setGroupUid(bytesGroupUid);
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class JsonScreenCaptureDetection {
+        byte[] groupUid;
+        byte[] groupOwner;
+        byte[] groupV2Identifier;
+
+        public static JsonScreenCaptureDetection of(Discussion discussion) throws Exception {
+            JsonScreenCaptureDetection jsonScreenCaptureDetection = new JsonScreenCaptureDetection();
+            switch (discussion.discussionType) {
+                case Discussion.TYPE_GROUP:
+                    jsonScreenCaptureDetection.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
+                    break;
+                case Discussion.TYPE_GROUP_V2:
+                    jsonScreenCaptureDetection.groupV2Identifier = discussion.bytesDiscussionIdentifier;
+                    break;
+                case Discussion.TYPE_CONTACT:
+                default:
+                    break;
+            }
+            return jsonScreenCaptureDetection;
         }
 
         @JsonProperty("guid")

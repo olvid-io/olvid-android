@@ -612,6 +612,22 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
                         holder.lastMessageContentTextView.setText(spannableString);
                         break;
                     }
+                    case Message.TYPE_SCREEN_SHOT_DETECTED: {
+                        SpannableString spannableString;
+                        if (Arrays.equals(discussionAndLastMessage.message.senderIdentifier, AppSingleton.getBytesCurrentIdentity())) {
+                            spannableString = new SpannableString(getString(R.string.text_you_captured_sensitive_message));
+                        } else {
+                            String displayName = AppSingleton.getContactCustomDisplayName(discussionAndLastMessage.message.senderIdentifier);
+                            if (displayName != null) {
+                                spannableString = new SpannableString(getString(R.string.text_xxx_captured_sensitive_message, displayName));
+                            } else {
+                                spannableString = new SpannableString(getString(R.string.text_unknown_member_captured_sensitive_message));
+                            }
+                        }
+                        spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        holder.lastMessageContentTextView.setText(spannableString);
+                        break;
+                    }
                     case Message.TYPE_INBOUND_EPHEMERAL_MESSAGE:
                         SpannableString spannableString = new SpannableString(discussionAndLastMessage.message.getStringContent(activity));
                         spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

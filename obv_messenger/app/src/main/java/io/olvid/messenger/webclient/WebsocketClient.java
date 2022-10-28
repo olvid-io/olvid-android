@@ -21,11 +21,12 @@ package io.olvid.messenger.webclient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import org.java_websocket.framing.ContinuousFrame;
-import org.java_websocket.framing.DataFrame;
-import org.java_websocket.framing.Framedata;
-import org.java_websocket.framing.TextFrame;
-import org.java_websocket.handshake.ServerHandshake;
+import org.java_websocket_olvid.client.WebSocketClient;
+import org.java_websocket_olvid.framing.ContinuousFrame;
+import org.java_websocket_olvid.framing.DataFrame;
+import org.java_websocket_olvid.framing.Framedata;
+import org.java_websocket_olvid.framing.TextFrame;
+import org.java_websocket_olvid.handshake.ServerHandshake;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -49,7 +50,7 @@ import io.olvid.messenger.webclient.datatypes.JsonMessage;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.Colissimo;
 import io.olvid.messenger.webclient.protobuf.ConnectionColissimoOuterClass.ConnectionColissimo;
 
-class WebsocketClient extends org.java_websocket.client.WebSocketClient {
+class WebsocketClient extends WebSocketClient {
     private final WebClientManager manager;
     private final MessageHandler messageHandler;
 
@@ -231,4 +232,9 @@ class WebsocketClient extends org.java_websocket.client.WebSocketClient {
     //  --> we do the check manually
     @Override
     protected void onSetSSLParameters(SSLParameters sslParameters) { }
+
+    // this is for this method that we had to patch websocket library: we need to access connection out queue to determine if it is overloaded or not
+    public int getConnectionOutputBufferSize() {
+        return this.engine.outQueue.size();
+    }
 }

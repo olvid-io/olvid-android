@@ -96,7 +96,6 @@ public interface EngineAPI {
     void publishLatestIdentityDetails(byte[] bytesOwnedIdentity);
     void updateOwnedIdentityPhoto(byte[] bytesOwnedIdentity, String absolutePhotoUrl) throws Exception;
 
-    String serverForIdentity(byte[] bytesIdentity);
     byte[] getServerAuthenticationToken(byte[] bytesOwnedIdentity);
 
     List<ObvCapability> getOwnCapabilities(byte[] bytesOwnedIdentity); // returns null in case of error, empty list if there are no capabilities
@@ -185,10 +184,10 @@ public interface EngineAPI {
     void downloadSmallAttachment(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber);
     void downloadLargeAttachment(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber);
     void pauseAttachmentDownload(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber);
-    void deleteAttachment(ObvAttachment attachment);
-    void deleteAttachment(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber);
+    void markAttachmentForDeletion(ObvAttachment attachment);
+    void markAttachmentForDeletion(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber);
     void deleteMessageAndAttachments(byte[] bytesOwnedIdentity, byte[] messageIdentifier);
-    void deleteMessage(byte[] bytesOwnedIdentity, byte[] messageIdentifier);
+    void markMessageForDeletion(byte[] bytesOwnedIdentity, byte[] messageIdentifier);
     void cancelAttachmentUpload(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber);
     void resendAllAttachmentNotifications() throws Exception;
     void connectWebsocket(String os, String osVersion, int appBuild, String appVersion);
@@ -200,7 +199,7 @@ public interface EngineAPI {
     void initiateBackup(boolean forExport);
     ObvBackupKeyInformation getBackupKeyInformation() throws Exception;
     void generateBackupKey();
-    void setAutoBackupEnabled(boolean enabled, boolean doNotInitiateBackupNow);
+    void setAutoBackupEnabled(boolean enabled, boolean initiateBackupNowIfNeeded);
     void markBackupExported(byte[] backupKeyUid, int version);
     void markBackupUploaded(byte[] backupKeyUid, int version);
     void discardBackup(byte[] backupKeyUid, int version);

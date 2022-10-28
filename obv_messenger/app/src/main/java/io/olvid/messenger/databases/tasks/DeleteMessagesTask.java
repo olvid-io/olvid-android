@@ -148,7 +148,7 @@ public class DeleteMessagesTask implements Runnable {
                     switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
                         case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
                         case FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE:
-                            engine.deleteAttachment(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
+                            engine.markAttachmentForDeletion(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
                             break;
                         case FyleMessageJoinWithStatus.STATUS_UPLOADING:
                             engine.cancelAttachmentUpload(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
@@ -184,6 +184,7 @@ public class DeleteMessagesTask implements Runnable {
                     case Message.TYPE_JOINED_GROUP:
                     case Message.TYPE_GAINED_GROUP_ADMIN:
                     case Message.TYPE_LOST_GROUP_ADMIN:
+                    case Message.TYPE_SCREEN_SHOT_DETECTED:
                         infoMessages.add(message);
                         break;
                     default:

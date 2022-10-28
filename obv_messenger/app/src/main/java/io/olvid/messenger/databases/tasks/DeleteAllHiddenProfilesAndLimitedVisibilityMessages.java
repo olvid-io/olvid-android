@@ -24,6 +24,7 @@ import java.util.List;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.settings.SettingsActivity;
 
 public class DeleteAllHiddenProfilesAndLimitedVisibilityMessages implements Runnable {
     @Override
@@ -31,6 +32,8 @@ public class DeleteAllHiddenProfilesAndLimitedVisibilityMessages implements Runn
         AppDatabase db = AppDatabase.getInstance();
 
         List<OwnedIdentity> hiddenOwnedIdentities = db.ownedIdentityDao().getAllHidden();
+
+        SettingsActivity.clearEmergencyPIN();
 
         for (OwnedIdentity hiddenOwnedIdentity: hiddenOwnedIdentities) {
             try {

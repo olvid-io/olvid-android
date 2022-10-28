@@ -1112,6 +1112,9 @@ public class AppSingleton {
                     e.printStackTrace();
                 }
             }
+            if (lastBuildExecuted != 0 && lastBuildExecuted < 183) {
+                App.openAppDialogIntroducingGroupsV2();
+            }
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
             setLastBuildExecutedVersion(BuildConfig.VERSION_CODE);
         } catch (Exception e) {

@@ -11,10 +11,10 @@ dependencies {
     testImplementation 'org.xerial:sqlite-jdbc:3.39.3.0' // only here to check if a new version is available
 
     implementation 'org.java-websocket:Java-WebSocket:1.5.3'
-    implementation 'org.slf4j:slf4j-api:2.0.1'
-    implementation 'org.slf4j:slf4j-simple:2.0.1'
+    implementation 'org.slf4j:slf4j-api:2.0.3'
+    implementation 'org.slf4j:slf4j-simple:2.0.3'
 
-    implementation 'org.bitbucket.b_c:jose4j:0.8.0'
+    implementation 'org.bitbucket.b_c:jose4j:0.9.0'
 
     implementation 'net.iharder:base64:2.3.9'
 }
