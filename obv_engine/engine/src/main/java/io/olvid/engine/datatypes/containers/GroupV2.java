@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -881,6 +881,15 @@ public class GroupV2 {
                     Encoded.of(groupVersion),
                     blobKeys.encode(),
             });
+        }
+    }
+    public static class IdentifierAndAdminStatus {
+        public final Identifier groupIdentifier;
+        public final boolean iAmAdmin;
+
+        public IdentifierAndAdminStatus(Identifier groupIdentifier, boolean iAmAdmin) {
+            this.groupIdentifier = groupIdentifier;
+            this.iAmAdmin = iAmAdmin;
         }
     }
 }

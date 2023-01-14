@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -50,9 +50,9 @@ public class GroupV2SignatureReceived implements ObvDatabase {
             return null;
         }
         try {
-            GroupV2SignatureReceived mutualScanSignatureReceived = new GroupV2SignatureReceived(protocolManagerSession, ownedIdentity, signature);
-            mutualScanSignatureReceived.insert();
-            return mutualScanSignatureReceived;
+            GroupV2SignatureReceived groupV2SignatureReceived = new GroupV2SignatureReceived(protocolManagerSession, ownedIdentity, signature);
+            groupV2SignatureReceived.insert();
+            return groupV2SignatureReceived;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

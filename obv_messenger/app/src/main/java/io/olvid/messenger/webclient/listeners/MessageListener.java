@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -115,7 +115,7 @@ public class MessageListener {
             if (liveData != null && observer != null) {
                 new Handler(Looper.getMainLooper()).post(() -> liveData.removeObserver(observer));
             }
-            Logger.e("MessageListener: Removed listener for discussion: " + discussionId);
+            Logger.d("MessageListener: Removed listener for discussion: " + discussionId);
         }
         discussionMessagesLiveData.remove(discussionId);
         this.messageObservers.remove(discussionId);
@@ -150,16 +150,20 @@ public class MessageListener {
 
                 index = 0;
                 requestMessageResponseBuilder = RequestMessageResponse.newBuilder();
-                // add as much messages as possible in requestMessageResponse, if size is exceeded
-                // send other messages using notif_new_message messages
+                // add as many messages as possible in requestMessageResponse, if size is exceeded, send other messages using notif_new_message messages
                 while (index < elements.size()) {
-                    if(elements.get(index).totalAttachmentCount > 0) {
-                        this.manager.getAttachmentListener().addListener(elements.get(index).id);
-                    }
-                    requestMessageResponseBuilder.addMessages(FillProtobufMessageFromOlvidMessageAndSend.fillProtobufMessageFromOlvidMessage(elements.get(index), this.manager.getService().getWebClientContext(), this.manager));
+                    Message message = elements.get(index);
+                    requestMessageResponseBuilder.addMessages(FillProtobufMessageFromOlvidMessageAndSend.fillProtobufMessageFromOlvidMessage(message, this.manager.getService().getWebClientContext(), this.manager));
                     index++;
-                    if (requestMessageResponseBuilder.build().getSerializedSize() > Constants.MAX_FRAME_SIZE) {
+                    if (requestMessageResponseBuilder.build().getSerializedSize() > Constants.MAX_PAYLOAD_SIZE) {
+                        requestMessageResponseBuilder.removeMessages(requestMessageResponseBuilder.getMessagesCount() - 1);
+                        index--;
+                        Logger.d("WebClient: request_message_response payload too large. Limiting to " + requestMessageResponseBuilder.getMessagesCount() + "/" + elements.size() + " messages");
                         break;
+                    }
+                    // only add the listener here, in case we exceeded the MAX_PAYLOAD_SIZE and message was removed from colissimo
+                    if(message.totalAttachmentCount > 0) {
+                        this.manager.getAttachmentListener().addListener(message.id);
                     }
                 }
 
@@ -173,20 +177,36 @@ public class MessageListener {
 
                 // if all discussions were sent just quit
                 if (index == elements.size()) {
-                    return ;
+                    return;
                 }
 
                 // send other messages in notif messages
                 NotifNewMessageOuterClass.NotifNewMessage.Builder notifBuilder = NotifNewMessageOuterClass.NotifNewMessage.newBuilder();
-                for (Message message:elements.subList(index, elements.size())) {
+                while (index < elements.size()) {
+                    Message message = elements.get(index);
                     notifBuilder.addMessages(FillProtobufMessageFromOlvidMessageAndSend.fillProtobufMessageFromOlvidMessage(message, this.manager.getService().getWebClientContext(), this.manager));
-                    if (notifBuilder.build().getSerializedSize() > Constants.MAX_FRAME_SIZE) {
-                        colissimo = ColissimoOuterClass.Colissimo.newBuilder()
-                                .setType(ColissimoOuterClass.ColissimoType.NOTIF_NEW_MESSAGE)
-                                .setNotifNewMessage(notifBuilder.build())
-                                .build();
-                        this.manager.sendColissimo(colissimo);
+                    index++;
+                    if (notifBuilder.build().getSerializedSize() > Constants.MAX_PAYLOAD_SIZE) {
+                        notifBuilder.removeMessages(notifBuilder.getMessagesCount() - 1);
+                        index--;
+                        Logger.d("WebClient: notif_new_message payload too large. Limiting to " + notifBuilder.getMessagesCount() + "/" + elements.size() + " messages");
+
+                        if (notifBuilder.getMessagesCount() == 0) {
+                            Logger.w("WebClient:  a single Message exceeds the MAX_PAYLOAD_SIZE. Skipping the whole Message");
+                            index++;
+                        } else {
+                            colissimo = ColissimoOuterClass.Colissimo.newBuilder()
+                                    .setType(ColissimoOuterClass.ColissimoType.NOTIF_NEW_MESSAGE)
+                                    .setNotifNewMessage(notifBuilder.build())
+                                    .build();
+                            this.manager.sendColissimo(colissimo);
+                        }
                         notifBuilder = NotifNewMessageOuterClass.NotifNewMessage.newBuilder();
+                    } else {
+                        // only add the listener here, in case we exceeded the MAX_PAYLOAD_SIZE and message was removed from colissimo
+                        if (message.totalAttachmentCount > 0) {
+                            this.manager.getAttachmentListener().addListener(message.id);
+                        }
                     }
                 }
 
@@ -443,7 +463,18 @@ public class MessageListener {
                                 messageBuilder.setSenderIsSelf(false);
                             }
                         }
-                        messageBuilder.setReplyBody(replyMessage.getStringContent(context));
+                        // truncate the replyBody to 500 bytes max
+                        String replyBody = replyMessage.getStringContent(context);
+                        if (replyBody.length() > 500) {
+                            replyBody = replyBody.substring(0, 499) + "…";
+                        }
+                        messageBuilder.setReplyBody(replyBody);
+                    }
+                }
+                if (messageBuilder.build().getSerializedSize() > Constants.MAX_PAYLOAD_SIZE) {
+                    if (message.contentBody != null && message.contentBody.length() > 500) {
+                        Logger.d("WebClient: a single Message exceeds the MAX_PAYLOAD_SIZE. Removing the contentBody from this Message");
+                        messageBuilder.setContentBody(context.getString(R.string.text_message_too_large_for_webclient));
                     }
                 }
                 return messageBuilder;

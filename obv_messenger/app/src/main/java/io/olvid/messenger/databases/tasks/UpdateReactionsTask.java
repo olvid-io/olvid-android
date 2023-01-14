@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -57,8 +57,7 @@ public class UpdateReactionsTask implements Runnable {
         AppDatabase db = AppDatabase.getInstance();
         Message message = db.messageDao().get(messageId);
         List<Reaction> reactions = db.reactionDao().getAllForMessage(messageId);
-        Reaction previousReaction = null;
-        boolean deletePrevious = false;
+        Reaction updatedReaction = null; // will be non-null if this is a reaction update. Will remain null for new reactions
 
         if (emoji != null && (emoji.length() == 0 || emoji.contains(":") || emoji.contains("|"))) {
             Logger.e("UpdateReactionsTask: Invalid emoji (length 0 or contained ':' or '|')");
@@ -83,33 +82,35 @@ public class UpdateReactionsTask implements Runnable {
         String myReaction = null;
         for (Reaction reaction : reactions) {
             if (Arrays.equals(reaction.bytesIdentity, bytesIdentity)) {
-                previousReaction = reaction;
-                if (emoji == null) {
-                    deletePrevious = true;
-                    continue;
-                } else {
-                    reaction.emoji = emoji;
-                    reaction.timestamp = reactionTimestamp;
+                // this is an update to a user (or my own) reaction
+                if (reaction.timestamp > reactionTimestamp) {
+                    // we already have a newer reaction --> abort the update
+                    return;
                 }
+                reaction.emoji = emoji;
+                reaction.timestamp = reactionTimestamp;
+                updatedReaction = reaction; // this is just a reference to the updated reaction
             }
 
-            Pair<Integer, Long> old = reactionsMap.get(reaction.emoji);
             if (reaction.bytesIdentity == null) {
                 myReaction = reaction.emoji;
             }
-            if (old == null) {
-                reactionsMap.put(reaction.emoji, new Pair<>(1, reaction.timestamp));
-            } else {
-                reactionsMap.put(reaction.emoji, new Pair<>(old.first + 1, Math.min(old.second, reaction.timestamp)));
+            if (reaction.emoji != null) {
+                Pair<Integer, Long> old = reactionsMap.get(reaction.emoji);
+                if (old == null) {
+                    reactionsMap.put(reaction.emoji, new Pair<>(1, reaction.timestamp));
+                } else {
+                    reactionsMap.put(reaction.emoji, new Pair<>(old.first + 1, Math.min(old.second, reaction.timestamp)));
+                }
             }
         }
 
-        // add reaction if a new one
-        if (previousReaction == null && emoji != null) {
-            Pair<Integer, Long> old = reactionsMap.get(emoji);
+        // add the new reaction to the map, unless this is an update (in which case it is already in the map)
+        if (updatedReaction == null && emoji != null) {
             if (bytesIdentity == null) {
                 myReaction = emoji;
             }
+            Pair<Integer, Long> old = reactionsMap.get(emoji);
             if (old == null) {
                 reactionsMap.put(emoji, new Pair<>(1, reactionTimestamp));
             } else {
@@ -142,16 +143,10 @@ public class UpdateReactionsTask implements Runnable {
         String messageReactionsString = stringBuilder.toString();
 
         // insert/update/delete reaction in reaction table
-        if (previousReaction == null) {
-            if (emoji != null) {
-                db.reactionDao().insert(new Reaction(messageId, bytesIdentity, emoji, reactionTimestamp));
-            }
+        if (updatedReaction == null) {
+            db.reactionDao().insert(new Reaction(messageId, bytesIdentity, emoji, reactionTimestamp));
         } else {
-            if (deletePrevious) {
-                db.reactionDao().delete(previousReaction);
-            } else {
-                db.reactionDao().update(previousReaction);
-            }
+            db.reactionDao().update(updatedReaction);
         }
 
         // update Message.reaction

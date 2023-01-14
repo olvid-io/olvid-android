@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -43,9 +43,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -60,6 +57,7 @@ import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.fragments.dialog.CloudProviderSignInDialogFragment;
+import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.services.BackupCloudProviderService;
 
 public class ManageCloudBackupsDialogFragment extends DialogFragment implements View.OnClickListener, BackupCloudProviderService.OnBackupsListCallback, BackupCloudProviderService.OnBackupDownloadCallback, BackupCloudProviderService.OnBackupDeleteCallback {
@@ -193,9 +191,9 @@ public class ManageCloudBackupsDialogFragment extends DialogFragment implements 
                     }
                     break;
                 case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_GOOGLE_DRIVE:
-                    GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(App.getContext());
-                    if (account != null && Objects.equals(account.getEmail(), cloudProviderConfiguration.account)) {
-                        displayGoogleDriveAccount(account.getEmail());
+                    String email = GoogleServicesUtils.getSignInEmail(App.getContext());
+                    if (email != null && Objects.equals(email, cloudProviderConfiguration.account)) {
+                        displayGoogleDriveAccount(email);
 
                         emptyView.setText(R.string.label_no_backup_found);
                         adapter.setBackupItems(null, true);
@@ -398,6 +396,7 @@ public class ManageCloudBackupsDialogFragment extends DialogFragment implements 
                 && backupItemContent != null) {
             final byte[] bytesToWrite = backupItemContent;
             App.runThread(() -> {
+                //noinspection ConstantConditions
                 try (OutputStream os = activity.getContentResolver().openOutputStream(data.getData())) {
                     if (os == null) {
                         throw new Exception("Unable to write to provided Uri");

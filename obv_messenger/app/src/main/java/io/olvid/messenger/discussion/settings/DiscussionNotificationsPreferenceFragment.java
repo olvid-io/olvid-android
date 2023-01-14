@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -220,6 +220,7 @@ public class DiscussionNotificationsPreferenceFragment extends PreferenceFragmen
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
                     if (StringUtils.validateUri(uri)) {
+                        //noinspection ConstantConditions
                         discussionSettingsDataStore.putString(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_MESSAGE_RINGTONE, uri.toString());
                     } else {
                         discussionSettingsDataStore.putString(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_MESSAGE_RINGTONE, Uri.EMPTY.toString());
@@ -232,6 +233,7 @@ public class DiscussionNotificationsPreferenceFragment extends PreferenceFragmen
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
                     if (StringUtils.validateUri(uri)) {
+                        //noinspection ConstantConditions
                         discussionSettingsDataStore.putString(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_CALL_RINGTONE, uri.toString());
                     } else {
                         discussionSettingsDataStore.putString(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_CALL_RINGTONE, Uri.EMPTY.toString());

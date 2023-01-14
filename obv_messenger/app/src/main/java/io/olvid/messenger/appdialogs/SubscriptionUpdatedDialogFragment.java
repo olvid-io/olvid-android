@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -37,6 +37,7 @@ import androidx.fragment.app.FragmentTransaction;
 import java.util.List;
 
 import io.olvid.engine.engine.types.EngineAPI;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.fragments.SubscriptionStatusFragment;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -121,7 +122,7 @@ public class SubscriptionUpdatedDialogFragment extends DialogFragment {
         Button okButton = dialogView.findViewById(R.id.button_ok);
         okButton.setOnClickListener(v -> dismiss());
 
-        SubscriptionStatusFragment subscriptionStatusFragment = SubscriptionStatusFragment.newInstance(bytesOwnedIdentity, apiKeyStatus, apiKeyExpirationTimestamp, apiKeyPermissions, false, true);
+        SubscriptionStatusFragment subscriptionStatusFragment = SubscriptionStatusFragment.newInstance(bytesOwnedIdentity, apiKeyStatus, apiKeyExpirationTimestamp, apiKeyPermissions, false, true, AppSingleton.getOtherProfileHasCallsPermission());
 
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.subscription_status_placeholder, subscriptionStatusFragment);

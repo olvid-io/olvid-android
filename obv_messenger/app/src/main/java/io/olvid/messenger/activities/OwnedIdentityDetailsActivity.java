@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -401,7 +401,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             inactiveCardView.setVisibility(View.VISIBLE);
         }
 
-        SubscriptionStatusFragment subscriptionStatusFragment = SubscriptionStatusFragment.newInstance(ownedIdentity.bytesOwnedIdentity, ownedIdentity.getApiKeyStatus(), ownedIdentity.apiKeyExpirationTimestamp, ownedIdentity.getApiKeyPermissions(), false, !keycloakManaged);
+        SubscriptionStatusFragment subscriptionStatusFragment = SubscriptionStatusFragment.newInstance(ownedIdentity.bytesOwnedIdentity, ownedIdentity.getApiKeyStatus(), ownedIdentity.apiKeyExpirationTimestamp, ownedIdentity.getApiKeyPermissions(), false, !keycloakManaged, AppSingleton.getOtherProfileHasCallsPermission());
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.subscription_status_placeholder, subscriptionStatusFragment);
         transaction.commit();

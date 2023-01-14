@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -219,6 +219,7 @@ public class Discussion {
             discussion.status = Discussion.STATUS_NORMAL;
             db.discussionDao().updateAll(discussion);
 
+            ShortcutActivity.updateShortcut(discussion);
 
             // insert revoked message if needed
             if (!contact.active) {
@@ -289,6 +290,8 @@ public class Discussion {
             discussion.trustLevel = null;
             discussion.status = Discussion.STATUS_NORMAL;
             db.discussionDao().updateAll(discussion);
+
+            ShortcutActivity.updateShortcut(discussion);
         }
 
         return discussion;
@@ -355,6 +358,8 @@ public class Discussion {
             discussion.trustLevel = null;
             discussion.status = Discussion.STATUS_NORMAL;
             db.discussionDao().updateAll(discussion);
+
+            ShortcutActivity.updateShortcut(discussion);
         }
 
         return discussion;
@@ -408,6 +413,7 @@ public class Discussion {
         if (db.messageDao().countMessagesInDiscussion(id) == 0) {
             // discussion is empty and will be locked --> delete it
             db.discussionDao().delete(this);
+            ShortcutActivity.disableShortcut(id);
         } else {
             // clear the LatestDiscussionSenderSequenceNumber to avoid "xx messages missing" if you re-join this discussion
             db.latestDiscussionSenderSequenceNumberDao().deleteForDiscussion(id);

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -1214,7 +1214,9 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     @Override
     public List<ObvGroupV2> getGroupsV2OfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception {
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-        return identityManager.getObvGroupsV2ForOwnedIdentity(ownedIdentity);
+        try (EngineSession engineSession = getSession()) {
+            return identityManager.getObvGroupsV2ForOwnedIdentity(engineSession.session, ownedIdentity);
+        }
     }
 
     @Override

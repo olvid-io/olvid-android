@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -23,31 +23,23 @@ package io.olvid.engine.networkfetch.coordinators;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.java_websocket.WebSocket;
-import org.java_websocket.framing.Framedata;
-import org.java_websocket.framing.PingFrame;
-import org.java_websocket.handshake.ServerHandshake;
 import net.iharder.Base64;
 
 import java.io.IOException;
-import java.net.URI;
-import java.nio.ByteBuffer;
+import java.security.KeyStore;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
@@ -62,7 +54,6 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
-import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.networkfetch.databases.ServerSession;
@@ -71,10 +62,20 @@ import io.olvid.engine.networkfetch.datatypes.DownloadMessagesAndListAttachments
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
 import io.olvid.engine.networkfetch.datatypes.WellKnownCacheDelegate;
+import okhttp3.Authenticator;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okio.ByteString;
 
 public class WebsocketCoordinator implements Operation.OnCancelCallback {
 
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private final SSLSocketFactory sslSocketFactory;
     private final CreateServerSessionDelegate createServerSessionDelegate;
     private final DownloadMessagesAndListAttachmentsDelegate downloadMessagesAndListAttachmentsDelegate;
@@ -99,8 +100,11 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     private final OwnedIdentityListUpdatedNotificationListener ownedIdentityListUpdatedNotificationListener;
     private final WellKnownCacheNotificationListener wellKnownCacheNotificationListener;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private NotificationListeningDelegate notificationListeningDelegate;
     private NotificationPostingDelegate notificationPostingDelegate;
+
+    private final OkHttpClient okHttpClient;
 
     private boolean doConnect = false;
 
@@ -140,6 +144,52 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         ownedIdentityCurrentDeviceUids = new HashMap<>();
         ownedIdentityServerSessionTokens = new HashMap<>();
         existingWebsockets = new HashMap<>();
+
+
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (sslSocketFactory != null) {
+            try {
+                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
+                        TrustManagerFactory.getDefaultAlgorithm());
+                trustManagerFactory.init((KeyStore) null);
+                TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+                if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+                    throw new IllegalStateException("Unexpected default trust managers:"
+                            + Arrays.toString(trustManagers));
+                }
+                X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
+                builder.sslSocketFactory(sslSocketFactory, trustManager);
+            } catch (Exception e) {
+                Logger.e("Error initializing websocket okHttpClient trustManager");
+                e.printStackTrace();
+            }
+        }
+
+        String userAgentProperty = System.getProperty("http.agent");
+        if (userAgentProperty != null) {
+            builder.addInterceptor(
+                    (Interceptor.Chain chain) -> chain.proceed(chain.request().newBuilder().header("User-Agent", userAgentProperty).build())
+            );
+            builder.proxyAuthenticator((Route route, Response response) -> {
+                Request request = Authenticator.JAVA_NET_AUTHENTICATOR.authenticate(route, response);
+                if (request == null) {
+                    if (route == null) {
+                        return null;
+                    }
+                    return new Request.Builder()
+                            .url(route.address().url())
+                            .method("CONNECT", null)
+                            .header("Host", okhttp3.internal.Util.toHostHeader(route.address().url(), true))
+                            .header("Proxy-Connection", "Keep-Alive")
+                            .header("User-Agent", userAgentProperty)
+                            .build();
+                } else {
+                    return request.newBuilder().header("User-Agent", userAgentProperty).build();
+                }
+            });
+        }
+
+        okHttpClient = builder.build();
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -208,10 +258,8 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     public void pingWebsocket(Identity ownedIdentity) {
         String server = ownedIdentity.getServer();
         WebSocketClient webSocketClient = existingWebsockets.get(server);
-        if (webSocketClient != null) {
-            if (webSocketClient.isOpen()) {
-                webSocketClient.sendPing();
-            }
+        if (webSocketClient != null && webSocketClient.websocketConnected) {
+            webSocketClient.sendPing();
         }
     }
 
@@ -223,7 +271,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     private void internalDisconnectWebsockets() {
         List<WebSocketClient> webSocketClients = new ArrayList<>(existingWebsockets.values());
         for (WebSocketClient webSocketClient: webSocketClients) {
-            webSocketClient.closeConnection(0, null);
+            webSocketClient.close();
         }
     }
 
@@ -412,47 +460,19 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                     return;
                 }
                 // create the websocket connection
-                URI wsUri;
+                String wsUrl;
                 try {
-                    wsUri = wellKnownCacheDelegate.getWsUri(server);
+                    wsUrl = wellKnownCacheDelegate.getWsUrl(server);
                 } catch (WellKnownCoordinator.NotCachedException e) {
                     cancel(RFC_WELL_KNOWN_NOT_CACHED_YET);
                     return;
                 }
-                if (wsUri == null) {
+                if (wsUrl == null) {
                     cancel(RFC_NO_KNOWN_WS_SERVER_FOR_SERVER);
                     return;
                 }
-                WebSocketClient webSocketClient = new WebSocketClient(server, wsUri);
-                webSocketClient.setSocketFactory(sslSocketFactory);
-                webSocketClient.connectBlocking(WebSocketClient.CONNECTION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-                try {
-                    // hack to check whether SSL supports SNI (not supported on Android < 25)
-                    Class.forName("javax.net.ssl.SNIHostName");
-                    // verify the hostname in the SSL connection
-                    HostnameVerifier hv = HttpsURLConnection.getDefaultHostnameVerifier();
-                    SSLSocket socket = (SSLSocket) webSocketClient.getSocket();
-                    SSLSession s = socket.getSession();
-                    if (!hv.verify(wsUri.getHost(), s)) {
-                        webSocketClient.close();
-                        cancel(RFC_SSL_HOSTNAME_VERIFICATION_ERROR);
-                        try {
-                            Logger.e("Websocket hostname verification error: expected " + wsUri.getHost() + ", found " + s.getPeerPrincipal());
-                        } catch (SSLPeerUnverifiedException sslEx) {
-                            // do nothing special, this occurs when there is no connection
-                        }
-                        return;
-                    }
-                } catch (ClassNotFoundException e) {
-                    // SNI not supported --> hostname verification will fail, so don't do it!
-                }
-                if (webSocketClient.connectionException != null) {
-                    throw webSocketClient.connectionException;
-                }
 
-                if (!doConnect) {
-                    webSocketClient.closeConnection(0, null);
-                }
+                new WebSocketClient(server, wsUrl);
                 finished = true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -506,7 +526,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                         cancel(RFC_WEBSOCKET_NOT_FOUND);
                         return;
                     }
-                    if (!webSocketClient.isOpen()) {
+                    if (!webSocketClient.websocketConnected) {
                         cancel(RFC_WEBSOCKET_NOT_CONNECTED);
                         return;
                     }
@@ -568,27 +588,35 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     }
 
 
-    private class WebSocketClient extends org.java_websocket.client.WebSocketClient {
-        static final int CONNECTION_TIMEOUT_MILLIS = 5000;
+    private class WebSocketClient extends WebSocketListener {
+        private final String wsUrl;
         private final String server;
+        private final WebSocket webSocket;
 
-        private boolean thisWebsocketDidConnect = false;
-        private Exception connectionException = null;
+        private boolean websocketConnected = false;
+        private boolean remotelyInitiatedClosing = false;
 
         private final AtomicLong pingCounter = new AtomicLong(0);
         private long lastPingCounter = -1;
         private long lastPingTimestamp = -1;
 
-        WebSocketClient(String server, URI serverUri) {
-            super(serverUri);
+        WebSocketClient(String server, String wsUrl) {
+            this.wsUrl = wsUrl;
             this.server = server;
+            this.webSocket = okHttpClient.newWebSocket(new Request.Builder().url(wsUrl).build(), this);
+            existingWebsockets.put(server, this);
         }
 
+        public void send(String message) {
+            webSocket.send(message);
+        }
+
+
+        @SuppressWarnings("NullableProblems")
         @Override
-        public void onOpen(ServerHandshake handshakedata) {
-            existingWebsockets.put(server, this);
-            thisWebsocketDidConnect = true;
-            Logger.d("Websocket connected to " + uri.toString());
+        public void onOpen(WebSocket webSocket, Response response) {
+            websocketConnected = true;
+            Logger.d("Websocket connected to " + wsUrl);
             if (notificationPostingDelegate != null) {
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 1);
@@ -604,8 +632,9 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             sendPing();
         }
 
+        @SuppressWarnings("NullableProblems")
         @Override
-        public void onMessage(String message) {
+        public void onMessage(WebSocket webSocket, String message) {
             // we received a message, so the connection is functioning properly, we can reset the connection failed count
             scheduler.clearFailedCount(server);
 
@@ -648,6 +677,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                             if (errObject instanceof Integer) {
                                 err = (int) errObject;
                             }
+                            //noinspection SwitchStatementWithTooFewBranches
                             switch ((byte) err) {
                                 case ServerMethod.INVALID_SESSION: {
                                     if (ownedIdentityServerSessionTokens.get(identity) != null) {
@@ -753,13 +783,54 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                         }
                         break;
                     }
+                    case "pong": {
+                        Object counterObj = receivedMessage.get("cnt");
+                        Object timestampObj = receivedMessage.get("timestamp");
+                        if (counterObj != null && timestampObj != null) {
+                            long counter = -1L;
+                            long timestamp = -1L;
+                            try {
+                                if (counterObj instanceof Integer) {
+                                    counter = (int) counterObj;
+                                } else {
+                                    counter = (long) counterObj;
+                                }
+                                if (timestampObj instanceof Integer) {
+                                    timestamp = (int) timestampObj;
+                                } else {
+                                    timestamp = (long) timestampObj;
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                // this is treated after
+                            }
+                            if (notificationPostingDelegate != null) {
+                                if (counter == lastPingCounter && timestamp != -1) {
+                                    lastPingCounter = -1;
+                                    long delay = System.currentTimeMillis() - timestamp;
+                                    HashMap<String, Object> userInfo = new HashMap<>();
+                                    userInfo.put(DownloadNotifications.NOTIFICATION_PING_RECEIVED_DELAY_KEY, delay);
+                                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PING_RECEIVED, userInfo);
+                                }
+                                HashMap<String, Object> userInfo = new HashMap<>();
+                                userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 2);
+                                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
+                            }
+                        }
+                        break;
+                    }
                 }
             }
         }
 
+        @SuppressWarnings("NullableProblems")
         @Override
-        public PingFrame onPreparePing(WebSocket conn) {
-            PingFrame pingFrame = new PingFrame();
+        public void onMessage(WebSocket webSocket, ByteString bytes) {
+            Logger.e("Received a binary message on websocket!");
+        }
+
+
+        public void sendPing() {
             long counter = pingCounter.incrementAndGet();
             long timestamp = System.currentTimeMillis();
             if (lastPingCounter != -1) {
@@ -769,76 +840,67 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             }
             lastPingCounter = counter;
             lastPingTimestamp = timestamp;
-            Encoded encoded = Encoded.of(new Encoded[] {
-                    Encoded.of(counter),
-                    Encoded.of(System.currentTimeMillis()),
-            });
-            pingFrame.setPayload(ByteBuffer.wrap(encoded.getBytes()));
-            return pingFrame;
-        }
 
-        @Override
-        public void onWebsocketPong(WebSocket conn, Framedata f) {
-            ByteBuffer buffer = f.getPayloadData();
-            byte[] payload = new byte[buffer.remaining()];
-            buffer.get(payload);
-            long counter = -1;
-            long timestamp = -1;
             try {
-                Encoded[] encodeds = new Encoded(payload).decodeList();
-                counter = encodeds[0].decodeLong();
-                timestamp = encodeds[1].decodeLong();
-            } catch (Exception ignored) {
-                // this is treated after
-            }
-            if (notificationPostingDelegate != null) {
-                if (counter == lastPingCounter && timestamp != -1) {
-                    lastPingCounter = -1;
-                    long delay = System.currentTimeMillis() - timestamp;
-                    HashMap<String, Object> userInfo = new HashMap<>();
-                    userInfo.put(DownloadNotifications.NOTIFICATION_PING_RECEIVED_DELAY_KEY, delay);
-                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PING_RECEIVED, userInfo);
-                }
-                HashMap<String, Object> userInfo = new HashMap<>();
-                userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 2);
-                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
+                Map<String, Object> messageMap = new HashMap<>();
+                messageMap.put("action", "ping");
+                messageMap.put("cnt", counter);
+                messageMap.put("timestamp", timestamp);
+
+                this.webSocket.send(jsonObjectMapper.writeValueAsString(messageMap));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
+
+        @SuppressWarnings("NullableProblems")
         @Override
-        public void onClose(int code, String reason, boolean remote) {
+        public void onClosed(WebSocket webSocket, int code, String reason) {
+            if (websocketConnected) {
+                if (remotelyInitiatedClosing) {
+                    Logger.d("Websocket remotely disconnected from " + wsUrl);
+                } else {
+                    Logger.d("Websocket locally disconnected from " + wsUrl);
+                }
+            }
+            close();
+            if (doConnect) {
+                scheduleNewWebsocketCreationQueueing(server);
+            }
+        }
+
+        @SuppressWarnings("NullableProblems")
+        @Override
+        public void onClosing(WebSocket webSocket, int code, String reason) {
+            remotelyInitiatedClosing = true;
+        }
+
+        @SuppressWarnings("NullableProblems")
+        @Override
+        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+            if (websocketConnected) {
+                Logger.w("Websocket exception");
+                t.printStackTrace();
+            }
+            close();
+            if (doConnect) {
+                scheduleNewWebsocketCreationQueueing(server);
+            }
+        }
+
+        void close() {
             if (notificationPostingDelegate != null) {
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 0);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
             }
+            websocketConnected = false;
             existingWebsockets.remove(server);
-            if (thisWebsocketDidConnect) {
-                if (remote) {
-                    Logger.d("Websocket remotely disconnected from " + uri.toString());
-                } else {
-                    Logger.d("Websocket locally disconnected from " + uri.toString());
-                }
-                if (doConnect) {
-                    scheduleNewWebsocketCreationQueueing(server);
-                }
+            if (webSocket.close(1000, null)) {
+                // if we initiated a graceful close, also schedule a cancel to make sure resources are properly released
+                scheduler.schedule(server, webSocket::cancel, "Websocket cancel()", 500);
             }
         }
-
-        @Override
-        public void onError(Exception ex) {
-            if (!thisWebsocketDidConnect) {
-                connectionException = ex;
-            } else {
-                Logger.w("Websocket exception");
-                ex.printStackTrace();
-            }
-        }
-
-
-        // since WeSocket 1.5.0 the native method uses sslParameters.setEndpointIdentificationAlgorithm which is not supported for Android API level < 24
-        //  --> we do the check manually
-        @Override
-        protected void onSetSSLParameters(SSLParameters sslParameters) { }
     }
 }

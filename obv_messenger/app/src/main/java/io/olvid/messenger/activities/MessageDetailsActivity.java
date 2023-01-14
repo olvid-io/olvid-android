@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -237,7 +237,7 @@ public class MessageDetailsActivity extends LockableActivity {
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         statusWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, metrics) + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 18, metrics);
-        messageCardView.setSizeChangeListener((w, h, oldw, oldh) -> recomputeMessageLayout());
+        messageCardView.setSizeChangeListener(this::recomputeMessageLayout);
 
 
         // metadata
@@ -903,6 +903,7 @@ public class MessageDetailsActivity extends LockableActivity {
     class MessageMetadataAdapter extends RecyclerView.Adapter<MessageMetadataAdapter.ViewHolder> implements Observer<List<MessageMetadata>> {
         private List<MessageMetadata> messageMetadatas;
         private final LayoutInflater inflater;
+        private boolean hasUploadedMetadata;
         private Long sentTimestamp;
         private boolean inbound;
 
@@ -919,6 +920,14 @@ public class MessageDetailsActivity extends LockableActivity {
 
         @Override
         public void onChanged(List<MessageMetadata> messageMetadatas) {
+            // check if a messageMetadata is of kind KIND_UPLOADED
+            hasUploadedMetadata = false;
+            for (MessageMetadata messageMetadata : messageMetadatas) {
+                if (messageMetadata.kind == MessageMetadata.KIND_UPLOADED) {
+                    hasUploadedMetadata = true;
+                    break;
+                }
+            }
             this.messageMetadatas = messageMetadatas;
             notifyDataSetChanged();
         }
@@ -935,7 +944,7 @@ public class MessageDetailsActivity extends LockableActivity {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             if (messageMetadatas != null) {
                 MessageMetadata metadata;
-                if (sentTimestamp == null) {
+                if (sentTimestamp == null || (hasUploadedMetadata && inbound)) {
                     metadata = messageMetadatas.get(position);
                 } else {
                     if (position == 0) {
@@ -953,6 +962,10 @@ public class MessageDetailsActivity extends LockableActivity {
 
                 holder.metadataTimestampDateTextView.setText(StringUtils.getPreciseAbsoluteDateString(MessageDetailsActivity.this, metadata.timestamp));
                 switch (metadata.kind) {
+                    case MessageMetadata.KIND_UPLOADED: {
+                        holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_uploaded);
+                        break;
+                    }
                     case MessageMetadata.KIND_DELIVERED: {
                         holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_delivered);
                         break;
@@ -1001,14 +1014,12 @@ public class MessageDetailsActivity extends LockableActivity {
 
         @Override
         public int getItemCount() {
-            if (messageMetadatas != null) {
-                if (sentTimestamp != null) {
-                    return messageMetadatas.size() + 1;
-                } else {
-                    return messageMetadatas.size();
-                }
+            int count = (messageMetadatas == null) ? 0 : messageMetadatas.size();
+            if (sentTimestamp == null || (hasUploadedMetadata && inbound)) {
+                    return count;
+            } else {
+                return count + 1;
             }
-            return (sentTimestamp == null) ? 0 : 1;
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -149,6 +149,7 @@ public class StorageExplorer extends LockableActivity {
             final Uri uri = data.getData();
             if (StringUtils.validateUri(uri)) {
                 App.runThread(() -> {
+                    //noinspection ConstantConditions
                     try (OutputStream os = getContentResolver().openOutputStream(uri)) {
                         if (os == null) {
                             throw new Exception("Unable to write to provided Uri");

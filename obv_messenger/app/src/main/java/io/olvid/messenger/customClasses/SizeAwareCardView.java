@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -47,7 +47,7 @@ public class SizeAwareCardView extends CardView {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (sizeChangeListener != null) {
-            sizeChangeListener.onSizeChange(w, h, oldw, oldh);
+            sizeChangeListener.onSizeChange();
         }
     }
 
@@ -60,6 +60,6 @@ public class SizeAwareCardView extends CardView {
     }
 
     public interface SizeChangeListener {
-        void onSizeChange(int w, int h, int oldw, int oldh);
+        void onSizeChange();
     }
 }

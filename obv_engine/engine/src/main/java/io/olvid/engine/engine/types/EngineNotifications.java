@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -137,9 +137,6 @@ public abstract class EngineNotifications {
     public static final String API_KEY_ACCEPTED_API_KEY_STATUS_KEY = "api_key_status"; // EngineApi.ApiKeyStatus
     public static final String API_KEY_ACCEPTED_PERMISSIONS_KEY = "permissions"; // List<EngineApi.Permission>
     public static final String API_KEY_ACCEPTED_API_KEY_EXPIRATION_TIMESTAMP_KEY = "api_key_expiration_timestamp"; // long
-
-//    public static final String API_KEY_REJECTED = "engine_notification_api_key_rejected";
-//    public static final String API_KEY_REJECTED_OWNED_IDENTITY_KEY = "owned_identity"; // byte[]
 
     public static final String OWNED_IDENTITY_LIST_UPDATED = "engine_notification_owned_identity_list_updated";
 

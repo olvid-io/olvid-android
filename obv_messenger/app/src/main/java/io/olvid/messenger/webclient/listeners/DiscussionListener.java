@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -42,6 +42,7 @@ import io.olvid.messenger.webclient.protobuf.RequestDiscussionsOuterClass.Reques
 import io.olvid.messenger.webclient.protobuf.datatypes.DiscussionOuterClass.Discussion;
 import io.olvid.messenger.webclient.protobuf.datatypes.MessageOuterClass.Message;
 import io.olvid.messenger.webclient.protobuf.notifications.NotifDeleteDiscussionOuterClass;
+import io.olvid.messenger.webclient.protobuf.notifications.NotifDiscussionUpdatedOuterClass;
 import io.olvid.messenger.webclient.protobuf.notifications.NotifNewDiscussionOuterClass.NotifNewDiscussion;
 
 public class DiscussionListener {
@@ -111,7 +112,10 @@ public class DiscussionListener {
             while (index < elements.size()) {
                 requestDiscussionsResponseBuilder.addDiscussions(fillDiscussionFromDiscussionAndLastMessage(elements.get(index), this.manager.getService().getWebClientContext()));
                 index++;
-                if (requestDiscussionsResponseBuilder.build().getSerializedSize() > Constants.MAX_FRAME_SIZE) {
+                if (requestDiscussionsResponseBuilder.build().getSerializedSize() > Constants.MAX_PAYLOAD_SIZE) {
+                    requestDiscussionsResponseBuilder.removeDiscussions(requestDiscussionsResponseBuilder.getDiscussionsCount() - 1);
+                    index--;
+                    Logger.d("WebClient: request_discussion_response payload too large. Limiting to " + requestDiscussionsResponseBuilder.getDiscussionsCount() + "/" + elements.size() + " discussions");
                     break ;
                 }
             }
@@ -130,14 +134,24 @@ public class DiscussionListener {
 
             // send other discussions in notif messages
             NotifNewDiscussion.Builder notifBuilder = NotifNewDiscussion.newBuilder();
-            for (DiscussionDao.DiscussionAndLastMessage element:elements.subList(index, elements.size())) {
-                notifBuilder.addDiscussions(fillDiscussionFromDiscussionAndLastMessage(element, this.manager.getService().getWebClientContext()));
-                if (notifBuilder.build().getSerializedSize() > Constants.MAX_FRAME_SIZE) {
-                    colissimo = Colissimo.newBuilder()
-                            .setType(ColissimoType.NOTIF_NEW_DISCUSSION)
-                            .setNotifNewDiscussion(notifBuilder)
-                            .build();
-                    this.manager.sendColissimo(colissimo);
+            while (index < elements.size()) {
+                notifBuilder.addDiscussions(fillDiscussionFromDiscussionAndLastMessage(elements.get(index), this.manager.getService().getWebClientContext()));
+                index++;
+                if (notifBuilder.build().getSerializedSize() > Constants.MAX_PAYLOAD_SIZE) {
+                    notifBuilder.removeDiscussions(notifBuilder.getDiscussionsCount() - 1);
+                    index--;
+                    Logger.d("WebClient: notif_new_discussion payload too large. Limiting to " + notifBuilder.getDiscussionsCount() + "/" + elements.size() + " discussions");
+
+                    if (notifBuilder.getDiscussionsCount() == 0) {
+                        Logger.w("WebClient: a single DiscussionAndLastMessage exceeds the MAX_PAYLOAD_SIZE. Skipping the whole discussion");
+                        index++;
+                    } else {
+                        colissimo = Colissimo.newBuilder()
+                                .setType(ColissimoType.NOTIF_NEW_DISCUSSION)
+                                .setNotifNewDiscussion(notifBuilder)
+                                .build();
+                        this.manager.sendColissimo(colissimo);
+                    }
                     notifBuilder = NotifNewDiscussion.newBuilder();
                 }
             }
@@ -225,7 +239,15 @@ public class DiscussionListener {
 
         @Override
         void modifiedElementHandler(DiscussionDao.DiscussionAndLastMessage element) {
-            newElementHandler(element);
+            Discussion.Builder discussionBuilder;
+            NotifDiscussionUpdatedOuterClass.NotifDiscussionUpdated.Builder notifBuilder = NotifDiscussionUpdatedOuterClass.NotifDiscussionUpdated.newBuilder();
+            Colissimo.Builder colissimoBuilder = Colissimo.newBuilder();
+
+            discussionBuilder = fillDiscussionFromDiscussionAndLastMessage(element, this.manager.getService().getWebClientContext());
+            notifBuilder.setDiscussion(discussionBuilder);
+            colissimoBuilder.setType(ColissimoType.NOTIF_DISCUSSION_UPDATED);
+            colissimoBuilder.setNotifDiscussionUpdated(notifBuilder);
+            this.manager.sendColissimo(colissimoBuilder.build());
         }
 
         private Discussion.Builder fillDiscussionFromDiscussionAndLastMessage(DiscussionDao.DiscussionAndLastMessage discussionAndLastMessage, Context context) {
@@ -298,7 +320,15 @@ public class DiscussionListener {
                 // add last message in discussion
                 discussionBuilder.setLastMessage(lastMessageBuilder);
             }
-            return (discussionBuilder);
+            // verify we do not exceed the maximum payload
+            if (discussionBuilder.build().getSerializedSize() > Constants.MAX_PAYLOAD_SIZE) {
+                // we assume that exceeding the payload is usually due to a long message contentBody
+                Logger.d("WebClient: a single DiscussionAndLastMessage exceeds the MAX_PAYLOAD_SIZE. Neutering the lastMessage from this discussion");
+                lastMessageBuilder.setContentBody(context.getString(R.string.text_message_too_large_for_webclient));
+                discussionBuilder.setLastMessage(lastMessageBuilder);
+            }
+
+            return discussionBuilder;
         }
     }
 }

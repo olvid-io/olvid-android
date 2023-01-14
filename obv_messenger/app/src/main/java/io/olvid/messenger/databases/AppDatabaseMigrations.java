@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -41,6 +41,42 @@ import io.olvid.messenger.customClasses.StringUtils;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[] {
+            new Migration(57, 58) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 57 TO 58");
+
+                    database.execSQL("CREATE TABLE `reactions_table_new` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `message_id` INTEGER NOT NULL, `bytes_identity` BLOB, `emoji` TEXT, `timestamp` INTEGER NOT NULL, FOREIGN KEY(`message_id`) REFERENCES `message_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+                    database.execSQL("INSERT INTO `reactions_table_new` " +
+                            " SELECT `id`, `message_id`, `bytes_identity`, `emoji`, `timestamp` " +
+                            " FROM `reactions_table`");
+
+                    database.execSQL("DROP INDEX `index_reactions_table_message_id`");
+                    database.execSQL("DROP INDEX `index_reactions_table_message_id_bytes_identity`");
+                    database.execSQL("DROP TABLE `reactions_table`");
+
+                    database.execSQL("ALTER TABLE `reactions_table_new` RENAME TO `reactions_table`");
+                    database.execSQL("CREATE INDEX `index_reactions_table_message_id` ON `reactions_table` (`message_id`)");
+                    database.execSQL("CREATE UNIQUE INDEX `index_reactions_table_message_id_bytes_identity` ON `reactions_table` (`message_id`, `bytes_identity`)");
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS `reaction_request_table_new` (`discussion_id` INTEGER NOT NULL, `sender_identifier` BLOB NOT NULL, `sender_thread_identifier` TEXT NOT NULL, `sender_sequence_number` INTEGER NOT NULL, `reacter` BLOB NOT NULL, `server_timestamp` INTEGER NOT NULL, `reaction` TEXT, PRIMARY KEY(`discussion_id`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`, `reacter`), FOREIGN KEY(`discussion_id`) REFERENCES `discussion_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+                    database.execSQL("INSERT INTO `reaction_request_table_new` " +
+                                    " SELECT `discussion_id`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`, `reacter`, `server_timestamp`, `reaction` " +
+                                    " FROM `reaction_request_table`");
+
+                    database.execSQL("DROP INDEX `index_reaction_request_table_discussion_id`");
+                    database.execSQL("DROP INDEX `index_reaction_request_table_server_timestamp`");
+                    database.execSQL("DROP INDEX `index_reaction_request_table_discussion_id_sender_identifier_sender_thread_identifier_sender_sequence_number`");
+                    database.execSQL("DROP TABLE `reaction_request_table`");
+
+                    database.execSQL("ALTER TABLE `reaction_request_table_new` RENAME TO `reaction_request_table`");
+                    database.execSQL("CREATE INDEX `index_reaction_request_table_discussion_id` ON `reaction_request_table` (`discussion_id`)");
+                    database.execSQL("CREATE INDEX `index_reaction_request_table_server_timestamp` ON `reaction_request_table` (`server_timestamp`)");
+                    database.execSQL("CREATE INDEX `index_reaction_request_table_discussion_id_sender_identifier_sender_thread_identifier_sender_sequence_number` ON `reaction_request_table` (`discussion_id`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`)");
+                }
+            },
+
             new Migration(56, 57) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

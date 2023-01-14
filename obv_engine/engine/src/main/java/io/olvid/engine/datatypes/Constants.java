@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -23,7 +23,7 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 32;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 33;
     public static final int SERVER_API_VERSION = 13;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
@@ -114,6 +114,7 @@ public abstract class Constants {
         GROUP_JOIN_NONCE,
         GROUP_UPDATE_ON_SERVER,
         GROUP_KICK,
+        OWNED_IDENTITY_DELETION,
     }
 
     public static final byte[] SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX = "authentChallenge".getBytes(StandardCharsets.UTF_8);
@@ -128,7 +129,7 @@ public abstract class Constants {
     public static final byte[] GROUP_JOIN_NONCE_SIGNATURE_CHALLENGE_PREFIX = "joinGroup".getBytes(StandardCharsets.UTF_8);
     public static final byte[] GROUP_UPDATE_ON_SERVER_SIGNATURE_CHALLENGE_PREFIX = "updateGroup".getBytes(StandardCharsets.UTF_8);
     public static final byte[] GROUP_KICK_SIGNATURE_CHALLENGE_PREFIX = "groupKick".getBytes(StandardCharsets.UTF_8);
-
+    public static final byte[] OWNED_IDENTITY_DELETION_SIGNATURE_CHALLENGE_PREFIX = "ownedIdentityDeletion".getBytes(StandardCharsets.UTF_8);
 
     public static byte[] getSignatureChallengePrefix(SignatureContext signatureContext) {
         switch (signatureContext) {
@@ -156,6 +157,8 @@ public abstract class Constants {
                 return GROUP_UPDATE_ON_SERVER_SIGNATURE_CHALLENGE_PREFIX;
             case GROUP_KICK:
                 return GROUP_KICK_SIGNATURE_CHALLENGE_PREFIX;
+            case OWNED_IDENTITY_DELETION:
+                return OWNED_IDENTITY_DELETION_SIGNATURE_CHALLENGE_PREFIX;
             default:
                 return null;
         }

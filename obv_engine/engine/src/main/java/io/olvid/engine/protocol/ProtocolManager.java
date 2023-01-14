@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -63,6 +63,7 @@ import io.olvid.engine.protocol.coordinators.ProtocolStepCoordinator;
 import io.olvid.engine.protocol.databases.ChannelCreationPingSignatureReceived;
 import io.olvid.engine.protocol.databases.ChannelCreationProtocolInstance;
 import io.olvid.engine.protocol.databases.GroupV2SignatureReceived;
+import io.olvid.engine.protocol.databases.IdentityDeletionSignatureReceived;
 import io.olvid.engine.protocol.databases.LinkBetweenProtocolInstances;
 import io.olvid.engine.protocol.databases.MutualScanSignatureReceived;
 import io.olvid.engine.protocol.databases.ProtocolInstance;
@@ -164,6 +165,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             TrustEstablishmentCommitmentReceived.createTable(protocolManagerSession.session);
             MutualScanSignatureReceived.createTable(protocolManagerSession.session);
             GroupV2SignatureReceived.createTable(protocolManagerSession.session);
+            IdentityDeletionSignatureReceived.createTable(protocolManagerSession.session);
             protocolManagerSession.session.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -181,6 +183,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         TrustEstablishmentCommitmentReceived.upgradeTable(session, oldVersion, newVersion);
         MutualScanSignatureReceived.upgradeTable(session, oldVersion, newVersion);
         GroupV2SignatureReceived.upgradeTable(session, oldVersion, newVersion);
+        IdentityDeletionSignatureReceived.upgradeTable(session, oldVersion, newVersion);
     }
 
     public void setDelegate(ChannelDelegate channelDelegate) {

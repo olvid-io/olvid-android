@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -125,9 +125,7 @@ public abstract class AbstractSendLocationFragment extends DialogFragment {
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
             if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                 builder.setMessage(R.string.dialog_message_background_location_access_api_q)
-                        .setPositiveButton(R.string.button_label_grant_access, (DialogInterface dialogInterface, int i) -> {
-                            grantBackgroundLocationPermissionActivityResultLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-                        });
+                        .setPositiveButton(R.string.button_label_grant_access, (DialogInterface dialogInterface, int i) -> grantBackgroundLocationPermissionActivityResultLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION));
             } else {
                 Intent openApplicationSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                 Uri uri = Uri.fromParts("package", activity.getPackageName(), null);

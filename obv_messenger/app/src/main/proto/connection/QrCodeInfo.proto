@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -27,4 +27,6 @@ message QrCodeInfo {
 		string identifier = 1;
 		string serverUrl = 2;
 		bytes publicKey = 3;
+		string awsSessionCookieName = 4;
+		bytes awsSessionCookie = 5;
 }

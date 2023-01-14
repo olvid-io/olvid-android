@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.main;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,8 +27,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -56,8 +59,6 @@ import androidx.lifecycle.Transformations;
 import androidx.preference.PreferenceManager;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -76,12 +77,14 @@ import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.CallLogActivity;
 import io.olvid.messenger.activities.ContactDetailsActivity;
 import io.olvid.messenger.activities.ObvLinkActivity;
 import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.activities.storage_manager.StorageManagerActivity;
+import io.olvid.messenger.billing.BillingUtils;
 import io.olvid.messenger.customClasses.ConfigurationPojo;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockableActivity;
@@ -94,6 +97,7 @@ import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.fragments.dialog.DiscussionSearchDialogFragment;
 import io.olvid.messenger.fragments.dialog.OtherKnownUsersDialogFragment;
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment;
+import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.onboarding.OnboardingActivity;
 import io.olvid.messenger.openid.KeycloakManager;
@@ -164,6 +168,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     });
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -204,7 +209,32 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
 
         ownInitialView = findViewById(R.id.owned_identity_initial_view);
         if (ownInitialView != null) {
-            ownInitialView.setOnClickListener(v -> new OwnIdentitySelectorPopupWindow(this, ownInitialView).open());
+            GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+                boolean scrolled = false;
+
+                @Override
+                public boolean onDown(@NonNull MotionEvent e) {
+                    scrolled = false;
+                    return true;
+                }
+
+                @Override
+                public boolean onSingleTapUp(@NonNull MotionEvent e) {
+                    new OwnIdentitySelectorPopupWindow(MainActivity.this, ownInitialView).open();
+                    return true;
+                }
+
+                @Override
+                public boolean onScroll(@NonNull MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
+                    if (scrolled) {
+                        return false;
+                    }
+                    scrolled = true;
+                    AppSingleton.getInstance().selectNextIdentity(distanceX > 0);
+                    return true;
+                }
+            });
+            ownInitialView.setOnTouchListener((View v, MotionEvent event) -> gestureDetector.onTouchEvent(event));
         }
 
         pingConnectivityDot = findViewById(R.id.ping_indicator_dot);
@@ -276,8 +306,8 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                 ownedIdentityMutedImageView.setVisibility(View.GONE);
             }
 
-            if (!ownedIdentity.keycloakManaged) {
-                Utils.verifyPurchases(ownedIdentity.bytesOwnedIdentity, getBaseContext());
+            if (BuildConfig.USE_BILLING_LIB && !ownedIdentity.keycloakManaged) {
+                BillingUtils.verifyPurchases(ownedIdentity.bytesOwnedIdentity, getBaseContext());
             }
         });
 
@@ -384,7 +414,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
                     // no automatic backups, and no backups since more that a week
                     snackbar = Snackbar.make(root, R.string.snackbar_message_remember_to_backup, BaseTransientBottomBar.LENGTH_INDEFINITE);
                     dialogTitleResourceId = R.string.snackbar_message_remember_to_backup;
-                    if (ConnectionResult.SUCCESS == GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)) {
+                    if (BuildConfig.USE_GOOGLE_LIBS && GoogleServicesUtils.googleServicesAvailable(this)) {
                         dialogMessageResourceId = R.string.dialog_message_remember_to_backup_explanation;
                     } else {
                         dialogMessageResourceId = R.string.dialog_message_remember_to_backup_explanation_no_google;

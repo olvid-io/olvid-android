@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -158,17 +158,6 @@ public class NotificationListenerDownloads implements NotificationListener {
                 engine.postEngineNotification(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS, engineInfo);
                 break;
             }
-//            case DownloadNotifications.NOTIFICATION_API_KEY_REJECTED_BY_SERVER: {
-//                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_API_KEY_REJECTED_BY_SERVER_IDENTITY_KEY);
-//                if (ownedIdentity == null) {
-//                    break;
-//                }
-//
-//                HashMap<String, Object> engineInfo = new HashMap<>();
-//                engineInfo.put(EngineNotifications.API_KEY_REJECTED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-//                engine.postEngineNotification(EngineNotifications.API_KEY_REJECTED, engineInfo);
-//                break;
-//            }
             case DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED: {
                 Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_IDENTITY_KEY);
                 ServerSession.ApiKeyStatus apiKeyStatus = (ServerSession.ApiKeyStatus) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_API_KEY_STATUS_KEY);

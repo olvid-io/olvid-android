@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -75,13 +75,10 @@ public interface IdentityDelegate {
     boolean isOwnedIdentityKeycloakManaged(Session session, Identity ownedIdentity) throws SQLException;
     List<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(Session session, String pushTopic) throws SQLException;
     ObvKeycloakState getOwnedIdentityKeycloakState(Session session, Identity ownedIdentity) throws SQLException;
-//    JsonWebKeySet getOwnedIdentityKeycloakJwks(Session session, Identity ownedIdentity) throws SQLException;
     JsonWebKey getOwnedIdentityKeycloakSignatureKey(Session session, Identity ownedIdentity) throws SQLException;
     void setOwnedIdentityKeycloakSignatureKey(Session session, Identity ownedIdentity, JsonWebKey signatureKey) throws SQLException;
     void setKeycloakLatestRevocationListTimestamp(Session session, Identity ownedIdentity, long latestRevocationListTimestamp) throws SQLException;
     void unCertifyExpiredSignedContactDetails(Session session, Identity ownedIdentity, long latestRevocationListTimestamp);
-//    JsonWebKeySet getTrustedKeycloakJwks(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException;
-//    JsonWebKey getTrustedKeycloakSignatureKey(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException;
     List<String> getKeycloakPushTopics(Session session, Identity ownedIdentity) throws SQLException;
     void verifyAndAddRevocationList(Session session, Identity ownedIdentity, List<String> signedRevocations) throws Exception;
     JsonKeycloakUserDetails verifyKeycloakSignature(Session session, Identity ownedIdentity, String signature);
@@ -158,7 +155,7 @@ public interface IdentityDelegate {
     byte[] signGroupInvitationNonce(Session session, Constants.SignatureContext signatureContext, GroupV2.Identifier groupIdentifier, byte[] nonce, Identity contactIdentity, Identity ownedIdentity, PRNGService prng) throws Exception;
 
     void createContactGroup(Session session, Identity ownedIdentity, GroupInformation groupInformation, Identity[] groupMembers, IdentityWithSerializedDetails[] pendingGroupMembers) throws Exception;
-    void leaveGroup(Session session, byte[] groupUid, Identity ownedIdentity) throws Exception;
+    void leaveGroup(Session session, byte[] groupOwnerAndUid, Identity ownedIdentity) throws Exception;
     void addPendingMembersToGroup(Session session, byte[] groupUid, Identity ownedIdentity, Identity[] contactIdentities, GroupMembersChangedCallback groupMembersChangedCallback) throws Exception;
     void removeMembersAndPendingFromGroup(Session session, byte[] groupOwnerAndUid, Identity ownedIdentity, Identity[] contactIdentities, GroupMembersChangedCallback groupMembersChangedCallback) throws Exception;
     void addGroupMemberFromPendingMember(Session session, byte[] groupOwnerAndUid, Identity ownedIdentity, Identity contactIdentity, GroupMembersChangedCallback groupMembersChangedCallback) throws Exception;
@@ -167,6 +164,7 @@ public interface IdentityDelegate {
     void updateGroupMembersAndDetails(Session session, Identity ownedIdentity, GroupInformation groupInformation, HashSet<IdentityWithSerializedDetails> groupMembers, HashSet<IdentityWithSerializedDetails> pendingMembers, long membersVersion) throws Exception;
     void deleteGroup(Session session, byte[] groupOwnerAndUid, Identity ownedIdentity) throws Exception;
     void resetGroupMembersAndPublishedDetailsVersions(Session session, Identity ownedIdentity, GroupInformation groupInformation) throws Exception;
+    void forcefullyRemoveMemberOrPendingFromJoinedGroup(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, Identity contactIdentity) throws SQLException;
     GroupWithDetails[] getGroupsForOwnedIdentity(Session session, Identity ownedIdentity) throws Exception;
     Group getGroup(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws Exception;
     GroupWithDetails getGroupWithDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws Exception;
@@ -181,6 +179,7 @@ public interface IdentityDelegate {
     int publishLatestGroupDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
     void discardLatestGroupDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
     byte[][] getGroupOwnerAndUidOfGroupsWhereContactIsPending(Session session, Identity contactIdentity, Identity ownedIdentity);
+    byte[][] getGroupOwnerAndUidsOfGroupsContainingContact(Session session, Identity contactIdentity, Identity ownedIdentity) throws SQLException;
     void refreshMembersOfGroupsOwnedByGroupOwner(UID currentDeviceUid, Identity remoteIdentity);
     void pushMembersOfOwnedGroupsToContact(UID currentDeviceUid, Identity remoteIdentity);
 
@@ -211,9 +210,11 @@ public interface IdentityDelegate {
     void setUpdatedGroupV2PhotoUrl(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String absolutePhotoUrl) throws Exception;
     GroupV2.AdministratorsChain getGroupV2AdministratorsChain(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
     boolean getGroupV2AdminStatus(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
-    List<ObvGroupV2> getObvGroupsV2ForOwnedIdentity(Identity ownedIdentity) throws Exception;
+    List<ObvGroupV2> getObvGroupsV2ForOwnedIdentity(Session session, Identity ownedIdentity) throws Exception;
     GroupV2.IdentifierVersionAndKeys[] getGroupsV2IdentifierVersionAndKeysForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
+    GroupV2.IdentifierAndAdminStatus[] getGroupsV2IdentifierAndMyAdminStatusForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
     void initiateGroupV2BatchKeysResend(UID currentDeviceUid, Identity contactIdentity, UID contactDeviceUid);
+    void forcefullyRemoveMemberOrPendingFromNonAdminGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity) throws SQLException;
     // endregion
 
 
@@ -226,5 +227,4 @@ public interface IdentityDelegate {
     UserData getUserData(Session session, Identity ownedIdentity, UID label) throws Exception;
     void deleteUserData(Session session, Identity ownedIdentity, UID label) throws Exception;
     void updateUserDataNextRefreshTimestamp(Session session, Identity ownedIdentity, UID label) throws Exception;
-
 }

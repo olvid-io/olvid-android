@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -43,9 +43,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -63,6 +60,7 @@ import io.olvid.messenger.customClasses.NoClickSwitchPreference;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.fragments.dialog.CloudProviderSignInDialogFragment;
+import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.services.BackupCloudProviderService;
 
 public class BackupPreferenceFragment extends PreferenceFragmentCompat implements EngineNotificationListener {
@@ -308,8 +306,7 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
                             try {
                                 SettingsActivity.setAutomaticBackupConfiguration(null);
                             } catch (Exception ignored) {}
-                            // sign out any google drive
-                            GoogleSignIn.getClient(activity, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut();
+                            GoogleServicesUtils.requestGoogleSignOut(activity);
                             deactivateAutomaticBackups();
                         })
                         .setPositiveButton(R.string.button_label_switch_account, (DialogInterface dialog, int which) -> openSignInDialog());
@@ -376,6 +373,7 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
                 final byte[] encryptedContent = viewModel.getExportBackupContent();
                 if (StringUtils.validateUri(uri)) {
                     App.runThread(() -> {
+                        //noinspection ConstantConditions
                         try (OutputStream os = activity.getContentResolver().openOutputStream(uri)) {
                             if (os == null) {
                                 throw new Exception("Unable to write to provided Uri");

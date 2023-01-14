@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -54,12 +54,11 @@ import androidx.core.location.LocationManagerCompat;
 import androidx.core.location.LocationRequestCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import com.google.android.gms.common.util.concurrent.HandlerExecutor;
-
 import java.util.concurrent.Executor;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.HandlerExecutor;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.tasks.PostLocationMessageInDiscussionTask;
 

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -27,15 +27,15 @@ public class Constants {
     public static final int ATTACHMENT_DONE_TIMEOUT_MS = 15_000;
     public static final long PROTOCOL_TIMEOUT = 10_000;
     public static final long CONNECTION_TIMEOUT_MILLIS = 5_000;
+    public static final long WEBSOCKET_PING_INTERVAL = 10_000L;
     public static final long RECONNECTION_TIMEOUT_MILLIS = 30_000;
     public static final long PING_TIMER_DELAY = 600_000; //10 minutes
     public static final long PING_TIMER_PERIOD = 600_000; //10 minutes
     public static final long DECLARE_INACTIVE_TIMEOUT = 600_000; //10 minutes of inactivity
 
-    public static final int CHUNK_SIZE = 96_000;
     public static final int ATTACHMENT_THUMBNAIL_SIZE = 128;
-    public static final int MAX_FRAME_SIZE = 32_768;
-    public static final int MAX_FRAME_COUNT = 4;
+    public static final int MAX_PAYLOAD_SIZE = 24_000; // max AWS message size is 32kB, but we need to account for the colissimo and encryption overheads, as well as json base64 encoding and overhead
+    public static final long MAX_PENDING_BYTES_DURING_ATTACHMENT_UPLOAD = 5L * MAX_PAYLOAD_SIZE;
 
-    public static final String[] SUPPORTED_LANGUAGES = new String[]{"en","fr"};
+    public static final String[] SUPPORTED_LANGUAGES = new String[]{"en", "fr"};
 }

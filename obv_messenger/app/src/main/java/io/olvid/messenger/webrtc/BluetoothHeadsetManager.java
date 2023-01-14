@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -95,7 +95,9 @@ class BluetoothHeadsetManager {
             // do nothing
         }
         if (bluetoothHeadset != null) {
-            bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset);
+            BluetoothHeadset bluetoothHeadsetRef = bluetoothHeadset;
+            bluetoothHeadset = null;
+            bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadsetRef);
         }
     }
 
@@ -150,8 +152,9 @@ class BluetoothHeadsetManager {
         public void onServiceDisconnected(int profile) {
             if (profile == BluetoothProfile.HEADSET) {
                 if (bluetoothHeadset != null) {
-                    bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset);
+                    BluetoothHeadset bluetoothHeadsetRef = bluetoothHeadset;
                     bluetoothHeadset = null;
+                    bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadsetRef);
                 }
                 state = State.HEADSET_UNAVAILABLE;
             }

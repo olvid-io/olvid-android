@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -331,13 +331,6 @@ public class BackupKey implements ObvDatabase {
         }
         return Backup.get(backupManagerSession, uid, uploadedBackupVersion);
     }
-
-//    public Backup getLatestBackup() {
-//        if (latestBackupVersion == null) {
-//            return null;
-//        }
-//        return Backup.get(backupManagerSession, uid, latestBackupVersion);
-//    }
 
     public Backup getExportedBackup() {
         if (exportedBackupVersion == null) {

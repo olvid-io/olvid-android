@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -92,18 +92,6 @@ public class OutboxMessage implements ObvDatabase {
     public EncryptedBytes getEncryptedExtendedContent() {
         return encryptedExtendedContent;
     }
-
-//    public UID getProofOfWorkUid() {
-//        return proofOfWorkUid;
-//    }
-//
-//    public Encoded getProofOfWorkEncodedChallenge() {
-//        return proofOfWorkEncodedChallenge;
-//    }
-//
-//    public Encoded getProofOfWorkEncodedSolution() {
-//        return proofOfWorkEncodedSolution;
-//    }
 
     public MessageHeader[] getHeaders() {
         return MessageHeader.getAll(sendManagerSession, ownedIdentity, uid);

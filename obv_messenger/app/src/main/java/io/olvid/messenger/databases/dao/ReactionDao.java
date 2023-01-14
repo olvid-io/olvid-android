@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -47,9 +47,10 @@ public interface ReactionDao {
 
     @Query("SELECT * FROM " + Reaction.TABLE_NAME +
             " WHERE " + Reaction.MESSAGE_ID + " = :messageId " +
+            " AND " + Reaction.EMOJI + " NOT NULL " +
             " ORDER BY CASE WHEN " + Reaction.BYTES_IDENTITY + " IS NULL THEN 0 ELSE 1 END ASC, " +
             Reaction.TIMESTAMP + " DESC")
-    LiveData<List<Reaction>> getAllForMessageSortedByTimestampLiveData(long messageId);
+    LiveData<List<Reaction>> getAllNonNullForMessageSortedByTimestampLiveData(long messageId);
 
     @Query("SELECT * FROM " + Reaction.TABLE_NAME +
             " WHERE " + Reaction.MESSAGE_ID + " = :messageId " +

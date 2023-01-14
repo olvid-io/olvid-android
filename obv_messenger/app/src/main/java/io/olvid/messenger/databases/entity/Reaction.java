@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -59,14 +59,14 @@ public class Reaction {
     public byte[] bytesIdentity;
 
     @ColumnInfo(name = EMOJI)
-    @NonNull
+    @Nullable
     public String emoji;
 
     @ColumnInfo(name = TIMESTAMP)
     public long timestamp;
 
     // default constructor required by Room
-    public Reaction(long messageId, @Nullable byte[] bytesIdentity, @NonNull String emoji, long timestamp) {
+    public Reaction(long messageId, @Nullable byte[] bytesIdentity, @Nullable String emoji, long timestamp) {
         this.messageId = messageId;
         this.bytesIdentity = bytesIdentity;
         this.emoji = emoji;

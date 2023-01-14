@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -457,6 +457,10 @@ public class KeycloakTasks {
         HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
         if (connection instanceof HttpsURLConnection && AppSingleton.getSslSocketFactory() != null) {
             ((HttpsURLConnection) connection).setSSLSocketFactory(AppSingleton.getSslSocketFactory());
+        }
+        String userAgentProperty = System.getProperty("http.agent");
+        if (userAgentProperty != null) {
+            connection.setRequestProperty("User-Agent", userAgentProperty);
         }
         try {
             connection.setConnectTimeout(10_000);

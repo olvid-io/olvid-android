@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -112,10 +112,6 @@ class RequestChallengeOperation extends Operation {
                         serverSession.setChallengeAndNonce(serverMethod.getChallenge(), nonce);
                         finished = true;
                         return;
-//                    case ServerMethod.UNKNOWN_API_KEY:
-//                    case ServerMethod.API_KEY_LICENSES_EXHAUSTED:
-//                        cancel(CreateServerSessionCompositeOperation.RFC_API_KEY_REJECTED);
-//                        return;
                     default:
                         cancel(CreateServerSessionCompositeOperation.RFC_NETWORK_ERROR);
                         return;

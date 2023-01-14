@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -50,7 +50,6 @@ import io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol;
 import io.olvid.engine.protocol.protocols.ContactManagementProtocol;
 import io.olvid.engine.protocol.protocols.OneToOneContactInvitationProtocol;
 import io.olvid.engine.protocol.protocols.OwnedIdentityDeletionWithContactNotificationProtocol;
-import io.olvid.engine.protocol.protocols.TrustEstablishmentProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithMutualScanProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithSasProtocol;
 
@@ -59,7 +58,7 @@ public abstract class ConcreteProtocol {
 
 
     public static final int DEVICE_DISCOVERY_PROTOCOL_ID = 0;
-    public static final int TRUST_ESTABLISHMENT_PROTOCOL_ID = 1; // legacy protocol (superseded by 11), may be removed in the future
+    public static final int TRUST_ESTABLISHMENT_PROTOCOL_ID = 1; // no longer used (superseded by 11)
     public static final int CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID = 2;
     public static final int DEVICE_DISCOVERY_CHILD_PROTOCOL_ID = 3;
     public static final int CONTACT_MUTUAL_INTRODUCTION_PROTOCOL_ID = 4;
@@ -78,10 +77,10 @@ public abstract class ConcreteProtocol {
     public static final int ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID = 17;
     public static final int GROUPS_V2_PROTOCOL_ID = 18;
     public static final int DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID = 19;
+    public static final int OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID = 20;
 
     // internal protocols, Android only
     public static final int KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID = 1000;
-    public static final int OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID = 1001;
 
 
     protected final ProtocolManagerSession protocolManagerSession;
@@ -164,8 +163,6 @@ public abstract class ConcreteProtocol {
         switch (protocolId) {
             case DEVICE_DISCOVERY_PROTOCOL_ID:
                 return new DeviceDiscoveryProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
-            case TRUST_ESTABLISHMENT_PROTOCOL_ID:
-                return new TrustEstablishmentProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID:
                 return new ChannelCreationWithContactDeviceProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case DEVICE_DISCOVERY_CHILD_PROTOCOL_ID:

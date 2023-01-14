@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -67,12 +67,14 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
 
         searchItem.setOnActionExpandListener(this);
         final SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint(activity.getString(R.string.hint_search_message));
-        searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_FILTER);
-        if (SettingsActivity.useKeyboardIncognitoMode()) {
-            searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
+        if (searchView != null) {
+            searchView.setQueryHint(activity.getString(R.string.hint_search_message));
+            searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_FILTER);
+            if (SettingsActivity.useKeyboardIncognitoMode()) {
+                searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
+            }
+            searchView.setOnQueryTextListener(this);
         }
-        searchView.setOnQueryTextListener(this);
 
         highlightedSpans = new BackgroundColorSpan[10];
         for (int i=0; i<highlightedSpans.length; i++) {
@@ -81,7 +83,7 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
     }
 
     @Override
-    public boolean onMenuItemActionExpand(MenuItem searchItem) {
+    public boolean onMenuItemActionExpand(@NonNull MenuItem searchItem) {
         for (int i=0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             if (item.getItemId() == R.id.action_call
@@ -98,7 +100,7 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
     }
 
     @Override
-    public boolean onMenuItemActionCollapse(MenuItem searchItem) {
+    public boolean onMenuItemActionCollapse(@NonNull MenuItem searchItem) {
         activity.invalidateOptionsMenu();
         return true;
     }
@@ -115,7 +117,7 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
     }
 
     @Override
-    public boolean onMenuItemClick(MenuItem item) {
+    public boolean onMenuItemClick(@NonNull MenuItem item) {
         try {
             int id = item.getItemId();
             if (id == R.id.action_prev) {

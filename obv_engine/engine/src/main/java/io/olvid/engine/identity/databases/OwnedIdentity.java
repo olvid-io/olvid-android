@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -181,20 +181,6 @@ public class OwnedIdentity implements ObvDatabase {
         }
         return null;
     }
-
-//    public JsonWebKeySet getKeycloakJwks() throws SQLException {
-//        if (keycloakServerUrl != null) {
-//            KeycloakServer keycloakServer = KeycloakServer.get(identityManagerSession, keycloakServerUrl, ownedIdentity);
-//            if (keycloakServer != null) {
-//                try {
-//                    return keycloakServer.getJwks();
-//                } catch (Exception e) {
-//                    // nothing
-//                }
-//            }
-//        }
-//        return null;
-//    }
 
     public JsonWebKey getKeycloakSignatureKey() throws SQLException {
         if (keycloakServerUrl != null) {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -67,7 +67,11 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
                 if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
                     db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                 }
+
+                group.newPublishedDetails = Group2.PUBLISHED_DETAILS_NEW_UNSEEN;
+                db.group2Dao().updateNewPublishedDetails(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.newPublishedDetails);
             }
+            
             if (!Objects.equals(group.photoUrl, detailsAndPhotos.photoUrl)) {
                 group.photoUrl = detailsAndPhotos.photoUrl;
                 db.group2Dao().updatePhotoUrl(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.photoUrl);

@@ -1,3 +1,30 @@
+# Build 191 (0.13.2)
+2023-01-14
+
+- Enable call initiation from another profile as long as one profile has a license 
+- Swipe your profile picture to switch profile
+
+# ~~Build 190 (0.13.2)~~
+2023-01-10
+
+- Create a "no google" flavor of the app
+- Improve the profile deletion with contact notification protocol
+
+# Build 189 (0.13.1)
+2022-11-18
+
+- Support for HTTP proxy inside webRTC
+
+# ~~Build 188 (0.13.1)~~
+2022-11-09
+
+- Fixes for webclient with okHttp
+
+# ~~Build 187 (0.13.1)~~
+2022-11-07
+
+- Replace the Java-Websocket library by okHttp to allow HTTP proxy on websocket
+
 # Build 184 (0.13.0)
 2022-10-24
 

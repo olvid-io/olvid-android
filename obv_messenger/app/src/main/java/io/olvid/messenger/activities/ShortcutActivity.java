@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -262,6 +262,30 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
                     ShortcutInfo shortcutInfo = builder.build().toShortcutInfo();
                     shortcutManager.updateShortcuts(Collections.singletonList(shortcutInfo));
                 }
+            }
+        }
+    }
+
+    public static void disableShortcut(long discussionId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            ShortcutManager shortcutManager = (ShortcutManager) App.getContext().getSystemService(Context.SHORTCUT_SERVICE);
+            if (shortcutManager != null) {
+                // first remove anything related to the deleted discussion
+                Intent intent = new Intent(App.getContext(), MainActivity.class);
+                intent.setAction(Intent.ACTION_MAIN);
+                InitialView initialView = new InitialView(App.getContext());
+                initialView.setUnknown();
+                Bitmap bitmap = initialView.getAdaptiveBitmap();
+
+                ShortcutInfoCompat.Builder builder = new ShortcutInfoCompat.Builder(App.getContext(), DiscussionActivity.SHORTCUT_PREFIX + discussionId)
+                        .setShortLabel(App.getContext().getString(R.string.text_invalid_shortcut))
+                        .setIcon(IconCompat.createWithAdaptiveBitmap(bitmap))
+                        .setIntent(intent);
+                ShortcutInfo shortcutInfo = builder.build().toShortcutInfo();
+                shortcutManager.updateShortcuts(Collections.singletonList(shortcutInfo));
+
+                // then disable shortcut
+                shortcutManager.disableShortcuts(Collections.singletonList(DiscussionActivity.SHORTCUT_PREFIX + discussionId));
             }
         }
     }

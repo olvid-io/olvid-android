@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -360,6 +360,9 @@ public interface FyleMessageJoinWithStatusDao {
         }
 
         public Uri getContentUri() {
+            if (fyle.sha256 == null) {
+                return null;
+            }
             byte[] randomizer = new byte[16];
             new SecureRandom().nextBytes(randomizer);
             return Uri.parse(BuildConfig.CONTENT_PROVIDER_URI_PREFIX + Logger.toHexString(fyle.sha256) + "/" + fyleMessageJoinWithStatus.messageId + "/" + Logger.toHexString(randomizer));

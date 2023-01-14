@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -28,7 +28,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -157,7 +156,6 @@ public class GroupV2MemberAdditionDialogFragment extends DialogFragment {
 
         FilteredContactListFragment filteredContactListFragment = new FilteredContactListFragment();
         filteredContactListFragment.setContactFilterEditText(dialogContactNameFilter);
-        filteredContactListFragment.removeBottomPadding();
         filteredContactListFragment.setSelectable(true);
 
         LiveData<List<Contact>> unfilteredContacts = AppDatabase.getInstance().group2Dao().getAllValidContactsNotInGroup(bytesOwnedIdentity, bytesGroupIdentifier, bytesAddedMemberIdentities, bytesRemovedMemberIdentities);

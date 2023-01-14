@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -29,7 +29,6 @@ import java.util.List;
 
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.ContactGroupJoin;
-import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 
 @Dao

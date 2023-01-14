@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -173,13 +173,6 @@ public class CreateServerSessionCoordinator implements Operation.OnFinishCallbac
                 break;
             case CreateServerSessionCompositeOperation.RFC_IDENTITY_NOT_FOUND:
                 break;
-//            case CreateServerSessionCompositeOperation.RFC_API_KEY_REJECTED: {
-//                HashMap<String, Object> userInfo = new HashMap<>();
-//                userInfo.put(DownloadNotifications.NOTIFICATION_API_KEY_REJECTED_BY_SERVER_IDENTITY_KEY, ownedIdentity);
-//                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_API_KEY_REJECTED_BY_SERVER, userInfo);
-//                scheduleNewCreateServerSessionCompositeOperationQueueing(ownedIdentity);
-//                break;
-//            }
             case CreateServerSessionCompositeOperation.RFC_INVALID_SESSION:
             default:
                 scheduleNewCreateServerSessionCompositeOperationQueueing(ownedIdentity);

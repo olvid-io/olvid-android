@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -254,6 +254,7 @@ public class RestoreChooseFileFragment extends Fragment {
                     ContentResolver contentResolver = App.getContext().getContentResolver();
                     String fileName = null;
                     String[] projection = {OpenableColumns.DISPLAY_NAME};
+                    //noinspection ConstantConditions
                     try (Cursor cursor = contentResolver.query(backupFileUri, projection, null, null, null)) {
                         if ((cursor != null) && cursor.moveToFirst()) {
                             int displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);

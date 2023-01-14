@@ -1201,7 +1201,7 @@
     <string name="pref_text_ping_connectivity_indicator_none">Pas d\'indicateur de connexion</string>
     <string name="pref_text_ping_connectivity_indicator_dot">Point coloré sur le «\u00a0i\u00a0» du logo Olvid</string>
     <string name="pref_text_ping_connectivity_indicator_line">Ligne discrète en haut de la liste de discussions</string>
-    <string name="pref_text_ping_connectivity_indicator_full">Status de connexion complet en haut de la liste de discussions</string>
+    <string name="pref_text_ping_connectivity_indicator_full">Statut de connexion complet en haut de la liste de discussions</string>
     <string name="label_ping_connectivity_none">Réseau\u00a0: AUCUN</string>
     <string name="label_ping_connectivity_connecting">Réseau\u00a0: CONNEXION…</string>
     <string name="label_ping_connectivity_connected">Réseau\u00a0: CONNECTÉ</string>
@@ -1308,7 +1308,7 @@
     <string name="dialog_message_widget_open_initial_hidden_profile">Ce widget utilise un profil masqué. Veuillez saisir le mot de passe du profil afin de le configurer.</string>
     <string name="menu_action_forward">Transférer</string>
     <string name="dialog_title_forward_message_explanation">Transfert de message</string>
-    <string name="dialog_message_forward_message_explanation">Le transfert de message vous permet de re-poster un ou plusieurs messages et leurs pièces jointes dans une sélection de discussions d\'un seul coup.\nCes messages seront vus comme envoyés par vous, avec la mention «\u00a0Transféré\u00a0» et sans mention de l\'auteur d\'origine.\nAppuyez sur «\u00a0Poursuivre\u00a0» pour choisir les discussions dans lesquelles transférer ces messages.</string>
+    <string name="dialog_message_forward_message_explanation">Le transfert de message vous permet de re-poster un ou plusieurs messages et leurs pièces jointes dans une sélection de discussions d\'un seul coup.\nLes messages que vous avez reçus seront vus comme envoyés par vous, avec la mention «\u00a0Transféré\u00a0» et sans mention de l\'auteur d\'origine.\nAppuyez sur «\u00a0Poursuivre\u00a0» pour choisir les discussions dans lesquelles transférer ces messages.</string>
     <string name="dialog_title_forward_to">Transférer vers…</string>
     <string name="button_label_forward">Transférer</string>
     <string name="label_forwarded">Transféré</string>
@@ -1567,6 +1567,10 @@
     <string name="button_label_clone_this_group">Cloner ce groupe</string>
     <string name="dialog_title_introducing_groups_v2">Découvrez les nouveaux groupes\u00a0!</string>
     <string name="dialog_message_introducing_groups_v2">Olvid permet maintenant d\'avoir plusieurs administrateurs par groupe\u00a0👑\u00a0! Cela ne change rien à vos «\u00a0anciens groupes\u00a0», mais fonctionnera pour tous les nouveaux groupes que vous créerez à partir de maintenant. Pour en bénéficier, vos contacts doivent avoir la dernière version d\'Olvid.\n\nVous voulez essayer\u00a0? Rendez vous sur l\'onglet des groupes et créez un nouveau groupe. Une fois créé, vous pourrez le modifier pour accorder les droits d\'administration à autant de participants que vous le voulez\u00a0!</string>
+    <string name="dialog_message_about_last_push_notification">Dernière notification push\u00a0: %1$s</string>
+    <string name="text_message_too_large_for_webclient">[Message trop long pour être affiché dans le client web]</string>
+    <string name="text_invalid_shortcut">Raccourci invalide</string>
+    <string name="text_feature_initiate_secure_calls_from_another_profile">Émettre des appels sécurisés\n(disponible grâce à un autre profil)</string>
 
 
 

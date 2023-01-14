@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -90,10 +90,6 @@ public class ContactGroupV2 implements ObvDatabase {
     public GroupV2.Identifier getGroupIdentifier() {
         return new GroupV2.Identifier(groupUid, serverUrl, category);
     }
-
-//    public AuthEncKey getSharedBlobSecretKey() {
-//        return GroupV2.getSharedBlobSecretKey(blobMainSeed, blobVersionSeed);
-//    }
 
     public Integer getVersion() {
         return version;
@@ -906,14 +902,15 @@ public class ContactGroupV2 implements ObvDatabase {
                 while (res.next()) {
                     byte[] groupUid = res.getBytes("uid");
                     String serverUld = res.getString("url");
-                    byte[] serializedPermission = res.getBytes("perms");
+                    byte[] serializedContactPermissions = res.getBytes("perms");
                     int version = res.getInt(ContactGroupV2.VERSION);
 
                     byte[] bytesMainSeed = res.getBytes(ContactGroupV2.BLOB_MAIN_SEED);
                     byte[] bytesVersionSeed = res.getBytes(ContactGroupV2.BLOB_VERSION_SEED);
                     ServerAuthenticationPrivateKey serverAuthenticationPrivateKey = null;
-                    if (GroupV2.Permission.deserializeKnownPermissions(serializedPermission).contains(GroupV2.Permission.GROUP_ADMIN)) {
-                        byte[] bytesGroupAdminKey = res.getBytes(ContactGroupV2.GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY);
+                    // only include the serverAuthenticationPrivateKey if both I and the contact are admin
+                    if (GroupV2.Permission.deserializeKnownPermissions(serializedContactPermissions).contains(GroupV2.Permission.GROUP_ADMIN)) {
+                        byte[] bytesGroupAdminKey = res.getBytes(ContactGroupV2.GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY); // this is non-null only when I am admin
                         if (bytesGroupAdminKey != null) {
                             try {
                                 serverAuthenticationPrivateKey = (ServerAuthenticationPrivateKey) new Encoded(bytesGroupAdminKey).decodePrivateKey();
@@ -937,6 +934,50 @@ public class ContactGroupV2 implements ObvDatabase {
             }
         }
     }
+
+    public static GroupV2.IdentifierAndAdminStatus[] getGroupsV2IdentifierAndMyAdminStatusForContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+                "SELECT * FROM (SELECT " + ContactGroupV2Member.GROUP_UID + " AS uid, " +
+                        ContactGroupV2Member.SERVER_URL + " AS url " +
+                        " FROM " + ContactGroupV2Member.TABLE_NAME +
+                        " WHERE " + ContactGroupV2Member.CATEGORY + " = " + GroupV2.Identifier.CATEGORY_SERVER +
+                        " AND " + ContactGroupV2Member.OWNED_IDENTITY + " = ? " +
+                        " AND " + ContactGroupV2Member.CONTACT_IDENTITY + " = ? " +
+                        " UNION SELECT " + ContactGroupV2PendingMember.GROUP_UID + " AS uid, " +
+                        ContactGroupV2PendingMember.SERVER_URL + " AS url " +
+                        " FROM " + ContactGroupV2PendingMember.TABLE_NAME +
+                        " WHERE " + ContactGroupV2PendingMember.CATEGORY + " = " + GroupV2.Identifier.CATEGORY_SERVER +
+                        " AND " + ContactGroupV2PendingMember.OWNED_IDENTITY + " = ? " +
+                        " AND " + ContactGroupV2PendingMember.CONTACT_IDENTITY + " = ?) AS gmj " +
+                        " INNER JOIN " + ContactGroupV2.TABLE_NAME + " AS gr " +
+                        " ON gmj.uid = gr." + ContactGroupV2.GROUP_UID +
+                        " AND gmj.url = gr." + ContactGroupV2.SERVER_URL +
+                        " AND gr." + ContactGroupV2.CATEGORY + " = " + GroupV2.Identifier.CATEGORY_SERVER +
+                        " AND gr." + ContactGroupV2.OWNED_IDENTITY + " = ?;"
+        )) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            statement.setBytes(2, contactIdentity.getBytes());
+            statement.setBytes(3, ownedIdentity.getBytes());
+            statement.setBytes(4, contactIdentity.getBytes());
+            statement.setBytes(5, ownedIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                ArrayList<GroupV2.IdentifierAndAdminStatus> list = new ArrayList<>();
+
+                while (res.next()) {
+                    byte[] groupUid = res.getBytes("uid");
+                    String serverUld = res.getString("url");
+                    byte[] serializedOwnPermissions = res.getBytes(ContactGroupV2.SERIALIZED_OWN_PERMISSIONS);
+
+                    list.add(new GroupV2.IdentifierAndAdminStatus(
+                            new GroupV2.Identifier(new UID(groupUid), serverUld, GroupV2.Identifier.CATEGORY_SERVER),
+                            GroupV2.Permission.deserializeKnownPermissions(serializedOwnPermissions).contains(GroupV2.Permission.GROUP_ADMIN)
+                    ));
+                }
+                return list.toArray(new GroupV2.IdentifierAndAdminStatus[0]);
+            }
+        }
+    }
+
 
     // endregion
 
@@ -1081,6 +1122,11 @@ public class ContactGroupV2 implements ObvDatabase {
             statement.setBytes(13, ownedIdentity.getBytes());
             statement.executeUpdate();
         }
+    }
+
+    public void triggerUpdateNotification() {
+        commitHookBits |= HOOK_BIT_UPDATED;
+        identityManagerSession.session.addSessionCommitListener(this);
     }
 
     // endregion

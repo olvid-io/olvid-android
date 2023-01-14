@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.ColumnInfo;
 import androidx.room.Dao;
@@ -31,8 +32,6 @@ import androidx.room.Transaction;
 import androidx.room.Update;
 
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import io.olvid.messenger.databases.entity.ContactGroupJoin;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -451,6 +450,10 @@ public abstract class DiscussionDao {
             " WHERE " + Discussion.PHOTO_URL + " IS NOT NULL " +
             " AND " + Discussion.STATUS + " = " + Discussion.STATUS_LOCKED)
     public abstract List<String> getAllLockedDiscussionPhotoUrls();
+
+    @Query("SELECT id FROM " + Discussion.TABLE_NAME +
+            " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
+    public abstract List<Long> getAllDiscussionIdsForOwnedIdentity(byte[] bytesOwnedIdentity);
 
     public static class DiscussionAndLastMessage {
         @Embedded(prefix = "disc_")

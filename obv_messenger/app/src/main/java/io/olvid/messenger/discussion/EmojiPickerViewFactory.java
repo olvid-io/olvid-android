@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -102,7 +102,7 @@ public class EmojiPickerViewFactory {
         });
         emojiRecyclerView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
-            public void onViewAttachedToWindow(View v) {
+            public void onViewAttachedToWindow(@NonNull View v) {
                 if (!isReactionPopup) {
                     DisplayMetrics metrics = v.getContext().getResources().getDisplayMetrics();
                     // count number of rows we could display (minus 2 to account for other views height)
@@ -113,7 +113,7 @@ public class EmojiPickerViewFactory {
             }
 
             @Override
-            public void onViewDetachedFromWindow(View v) { }
+            public void onViewDetachedFromWindow(@NonNull View v) { }
         });
 
         EmojiListAdapter adapter = new EmojiListAdapter(context, emojiClickListener, isReactionPopup, highlightedEmoji, windowTokenView);

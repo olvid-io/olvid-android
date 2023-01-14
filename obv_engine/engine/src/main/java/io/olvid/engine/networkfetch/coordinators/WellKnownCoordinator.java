@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -20,13 +20,10 @@
 package io.olvid.engine.networkfetch.coordinators;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -182,7 +179,7 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
     public static class NotCachedException extends Exception {}
 
     @Override
-    public URI getWsUri(String server) throws NotCachedException {
+    public String getWsUrl(String server) throws NotCachedException {
         if (!cacheInitialized) {
             throw new NotCachedException();
         }
@@ -194,7 +191,7 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
         if (jsonWellKnown.serverConfig == null) {
             return null;
         }
-        return jsonWellKnown.serverConfig.getWebSocketUri();
+        return jsonWellKnown.serverConfig.getWebSocketUrl();
     }
 
     @Override
@@ -244,8 +241,6 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
     public static class JsonWellKnownServerConfig {
         String webSocketUrl;
         List<String> turnServerUrls;
-        @JsonIgnore
-        URI webSocketUri = null;
 
         @JsonProperty("ws_server")
         public String getWebSocketUrl() {
@@ -265,18 +260,6 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
         @JsonProperty("turn_servers")
         public void setTurnServerUrls(List<String> turnServerUrls) {
             this.turnServerUrls = turnServerUrls;
-        }
-
-        @JsonIgnore
-        public URI getWebSocketUri() {
-            if (webSocketUri == null) {
-                try {
-                    webSocketUri = new URI(webSocketUrl);
-                } catch (URISyntaxException e) {
-                    // do nothing
-                }
-            }
-            return webSocketUri;
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -119,6 +119,7 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 
 public class WebrtcCallService extends Service {
@@ -726,7 +727,24 @@ public class WebrtcCallService extends Service {
         Logger.d("☎ Requesting new turn credentials");
         // request turn credentials
         setState(State.GETTING_TURN_CREDENTIALS);
-        AppSingleton.getEngine().getTurnCredentials(bytesOwnedIdentity, callIdentifier, "caller", "recipient");
+
+        // check if my current owned identity has call permission, if not, check if another non-hidden identity has it
+        byte[] bytesOwnedIdentityWithCallPermission = bytesOwnedIdentity;
+        OwnedIdentity currentOwnedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(bytesOwnedIdentity);
+        if (currentOwnedIdentity == null || !currentOwnedIdentity.getApiKeyPermissions().contains(EngineAPI.ApiKeyPermission.CALL)) {
+            // if my current identity can't call, check other identities
+            for (OwnedIdentity ownedIdentity : AppDatabase.getInstance().ownedIdentityDao().getAllNotHidden()) {
+                if (Arrays.equals(ownedIdentity.bytesOwnedIdentity, bytesOwnedIdentity)) {
+                    // skip the current identity
+                    continue;
+                }
+                if (ownedIdentity.getApiKeyPermissions().contains(EngineAPI.ApiKeyPermission.CALL)) {
+                    bytesOwnedIdentityWithCallPermission = ownedIdentity.bytesOwnedIdentity;
+                    break;
+                }
+            }
+        }
+        AppSingleton.getEngine().getTurnCredentials(bytesOwnedIdentityWithCallPermission, callIdentifier, "caller", "recipient");
     }
 
     void clearCredentialsCache() {
@@ -2362,10 +2380,10 @@ public class WebrtcCallService extends Service {
         public void callback(String notificationName, HashMap<String, Object> userInfo) {
             switch (notificationName) {
                 case EngineNotifications.TURN_CREDENTIALS_RECEIVED: {
-                    byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.TURN_CREDENTIALS_RECEIVED_OWNED_IDENTITY_KEY);
+//                    byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.TURN_CREDENTIALS_RECEIVED_OWNED_IDENTITY_KEY);
                     UUID callUuid = (UUID) userInfo.get(EngineNotifications.TURN_CREDENTIALS_RECEIVED_CALL_UUID_KEY);
                     // ignore notifications from another call...
-                    if (Arrays.equals(bytesOwnedIdentity, WebrtcCallService.this.bytesOwnedIdentity) && WebrtcCallService.this.callIdentifier.equals(callUuid)) {
+                    if (WebrtcCallService.this.callIdentifier.equals(callUuid)) {
                         String callerUsername = (String) userInfo.get(EngineNotifications.TURN_CREDENTIALS_RECEIVED_USERNAME_1_KEY);
                         String callerPassword = (String) userInfo.get(EngineNotifications.TURN_CREDENTIALS_RECEIVED_PASSWORD_1_KEY);
                         String recipientUsername = (String) userInfo.get(EngineNotifications.TURN_CREDENTIALS_RECEIVED_USERNAME_2_KEY);
@@ -2393,10 +2411,10 @@ public class WebrtcCallService extends Service {
                     break;
                 }
                 case EngineNotifications.TURN_CREDENTIALS_FAILED: {
-                    byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.TURN_CREDENTIALS_FAILED_OWNED_IDENTITY_KEY);
+//                    byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.TURN_CREDENTIALS_FAILED_OWNED_IDENTITY_KEY);
                     UUID callUuid = (UUID) userInfo.get(EngineNotifications.TURN_CREDENTIALS_FAILED_CALL_UUID_KEY);
                     // ignore notifications from another call...
-                    if (Arrays.equals(bytesOwnedIdentity, WebrtcCallService.this.bytesOwnedIdentity) && WebrtcCallService.this.callIdentifier.equals(callUuid)) {
+                    if (WebrtcCallService.this.callIdentifier.equals(callUuid)) {
                         ObvTurnCredentialsFailedReason rfc = (ObvTurnCredentialsFailedReason) userInfo.get(EngineNotifications.TURN_CREDENTIALS_FAILED_REASON_KEY);
                         callerFailedTurnCredentials(rfc);
                     }

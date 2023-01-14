@@ -56,7 +56,6 @@
             android:order="50"
             />
         <SwitchPreference
-            android:defaultValue="false"
             android:key="pref_key_permanent_websocket"
             android:summary="@string/pref_permanent_websocket_summary"
             android:title="@string/pref_permanent_websocket_title"

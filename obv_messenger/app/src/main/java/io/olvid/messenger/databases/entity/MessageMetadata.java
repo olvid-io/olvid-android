@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -57,6 +57,7 @@ public class MessageMetadata {
     public static final int KIND_UNDELIVERED = 5; // when we set the outbound status to undelivered
     public static final int KIND_LOCATION_SHARING_LATEST_UPDATE = 6; // used to avoid multiple edited metadata when sharing location
     public static final int KIND_LOCATION_SHARING_END = 7;
+    public static final int KIND_UPLOADED = 8; // used for inbound messages to preserve the original server timestamp, even if the message timestamp was modified to respect the timeline
 
     @PrimaryKey(autoGenerate = true)
     public long id;

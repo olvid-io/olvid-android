@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -42,22 +42,14 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.tasks.Task;
-import com.google.api.services.drive.DriveScopes;
-
 import java.util.Objects;
 
 import io.olvid.messenger.App;
+import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.TextChangeListener;
+import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.services.BackupCloudProviderService;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -210,7 +202,7 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
         });
 
 
-        viewModel.googleDriveAvailable = ConnectionResult.SUCCESS == GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity);
+        viewModel.googleDriveAvailable = BuildConfig.USE_GOOGLE_LIBS && GoogleServicesUtils.googleServicesAvailable(activity);
 
         if (viewModel.webdavConfiguration.serverUrl == null) {
             BackupCloudProviderService.CloudProviderConfiguration configuration = SettingsActivity.getAutomaticBackupConfiguration();
@@ -266,9 +258,9 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
 
         if (requestCode == REQUEST_CODE_AUTHORIZE_DRIVE) {
             if (resultCode == Activity.RESULT_OK) {
-                GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(activity);
-                if (account != null && viewModel != null && viewModel.onCloudProviderConfigurationCallback != null) {
-                    viewModel.onCloudProviderConfigurationCallback.onCloudProviderConfigurationSuccess(BackupCloudProviderService.CloudProviderConfiguration.buildGoogleDrive(account.getEmail()));
+                String email = GoogleServicesUtils.getSignInEmail(activity);
+                if (email != null && viewModel != null && viewModel.onCloudProviderConfigurationCallback != null) {
+                    viewModel.onCloudProviderConfigurationCallback.onCloudProviderConfigurationSuccess(BackupCloudProviderService.CloudProviderConfiguration.buildGoogleDrive(email));
                     viewModel.failOnDismiss = false;
                     dismiss();
                     return;
@@ -283,20 +275,7 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
             viewModel.webdavDetailsOpened = false;
         }
         refreshLayout();
-        GoogleSignIn.getClient(activity, GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .signOut()
-                .addOnCompleteListener((Task<Void> task) -> {
-                    if (getActivity() != null) {
-                        try {
-                            GoogleSignIn.requestPermissions(
-                                    this,
-                                    REQUEST_CODE_AUTHORIZE_DRIVE,
-                                    null,
-                                    new Scope(DriveScopes.DRIVE_APPDATA),
-                                    new Scope(Scopes.EMAIL));
-                        } catch (Exception ignored) {}
-                    }
-                });
+        GoogleServicesUtils.requestGoogleSignIn(this, REQUEST_CODE_AUTHORIZE_DRIVE);
     }
 
     @Override

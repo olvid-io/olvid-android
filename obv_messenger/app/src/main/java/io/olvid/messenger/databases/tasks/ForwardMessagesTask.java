@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -164,7 +164,9 @@ public class ForwardMessagesTask implements Runnable {
                        discussion.senderThreadIdentifier,
                        0, 0
                );
-               newMessage.forwarded = true;
+               if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE) {
+                  newMessage.forwarded = true;
+               }
                newMessage.id = db.messageDao().insert(newMessage);
 
                for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {

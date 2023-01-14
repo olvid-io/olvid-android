@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -36,15 +36,14 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-
 import io.olvid.messenger.App;
+import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.NoClickSwitchPreference;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.SelectableArrayAdapter;
+import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
@@ -117,6 +116,7 @@ public class PrivacyPreferenceFragment extends PreferenceFragmentCompat {
 
         SwitchPreference permanentWebSocketPreference = screen.findPreference(SettingsActivity.PREF_KEY_PERMANENT_WEBSOCKET);
         if (permanentWebSocketPreference != null) {
+            permanentWebSocketPreference.setChecked(SettingsActivity.usePermanentWebSocket());
             permanentWebSocketPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
                 App.runThread(() -> {
                     try {
@@ -133,7 +133,10 @@ public class PrivacyPreferenceFragment extends PreferenceFragmentCompat {
 
         NoClickSwitchPreference disablePushPreference = screen.findPreference(SettingsActivity.PREF_KEY_DISABLE_PUSH_NOTIFICATIONS);
         if (disablePushPreference != null) {
-            if (ConnectionResult.SUCCESS != GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity)) {
+            if (!BuildConfig.USE_FIREBASE_LIB) {
+                // google services unavailable --> disable this preference
+                screen.removePreference(disablePushPreference);
+            } else if (!GoogleServicesUtils.googleServicesAvailable(activity)) {
                 // google services unavailable --> disable this preference
                 disablePushPreference.setChecked(true);
                 disablePushPreference.setEnabled(false);

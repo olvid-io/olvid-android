@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -29,8 +29,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -38,34 +36,22 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
-import com.android.billingclient.api.AcknowledgePurchaseParams;
-import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingClientStateListener;
-import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.Purchase;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.olvid.engine.Logger;
-import io.olvid.engine.engine.types.EngineNotificationListener;
-import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -86,7 +72,7 @@ public class Utils {
         if (!dialogsLoaded) {
             dialogsLoaded = true;
 
-            if (ConnectionResult.SUCCESS != GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity)
+            if ((!BuildConfig.USE_FIREBASE_LIB || !GoogleServicesUtils.googleServicesAvailable(activity))
                     && !SettingsActivity.usePermanentWebSocket()) {
                 boolean hideDialog = prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_GOOGLE_APIS, false);
                 if (!hideDialog) {
@@ -325,82 +311,6 @@ public class Utils {
         return builder;
     }
 
-    static void verifyPurchases(byte[] bytesOwnedIdentity, Context context) {
-        try {
-            final BillingClient billingClient = BillingClient.newBuilder(context)
-                    .enablePendingPurchases()
-                    .setListener((billingResult, list) -> Logger.e("Purchase updated " + list))
-                    .build();
-
-            billingClient.startConnection(new BillingClientStateListener() {
-                @Override
-                public void onBillingSetupFinished(@NonNull BillingResult setupBillingResult) {
-                    billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS, (BillingResult queryBillingResult, List<Purchase> list) -> {
-                        if (list.size() > 0) {
-                            for (Purchase purchase : list) {
-                                if (!purchase.isAcknowledged()) {
-                                    Logger.d("Found not acknowledged purchase --> sending it to server");
-                                    AppSingleton.getEngine().verifyReceipt(bytesOwnedIdentity, purchase.getPurchaseToken());
-                                    final EngineNotificationListener notificationListener = new EngineNotificationListener() {
-                                        private Long regNumber;
-
-                                        @Override
-                                        public void callback(String notificationName, HashMap<String, Object> userInfo) {
-                                            AppSingleton.getEngine().removeNotificationListener(EngineNotifications.VERIFY_RECEIPT_SUCCESS, this);
-                                            AcknowledgePurchaseParams acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
-                                                    .setPurchaseToken(purchase.getPurchaseToken())
-                                                    .build();
-
-                                            billingClient.acknowledgePurchase(acknowledgePurchaseParams, purchaseBillingResult -> {
-                                                if (purchaseBillingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-                                                    Logger.e("Error acknowledging store purchase " + purchaseBillingResult.getDebugMessage());
-                                                }
-                                            });
-                                        }
-
-                                        @Override
-                                        public void setEngineNotificationListenerRegistrationNumber(long registrationNumber) {
-                                            regNumber = registrationNumber;
-                                        }
-
-                                        @Override
-                                        public long getEngineNotificationListenerRegistrationNumber() {
-                                            return regNumber;
-                                        }
-
-                                        @Override
-                                        public boolean hasEngineNotificationListenerRegistrationNumber() {
-                                            return regNumber != null;
-                                        }
-                                    };
-                                    AppSingleton.getEngine().addNotificationListener(EngineNotifications.VERIFY_RECEIPT_SUCCESS, notificationListener);
-                                    // auto remove the listener after 20s
-                                    new Handler(Looper.getMainLooper()).postDelayed(() -> AppSingleton.getEngine().removeNotificationListener(EngineNotifications.VERIFY_RECEIPT_SUCCESS, notificationListener), 20_000);
-                                }
-                            }
-                        } else {
-                            billingClient.endConnection();
-                        }
-                    });
-                }
-
-                @Override
-                public void onBillingServiceDisconnected() {
-                    // do nothing, we'll query again at next startup
-                }
-            });
-
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                try {
-                    billingClient.endConnection();
-                } catch (Exception e) {
-                    // nothing
-                }
-            }, 30_000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
 
     // region Websocket latency ping

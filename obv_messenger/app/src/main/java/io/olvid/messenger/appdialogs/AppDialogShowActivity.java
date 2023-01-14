@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -623,9 +623,7 @@ public class AppDialogShowActivity extends LockableActivity {
 
                             AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                                     .setView(dialogView)
-                                    .setPositiveButton(R.string.button_label_trust_certificate, (DialogInterface dialog, int which) -> App.runThread(() -> {
-                                        AppSingleton.getSslSocketFactory().trustCertificateInDb(untrustedCertificate);
-                                    }))
+                                    .setPositiveButton(R.string.button_label_trust_certificate, (DialogInterface dialog, int which) -> App.runThread(() -> AppSingleton.getSslSocketFactory().trustCertificateInDb(untrustedCertificate)))
                                     .setNegativeButton(R.string.button_label_do_not_trust_yet, null)
                                     .setOnDismissListener(dialog -> continueWithNextDialog());
 

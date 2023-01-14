@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -214,6 +214,7 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat {
                     if (Objects.equals(uri, Settings.System.DEFAULT_NOTIFICATION_URI)) {
                         SettingsActivity.setMessageRingtone(null);
                     } else if (StringUtils.validateUri(uri)) {
+                        //noinspection ConstantConditions
                         SettingsActivity.setMessageRingtone(uri.toString());
                     } else {
                         SettingsActivity.setMessageRingtone(Uri.EMPTY.toString());
@@ -229,6 +230,7 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat {
                     if (Objects.equals(uri, Settings.System.DEFAULT_NOTIFICATION_URI)) {
                         SettingsActivity.setCallRingtone(null);
                     } else if (StringUtils.validateUri(uri)) {
+                        //noinspection ConstantConditions
                         SettingsActivity.setCallRingtone(uri.toString());
                     } else {
                         SettingsActivity.setCallRingtone(Uri.EMPTY.toString());

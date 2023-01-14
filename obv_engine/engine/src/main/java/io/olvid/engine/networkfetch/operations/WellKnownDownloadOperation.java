@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -103,6 +103,10 @@ public class WellKnownDownloadOperation extends Operation {
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 if (connection instanceof HttpsURLConnection && sslSocketFactory != null) {
                     ((HttpsURLConnection) connection).setSSLSocketFactory(sslSocketFactory);
+                }
+                String userAgentProperty = System.getProperty("http.agent");
+                if (userAgentProperty != null) {
+                    connection.setRequestProperty("User-Agent", userAgentProperty);
                 }
                 try {
                     // Timeout after 5 seconds

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,12 +20,11 @@
 package io.olvid.engine.networkfetch.datatypes;
 
 
-import java.net.URI;
 import java.util.List;
 
 import io.olvid.engine.networkfetch.coordinators.WellKnownCoordinator;
 
 public interface WellKnownCacheDelegate {
-    URI getWsUri(String server) throws WellKnownCoordinator.NotCachedException;
+    String getWsUrl(String server) throws WellKnownCoordinator.NotCachedException;
     List<String> getTurnUrls(String server) throws WellKnownCoordinator.NotCachedException;
 }

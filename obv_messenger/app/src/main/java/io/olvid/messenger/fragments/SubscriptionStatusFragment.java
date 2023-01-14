@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -42,8 +42,8 @@ import java.util.List;
 
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.messenger.R;
+import io.olvid.messenger.billing.SubscriptionPurchaseFragment;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.viewModels.SubscriptionPurchaseViewModel;
 
 public class SubscriptionStatusFragment extends Fragment {
     public static final String BYTES_OWNED_IDENTITY = "bytes_owned_identity";
@@ -52,6 +52,7 @@ public class SubscriptionStatusFragment extends Fragment {
     public static final String API_KEY_EXPIRATION = "expiration";
     public static final String LICENSE_QUERY = "licenseQuery";
     public static final String SHOW_IN_APP_PURCHASE = "showInAppPurchase";
+    public static final String ANOTHER_IDENTITY_HAS_CALLS_PERMISSION = "anotherIdentityHasCallsPermission";
 
     private AppCompatActivity activity;
 
@@ -61,11 +62,13 @@ public class SubscriptionStatusFragment extends Fragment {
     Long apiKeyExpirationTimestamp;
     boolean licenseQuery;
     boolean showInAppPurchase;
+    boolean anotherIdentityHasCallsPermission;
+
     Button subscribeButton;
     ViewGroup subscriptionPurchasePlaceholder;
-    SubscriptionPurchaseViewModel viewModel;
+    SubscriptionPurchaseFragment.SubscriptionPurchaseViewModel viewModel;
 
-    public static SubscriptionStatusFragment newInstance(byte[] bytesOwnedIdentity, EngineAPI.ApiKeyStatus apiKeyStatus, @Nullable Long apiKeyExpirationTimestamp, List<EngineAPI.ApiKeyPermission> apiKeyPermissions, boolean licenseQuery, boolean showInAppPurchase) {
+    public static SubscriptionStatusFragment newInstance(byte[] bytesOwnedIdentity, EngineAPI.ApiKeyStatus apiKeyStatus, @Nullable Long apiKeyExpirationTimestamp, List<EngineAPI.ApiKeyPermission> apiKeyPermissions, boolean licenseQuery, boolean showInAppPurchase, boolean anotherIdentityHasCallsPermission) {
         SubscriptionStatusFragment fragment = new SubscriptionStatusFragment();
         Bundle args = new Bundle();
         args.putByteArray(BYTES_OWNED_IDENTITY, bytesOwnedIdentity);
@@ -76,6 +79,7 @@ public class SubscriptionStatusFragment extends Fragment {
         args.putLong(API_KEY_PERMISSIONS, OwnedIdentity.serializeApiKeyPermissions(apiKeyPermissions));
         args.putBoolean(LICENSE_QUERY, licenseQuery);
         args.putBoolean(SHOW_IN_APP_PURCHASE, showInAppPurchase);
+        args.putBoolean(ANOTHER_IDENTITY_HAS_CALLS_PERMISSION, anotherIdentityHasCallsPermission);
         fragment.setArguments(args);
         return fragment;
     }
@@ -96,8 +100,9 @@ public class SubscriptionStatusFragment extends Fragment {
             apiKeyPermissions = OwnedIdentity.deserializeApiKeyPermissions(arguments.getLong(API_KEY_PERMISSIONS));
             licenseQuery = arguments.getBoolean(LICENSE_QUERY);
             showInAppPurchase = arguments.getBoolean(SHOW_IN_APP_PURCHASE);
+            anotherIdentityHasCallsPermission = arguments.getBoolean(ANOTHER_IDENTITY_HAS_CALLS_PERMISSION);
         }
-        viewModel = new ViewModelProvider(activity).get(SubscriptionPurchaseViewModel.class);
+        viewModel = new ViewModelProvider(activity).get(SubscriptionPurchaseFragment.SubscriptionPurchaseViewModel.class);
         viewModel.setBytesOwnedIdentity(bytesOwnedIdentity);
     }
 
@@ -262,10 +267,17 @@ public class SubscriptionStatusFragment extends Fragment {
             premiumFeaturesTitleTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_activated_green, 0);
             permissionCallTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_phone_failed_out, 0, 0, 0);
             permissionCallTextView.setTextColor(ContextCompat.getColor(view.getContext(), R.color.almostBlack));
+            permissionCallTextView.setText(R.string.text_feature_initiate_secure_calls);
+        } else if (anotherIdentityHasCallsPermission) {
+            premiumFeaturesTitleTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_activated_green, 0);
+            permissionCallTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_phone_failed_out, 0, 0, 0);
+            permissionCallTextView.setTextColor(ContextCompat.getColor(view.getContext(), R.color.almostBlack));
+            permissionCallTextView.setText(R.string.text_feature_initiate_secure_calls_from_another_profile);
         } else {
             premiumFeaturesTitleTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_deactivated_grey, 0);
             permissionCallTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_phone_outgoing_grey, 0, 0, 0);
             permissionCallTextView.setTextColor(ContextCompat.getColor(view.getContext(), R.color.grey));
+            permissionCallTextView.setText(R.string.text_feature_initiate_secure_calls);
         }
 
         if (viewModel.showSubscriptionPlans) {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,6 +22,7 @@ package io.olvid.messenger;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -55,6 +57,7 @@ import javax.net.ssl.SSLContext;
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.engine.engine.Engine;
+import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
@@ -80,6 +83,7 @@ public class AppSingleton {
     private static final String LATEST_IDENTITY_SHARED_PREFERENCE_KEY = "last_identity";
     private static final String FIREBASE_TOKEN_SHARED_PREFERENCE_KEY = "firefase_token";
     private static final String LAST_BUILD_EXECUTED_PREFERENCE_KEY = "last_build";
+    private static final String LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY = "last_android_sdk_version";
 
     public static final String FYLE_DIRECTORY = "fyles";
     public static final String DISCUSSION_BACKGROUNDS_DIRECTORY = "discussion_backgrounds";
@@ -114,6 +118,7 @@ public class AppSingleton {
         this.sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_app), Context.MODE_PRIVATE);
 
         int lastBuildExecuted = sharedPreferences.getInt(LAST_BUILD_EXECUTED_PREFERENCE_KEY, 0);
+        int lastAndroidSdkVersionExecuted = sharedPreferences.getInt(LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY, 0);
 
         if (lastBuildExecuted != 0 && lastBuildExecuted < 89) {
             runNoBackupFolderMigration();
@@ -171,11 +176,13 @@ public class AppSingleton {
         }
 
         SSLContext sslContext = null;
-        try {
-            sslContext = SSLContext.getDefault();
-        } catch (Exception e) {
-            Log.e("Logger", "Failed to initialize custom SSLSocketFactory");
-            e.printStackTrace();
+        if (BuildConfig.ENABLE_SSL_HANDSHAKE_VERIFICATION) {
+            try {
+                sslContext = SSLContext.getDefault();
+            } catch (Exception e) {
+                Log.e("Logger", "Failed to initialize custom SSLSocketFactory");
+                e.printStackTrace();
+            }
         }
         if (sslContext != null) {
             this.sslSocketFactory = new CustomSSLSocketFactory(sslContext.getSocketFactory());
@@ -236,6 +243,16 @@ public class AppSingleton {
             return null;
         });
         availableIdentities = db.ownedIdentityDao().getAllNotHiddenLiveData();
+        aNonHiddenIdentityHasCallsPermission = Transformations.map(availableIdentities, (List<OwnedIdentity> availableIdentities) -> {
+            for (OwnedIdentity ownedIdentity : availableIdentities) {
+                if (ownedIdentity.getApiKeyPermissions().contains(EngineAPI.ApiKeyPermission.CALL)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        // add a dummy observer to this liveData, so that it is indeed computed
+        new Handler(Looper.getMainLooper()).post(() -> aNonHiddenIdentityHasCallsPermission.observeForever((Boolean canCall) -> Logger.d("aNonHiddenIdentityHasCallsPermission changed " + canCall)));
         if (this.sslSocketFactory != null) {
             this.sslSocketFactory.loadKnownCertificates();
         }
@@ -281,10 +298,10 @@ public class AppSingleton {
 
         new Handler(Looper.getMainLooper()).post(() -> currentIdentityLiveData.observeForever(currentIdentityObserverForNameCache));
 
-        if (lastBuildExecuted != BuildConfig.VERSION_CODE) {
+        if (lastBuildExecuted != BuildConfig.VERSION_CODE || lastAndroidSdkVersionExecuted != Build.VERSION.SDK_INT) {
             App.runThread(() -> {
                 AndroidNotificationManager.createChannels(lastBuildExecuted);
-                runBuildUpgrade(lastBuildExecuted);
+                runBuildUpgrade(lastBuildExecuted, lastAndroidSdkVersionExecuted);
             });
         }
 
@@ -332,9 +349,38 @@ public class AppSingleton {
     @NonNull private final MutableLiveData<byte[]> bytesCurrentIdentityLiveData;
     @NonNull private final LiveData<OwnedIdentity> currentIdentityLiveData;
     @NonNull private final LiveData<List<OwnedIdentity>> availableIdentities;
+    @NonNull private final LiveData<Boolean> aNonHiddenIdentityHasCallsPermission;
 
     public interface IdentitySelectedCallback {
+
         void onIdentitySelected(@Nullable OwnedIdentity ownedIdentity);
+    }
+
+    public void selectNextIdentity(boolean selectPreviousInstead) {
+        executor.execute(() -> {
+            List<OwnedIdentity> ownedIdentities = AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenSortedSync();
+            int pos = -1;
+            for (int i = 0; i < ownedIdentities.size(); i++) {
+                if (Arrays.equals(ownedIdentities.get(i).bytesOwnedIdentity, bytesCurrentIdentity)) {
+                    pos = i;
+                    break;
+                }
+            }
+            int posToSelect;
+            if (selectPreviousInstead) {
+                posToSelect = pos - 1;
+            } else {
+                posToSelect = pos + 1;
+            }
+            if (posToSelect < 0) {
+                posToSelect = ownedIdentities.size() - 1;
+            } else {
+                posToSelect = posToSelect % ownedIdentities.size();
+            }
+            if (posToSelect != pos) {
+                selectIdentity(ownedIdentities.get(posToSelect).bytesOwnedIdentity, null);
+            }
+        });
     }
 
     public void selectIdentity(byte[] bytesIdentity, IdentitySelectedCallback callback) {
@@ -381,6 +427,11 @@ public class AppSingleton {
     @NonNull
     public static LiveData<OwnedIdentity> getCurrentIdentityLiveData() {
         return instance.currentIdentityLiveData;
+    }
+
+    public static boolean getOtherProfileHasCallsPermission() {
+        Boolean canCall = instance.aNonHiddenIdentityHasCallsPermission.getValue();
+        return canCall != null && canCall;
     }
 
     private void selectLatestOpenedIdentity() {
@@ -757,9 +808,10 @@ public class AppSingleton {
         }
     }
 
-    private static void setLastBuildExecutedVersion(@SuppressWarnings("SameParameterValue") int buildVersion) {
+    private static void saveLastExecutedVersions(@SuppressWarnings("SameParameterValue") int buildVersion, @SuppressWarnings("SameParameterValue") int androidSdkVersion) {
         SharedPreferences.Editor editor = instance.sharedPreferences.edit();
         editor.putInt(LAST_BUILD_EXECUTED_PREFERENCE_KEY, buildVersion);
+        editor.putInt(LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY, androidSdkVersion);
         editor.apply();
     }
 
@@ -885,7 +937,9 @@ public class AppSingleton {
         List<Group2PendingMember> pendingMembers = AppDatabase.getInstance().group2PendingMemberDao().getAll(ownedIdentity.bytesOwnedIdentity);
         for (Group2PendingMember pendingMember : pendingMembers) {
             BytesKey key = new BytesKey(pendingMember.bytesContactIdentity);
-            contactNamesHashMap.put(key, pendingMember.displayName);
+            if (!contactNamesHashMap.containsKey(key)) {
+                contactNamesHashMap.put(key, pendingMember.displayName);
+            }
         }
 
         getInstance().contactNamesCache.postValue(contactNamesHashMap);
@@ -1067,7 +1121,7 @@ public class AppSingleton {
 
     // region Upgrade after new build
 
-    private void runBuildUpgrade(int lastBuildExecuted) {
+    private void runBuildUpgrade(int lastBuildExecuted, int lastAndroidSdkVersionExecuted) {
         try {
             if (lastBuildExecuted < 88) {
                 // trigger the download of all waiting userData in the engine
@@ -1116,7 +1170,7 @@ public class AppSingleton {
                 App.openAppDialogIntroducingGroupsV2();
             }
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
-            setLastBuildExecutedVersion(BuildConfig.VERSION_CODE);
+            saveLastExecutedVersions(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);
         } catch (Exception e) {
             // upgrade failed, will be tried again at next startup...
             Logger.w("Build Upgrade failed");

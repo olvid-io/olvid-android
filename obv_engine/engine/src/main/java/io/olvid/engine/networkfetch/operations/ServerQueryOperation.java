@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -435,7 +436,7 @@ class GetUserDataServerMethod extends ServerQueryServerMethod {
                 // write the result to a file
                 EncryptedBytes encryptedData = receivedData[0].decodeEncryptedData();
                 // Ugly hack: the filename contains a timestamp after which the file is considered "orphan" and can be deleted
-                String userDataPath = Constants.DOWNLOADED_USER_DATA_DIRECTORY + File.separator + (System.currentTimeMillis() + Constants.GET_USER_DATA_LOCAL_FILE_LIFESPAN) + "." + Logger.toHexString(serverLabel.getBytes());
+                String userDataPath = Constants.DOWNLOADED_USER_DATA_DIRECTORY + File.separator + (System.currentTimeMillis() + Constants.GET_USER_DATA_LOCAL_FILE_LIFESPAN) + "." + Logger.toHexString(serverLabel.getBytes()) + "-" + Logger.getUuidString(UUID.randomUUID());
                 try (FileOutputStream fis = new FileOutputStream(new File(engineBaseDirectory, userDataPath))) {
                     fis.write(encryptedData.getBytes());
                 }
@@ -512,7 +513,7 @@ class CheckKeycloakRevocationServerMethod extends ServerQueryServerMethod {
 }
 
 class CreateGroupBlobServerMethod extends ServerQueryServerMethod {
-    private static final String SERVER_METHOD_PATH = "groupBlobCreate";
+    private static final String SERVER_METHOD_PATH = "/groupBlobCreate";
 
     private final Identity ownedIdentity;
     private final byte[] token;
@@ -571,7 +572,7 @@ class CreateGroupBlobServerMethod extends ServerQueryServerMethod {
 }
 
 class GetGroupBlobServerMethod extends ServerQueryServerMethod {
-    private static final String SERVER_METHOD_PATH = "groupBlobGet";
+    private static final String SERVER_METHOD_PATH = "/groupBlobGet";
 
     private final String server;
     private final UID groupUid;
@@ -644,7 +645,7 @@ class GetGroupBlobServerMethod extends ServerQueryServerMethod {
 }
 
 class LockGroupBlobServerMethod extends ServerQueryServerMethod {
-    private static final String SERVER_METHOD_PATH = "groupBlobLock";
+    private static final String SERVER_METHOD_PATH = "/groupBlobLock";
 
     private final String server;
     private final UID groupUid;
@@ -720,7 +721,7 @@ class LockGroupBlobServerMethod extends ServerQueryServerMethod {
 }
 
 class UpdateGroupBlobServerMethod extends ServerQueryServerMethod {
-    private static final String SERVER_METHOD_PATH = "groupBlobUpdate";
+    private static final String SERVER_METHOD_PATH = "/groupBlobUpdate";
 
     private final String server;
     private final UID groupUid;
@@ -783,7 +784,7 @@ class UpdateGroupBlobServerMethod extends ServerQueryServerMethod {
 }
 
 class PutGroupLogServerMethod extends ServerQueryServerMethod {
-    private static final String SERVER_METHOD_PATH = "groupLogPut";
+    private static final String SERVER_METHOD_PATH = "/groupLogPut";
 
     private final String server;
     private final UID groupUid;
@@ -793,6 +794,12 @@ class PutGroupLogServerMethod extends ServerQueryServerMethod {
         this.server = server;
         this.groupUid = groupUid;
         this.signature = signature;
+    }
+
+    @Override
+    protected boolean isActiveIdentityRequired() {
+        // this server query is also called when an owned identity is deleted with contact notification --> it should not require an active identity
+        return false;
     }
 
     @Override
@@ -821,7 +828,7 @@ class PutGroupLogServerMethod extends ServerQueryServerMethod {
 
 
 class DeleteGroupBlobServerMethod extends ServerQueryServerMethod {
-    private static final String SERVER_METHOD_PATH = "groupBlobDelete";
+    private static final String SERVER_METHOD_PATH = "/groupBlobDelete";
 
     private final String server;
     private final UID groupUid;
@@ -833,6 +840,12 @@ class DeleteGroupBlobServerMethod extends ServerQueryServerMethod {
         this.server = server;
         this.groupUid = groupUid;
         this.signature = signature;
+    }
+
+    @Override
+    protected boolean isActiveIdentityRequired() {
+        // this server query is also called when an owned identity is deleted with contact notification --> it should not require an active identity
+        return false;
     }
 
     @Override

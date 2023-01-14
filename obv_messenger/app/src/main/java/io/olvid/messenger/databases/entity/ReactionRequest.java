@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,6 +20,7 @@
 package io.olvid.messenger.databases.entity;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -86,11 +87,11 @@ public class ReactionRequest {
     public long serverTimestamp;
 
     @ColumnInfo(name = REACTION)
-    @NonNull
+    @Nullable
     public String reaction;
 
     // default constructor required by Room
-    public ReactionRequest(long discussionId, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, long senderSequenceNumber, @NonNull byte[] reacter, long serverTimestamp, @NonNull String reaction) {
+    public ReactionRequest(long discussionId, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, long senderSequenceNumber, @NonNull byte[] reacter, long serverTimestamp, @Nullable String reaction) {
         this.discussionId = discussionId;
         this.senderIdentifier = senderIdentifier;
         this.senderThreadIdentifier = senderThreadIdentifier;

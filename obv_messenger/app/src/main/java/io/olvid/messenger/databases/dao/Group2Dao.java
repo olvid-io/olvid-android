@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -28,8 +29,6 @@ import androidx.room.Query;
 import androidx.room.Update;
 
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Group;
@@ -223,7 +222,8 @@ public interface Group2Dao {
             " AND ( c." + Contact.BYTES_CONTACT_IDENTITY + " IN (:bytesRemovedMemberIdentities) " +
             " OR ( gm." + Group2Member.BYTES_CONTACT_IDENTITY + " IS NULL " +
             " AND gpm." + Group2PendingMember.BYTES_CONTACT_IDENTITY + " IS NULL ) ) " +
-            " AND c." + Contact.BYTES_CONTACT_IDENTITY + " NOT IN (:bytesAddedMemberIdentities)")
+            " AND c." + Contact.BYTES_CONTACT_IDENTITY + " NOT IN (:bytesAddedMemberIdentities) " +
+            " ORDER BY c." + Contact.SORT_DISPLAY_NAME + " ASC ")
     LiveData<List<Contact>> getAllValidContactsNotInGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, List<byte[]> bytesAddedMemberIdentities, List<byte[]> bytesRemovedMemberIdentities);
 
 

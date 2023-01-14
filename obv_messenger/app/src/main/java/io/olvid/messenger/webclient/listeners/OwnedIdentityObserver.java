@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,23 +19,40 @@
 
 package io.olvid.messenger.webclient.listeners;
 
+import android.os.Handler;
+import android.os.Looper;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Observer;
+
 import java.util.Arrays;
 
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.webclient.WebClientManager;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass;
 
-public class OwnedIdentityObserver implements androidx.lifecycle.Observer<OwnedIdentity> {
+public class OwnedIdentityObserver implements Observer<OwnedIdentity> {
+    @NonNull
     private final WebClientManager manager;
     private byte[] bytesCurrentOwnedIdentity;
 
-    public OwnedIdentityObserver(WebClientManager manager, byte[] bytesCurrentOwnedIdentity) {
+    public OwnedIdentityObserver(@NonNull WebClientManager manager, byte[] bytesCurrentOwnedIdentity) {
         this.manager = manager;
         this.bytesCurrentOwnedIdentity = bytesCurrentOwnedIdentity;
     }
 
     @Override
-    public void onChanged(OwnedIdentity ownedIdentity) {
+    public void onChanged(@Nullable OwnedIdentity ownedIdentity) {
+        if (ownedIdentity == null) {
+            try {
+                this.manager.sendColissimo(ColissimoOuterClass.Colissimo.newBuilder().setType(ColissimoOuterClass.ColissimoType.BYE).build());
+                new Handler(Looper.getMainLooper()).postDelayed(() -> this.manager.getService().stopService(), 500);
+            } catch (Exception ignored) {
+            }
+            return;
+        }
+
         if (!Arrays.equals(bytesCurrentOwnedIdentity, ownedIdentity.bytesOwnedIdentity)) {
             this.bytesCurrentOwnedIdentity = ownedIdentity.bytesOwnedIdentity;
             // send a message to webclient to tell him to start a refresh protocol

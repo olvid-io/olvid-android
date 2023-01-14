@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -101,6 +101,17 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                 }
                 return true;
             });
+        }
+
+        if (!BuildConfig.ENABLE_SSL_HANDSHAKE_VERIFICATION) {
+            Preference notifyCertificateChangePreference = screen.findPreference(SettingsActivity.PREF_KEY_NOTIFY_CERTIFICATE_CHANGE);
+            if (notifyCertificateChangePreference != null) {
+                screen.removePreference(notifyCertificateChangePreference);
+            }
+            Preference blockUntrustedCertificatePreference = screen.findPreference(SettingsActivity.PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE);
+            if (blockUntrustedCertificatePreference != null) {
+                screen.removePreference(blockUntrustedCertificatePreference);
+            }
         }
 
         SwitchPreference permanentForegroundPreference = screen.findPreference(SettingsActivity.PREF_KEY_PERMANENT_FOREGROUND_SERVICE);

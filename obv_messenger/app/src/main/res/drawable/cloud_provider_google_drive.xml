@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector
-    android:height="48dp"
-    android:viewportHeight="87.3"
-    android:viewportWidth="87.3"
-    android:width="48dp"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:pathData="M 6.6,71.5 L 10.45,78.15 C 11.25,79.55 12.4,80.65 13.75,81.45 L 27.5,57.65 L 0.0,57.65 C 0.0,59.2 0.4,60.75 1.2,62.15 L 6.6,71.5" android:fillColor="#0066da"/>
-    <path android:pathData="M 43.65,29.65 L 29.9,5.85 C 28.55,6.65 27.4,7.75 26.6,9.15 L 1.2,53.15 A 9.06,9.06 0.0 0,0 -6.661338147750939e-16,57.65 L 27.5,57.65 L 43.65,29.65" android:fillColor="#00ac47"/>
-    <path android:pathData="M 73.55,81.45 C 74.9,80.65 76.05,79.55 76.85,78.15 L 78.45,75.4 L 86.1,62.15 C 86.9,60.75 87.3,59.2 87.3,57.65 L 59.798,57.65 L 65.65,69.15 L 73.55,81.45" android:fillColor="#ea4335"/>
-    <path android:pathData="M 43.65,29.65 L 57.4,5.85 C 56.05,5.05 54.5,4.65 52.9,4.65 L 34.4,4.65 C 32.8,4.65 31.25,5.1 29.9,5.85 L 43.65,29.65" android:fillColor="#00832d"/>
-    <path android:pathData="M 59.8,57.65 L 27.5,57.65 L 13.75,81.45 C 15.1,82.25 16.65,82.65 18.25,82.65 L 69.05,82.65 C 70.65,82.65 72.2,82.2 73.55,81.45 L 59.8,57.65" android:fillColor="#2684fc"/>
-    <path android:pathData="M 73.4,31.15 L 60.7,9.15 C 59.9,7.75 58.75,6.65 57.4,5.85 L 43.65,29.65 L 59.8,57.65 L 87.25,57.65 C 87.25,56.1 86.85,54.55 86.05,53.15 L 73.4,31.15" android:fillColor="#ffba00"/>
-</vector>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/cloud_provider_google_drive_disabled" android:state_enabled="false"/>
+    <item android:drawable="@drawable/cloud_provider_google_drive_enabled"/>
+</selector>

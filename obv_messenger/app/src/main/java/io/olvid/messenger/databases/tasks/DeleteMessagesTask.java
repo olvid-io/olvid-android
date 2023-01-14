@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -33,6 +33,7 @@ import io.olvid.engine.engine.Engine;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -219,6 +220,7 @@ public class DeleteMessagesTask implements Runnable {
         if (wholeDiscussion) {
             if (discussion.isLocked()) {
                 db.discussionDao().delete(discussion);
+                ShortcutActivity.disableShortcut(discussionId);
             } else if (db.messageDao().getDiscussionDraftMessageSync(discussionId) == null) {
                 // only remove discussion from list if there is no draft
                 discussion.lastMessageTimestamp = 0;
@@ -230,6 +232,7 @@ public class DeleteMessagesTask implements Runnable {
                 if (aDiscussion != null && aDiscussion.isLocked()) {
                     if (db.messageDao().countMessagesInDiscussion(discussionId) == 0) {
                         db.discussionDao().delete(aDiscussion);
+                        ShortcutActivity.disableShortcut(discussionId);
                     }
                 }
             }

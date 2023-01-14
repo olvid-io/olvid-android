@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -274,17 +274,6 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 }
                 break;
             }
-//            case EngineNotifications.API_KEY_REJECTED: {
-//                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.API_KEY_REJECTED_OWNED_IDENTITY_KEY);
-//                if (bytesOwnedIdentity != null) {
-//                    OwnedIdentity identity = db.ownedIdentityDao().get(bytesOwnedIdentity);
-//                    if (identity != null && identity.apiKeyStatus != OwnedIdentity.API_KEY_STATUS_INVALID) {
-//                        identity.apiKeyStatus = OwnedIdentity.API_KEY_STATUS_INVALID;
-//                        db.ownedIdentityDao().update(identity);
-//                    }
-//                }
-//                break;
-//            }
             case EngineNotifications.OWNED_IDENTITY_LIST_UPDATED: {
                 App.runThread(() -> {
                     // only check for ownedIdentityManaged status change, do not handle insertions or deletions here

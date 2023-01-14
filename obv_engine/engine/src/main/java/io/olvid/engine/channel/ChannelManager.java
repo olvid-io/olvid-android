@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -313,6 +313,13 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
         if (obliviousChannel != null) {
             obliviousChannel.delete();
         }
+    }
+
+    public boolean checkIfObliviousChannelExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws Exception {
+        UID currentDeviceUid = identityDelegate.getCurrentDeviceUidOfOwnedIdentity(session, ownedIdentity);
+        // delete the channel
+        ObliviousChannel obliviousChannel = ObliviousChannel.get(wrapSession(session), currentDeviceUid, remoteDeviceUid, remoteIdentity, false);
+        return obliviousChannel != null;
     }
 
     @Override

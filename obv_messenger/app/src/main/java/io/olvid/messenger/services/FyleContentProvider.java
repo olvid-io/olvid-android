@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -56,13 +56,16 @@ public class FyleContentProvider extends ContentProvider {
     public ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode) throws FileNotFoundException {
         Matcher matcher = uriPattern.matcher(uri.toString());
         if (matcher.matches()) {
+            //noinspection ConstantConditions
             String sha256String = matcher.group(1).toUpperCase(Locale.ENGLISH);
             byte[] sha256 = Logger.fromHexString(sha256String);
+            //noinspection ConstantConditions
             long messageId = Long.parseLong(matcher.group(2));
             Fyle fyle = AppDatabase.getInstance().fyleDao().getBySha256(sha256);
             Message message = AppDatabase.getInstance().messageDao().get(messageId);
             if (fyle != null && message != null) {
                 if (fyle.isComplete()) {
+                    //noinspection ConstantConditions
                     File providedFile = new File(App.absolutePathFromRelative(fyle.filePath));
                     return ParcelFileDescriptor.open(providedFile, ParcelFileDescriptor.MODE_READ_ONLY);
                 } else {
@@ -95,8 +98,10 @@ public class FyleContentProvider extends ContentProvider {
         MatrixCursor cursor = new MatrixCursor(projection, 0);
         Matcher matcher = uriPattern.matcher(uri.toString());
         if (matcher.matches()) {
+            //noinspection ConstantConditions
             String sha256String = matcher.group(1).toUpperCase(Locale.ENGLISH);
             byte[] sha256 = Logger.fromHexString(sha256String);
+            //noinspection ConstantConditions
             long messageId = Long.parseLong(matcher.group(2));
             Fyle fyle = AppDatabase.getInstance().fyleDao().getBySha256(sha256);
             if (fyle != null) {
@@ -127,8 +132,10 @@ public class FyleContentProvider extends ContentProvider {
     public String getType(@NonNull Uri uri) {
         Matcher matcher = uriPattern.matcher(uri.toString());
         if (matcher.matches()) {
+            //noinspection ConstantConditions
             String sha256String = matcher.group(1).toUpperCase(Locale.ENGLISH);
             byte[] sha256 = Logger.fromHexString(sha256String);
+            //noinspection ConstantConditions
             long messageId = Long.parseLong(matcher.group(2));
             Fyle fyle = AppDatabase.getInstance().fyleDao().getBySha256(sha256);
             if (fyle != null) {

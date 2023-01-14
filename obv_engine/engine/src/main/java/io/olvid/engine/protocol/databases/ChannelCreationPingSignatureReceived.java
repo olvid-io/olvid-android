@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -42,12 +42,12 @@ public class ChannelCreationPingSignatureReceived implements ObvDatabase {
     static final String SIGNATURE = "signature";
 
 
-    public static ChannelCreationPingSignatureReceived create(ProtocolManagerSession protocolManagerSession/*, UID contactDeviceUid, Identity contactIdentity*/, Identity ownedIdentity, byte[] signature) {
+    public static ChannelCreationPingSignatureReceived create(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity, byte[] signature) {
         if ((ownedIdentity == null) || (signature == null)) {
             return null;
         }
         try {
-            ChannelCreationPingSignatureReceived channelCreationPingSignatureReceived = new ChannelCreationPingSignatureReceived(protocolManagerSession, /*contactDeviceUid, contactIdentity, */ownedIdentity, signature);
+            ChannelCreationPingSignatureReceived channelCreationPingSignatureReceived = new ChannelCreationPingSignatureReceived(protocolManagerSession, ownedIdentity, signature);
             channelCreationPingSignatureReceived.insert();
             return channelCreationPingSignatureReceived;
         } catch (SQLException e) {
@@ -56,25 +56,11 @@ public class ChannelCreationPingSignatureReceived implements ObvDatabase {
         }
     }
 
-    public ChannelCreationPingSignatureReceived(ProtocolManagerSession protocolManagerSession/*, UID contactDeviceUid, Identity contactIdentity*/, Identity ownedIdentity, byte[] signature) {
+    public ChannelCreationPingSignatureReceived(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity, byte[] signature) {
         this.protocolManagerSession = protocolManagerSession;
         this.ownedIdentity = ownedIdentity;
         this.signature = signature;
     }
-
-
-//    private ChannelCreationPingSignatureReceived(ProtocolManagerSession protocolManagerSession, ResultSet res) throws SQLException {
-//        this.protocolManagerSession = protocolManagerSession;
-//
-//        try {
-//            this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
-//        } catch (DecodingException e) {
-//            throw new SQLException();
-//        }
-//        this.signature = res.getBytes(SIGNATURE);
-//    }
-
-
 
 
     public static void createTable(Session session) throws SQLException {

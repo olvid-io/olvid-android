@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -39,6 +39,11 @@ import org.webrtc.audio.JavaAudioDeviceModule;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.SocketAddress;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -139,13 +144,33 @@ class WebrtcPeerConnectionHolder {
 
 //        org.webrtc.Logging.enableLogToDebugOutput(org.webrtc.Logging.Severity.LS_INFO);
 
-
-        peerConnectionFactory = PeerConnectionFactory.builder()
+        PeerConnectionFactory.Builder builder = PeerConnectionFactory.builder()
                 .setOptions(options)
-                .setAudioDeviceModule(audioDeviceModule)
+                .setAudioDeviceModule(audioDeviceModule);
 //                .setVideoEncoderFactory(videoEncoderFactory)
 //                .setVideoDecoderFactory(videoDecoderFactory)
-                .createPeerConnectionFactory();
+
+        // check if a proxy is required for WebRCT
+        try {
+            List<Proxy> proxies = ProxySelector.getDefault().select(URI.create("https://turn-scaled.olvid.io/"));
+            for (Proxy proxy : proxies) {
+                Proxy.Type type = proxy.type();
+                if (type == Proxy.Type.HTTP) {
+                    SocketAddress address = proxy.address();
+                    if (address instanceof InetSocketAddress) {
+                        builder.setHttpsProxy(((InetSocketAddress) address).getHostString(), ((InetSocketAddress) address).getPort());
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String userAgentProperty = System.getProperty("http.agent");
+        if (userAgentProperty != null) {
+            builder.setUserAgent(userAgentProperty);
+        }
+        peerConnectionFactory = builder.createPeerConnectionFactory();
     }
 
 
@@ -440,30 +465,6 @@ class WebrtcPeerConnectionHolder {
         }
     }
 
-
-    // We no longer need to filter out non-relay connections manually
-/*
-    private String filterSdpDescriptionKeepOnlyRelay(String description) {
-        // Pattern to filter out all "host" candidates, which are direct connection candidates, revealing info about the local IP of the user
-        Pattern p = Pattern.compile("^a=candidate:(\\S+\\s+){7}host.*$");
-        BufferedReader br = new BufferedReader(new StringReader(description));
-        StringBuilder sb = new StringBuilder();
-        String line;
-        try {
-            while ((line = br.readLine()) != null) {
-                Matcher m = p.matcher(line);
-                if (!m.find()) {
-                    sb.append(line); sb.append("\n");
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            webrtcCallService.peerConnectionHolderFailed(FailReason.INTERNAL_ERROR);
-            return "";
-        }
-        return sb.toString();
-    }
-*/
 
     private String filterSdpDescriptionCodec(String description) {
         Pattern mediaStartAudio = Pattern.compile("^m=audio\\s+");

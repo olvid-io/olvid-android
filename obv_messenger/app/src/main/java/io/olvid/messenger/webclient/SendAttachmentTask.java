@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -81,8 +81,8 @@ public class SendAttachmentTask implements Runnable {
         }
 
         // start attachment upload
-            byte[] buffer = new byte[Constants.CHUNK_SIZE];
-            continueUpload(buffer, 0, 0, fyleAbsoluteFilePath);
+        byte[] buffer = new byte[Constants.MAX_PAYLOAD_SIZE];
+        continueUpload(buffer, 0, 0, fyleAbsoluteFilePath);
     }
 
     // this function is sending attachments chunks only if websocket connection is not over laoded
@@ -98,7 +98,7 @@ public class SendAttachmentTask implements Runnable {
                     return;
                 }
 
-                if (manager.getConnectionOutputBufferSize() > 10) {
+                if (manager.getConnectionOutputBufferSize() > Constants.MAX_PENDING_BYTES_DURING_ATTACHMENT_UPLOAD) {
                     Logger.w("WebClient: SendAttachmentTask: Connection is blocked, waiting to continue upload");
                     int finalIndex = index;
                     int finalOffset = offset;

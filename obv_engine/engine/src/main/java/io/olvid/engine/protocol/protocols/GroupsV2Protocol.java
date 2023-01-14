@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -984,7 +984,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     public static class DeleteGroupBlobFromServerMessage extends EmptyProtocolMessage {
         private final boolean success;
 
-        private DeleteGroupBlobFromServerMessage(CoreProtocolMessage coreProtocolMessage) {
+        public DeleteGroupBlobFromServerMessage(CoreProtocolMessage coreProtocolMessage) {
             super(coreProtocolMessage);
             success = false;
         }
@@ -1187,7 +1187,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     }
 
     public static class PutGroupLogOnServerMessage extends EmptyProtocolMessage {
-        private PutGroupLogOnServerMessage(CoreProtocolMessage coreProtocolMessage) {
+        public PutGroupLogOnServerMessage(CoreProtocolMessage coreProtocolMessage) {
             super(coreProtocolMessage);
         }
 
@@ -4224,7 +4224,6 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 AuthEncKey encryptionKey = (AuthEncKey) Suite.getKDF(KDF.KDF_SHA256).gen(startState.blobKeys.blobMainSeed, Suite.getDefaultAuthEnc(0).getKDFDelegate())[0];
                 EncryptedBytes encryptedChain = Suite.getAuthEnc(encryptionKey).encrypt(encryptionKey, chainPlaintext, getPrng());
 
-                // kick removed members
                 GroupV2.ServerBlob serverBlob = protocolManagerSession.identityDelegate.getGroupV2ServerBlob(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
 
                 for (GroupV2.IdentityAndPermissionsAndDetails member : serverBlob.groupMemberIdentityAndPermissionsAndDetailsList) {

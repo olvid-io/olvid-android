@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -1481,6 +1481,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     final Uri uri = data.getData();
                     if (StringUtils.validateUri(uri)) {
                         App.runThread(() -> {
+                            //noinspection ConstantConditions
                             try (OutputStream os = DiscussionActivity.this.getContentResolver().openOutputStream(uri)) {
                                 if (os == null) {
                                     throw new Exception("Unable to write to provided Uri");
@@ -3703,7 +3704,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         private final int[] posCardView = new int[2];
 
                         @Override
-                        public boolean onDoubleTap(MotionEvent e) {
+                        public boolean onDoubleTap(@NonNull MotionEvent e) {
                             try {
                                 Utils.launchModifyMessagePopup(DiscussionActivity.this, messages.get(getBindingAdapterPosition() - 1));
                             } catch (Exception ignored) {}
@@ -3711,13 +3712,13 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         }
 
                         @Override
-                        public boolean onSingleTapConfirmed(MotionEvent e) {
+                        public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
                             MessageViewHolder.this.onClick(messageContentCardView);
                             return true;
                         }
 
                         @Override
-                        public void onLongPress(MotionEvent e) {
+                        public void onLongPress(@NonNull MotionEvent e) {
                             if (discussionDelegate != null) {
                                 messageRecyclerView.getLocationInWindow(posRecyclerView);
                                 messageContentCardView.getLocationInWindow(posCardView);
@@ -3762,7 +3763,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             recomputeLayout();
                         }
                     });
-                    messageContentCardView.setSizeChangeListener((w, h, oldw, oldh) -> recomputeLayout());
+                    messageContentCardView.setSizeChangeListener(this::recomputeLayout);
                 }
 
                 messageSenderTextView = itemView.findViewById(R.id.message_sender_text_view);

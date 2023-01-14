@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -63,19 +63,6 @@ public enum ObvCapability {
     public static List<ObvCapability> getAll() {
         return Arrays.asList(ObvCapability.values());
     }
-
-//    public static byte[] serializeDeviceCapabilities(List<ObvCapability> capabilities) {
-//        if (capabilities == null) {
-//            return null;
-//        }
-//        String[] capabilityStrings = new String[capabilities.size()];
-//        int i = 0;
-//        for (ObvCapability capability : capabilities) {
-//            capabilityStrings[i] = capability.toString();
-//            i++;
-//        }
-//        return serializeDeviceCapabilityStrings(capabilityStrings);
-//    }
 
     public static String[] capabilityListToStringArray(List<ObvCapability> capabilities) {
         String[] capabilityStrings = new String[capabilities.size()];

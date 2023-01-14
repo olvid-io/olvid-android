@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -45,4 +45,5 @@ public interface ChannelDelegate {
     void deleteObliviousChannelsWithContact(Session session, Identity ownedIdentity, Identity remoteIdentity) throws Exception;
     void deleteObliviousChannelIfItExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws Exception;
     void deleteAllChannelsForOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
+    boolean checkIfObliviousChannelExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws Exception;
 }

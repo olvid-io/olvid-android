@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -55,6 +55,9 @@ public class PreviewUtilsWithDrawables {
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     public static Drawable getDrawablePreview(Fyle fyle, FyleMessageJoinWithStatus fyleMessageJoinWithStatus, int previewPixelSize) throws PreviewUtils.DrawablePreviewException {
+        if (fyle.sha256 == null) {
+            return null;
+        }
         String cacheKey = Logger.toHexString(fyle.sha256) + "_" + fyleMessageJoinWithStatus.getNonNullMimeType();
         if (fyle.isComplete()) {
             SizeAndDrawable sizeAndDrawable = thumbnailDrawableCache.get(cacheKey);

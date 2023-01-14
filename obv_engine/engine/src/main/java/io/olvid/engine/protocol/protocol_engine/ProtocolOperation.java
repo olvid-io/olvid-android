@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -114,7 +114,6 @@ public final class ProtocolOperation extends Operation {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    protocol = null;
                 }
                 if (protocol == null) {
                     cancel(RFC_UNABLE_TO_RECONSTRUCT_PROTOCOL);

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,9 +19,8 @@
 
 package io.olvid.messenger.databases.tasks;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-import javax.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -31,7 +30,8 @@ import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
 
 public class UpdateAllGroupMembersNames implements Runnable {
-    @Nullable private final byte[] bytesOwnedIdentity;
+    @Nullable
+    private final byte[] bytesOwnedIdentity;
     @Nullable private final byte[] bytesContactIdentity;
 
     public UpdateAllGroupMembersNames() {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -234,6 +234,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }
 
+                    db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_UPLOADED, obvMessage.getServerTimestamp()));
                     db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_DELIVERED, System.currentTimeMillis()));
                     db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_REMOTE_DELETED, remoteDeleteAndEditRequest.serverTimestamp, remoteDeleteAndEditRequest.remoteDeleter));
 
@@ -341,6 +342,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }
 
+                    db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_UPLOADED, obvMessage.getServerTimestamp()));
                     db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_DELIVERED, System.currentTimeMillis()));
                     if (edited) {
                         db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_EDITED, remoteDeleteAndEditRequest.serverTimestamp));
@@ -896,15 +898,11 @@ public class HandleNewMessageNotificationTask implements Runnable {
             if (reactionRequest != null) {
                 if (reactionRequest.serverTimestamp < serverTimestamp) {
                     // we got a newer reaction --> update it
-                    if (jsonReaction.getReaction() == null) {
-                        db.reactionRequestDao().delete(reactionRequest);
-                    } else {
-                        reactionRequest.reaction = jsonReaction.getReaction();
-                        reactionRequest.serverTimestamp = serverTimestamp;
-                        db.reactionRequestDao().update(reactionRequest);
-                    }
+                    reactionRequest.reaction = jsonReaction.getReaction();
+                    reactionRequest.serverTimestamp = serverTimestamp;
+                    db.reactionRequestDao().update(reactionRequest);
                 }
-            } else if (jsonReaction.getReaction() != null) {
+            } else {
                 // only create a reactionRequest if the reaction is non-null
                 reactionRequest = new ReactionRequest(
                         discussion.id,

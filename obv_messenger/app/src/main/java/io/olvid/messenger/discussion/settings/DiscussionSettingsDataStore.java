@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -78,15 +78,11 @@ public class DiscussionSettingsDataStore extends PreferenceDataStore {
                 break;
             }
             case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_CALL_VIBRATION_PATTERN: {
-                performUpdateOnPossiblyNullDiscussionCustomization((DiscussionCustomization discussionCustomization) -> {
-                    discussionCustomization.prefCallNotificationVibrationPattern = value;
-                });
+                performUpdateOnPossiblyNullDiscussionCustomization((DiscussionCustomization discussionCustomization) -> discussionCustomization.prefCallNotificationVibrationPattern = value);
                 break;
             }
             case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_CALL_RINGTONE: {
-                performUpdateOnPossiblyNullDiscussionCustomization((DiscussionCustomization discussionCustomization) -> {
-                    discussionCustomization.prefCallNotificationRingtone = value;
-                });
+                performUpdateOnPossiblyNullDiscussionCustomization((DiscussionCustomization discussionCustomization) -> discussionCustomization.prefCallNotificationRingtone = value);
                 break;
             }
             case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_READ_RECEIPT: {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import java.util.List;
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -42,11 +43,19 @@ public class DeleteOwnedIdentityAndEverythingRelatedToItTask implements Runnable
     public void run() {
         AppDatabase db = AppDatabase.getInstance();
 
+        List<Long> discussionIds = db.discussionDao().getAllDiscussionIdsForOwnedIdentity(bytesOwnedIdentity);
+
         //////////////
         // deleting an OwnedIdentity will cascade delete EVERYTHING related to it!
         OwnedIdentity ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(bytesOwnedIdentity);
         if (ownedIdentity != null) {
             db.ownedIdentityDao().delete(ownedIdentity);
+        }
+
+        //////////////
+        // disable all discussion shortcuts there may be
+        for (Long discussionId : discussionIds) {
+            ShortcutActivity.disableShortcut(discussionId);
         }
 
         //////////////

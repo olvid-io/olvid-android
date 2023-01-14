@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Base64;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,6 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
-import java.net.URI;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Timer;
@@ -56,6 +56,7 @@ import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.Colissimo;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.ColissimoType;
 import io.olvid.messenger.webclient.protobuf.ConnectionColissimoOuterClass.ConnectionColissimo;
 import io.olvid.messenger.webclient.protobuf.ConnectionPingOuterClass;
+import io.olvid.messenger.webclient.protobuf.QrCodeInfoOuterClass;
 import io.olvid.messenger.webclient.protobuf.datatypes.SettingsOuterClass;
 
 public class WebClientManager {
@@ -115,7 +116,9 @@ public class WebClientManager {
     private final String QrCodeBase64Data;
     private final String connectionIdentifier;
     private String correspondingIdentifier;
-    private URI serverUri;
+    private String serverUrl;
+    private @Nullable String awsSessionCookieName;
+    private @Nullable String awsSessionCookie;
     private byte[] rawWebPublicKey;
 
     // Protocol data
@@ -238,14 +241,15 @@ public class WebClientManager {
                 this.stopTimeouts();
                 this.startProtocolTimeout();
                 taskWrapper(() -> {
-                    QrCodeParser.QrCodeParserResult result = QrCodeParser.parse(this.QrCodeBase64Data);
-                    if (result == null) {
+                    QrCodeInfoOuterClass.QrCodeInfo qrCodeInfo = QrCodeParser.parse(this.QrCodeBase64Data);
+                    if (qrCodeInfo == null) {
                         this.updateState(State.ERROR);
-                    }
-                    else {
-                        this.correspondingIdentifier = result.getCorrespondingIdentifier();
-                        this.serverUri = result.getServerUri();
-                        this.rawWebPublicKey = result.getRawWebPublicKey();
+                    } else {
+                        this.correspondingIdentifier = qrCodeInfo.getIdentifier();
+                        this.serverUrl = qrCodeInfo.getServerUrl();
+                        this.awsSessionCookieName = qrCodeInfo.getAwsSessionCookieName();
+                        this.awsSessionCookie = Base64.encodeToString(qrCodeInfo.getAwsSessionCookie().toByteArray(), Base64.NO_WRAP);
+                        this.rawWebPublicKey = qrCodeInfo.getPublicKey().toByteArray();
                         this.updateState(State.READY_FOR_CONNECTION);
                     }
                 });
@@ -258,7 +262,7 @@ public class WebClientManager {
                     this.updateState(State.ERROR_INVALID_STEP);
                     return ;
                 }
-                taskWrapper(() -> this.webSocketClient = new WebsocketClient(this.serverUri, this));
+                taskWrapper(() -> this.webSocketClient = new WebsocketClient(this.serverUrl, this.correspondingIdentifier, this.awsSessionCookieName, this.awsSessionCookie, this));
                 break ;
             // register connection identifier on server
             // shall be called when reconnecting or when opening connection on "start"
@@ -447,21 +451,26 @@ public class WebClientManager {
                         this.webSocketClient.reconnect();
                     });
                 } else if (this.currentState == State.RECONNECTING) {
-                    taskWrapper(() -> {
-                        if (!this.webSocketClient.isOpen()) {
-                            this.webSocketClient.reconnect();
-                        }
-                        else {
-                            Logger.e("reconnecting while connection is open, ignoring");
-                        }
-                    });
+                    if (reconnectionTimer != null) {
+                        reconnectionTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                taskWrapper(() -> {
+                                    if (!WebClientManager.this.webSocketClient.isConnected()) {
+                                        WebClientManager.this.webSocketClient.reconnect();
+                                    } else {
+                                        Logger.e("reconnecting while connection is open, ignoring");
+                                    }
+                                });
+                            }
+                        }, 1000);
+                    }
                 } else if (this.currentState != State.FINISHING && this.isProtocolDone) {
                     Logger.e("Reconnecting in a special state: " + newState);
                     taskWrapper(() -> {
-                        if (!this.webSocketClient.isOpen()) {
+                        if (!this.webSocketClient.isConnected()) {
                             this.webSocketClient.reconnect();
-                        }
-                        else {
+                        } else {
                             Logger.e("reconnecting while connection is open, ignoring");
                         }
                     });
@@ -537,10 +546,6 @@ public class WebClientManager {
         } else {
             this.service.stopServiceWithNotification(StopServiceReason.CONNECTION_ERROR);
         }
-    }
-
-    // used as handler on websocket onError method
-    protected void handlerWebsocketError() {
     }
 
     // called if a connectionRegistered server message arrive
@@ -676,7 +681,7 @@ public class WebClientManager {
         return this.cryptography.decrypt(payload);
     }
 
-    public int getConnectionOutputBufferSize() {
+    public long getConnectionOutputBufferSize() {
         return this.webSocketClient.getConnectionOutputBufferSize();
     }
 

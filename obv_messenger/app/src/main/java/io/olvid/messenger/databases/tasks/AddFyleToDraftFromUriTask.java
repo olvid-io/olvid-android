@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -28,6 +28,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.exifinterface.media.ExifInterface;
 
 import java.io.File;
@@ -42,8 +43,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
@@ -226,6 +225,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                 db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, 0, draftMessage.imageResolutions);
 
                 long lastUpdateTimestamp = 0;
+                //noinspection ConstantConditions
                 try (InputStream is = contentResolver.openInputStream(uri)) {
                     if (is == null) {
                         throw new Exception("Unable to read from provided Uri");

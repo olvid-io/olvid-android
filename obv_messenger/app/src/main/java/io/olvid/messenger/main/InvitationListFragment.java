@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -511,7 +511,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                                 invitationName = null;
                             }
                             holder.initialView.setNullTrustLevel();
-                            holder.initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(invitationName.toString()));
+                            holder.initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(invitationName == null ? "" : invitationName.toString()));
                             break;
                     }
                 }

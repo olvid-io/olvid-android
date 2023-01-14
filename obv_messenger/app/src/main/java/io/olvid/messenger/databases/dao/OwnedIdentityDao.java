@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -165,6 +165,11 @@ public interface OwnedIdentityDao {
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " AND " + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :bytesOwnedIdentity ")
     LiveData<List<OwnedIdentity>> getAllNotHiddenExceptOne(byte[] bytesOwnedIdentity);
+
+    @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
+            " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
+            " ORDER BY COALESCE(" + OwnedIdentity.CUSTOM_DISPLAY_NAME + ", " + OwnedIdentity.DISPLAY_NAME + ") ASC ")
+    List<OwnedIdentity> getAllNotHiddenSortedSync();
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME)
     List<OwnedIdentity> getAll();

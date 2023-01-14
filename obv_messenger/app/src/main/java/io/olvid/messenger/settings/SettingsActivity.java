@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -53,12 +53,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingClientStateListener;
-import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.Purchase;
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -76,10 +70,14 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
+import io.olvid.messenger.billing.BillingUtils;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.services.BackupCloudProviderService;
+import io.olvid.messenger.firebase.ObvFirebaseMessagingService;
 
 public class SettingsActivity extends LockableActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
@@ -206,7 +204,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final boolean PREF_KEY_DISABLE_PUSH_NOTIFICATIONS_DEFAULT = false;
 
     static final String PREF_KEY_PERMANENT_WEBSOCKET = "pref_key_permanent_websocket";
-    static final boolean PREF_KEY_PERMANENT_WEBSOCKET_DEFAULT = false;
+    static final boolean PREF_KEY_PERMANENT_WEBSOCKET_DEFAULT = !BuildConfig.USE_FIREBASE_LIB;
 
     // CONTACTS & GROUPS
 
@@ -478,19 +476,33 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
                 String features = String.join(getString(R.string.text_contact_names_separator), extraFeatures);
                 sb.append(getString(R.string.dialog_message_about_olvid_extra_features, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, Constants.SERVER_API_VERSION, Constants.CURRENT_ENGINE_DB_SCHEMA_VERSION, AppDatabase.DB_SCHEMA_VERSION, features, uptime));
             }
-            sb.append("\n\n");
-
-            String link = getString(R.string.activity_title_open_source_licenses);
-            sb.append(link);
-            SpannableString spannableString = new SpannableString(sb);
-            spannableString.setSpan(new ClickableSpan() {
-                @Override
-                public void onClick(@NonNull View widget) {
-                    OssLicensesMenuActivity.setActivityTitle(getString(R.string.activity_title_open_source_licenses));
-                    startActivity(new Intent(SettingsActivity.this, OssLicensesMenuActivity.class));
+            if (BuildConfig.USE_FIREBASE_LIB && GoogleServicesUtils.googleServicesAvailable(this) && !SettingsActivity.disablePushNotifications()) {
+                sb.append("\n");
+                CharSequence date;
+                if (ObvFirebaseMessagingService.getLastPushNotificationTimestamp() == null) {
+                    date = "-";
+                } else {
+                    date = StringUtils.getLongNiceDateString(this, ObvFirebaseMessagingService.getLastPushNotificationTimestamp());
                 }
-            }, spannableString.length()-link.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            builder.setMessage(spannableString);
+                sb.append(getString(R.string.dialog_message_about_last_push_notification, date));
+            }
+
+            if (BuildConfig.USE_GOOGLE_LIBS) {
+                sb.append("\n\n");
+
+                String link = getString(R.string.activity_title_open_source_licenses);
+                sb.append(link);
+                SpannableString spannableString = new SpannableString(sb);
+                spannableString.setSpan(new ClickableSpan() {
+                    @Override
+                    public void onClick(@NonNull View widget) {
+                        GoogleServicesUtils.openOssMenuActivity(SettingsActivity.this);
+                    }
+                }, spannableString.length() - link.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                builder.setMessage(spannableString);
+            } else {
+                builder.setMessage(sb);
+            }
             Dialog dialog = builder.create();
 
             dialog.setOnShowListener(dialog1 -> {
@@ -529,38 +541,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
             final FragmentActivity activity = requireActivity();
 
-            {
-                final BillingClient billingClient = BillingClient.newBuilder(activity)
-                        .enablePendingPurchases()
-                        .setListener((billingResult, list) -> Logger.d("Purchase updated " + list))
-                        .build();
-
-                billingClient.startConnection(new BillingClientStateListener() {
-                    @Override
-                    public void onBillingSetupFinished(@NonNull BillingResult setupBillingResult) {
-                        billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS, (BillingResult queryBillingResult, List<Purchase> list) -> {
-                            if (list.size() > 0) {
-                                // there are some subscriptions, add a link
-                                new Handler(Looper.getMainLooper()).post(() -> {
-                                    Preference subscriptionPref = new Preference(activity);
-                                    subscriptionPref.setIcon(R.drawable.ic_pref_subscription);
-                                    subscriptionPref.setTitle(R.string.pref_title_subscription);
-                                    subscriptionPref.setOnPreferenceClickListener((preference) -> {
-                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/subscriptions?sku=premium_2020_monthly&package=io.olvid.messenger")));
-                                        return true;
-                                    });
-                                    getPreferenceScreen().addPreference(subscriptionPref);
-                                });
-                            }
-                            billingClient.endConnection();
-                        });
-                    }
-
-                    @Override
-                    public void onBillingServiceDisconnected() {
-                        // nothing to do
-                    }
-                });
+            if (BuildConfig.USE_BILLING_LIB) {
+                BillingUtils.loadSubscriptionSettingsHeader(activity, getPreferenceScreen());
             }
 
             {
@@ -674,23 +656,17 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static float getFontScale() {
         String scaleString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_FONT_SCALE, PREF_KEY_FONT_SCALE_DEFAULT);
-        if (scaleString != null) {
-            try {
-                return Float.parseFloat(scaleString);
-            } catch (Exception ignored) {
-            }
-        }
+        try {
+            return Float.parseFloat(scaleString);
+        } catch (Exception ignored) { }
         return 1.0f;
     }
 
     public static float getScreenScale() {
         String scaleString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_SCREEN_SCALE, PREF_KEY_SCREEN_SCALE_DEFAULT);
-        if (scaleString != null) {
-            try {
-                return Float.parseFloat(scaleString);
-            } catch (Exception ignored) {
-            }
-        }
+        try {
+            return Float.parseFloat(scaleString);
+        } catch (Exception ignored) { }
         return 1.0f;
     }
 
@@ -809,10 +785,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static long getAutoDownloadSize() {
         String downloadSizeString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_AUTODOWNLOAD_SIZE, PREF_KEY_AUTODOWNLOAD_SIZE_DEFAULT);
-        if (downloadSizeString != null) {
-            return Long.parseLong(downloadSizeString);
-        }
-        return 0;
+        return Long.parseLong(downloadSizeString);
     }
 
     public static void setAutoDownloadSize(long autoDownloadSize) {
@@ -924,12 +897,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static Long getDefaultDiscussionRetentionCount() {
         try {
             String retentionCountString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT, PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT_DEFAULT);
-            if (retentionCountString != null) {
-                if ("".equals(retentionCountString)) {
-                    return null;
-                }
-                return Long.parseLong(retentionCountString);
+            if ("".equals(retentionCountString)) {
+                return null;
             }
+            return Long.parseLong(retentionCountString);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -945,12 +916,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static Long getDefaultDiscussionRetentionDuration() {
         try {
             String retentionDurationString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_DEFAULT_DISCUSSION_RETENTION_DURATION, PREF_KEY_DEFAULT_DISCUSSION_RETENTION_DURATION_DEFAULT);
-            if (retentionDurationString != null) {
-                if ("null".equals(retentionDurationString)) {
-                    return null;
-                }
-                return Long.parseLong(retentionDurationString);
+            if ("null".equals(retentionDurationString)) {
+                return null;
             }
+            return Long.parseLong(retentionDurationString);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -976,12 +945,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static Long getDefaultDiscussionVisibilityDuration() {
         try {
             String visibilityDurationString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_DEFAULT_VISIBILITY_DURATION, PREF_KEY_DEFAULT_VISIBILITY_DURATION_DEFAULT);
-            if (visibilityDurationString != null) {
-                if ("null".equals(visibilityDurationString)) {
-                    return null;
-                }
-                return Long.parseLong(visibilityDurationString);
+            if ("null".equals(visibilityDurationString)) {
+                return null;
             }
+            return Long.parseLong(visibilityDurationString);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1001,12 +968,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static Long getDefaultDiscussionExistenceDuration() {
         try {
             String existenceDurationString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_DEFAULT_EXISTENCE_DURATION, PREF_KEY_DEFAULT_EXISTENCE_DURATION_DEFAULT);
-            if (existenceDurationString != null) {
-                if ("null".equals(existenceDurationString)) {
-                    return null;
-                }
-                return Long.parseLong(existenceDurationString);
+            if ("null".equals(existenceDurationString)) {
+                return null;
             }
+            return Long.parseLong(existenceDurationString);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1417,10 +1382,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static int getLockGraceTime() {
         String timeString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCK_GRACE_TIME, PREF_KEY_LOCK_GRACE_TIME_DEFAULT);
-        if (timeString != null) {
-            return Integer.parseInt(timeString);
-        }
-        return -1;
+        return Integer.parseInt(timeString);
     }
 
     public static void setLockGraceTime(int graceTime) {
@@ -1502,17 +1464,11 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static long[] getMessageVibrationPattern() {
         String pattern = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_MESSAGE_VIBRATION_PATTERN, PREF_KEY_MESSAGE_VIBRATION_PATTERN_DEFAULT);
-        if (pattern == null) {
-            pattern = PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT;
-        }
         return intToVibrationPattern(Integer.parseInt(pattern));
     }
 
     public static String getMessageVibrationPatternRaw() {
         String pattern = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_MESSAGE_VIBRATION_PATTERN, PREF_KEY_MESSAGE_VIBRATION_PATTERN_DEFAULT);
-        if (pattern == null) {
-            pattern = PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT;
-        }
         return pattern;
     }
 
@@ -1578,17 +1534,11 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static long[] getCallVibrationPattern() {
         String pattern = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_CALL_VIBRATION_PATTERN, PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT);
-        if (pattern == null) {
-            pattern = PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT;
-        }
         return intToVibrationPattern(Integer.parseInt(pattern));
     }
 
     public static String getCallVibrationPatternRaw() {
         String pattern = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_CALL_VIBRATION_PATTERN, PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT);
-        if (pattern == null) {
-            pattern = PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT;
-        }
         return pattern;
     }
 
@@ -1626,9 +1576,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static int getCameraResolution() {
         String qualityString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_CAMERA_RESOLUTION, PREF_KEY_CAMERA_RESOLUTION_DEFAULT);
-        if (qualityString == null) {
-            return -1;
-        }
         return Integer.parseInt(qualityString);
     }
 

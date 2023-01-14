@@ -267,19 +267,6 @@
             android:configChanges="orientation|screenSize|screenLayout|uiMode"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar.DimmedWithStatusTransparent" />
-        <!-- Override the default theme for OSS to have nicer colors -->
-        <activity
-            android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
-            android:label="@string/oss_license_title"
-            android:theme="@style/AppTheme.WhiteBackground.Licenses" />
-        <activity
-            android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
-            android:theme="@style/AppTheme.WhiteBackground.Licenses" />
-        <!-- Override the default theme for SignInHubActivity to remove nasty close animation after choosing a drive account -->
-        <activity
-            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
-            tools:replace="android:theme"
-            android:theme="@style/AppTheme.NoActionBar.Transparent" />
         <activity
             android:name=".owneddetails.SelectDetailsPhotoActivity"
             android:theme="@style/AppTheme.NoActionBar.FullScreen.Black" />
@@ -340,14 +327,6 @@
             android:theme="@style/AppTheme.NoActionBar.ActionModeOverlay" />
 
 
-        <service
-            android:name=".services.ObvFirebaseMessagingService"
-            android:exported="true"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
         <service android:name=".notifications.NotificationActionService"
             android:exported="false"/>
         <service

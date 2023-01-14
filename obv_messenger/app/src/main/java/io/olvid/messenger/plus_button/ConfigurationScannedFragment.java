@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -302,7 +302,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
 
         // show current status
         currentCardView.setVisibility(View.VISIBLE);
-        SubscriptionStatusFragment currentSubscriptionStatusFragment = SubscriptionStatusFragment.newInstance(ownedIdentity.bytesOwnedIdentity, ownedIdentity.getApiKeyStatus(), ownedIdentity.apiKeyExpirationTimestamp, ownedIdentity.getApiKeyPermissions(), false, false);
+        SubscriptionStatusFragment currentSubscriptionStatusFragment = SubscriptionStatusFragment.newInstance(ownedIdentity.bytesOwnedIdentity, ownedIdentity.getApiKeyStatus(), ownedIdentity.apiKeyExpirationTimestamp, ownedIdentity.getApiKeyPermissions(), false, false, AppSingleton.getOtherProfileHasCallsPermission());
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.current_license_status_placeholder, currentSubscriptionStatusFragment);
         transaction.commit();
@@ -546,7 +546,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
                 new Handler(Looper.getMainLooper()).post(() -> {
                     newLicenseStatusPlaceholder.removeAllViews();
 
-                    SubscriptionStatusFragment newSubscriptionStatusFragment = SubscriptionStatusFragment.newInstance(bytesOwnedIdentity, apiKeyStatus, apiKeyExpirationTimestamp, permissions, true, false);
+                    SubscriptionStatusFragment newSubscriptionStatusFragment = SubscriptionStatusFragment.newInstance(bytesOwnedIdentity, apiKeyStatus, apiKeyExpirationTimestamp, permissions, true, false, AppSingleton.getOtherProfileHasCallsPermission());
                     FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
                     transaction.replace(R.id.new_license_status_placeholder, newSubscriptionStatusFragment);
                     transaction.commit();

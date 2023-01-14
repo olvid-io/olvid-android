@@ -1319,7 +1319,7 @@
     <string name="dialog_message_widget_open_initial_hidden_profile">This widget is using a hidden profile. Please enter this profile\'s password to configure it.</string>
     <string name="menu_action_forward">Forward</string>
     <string name="dialog_title_forward_message_explanation">Message forward</string>
-    <string name="dialog_message_forward_message_explanation">Message forwarding allows you to re-post one or several messages and their attachments in multiple discussions at once.\nThese messages will be seen as sent by you, with the mention \"Forwarded\" and without mention of the original author.\nPress \"Proceed\" to select the discussions in which to forward these messages.</string>
+    <string name="dialog_message_forward_message_explanation">Message forwarding allows you to re-post one or several messages and their attachments in multiple discussions at once.\nMessages you received will be seen as sent by you, with the mention \"Forwarded\" and without mention of the original author.\nPress \"Proceed\" to select the discussions in which to forward these messages.</string>
     <string name="dialog_title_forward_to">Forward to…</string>
     <string name="button_label_forward">Forward</string>
     <string name="label_forwarded">Forwarded</string>
@@ -1583,6 +1583,11 @@
     <string name="button_label_clone_this_group">Clone this group</string>
     <string name="dialog_title_introducing_groups_v2">Introducing new groups!</string>
     <string name="dialog_message_introducing_groups_v2">Olvid now supports new groups with multiple administrators\u00a0👑! This does not change anything to your existing \"old groups\" but applies to all groups you create from now on. To benefit from this, your contacts need to use the latest version of Olvid.\n\nWant to try this out? Tap on the group tab and create a new group. Once created, you may edit it to grant administrator privilege to as many members as you wish!</string>
+    <string name="dialog_message_about_last_push_notification">Latest push notification: %1$s</string>
+    <string name="text_message_too_large_for_webclient">[Message too large to display in web client]</string>
+    <string name="text_invalid_shortcut">Invalid shortcut</string>
+    <string name="text_feature_initiate_secure_calls_from_another_profile">Initiate secure calls\n(available through another profile)</string>
+
 
 
 

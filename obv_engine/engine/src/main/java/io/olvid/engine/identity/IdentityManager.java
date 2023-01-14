@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -625,15 +625,6 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return null;
     }
 
-//    @Override
-//    public JsonWebKeySet getOwnedIdentityKeycloakJwks(Session session, Identity ownedIdentity) throws SQLException {
-//        OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
-//        if (ownedIdentityObject != null) {
-//            return ownedIdentityObject.getKeycloakJwks();
-//        }
-//        return null;
-//    }
-
     @Override
     public JsonWebKey getOwnedIdentityKeycloakSignatureKey(Session session, Identity ownedIdentity) throws SQLException {
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
@@ -680,32 +671,6 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             } catch (Exception ignored) { }
         }
     }
-
-//    @Override
-//    public JsonWebKeySet getTrustedKeycloakJwks(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException {
-//        KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), keycloakServerUrl, ownedIdentity);
-//        if (keycloakServer != null) {
-//            try {
-//                return keycloakServer.getJwks();
-//            } catch (Exception e) {
-//                // nothing
-//            }
-//        }
-//        return null;
-//    }
-//
-//    @Override
-//    public JsonWebKey getTrustedKeycloakSignatureKey(Session session, Identity ownedIdentity, String keycloakServerUrl) throws SQLException {
-//        KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), keycloakServerUrl, ownedIdentity);
-//        if (keycloakServer != null) {
-//            try {
-//                return keycloakServer.getSignatureKey();
-//            } catch (Exception e) {
-//                // nothing
-//            }
-//        }
-//        return null;
-//    }
 
     @Override
     public List<String> getKeycloakPushTopics(Session session, Identity ownedIdentity) throws SQLException {
@@ -1405,15 +1370,6 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
     }
 
-//    @Override
-//    public TrustLevel getContactIdentityTrustLevel(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-//        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
-//        if (contactIdentityObject == null) {
-//            return null;
-//        }
-//        return contactIdentityObject.getTrustLevel();
-//    }
-
     @Override
     public EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
         ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
@@ -1577,21 +1533,6 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             throw new Exception();
         }
         contactDevice.setRawDeviceCapabilities(rawDeviceCapabilities);
-        // This presents a security risk as a contact could pretend not to have oneToOne capability to automatically gain oneToOne access
-        // We comment this out as all users should be oneToOne capable by now!
-        /*
-               if (contactDevice.setRawDeviceCapabilities(rawDeviceCapabilities)) {
-                   // check if this device is capable of handling non-oneToOne contacts
-                   List<ObvCapability> contactDeviceCapabilities = contactDevice.getDeviceCapabilities();
-                   if (contactDeviceCapabilities != null && !contactDeviceCapabilities.contains(ObvCapability.ONE_TO_ONE_CONTACTS)) {
-                       ContactIdentity contact = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
-                       if (contact != null && !contact.isOneToOne()) {
-                           // the contact needs to be upgraded to oneToOne as he will not understand our non-oneToOne protocols
-                           contact.setOneToOne(true);
-                       }
-                   }
-               }
-        */
     }
 
     @Override
@@ -1848,8 +1789,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     // only for groups you do not own, when you get kicked or you leave
     @Override
-    public void leaveGroup(Session session, byte[] groupUid, Identity ownedIdentity) throws Exception {
-        ContactGroup contactGroup = ContactGroup.get(wrapSession(session), groupUid, ownedIdentity);
+    public void leaveGroup(Session session, byte[] groupOwnerAndUid, Identity ownedIdentity) throws Exception {
+        ContactGroup contactGroup = ContactGroup.get(wrapSession(session), groupOwnerAndUid, ownedIdentity);
         if (contactGroup == null) {
             Logger.e("Error in leaveGroup: group not found");
             throw new Exception();
@@ -2203,6 +2144,17 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         session.addSessionCommitListener(backupNeededSessionCommitListener);
     }
 
+    @Override
+    public void forcefullyRemoveMemberOrPendingFromJoinedGroup(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, Identity contactIdentity) throws SQLException {
+        PendingGroupMember pendingGroupMember = PendingGroupMember.get(wrapSession(session), groupOwnerAndUid, ownedIdentity, contactIdentity);
+        if (pendingGroupMember != null) {
+            pendingGroupMember.delete();
+        }
+        ContactGroupMembersJoin contactGroupMembersJoin = ContactGroupMembersJoin.get(wrapSession(session), groupOwnerAndUid, ownedIdentity, contactIdentity);
+        if (contactGroupMembersJoin != null) {
+            contactGroupMembersJoin.delete();
+        }
+    }
 
     @Override
     public GroupWithDetails[] getGroupsForOwnedIdentity(Session session, Identity ownedIdentity) throws Exception {
@@ -2378,6 +2330,11 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     @Override
     public byte[][] getGroupOwnerAndUidOfGroupsWhereContactIsPending(Session session, Identity contactIdentity, Identity ownedIdentity) {
         return PendingGroupMember.getGroupOwnerAndUidOfGroupsWhereContactIsPending(wrapSession(session), contactIdentity, ownedIdentity, false);
+    }
+
+    @Override
+    public byte[][] getGroupOwnerAndUidsOfGroupsContainingContact(Session session, Identity contactIdentity, Identity ownedIdentity) throws SQLException {
+        return ContactGroupMembersJoin.getGroupOwnerAndUidsOfGroupsContainingContact(wrapSession(session), contactIdentity, ownedIdentity);
     }
 
     @Override
@@ -2944,23 +2901,22 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public List<ObvGroupV2> getObvGroupsV2ForOwnedIdentity(Identity ownedIdentity) throws Exception {
+    public List<ObvGroupV2> getObvGroupsV2ForOwnedIdentity(Session session, Identity ownedIdentity) throws Exception {
         if (ownedIdentity == null) {
             throw new Exception();
         }
 
-        try (IdentityManagerSession identityManagerSession = getSession()) {
-            List<ContactGroupV2> groupsV2 = ContactGroupV2.getAllForIdentity(identityManagerSession, ownedIdentity);
+        IdentityManagerSession identityManagerSession = wrapSession(session);
+        List<ContactGroupV2> groupsV2 = ContactGroupV2.getAllForIdentity(identityManagerSession, ownedIdentity);
 
-            List<ObvGroupV2> obvGroupsV2 = new ArrayList<>();
-            for (ContactGroupV2 groupV2 : groupsV2) {
-                ObvGroupV2 obvGroupV2 = groupV2toObvGroupV2(identityManagerSession, ownedIdentity, groupV2.getGroupIdentifier(), groupV2);
-                if (obvGroupV2 != null) {
-                    obvGroupsV2.add(obvGroupV2);
-                }
+        List<ObvGroupV2> obvGroupsV2 = new ArrayList<>();
+        for (ContactGroupV2 groupV2 : groupsV2) {
+            ObvGroupV2 obvGroupV2 = groupV2toObvGroupV2(identityManagerSession, ownedIdentity, groupV2.getGroupIdentifier(), groupV2);
+            if (obvGroupV2 != null) {
+                obvGroupsV2.add(obvGroupV2);
             }
-            return obvGroupsV2;
         }
+        return obvGroupsV2;
     }
 
     @Override
@@ -2973,6 +2929,16 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
+    public GroupV2.IdentifierAndAdminStatus[] getGroupsV2IdentifierAndMyAdminStatusForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
+        if (ownedIdentity == null || contactIdentity == null) {
+            throw new Exception();
+        }
+
+        return ContactGroupV2.getGroupsV2IdentifierAndMyAdminStatusForContact(wrapSession(session), ownedIdentity, contactIdentity);
+    }
+
+
+        @Override
     public void initiateGroupV2BatchKeysResend(UID currentDeviceUid, Identity contactIdentity, UID contactDeviceUid) {
         if (contactIdentity == null || contactDeviceUid == null) {
             return;
@@ -2992,6 +2958,23 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void forcefullyRemoveMemberOrPendingFromNonAdminGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity) throws SQLException {
+        ContactGroupV2 contactGroupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (contactGroupV2 != null) {
+            contactGroupV2.triggerUpdateNotification();
+
+            ContactGroupV2PendingMember pendingMember = ContactGroupV2PendingMember.get(wrapSession(session), ownedIdentity, groupIdentifier, contactIdentity);
+            if (pendingMember != null) {
+                pendingMember.delete();
+            }
+            ContactGroupV2Member member = ContactGroupV2Member.get(wrapSession(session), ownedIdentity, groupIdentifier, contactIdentity);
+            if (member != null) {
+                member.delete();
+            }
         }
     }
 

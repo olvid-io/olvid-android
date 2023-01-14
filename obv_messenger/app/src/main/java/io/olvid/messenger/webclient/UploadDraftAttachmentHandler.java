@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -126,7 +126,7 @@ public class UploadDraftAttachmentHandler {
 
     void handleAttachmentChunk(long attachmentLocalId, long offset, long index, byte [] chunk) {
         Attachment attachment = this.attachmentsMap.get(attachmentLocalId);
-        if(attachment == null){ //no attachment associated to id (for example upload was canceled in the middle)
+        if(attachment == null) { //no attachment associated to id (for example upload was canceled in the middle)
             Logger.e("UploadDraftAttachmentHandler : No attachment for this Id");
             return;
         }

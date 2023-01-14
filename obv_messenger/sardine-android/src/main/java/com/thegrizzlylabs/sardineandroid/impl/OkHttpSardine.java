@@ -60,6 +60,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.namespace.QName;
 
+import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -68,6 +69,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.Route;
 
 /**
  * Created by guillaume on 08/11/2017.
@@ -82,6 +84,7 @@ public class OkHttpSardine implements Sardine {
     }
 
     public OkHttpSardine(@Nullable SSLSocketFactory sslSocketFactory) {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
         if (sslSocketFactory != null) {
             try {
                 TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
@@ -94,15 +97,37 @@ public class OkHttpSardine implements Sardine {
                 }
                 X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
 
-                this.client = new OkHttpClient.Builder()
-                        .sslSocketFactory(sslSocketFactory, trustManager)
-                        .build();
-                return;
+                builder.sslSocketFactory(sslSocketFactory, trustManager);
             } catch (Exception ignored) {
                 Log.w("Sardine", "Failed to initialize TrustManager for Sardine.");
             }
         }
-        this.client = new OkHttpClient.Builder().build();
+
+        String userAgentProperty = System.getProperty("http.agent");
+        if (userAgentProperty != null) {
+            builder.addInterceptor(
+                    (Interceptor.Chain chain) -> chain.proceed(chain.request().newBuilder().header("User-Agent", userAgentProperty).build())
+            );
+            builder.proxyAuthenticator((Route route, Response response) -> {
+                Request request = Authenticator.JAVA_NET_AUTHENTICATOR.authenticate(route, response);
+                if (request == null) {
+                    if (route == null) {
+                        return null;
+                    }
+                    return new Request.Builder()
+                            .url(route.address().url())
+                            .method("CONNECT", null)
+                            .header("Host", okhttp3.internal.Util.toHostHeader(route.address().url(), true))
+                            .header("Proxy-Connection", "Keep-Alive")
+                            .header("User-Agent", userAgentProperty)
+                            .build();
+                } else {
+                    return request.newBuilder().header("User-Agent", userAgentProperty).build();
+                }
+            });
+        }
+
+        this.client = builder.build();
     }
 
 

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -997,19 +997,26 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 return new CancelledState();
             }
 
-            // add the contact deviceUid if not already there --> we also trigger a device discovery
+            // add the contact deviceUid if not already there --> we no longer trigger a device discovery
             try {
                 protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid);
-
-                UID childProtocolInstanceUid = new UID(getPrng());
-                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
-                        ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false);
-                ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
-                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             } catch (Exception e) {
                 Logger.w("Exception when adding a contact device");
+            }
+
+            // if there is already a channel, we have a problem! Abort the protocol and restart from scratch
+            if (protocolManagerSession.channelDelegate.checkIfObliviousChannelExists(protocolManagerSession.session, getOwnedIdentity(), startState.contactDeviceUid, startState.contactIdentity)) {
+                UID childProtocolInstanceUid = new UID(getPrng());
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                        SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID,
+                        childProtocolInstanceUid,
+                        false
+                );
+                ChannelMessageToSend messageToSend = new ChannelCreationWithContactDeviceProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity, startState.contactDeviceUid).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
+                return new CancelledState();
             }
 
             // create the channel
@@ -1058,19 +1065,26 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 return new CancelledState();
             }
 
-            // Add the contactDeviceUid to the contactIdentity (if needed --> we also trigger a device discovery)
+            // Add the contactDeviceUid to the contactIdentity if needed --> we no longer trigger a device discovery
             try {
                 protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid);
-
-                UID childProtocolInstanceUid = new UID(getPrng());
-                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
-                        ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false);
-                ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
-                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             } catch (Exception e) {
                 Logger.w("Exception when adding a contact device");
+            }
+
+            // if there is already a channel, we have a problem! Abort the protocol and restart from scratch
+            if (protocolManagerSession.channelDelegate.checkIfObliviousChannelExists(protocolManagerSession.session, getOwnedIdentity(), startState.contactDeviceUid, startState.contactIdentity)) {
+                UID childProtocolInstanceUid = new UID(getPrng());
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                        SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID,
+                        childProtocolInstanceUid,
+                        false
+                );
+                ChannelMessageToSend messageToSend = new ChannelCreationWithContactDeviceProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity, startState.contactDeviceUid).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
+                return new CancelledState();
             }
 
 

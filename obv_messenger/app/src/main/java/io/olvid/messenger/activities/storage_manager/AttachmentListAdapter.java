@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -495,8 +495,13 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                     runningPreviews.put(fyleAndStatus, this);
                 } else {
                     if (fyleAndStatus.fyle.isComplete()) {
-                        oldTask.interrupt = true;
-                        runningPreviews.put(fyleAndStatus, this);
+                        // only interrupt the current running task if it is for the same view holder
+                        AttachmentViewHolder oldHolder = oldTask.holderWeakReference.get();
+                        AttachmentViewHolder holder = holderWeakReference.get();
+                        if (holder == oldHolder) {
+                            oldTask.interrupt = true;
+                            runningPreviews.put(fyleAndStatus, this);
+                        }
                     } else {
                         return;
                     }

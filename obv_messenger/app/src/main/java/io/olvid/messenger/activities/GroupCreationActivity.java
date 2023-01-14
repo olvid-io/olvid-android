@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -282,40 +282,42 @@ public class GroupCreationActivity extends LockableActivity implements View.OnCl
         if (viewPager.getCurrentItem() == CONTACTS_SELECTION_TAB) {
             getMenuInflater().inflate(R.menu.menu_group_creation_contact_selection, menu);
             final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-            searchView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(@NonNull View v) {
-                    groupCreationViewModel.setSearchOpened(true);
-                }
+            if (searchView != null) {
+                searchView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(@NonNull View v) {
+                        groupCreationViewModel.setSearchOpened(true);
+                    }
 
-                @Override
-                public void onViewDetachedFromWindow(@NonNull View v) {
-                    groupCreationViewModel.setSearchOpened(false);
+                    @Override
+                    public void onViewDetachedFromWindow(@NonNull View v) {
+                        groupCreationViewModel.setSearchOpened(false);
+                    }
+                });
+                searchView.setQueryHint(getString(R.string.hint_search_contact_name));
+                if (SettingsActivity.useKeyboardIncognitoMode()) {
+                    searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
                 }
-            });
-            searchView.setQueryHint(getString(R.string.hint_search_contact_name));
-            if (SettingsActivity.useKeyboardIncognitoMode()) {
-                searchView.setImeOptions(searchView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
+                searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_FILTER);
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    final EditText editText = new AppCompatEditText(searchView.getContext());
+
+                    {
+                        contactsSelectionFragment.setContactFilterEditText(editText);
+                    }
+
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        editText.setText(newText);
+                        return true;
+                    }
+                });
             }
-            searchView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_FILTER);
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                final EditText editText = new AppCompatEditText(searchView.getContext());
-
-                {
-                    contactsSelectionFragment.setContactFilterEditText(editText);
-                }
-
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    return true;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    editText.setText(newText);
-                    return true;
-                }
-            });
         }
         return true;
     }

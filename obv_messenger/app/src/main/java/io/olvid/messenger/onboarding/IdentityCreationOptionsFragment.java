@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -278,7 +278,7 @@ public class IdentityCreationOptionsFragment extends Fragment implements View.On
                         licenseStatusLoader.setVisibility(View.GONE);
                         licenseStatusPlaceholder.setVisibility(View.VISIBLE);
 
-                        SubscriptionStatusFragment newSubscriptionStatusFragment = SubscriptionStatusFragment.newInstance(bytesOwnedIdentity, apiKeyStatus, apiKeyExpirationTimestamp, permissions, true, false);
+                        SubscriptionStatusFragment newSubscriptionStatusFragment = SubscriptionStatusFragment.newInstance(bytesOwnedIdentity, apiKeyStatus, apiKeyExpirationTimestamp, permissions, true, false, false);
                         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
                         transaction.replace(R.id.license_status_placeholder, newSubscriptionStatusFragment);
                         transaction.commit();

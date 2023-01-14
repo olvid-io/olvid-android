@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -181,13 +181,16 @@ public class CustomSSLSocketFactory extends SSLSocketFactory implements Handshak
     @Override
     public void handshakeCompleted(HandshakeCompletedEvent event) {
         try {
-            Logger.d("Connected to " + event.getSocket().getInetAddress().getHostName() + " using cipher suite " + event.getCipherSuite());
-            final String hostname = event.getSocket().getInetAddress().getHostName();
+            final String hostname = event.getSession().getPeerHost();
+            if (hostname == null) {
+                return;
+            }
+            Logger.d("Connected to " + hostname + " using cipher suite " + event.getCipherSuite());
             final Certificate[] certificates = event.getPeerCertificates();
 
             synchronized (knownCertificatesByDomainCache) {
                 if (!cacheInitialized || !verifySllCertificateAndAllowConnection(hostname, certificates)) {
-                    Logger.e("Connection to " + event.getSocket().getInetAddress().getHostName() + " was blocked");
+                    Logger.e("Connection to " + hostname + " was blocked");
                     App.runThread(() -> { // we close the connection from another thread to avoid crashed on API 27 & 28
                         try {
                             event.getSocket().close();
@@ -213,9 +216,7 @@ public class CustomSSLSocketFactory extends SSLSocketFactory implements Handshak
                     // no known certificate, automatically trust this new certificate (trust on first use)
                     KnownCertificate newKnownCertificate = getKnownCertificateForDb(domainName, certificates, true);
                     if (newKnownCertificate != null) {
-                        App.runThread(() -> {
-                            insertCertificateInDb(domainName, newKnownCertificate);
-                        });
+                        App.runThread(() -> insertCertificateInDb(domainName, newKnownCertificate));
                     }
                     return true;
                 } else {

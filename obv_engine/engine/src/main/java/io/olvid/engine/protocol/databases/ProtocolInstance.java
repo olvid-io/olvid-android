@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -173,6 +173,13 @@ public class ProtocolInstance implements ObvDatabase {
                 statement.execute("DELETE FROM protocol_instance WHERE protocol_id = 5;");
             }
             oldVersion = 11;
+        }
+        if (oldVersion < 33 && newVersion >= 33) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING protocol_instance DATABASE FROM VERSION " + oldVersion + " TO 33");
+                statement.execute("DELETE FROM protocol_instance WHERE protocol_id = 1;");
+            }
+            oldVersion = 33;
         }
     }
 

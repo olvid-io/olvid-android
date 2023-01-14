@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -100,7 +100,7 @@ public class ReactionListBottomSheetFragment extends BottomSheetDialogFragment {
         View view = inflater.inflate(R.layout.bottom_sheet_fragment_reactions_list, container, false);
 
         // create reactions recycler view required elements
-        LiveData<List<Reaction>> reactionsLiveData = AppDatabase.getInstance().reactionDao().getAllForMessageSortedByTimestampLiveData(messageId);
+        LiveData<List<Reaction>> reactionsLiveData = AppDatabase.getInstance().reactionDao().getAllNonNullForMessageSortedByTimestampLiveData(messageId);
         reactionsRecyclerView = view.findViewById(R.id.reactions_list);
         reactionsAdapter = new ReactionListAdapter();
         reactionsLiveData.observe(this, this.reactionsAdapter);
@@ -177,7 +177,7 @@ public class ReactionListBottomSheetFragment extends BottomSheetDialogFragment {
 
             List<Reaction> filteredReactions = new ArrayList<>();
             for (Reaction reaction : reactionsList) {
-                if (reaction.emoji.equals(filter)) {
+                if (Objects.equals(reaction.emoji, filter)) {
                     filteredReactions.add(reaction);
                 }
             }

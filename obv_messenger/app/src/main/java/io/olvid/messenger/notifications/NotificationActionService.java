@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -74,24 +74,26 @@ public class NotificationActionService extends IntentService {
                 if (dialogUuid != null) {
                     try {
                         Invitation invitation = AppDatabase.getInstance().invitationDao().getByDialogUuid(dialogUuid);
-                        switch (invitation.associatedDialog.getCategory().getId()) {
-                            case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
-                                invitation.associatedDialog.setResponseToAcceptInvite(true);
-                                break;
-                            case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
-                                invitation.associatedDialog.setResponseToAcceptMediatorInvite(true);
-                                break;
-                            case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
-                            case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY:
-                                invitation.associatedDialog.setResponseToAcceptGroupInvite(true);
-                                break;
-                            case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
-                                invitation.associatedDialog.setResponseToAcceptOneToOneInvitation(true);
-                                break;
-                            default:
-                                throw new Exception("Bad dialog category");
+                        if (invitation != null) {
+                            switch (invitation.associatedDialog.getCategory().getId()) {
+                                case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
+                                    invitation.associatedDialog.setResponseToAcceptInvite(true);
+                                    break;
+                                case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
+                                    invitation.associatedDialog.setResponseToAcceptMediatorInvite(true);
+                                    break;
+                                case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
+                                case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY:
+                                    invitation.associatedDialog.setResponseToAcceptGroupInvite(true);
+                                    break;
+                                case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
+                                    invitation.associatedDialog.setResponseToAcceptOneToOneInvitation(true);
+                                    break;
+                                default:
+                                    throw new Exception("Bad dialog category");
+                            }
+                            AppSingleton.getEngine().respondToDialog(invitation.associatedDialog);
                         }
-                        AppSingleton.getEngine().respondToDialog(invitation.associatedDialog);
                         AndroidNotificationManager.clearInvitationNotification(dialogUuid);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -104,25 +106,27 @@ public class NotificationActionService extends IntentService {
                 if (dialogUuid != null) {
                     try {
                         Invitation invitation = AppDatabase.getInstance().invitationDao().getByDialogUuid(dialogUuid);
-                        switch (invitation.associatedDialog.getCategory().getId()) {
-                            case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
-                                invitation.associatedDialog.setResponseToAcceptInvite(false);
-                                break;
-                            case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
-                                invitation.associatedDialog.setResponseToAcceptMediatorInvite(false);
-                                break;
-                            case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
-                            case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY:
-                            case ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY:
-                                invitation.associatedDialog.setResponseToAcceptGroupInvite(false);
-                                break;
-                            case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
-                                invitation.associatedDialog.setResponseToAcceptOneToOneInvitation(false);
-                                break;
-                            default:
-                                throw new Exception("Bad dialog category");
+                        if (invitation != null) {
+                            switch (invitation.associatedDialog.getCategory().getId()) {
+                                case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
+                                    invitation.associatedDialog.setResponseToAcceptInvite(false);
+                                    break;
+                                case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
+                                    invitation.associatedDialog.setResponseToAcceptMediatorInvite(false);
+                                    break;
+                                case ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY:
+                                case ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY:
+                                case ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY:
+                                    invitation.associatedDialog.setResponseToAcceptGroupInvite(false);
+                                    break;
+                                case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
+                                    invitation.associatedDialog.setResponseToAcceptOneToOneInvitation(false);
+                                    break;
+                                default:
+                                    throw new Exception("Bad dialog category");
+                            }
+                            AppSingleton.getEngine().respondToDialog(invitation.associatedDialog);
                         }
-                        AppSingleton.getEngine().respondToDialog(invitation.associatedDialog);
                         AndroidNotificationManager.clearInvitationNotification(dialogUuid);
                     } catch (Exception e) {
                         e.printStackTrace();

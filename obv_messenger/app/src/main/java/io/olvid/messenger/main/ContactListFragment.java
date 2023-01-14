@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -888,8 +888,6 @@ public class ContactListFragment extends Fragment implements PopupMenu.OnMenuIte
                             }
                             canvas.save();
                             parent.getDecoratedBoundsWithMargins(child, itemRect);
-//                            itemRect.top += child.getTranslationY();
-//                            itemRect.bottom += child.getTranslationY();
                             Paint paint = new Paint();
                             paint.setAlpha((int) (child.getAlpha() * 255));
                             canvas.drawBitmap(notOneToOneHeaderBitmap, itemRect.left, itemRect.top, paint);
@@ -917,8 +915,6 @@ public class ContactListFragment extends Fragment implements PopupMenu.OnMenuIte
                             }
                             canvas.save();
                             parent.getDecoratedBoundsWithMargins(child, itemRect);
-//                            itemRect.top += child.getTranslationY();
-//                            itemRect.bottom += child.getTranslationY();
                             Paint paint = new Paint();
                             paint.setAlpha((int) (child.getAlpha() * 255));
                             canvas.drawBitmap(keycloakHeaderBitmap, itemRect.left, itemRect.top, paint);

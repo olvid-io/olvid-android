@@ -13,7 +13,6 @@
             <option value="$PROJECT_DIR$/../obv_engine/engine" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/java-websocket" />
             <option value="$PROJECT_DIR$/libwebrtc" />
             <option value="$PROJECT_DIR$/sardine-android" />
           </set>

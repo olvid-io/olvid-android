@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -43,6 +43,10 @@ public class NoExceptionConnectionBuilder implements ConnectionBuilder {
             HttpURLConnection connection = INSTANCE.openConnection(uri);
             if (connection instanceof HttpsURLConnection && AppSingleton.getSslSocketFactory() != null) {
                 ((HttpsURLConnection) connection).setSSLSocketFactory(AppSingleton.getSslSocketFactory());
+            }
+            String userAgentProperty = System.getProperty("http.agent");
+            if (userAgentProperty != null) {
+                connection.setRequestProperty("User-Agent", userAgentProperty);
             }
             return connection;
         } catch (Exception e) {

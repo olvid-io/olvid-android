@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2023 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -156,6 +156,9 @@ public class PreviewUtils {
     }
 
     public static Bitmap getBitmapPreview(Fyle fyle, FyleMessageJoinWithStatus fyleMessageJoinWithStatus, int previewPixelSize) {
+        if (fyle.sha256 == null) {
+            return null;
+        }
         String cacheKey = Logger.toHexString(fyle.sha256) + "_" + fyleMessageJoinWithStatus.getNonNullMimeType();
         if (fyle.isComplete()) {
             SizeAndBitmap sizeAndBitmap = thumbnailCache.get(cacheKey);

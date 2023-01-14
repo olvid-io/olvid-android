@@ -14,6 +14,10 @@
         android:title="@string/menu_action_rename"
         app:showAsAction="ifRoom"/>
     <item
+        android:id="@+id/action_clone_group"
+        android:orderInCategory="130"
+        android:title="@string/menu_action_clone_group"/>
+    <item
         android:id="@+id/action_leave_group"
         android:orderInCategory="200"
         android:title="@string/menu_action_leave_group"
