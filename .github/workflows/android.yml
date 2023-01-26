@@ -29,13 +29,16 @@ jobs:
         run: cd obv_messenger/ && ./gradlew assembleRelease --stacktrace
 
       - name: Rename APK
-        run: mv obv_messenger/app/build/outputs/apk/prod/release/app-prod-release-unsigned.apk Olvid.apk
+        run: |
+          find . -name '*.apk'
+          mv ./obv_messenger/app/build/outputs/apk/prodFull/release/app-prod-full-release-unsigned.apk Olvid.apk
+          mv ./obv_messenger/app/build/outputs/apk/prodNogoogle/release/app-prod-nogoogle-release-unsigned.apk Olvid-nogoogle.apk
 
       - name: Upload APK
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: apk
-          path: Olvid.apk
+          path: Olvid*.apk
 
   release:
     name: Sign/Release APK
@@ -45,7 +48,7 @@ jobs:
     steps:
 
       - name: Download APK from build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: apk
 
@@ -72,4 +75,6 @@ jobs:
         with:
           files: |
             Olvid.apk
-            ${{steps.sign_app.outputs.signedReleaseFile}}
+            Olvid-nogoogle.apk
+            ${{steps.sign_app.outputs.signedReleaseFile0}}
+            ${{steps.sign_app.outputs.signedReleaseFile1}}
