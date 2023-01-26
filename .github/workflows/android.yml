@@ -76,5 +76,5 @@ jobs:
           files: |
             Olvid.apk
             Olvid-nogoogle.apk
-            ${{steps.sign_app.outputs.signedReleaseFile0}}
-            ${{steps.sign_app.outputs.signedReleaseFile1}}
+            Olvid-signed.apk
+            Olvid-nogoogle-signed.apk
