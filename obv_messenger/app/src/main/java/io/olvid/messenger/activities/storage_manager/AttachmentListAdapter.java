@@ -26,6 +26,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -43,6 +44,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -78,6 +80,7 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentFromAllMessagesTask;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.discussion.DiscussionActivity;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.services.MediaPlayerService;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -413,6 +416,24 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                                     break;
                             }
                             App.openOwnedIdentityGalleryActivity(activity, AppSingleton.getBytesCurrentIdentity(), sortOrder, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
+                        }
+                    } else if (fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().equals(OpenGraph.MIME_TYPE)) {
+                        OpenGraph openGraph = new OpenGraph();
+                        openGraph.setUrl(fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fileName);
+                        Uri uri = openGraph.getSafeUri();
+                        if (uri != null) {
+                            final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                                    .setTitle(R.string.dialog_title_confirm_open_link)
+                                    .setMessage(uri.toString())
+                                    .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
+                                        try {
+                                            activity.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                                        } catch (Exception e) {
+                                            App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.button_label_cancel, null);
+                            builder.create().show();
                         }
                     } else {
                         App.openFyleInExternalViewer(activity, fyleAndOrigin.fyleAndStatus, null);

@@ -296,6 +296,10 @@ class WebsocketClient extends WebSocketListener {
         public List<Cookie> loadForRequest(@NonNull HttpUrl httpUrl) {
             String hostname = URI.create(serverUrl).getHost();
             ArrayList<Cookie> cookies = new ArrayList<>(2);
+            if (hostname == null) {
+                return cookies;
+            }
+
             if (olvidSessionCookie != null) {
                 Logger.d("WebsocketClient: olvidSession=" + olvidSessionCookie);
                 cookies.add(new Cookie.Builder()

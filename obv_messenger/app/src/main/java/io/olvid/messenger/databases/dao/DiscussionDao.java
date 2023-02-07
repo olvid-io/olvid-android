@@ -170,7 +170,7 @@ public abstract class DiscussionDao {
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
             Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
-            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " +
+            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
             " ON message." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unread " +
@@ -198,7 +198,7 @@ public abstract class DiscussionDao {
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
             Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
-            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " +
+            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " != " + Message.STATUS_DRAFT + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
             " ON message." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unread " +

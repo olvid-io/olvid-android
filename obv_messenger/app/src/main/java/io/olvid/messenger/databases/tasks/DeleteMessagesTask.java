@@ -143,7 +143,7 @@ public class DeleteMessagesTask implements Runnable {
 
 
         for (Message message : messages) {
-            if (message.hasAttachments()) {
+            if (message.hasAttachments() || message.linkPreviewFyleId != null) {
                 List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = db.fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(message.id);
                 for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {
                     switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
@@ -200,6 +200,10 @@ public class DeleteMessagesTask implements Runnable {
                             message.imageCount = 0;
                             message.imageResolutions = null;
                             db.messageDao().updateAttachmentCount(message.id, 0, 0, message.wipedAttachmentCount, null);
+                        }
+                        if (message.linkPreviewFyleId != null) {
+                            message.linkPreviewFyleId = null;
+                            db.messageDao().updateLinkPreviewFyleId(message.id, null);
                         }
                         break;
                 }

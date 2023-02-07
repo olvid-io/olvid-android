@@ -315,6 +315,7 @@ public class PeriodicTasksScheduler {
                     Set<String> customPhotoUrlFileNames = new HashSet<>();
                     customPhotoUrlFileNames.addAll(db.contactDao().getAllCustomPhotoUrls());
                     customPhotoUrlFileNames.addAll(db.groupDao().getAllCustomPhotoUrls());
+                    customPhotoUrlFileNames.addAll(db.group2Dao().getAllCustomPhotoUrls());
                     customPhotoUrlFileNames.addAll(db.discussionDao().getAllLockedDiscussionPhotoUrls());
 
                     File customPhotosDir = new File(App.absolutePathFromRelative(AppSingleton.CUSTOM_PHOTOS_DIRECTORY));

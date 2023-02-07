@@ -30,7 +30,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -71,6 +70,7 @@ import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.tasks.CheckLinkPreviewValidityTask;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
 import io.olvid.messenger.discussion.ComposeMessageFragment;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
@@ -1168,6 +1168,19 @@ public class AppSingleton {
             }
             if (lastBuildExecuted != 0 && lastBuildExecuted < 183) {
                 App.openAppDialogIntroducingGroupsV2();
+            }
+            if (lastBuildExecuted < 193) {
+                // recompute the number of images in all messages as the filtering method was changed
+                long migrationStartTime = System.currentTimeMillis();
+                AppDatabase db = AppDatabase.getInstance();
+                List<Message> messages = db.messageDao().getAllWithLinkPreview();
+                for (Message message: messages) {
+                    if (message.recomputeAttachmentCount(db)) {
+                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.wipedAttachmentCount, message.imageResolutions);
+                    }
+                    new CheckLinkPreviewValidityTask(message, message.contentBody).run();
+                }
+                Logger.i("Build 193 link-preview migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
             }
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
             saveLastExecutedVersions(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);

@@ -166,6 +166,7 @@ import io.olvid.messenger.databases.tasks.ReplaceDiscussionDraftTask;
 import io.olvid.messenger.databases.tasks.SaveDraftTask;
 import io.olvid.messenger.databases.tasks.SaveMultipleAttachmentsTask;
 import io.olvid.messenger.databases.tasks.SetDraftReplyTask;
+import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel;
 import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity;
 import io.olvid.messenger.fragments.FullScreenImageFragment;
 import io.olvid.messenger.fragments.ReactionListBottomSheetFragment;
@@ -209,6 +210,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
     private DiscussionViewModel discussionViewModel;
     private ComposeMessageViewModel composeMessageViewModel;
+    private LinkPreviewViewModel linkPreviewViewModel;
     private AudioAttachmentServiceBinding audioAttachmentServiceBinding;
     private Toolbar toolBar;
     private InitialView toolBarInitialView;
@@ -294,7 +296,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         super.onCreate(savedInstanceState);
 
         discussionViewModel = new ViewModelProvider(this, FACTORY).get(DiscussionViewModel.class);
-        composeMessageViewModel = new ViewModelProvider(this,  FACTORY).get(ComposeMessageViewModel.class);
+        composeMessageViewModel = new ViewModelProvider(this, FACTORY).get(ComposeMessageViewModel.class);
+        linkPreviewViewModel = new ViewModelProvider(this, FACTORY).get(LinkPreviewViewModel.class);
 
         try {
             audioAttachmentServiceBinding = new AudioAttachmentServiceBinding(this);
@@ -463,8 +466,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
             if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.getDiscussionId())) {
                 locationSharingFab.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.red, null)));
-            }
-            else {
+            } else {
                 locationSharingFab.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.green, null)));
             }
             locationSharingFab.show();
@@ -578,8 +580,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 actionMode = null;
             }
         };
-
-
 
 
         discussionViewModel.getSelectedMessageIds().observe(this, messageListAdapter.selectedMessageIdsObserver);
@@ -737,7 +737,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             // background color and image
             if (discussionCustomization != null) {
                 if (discussionCustomization.backgroundImageUrl != null) {
-                    App.runThread(()->{
+                    App.runThread(() -> {
                         String backgroundImageAbsolutePath = App.absolutePathFromRelative(discussionCustomization.backgroundImageUrl);
                         Bitmap bitmap = BitmapFactory.decodeFile(backgroundImageAbsolutePath);
                         if (bitmap.getByteCount() > SelectDetailsPhotoViewModel.MAX_BITMAP_SIZE) {
@@ -751,7 +751,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             Logger.d("Error creating ExifInterface for file " + backgroundImageAbsolutePath);
                         }
                         final Bitmap finalBitmap = bitmap;
-                        new Handler(Looper.getMainLooper()).post(()->rootBackgroundImageView.setImageBitmap(finalBitmap));
+                        new Handler(Looper.getMainLooper()).post(() -> rootBackgroundImageView.setImageBitmap(finalBitmap));
                     });
                     rootBackgroundImageView.setBackgroundColor(0x00ffffff);
                 } else {
@@ -780,8 +780,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 // receipts were just switched to true, or settings were loaded --> send read receipts for all messages already ready for notification
                 DiscussionActivity.this.sendReadReceipt = true;
                 Discussion discussion = discussionViewModel.getDiscussion().getValue();
-                App.runThread(()-> {
-                    for (Long messageId: messageIdsToMarkAsRead) {
+                App.runThread(() -> {
+                    for (Long messageId : messageIdsToMarkAsRead) {
                         if (messageId != null) {
                             Message message = AppDatabase.getInstance().messageDao().get(messageId);
                             if (message != null && message.messageType == Message.TYPE_INBOUND_MESSAGE) {
@@ -851,7 +851,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 metrics.widthPixels - (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 88, metrics),
                 Math.max(
                         (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 392, metrics), // for screens larger than 480dp, the width of a cell if 400dp
-                        (int) (.6* metrics.widthPixels - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, metrics))
+                        (int) (.6 * metrics.widthPixels - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, metrics))
                 )
         );
         attachmentFileHeight = getResources().getDimensionPixelSize(R.dimen.attachment_small_preview_size);
@@ -1142,7 +1142,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (messageRecyclerView != null && messageListAdapter != null) {
-            View child = messageRecyclerView.findChildViewUnder(messageRecyclerView.getWidth()/2.f, messageRecyclerView.getHeight()/2.f);
+            View child = messageRecyclerView.findChildViewUnder(messageRecyclerView.getWidth() / 2.f, messageRecyclerView.getHeight() / 2.f);
             if (child != null) {
                 int pos = messageRecyclerView.getChildAdapterPosition(child);
                 messageRecyclerView.setAdapter(messageListAdapter);
@@ -1385,7 +1385,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     }
 
 
-
     @Override
     public void onClick(View view) {
         int id = view.getId();
@@ -1419,10 +1418,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     messageRecyclerView.scrollToPosition(messageListAdapter.messages.size());
                 }
             }
-        }
-        else if (id == R.id.discussion_location_sharing_fab) {
+        } else if (id == R.id.discussion_location_sharing_fab) {
             if (discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue() == null
-                || discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().size() == 0) {
+                    || discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().size() == 0) {
                 return;
             }
 
@@ -1467,9 +1465,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             locationMessagePopUp.show();
         }
     }
-
-
-
 
 
     @Override
@@ -1758,6 +1753,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         static final int MISSED_COUNT_CHANGE_MASK = 512;
         static final int FORWARDED_CHANGE_MASK = 1024;
         static final int LOCATION_CHANGE_MASK = 2048;
+        static final int LINK_PREVIEW_MASK = 4096;
 
         @SuppressLint("NotifyDataSetChanged")
         MessageListAdapter(Context context) {
@@ -1957,6 +1953,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             return -1;
                         }
 
+                        if (!Objects.equals(oldItem.linkPreviewFyleId, newItem.linkPreviewFyleId)) {
+                            // preview link changed --> rebind
+                            changesMask |= LINK_PREVIEW_MASK;
+                        }
+
                         if (oldItem.status != newItem.status && (
                                 (oldItem.status != Message.STATUS_UNPROCESSED && oldItem.status != Message.STATUS_COMPUTING_PREVIEW)
                                         || (newItem.status != Message.STATUS_COMPUTING_PREVIEW && newItem.status != Message.STATUS_PROCESSING)
@@ -2004,7 +2005,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         }
 
                         if (!Objects.equals(oldItem.jsonLocation, newItem.jsonLocation)
-                            || oldItem.locationType != newItem.locationType) {
+                                || oldItem.locationType != newItem.locationType) {
                             changesMask |= LOCATION_CHANGE_MASK;
                         }
 
@@ -2424,7 +2425,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                         attachmentsHeight += attachmentSpace;
                                     }
                                     if ((imageResolutions.length & 1) != 0) {
-                                        attachmentsHeight += imageResolutions[imageResolutions.length -1].getPreferredHeight(attachmentRecyclerViewWidth, true);
+                                        attachmentsHeight += imageResolutions[imageResolutions.length - 1].getPreferredHeight(attachmentRecyclerViewWidth, true);
                                     } else {
                                         attachmentsHeight -= attachmentSpace;
                                     }
@@ -2661,8 +2662,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                 if (splitReactions[i].charAt(0) == '|') {
                                     isMine = true;
                                     emoji = splitReactions[i].substring(1);
-                                }
-                                else {
+                                } else {
                                     emoji = splitReactions[i];
                                 }
                                 // inflate and set layout for this reaction
@@ -2714,6 +2714,95 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             if ((changesMask & LOCATION_CHANGE_MASK) != 0) {
                 if (message.isLocationMessage()) {
                     setLocationMessageContent(message, holder);
+                }
+            }
+
+            if ((changesMask & LINK_PREVIEW_MASK) != 0) {
+                if ((message.messageType == Message.TYPE_INBOUND_MESSAGE
+                        || message.messageType == Message.TYPE_OUTBOUND_MESSAGE)
+                        && holder.messageLinkPreviewGroup != null) {
+                    if (holder.linkPreviewFyleLiveData != null) {
+                        holder.linkPreviewFyleLiveData.removeObservers(DiscussionActivity.this);
+                        holder.linkPreviewFyleLiveData = null;
+                        if (message.linkPreviewFyleId == null) {
+                            holder.messageLinkPreviewGroup.setVisibility(View.GONE);
+                        }
+                    }
+                    if (message.linkPreviewFyleId != null) {
+                        final long targetMessageId = holder.messageId;
+                        holder.linkPreviewFyleLiveData = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getFyleAndStatusObservable(message.id, message.linkPreviewFyleId);
+                        holder.linkPreviewFyleLiveData.observe(DiscussionActivity.this, fyleAndStatus -> {
+                            if (fyleAndStatus == null) {
+                                holder.messageLinkPreviewGroup.setVisibility(View.GONE);
+                            } else {
+                                if (fyleAndStatus.fyle.isComplete()) {
+                                    linkPreviewViewModel.linkPreviewLoader(fyleAndStatus.fyle, holder.messageId, openGraph -> {
+                                        if (holder.messageId == targetMessageId) {
+                                            if (openGraph != null && !openGraph.isEmpty()) {
+                                                holder.messageLinkPreviewGroup.setVisibility(View.VISIBLE);
+                                                final Uri uri = openGraph.getSafeUri();
+                                                if (uri != null) {
+                                                    holder.messageLinkPreviewGroup.setOnClickListener(v -> {
+                                                        try {
+                                                            startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                                                        } catch (Exception e) {
+                                                            App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
+                                                        }
+                                                    });
+                                                } else {
+                                                    holder.messageLinkPreviewGroup.setOnClickListener(null);
+                                                }
+                                                holder.messageLinkPreviewTitle.setText(openGraph.getTitle());
+                                                holder.messageLinkPreviewDescription.setText(openGraph.getDescription());
+                                                if (openGraph.getBitmap() != null) {
+                                                    holder.messageLinkPreviewImage.setImageBitmap(openGraph.getBitmap());
+                                                } else {
+                                                    holder.messageLinkPreviewImage.setImageResource(R.drawable.mime_type_icon_link);
+                                                }
+                                            } else {
+                                                holder.messageLinkPreviewGroup.setVisibility(View.GONE);
+                                            }
+                                        }
+                                        return null;
+                                    });
+                                }
+                            }
+                        });
+                    } else {
+                        if (message.messageType == Message.TYPE_INBOUND_MESSAGE && SettingsActivity.isLinkPreviewInbound()) {
+                            int size = (int) (56 * getResources().getDisplayMetrics().density);
+                            final long targetMessageId = holder.messageId;
+                            linkPreviewViewModel.linkPreviewLoader(message.contentBody, size, size, holder.messageId, openGraph -> {
+                                if (holder.messageId == targetMessageId) {
+                                    if (openGraph != null && !openGraph.isEmpty()) {
+                                        holder.messageLinkPreviewGroup.setVisibility(View.VISIBLE);
+                                        final Uri uri = openGraph.getSafeUri();
+                                        if (uri != null) {
+                                            holder.messageLinkPreviewGroup.setOnClickListener(v -> {
+                                                try {
+                                                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                                                } catch (Exception e) {
+                                                    App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
+                                                }
+                                            });
+                                        } else {
+                                            holder.messageLinkPreviewGroup.setOnClickListener(null);
+                                        }
+                                        holder.messageLinkPreviewTitle.setText(openGraph.getTitle());
+                                        holder.messageLinkPreviewDescription.setText(openGraph.getDescription());
+                                        if (openGraph.getBitmap() != null) {
+                                            holder.messageLinkPreviewImage.setImageBitmap(openGraph.getBitmap());
+                                        } else {
+                                            holder.messageLinkPreviewImage.setImageResource(R.drawable.mime_type_icon_link);
+                                        }
+                                    } else {
+                                        holder.messageLinkPreviewGroup.setVisibility(View.GONE);
+                                    }
+                                }
+                                return null;
+                            });
+                        }
+                    }
                 }
             }
 
@@ -2930,44 +3019,44 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         // do nothing
                     }
                     // callStatus is positive for incoming calls
-                    switch(callStatus) {
-                        case -CallLogItem.STATUS_BUSY:  {
+                    switch (callStatus) {
+                        case -CallLogItem.STATUS_BUSY: {
                             holder.messageInfoTextView.setText(R.string.text_busy_outgoing_call);
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_busy_out);
                             break;
                         }
-                        case -CallLogItem.STATUS_REJECTED:  {
+                        case -CallLogItem.STATUS_REJECTED: {
                             holder.messageInfoTextView.setText(R.string.text_rejected_call);
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_rejected_out);
                             break;
                         }
                         case -CallLogItem.STATUS_MISSED:
-                        case -CallLogItem.STATUS_FAILED:  {
+                        case -CallLogItem.STATUS_FAILED: {
                             holder.messageInfoTextView.setText(R.string.text_failed_call);
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_failed_out);
                             break;
                         }
-                        case -CallLogItem.STATUS_SUCCESSFUL:  {
+                        case -CallLogItem.STATUS_SUCCESSFUL: {
                             holder.messageInfoTextView.setText(R.string.text_successful_call);
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_success_out);
                             break;
                         }
-                        case CallLogItem.STATUS_BUSY:  {
+                        case CallLogItem.STATUS_BUSY: {
                             holder.messageInfoTextView.setText(R.string.text_busy_call);
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_busy_in);
                             break;
                         }
-                        case CallLogItem.STATUS_FAILED:  {
+                        case CallLogItem.STATUS_FAILED: {
                             holder.messageInfoTextView.setText(R.string.text_failed_call);
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_failed_in);
                             break;
                         }
-                        case CallLogItem.STATUS_SUCCESSFUL:  {
+                        case CallLogItem.STATUS_SUCCESSFUL: {
                             holder.messageInfoTextView.setText(R.string.text_successful_call);
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_success_in);
                             break;
                         }
-                        case CallLogItem.STATUS_REJECTED:  {
+                        case CallLogItem.STATUS_REJECTED: {
                             holder.messageInfoTextView.setText(R.string.text_rejected_call);
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_rejected_in);
                             break;
@@ -3253,6 +3342,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             if (holder.messageReplyBody != null) {
                 holder.messageReplyBody.setText("");
             }
+            if (holder.messageLinkPreviewGroup != null) {
+                holder.messageLinkPreviewImage.setImageBitmap(null);
+                holder.messageLinkPreviewGroup.setVisibility(View.GONE);
+            }
             if (holder.messageContentTextView != null) {
                 holder.messageContentTextView.setText("");
             }
@@ -3274,6 +3367,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             if (holder.attachmentFyles != null) {
                 holder.attachmentFyles.removeObservers(DiscussionActivity.this);
                 holder.attachmentFyles = null;
+            }
+            if (holder.linkPreviewFyleLiveData != null) {
+                holder.linkPreviewFyleLiveData.removeObservers(DiscussionActivity.this);
+                holder.linkPreviewFyleLiveData = null;
             }
             if (holder.adapter != null) {
                 holder.adapter.onChanged(null);
@@ -3326,7 +3423,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     // sharing location expiration
                     if (jsonMessage.getJsonLocation().getSharingExpiration() != null) {
                         holder.locationMessageSharingExpirationTextView.setText(
-                            getString(R.string.label_sharing_location_until, DateUtils.formatDateTime(getApplicationContext(), jsonMessage.getJsonLocation().getSharingExpiration(), DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH))
+                                getString(R.string.label_sharing_location_until, DateUtils.formatDateTime(getApplicationContext(), jsonMessage.getJsonLocation().getSharingExpiration(), DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH))
                         );
                         holder.locationMessageSharingExpirationTextView.setVisibility(View.VISIBLE);
                         holder.locationIconBackgroundView.setBackgroundResource(R.drawable.background_location_icon_top_left_rounded);
@@ -3412,7 +3509,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             ClipData clipData = ClipData.newPlainText(getString(R.string.label_gps_coordinates), String.format("%s,%s", truncatedLatitudeString, truncatedLongitudeString));
             clipboard.setPrimaryClip(clipData);
 
-            App.toast(R.string.toast_location_coordinates_copied_to_clipboard , Toast.LENGTH_SHORT, Gravity.BOTTOM);
+            App.toast(R.string.toast_location_coordinates_copied_to_clipboard, Toast.LENGTH_SHORT, Gravity.BOTTOM);
         }
 
         private class SwipeCallback extends ItemTouchHelper.SimpleCallback implements MessageAttachmentAdapter.BlockMessageSwipeListener {
@@ -3591,7 +3688,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
 
             @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder vh, int direction) { }
+            public void onSwiped(@NonNull RecyclerView.ViewHolder vh, int direction) {
+            }
 
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
@@ -3632,6 +3730,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             private final TextView messageReplyBody;
             private final TextView messageReplyAttachmentCount;
 
+            private final ViewGroup messageLinkPreviewGroup;
+            private final TextView messageLinkPreviewTitle;
+            private final TextView messageLinkPreviewDescription;
+            private final ImageView messageLinkPreviewImage;
+
             private final TextView settingsUpdateReadOnce;
             private final TextView settingsUpdateVisibilityDuration;
             private final TextView settingsUpdateExistenceDuration;
@@ -3667,6 +3770,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             private final TextView locationMessageSharingExpirationTextView;
 
             private LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> attachmentFyles;
+            private LiveData<FyleMessageJoinWithStatusDao.FyleAndStatus> linkPreviewFyleLiveData;
             private LiveData<Message> repliedToMessage;
 
             private boolean expandMessage;
@@ -3707,7 +3811,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         public boolean onDoubleTap(@NonNull MotionEvent e) {
                             try {
                                 Utils.launchModifyMessagePopup(DiscussionActivity.this, messages.get(getBindingAdapterPosition() - 1));
-                            } catch (Exception ignored) {}
+                            } catch (Exception ignored) {
+                            }
                             return true;
                         }
 
@@ -3745,6 +3850,12 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 if (messageReplyGroup != null) {
                     messageReplyGroup.setOnClickListener(this);
                 }
+
+                // link preview
+                messageLinkPreviewGroup = itemView.findViewById(R.id.message_link_preview_group);
+                messageLinkPreviewTitle = itemView.findViewById(R.id.message_link_preview_title);
+                messageLinkPreviewImage = itemView.findViewById(R.id.message_link_preview_image);
+                messageLinkPreviewDescription = itemView.findViewById(R.id.message_link_preview_description);
 
                 messageContentExpander = itemView.findViewById(R.id.message_content_expander);
                 messageBottomTimestampTextView = itemView.findViewById(R.id.message_timestamp_bottom_text_view);
@@ -4218,11 +4329,17 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
     interface DiscussionDelegate {
         void markMessagesRead();
+
         void doNotMarkAsReadOnPause();
+
         void scrollToMessage(long messageId);
+
         void replyToMessage(long discussionId, long messageId);
+
         void initiateMessageForward(long messageId, Runnable openDialogCallback);
+
         void selectMessage(long messageId, boolean forwardable);
+
         void setAdditionalBottomPadding(int paddingPx);
     }
 }

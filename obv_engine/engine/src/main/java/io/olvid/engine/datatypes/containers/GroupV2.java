@@ -53,7 +53,7 @@ import io.olvid.engine.metamanager.IdentityDelegate;
 public class GroupV2 {
     public enum Permission {
         GROUP_ADMIN, // allows changing members and their permissions
-        REMOTE_DELETE_ANYTHING, // allows to remote delete any message or the whole discussion
+        REMOTE_DELETE_ANYTHING, // allows to remote-delete any message or the whole discussion
         EDIT_OR_REMOTE_DELETE_OWN_MESSAGES, // allows to edit your messages and remote delete them
         CHANGE_SETTINGS,
         SEND_MESSAGE;

@@ -319,6 +319,10 @@
     <string name="pref_discussion_background_image_click_to_choose_summary">Cliquez pour choisir une image</string>
     <string name="pref_read_receipt_title">Confirmations de lecture</string>
     <string name="pref_read_receipt_summary">Une fois cette fonction activée, vos correspondants recevront une notification lorsque vous aurez lu leurs messages. Cela peut être reconfiguré pour chaque discussion.</string>
+    <string name="pref_link_preview_outbound_title">Joindre un aperçu des liens envoyés</string>
+    <string name="pref_link_preview_summary_outbound">Une fois cette option activée, Olvid téléchargera un aperçu des liens que vous envoyez et le joindra au message.</string>
+    <string name="pref_link_preview_inbound_title">Télécharger un aperçu des liens reçus</string>
+    <string name="pref_link_preview_summary_inbound">Une fois cette option activée, Olvid téléchargera automatiquement un aperçu des liens que vous recevez (si un aperçu n\'est pas joint au message).</string>
     <string name="pref_discussion_read_receipt_title">Confirmations de lecture</string>
     <string name="pref_text_app_default">Votre réglage par défaut</string>
     <string name="pref_text_app_default_true">Votre réglage par défaut (activées)</string>
@@ -1137,6 +1141,7 @@
     <string name="pref_reload_backup_configuration_title">Relire la configuration des sauvergardes</string>
     <string name="content_description_back_button">Bouton retour</string>
     <string name="content_description_remove_message_reply_to">Enlever le message en réponse</string>
+    <string name="content_description_remove_link_preview">Enlever la prévisualisation du lien</string>
     <string name="content_description_notification_muted_indicator">Indicateur que les notifications sont désactivées pour ce profil</string>
     <string name="activity_title_create_new_profile">Création de nouveau profil</string>
     <string name="button_label_create_new_profile">Créer un nouveau profil</string>
@@ -1534,6 +1539,8 @@
     <string name="text_setting_auto_join_groups">\u2023 Accepter automatiquement les invitations de groupe de la part de\u00a0:\u0020</string>
     <string name="text_setting_lock_delay">\u2023 Délai de verrouillage\u00a0:\u0020</string>
     <string name="text_setting_auto_download_size">\u2023 Télécharger automatiquement les pièces jointes\u00a0:\u0020</string>
+    <string name="text_setting_link_preview_inbound">\u2023 Prévisualisation des liens reçus\u00a0:\u0020</string>
+    <string name="text_setting_link_preview_outbound">\u2023 Prévisualisation des liens envoyés\u00a0:\u0020</string>
     <string name="text_setting_block_unknown_certificate">\u2023 Bloquer les connexions utilisant un certificat inconnu\u00a0:\u0020</string>
     <string name="text_setting_connectivity_indicator">\u2023 Indicateur de connexion réseau\u00a0:\u0020</string>
     <string name="text_setting_yes">oui</string>
@@ -1571,7 +1578,8 @@
     <string name="text_message_too_large_for_webclient">[Message trop long pour être affiché dans le client web]</string>
     <string name="text_invalid_shortcut">Raccourci invalide</string>
     <string name="text_feature_initiate_secure_calls_from_another_profile">Émettre des appels sécurisés\n(disponible grâce à un autre profil)</string>
-
+    <string name="dialog_title_confirm_open_link">Ouvrir ce lien dans votre navigateur\u00a0?</string>
+    <string name="toast_message_unable_to_open_url">Impossible d\'ouvrir l\'URL</string>
 
 
 

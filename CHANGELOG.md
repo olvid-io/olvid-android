@@ -1,3 +1,23 @@
+# Build 195 (0.13.3)
+
+- Fix bug with group v2 custom photos being deleted in periodic cleanup task 
+
+# ~~Build 194 (0.13.3)~~
+2023-02-05
+
+- [beta] Improved preview link detection/validation
+
+# ~~Build 193 (0.13.3)~~
+2023-01-25
+
+- Add missing ping to websocket
+
+# ~~Build 192 (0.13.3)~~
+2023-01-24
+
+- [beta] rich link preview, sent as attachment
+- Upgrade webRTC to 5481
+
 # Build 191 (0.13.2)
 2023-01-14
 

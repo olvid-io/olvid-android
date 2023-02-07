@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -44,6 +45,7 @@ import javax.net.ssl.X509TrustManager;
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.ExponentialBackoffRepeatingScheduler;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
@@ -188,7 +190,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 }
             });
         }
-
+        builder.pingInterval(Constants.WEBSOCKET_PING_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
         okHttpClient = builder.build();
     }
 

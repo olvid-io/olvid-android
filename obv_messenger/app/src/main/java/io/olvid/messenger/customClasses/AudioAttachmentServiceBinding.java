@@ -283,6 +283,8 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
         public void run() {
             final AudioInfo audioInfo = new AudioInfo();
             try {
+                // Do not use "close with resource" as this only works on API 29 or higher...
+                //noinspection resource
                 MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                 mediaMetadataRetriever.setDataSource(App.absolutePathFromRelative(fyleAndStatus.fyle.filePath));
                 String durationString = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
@@ -301,14 +303,14 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
                 if (associatedViewHolders == null) {
                     return;
                 }
-                for (WeakReference<AudioServiceBindableViewHolder> weakReference: associatedViewHolders) {
+                for (WeakReference<AudioServiceBindableViewHolder> weakReference : associatedViewHolders) {
                     AudioServiceBindableViewHolder vh = weakReference.get();
                     if (vh != null) {
                         viewHolders.add(vh);
                     }
                 }
                 uiThreadHandler.post(() -> {
-                    for (AudioServiceBindableViewHolder viewHolder: viewHolders) {
+                    for (AudioServiceBindableViewHolder viewHolder : viewHolders) {
                         viewHolder.bindAudioInfo(audioInfo, audioOutput);
                         if (key.equals(nowPlaying)) {
                             viewHolder.updatePlayTimeMs(audioInfo, playTimeMs, playing);

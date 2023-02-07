@@ -3148,6 +3148,15 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_GROUP_V2_UPDATE_FAILED, userInfo);
 
                 return new FinalState();
+            } else if (receivedMessage.changeSet.isEmpty()) {
+                // empty changeset, still notify, but without error
+                HashMap<String, Object> userInfo = new HashMap<>();
+                userInfo.put(ProtocolNotifications.NOTIFICATION_GROUP_V2_UPDATE_FAILED_OWNED_IDENTITY_KEY, getOwnedIdentity());
+                userInfo.put(ProtocolNotifications.NOTIFICATION_GROUP_V2_UPDATE_FAILED_GROUP_IDENTIFIER_KEY, receivedMessage.groupIdentifier);
+                userInfo.put(ProtocolNotifications.NOTIFICATION_GROUP_V2_UPDATE_FAILED_ERROR_KEY, false);
+                protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_GROUP_V2_UPDATE_FAILED, userInfo);
+
+                return new FinalState();
             }
 
             protocolManagerSession.identityDelegate.freezeGroupV2(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.groupIdentifier);

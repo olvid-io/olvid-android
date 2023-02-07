@@ -64,7 +64,7 @@ public class MessageExpirationService extends BroadcastReceiver {
     private static void wipeExpiredMessages() {
         AppDatabase db = AppDatabase.getInstance();
         List<MessageExpiration> messageExpirations = db.messageExpirationDao().getAllExpired(System.currentTimeMillis());
-        Logger.d("Messages to delete " + messageExpirations.size());
+        Logger.d("MessageExpirationService - Messages to delete " + messageExpirations.size());
         for (MessageExpiration messageExpiration : messageExpirations) {
             db.runInTransaction(() -> {
                 Message message = db.messageDao().get(messageExpiration.messageId);
@@ -156,7 +156,7 @@ public class MessageExpirationService extends BroadcastReceiver {
             if (alarmManager != null) {
                 alarmManager.cancel(pendingExpireIntent);
                 if (scheduledAlarmTimestamp != null) {
-                    Logger.d("Scheduling wipe at " + scheduledAlarmTimestamp);
+                    Logger.d("MessageExpirationService - Scheduling wipe at " + scheduledAlarmTimestamp);
                     alarmManager.setExact(AlarmManager.RTC_WAKEUP, scheduledAlarmTimestamp, pendingExpireIntent);
                 }
             }

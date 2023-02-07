@@ -324,6 +324,10 @@
     <string name="pref_discussion_background_image_click_to_choose_summary">Click to choose an image</string>
     <string name="pref_read_receipt_title">Send read receipts</string>
     <string name="pref_read_receipt_summary">When this is on, people are notified when you have read their messages. This can be overridden in each discussion.</string>
+    <string name="pref_link_preview_outbound_title">Attach a preview of links you send</string>
+    <string name="pref_link_preview_summary_outbound">Once activated, Olvid will fetch a preview of links you send and attach it to the message.</string>
+    <string name="pref_link_preview_inbound_title">Fetch previews of received links</string>
+    <string name="pref_link_preview_summary_inbound">Once activated, Olvid will automatically fetch previews of links you receive (if a preview is not attached to the message).</string>
     <string name="pref_discussion_read_receipt_title">Send read receipts</string>
     <string name="pref_text_app_default">Use your default setting</string>
     <string name="pref_text_app_default_true">Use your default setting (on)</string>
@@ -1147,6 +1151,7 @@
     <string name="pref_reload_backup_configuration_title">Reload backup configuration</string>
     <string name="content_description_back_button">Back button</string>
     <string name="content_description_remove_message_reply_to">Clear message reply</string>
+    <string name="content_description_remove_link_preview">Clear link preview</string>
     <string name="content_description_notification_muted_indicator">Indicator that notifications are muted for this profile</string>
     <string name="activity_title_create_new_profile">New profile creation</string>
     <string name="button_label_create_new_profile">Create a new profile</string>
@@ -1535,6 +1540,8 @@
     <string name="text_setting_lock_biometry">\u2023 Unlock with biometry:\u0020</string>
     <string name="text_setting_lock_notification">\u2023 Permanent lock screen notification:\u0020</string>
     <string name="text_setting_lock_wipe_on_fail">\u2023 Erase sensitive messages after 3 bad PINs:\u0020</string>
+    <string name="text_setting_link_preview_inbound">\u2023 Link preview received:\u0020</string>
+    <string name="text_setting_link_preview_outbound">\u2023 Link preview sent:\u0020</string>
     <string name="text_setting_send_read_receipt">\u2023 Send read receipts:\u0020</string>
     <string name="text_setting_auto_open_limited_visibility">\u2023 Automatically open ephemeral messages:\u0020</string>
     <string name="text_setting_retain_wiped_outbound">\u2023 Retain wiped outbound messages:\u0020</string>
@@ -1587,10 +1594,8 @@
     <string name="text_message_too_large_for_webclient">[Message too large to display in web client]</string>
     <string name="text_invalid_shortcut">Invalid shortcut</string>
     <string name="text_feature_initiate_secure_calls_from_another_profile">Initiate secure calls\n(available through another profile)</string>
-
-
-
-
+    <string name="dialog_title_confirm_open_link">Open this link in your browser?</string>
+    <string name="toast_message_unable_to_open_url">Unable to open URL</string>
 
 
     <plurals name="dialog_message_delete_user_impossible_count">

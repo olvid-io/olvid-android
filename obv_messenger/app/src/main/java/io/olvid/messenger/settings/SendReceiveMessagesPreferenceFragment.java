@@ -32,6 +32,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
+import androidx.preference.SwitchPreference;
 
 import java.util.List;
 
@@ -48,6 +49,20 @@ public class SendReceiveMessagesPreferenceFragment extends PreferenceFragmentCom
         PreferenceScreen screen = getPreferenceScreen();
         if (screen == null) {
             return;
+        }
+
+        SwitchPreference linkPreviewPreferenceOutbound = screen.findPreference(SettingsActivity.PREF_KEY_LINK_PREVIEW_OUTBOUND);
+        if (linkPreviewPreferenceOutbound != null) {
+            if (!SettingsActivity.getBetaFeaturesEnabled()) {
+                screen.removePreference(linkPreviewPreferenceOutbound);
+            }
+        }
+
+        SwitchPreference linkPreviewPreferenceInbound = screen.findPreference(SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND);
+        if (linkPreviewPreferenceInbound != null) {
+            if (!SettingsActivity.getBetaFeaturesEnabled()) {
+                screen.removePreference(linkPreviewPreferenceInbound);
+            }
         }
 
         EditTextPreference defaultDiscussionRetentionCountPreference = screen.findPreference(SettingsActivity.PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT);

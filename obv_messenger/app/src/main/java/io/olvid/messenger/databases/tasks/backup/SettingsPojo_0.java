@@ -81,6 +81,10 @@ public class SettingsPojo_0 {
     public Boolean lock_wipe_on_fail;
 
     public Long auto_download_size;
+
+    public Boolean link_preview_inbound;
+
+    public Boolean link_preview_outbound;
     public Boolean send_read_receipt;
     public Boolean auto_open_limited_visibility;
     public Boolean retain_wiped_outbound;
@@ -164,6 +168,8 @@ public class SettingsPojo_0 {
         settingsPojo.lock_wipe_on_fail = SettingsActivity.wipeMessagesOnUnlockFails();
 
         settingsPojo.auto_download_size = SettingsActivity.getAutoDownloadSize();
+        settingsPojo.link_preview_inbound = SettingsActivity.isLinkPreviewInbound();
+        settingsPojo.link_preview_outbound = SettingsActivity.isLinkPreviewOutbound();
         settingsPojo.send_read_receipt = SettingsActivity.getDefaultSendReadReceipt();
         settingsPojo.auto_open_limited_visibility = SettingsActivity.getDefaultAutoOpenLimitedVisibilityInboundMessages();
         settingsPojo.retain_wiped_outbound = SettingsActivity.getDefaultRetainWipedOutboundMessages();
@@ -271,8 +277,18 @@ public class SettingsPojo_0 {
         if (lock_notification != null) {SettingsActivity.setKeepLockServiceOpen(lock_notification); }
         if (lock_wipe_on_fail != null) {SettingsActivity.setWipeMessagesOnUnlockFails(lock_wipe_on_fail); }
 
-        if (auto_download_size != null) { SettingsActivity.setAutoDownloadSize(auto_download_size); }
-        if (send_read_receipt != null) { SettingsActivity.setDefaultSendReadReceipt(send_read_receipt); }
+        if (auto_download_size != null) {
+            SettingsActivity.setAutoDownloadSize(auto_download_size);
+        }
+        if (link_preview_inbound != null) {
+            SettingsActivity.setLinkPreviewInbound(link_preview_inbound);
+        }
+        if (link_preview_outbound != null) {
+            SettingsActivity.setLinkPreviewOutbound(link_preview_outbound);
+        }
+        if (send_read_receipt != null) {
+            SettingsActivity.setDefaultSendReadReceipt(send_read_receipt);
+        }
         if (auto_open_limited_visibility != null) { SettingsActivity.setDefaultAutoOpenLimitedVisibilityInboundMessages(auto_open_limited_visibility); }
         if (retain_wiped_outbound != null) { SettingsActivity.setDefaultRetainWipedOutboundMessages(retain_wiped_outbound); }
         if (default_retention_count != null) { SettingsActivity.setDefaultDiscussionRetentionCount(default_retention_count); }

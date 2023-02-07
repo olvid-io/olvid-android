@@ -141,7 +141,11 @@ public class BillingUtils {
                             subscriptionPref.setIcon(R.drawable.ic_pref_subscription);
                             subscriptionPref.setTitle(R.string.pref_title_subscription);
                             subscriptionPref.setOnPreferenceClickListener((preference) -> {
-                                activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/subscriptions?sku=premium_2020_monthly&package=io.olvid.messenger")));
+                                try {
+                                    activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/subscriptions?sku=premium_2020_monthly&package=io.olvid.messenger")));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                                 return true;
                             });
                             preferenceScreen.addPreference(subscriptionPref);

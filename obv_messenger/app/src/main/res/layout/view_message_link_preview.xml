@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/message_link_preview_group"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_reply_white"
+    android:foreground="?attr/selectableItemBackground"
+    android:theme="@style/SubtleGreyRipple"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <ImageView
+        android:id="@+id/message_link_preview_image"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        app:srcCompat="@drawable/mime_type_icon_link"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/message_link_preview_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:paddingStart="68dp"
+        android:paddingEnd="4dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/darkGrey"
+        android:textSize="14sp"
+        app:layout_constraintWidth_min="wrap"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Link title" />
+
+    <TextView
+        android:id="@+id/message_link_preview_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="68dp"
+        android:paddingEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:ellipsize="end"
+        android:maxLines="5"
+        android:textColor="@color/greyTint"
+        app:layout_constraintWidth_min="wrap"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/message_link_preview_title"
+        tools:text="Link description sufficiently long to span multiple lines" />
+</androidx.constraintlayout.widget.ConstraintLayout>

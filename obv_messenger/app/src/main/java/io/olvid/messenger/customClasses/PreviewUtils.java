@@ -70,12 +70,15 @@ public class PreviewUtils {
 
     @NonNull
     public static String getNonNullMimeType(@Nullable String mimeType, @Nullable String fileName) {
-        if (mimeType == null || !mimeType.contains("/")) {
-            String extension = MimeTypeMap.getFileExtensionFromUrl(fileName);
-            String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-            if (type != null) {
-                return type;
-            } else {
+        if (mimeType == null || !mimeType.contains("/") || mimeType.endsWith("/*")) { // also try yo correct generic mime types
+            if (fileName != null) {
+                String extension = StringUtils2.Companion.getExtensionFromFilename(fileName);
+                String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                if (type != null) {
+                    return type;
+                }
+            }
+            if (mimeType == null || !mimeType.contains("/")) { // don't return this when the mime type ends with "/*"
                 return "application/octet-stream";
             }
         }
@@ -291,6 +294,8 @@ public class PreviewUtils {
                     imageResolution = "";
                 } else {
                     try {
+                        // Do not use "close with resource" as this only works on API 29 or higher...
+                        //noinspection resource
                         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                         mediaMetadataRetriever.setDataSource(filePath);
                         String widthString = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
@@ -361,6 +366,8 @@ public class PreviewUtils {
             String mimeType = getNonNullMimeType(fyleMessageJoinWithStatus.mimeType, fyleMessageJoinWithStatus.fileName);
             if (mimeType.startsWith("video/")) {
                 try {
+                    // Do not use "close with resource" as this only works on API 29 or higher...
+                    //noinspection resource
                     MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                     mediaMetadataRetriever.setDataSource(fyle.filePath);
                     String widthString = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);

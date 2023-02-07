@@ -45,10 +45,11 @@
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/background_reply_white"
                 android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/message_link_preview_group"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/compose_barrier"
                 tools:visibility="visible">
 
                 <TextView
@@ -87,13 +88,13 @@
                     android:id="@+id/compose_message_reply_attachment_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
                     android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="4dp"
                     android:background="@drawable/background_attachment_count_reply"
-                    android:paddingBottom="2dp"
-                    android:paddingEnd="4dp"
                     android:paddingStart="4dp"
                     android:paddingTop="2dp"
+                    android:paddingEnd="4dp"
+                    android:paddingBottom="2dp"
                     android:textAppearance="@style/RobotoMedium"
                     android:textColor="@color/almostWhite"
                     android:textSize="12sp"
@@ -105,18 +106,32 @@
                     app:layout_constraintTop_toBottomOf="@+id/compose_message_reply_body"
                     app:layout_goneMarginTop="2dp"
                     tools:text="5 attachments"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible" />
 
 
                 <ImageView
                     android:id="@+id/compose_message_reply_clear"
                     android:layout_width="24dp"
                     android:layout_height="22dp"
+                    android:contentDescription="@string/content_description_remove_message_reply_to"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    android:contentDescription="@string/content_description_remove_message_reply_to"
                     app:srcCompat="@drawable/ic_close" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <include
+                layout="@layout/view_message_compose_link_preview"
+                android:id="@+id/message_link_preview_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="4dp"
+                app:layout_goneMarginTop="8dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/compose_message_reply_group"
+                app:layout_constraintBottom_toTopOf="@id/compose_barrier" />
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/compose_barrier"

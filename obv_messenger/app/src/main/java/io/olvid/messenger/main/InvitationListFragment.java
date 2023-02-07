@@ -89,6 +89,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
     private boolean invitationsAreVisible;
     private Long engineNotificationListenerRegistrationNumber;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private EmptyRecyclerView recyclerView;
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
@@ -116,7 +117,7 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_main_fragment_invitation_list, container, false);
 
-        EmptyRecyclerView recyclerView = rootView.findViewById(R.id.invitation_list_recycler_view);
+        recyclerView = rootView.findViewById(R.id.invitation_list_recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
@@ -710,9 +711,11 @@ public class InvitationListFragment extends Fragment implements SwipeRefreshLayo
                 });
                 this.invitations = invitations;
                 result.dispatchUpdatesTo(this);
+                recyclerView.scrollBy(0, 0);
             } else {
                 this.invitations = invitations;
                 notifyDataSetChanged();
+                recyclerView.scrollBy(0, 0);
             }
         }
 

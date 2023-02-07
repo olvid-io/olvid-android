@@ -31,6 +31,7 @@ import java.util.List;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 @Dao
 public interface FyleDao {
@@ -48,7 +49,8 @@ public interface FyleDao {
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
             " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = " +
-            " ( SELECT id FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_DRAFT + " AND " + Message.DISCUSSION_ID + " = :discussionId )")
+            " ( SELECT id FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_DRAFT + " AND " + Message.DISCUSSION_ID + " = :discussionId ) " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "' ")
     LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> getDiscussionDraftFyles(long discussionId);
 
     @Query("SELECT * FROM " + Fyle.TABLE_NAME + " WHERE id = :fyleId")

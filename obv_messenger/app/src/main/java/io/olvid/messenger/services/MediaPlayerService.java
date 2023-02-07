@@ -185,6 +185,9 @@ public class MediaPlayerService extends Service {
                         mediaPlayer.seekTo((int) seekTimeMs);
                         mediaPlayerPrepared = true;
                         if (mediaPlaying) {
+                            try {
+                                Thread.sleep(200);
+                            } catch (InterruptedException ignored) { }
                             mediaPlayer.start();
                         }
                     } catch (Exception e) {
@@ -211,9 +214,9 @@ public class MediaPlayerService extends Service {
             playIntent.setAction(ACTION_PLAY);
             PendingIntent playPendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                playPendingIntent = PendingIntent.getService(App.getContext(), 0, playIntent, PendingIntent.FLAG_IMMUTABLE);
+                playPendingIntent = PendingIntent.getService(App.getContext(), 564, playIntent, PendingIntent.FLAG_IMMUTABLE);
             } else {
-                playPendingIntent = PendingIntent.getService(App.getContext(), 0, playIntent, 0);
+                playPendingIntent = PendingIntent.getService(App.getContext(), 564, playIntent, 0);
             }
             builder.addAction(R.drawable.ic_play, getString(R.string.notification_action_play), playPendingIntent);
         } else {
@@ -221,9 +224,9 @@ public class MediaPlayerService extends Service {
             pauseIntent.setAction(ACTION_PAUSE);
             PendingIntent pausePendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                pausePendingIntent = PendingIntent.getService(App.getContext(), 0, pauseIntent, PendingIntent.FLAG_IMMUTABLE);
+                pausePendingIntent = PendingIntent.getService(App.getContext(), 565, pauseIntent, PendingIntent.FLAG_IMMUTABLE);
             } else {
-                pausePendingIntent = PendingIntent.getService(App.getContext(), 0, pauseIntent, 0);
+                pausePendingIntent = PendingIntent.getService(App.getContext(), 565, pauseIntent, 0);
             }
             builder.addAction(R.drawable.ic_pause, getString(R.string.notification_action_pause), pausePendingIntent);
         }
@@ -237,9 +240,9 @@ public class MediaPlayerService extends Service {
         }
         PendingIntent contentPendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, contentIntent, PendingIntent.FLAG_IMMUTABLE);
+            contentPendingIntent = PendingIntent.getActivity(App.getContext(), 566, contentIntent, PendingIntent.FLAG_IMMUTABLE);
         } else {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, contentIntent, 0);
+            contentPendingIntent = PendingIntent.getActivity(App.getContext(), 566, contentIntent, 0);
         }
         builder.setContentIntent(contentPendingIntent);
 
@@ -247,9 +250,9 @@ public class MediaPlayerService extends Service {
         stopIntent.setAction(ACTION_STOP);
         PendingIntent stopPendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            stopPendingIntent = PendingIntent.getService(App.getContext(), 0, stopIntent, PendingIntent.FLAG_IMMUTABLE);
+            stopPendingIntent = PendingIntent.getService(App.getContext(), 567, stopIntent, PendingIntent.FLAG_IMMUTABLE);
         } else {
-            stopPendingIntent = PendingIntent.getService(App.getContext(), 0, stopIntent, 0);
+            stopPendingIntent = PendingIntent.getService(App.getContext(), 567, stopIntent, 0);
         }
         builder.setDeleteIntent(stopPendingIntent);
 

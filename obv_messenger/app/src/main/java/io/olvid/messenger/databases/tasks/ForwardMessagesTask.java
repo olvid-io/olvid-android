@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.databases.AppDatabase;
@@ -31,6 +32,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 public class ForwardMessagesTask implements Runnable {
    private final List<Long> messageIdsToForward;
@@ -90,7 +92,8 @@ public class ForwardMessagesTask implements Runnable {
          boolean allAttachmentsComplete = true;
          List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = db.fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(message.id);
          for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {
-            if (!fyleAndStatus.fyle.isComplete()) {
+            if (!fyleAndStatus.fyle.isComplete() && !Objects.equals(fyleAndStatus.fyleMessageJoinWithStatus.mimeType, OpenGraph.MIME_TYPE)) {
+               // never fail the forward because of an incomplete link preview
                allAttachmentsComplete = false;
                break;
             }
@@ -170,15 +173,17 @@ public class ForwardMessagesTask implements Runnable {
                newMessage.id = db.messageDao().insert(newMessage);
 
                for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {
-                  FyleMessageJoinWithStatus fyleMessageJoinWithStatus = FyleMessageJoinWithStatus.createDraft(fyleAndStatus.fyle.id,
-                          newMessage.id,
-                          discussion.bytesOwnedIdentity,
-                          fyleAndStatus.fyle.filePath,
-                          fyleAndStatus.fyleMessageJoinWithStatus.fileName,
-                          fyleAndStatus.fyleMessageJoinWithStatus.mimeType,
-                          fyleAndStatus.fyleMessageJoinWithStatus.size
-                  );
-                  db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
+                  if (fyleAndStatus.fyle.isComplete()) {
+                     FyleMessageJoinWithStatus fyleMessageJoinWithStatus = FyleMessageJoinWithStatus.createDraft(fyleAndStatus.fyle.id,
+                             newMessage.id,
+                             discussion.bytesOwnedIdentity,
+                             fyleAndStatus.fyle.filePath,
+                             fyleAndStatus.fyleMessageJoinWithStatus.fileName,
+                             fyleAndStatus.fyleMessageJoinWithStatus.mimeType,
+                             fyleAndStatus.fyleMessageJoinWithStatus.size
+                     );
+                     db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
+                  }
                }
                newMessage.recomputeAttachmentCount(db);
                db.messageDao().updateAttachmentCount(newMessage.id, newMessage.totalAttachmentCount, newMessage.imageCount, 0, newMessage.imageResolutions);

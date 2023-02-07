@@ -92,6 +92,7 @@ public abstract class Constants {
 
 
     public static final long BASE_RESCHEDULING_TIME = 250L;
+    public static final long WEBSOCKET_PING_INTERVAL_MILLIS = 20_000L;
 
     // Keycloak
     public static final long KEYCLOAK_SIGNATURE_VALIDITY_MILLIS = 60 * 86_400_000L;

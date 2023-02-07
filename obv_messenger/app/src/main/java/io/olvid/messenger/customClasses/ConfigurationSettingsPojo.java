@@ -62,6 +62,8 @@ public class ConfigurationSettingsPojo {
     public Integer lw; // lock_wipe_on_fail;
 
     public Long ad; // auto_download_size;
+    public Integer lpi; // link_preview_inbound;
+    public Integer lpo; // link_preview_outbound;
     public Integer rr; // send_read_receipt;
     public Integer ao; // auto_open_limited_visibility;
     public Integer rw; // retain_wiped_outbound;
@@ -119,8 +121,16 @@ public class ConfigurationSettingsPojo {
         if (ln != null) { pojo.lock_notification = ln != 0; }
         if (lw != null) { pojo.lock_wipe_on_fail = lw != 0; }
 
-        if (ad != null) { pojo.auto_download_size = ad; }
-        if (rr != null) { pojo.send_read_receipt = rr != 0; }
+        if (ad != null) {
+            pojo.auto_download_size = ad;
+        }
+
+        if (lpi != null) { pojo.link_preview_inbound = lpi != 0; }
+        if (lpo != null) { pojo.link_preview_outbound = lpo != 0; }
+
+        if (rr != null) {
+            pojo.send_read_receipt = rr != 0;
+        }
         if (ao != null) { pojo.auto_open_limited_visibility = ao != 0; }
         if (rw != null) { pojo.retain_wiped_outbound = rw != 0; }
         
@@ -245,7 +255,12 @@ public class ConfigurationSettingsPojo {
             sb.append("\n");
         }
 
-        if (rr != null) { sb.append(highlight(c, R.string.text_setting_send_read_receipt)).append(bool(c, rr != 0)).append("\n"); }
+        if (lpi != null) { sb.append(highlight(c, R.string.text_setting_link_preview_inbound)).append(bool(c, lpi != 0)).append("\n"); }
+        if (lpo != null) { sb.append(highlight(c, R.string.text_setting_link_preview_outbound)).append(bool(c, lpo != 0)).append("\n"); }
+
+        if (rr != null) {
+            sb.append(highlight(c, R.string.text_setting_send_read_receipt)).append(bool(c, rr != 0)).append("\n");
+        }
         if (ao != null) { sb.append(highlight(c, R.string.text_setting_auto_open_limited_visibility)).append(bool(c, ao != 0)).append("\n"); }
         if (rw != null) { sb.append(highlight(c, R.string.text_setting_retain_wiped_outbound)).append(bool(c, rw != 0)).append("\n"); }
 

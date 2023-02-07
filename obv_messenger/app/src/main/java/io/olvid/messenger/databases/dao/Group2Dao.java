@@ -226,6 +226,10 @@ public interface Group2Dao {
             " ORDER BY c." + Contact.SORT_DISPLAY_NAME + " ASC ")
     LiveData<List<Contact>> getAllValidContactsNotInGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, List<byte[]> bytesAddedMemberIdentities, List<byte[]> bytesRemovedMemberIdentities);
 
+    @Query("SELECT " + Group2.CUSTOM_PHOTO_URL + " FROM " + Group2.TABLE_NAME +
+            " WHERE " + Group2.CUSTOM_PHOTO_URL + " IS NOT NULL")
+    List<String> getAllCustomPhotoUrls();
+
 
     class GroupOrGroup2 {
         @Embedded(prefix = "group_")

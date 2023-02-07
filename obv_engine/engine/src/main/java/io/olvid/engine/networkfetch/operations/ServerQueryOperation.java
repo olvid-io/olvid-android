@@ -123,7 +123,7 @@ public class ServerQueryOperation extends Operation {
                         // encrypt the photo
                         String absoluteOrNotPhotoUrl = serverQuery.getType().getDataUrl();
                         File photoFile;
-                        if (absoluteOrNotPhotoUrl.startsWith(File.separator)) {
+                        if (new File(absoluteOrNotPhotoUrl).isAbsolute()) {
                             photoFile = new File(absoluteOrNotPhotoUrl);
                         } else {
                             photoFile = new File(fetchManagerSession.engineBaseDirectory, absoluteOrNotPhotoUrl);

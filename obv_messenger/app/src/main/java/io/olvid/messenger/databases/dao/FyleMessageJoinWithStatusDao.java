@@ -40,6 +40,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 @Dao
 public interface FyleMessageJoinWithStatusDao {
@@ -121,16 +122,26 @@ public interface FyleMessageJoinWithStatusDao {
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
-            " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId ORDER BY FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
+            " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
+            " ORDER BY FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
     List<FyleAndStatus> getFylesAndStatusForMessageSync(final long messageId);
+
+    @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "' " +
+            " ORDER BY FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
+    List<FyleAndStatus> getFylesAndStatusForMessageSyncWithoutLinkPreview(final long messageId);
 
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
             " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId" +
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "' " +
             " ORDER BY FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
-    List<FyleAndStatus> getCompleteFylesAndStatusForMessageSync(final long messageId);
+    List<FyleAndStatus> getCompleteFylesAndStatusForMessageSyncWithoutLinkPreview(final long messageId);
 
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -138,6 +149,13 @@ public interface FyleMessageJoinWithStatusDao {
             " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId" +
             " AND FMjoin." + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId")
     FyleAndStatus getFyleAndStatus(final long messageId, final long fyleId);
+
+    @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId" +
+            " AND FMjoin." + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId")
+    LiveData<FyleAndStatus> getFyleAndStatusObservable(final long messageId, final long fyleId);
 
     @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME +
             " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
@@ -147,7 +165,9 @@ public interface FyleMessageJoinWithStatusDao {
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
-            " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId ORDER BY FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
+            " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "' " +
+            " ORDER BY FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
     LiveData<List<FyleAndStatus>> getFylesAndStatusForMessage(final long messageId);
 
     @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME +

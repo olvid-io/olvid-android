@@ -1,7 +1,8 @@
 .DS_Store
 *~
 Backup*.cdr
-obv_messenger/app/release/
+/obv_messenger/app/release/
+/obv_messenger/app/devFull/
 avd/
 *.iml
 .gradle

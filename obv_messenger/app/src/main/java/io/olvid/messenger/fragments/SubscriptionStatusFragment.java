@@ -235,7 +235,13 @@ public class SubscriptionStatusFragment extends Fragment {
                 fixPaymentGroup.setVisibility(View.VISIBLE);
                 fixPaymentGroup
                         .findViewById(R.id.fix_payment_method_button)
-                        .setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/subscriptions?sku=premium_2020_monthly&package=io.olvid.messenger"))));
+                        .setOnClickListener(v -> {
+                            try {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/subscriptions?sku=premium_2020_monthly&package=io.olvid.messenger")));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
                 break;
             }
             case FREE_TRIAL_KEY_EXPIRED: {

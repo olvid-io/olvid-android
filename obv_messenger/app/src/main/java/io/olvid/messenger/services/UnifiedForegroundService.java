@@ -151,7 +151,7 @@ public class UnifiedForegroundService extends Service {
         activity.startService(lockIntent);
     }
 
-    private static void connectOrDisconnectWebSocket() {
+    public static void connectOrDisconnectWebSocket() {
         if (App.isVisible() || WebClientSubService.isRunning || SettingsActivity.usePermanentWebSocket()) {
             if (SettingsActivity.shareAppVersion()) {
                 AppSingleton.getEngine().connectWebsocket("android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME);

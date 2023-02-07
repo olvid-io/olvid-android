@@ -75,16 +75,16 @@ import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.firebase.ObvFirebaseMessagingService;
 import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.services.BackupCloudProviderService;
-import io.olvid.messenger.firebase.ObvFirebaseMessagingService;
 
 public class SettingsActivity extends LockableActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     public static final String SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA = "sub_setting";
     public static final String PREF_HEADER_KEY_BACKUP = "pref_header_key_backup";
     public static final String PREF_HEADER_KEY_NOTIFICATIONS = "pref_header_key_notifications";
-//    public static final String PREF_HEADER_KEY_PRIVACY = "pref_header_key_privacy";
+    //    public static final String PREF_HEADER_KEY_PRIVACY = "pref_header_key_privacy";
     public static final String PREF_HEADER_KEY_LOCK_SCREEN = "pref_header_key_lock_screen";
 
     public static final String ACTIVITY_RECREATE_REQUIRED_ACTION = "activity_recreate_required_action";
@@ -333,6 +333,11 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_AUTODOWNLOAD_SIZE_DEFAULT = "10000000";
 
 
+    static final String PREF_KEY_LINK_PREVIEW_OUTBOUND = "pref_key_link_preview_outbound";
+    public static final boolean PREF_KEY_LINK_PREVIEW_OUTBOUND_DEFAULT = true;
+    static final String PREF_KEY_LINK_PREVIEW_INBOUND = "pref_key_link_preview_inbound";
+    public static final boolean PREF_KEY_LINK_PREVIEW_INBOUND_DEFAULT = false;
+
     static final String PREF_KEY_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND = "pref_key_auto_open_limited_visibility_inbound";
     static final boolean PREF_KEY_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND_DEFAULT = false;
 
@@ -521,11 +526,19 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             try {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
             } catch (ActivityNotFoundException e) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                } catch (Exception ee) {
+                    ee.printStackTrace();
+                }
             }
             return true;
         } else if (itemId == R.id.action_help_faq) {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://olvid.io/faq/")));
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://olvid.io/faq/")));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return true;
         } else if (item.getItemId() == android.R.id.home) {
             onBackPressed();
@@ -658,7 +671,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         String scaleString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_FONT_SCALE, PREF_KEY_FONT_SCALE_DEFAULT);
         try {
             return Float.parseFloat(scaleString);
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
         return 1.0f;
     }
 
@@ -666,7 +680,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         String scaleString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_SCREEN_SCALE, PREF_KEY_SCREEN_SCALE_DEFAULT);
         try {
             return Float.parseFloat(scaleString);
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
         return 1.0f;
     }
 
@@ -679,9 +694,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             Configuration configuration = new Configuration();
             configuration.fontScale = baseContext.getResources().getConfiguration().fontScale * customFontScale;
             configuration.densityDpi = (int) (baseContext.getResources().getConfiguration().densityDpi * customScreenScale);
-            configuration.screenWidthDp = (int) (baseConfiguration.screenWidthDp/customScreenScale);
-            configuration.screenHeightDp = (int) (baseConfiguration.screenHeightDp/customScreenScale);
-            configuration.smallestScreenWidthDp = (int) (baseConfiguration.smallestScreenWidthDp/customScreenScale);
+            configuration.screenWidthDp = (int) (baseConfiguration.screenWidthDp / customScreenScale);
+            configuration.screenHeightDp = (int) (baseConfiguration.screenHeightDp / customScreenScale);
+            configuration.smallestScreenWidthDp = (int) (baseConfiguration.smallestScreenWidthDp / customScreenScale);
             newContext = baseContext.createConfigurationContext(configuration);
         } else {
             newContext = baseContext;
@@ -791,6 +806,32 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static void setAutoDownloadSize(long autoDownloadSize) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         editor.putString(PREF_KEY_AUTODOWNLOAD_SIZE, Long.toString(autoDownloadSize));
+        editor.apply();
+    }
+
+    public static boolean isLinkPreviewInbound() {
+        if (!getBetaFeaturesEnabled()) {
+            return false;
+        }
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND, SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND_DEFAULT);
+    }
+
+    public static boolean isLinkPreviewOutbound() {
+        if (!getBetaFeaturesEnabled()) {
+            return false;
+        }
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(SettingsActivity.PREF_KEY_LINK_PREVIEW_OUTBOUND, SettingsActivity.PREF_KEY_LINK_PREVIEW_OUTBOUND_DEFAULT);
+    }
+
+    public static void setLinkPreviewInbound(boolean defaultLinkPreviewInbound) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_LINK_PREVIEW_INBOUND, defaultLinkPreviewInbound);
+        editor.apply();
+    }
+
+    public static void setLinkPreviewOutbound(boolean defaultLinkPreviewOutbound) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_LINK_PREVIEW_OUTBOUND, defaultLinkPreviewOutbound);
         editor.apply();
     }
 
@@ -1027,7 +1068,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return getAutoJoinGroupsFromString(stringValue);
     }
 
-    @NonNull public static AutoJoinGroupsCategory getAutoJoinGroupsFromString(String stringValue) {
+    @NonNull
+    public static AutoJoinGroupsCategory getAutoJoinGroupsFromString(String stringValue) {
         if (stringValue != null) {
             switch (stringValue) {
                 case "nobody":
@@ -1148,7 +1190,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static String[] getHiddenProfileClosePolicyBackgroundGraceDelayLabels(Context context) {
-        return new String[] {
+        return new String[]{
                 context.getString(R.string.text_close_profile_instantly),
                 context.getString(R.string.text_after_10s),
                 context.getString(R.string.text_after_30s),
@@ -1173,7 +1215,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         }
         editor.apply();
     }
-
 
 
     public static boolean useLowBandwidthInCalls() {
@@ -1437,7 +1478,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         if (serializedConfiguration != null) {
             try {
                 return AppSingleton.getJsonObjectMapper().readValue(serializedConfiguration, BackupCloudProviderService.CloudProviderConfiguration.class);
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
         }
         return null;
     }
@@ -1481,7 +1523,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
             editor.putString(PREF_KEY_MESSAGE_VIBRATION_PATTERN, pattern);
             editor.apply();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     public static long[] intToVibrationPattern(int patternIndex) {
@@ -1551,7 +1594,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
             editor.putString(PREF_KEY_CALL_VIBRATION_PATTERN, pattern);
             editor.apply();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     public static boolean useFlashOnIncomingCall() {
@@ -1596,16 +1640,16 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static String getWebclientLanguage() {
-       String language = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LANGUAGE_WEBCLIENT, PREF_KEY_LANGUAGE_WEBCLIENT_DEFAULT);
-       if("".equals(language)){
-           language = PREF_KEY_LANGUAGE_WEBCLIENT_DEFAULT;
-       }
-       return language;
+        String language = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LANGUAGE_WEBCLIENT, PREF_KEY_LANGUAGE_WEBCLIENT_DEFAULT);
+        if ("".equals(language)) {
+            language = PREF_KEY_LANGUAGE_WEBCLIENT_DEFAULT;
+        }
+        return language;
     }
 
     public static void setWebclientLanguage(String language) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
-        if(language == null || "".equals(language)){
+        if (language == null || "".equals(language)) {
             editor.remove(PREF_KEY_LANGUAGE_WEBCLIENT);
         } else {
             editor.putString(PREF_KEY_LANGUAGE_WEBCLIENT, language);
@@ -1615,7 +1659,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static String gWebclientTheme() {
         String theme = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_THEME_WEBCLIENT, PREF_KEY_THEME_WEBCLIENT_DEFAULT);
-        if("".equals(theme)){
+        if ("".equals(theme)) {
             theme = PREF_KEY_THEME_WEBCLIENT_DEFAULT;
         }
         return theme;
@@ -1646,7 +1690,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static void setWebclientSendOnEnter(Boolean send) {
-        if(send == null){
+        if (send == null) {
             return;
         }
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
@@ -1659,7 +1703,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static void setShowWebclientNotificationsInBrowser(Boolean show) {
-        if(show == null) {
+        if (show == null) {
             return;
         }
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
@@ -1672,8 +1716,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
 
-    public static void setPlayWebclientNotificationsSoundInBrowser(Boolean notifications){
-        if(notifications == null){
+    public static void setPlayWebclientNotificationsSoundInBrowser(Boolean notifications) {
+        if (notifications == null) {
             return;
         }
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
@@ -1682,7 +1726,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static boolean keepWebclientAliveAfterClose() {
-        return  PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_KEEP_WEBCLIENT_ALIVE_AFTER_CLOSE, PREF_KEY_KEEP_WEBCLIENT_ALIVE_AFTER_CLOSE_DEFAULT);
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_KEEP_WEBCLIENT_ALIVE_AFTER_CLOSE, PREF_KEY_KEEP_WEBCLIENT_ALIVE_AFTER_CLOSE_DEFAULT);
     }
 
     public static void setKeepWebclientAliveAfterClose(boolean keepAlive) {
@@ -1757,7 +1801,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
                 }
                 return preferredIcons;
             }
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
         return null;
     }
 
@@ -1781,7 +1826,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
                 String[] reactions = preferredReactions.split(",");
                 return new ArrayList<>(Arrays.asList(reactions)); // build a new ArrayList to make the list mutable
             }
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
         return new ArrayList<>(Arrays.asList(PREF_KEY_PREFERRED_REACTIONS_DEFAULT));
     }
 
@@ -1791,7 +1837,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             editor.remove(PREF_KEY_PREFERRED_REACTIONS);
         } else {
             StringBuilder sb = new StringBuilder();
-            for (String reaction: reactions) {
+            for (String reaction : reactions) {
                 if (sb.length() > 0) {
                     sb.append(",");
                 }

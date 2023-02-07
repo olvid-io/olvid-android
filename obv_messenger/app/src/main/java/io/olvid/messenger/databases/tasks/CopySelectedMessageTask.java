@@ -65,7 +65,7 @@ public class CopySelectedMessageTask implements Runnable {
                     clipData = null;
                 }
             } else {
-                List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getCompleteFylesAndStatusForMessageSync(selectedMessageId);
+                List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getCompleteFylesAndStatusForMessageSyncWithoutLinkPreview(selectedMessageId);
                 if (fyleAndStatuses.size() > 0) {
                     List<ClipData.Item> clipItems = new ArrayList<>();
                     List<String> mimeTypes = new ArrayList<>();

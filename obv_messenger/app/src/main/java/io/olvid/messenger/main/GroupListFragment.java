@@ -86,7 +86,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
     private FragmentActivity activity;
     private GroupListViewModel groupListViewModel;
     private SwipeRefreshLayout swipeRefreshLayout;
-
+    private EmptyRecyclerView recyclerView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -108,7 +108,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_main_fragment_group_list, container, false);
 
-        EmptyRecyclerView recyclerView = rootView.findViewById(R.id.group_list_recycler_view);
+        recyclerView = rootView.findViewById(R.id.group_list_recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
@@ -638,6 +638,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
             if (this.groups == null) {
                 this.groups = groups;
                 notifyDataSetChanged();
+                recyclerView.scrollBy(0, 0);
             } else {
                 DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                     @Override
@@ -675,6 +676,7 @@ public class GroupListFragment extends Fragment implements SwipeRefreshLayout.On
                 });
                 this.groups = groups;
                 result.dispatchUpdatesTo(this);
+                recyclerView.scrollBy(0, 0);
             }
         }
 

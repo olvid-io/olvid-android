@@ -511,9 +511,11 @@ public class ContactListFragment extends Fragment implements PopupMenu.OnMenuIte
                 });
                 this.filteredContacts = contacts;
                 result.dispatchUpdatesTo(this);
+                recyclerView.scrollBy(0, 0);
             } else {
                 this.filteredContacts = contacts;
                 notifyDataSetChanged();
+                recyclerView.scrollBy(0, 0);
             }
         }
 

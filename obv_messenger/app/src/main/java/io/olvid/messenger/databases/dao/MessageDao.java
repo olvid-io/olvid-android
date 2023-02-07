@@ -35,6 +35,7 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 @Dao
 public interface MessageDao {
@@ -63,8 +64,9 @@ public interface MessageDao {
             "mess." + Message.REACTIONS + " AS mess_" + Message.REACTIONS + ", " +
             "mess." + Message.IMAGE_RESOLUTIONS + " AS mess_" + Message.IMAGE_RESOLUTIONS + ", " +
             "mess." + Message.MISSED_MESSAGE_COUNT + " AS mess_" + Message.MISSED_MESSAGE_COUNT + ", " +
-            "mess." + Message.EXPIRATION_START_TIMESTAMP + " AS mess_" + Message.EXPIRATION_START_TIMESTAMP  + ", " +
-            "mess." + Message.LIMITED_VISIBILITY + " AS mess_" + Message.LIMITED_VISIBILITY;
+            "mess." + Message.EXPIRATION_START_TIMESTAMP + " AS mess_" + Message.EXPIRATION_START_TIMESTAMP + ", " +
+            "mess." + Message.LIMITED_VISIBILITY + " AS mess_" + Message.LIMITED_VISIBILITY + ", " +
+            "mess." + Message.LINK_PREVIEW_FYLE_ID + " AS mess_" + Message.LINK_PREVIEW_FYLE_ID;
 
     @Insert
     long insert(Message message);
@@ -145,6 +147,11 @@ public interface MessageDao {
             " SET " + Message.EXPIRATION_START_TIMESTAMP + " = :expirationStartTimestamp " +
             " WHERE id = :messageId")
     void updateExpirationStartTimestamp(long messageId, long expirationStartTimestamp);
+
+    @Query("UPDATE " + Message.TABLE_NAME +
+            " SET " + Message.LINK_PREVIEW_FYLE_ID + " = :linkPreviewFyleId " +
+            " WHERE id = :messageId")
+    void updateLinkPreviewFyleId(long messageId, Long linkPreviewFyleId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " ASC")
     LiveData<List<Message>> getDiscussionMessages(long discussionId);
@@ -357,6 +364,12 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.IMAGE_COUNT + " != 0")
     List<Message> getAllWithImages();
+
+    @Query("SELECT message.* FROM " + Message.TABLE_NAME + " AS message " +
+            " JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON message.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " WHERE FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " = '" + OpenGraph.MIME_TYPE + "'")
+    List<Message> getAllWithLinkPreview();
 
     @Query("SELECT id FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +

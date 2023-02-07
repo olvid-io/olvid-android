@@ -275,7 +275,8 @@ public class ColissimoMessageQueue {
                             App.runThread(new PostMessageInDiscussionTask(
                                     body.trim(),
                                     discussionId,
-                                    false
+                                    false,
+                                    null
                             ));
                         }
                         break;

@@ -94,6 +94,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
     private Long engineNotificationListenerRegistrationNumber;
     private SwipeRefreshLayout swipeRefreshLayout;
     private FragmentActivity activity;
+    private EmptyRecyclerView recyclerView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -114,7 +115,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_main_fragment_discussion_list, container, false);
 
-        EmptyRecyclerView recyclerView = rootView.findViewById(R.id.discussion_list_recycler_view);
+        recyclerView = rootView.findViewById(R.id.discussion_list_recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
@@ -742,6 +743,7 @@ public class DiscussionListFragment extends Fragment implements PopupMenu.OnMenu
         public void onChanged(@Nullable List<DiscussionDao.DiscussionAndLastMessage> discussionsAndLastMessages) {
             this.discussionsAndLastMessages = discussionsAndLastMessages;
             notifyDataSetChanged();
+            recyclerView.scrollBy(0, 0);
         }
 
         class DiscussionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {

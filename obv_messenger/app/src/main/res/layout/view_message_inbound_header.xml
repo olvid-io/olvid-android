@@ -42,7 +42,9 @@
         android:paddingBottom="4dp"
         android:theme="@style/SubtleGreyRipple"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/message_forwarded_badge"
+        android:layout_marginBottom="4dp"
+        app:layout_goneMarginBottom="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/message_link_preview_group"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -68,7 +70,6 @@
             android:id="@+id/message_content_reply_body"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:autoLink="all"
             android:ellipsize="end"
             android:maxLines="3"
             android:textColor="@color/greyTint"
@@ -103,6 +104,18 @@
             tools:text="5 attachments"
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <include
+        layout="@layout/view_message_link_preview"
+        android:id="@+id/message_link_preview_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/message_forwarded_badge"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_min="wrap" />
 
     <TextView
         android:id="@+id/message_forwarded_badge"

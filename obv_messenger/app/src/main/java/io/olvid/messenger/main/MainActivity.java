@@ -32,7 +32,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -51,13 +50,15 @@ import androidx.core.content.ContextCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentOnAttachListener;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.preference.PreferenceManager;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.MarginPageTransformer;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -114,7 +115,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
     private TextView pingConnectivityFullTextView;
     private TextView pingConnectivityFullPingTextView;
     private TabsPagerAdapter tabsPagerAdapter;
-    private ViewPager viewPager;
+    private ViewPager2 viewPager;
     private MainActivityPageChangeListener mainActivityPageChangeListener;
     private PingListener pingListener;
 
@@ -250,7 +251,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         pingListener = new PingListener();
         AppSingleton.getWebsocketConnectivityStateLiveData().observe(this, pingListener);
 
-        tabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(),
+        tabsPagerAdapter = new TabsPagerAdapter(this,
                 findViewById(R.id.tab_discussions_notification_dot),
                 findViewById(R.id.tab_contacts_notification_dot),
                 findViewById(R.id.tab_groups_notification_dot),
@@ -271,8 +272,8 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
 
         viewPager = findViewById(R.id.view_pager_container);
         viewPager.setAdapter(tabsPagerAdapter);
-        viewPager.addOnPageChangeListener(mainActivityPageChangeListener);
-        viewPager.setPageMargin(getResources().getDimensionPixelSize(R.dimen.main_activity_page_margin));
+        viewPager.registerOnPageChangeCallback(mainActivityPageChangeListener);
+        viewPager.setPageTransformer(new MarginPageTransformer(getResources().getDimensionPixelSize(R.dimen.main_activity_page_margin)));
         viewPager.setOffscreenPageLimit(3);
 
         getSupportFragmentManager().addFragmentOnAttachListener(this);
@@ -658,64 +659,50 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         invitationListFragment = null;
     }
 
-    public class TabsPagerAdapter extends FragmentPagerAdapter {
+    public class TabsPagerAdapter extends FragmentStateAdapter {
         final View[] notificationDots;
 
-        TabsPagerAdapter(FragmentManager fm, View... notificationDots) {
-            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        TabsPagerAdapter(FragmentActivity activity, View... notificationDots) {
+            super(activity);
             this.notificationDots = notificationDots;
         }
 
         @NonNull
         @Override
-        public Fragment getItem(int position) {
+        public Fragment createFragment(int position) {
             switch (position) {
-                case DISCUSSIONS_TAB: {
-                    return new DiscussionListFragment();
-                }
                 case CONTACTS_TAB: {
-                    return new ContactListFragment();
+                    contactListFragment = new ContactListFragment();
+                    return contactListFragment;
                 }
                 case GROUPS_TAB: {
                     return new GroupListFragment();
                 }
-                case INVITATIONS_TAB:
+                case INVITATIONS_TAB: {
+                    invitationListFragment = new InvitationListFragment();
+                    return invitationListFragment;
+                }
+                case DISCUSSIONS_TAB:
                 default: {
-                    return new InvitationListFragment();
+                    return new DiscussionListFragment();
                 }
             }
         }
 
-        @NonNull
         @Override
-        public Object instantiateItem(@NonNull ViewGroup container, int position) {
-            Fragment fragment = (Fragment) super.instantiateItem(container, position);
-            if (position == CONTACTS_TAB) {
-                if (fragment instanceof ContactListFragment) {
-                    contactListFragment = (ContactListFragment) fragment;
-                }
-            } else if (position == INVITATIONS_TAB) {
-                if (fragment instanceof InvitationListFragment) {
-                    invitationListFragment = (InvitationListFragment) fragment;
-                }
-            }
-            return fragment;
-        }
-
-        @Override
-        public int getCount() {
+        public int getItemCount() {
             return 4;
         }
 
         void showNotificationDot(int position) {
-            if (position<0 || position >= getCount()) {
+            if (position<0 || position >= getItemCount()) {
                 return;
             }
             notificationDots[position].setVisibility(View.VISIBLE);
         }
 
         void hideNotificationDot(int position) {
-            if (position<0 || position >= getCount()) {
+            if (position<0 || position >= getItemCount()) {
                 return;
             }
             notificationDots[position].setVisibility(View.GONE);
@@ -980,7 +967,7 @@ public class MainActivity extends LockableActivity implements View.OnClickListen
         }
     }
 
-    class MainActivityPageChangeListener implements ViewPager.OnPageChangeListener {
+    class MainActivityPageChangeListener extends ViewPager2.OnPageChangeCallback {
         private final InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         private final ImageView[] imageViews;
         private final int inactiveColor;

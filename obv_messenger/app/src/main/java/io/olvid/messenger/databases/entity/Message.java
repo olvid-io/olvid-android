@@ -66,6 +66,7 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.dao.MessageDao;
 import io.olvid.messenger.databases.tasks.ComputeAttachmentPreviewsAndPostMessageTask;
 import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
 @SuppressWarnings("CanBeFinal")
@@ -114,6 +115,10 @@ public class Message {
     public static final String MISSED_MESSAGE_COUNT = "missed_message_count"; // only used in inbound messages: the number of missing sequence numbers when this message is received. 0 --> everything is fine
     public static final String EXPIRATION_START_TIMESTAMP = "expiration_start_timestamp"; // set when the message is first marked as sent --> this is when expirations are started. Only set for message with an expiration
     public static final String LIMITED_VISIBILITY = "limited_visibility"; // true for read_once messages and messages with a visibility_duration
+    public static final String LINK_PREVIEW_FYLE_ID = "link_preview_fyle_id"; // id of attached link preview
+
+
+
 
     // This enum is used in protobuf for webclient, please send notification if you modify anything
     public static final int STATUS_UNPROCESSED = 0; // MessageRecipientInfos not created yet
@@ -257,12 +262,15 @@ public class Message {
     @ColumnInfo(name = LIMITED_VISIBILITY)
     public boolean limitedVisibility;
 
+    @ColumnInfo(name = LINK_PREVIEW_FYLE_ID)
+    public Long linkPreviewFyleId;
+
     public boolean hasAttachments() {
-        return totalAttachmentCount != 0;
+        return totalAttachmentCount > 0;
     }
 
     // default constructor required by Room
-    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, byte[] engineMessageIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility) {
+    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, byte[] engineMessageIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility, @Nullable Long linkPreviewFyleId) {
         this.senderSequenceNumber = senderSequenceNumber;
         this.contentBody = contentBody;
         this.jsonReply = jsonReply;
@@ -289,6 +297,7 @@ public class Message {
         this.missedMessageCount = missedMessageCount;
         this.expirationStartTimestamp = expirationStartTimestamp;
         this.limitedVisibility = limitedVisibility;
+        this.linkPreviewFyleId = linkPreviewFyleId;
     }
 
 
@@ -323,6 +332,7 @@ public class Message {
         this.imageResolutions = null;
         this.missedMessageCount = 0;
         this.expirationStartTimestamp = 0;
+        this.linkPreviewFyleId = null;
 
         if (messageType == TYPE_OUTBOUND_MESSAGE) {
             computeOutboundSortIndex(db);
@@ -397,7 +407,8 @@ public class Message {
                 null,
                 0,
                 0,
-                false
+                false,
+                null
         );
     }
 
@@ -426,7 +437,8 @@ public class Message {
                 null,
                 0,
                 0,
-                false
+                false,
+                null
         );
         if (!useActualTimestampForSorting) {
             message.computeOutboundSortIndex(db);
@@ -943,7 +955,7 @@ public class Message {
                 }
 
                 // start the expiration timers
-                new ExpiringOutboundMessageSent(this).run();
+                App.runThread(new ExpiringOutboundMessageSent(this));
                 return;
             }
 
@@ -1343,10 +1355,12 @@ public class Message {
     }
 
     public JsonLocation getJsonLocation() {
-        try {
-            return AppSingleton.getJsonObjectMapper().readValue(this.jsonLocation, JsonLocation.class);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (this.jsonLocation != null) {
+            try {
+                return AppSingleton.getJsonObjectMapper().readValue(this.jsonLocation, JsonLocation.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }
@@ -1462,8 +1476,19 @@ public class Message {
         int imageCount = 0;
         StringBuilder sb = new StringBuilder();
         boolean first = true;
+        boolean hasLinkPreview = false;
         for (FyleMessageJoinWithStatus fmjoin : db.fyleMessageJoinWithStatusDao().getStatusesForMessage(this.id)) {
-            if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(fmjoin.getNonNullMimeType())) {
+            if (fmjoin.getNonNullMimeType().equals(OpenGraph.MIME_TYPE)) {
+                if (!hasLinkPreview) {
+                    // always consider only the first link-preview attachment
+                    hasLinkPreview = true;
+                    if (!Objects.equals(this.linkPreviewFyleId, fmjoin.fyleId)) {
+                        this.linkPreviewFyleId = fmjoin.fyleId;
+                        db.messageDao().updateLinkPreviewFyleId(this.id, this.linkPreviewFyleId);
+                    }
+                }
+                continue;
+            } else if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(fmjoin.getNonNullMimeType())) {
                 imageCount++;
                 if (fmjoin.imageResolution != null && fmjoin.imageResolution.length() > 0) {
                     if (!first) {
@@ -1474,6 +1499,10 @@ public class Message {
                 }
             }
             totalCount++;
+        }
+        if (!hasLinkPreview && this.linkPreviewFyleId != null) {
+            this.linkPreviewFyleId = null;
+            db.messageDao().updateLinkPreviewFyleId(this.id, null);
         }
         String imageResolutions = sb.toString();
         if (this.totalAttachmentCount != totalCount || this.imageCount != imageCount || !Objects.equals(this.imageResolutions, imageResolutions)) {
@@ -1532,6 +1561,8 @@ public class Message {
         imageCount = 0;
         imageResolutions = null;
         db.messageDao().updateAttachmentCount(id, 0, 0, wipedAttachmentCount, null);
+        linkPreviewFyleId = null;
+        db.messageDao().updateLinkPreviewFyleId(id, null);
     }
 
     // this method clears the message's body and deletes it if there are no more attachments

@@ -66,7 +66,7 @@ public class SaveMultipleAttachmentsTask implements Runnable {
 
         final List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatusesToSave;
         if (messageId != null) {
-            fyleAndStatusesToSave = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(messageId);
+            fyleAndStatusesToSave = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSyncWithoutLinkPreview(messageId);
         } else if (selectedFyleAndStatuses != null) {
             fyleAndStatusesToSave = selectedFyleAndStatuses;
         } else {

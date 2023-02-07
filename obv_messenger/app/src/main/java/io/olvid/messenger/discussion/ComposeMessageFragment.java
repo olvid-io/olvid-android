@@ -103,6 +103,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding;
+import io.olvid.messenger.customClasses.BitmapUtils;
 import io.olvid.messenger.customClasses.DiscussionInputEditText;
 import io.olvid.messenger.customClasses.DraftAttachmentAdapter;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
@@ -122,6 +123,7 @@ import io.olvid.messenger.databases.tasks.ClearDraftReplyTask;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.databases.tasks.PostMessageInDiscussionTask;
 import io.olvid.messenger.databases.tasks.SaveDraftTask;
+import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel;
 import io.olvid.messenger.discussion.location.SendLocationBasicDialogFragment;
 import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -141,6 +143,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     private FragmentActivity activity;
     private DiscussionViewModel discussionViewModel;
     private ComposeMessageViewModel composeMessageViewModel;
+    private LinkPreviewViewModel linkPreviewViewModel;
     private AudioAttachmentServiceBinding audioAttachmentServiceBinding;
     private InitialView ownedIdentityInitialView;
 
@@ -164,6 +167,11 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     private TextView composeMessageReplySenderName;
     private TextView composeMessageReplyBody;
     private TextView composeMessageReplyAttachmentCount;
+
+    private ViewGroup composeMessageLinkPreviewGroup;
+    private TextView composeMessageLinkPreviewTitle;
+    private TextView composeMessageLinkPreviewDescription;
+    private ImageView composeMessageLinkPreviewImage;
 
     private DraftAttachmentAdapter newMessageAttachmentAdapter;
 
@@ -326,6 +334,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         activity = requireActivity();
         discussionViewModel = new ViewModelProvider(activity, FACTORY).get(DiscussionViewModel.class);
         composeMessageViewModel = new ViewModelProvider(activity, FACTORY).get(ComposeMessageViewModel.class);
+        linkPreviewViewModel = new ViewModelProvider(activity, FACTORY).get(LinkPreviewViewModel.class);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -354,8 +363,39 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 } else {
                     updateComposeAreaLayout();
                 }
+                if (SettingsActivity.isLinkPreviewOutbound()) {
+                    linkPreviewViewModel.findLinkPreview(editable == null ? null : editable.toString(), BitmapUtils.MAX_BITMAP_SIZE, BitmapUtils.MAX_BITMAP_SIZE);
+                }
             }
         });
+
+        linkPreviewViewModel.getOpenGraph().observe(activity, openGraph -> {
+            if (openGraph != null && !openGraph.isEmpty()) {
+                composeMessageLinkPreviewGroup.setVisibility(View.VISIBLE);
+                final Uri uri = openGraph.getSafeUri();
+                if (uri != null) {
+                    composeMessageLinkPreviewGroup.setOnClickListener(v -> {
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                        } catch (Exception e) {
+                            App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
+                        }
+                    });
+                } else {
+                    composeMessageLinkPreviewGroup.setOnClickListener(null);
+                }
+                composeMessageLinkPreviewTitle.setText(openGraph.getTitle());
+                composeMessageLinkPreviewDescription.setText(openGraph.getDescription());
+                if (openGraph.getBitmap() != null) {
+                    composeMessageLinkPreviewImage.setImageBitmap(openGraph.getBitmap());
+                } else {
+                    composeMessageLinkPreviewImage.setImageResource(R.drawable.mime_type_icon_link);
+                }
+            } else {
+                composeMessageLinkPreviewGroup.setVisibility(View.GONE);
+            }
+        });
+
         newMessageEditText.setOnClickListener(v -> setShowAttachIcons(false, true));
         newMessageEditText.requestFocus();
         activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -448,6 +488,15 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 discussionDelegate.scrollToMessage(composeMessageReplyMessageId);
             }
         });
+
+        // link preview
+        composeMessageLinkPreviewGroup = rootConstraintLayout.findViewById(R.id.message_link_preview_group);
+        composeMessageLinkPreviewTitle = rootConstraintLayout.findViewById(R.id.message_link_preview_title);
+        composeMessageLinkPreviewImage = rootConstraintLayout.findViewById(R.id.message_link_preview_image);
+        composeMessageLinkPreviewDescription = rootConstraintLayout.findViewById(R.id.message_link_preview_description);
+        ImageView composeMessageLinkPreviewClear = rootConstraintLayout.findViewById(R.id.message_link_preview_clear);
+
+        composeMessageLinkPreviewClear.setOnClickListener(v -> linkPreviewViewModel.clearLinkPreview());
 
         // attachments recycler view
         EmptyRecyclerView newMessageAttachmentRecyclerView = composeMessageCard.findViewById(R.id.attachments_recycler_view);
@@ -563,6 +612,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     }
 
     private void sendMessage() {
+        composeMessageLinkPreviewGroup.setVisibility(View.GONE);
         if (discussionViewModel.getDiscussionId() != null) {
             if (composeMessageViewModel.getTrimmedNewMessageText() != null || composeMessageViewModel.hasAttachments()) {
                 if (discussionDelegate != null) {
@@ -571,9 +621,11 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 App.runThread(new PostMessageInDiscussionTask(
                         composeMessageViewModel.getTrimmedNewMessageText(),
                         discussionViewModel.getDiscussionId(),
-                        true
+                        true,
+                        linkPreviewViewModel.getOpenGraph().getValue()
                 ));
                 newMessageEditText.setText("");
+                linkPreviewViewModel.reset();
             }
         }
     }
@@ -803,12 +855,19 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
     interface ComposeMessageDelegate {
         void setDiscussionId(long discussionId);
+
         void hideSoftInputKeyboard();
+
         void showSoftInputKeyboard();
+
         boolean stopVoiceRecorderIfRecording(); // returns true if a recording was indeed in progress
+
         void addComposeMessageHeightListener(ComposeMessageHeightListener composeMessageHeightListener);
+
         void removeComposeMessageHeightListener(ComposeMessageHeightListener composeMessageHeightListener);
+
         void setAnimateLayoutChanges(boolean animateLayoutChanges);
+
         void setEmojiKeyboardAttachDelegate(EmojiKeyboardAttachDelegate emojiKeyboardAttachDelegate);
     }
 
@@ -901,7 +960,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     private void showIconOrderSelector() {
         LayoutInflater inflater = LayoutInflater.from(activity);
         RecyclerView iconOrderRecyclerView = new RecyclerView(activity);
-        iconOrderRecyclerView.setPadding(0, 2*fourDp, 0, 0);
+        iconOrderRecyclerView.setPadding(0, 2 * fourDp, 0, 0);
         iconOrderRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
         DiffUtil.ItemCallback<Integer> diffUtilCallback = new DiffUtil.ItemCallback<Integer>() {
             @Override
@@ -1154,7 +1213,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             ImageView imageView = new ImageView(new ContextThemeWrapper(activity, R.style.SubtleBlueRipple));
             imageView.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
             imageView.setPadding(fourDp, fourDp, fourDp, fourDp);
-            imageView.setBackgroundResource( R.drawable.background_circular_ripple);
+            imageView.setBackgroundResource(R.drawable.background_circular_ripple);
             imageView.setImageResource(getImageResourceForIcon(icon));
             imageView.setId(getViewIdForIcon(icon));
             imageView.setOnClickListener(this);
@@ -1306,7 +1365,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setTextColor(greyColor);
                 textView.setGravity(Gravity.CENTER_VERTICAL);
-                textView.setPadding(fourDp, fourDp, 2*fourDp, fourDp);
+                textView.setPadding(fourDp, fourDp, 2 * fourDp, fourDp);
                 textView.setCompoundDrawablePadding(fourDp);
                 textView.setBackgroundResource(backgroundDrawable.resourceId);
                 textView.setOnClickListener(onClickListener);
@@ -1315,10 +1374,10 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             }
         }
 
-        int popupHeight = (iconsOverflow.size()+2) * iconSize + fourDp;
+        int popupHeight = (iconsOverflow.size() + 2) * iconSize + fourDp;
 
         popupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
-        popupWindow.showAsDropDown(attachStuffPlus, fourDp/2, -popupHeight, Gravity.TOP | Gravity.START);
+        popupWindow.showAsDropDown(attachStuffPlus, fourDp / 2, -popupHeight, Gravity.TOP | Gravity.START);
     }
 
     private int getImageResourceForIcon(int icon) {
@@ -1374,7 +1433,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             case ICON_ATTACH_PICTURE:
                 return R.string.label_attach_image;
             case ICON_EPHEMERAL_SETTINGS:
-                    return R.string.label_attach_timer;
+                return R.string.label_attach_timer;
             case ICON_TAKE_PICTURE:
                 return R.string.label_attach_camera;
             case ICON_TAKE_VIDEO:
@@ -1397,6 +1456,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
     interface EmojiKeyboardAttachDelegate {
         void attachKeyboardFragment(@NonNull Fragment fragment);
+
         void detachKeyboardFragment(@NonNull Fragment fragment);
     }
 

@@ -19,23 +19,32 @@
 
 package io.olvid.messenger.databases.tasks;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.UUID;
+
 import io.olvid.engine.Logger;
+import io.olvid.messenger.App;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 public class PostMessageInDiscussionTask implements Runnable {
     private final AppDatabase db;
     private final String body;
     private final long discussionId;
     private final boolean showToast;
+    private final OpenGraph openGraph;
 
-    public PostMessageInDiscussionTask(String body, long discussionId, boolean showToast) {
+    public PostMessageInDiscussionTask(String body, long discussionId, boolean showToast, OpenGraph openGraph) {
         this.db = AppDatabase.getInstance();
         this.body = body;
         this.discussionId = discussionId;
         this.showToast = showToast;
+        this.openGraph = openGraph;
     }
 
     @Override
@@ -44,6 +53,27 @@ public class PostMessageInDiscussionTask implements Runnable {
         if (!discussion.canPostMessages()) {
             Logger.w("A message was posted in a locked discussion!!!");
             return;
+        }
+
+        // attach link preview if any
+        if (openGraph != null && !openGraph.isEmpty()) {
+            try {
+                File cacheDir = new File(App.getContext().getCacheDir(), App.CAMERA_PICTURE_FOLDER);
+                File payloadFile = new File(cacheDir, Logger.getUuidString(UUID.randomUUID()));
+                cacheDir.mkdirs();
+                if (!payloadFile.createNewFile()) {
+                    throw new FileNotFoundException();
+                }
+                FileOutputStream fos = new FileOutputStream(payloadFile);
+                fos.write(openGraph.encode().getBytes());
+                fos.flush();
+                fos.close();
+
+                // no need to delete payloadFile: AddFyleToDraftFromUriTask already moves it
+                new AddFyleToDraftFromUriTask(payloadFile, openGraph.fileName(), OpenGraph.MIME_TYPE, discussionId).run();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
 
         Message.JsonExpiration discussionDefaultJsonExpiration = null;

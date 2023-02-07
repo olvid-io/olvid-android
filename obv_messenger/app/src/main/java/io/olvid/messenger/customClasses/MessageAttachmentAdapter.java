@@ -76,6 +76,7 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked;
 import io.olvid.messenger.databases.tasks.StartAttachmentDownloadTask;
 import io.olvid.messenger.databases.tasks.StopAttachmentDownloadTask;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.services.MediaPlayerService;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -1335,6 +1336,8 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
             return R.drawable.mime_type_icon_text;
         } else {
             switch (mimeType) {
+                case OpenGraph.MIME_TYPE:
+                    return R.drawable.mime_type_icon_link;
                 case "application/zip":
                 case "application/gzip":
                 case "application/x-bzip":

@@ -65,7 +65,7 @@ public class ShareSelectedMessageTask implements Runnable {
                 mimeType = "text/plain";
             }
             if (message.hasAttachments()) {
-                List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = db.fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(message.id);
+                List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = db.fyleMessageJoinWithStatusDao().getCompleteFylesAndStatusForMessageSyncWithoutLinkPreview(message.id);
                 if (multiple) {
                     ArrayList<Uri> uris = new ArrayList<>(fyleAndStatuses.size());
                     for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {

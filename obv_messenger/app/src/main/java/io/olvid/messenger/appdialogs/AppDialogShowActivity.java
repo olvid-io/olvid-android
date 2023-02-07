@@ -248,7 +248,11 @@ public class AppDialogShowActivity extends LockableActivity {
                             try {
                                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
                             } catch (ActivityNotFoundException e) {
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                                try {
+                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                                } catch (Exception ee) {
+                                    ee.printStackTrace();
+                                }
                             }
                         })
                         .setNegativeButton(R.string.button_label_ignore, null)
@@ -265,7 +269,11 @@ public class AppDialogShowActivity extends LockableActivity {
                             try {
                                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
                             } catch (ActivityNotFoundException e) {
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                                try {
+                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                                } catch (Exception ee) {
+                                    ee.printStackTrace();
+                                }
                             }
                         })
                         .setNegativeButton(R.string.button_label_remind_me_later, null)

@@ -34,6 +34,8 @@ public class OutgoingCallRinger {
 
     private MediaPlayer mediaPlayer;
 
+    private AssetFileDescriptor afd;
+
     public OutgoingCallRinger(Context context) {
         this.context = context;
     }
@@ -60,7 +62,11 @@ public class OutgoingCallRinger {
                     resourceId = R.raw.busy;
                     break;
             }
-            AssetFileDescriptor afd = context.getResources().openRawResourceFd(resourceId);
+            if (afd != null) {
+                afd.close();
+                afd = null;
+            }
+            afd = context.getResources().openRawResourceFd(resourceId);
             if (afd == null) {
                 mediaPlayer = null;
                 return;
@@ -94,6 +100,12 @@ public class OutgoingCallRinger {
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
+        }
+        if (afd != null) {
+            try {
+                afd.close();
+            } catch (Exception ignored) { }
+            afd = null;
         }
     }
 }

@@ -62,6 +62,8 @@ public class NetworkStateMonitorReceiver extends BroadcastReceiver {
             AppSingleton.getEngine().retryScheduledNetworkTasks();
             KeycloakManager.syncAllManagedIdentities();
             BackupCloudProviderService.networkAvailable();
+            // try to reconnect websocket in case connection was lost for a long time and exponential backup may take some time top try again
+            UnifiedForegroundService.connectOrDisconnectWebSocket();
         }
     }
 

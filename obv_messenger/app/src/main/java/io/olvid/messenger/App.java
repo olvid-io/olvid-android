@@ -39,6 +39,7 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -95,6 +96,7 @@ import io.olvid.messenger.appdialogs.AppDialogTag;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.customClasses.StringUtils2;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.CallLogItem;
@@ -542,44 +544,53 @@ public class App extends Application implements DefaultLifecycleObserver {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(fyleAndStatus.getContentUri(), fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        if (getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).size() > 0) {
-            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
-            if (prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP, false)) {
-                if (onOpenCallback != null) {
-                    onOpenCallback.run();
-                }
-                killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
-                Intent lockIntent = new Intent(activity, LockScreenActivity.class);
-                activity.startActivity(lockIntent);
-                activity.startActivity(intent);
-            } else {
-                View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_view_message_and_checkbox, null);
-                TextView message = dialogView.findViewById(R.id.dialog_message);
-                message.setText(R.string.dialog_message_open_external_app_warning);
-                CheckBox checkBox = dialogView.findViewById(R.id.checkbox);
-                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP, isChecked);
-                    editor.apply();
-                });
-
-                AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
-                builder.setTitle(R.string.dialog_title_open_external_app_warning)
-                        .setView(dialogView)
-                        .setNegativeButton(R.string.button_label_cancel, null)
-                        .setPositiveButton(R.string.button_label_proceed, (dialog, which) -> {
-                            if (onOpenCallback != null) {
-                                onOpenCallback.run();
-                            }
-                            killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
-                            Intent lockIntent = new Intent(activity, LockScreenActivity.class);
-                            activity.startActivity(lockIntent);
-                            activity.startActivity(intent);
-                        });
-                builder.create().show();
+        if (getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).size() == 0) {
+            // if the mime type is not openable, try to fallback to the default mime type from extension
+            String extension = StringUtils2.Companion.getExtensionFromFilename(fyleAndStatus.fyleMessageJoinWithStatus.fileName);
+            String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            if (type != null) {
+                intent.setDataAndType(fyleAndStatus.getContentUri(), type);
             }
+            if (type == null || getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).size() == 0) {
+                App.toast(R.string.toast_message_unable_to_open_file, Toast.LENGTH_SHORT);
+                return;
+            }
+        }
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+        if (prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP, false)) {
+            if (onOpenCallback != null) {
+                onOpenCallback.run();
+            }
+            killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
+            Intent lockIntent = new Intent(activity, LockScreenActivity.class);
+            activity.startActivity(lockIntent);
+            activity.startActivity(intent);
         } else {
-            App.toast(R.string.toast_message_unable_to_open_file, Toast.LENGTH_SHORT);
+            View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_view_message_and_checkbox, null);
+            TextView message = dialogView.findViewById(R.id.dialog_message);
+            message.setText(R.string.dialog_message_open_external_app_warning);
+            CheckBox checkBox = dialogView.findViewById(R.id.checkbox);
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP, isChecked);
+                editor.apply();
+            });
+
+            AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
+            builder.setTitle(R.string.dialog_title_open_external_app_warning)
+                    .setView(dialogView)
+                    .setNegativeButton(R.string.button_label_cancel, null)
+                    .setPositiveButton(R.string.button_label_proceed, (dialog, which) -> {
+                        if (onOpenCallback != null) {
+                            onOpenCallback.run();
+                        }
+                        killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
+                        Intent lockIntent = new Intent(activity, LockScreenActivity.class);
+                        activity.startActivity(lockIntent);
+                        activity.startActivity(intent);
+                    });
+            builder.create().show();
         }
     }
 

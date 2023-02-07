@@ -39,6 +39,7 @@ import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.PreviewUtils;
+import io.olvid.messenger.customClasses.StringUtils2;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -56,6 +57,7 @@ import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.ReactionRequest;
 import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.services.AvailableSpaceHelper;
 import io.olvid.messenger.services.MessageExpirationService;
@@ -278,10 +280,15 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
                 int imageCount = 0;
                 int attachmentCount = 0;
-                for (int i=0; i<obvMessage.getAttachments().length; i++) {
+                for (int i = 0; i < obvMessage.getAttachments().length; i++) {
                     try {
                         attachmentMetadatas[i] = AppSingleton.getJsonObjectMapper().readValue(obvMessage.getAttachments()[i].getMetadata(), Fyle.JsonMetadata.class);
-                        if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(PreviewUtils.getNonNullMimeType(attachmentMetadatas[i].getType(), attachmentMetadatas[i].getFileName()))) {
+                        String mimeType = PreviewUtils.getNonNullMimeType(attachmentMetadatas[i].getType(), attachmentMetadatas[i].getFileName());
+                        // correct the received mime type in case it was invalid
+                        attachmentMetadatas[i].setType(mimeType);
+                        if (Objects.equals(mimeType, OpenGraph.MIME_TYPE)) {
+                            continue;
+                        } else if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(mimeType)) {
                             imageCount++;
                         }
                         attachmentCount++;
@@ -365,7 +372,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                         db.remoteDeleteAndEditRequestDao().delete(remoteDeleteAndEditRequest);
                     }
                     if (reactionRequests != null) {
-                        for (ReactionRequest reactionRequest: reactionRequests) {
+                        for (ReactionRequest reactionRequest : reactionRequests) {
                             new UpdateReactionsTask(message.id, reactionRequest.reaction, reactionRequest.reacter, reactionRequest.serverTimestamp).run();
                         }
                         db.reactionRequestDao().delete(reactionRequests.toArray(new ReactionRequest[0]));
@@ -398,8 +405,13 @@ public class HandleNewMessageNotificationTask implements Runnable {
                         continue;
                     }
                     try {
-                        if (attachmentMetadata == null) {
+                        if (attachmentMetadata == null || attachmentMetadata.getFileName() == null) {
                             throw new Exception();
+                        }
+                        if (isLinkAttachmentButMessageBodyDoesNotMatchLink(attachmentMetadata, message)) {
+                            // do not download attachment when body does not contain link from link-preview
+                            // throw so that the attachment is deleted from engine
+                            throw new Exception("Link preview attachment with message body mismatch");
                         }
                         final byte[] sha256 = attachmentMetadata.getSha256();
                         Fyle.acquireLock(sha256);
@@ -474,6 +486,10 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                 db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                                 fyleMessageJoinWithStatusesToDownload.add(fyleMessageJoinWithStatus);
                             }
+                            if (message.linkPreviewFyleId == null && Objects.equals(attachmentMetadata.getType(), OpenGraph.MIME_TYPE)) {
+                                message.linkPreviewFyleId = fyle.id;
+                                db.messageDao().updateLinkPreviewFyleId(message.id, fyle.id);
+                            }
                         } finally {
                             Fyle.releaseLock(sha256);
                         }
@@ -494,20 +510,24 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
                 // auto-download attachments if needed
                 long downloadSize = SettingsActivity.getAutoDownloadSize();
-                if (downloadSize != 0) {
-                    for (FyleMessageJoinWithStatus fyleMessageJoinWithStatus : fyleMessageJoinWithStatusesToDownload) {
-                        if ((downloadSize == -1 || fyleMessageJoinWithStatus.size < downloadSize)
-                                && (AvailableSpaceHelper.getAvailableSpace() == null || AvailableSpaceHelper.getAvailableSpace() > fyleMessageJoinWithStatus.size)) {
-                            AppSingleton.getEngine().downloadSmallAttachment(obvMessage.getBytesToIdentity(), fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
-                            fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
-                            AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
-                        }
+
+                for (FyleMessageJoinWithStatus fyleMessageJoinWithStatus : fyleMessageJoinWithStatusesToDownload) {
+                    if (Objects.equals(message.linkPreviewFyleId, fyleMessageJoinWithStatus.fyleId) // always download link previews
+                            || ((downloadSize == -1 || fyleMessageJoinWithStatus.size < downloadSize)
+                            && (AvailableSpaceHelper.getAvailableSpace() == null || AvailableSpaceHelper.getAvailableSpace() > fyleMessageJoinWithStatus.size))) {
+                        AppSingleton.getEngine().downloadSmallAttachment(obvMessage.getBytesToIdentity(), fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
+                        fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
+                        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
                     }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isLinkAttachmentButMessageBodyDoesNotMatchLink(Fyle.JsonMetadata attachmentMetadata, Message message) {
+        return Objects.equals(attachmentMetadata.getType(), OpenGraph.MIME_TYPE) && !StringUtils2.Companion.stringFirstLinkCheck(message.contentBody, attachmentMetadata.getFileName());
     }
 
 
@@ -783,6 +803,10 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 if (Objects.equals(message.contentBody, newBody)) {
                     return;
                 }
+
+                // delete preview if link removed from body
+                new CheckLinkPreviewValidityTask(message, newBody).run();
+
                 db.runInTransaction(() -> {
                     db.messageDao().updateBody(message.id, newBody);
                     db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_EDITED, serverTimestamp));
