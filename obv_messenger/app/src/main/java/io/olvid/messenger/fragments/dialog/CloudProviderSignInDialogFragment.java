@@ -224,7 +224,7 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
     public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
         if (viewModel != null && viewModel.onCloudProviderConfigurationCallback != null && viewModel.failOnDismiss) {
-            onCloudProviderConfigurationCallback.onCloudProviderConfigurationFailed();
+            viewModel.onCloudProviderConfigurationCallback.onCloudProviderConfigurationFailed();
         }
     }
 

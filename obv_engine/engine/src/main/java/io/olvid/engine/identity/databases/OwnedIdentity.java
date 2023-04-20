@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
@@ -173,9 +174,9 @@ public class OwnedIdentity implements ObvDatabase {
                 try {
                     JsonWebKeySet jwks = keycloakServer.getJwks();
                     JsonWebKey signatureKey = keycloakServer.getSignatureKey();
-                    return new ObvKeycloakState(keycloakServer.getServerUrl(), keycloakServer.getClientId(), keycloakServer.getClientSecret(), jwks, signatureKey, keycloakServer.getSerializedAuthState(), keycloakServer.getLatestRevocationListTimestamp());
+                    return new ObvKeycloakState(keycloakServer.getServerUrl(), keycloakServer.getClientId(), keycloakServer.getClientSecret(), jwks, signatureKey, keycloakServer.getSerializedAuthState(), keycloakServer.getLatestRevocationListTimestamp(), keycloakServer.getLatestGroupUpdateTimestamp());
                 } catch (Exception e) {
-                    return new ObvKeycloakState(keycloakServer.getServerUrl(), keycloakServer.getClientId(), keycloakServer.getClientSecret(), null, null, keycloakServer.getSerializedAuthState(), keycloakServer.getLatestRevocationListTimestamp());
+                    return new ObvKeycloakState(keycloakServer.getServerUrl(), keycloakServer.getClientId(), keycloakServer.getClientSecret(), null, null, keycloakServer.getSerializedAuthState(), keycloakServer.getLatestRevocationListTimestamp(), keycloakServer.getLatestGroupUpdateTimestamp());
                 }
             }
         }
@@ -425,6 +426,8 @@ public class OwnedIdentity implements ObvDatabase {
     }
 
     public void setKeycloakServerUrl(String keycloakServerUrl) throws SQLException {
+        boolean deleteAllKeycloakGroups = !Objects.equals(keycloakServerUrl, this.keycloakServerUrl);
+
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + KEYCLOAK_SERVER_URL + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
@@ -434,6 +437,10 @@ public class OwnedIdentity implements ObvDatabase {
             this.keycloakServerUrl = keycloakServerUrl;
             commitHookBits |= HOOK_BIT_IDENTITY_LIST_CHANGED;
             identityManagerSession.session.addSessionCommitListener(this);
+
+            if (deleteAllKeycloakGroups) {
+                ContactGroupV2.deleteAllKeycloakGroupsForOwnedIdentity(identityManagerSession, ownedIdentity);
+            }
         }
     }
 

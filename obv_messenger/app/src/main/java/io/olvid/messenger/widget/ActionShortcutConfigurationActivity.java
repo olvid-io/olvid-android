@@ -456,7 +456,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         ownedIdentityListRecyclerView.setAdapter(adapter);
         ownedIdentityListRecyclerView.setEmptyView(popupView.findViewById(R.id.empty_view));
 
-        ownedIdentityPopupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        ownedIdentityPopupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
         ownedIdentityPopupWindow.showAsDropDown(separator);
     }
 
@@ -599,7 +599,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         widgetTintPopupWindow.setElevation(12);
         widgetTintPopupWindow.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.background_rounded_dialog));
         widgetTintPopupWindow.setOnDismissListener(() -> widgetTintPopupWindow = null);
-        widgetTintPopupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        widgetTintPopupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
 
         // center the popup below the button
         int[] pos = new int[2];
@@ -668,7 +668,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         widgetIconPopupWindow.setElevation(12);
         widgetIconPopupWindow.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.background_rounded_dialog));
         widgetIconPopupWindow.setOnDismissListener(() -> widgetIconPopupWindow = null);
-        widgetIconPopupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        widgetIconPopupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
 
         // center the popup below the button
         int[] pos = new int[2];

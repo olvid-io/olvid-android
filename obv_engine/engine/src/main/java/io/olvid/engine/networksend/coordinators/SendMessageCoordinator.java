@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;

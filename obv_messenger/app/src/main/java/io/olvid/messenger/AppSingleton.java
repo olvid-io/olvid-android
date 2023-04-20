@@ -192,7 +192,7 @@ public class AppSingleton {
 
         // set current App capabilities
         ObvCapability.currentCapabilities.addAll(Arrays.asList(
-                // add App capabilities here, once we have some 😁
+                // add App capabilities here
                 ObvCapability.WEBRTC_CONTINUOUS_ICE
         ));
 
@@ -322,6 +322,7 @@ public class AppSingleton {
                                     keycloakState.signatureKey,
                                     keycloakState.serializedAuthState,
                                     keycloakState.latestRevocationListTimestamp,
+                                    keycloakState.latestGroupUpdateTimestamp,
                                     false
                             );
                         }
@@ -515,6 +516,7 @@ public class AppSingleton {
                                             keycloakState.signatureKey,
                                             keycloakState.serializedAuthState,
                                             keycloakState.latestRevocationListTimestamp,
+                                            keycloakState.latestGroupUpdateTimestamp,
                                             false
                                     );
                                 }
@@ -552,14 +554,14 @@ public class AppSingleton {
         App.runThread(() -> {
             ObvKeycloakState keycloakState = null;
             if (keycloakServer != null && serializedKeycloakState != null && jwks != null && clientId != null && signatureKey != null) {
-                keycloakState = new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, 0);
+                keycloakState = new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, 0, 0);
             }
 
             ObvIdentity obvOwnedIdentity = engine.generateOwnedIdentity(server, identityDetails, apiKey, keycloakState);
 
             if (obvOwnedIdentity != null) {
                 if (keycloakState != null) {
-                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, 0, true);
+                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, 0, 0, true);
                 }
                 OwnedIdentity ownedIdentity;
                 try {
@@ -676,6 +678,7 @@ public class AppSingleton {
                                                 keycloakState.jwks,
                                                 keycloakState.signatureKey,
                                                 keycloakState.serializedAuthState,
+                                                0,
                                                 0,
                                                 false
                                         );
@@ -1181,6 +1184,9 @@ public class AppSingleton {
                     new CheckLinkPreviewValidityTask(message, message.contentBody).run();
                 }
                 Logger.i("Build 193 link-preview migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
+            }
+            if (lastBuildExecuted != 0 && lastBuildExecuted < 197) {
+                    App.openAppDialogIntroducingMentions();
             }
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
             saveLastExecutedVersions(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);

@@ -71,7 +71,7 @@ public class SelectDetailsPhotoViewModel extends ViewModel {
                     ExifInterface exifInterface = new ExifInterface(is);
                     orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 

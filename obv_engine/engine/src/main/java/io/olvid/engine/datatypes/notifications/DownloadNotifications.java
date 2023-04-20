@@ -153,4 +153,7 @@ public abstract class DownloadNotifications {
 
     public static final String NOTIFICATION_PUSH_TOPIC_NOTIFIED = "network_fetch_notification_push_topic_notified";
     public static final String NOTIFICATION_PUSH_TOPIC_NOTIFIED_TOPIC_KEY = "topic"; // String
+
+    public static final String NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED = "network_fetch_notification_keycloak_update_required";
+    public static final String NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED_OWNED_IDENTITY_KEY = "identity"; // Identity
 }

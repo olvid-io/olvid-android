@@ -21,6 +21,7 @@ package io.olvid.messenger.customClasses
 
 import android.text.SpannableString
 import android.text.style.URLSpan
+import android.text.util.Linkify
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.util.PatternsCompat
 
@@ -55,4 +56,8 @@ class StringUtils2 {
             return null
         }
     }
+}
+
+fun SpannableString.linkify() : SpannableString {
+   return apply { LinkifyCompat.addLinks(this, Linkify.WEB_URLS or Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS) }
 }

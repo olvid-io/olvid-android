@@ -30,8 +30,8 @@ import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -122,7 +122,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
 
     private final String dbPath;
-    @SuppressWarnings({"FieldCanBeLocal", "unused"}) // will be used once we use SQLcipher
+    @SuppressWarnings({"FieldCanBeLocal", "unused"}) // will be used once we use SQL cipher
     private final String dbKey;
     private final CreateSessionDelegate createSessionDelegate;
 
@@ -476,10 +476,6 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 category = ObvDialog.Category.createSasConfirmed(dialogType.contactIdentity.getBytes(), dialogType.contactDisplayNameOrSerializedDetails, dialogType.sasToDisplay, dialogType.sasEntered);
                 break;
             }
-            case DialogType.MUTUAL_TRUST_CONFIRMED_DIALOG_ID: {
-                category = ObvDialog.Category.createMutualTrustConfirmed(dialogType.contactIdentity.getBytes(), dialogType.contactDisplayNameOrSerializedDetails);
-                break;
-            }
             case DialogType.INVITE_ACCEPTED_DIALOG_ID: {
                 category = ObvDialog.Category.createInviteAccepted(dialogType.contactIdentity.getBytes(), dialogType.contactDisplayNameOrSerializedDetails);
                 break;
@@ -675,6 +671,32 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         return null;
     }
 
+    // returns true if the update was successful
+    @Override
+    public boolean updateKeycloakGroups(byte[] bytesOwnedIdentity, List<String> signedGroupBlobs, List<String> signedGroupDeletions, List<String> signedGroupKicks, long keycloakCurrentTimestamp) {
+        try (EngineSession engineSession = getSession()) {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            boolean success = false;
+            try {
+                engineSession.session.startTransaction();
+                identityManager.updateKeycloakGroups(engineSession.session, ownedIdentity, signedGroupBlobs, signedGroupDeletions, signedGroupKicks, keycloakCurrentTimestamp);
+                success = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (success) {
+                    engineSession.session.commit();
+                } else {
+                    engineSession.session.rollback();
+                }
+            }
+            return success;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     @Override
     public void recreateServerSession(byte[] bytesOwnedIdentity) {
         try (EngineSession engineSession = getSession()) {
@@ -745,7 +767,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
 
     @Override
-    public List<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(String pushTopic) throws Exception {
+    public Collection<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(String pushTopic) throws Exception {
         try (EngineSession engineSession = getSession()) {
             return identityManager.getOwnedIdentitiesWithKeycloakPushTopic(engineSession.session, pushTopic);
         }
@@ -846,6 +868,15 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     @Override
     public void processAndroidPushNotification(String maskingUidString) {
         fetchManager.processAndroidPushNotification(maskingUidString);
+    }
+
+    @Override
+    public byte[] getOwnedIdentityFromMaskingUid(String maskingUidString) {
+        Identity ownedIdentity = fetchManager.getOwnedIdentityFromMaskingUid(maskingUidString);
+        if (ownedIdentity != null) {
+            return ownedIdentity.getBytes();
+        }
+        return null;
     }
 
     @Override
@@ -1295,7 +1326,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public int getGroupV2Version(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception {
+    public Integer getGroupV2Version(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception {
         if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
             throw new Exception();
         }
@@ -1666,13 +1697,13 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     @Override
     public ObvPostMessageOutput post(byte[] messagePayload, byte[] extendedMessagePayload, ObvOutboundAttachment[] outboundAttachments, List<byte[]> bytesContactIdentities, byte[] bytesOwnedIdentity, boolean hasUserContent, boolean isVoipMessage) {
         // compute contact groups by server
-        HashMap<String, List<Identity>> contactServersHashMap = new HashMap<>();
+        HashMap<String, HashSet<Identity>> contactServersHashMap = new HashMap<>();
         for (byte[] bytesContactIdentity: bytesContactIdentities) {
             try {
                 Identity contactIdentity = Identity.of(bytesContactIdentity);
-                List<Identity> list = contactServersHashMap.get(contactIdentity.getServer());
+                HashSet<Identity> list = contactServersHashMap.get(contactIdentity.getServer());
                 if (list == null) {
-                    list = new ArrayList<>();
+                    list = new HashSet<>();
                     contactServersHashMap.put(contactIdentity.getServer(), list);
                 }
                 list.add(contactIdentity);
@@ -1686,7 +1717,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         boolean messageSent = false;
 
         for (String server: contactServersHashMap.keySet()) {
-            List<Identity> contactIdentities = contactServersHashMap.get(server);
+            HashSet<Identity> contactIdentities = contactServersHashMap.get(server);
             if (contactIdentities == null) {
                 continue;
             }
@@ -1894,6 +1925,9 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     private void markAttachmentForDeletion(Identity ownedIdentity, UID messageUid, int attachmentNumber) {
+        if (ownedIdentity == null || messageUid == null) {
+            return;
+        }
         try (EngineSession engineSession = getSession()) {
             fetchManager.deleteAttachment(engineSession.session, ownedIdentity, messageUid, attachmentNumber);
             engineSession.session.commit();
@@ -1904,6 +1938,9 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
     @Override
     public void cancelAttachmentUpload(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber) {
+        if (bytesOwnedIdentity == null || messageIdentifier == null) {
+            return;
+        }
         try (EngineSession engineSession = getSession()) {
             sendManager.cancelAttachmentUpload(engineSession.session, Identity.of(bytesOwnedIdentity), new UID(messageIdentifier), attachmentNumber);
             engineSession.session.commit();
@@ -2119,6 +2156,26 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     @Override
     public void queryServerWellKnown(String server) {
         fetchManager.queryServerWellKnown(server);
+    }
+
+    @Override
+    public String getOsmServerUrl(byte[] bytesOwnedIdentity) {
+        try {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            return fetchManager.getOsmServerUrl(ownedIdentity.getServer());
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    @Override
+    public String getAddressServerUrl(byte[] bytesOwnedIdentity) {
+        try {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            return fetchManager.getAddressServerUrl(ownedIdentity.getServer());
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     // Run once after you upgrade from a version not handling Contact and ContactGroup UserData to a version able to do so

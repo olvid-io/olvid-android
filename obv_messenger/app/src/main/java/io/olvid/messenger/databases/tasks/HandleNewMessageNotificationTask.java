@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -225,6 +226,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     message.locationType = Message.LOCATION_TYPE_NONE;
                     message.jsonReply = null;
                     message.forwarded = false;
+                    message.mentioned = false;
                     message.edited = Message.EDITED_NONE;
                     message.wipeStatus = Message.WIPE_STATUS_REMOTE_DELETED;
                     message.wipedAttachmentCount = obvMessage.getAttachments().length;
@@ -332,14 +334,30 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     );
                     message.missedMessageCount = processSequenceNumber(db, discussion.id, contact.bytesContactIdentity, jsonMessage.getSenderThreadIdentifier(), jsonMessage.getSenderSequenceNumber());
                     message.forwarded = jsonMessage.isForwarded() != null && jsonMessage.isForwarded();
+                    message.mentioned = message.isIdentityMentioned(bytesOwnedIdentity) || message.isOwnMessageReply(bytesOwnedIdentity);
                     boolean edited = false;
 
                     if (remoteDeleteAndEditRequest != null && remoteDeleteAndEditRequest.requestType == RemoteDeleteAndEditRequest.TYPE_EDIT) {
                         String newBody = remoteDeleteAndEditRequest.body == null ? null : remoteDeleteAndEditRequest.body.trim();
+                        String mentions = remoteDeleteAndEditRequest.getSanitizedSerializedMentions();
                         if (!Objects.equals(message.contentBody, newBody)) {
                             edited = true;
                             message.contentBody = newBody;
+                            message.jsonMentions = mentions;
+                            message.mentioned = message.isIdentityMentioned(bytesOwnedIdentity) || message.isOwnMessageReply(bytesOwnedIdentity);
                             message.edited = Message.EDITED_UNSEEN;
+                        }
+                    }
+
+                    // if start sharing location message check this contact is not already sharing their location in this discussion
+                    // if already sharing force end of previous sharing message
+                    if (message.locationType == Message.LOCATION_TYPE_SHARE) {
+                        List<Message> currentLocationSharingMessages = db.messageDao().getCurrentLocationSharingMessagesOfIdentityInDiscussion(message.senderIdentifier, message.discussionId);
+                        if (currentLocationSharingMessages != null && currentLocationSharingMessages.size() > 0) {
+                            for (Message m : currentLocationSharingMessages) {
+                                Logger.e("This identity was already sharing it location, marking sharing as finished for message: " + m.id);
+                                db.messageDao().updateLocationType(m.id, Message.LOCATION_TYPE_SHARE_FINISHED);
+                            }
                         }
                     }
 
@@ -715,7 +733,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
         new DeleteMessagesTask(discussion.bytesOwnedIdentity, discussion.id, false, true).run();
         // stop sharing location if needed
         if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussion.id)) {
-            UnifiedForegroundService.LocationSharingSubService.stopSharingLocationSync(discussion.id);
+            UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussion.id, true);
         }
         // clear notifications if needed
         AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussion.id);
@@ -751,7 +769,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 if (remoteDeletePermission || (editAndDeleteOwnMessagesPermission && Arrays.equals(message.senderIdentifier, contact.bytesContactIdentity))) {
                     // stop sharing location if needed
                     if (message.isLocationMessage() && message.locationType == Message.LOCATION_TYPE_SHARE) {
-                        UnifiedForegroundService.LocationSharingSubService.stopSharingLocationSync(message.discussionId);
+                        UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussion.id, true);
                     }
 
                     db.runInTransaction(() -> {
@@ -773,7 +791,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     }
                 }
 
-                remoteDeleteAndEditRequest = new RemoteDeleteAndEditRequest(discussion.id, messageReference.getSenderIdentifier(), messageReference.getSenderThreadIdentifier(), messageReference.getSenderSequenceNumber(), serverTimestamp, RemoteDeleteAndEditRequest.TYPE_DELETE, null, contact.bytesContactIdentity);
+                remoteDeleteAndEditRequest = new RemoteDeleteAndEditRequest(discussion.id, messageReference.getSenderIdentifier(), messageReference.getSenderThreadIdentifier(), messageReference.getSenderSequenceNumber(), serverTimestamp, RemoteDeleteAndEditRequest.TYPE_DELETE, null, null, contact.bytesContactIdentity);
                 db.remoteDeleteAndEditRequestDao().insert(remoteDeleteAndEditRequest);
             }
         }
@@ -793,6 +811,15 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
         Message message = db.messageDao().getBySenderSequenceNumber(jsonUpdateMessage.getMessageReference().getSenderSequenceNumber(), jsonUpdateMessage.getMessageReference().getSenderThreadIdentifier(), jsonUpdateMessage.getMessageReference().getSenderIdentifier(), discussion.id);
         String newBody = jsonUpdateMessage.getBody() == null ? null : jsonUpdateMessage.getBody().trim();
+        String newMentions = null;
+        try {
+            jsonUpdateMessage.sanitizeJsonUserMentions();
+            newMentions = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonUpdateMessage.getJsonUserMentions());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Logger.w("Unable to serialize mentions");
+        }
+
         if (message != null) {
             if (message.wipeStatus != Message.WIPE_STATUS_NONE) {
                 return;
@@ -800,21 +827,45 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
             // normal updateMessage message
             if (jsonUpdateMessage.getJsonLocation() == null) {
-                if (Objects.equals(message.contentBody, newBody)) {
+                List<Message.JsonUserMention> mentions = message.getMentions();
+                HashSet<Message.JsonUserMention> mentionSet = mentions == null ? null : new HashSet<>(mentions);
+                HashSet<Message.JsonUserMention> newMentionSet = jsonUpdateMessage.getJsonUserMentions() == null ? null : new HashSet<>(jsonUpdateMessage.getJsonUserMentions());
+                boolean mentionsDidNotChange = Objects.equals(mentionSet, newMentionSet);
+                if (Objects.equals(message.contentBody, newBody) && mentionsDidNotChange) {
+                    // no update needed --> do nothing
                     return;
                 }
 
                 // delete preview if link removed from body
                 new CheckLinkPreviewValidityTask(message, newBody).run();
 
+                String finalNewMentions = newMentions;
                 db.runInTransaction(() -> {
+                    message.jsonMentions = finalNewMentions;
+                    db.messageDao().updateMentions(message.id, finalNewMentions);
+                    db.messageDao().updateMentioned(message.id, message.isIdentityMentioned(discussion.bytesOwnedIdentity) || message.isOwnMessageReply(discussion.bytesOwnedIdentity));
+                    message.contentBody = newBody;
                     db.messageDao().updateBody(message.id, newBody);
                     db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_EDITED, serverTimestamp));
                 });
 
                 // never edit the content of an hidden message notification!
                 if (message.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
-                    AndroidNotificationManager.editMessageNotification(discussion, message.id, newBody);
+                    boolean editMentionsMyself = false;
+                    // check if I was mentioned in the update but not in the original message
+                    if (!mentionsDidNotChange && newMentionSet != null) {
+                        if (mentionSet != null) {
+                            newMentionSet.removeAll(mentionSet);
+                        }
+                        for (Message.JsonUserMention mention : newMentionSet) {
+                            if (Arrays.equals(mention.getUserIdentifier(), discussion.bytesOwnedIdentity)) {
+                                editMentionsMyself = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    AndroidNotificationManager.editMessageNotification(discussion, message, contact, newBody, editMentionsMyself);
                 }
             } else { // update location message
                 // check message is a sharing location one
@@ -822,13 +873,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     Logger.e("HandleNewMessageNotificationTask: trying to update a message that is not a location message");
                     return;
                 }
-                if (message.locationType != Message.LOCATION_TYPE_SHARE) {
-                    if (message.locationType == Message.LOCATION_TYPE_SHARE_FINISHED) {
-                        Logger.w("HandleNewMessageNotificationTask: trying to update a sharing location message that is already finished");
-                    } else {
-                        Logger.w("HandleNewMessageNotificationTask: trying to update a message that is not location sharing");
-                        return;
-                    }
+                if (message.locationType != Message.LOCATION_TYPE_SHARE && message.locationType != Message.LOCATION_TYPE_SHARE_FINISHED) {
+                    Logger.w("HandleNewMessageNotificationTask: trying to update a message that is not location sharing");
+                    return;
                 }
 
                 Message.JsonLocation jsonLocation = jsonUpdateMessage.getJsonLocation();
@@ -884,7 +931,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 }
             }
 
-            remoteDeleteAndEditRequest = new RemoteDeleteAndEditRequest(discussion.id, jsonUpdateMessage.getMessageReference().getSenderIdentifier(), jsonUpdateMessage.getMessageReference().getSenderThreadIdentifier(), jsonUpdateMessage.getMessageReference().getSenderSequenceNumber(), serverTimestamp, RemoteDeleteAndEditRequest.TYPE_EDIT, newBody, null);
+            remoteDeleteAndEditRequest = new RemoteDeleteAndEditRequest(discussion.id, jsonUpdateMessage.getMessageReference().getSenderIdentifier(), jsonUpdateMessage.getMessageReference().getSenderThreadIdentifier(), jsonUpdateMessage.getMessageReference().getSenderSequenceNumber(), serverTimestamp, RemoteDeleteAndEditRequest.TYPE_EDIT, newBody, newMentions, null);
             db.remoteDeleteAndEditRequestDao().insert(remoteDeleteAndEditRequest);
         }
     }
@@ -912,7 +959,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 return;
             }
 
-            if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+            if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE || message.mentioned) {
                 OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(contact.bytesOwnedIdentity);
                 AndroidNotificationManager.displayReactionNotification(ownedIdentity, discussion, message, jsonReaction.getReaction(), contact);
             }

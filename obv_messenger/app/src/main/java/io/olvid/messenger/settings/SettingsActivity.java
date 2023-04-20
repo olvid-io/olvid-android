@@ -59,6 +59,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.crypto.SecretKeyFactory;
@@ -86,6 +87,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static final String PREF_HEADER_KEY_NOTIFICATIONS = "pref_header_key_notifications";
     //    public static final String PREF_HEADER_KEY_PRIVACY = "pref_header_key_privacy";
     public static final String PREF_HEADER_KEY_LOCK_SCREEN = "pref_header_key_lock_screen";
+    public static final String PREF_HEADER_KEY_LOCATION = "pref_header_key_location";
 
     public static final String ACTIVITY_RECREATE_REQUIRED_ACTION = "activity_recreate_required_action";
 
@@ -308,6 +310,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         NEVER,
     }
 
+    static final String PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS = "pref_key_no_notify_certificate_change_for_previews";
+    static final boolean PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS_DEFAULT = false;
+
     public static final String USER_DIALOG_HIDE_BATTERY_OPTIMIZATION = "user_dialog_hide_battery_optimization";
     public static final String USER_DIALOG_HIDE_BACKGROUND_RESTRICTED = "user_dialog_hide_background_restricted";
     public static final String USER_DIALOG_HIDE_GOOGLE_APIS = "user_dialog_hide_google_apis";
@@ -322,6 +327,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_LOW_BANDWIDTH_CALLS = "pref_key_low_bandwidth_calls";
     static final boolean PREF_KEY_LOW_BANDWIDTH_CALLS_DEFAULT = false;
+
+    static final String PREF_KEY_USE_LEGACY_ZXING_SCANNER = "pref_key_use_legacy_zxing_scanner";
+    static final boolean PREF_KEY_USE_LEGACY_ZXING_SCANNER_DEFAULT = false;
+
 
     static final String PREF_KEY_PREFERRED_KEYCLOAK_BROWSER = "pref_key_preferred_keycloak_browser";
 
@@ -361,8 +370,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_DEFAULT_EXISTENCE_DURATION = "pref_key_default_existence_duration";
     static final String PREF_KEY_DEFAULT_EXISTENCE_DURATION_DEFAULT = "null";
 
-    static final String PREF_KEY_LAST_DELETE_EVERYWHERE = "pref_key_last_delete_everywhere";
-    static final boolean PREF_KEY_LAST_DELETE_EVERYWHERE_DEFAULT = false;
 
 
     // WEBCLIENT
@@ -392,6 +399,45 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_REQUIRE_UNLOCK_BEFORE_CONNECTING_TO_WEBCLIENT = "pref_key_require_unlock_before_connecting_to_webclient";
     static final boolean PREF_KEY_REQUIRE_UNLOCK_BEFORE_CONNECTING_TO_WEBCLIENT_DEFAULT = true;
+
+
+    // LOCATION
+    static final String PREF_KEY_LOCATION_INTEGRATION = "pref_key_location_integration";
+    public enum LocationIntegrationEnum {
+        NONE, // used if user do not chose integration
+        OSM,
+        MAPS,
+        BASIC;
+
+        public String getString() {
+            switch (this) {
+                case OSM:
+                    return PREF_VALUE_LOCATION_INTEGRATION_OSM;
+                case MAPS:
+                    return PREF_VALUE_LOCATION_INTEGRATION_MAPS;
+                case BASIC:
+                    return PREF_VALUE_LOCATION_INTEGRATION_BASIC;
+                case NONE:
+                default:
+                    return null;
+            }
+        }
+    }
+    public static final String PREF_VALUE_LOCATION_INTEGRATION_OSM = "osm";
+    public static final String PREF_VALUE_LOCATION_INTEGRATION_MAPS = "maps";
+    public static final String PREF_VALUE_LOCATION_INTEGRATION_BASIC = "basic";
+
+    static final String PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION = "pref_key_location_share_duration";
+    static final long PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION_DEFAULT = 3_600_000L;
+
+    static final String PREF_KEY_LOCATION_DEFAULT_SHARE_INTERVAL = "pref_key_location_share_interval";
+    static final long PREF_KEY_LOCATION_DEFAULT_SHARE_INTERVAL_DEFAULT = 60_000L;
+
+    static final String PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS = "pref_key_location_hide_error_notifications";
+    static final boolean PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS_DEFAULT = false;
+
+    static final String PREF_KEY_LOCATION_OSM_LANGUAGE = "pref_key_location_osm_language";
+    static final String PREF_KEY_LOCATION_OSM_LANGUAGE_DEFAULT = "default";
 
     // ACTIVITY VARIABLES
 
@@ -425,20 +471,27 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
                             Preference preference = headersPreferenceFragment.findPreference(prefKey);
                             if (preference != null) {
                                 int position = preference.getOrder();
+                                // TODO: remove this once location is no longer in beta
+                                if (!getBetaFeaturesEnabled() && position > 6) {
+                                    position--;
+                                }
                                 RecyclerView recyclerView = headersPreferenceFragment.getListView();
-                                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
-                                if (viewHolder != null) {
-                                    viewHolder.itemView.setPressed(true);
-                                    handler.postDelayed(() -> onPreferenceStartFragment(headersPreferenceFragment, preference), 600);
-                                } else {
-                                    recyclerView.scrollToPosition(position);
-                                    handler.postDelayed(() -> {
-                                        RecyclerView.ViewHolder reViewHolder = recyclerView.findViewHolderForAdapterPosition(position);
-                                        if (reViewHolder != null) {
-                                            reViewHolder.itemView.setPressed(true);
-                                        }
-                                    }, 100);
-                                    handler.postDelayed(() -> onPreferenceStartFragment(headersPreferenceFragment, preference), 700);
+                                if (recyclerView != null) {
+                                    RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
+                                    if (viewHolder != null) {
+                                        viewHolder.itemView.setPressed(true);
+                                        handler.postDelayed(() -> onPreferenceStartFragment(headersPreferenceFragment, preference), 600);
+                                    } else {
+                                        recyclerView.scrollToPosition(position);
+                                        int finalPosition = position;
+                                        handler.postDelayed(() -> {
+                                            RecyclerView.ViewHolder reViewHolder = recyclerView.findViewHolderForAdapterPosition(finalPosition);
+                                            if (reViewHolder != null) {
+                                                reViewHolder.itemView.setPressed(true);
+                                            }
+                                        }, 100);
+                                        handler.postDelayed(() -> onPreferenceStartFragment(headersPreferenceFragment, preference), 700);
+                                    }
                                 }
                             }
                         }
@@ -556,6 +609,15 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
             if (BuildConfig.USE_BILLING_LIB) {
                 BillingUtils.loadSubscriptionSettingsHeader(activity, getPreferenceScreen());
+            }
+
+            {
+                if (!getBetaFeaturesEnabled()) {
+                    Preference locationHeaderPreference = findPreference(PREF_HEADER_KEY_LOCATION);
+                    if (locationHeaderPreference != null) {
+                        getPreferenceScreen().removePreference(locationHeaderPreference);
+                    }
+                }
             }
 
             {
@@ -1053,15 +1115,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
-    public static boolean getLastDeleteEverywhere() {
-        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_LAST_DELETE_EVERYWHERE, PREF_KEY_LAST_DELETE_EVERYWHERE_DEFAULT);
-    }
-
-    public static void setLastDeleteEverywhere(boolean deleteEverywhere) {
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
-        editor.putBoolean(PREF_KEY_LAST_DELETE_EVERYWHERE, deleteEverywhere);
-        editor.apply();
-    }
 
     public static AutoJoinGroupsCategory getAutoJoinGroups() {
         String stringValue = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_AUTO_JOIN_GROUPS, PREF_KEY_AUTO_JOIN_GROUPS_DEFAULT);
@@ -1227,6 +1280,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
+    public static boolean useLegacyZxingScanner() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_USE_LEGACY_ZXING_SCANNER, PREF_KEY_USE_LEGACY_ZXING_SCANNER_DEFAULT);
+    }
+
     public static boolean usePermanentWebSocket() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_PERMANENT_WEBSOCKET, PREF_KEY_PERMANENT_WEBSOCKET_DEFAULT);
     }
@@ -1290,6 +1347,16 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         } else {
             editor.putString(PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE, untrustedCertificateCategory);
         }
+        editor.apply();
+    }
+
+    public static boolean getNoNotifyCertificateChangeForPreviews() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS, PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS_DEFAULT);
+    }
+
+    public static void setNoNotifyCertificateChangeForPreviews(boolean doNotNotify) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS, doNotNotify);
         editor.apply();
     }
 
@@ -1848,4 +1915,157 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
+    @NonNull
+    public static LocationIntegrationEnum getLocationIntegration() {
+        String integrationString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_INTEGRATION, null);
+
+        if (integrationString == null) {
+            return LocationIntegrationEnum.NONE;
+        }
+
+        switch (integrationString) {
+            case PREF_VALUE_LOCATION_INTEGRATION_OSM: {
+                return LocationIntegrationEnum.OSM;
+            }
+            case PREF_VALUE_LOCATION_INTEGRATION_MAPS: {
+                return LocationIntegrationEnum.MAPS;
+            }
+            case PREF_VALUE_LOCATION_INTEGRATION_BASIC: {
+                return LocationIntegrationEnum.BASIC;
+            }
+            default: {
+                return LocationIntegrationEnum.NONE;
+            }
+        }
+    }
+
+    // return language set by user ot system default language
+    public static String getLocationOpenStreetMapLanguage() {
+        String language = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_OSM_LANGUAGE, PREF_KEY_LOCATION_OSM_LANGUAGE_DEFAULT);
+        if (language.equals(PREF_KEY_LOCATION_OSM_LANGUAGE_DEFAULT)) {
+            return Locale.getDefault().getLanguage();
+        }
+        return language;
+    }
+
+    public static void setLocationIntegration(String integrationString) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        if (integrationString == null) {
+            editor.remove(PREF_KEY_LOCATION_INTEGRATION);
+        } else {
+            switch (integrationString) {
+                case PREF_VALUE_LOCATION_INTEGRATION_MAPS:
+                case PREF_VALUE_LOCATION_INTEGRATION_BASIC:
+                case PREF_VALUE_LOCATION_INTEGRATION_OSM: {
+                    editor.putString(PREF_KEY_LOCATION_INTEGRATION, integrationString);
+                    break;
+                }
+                default: {
+                    editor.remove(PREF_KEY_LOCATION_INTEGRATION);
+                    break;
+                }
+            }
+        }
+        editor.apply();
+    }
+
+    public static String getLocationOpenStreetMapRawLanguage() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_OSM_LANGUAGE, PREF_KEY_LOCATION_OSM_LANGUAGE_DEFAULT);
+    }
+
+    public static void setLocationOpenStreetMapRawLanguage(String language) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putString(PREF_KEY_LOCATION_OSM_LANGUAGE, language);
+        editor.apply();
+    }
+
+
+    public static Long getLocationDefaultSharingDurationValue() {
+        String durationString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION, null);
+
+        if (durationString == null) {
+            return PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION_DEFAULT;
+        }
+        try {
+            return Long.parseLong(durationString);
+        } catch (NumberFormatException e) {
+            return PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION_DEFAULT;
+        }
+    }
+
+    public static void setLocationDefaultSharingDurationValue(long duration) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putString(PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION, Long.toString(duration));
+        editor.apply();
+    }
+
+    public static String getLocationDefaultSharingDurationLongString(Context context) {
+        String duration = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION, null);
+
+        // default value not set
+        if (duration == null) {
+            duration = String.valueOf(PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION_DEFAULT);
+        }
+
+        String[] valuesArray = context.getResources().getStringArray(R.array.share_location_duration_values);
+        String[] longStringArray = context.getResources().getStringArray(R.array.share_location_duration_long_strings);
+
+        int index = Arrays.asList(valuesArray).indexOf(duration);
+        if (index >= 0 && index < longStringArray.length) {
+            return longStringArray[index];
+        }
+
+        // fallback mechanism
+        if (longStringArray.length == 0) {
+            return "";
+        }
+        return longStringArray[0];
+    }
+
+    public static long getLocationDefaultSharingIntervalValue() {
+        String interval = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_DEFAULT_SHARE_INTERVAL, null);
+
+        if (interval == null) {
+            return PREF_KEY_LOCATION_DEFAULT_SHARE_INTERVAL_DEFAULT;
+        }
+        try {
+            return Long.parseLong(interval);
+        } catch (NumberFormatException e) {
+            return PREF_KEY_LOCATION_DEFAULT_SHARE_INTERVAL_DEFAULT;
+        }
+    }
+
+    public static void setLocationDefaultSharingIntervalValue(long interval) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putString(PREF_KEY_LOCATION_DEFAULT_SHARE_INTERVAL, Long.toString(interval));
+        editor.apply();
+    }
+
+    public static String getLocationDefaultSharingIntervalLongString(Context context) {
+        String duration = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_DEFAULT_SHARE_INTERVAL, null);
+
+        // default value not set
+        if (duration == null) {
+            duration = String.valueOf(PREF_KEY_LOCATION_DEFAULT_SHARE_INTERVAL_DEFAULT);
+        }
+
+        String[] valuesArray = context.getResources().getStringArray(R.array.share_location_interval_values);
+        String[] longStringArray = context.getResources().getStringArray(R.array.share_location_interval_long_strings);
+
+        int index = Arrays.asList(valuesArray).indexOf(duration);
+        if (index >= 0 && index < longStringArray.length) {
+            return longStringArray[index];
+        }
+
+        // fallback mechanism
+        if (longStringArray.length == 0) {
+            return "";
+        }
+        return longStringArray[0];
+    }
+
+    public static boolean hideLocationErrorsNotifications() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                .getBoolean(PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS, PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS_DEFAULT);
+    }
 }

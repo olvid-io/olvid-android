@@ -30,6 +30,7 @@ import androidx.room.Index;
 import java.util.Arrays;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -189,7 +190,6 @@ public class Contact {
     }
 
 
-
     // Constructor used when inserting a new contact
     @Ignore
     public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @NonNull JsonIdentityDetails identityDetails, boolean hasUntrustedPublishedDetails, @Nullable String photoUrl, boolean keycloakManaged, boolean active, boolean oneToOne, int trustLevel) throws Exception {
@@ -268,7 +268,6 @@ public class Contact {
     }
 
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -321,7 +320,7 @@ public class Contact {
             // get all unsent (not passed to the engine because of a lack of channel) MessageRecipientInfo and delete them
             //  --> update message status accordingly
             List<MessageRecipientInfo> messageRecipientInfoList = db.messageRecipientInfoDao().getUnsentForContact(bytesOwnedIdentity, bytesContactIdentity);
-            for (MessageRecipientInfo messageRecipientInfo: messageRecipientInfoList) {
+            for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfoList) {
                 db.messageRecipientInfoDao().delete(messageRecipientInfo);
 
                 Message message = db.messageDao().get(messageRecipientInfo.messageId);
@@ -332,5 +331,71 @@ public class Contact {
                 }
             }
         });
+    }
+
+    @Nullable
+    public static Contact createFake(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails) {
+        try {
+            return new Contact(bytesContactIdentity,
+                    bytesOwnedIdentity,
+                    null,
+                    AppSingleton.getJsonObjectMapper().readValue(identityDetails, JsonIdentityDetails.class).formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()),
+                    sortDisplayName,
+                    fullSearchDisplayName,
+                    identityDetails,
+                    0,
+                    1,
+                    1,
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    true,
+                    false,
+                    -1,
+                    false,
+                    false,
+                    false);
+        } catch (Exception ex) {
+            Logger.w("Unable to parse jsonIdentityDetails");
+            return null;
+        }
+    }
+
+    @Nullable
+    public static Contact createFakeFromOwnedIdentity(@NonNull OwnedIdentity ownedIdentity) {
+        try {
+            JsonIdentityDetails ownIdentityDetails = ownedIdentity.getIdentityDetails();
+            if (ownIdentityDetails == null) {
+                return null;
+            } else {
+                byte[] sortDisplayName = ContactDisplayNameFormatChangedTask.computeSortDisplayName(ownIdentityDetails, ownedIdentity.customDisplayName, SettingsActivity.getSortContactsByLastName());
+                String fullSearchDisplayName = StringUtils.unAccent(ownIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
+                return new Contact(ownedIdentity.bytesOwnedIdentity,
+                        ownedIdentity.bytesOwnedIdentity,
+                        ownedIdentity.customDisplayName,
+                        ownedIdentity.displayName,
+                        sortDisplayName,
+                        fullSearchDisplayName,
+                        ownedIdentity.identityDetails,
+                        0,
+                        1,
+                        1,
+                        ownedIdentity.photoUrl,
+                        null,
+                        ownedIdentity.keycloakManaged,
+                        null,
+                        null,
+                        true,
+                        true,
+                        -1,
+                        true,
+                        true,
+                        true);
+            }
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

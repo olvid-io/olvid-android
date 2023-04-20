@@ -53,6 +53,10 @@ public interface InvitationDao {
     Invitation getByDialogUuid(UUID dialogUuid);
 
     @Query("SELECT * FROM " + Invitation.TABLE_NAME +
+            " WHERE " + Invitation.DISCUSSION_ID + " = :discussionId")
+    LiveData<List<Invitation>> getByDiscussionId(long discussionId);
+
+    @Query("SELECT * FROM " + Invitation.TABLE_NAME +
             " WHERE " + Invitation.CATEGORY_ID + " = " + ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY +
             " OR " + Invitation.CATEGORY_ID + " = " + ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY)
     List<Invitation> getAllGroupInvites();
@@ -63,4 +67,9 @@ public interface InvitationDao {
             " AND " + Invitation.CATEGORY_ID + " in ( " + ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY + ", " + ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ") " +
             " LIMIT 1")
     LiveData<Invitation> getContactOneToOneInvitation(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+
+    @Query("SELECT COUNT(*) > 0 FROM " + Invitation.TABLE_NAME +
+            " WHERE " + Invitation.DISCUSSION_ID + " = :discussionId"
+    )
+    boolean discussionHasInvitations(long discussionId);
 }

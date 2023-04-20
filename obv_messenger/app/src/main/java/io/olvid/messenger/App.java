@@ -481,7 +481,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openLocationInMapApplication(Activity activity, String latitude, String longitude, String fallbackUri, Runnable onOpenCallback) {
+    public static void openLocationInMapApplication(Activity activity, String latitude, String longitude, String fallbackUri, @Nullable Runnable onOpenCallback) {
         try {
             Intent geoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("geo:%s,%s?q=%s,%s&z=17", latitude, longitude, latitude, longitude)));
             geoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -502,7 +502,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         App.toast(R.string.toast_message_impossible_to_open_map, Toast.LENGTH_SHORT, Gravity.BOTTOM);
     }
 
-    private static void openLocationIntent(Activity activity, Intent geoIntent, Runnable onOpenCallback) {
+    private static void openLocationIntent(Activity activity, Intent geoIntent, @Nullable Runnable onOpenCallback) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
         if (prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION, false)) {
             if (onOpenCallback != null) {
@@ -838,6 +838,10 @@ public class App extends Application implements DefaultLifecycleObserver {
         showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_GROUPS_V2, new HashMap<>());
     }
 
+    public static void openAppDialogIntroducingMentions() {
+        showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_MENTIONS, new HashMap<>());
+    }
+
 
     private static void showDialog(@Nullable byte[] bytesDialogOwnedIdentity, String dialogTag, HashMap<String, Object> dialogParameters) {
         dialogsToShowLock.lock();
@@ -1083,11 +1087,8 @@ public class App extends Application implements DefaultLifecycleObserver {
             int count = AppDatabase.getInstance().messageDao().countOutboundSharingLocationMessages();
             if (count > 0) {
                 try {
-                    Intent syncSharingLocationIntent = new Intent(App.getContext(), UnifiedForegroundService.class);
-                    syncSharingLocationIntent.putExtra(UnifiedForegroundService.SUB_SERVICE_INTENT_EXTRA, UnifiedForegroundService.SUB_SERVICE_LOCATION_SHARING);
-                    syncSharingLocationIntent.setAction(UnifiedForegroundService.LocationSharingSubService.SYNC_SHARING_MESSAGES_ACTION);
-                    App.getContext().startService(syncSharingLocationIntent);
-                } catch (Exception ignored) { }
+                    UnifiedForegroundService.LocationSharingSubService.syncSharingMessages();
+                } catch (Exception ignored) {}
             }
         }
     }

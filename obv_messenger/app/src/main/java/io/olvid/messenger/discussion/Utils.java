@@ -20,39 +20,45 @@
 package io.olvid.messenger.discussion;
 
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
-import android.view.LayoutInflater;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.view.Gravity;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.view.inputmethod.EditorInfoCompat;
+import androidx.core.util.Pair;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
-import com.google.android.material.textfield.TextInputEditText;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
+import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
-import io.olvid.messenger.customClasses.TextChangeListener;
+import io.olvid.messenger.customClasses.StringUtils2Kt;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
-import io.olvid.messenger.databases.tasks.UpdateMessageBodyTask;
+import io.olvid.messenger.discussion.mention.MentionUrlSpan;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class Utils {
@@ -63,70 +69,6 @@ public class Utils {
         cal1.setTimeInMillis(timestamp1);
         cal2.setTimeInMillis(timestamp2);
         return cal1.get(Calendar.DAY_OF_YEAR) != cal2.get(Calendar.DAY_OF_YEAR) || cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR);
-    }
-
-    static void launchModifyMessagePopup(FragmentActivity activity, Message message) {
-        if (message != null
-                && message.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
-                && message.wipeStatus != Message.WIPE_STATUS_WIPED
-                && !message.isLocationMessage()) {
-            View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_view_edit_message, null);
-            final TextInputEditText editMessageTextView = dialogView.findViewById(R.id.edit_message_text_view);
-            if (SettingsActivity.useKeyboardIncognitoMode()) {
-                editMessageTextView.setImeOptions(editMessageTextView.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
-            }
-            editMessageTextView.setText(message.contentBody);
-
-            final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
-                    .setTitle(R.string.dialog_title_edit_message)
-                    .setView(dialogView)
-                    .setPositiveButton(R.string.button_label_update, (DialogInterface dialog, int which) -> App.runThread(new UpdateMessageBodyTask(message.id, (editMessageTextView.getText() == null) ? "" : editMessageTextView.getText().toString().trim())))
-                    .setNegativeButton(R.string.button_label_cancel, null);
-            AlertDialog alertDialog = builder.create();
-            alertDialog.setOnShowListener(dialog -> {
-                Window window = ((AlertDialog) dialog).getWindow();
-                if (window != null) {
-                    window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                }
-
-                final Button button = ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE);
-                button.setEnabled(false);
-                if (message.contentBody != null) {
-                    try {
-                        editMessageTextView.setSelection(message.contentBody.length());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null) {
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> imm.showSoftInput(editMessageTextView, InputMethodManager.SHOW_IMPLICIT), 200);
-                }
-
-                editMessageTextView.requestFocus();
-
-                editMessageTextView.addTextChangedListener(new TextChangeListener() {
-                    final String oldBody = message.contentBody;
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        String trimmed = s.toString().trim();
-                        if (trimmed.length() == 0 || trimmed.equals(oldBody)) {
-                            if (button.isEnabled()) {
-                                button.setEnabled(false);
-                            }
-                        } else {
-                            if (!button.isEnabled()) {
-                                button.setEnabled(true);
-                            }
-                        }
-                    }
-                });
-            });
-            alertDialog.show();
-        }
     }
 
     static void openForwardMessageDialog(FragmentActivity activity, @NonNull List<Long> selectedMessageIds, @Nullable Runnable openDialogCallback) {
@@ -190,5 +132,115 @@ public class Utils {
                 }
             });
         });
+    }
+
+    static void applyBodyWithSpans(@NonNull TextView textView, @Nullable byte[] bytesOwnedIdentity, @NonNull Message message, @Nullable List<Pattern> searchPatterns, boolean linkifyLinks) {
+        SpannableString result = new SpannableString(message.getStringContent(textView.getContext()));
+        try {
+            // call linkify first as it removes existing spans
+            if (linkifyLinks) {
+                StringUtils2Kt.linkify(result);
+            }
+            if (bytesOwnedIdentity != null) {
+                applyMentionSpans(textView.getContext(), bytesOwnedIdentity, message, result);
+            }
+            if (searchPatterns != null) {
+                DiscussionSearch.highlightString(result, searchPatterns);
+            }
+        } catch (Exception ex) {
+            Logger.w("Error while applying spans to message content body");
+        }
+        textView.setText(result);
+    }
+
+    private static void applyMentionSpans(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull Message message, SpannableString result) {
+        List<Message.JsonUserMention> mentions = message.getMentions();
+        if (mentions != null && !mentions.isEmpty()) {
+            for (Message.JsonUserMention mention : mentions) {
+                if (mention.getRangeStart() >= 0 && mention.getRangeEnd() <= result.length()) {
+                    // this test also considers groupV2 pending members as contacts --> need to check this at click time
+                    if (mention.getUserIdentifier() == null || AppSingleton.getContactCustomDisplayName(mention.getUserIdentifier()) == null) {
+                        // Unknown contact
+                        result.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), context.getResources().getColor(R.color.darkGrey), null), mention.getRangeStart(), mention.getRangeEnd(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    } else {
+                        int color = InitialView.getTextColor(context, mention.getUserIdentifier(), AppSingleton.getContactCustomHue(mention.getUserIdentifier()));
+                        final String name = result.subSequence(mention.getRangeStart(), mention.getRangeEnd()).toString();
+                        result.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), color, () -> {
+                            if (Arrays.equals(bytesOwnedIdentity, mention.getUserIdentifier())) {
+                                context.startActivity(new Intent(context, OwnedIdentityDetailsActivity.class));
+                            } else {
+                                // check that there is indeed a contact
+                                App.runThread(() -> {
+                                    if (AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, mention.getUserIdentifier()) != null) {
+                                        new Handler(Looper.getMainLooper()).post(() -> App.openContactDetailsActivity(context, bytesOwnedIdentity, mention.getUserIdentifier()));
+                                    } else {
+                                        App.toast(context.getString(R.string.toast_message_not_yet_in_your_contacts, name), Toast.LENGTH_SHORT, Gravity.BOTTOM);
+                                    }
+                                });
+                            }
+                            return null;
+                        }), mention.getRangeStart(), mention.getRangeEnd(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                }
+            }
+        }
+    }
+
+
+    static CharSequence protectMentionUrlSpansWithFEFF(Spanned input) {
+        List<MentionUrlSpan> mentionUrlSpans = new ArrayList<>(Arrays.asList(input.getSpans(0, input.length(), MentionUrlSpan.class)));
+        //noinspection ComparatorCombinators
+        Collections.sort(mentionUrlSpans, (o1, o2) -> Integer.compare(input.getSpanStart(o1), input.getSpanStart(o2)));
+        SpannableStringBuilder ssb = new SpannableStringBuilder();
+        int offset = 0;
+        for (MentionUrlSpan mentionUrlSpan : mentionUrlSpans) {
+            ssb.append(input.subSequence(offset, input.getSpanStart(mentionUrlSpan)));
+            offset = input.getSpanEnd(mentionUrlSpan);
+            SpannableString spannableString = new SpannableString(input.subSequence(input.getSpanStart(mentionUrlSpan), offset) + "\ufeff");
+            spannableString.setSpan(new MentionUrlSpan(mentionUrlSpan.getUserIdentifier(), spannableString.length(), mentionUrlSpan.getColor(), mentionUrlSpan.getOnClick()), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.append(spannableString);
+        }
+        ssb.append(input.subSequence(offset, input.length()));
+        return ssb;
+    }
+
+    static Pair<String, List<Message.JsonUserMention>> removeProtectionFEFFsAndTrim(@NonNull CharSequence protectedMessageBody, @Nullable Collection<Message.JsonUserMention> mentions) {
+        // sort the mentions
+        ArrayList<Message.JsonUserMention> sortedMentions = mentions == null ? new ArrayList<>() : new ArrayList<>(mentions);
+        //noinspection ComparatorCombinators
+        Collections.sort(sortedMentions, (o1, o2) -> Integer.compare(o1.getRangeStart(), o2.getRangeStart()));
+
+        // rebuild the String without the FEFFs
+        StringBuilder sb = new StringBuilder();
+        int offset = 0;
+        // trim the String start
+        while ((offset < protectedMessageBody.length()) && (protectedMessageBody.charAt(offset) <= ' ')) {
+            offset++;
+        }
+        int mentionRangeCorrection = offset;
+        ArrayList<Message.JsonUserMention> correctedMentions = new ArrayList<>(sortedMentions.size());
+        for (Message.JsonUserMention mention : sortedMentions) {
+            if (mention.getRangeEnd() <= offset || mention.getRangeEnd() > protectedMessageBody.length()) {
+                // this can happen after deleting a mention
+                continue;
+            }
+            if (protectedMessageBody.charAt(mention.getRangeEnd()-1) == '\ufeff') {
+                sb.append(protectedMessageBody.subSequence(offset, mention.getRangeEnd() - 1));
+                offset = mention.getRangeEnd();
+                correctedMentions.add(new Message.JsonUserMention(mention.getUserIdentifier(), mention.getRangeStart() - mentionRangeCorrection, mention.getRangeEnd() - mentionRangeCorrection - 1));
+                mentionRangeCorrection++;
+            } else {
+                sb.append(protectedMessageBody.subSequence(offset, mention.getRangeEnd()));
+                offset = mention.getRangeEnd();
+                correctedMentions.add(new Message.JsonUserMention(mention.getUserIdentifier(), mention.getRangeStart() - mentionRangeCorrection, mention.getRangeEnd() - mentionRangeCorrection));
+            }
+        }
+        // trim the String end
+        int end = protectedMessageBody.length();
+        while ((end > offset) && (protectedMessageBody.charAt(end - 1) <= ' ')) {
+            end--;
+        }
+        sb.append(protectedMessageBody.subSequence(offset, end));
+        return new Pair<>(sb.length() == 0 ? null : sb.toString(), correctedMentions.size() > 0 ? correctedMentions : null);
     }
 }

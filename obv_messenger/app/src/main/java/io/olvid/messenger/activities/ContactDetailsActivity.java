@@ -864,7 +864,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                     .setPositiveButton(R.string.button_label_ok, (dialogInterface, i) -> {
                         try {
                             AppSingleton.getEngine().startTrustEstablishmentProtocol(contact.bytesContactIdentity, contact.getCustomDisplayName(), contact.bytesOwnedIdentity);
-                            App.showMainActivityTab(ContactDetailsActivity.this, MainActivity.INVITATIONS_TAB);
+                            App.openOneToOneDiscussionActivity(view.getContext(), contact.bytesOwnedIdentity, contact.bytesContactIdentity, true);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

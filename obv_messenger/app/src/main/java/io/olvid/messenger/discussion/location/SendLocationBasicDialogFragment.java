@@ -26,7 +26,6 @@ import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -52,6 +51,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.location.LocationListenerCompat;
 import androidx.core.location.LocationManagerCompat;
 import androidx.core.location.LocationRequestCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 
 import java.util.concurrent.Executor;
@@ -61,11 +61,17 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.HandlerExecutor;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.tasks.PostLocationMessageInDiscussionTask;
+import io.olvid.messenger.settings.SettingsActivity;
 
-public class SendLocationBasicDialogFragment extends AbstractSendLocationFragment implements View.OnClickListener {
+public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragment implements View.OnClickListener {
 
     private static final double GREEN_PRECISION_LIMIT = 20.0;
     private static final double ORANGE_PRECISION_LIMIT = 50.0;
+
+    // used to manually request location permission and activation on first launch
+    private boolean firstCallToOnStart = true;
+    // map integrations use this fragment for sharing location, behaviour is a little bit different
+    private final boolean shareLocationOnly;
 
     private LocationManager locationManager;
     private FragmentActivity activity;
@@ -77,8 +83,6 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
 
     private View rootView;
 
-    private ConstraintLayout positionLayout;
-
     private TextView locationTextView;
     private TextView precisionTextView;
     private TextView altitudeTextView;
@@ -87,8 +91,8 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch shareLocationSwitch;
     private TextView shareLocationDurationTextView;
-    private Long shareLocationCurrentDurationInS = null;
-    private long shareLocationCurrentIntervalInS;
+    private Long shareLocationCurrentDuration = null;
+    private long shareLocationCurrentInterval;
 
     private ConstraintLayout shareLocationIntervalLayout;
     private TextView shareLocationIntervalTextView;
@@ -97,12 +101,21 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
 
     // os need an empty public constructor
     public SendLocationBasicDialogFragment() {
-        discussionId = 0;
+        this.discussionId = 0;
+        this.shareLocationOnly = false;
     }
 
     public SendLocationBasicDialogFragment(long discussionId) {
         super();
         this.discussionId = discussionId;
+        this.shareLocationOnly = false;
+    }
+
+    // used when sharing location with some map integration
+    public SendLocationBasicDialogFragment(long discussionId, boolean shareLocationOnly) {
+        super();
+        this.discussionId = discussionId;
+        this.shareLocationOnly = shareLocationOnly;
     }
 
     @Nullable
@@ -115,7 +128,6 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
         rootView = inflater.inflate(R.layout.fragment_send_location_basic, container, false);
 
         // find all view elements
-        positionLayout = rootView.findViewById(R.id.send_location_basic_position_layout);
         locationTextView = rootView.findViewById(R.id.send_location_basic_position_coordinates_text_view);
         precisionTextView = rootView.findViewById(R.id.send_location_basic_position_precision_text_view);
         altitudeTextView = rootView.findViewById(R.id.send_location_basic_position_altitude_text_view);
@@ -133,8 +145,8 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
         cancelButton.setOnClickListener(this);
 
         // share duration default value
-        shareLocationDurationTextView.setText(R.string.location_sharing_duration_one_hour_full_string);
-        shareLocationCurrentDurationInS = 3600L;
+        shareLocationDurationTextView.setText(SettingsActivity.getLocationDefaultSharingDurationLongString(activity));
+        shareLocationCurrentDuration = SettingsActivity.getLocationDefaultSharingDurationValue();
         // share duration dropdown menu setup
         shareLocationDurationTextView.setOnClickListener((view) -> {
             ShareLocationPopupMenu shareLocationPopupMenu = ShareLocationPopupMenu.getDurationPopUpMenu(this.activity, view);
@@ -142,7 +154,7 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
                 // set text
                 shareLocationDurationTextView.setText(shareLocationPopupMenu.getItemLongString(item));
                 // keep duration in memory
-                shareLocationCurrentDurationInS = shareLocationPopupMenu.getItemDuration(item);
+                shareLocationCurrentDuration = shareLocationPopupMenu.getItemDuration(item);
                 // enable sharing if it was not
                 if (!shareLocationSwitch.isChecked()) {
                     shareLocationSwitch.setChecked(true);
@@ -153,8 +165,8 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
         });
 
         // share interval default value
-        shareLocationIntervalTextView.setText(R.string.location_sharing_interval_one_minute_full_string);
-        shareLocationCurrentIntervalInS = 60L;
+        shareLocationIntervalTextView.setText(SettingsActivity.getLocationDefaultSharingIntervalLongString(activity));
+        shareLocationCurrentInterval = SettingsActivity.getLocationDefaultSharingIntervalValue();
         // share duration dropdown menu setup
         shareLocationIntervalTextView.setOnClickListener((view) -> {
             ShareLocationPopupMenu shareLocationPopupMenu = ShareLocationPopupMenu.getIntervalPopUpMenu(this.activity, view);
@@ -162,7 +174,7 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
                 // set text
                 shareLocationIntervalTextView.setText(shareLocationPopupMenu.getItemLongString(item));
                 // keep duration in memory
-                shareLocationCurrentIntervalInS = shareLocationPopupMenu.getItemDuration(item);
+                shareLocationCurrentInterval = shareLocationPopupMenu.getItemDuration(item);
                 // enable sharing if it was not
                 if (!shareLocationSwitch.isChecked()) {
                     shareLocationSwitch.setChecked(true);
@@ -205,7 +217,10 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
             }
         }
 
-        checkPermissionsAndUpdateDialog();
+        if (firstCallToOnStart) {
+            checkPermissionsAndUpdateDialog();
+            firstCallToOnStart = false;
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -213,35 +228,42 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
     public void onResume() {
         super.onResume();
 
-        if (locationManager != null) {
-            if (isLocationPermissionGranted(activity)) {
-                // setup location updates
-                LocationRequestCompat locationRequest = new LocationRequestCompat.Builder(0)
-                        .setMinUpdateIntervalMillis(0)
-                        .setMinUpdateDistanceMeters(0)
-                        .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
-                        .build();
+        if (locationManager != null
+                && isLocationPermissionGranted(activity)
+                && isLocationEnabled()) {
+            // setup location updates
+            LocationRequestCompat locationRequest = new LocationRequestCompat.Builder(0)
+                    .setMinUpdateIntervalMillis(0)
+                    .setMinUpdateDistanceMeters(0)
+                    .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
+                    .build();
 
-                // get executor
-                Executor executor;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    executor = App.getContext().getMainExecutor();
-                } else {
-                    executor = new HandlerExecutor(Looper.getMainLooper());
-                }
+            // get executor
+            Executor executor;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                executor = App.getContext().getMainExecutor();
+            } else {
+                executor = new HandlerExecutor(Looper.getMainLooper());
+            }
 
-                // request location updates
-                String provider = locationManager.getBestProvider(new Criteria(), true);
-                if (provider != null) {
-                    LocationManagerCompat.requestLocationUpdates(locationManager, provider, locationRequest, executor, locationListenerCompat);
-                    LocationManagerCompat.getCurrentLocation(locationManager, provider, null, executor, this::onLocationUpdate);
+            // subscribe to all providers locations updates (to have results as fast as possible)
+            for (String provider : locationManager.getProviders(true)) {
+                LocationManagerCompat.requestLocationUpdates(locationManager, provider, locationRequest, executor, locationListenerCompat);
+                LocationManagerCompat.getCurrentLocation(locationManager, provider, null, executor, this::onLocationUpdate);
+            }
+
+            // when in share location only we try to use last know locations to be able to start location sharing even if gps is not available
+            // not in normal mode cause we do not want to be able to send a location that is not your current location !
+            if (shareLocationOnly) {
+                for (String p : locationManager.getProviders(true)) {
+                    onLocationUpdate(locationManager.getLastKnownLocation(p));
                 }
             }
         }
     }
 
     @Override
-    void checkPermissionsAndUpdateDialog() {
+    protected void checkPermissionsAndUpdateDialog() {
         // check location services are accessible
         locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         if (locationManager == null) {
@@ -263,6 +285,13 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
         }
 
         rootView.setVisibility(View.VISIBLE);
+
+        // if share location only: force sharing mode and hide switch
+        if (shareLocationOnly) {
+            shareLocationSwitch.setEnabled(false);
+            shareLocationSwitch.setChecked(true);
+            shareLocationSwitch.setVisibility(View.GONE);
+        }
 
         if (currentLocation == null) {
             // first mark waiting for location message and start spinner rotation
@@ -293,16 +322,13 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
 
         // update location
         currentLocation = location;
-        updateCurrentLocation();
-    }
 
-    private void updateCurrentLocation() {
         // truncate float to show
         Message.JsonLocation jsonLocation = Message.JsonLocation.sendLocationMessage(currentLocation);
 
-        locationTextView.setText(activity.getString(R.string.label_location_message_content_position, jsonLocation.getTruncatedLatitudeString(), jsonLocation.getTruncatedLongitudeString()));
-        altitudeTextView.setText(activity.getString(R.string.label_location_message_content_altitude, jsonLocation.getTruncatedAltitudeString(activity)));
-        precisionTextView.setText(activity.getString(R.string.label_location_message_content_precision, jsonLocation.getTruncatedPrecisionString(activity)));
+        locationTextView.setText(getString(R.string.label_location_message_content_position, jsonLocation.getTruncatedLatitudeString(), jsonLocation.getTruncatedLongitudeString()));
+        altitudeTextView.setText(getString(R.string.label_location_message_content_altitude, jsonLocation.getTruncatedAltitudeString(activity)));
+        precisionTextView.setText(getString(R.string.label_location_message_content_precision, jsonLocation.getTruncatedPrecisionString(activity)));
 
         if (currentLocation.getAccuracy() < GREEN_PRECISION_LIMIT) {
             precisionTextView.setTextColor(this.activity.getResources().getColor(R.color.green));
@@ -343,19 +369,28 @@ public class SendLocationBasicDialogFragment extends AbstractSendLocationFragmen
                 }
             }
             dismiss();
+            // if shareLocationOnly dismiss parent (map fragment) fragment when start sharing
+            if (shareLocationOnly && getParentFragment() != null && getParentFragment() instanceof DialogFragment) {
+                ((DialogFragment) getParentFragment()).dismiss();
+            }
         }
     }
 
     private void startSharingLocation() {
         Long shareExpirationInMs;
-        if (shareLocationCurrentDurationInS == null || shareLocationCurrentDurationInS < 0) {
+        if (shareLocationCurrentDuration == null || shareLocationCurrentDuration < 0) {
             shareExpirationInMs = null;
         } else {
-            shareExpirationInMs = System.currentTimeMillis() + shareLocationCurrentDurationInS * 1000;
+            shareExpirationInMs = System.currentTimeMillis() + shareLocationCurrentDuration;
         }
-        long shareIntervalInMs = shareLocationCurrentIntervalInS * 1000;
 
         // post first location message (will start location sharing service)
-        App.runThread(PostLocationMessageInDiscussionTask.startLocationSharingInDiscussionTask(currentLocation, discussionId, true, shareExpirationInMs, shareIntervalInMs));
+        App.runThread(PostLocationMessageInDiscussionTask.startLocationSharingInDiscussionTask(currentLocation, discussionId, true, shareExpirationInMs, shareLocationCurrentInterval));
+    }
+
+    // dismiss if request for permission or location activation was canceled
+    @Override
+    public void onRequestCanceled() {
+        this.dismiss();
     }
 }

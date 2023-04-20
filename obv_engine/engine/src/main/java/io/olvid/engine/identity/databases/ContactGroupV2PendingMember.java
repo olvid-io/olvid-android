@@ -21,8 +21,6 @@ package io.olvid.engine.identity.databases;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -87,15 +85,7 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
         }
 
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            for (String permissionString : permissionStrings) {
-                if (baos.size() > 0) {
-                    baos.write(0x00);
-                }
-                baos.write(permissionString.getBytes(StandardCharsets.UTF_8));
-            }
-            byte[] serializedPermissions = baos.toByteArray();
-            baos.close();
+            byte[] serializedPermissions = GroupV2.Permission.serializePermissionStrings(permissionStrings);
 
             ContactGroupV2PendingMember contactGroupPendingMember = new ContactGroupV2PendingMember(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, contactIdentity, serializedContactDetails, serializedPermissions, groupInvitationNonce);
             contactGroupPendingMember.insert();
@@ -251,6 +241,33 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
         }
     }
 
+    public static List<GroupV2.Identifier> getKeycloakGroupV2IdentifiersWhereContactIsPending(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+        if ((ownedIdentity == null) || (contactIdentity == null)) {
+            return null;
+        }
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + GROUP_UID + " as uid, " + SERVER_URL + " as url FROM " + TABLE_NAME +
+                " WHERE " + OWNED_IDENTITY + " = ? " +
+                " AND " + CONTACT_IDENTITY + " = ?" +
+                " AND " + CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK + ";")) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            statement.setBytes(2, contactIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                List<GroupV2.Identifier> list = new ArrayList<>();
+                while (res.next()) {
+                    try {
+                        list.add(new GroupV2.Identifier(
+                                new UID(res.getBytes("uid")),
+                                res.getString("url"),
+                                GroupV2.Identifier.CATEGORY_KEYCLOAK
+                        ));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return list;
+            }
+        }
+    }
 
 
     // endregion

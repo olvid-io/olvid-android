@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.ObvPostMessageOutput;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
@@ -36,6 +37,8 @@ public class UpdateLocationMessageTask implements Runnable {
     final long discussionId;
     final long messageId;
     final Location location;
+    // obvPostMessageOutput is used as a return value, sharing service will store it to check if updates had been sent
+    public ObvPostMessageOutput obvPostMessageOutput = null;
 
     // normal update location message (will update location and increment count field)
     public static UpdateLocationMessageTask createPostSharingLocationUpdateMessage(long discussionId, long messageId, @NonNull Location location) {
@@ -47,7 +50,7 @@ public class UpdateLocationMessageTask implements Runnable {
         return new UpdateLocationMessageTask(discussionId, messageId, null);
     }
 
-    public UpdateLocationMessageTask(long discussionId, long messageId, Location location) {
+    private UpdateLocationMessageTask(long discussionId, long messageId, Location location) {
         this.discussionId = discussionId;
         this.messageId = messageId;
         this.location = location;
@@ -62,7 +65,7 @@ public class UpdateLocationMessageTask implements Runnable {
             if (location != null) {
                 // If the message can no longer be found (typically because it expired, was deleted, or was remote deleted) --> stop sharing
                 // Only do this for createPostSharingLocationUpdateMessage to avoid infinite loop ;)
-                UnifiedForegroundService.LocationSharingSubService.stopSharingLocationSync(discussionId);
+                UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussionId, true);
             }
             return;
         }
@@ -75,11 +78,6 @@ public class UpdateLocationMessageTask implements Runnable {
         if (originalMessage.locationType != Message.LOCATION_TYPE_SHARE && originalMessage.locationType != Message.LOCATION_TYPE_SHARE_FINISHED) {
             Logger.e("UpdateLocationMessageTask: trying to update a message that is not location sharing");
             return;
-        }
-
-        // just show an error in logs, this shall not happen
-        if (originalMessage.locationType == Message.LOCATION_TYPE_SHARE_FINISHED) {
-            Logger.e("UpdateLocationMessageTask: trying to update a sharing location message that is already finished");
         }
 
         // create jsonLocation depending on update message type
@@ -102,10 +100,14 @@ public class UpdateLocationMessageTask implements Runnable {
             return;
         }
 
-        // try to post update message, abort if unable to post
-        boolean success = Message.postUpdateMessageMessage(originalMessage);
-        if (!success) {
-            Logger.e("UpdateLocationMessageTask: Unable to update location message");
+        // try to post update message, abort on exception and consider null result as valid (valid corner cases)
+        try {
+            obvPostMessageOutput = Message.postUpdateMessageMessage(originalMessage);
+            if (!obvPostMessageOutput.isMessagePostedForAtLeastOneContact()) {
+                throw new Exception("Message not sent");
+            }
+        } catch (Exception e) {
+            Logger.e("UpdateLocationMessageTask: Unable to update location message", e);
             return;
         }
 

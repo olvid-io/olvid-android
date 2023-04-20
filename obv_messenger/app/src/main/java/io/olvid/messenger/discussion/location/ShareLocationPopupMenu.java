@@ -27,14 +27,19 @@ import android.widget.PopupMenu;
 import io.olvid.messenger.R;
 
 public class ShareLocationPopupMenu extends PopupMenu {
-    private int[] durationArray;
+    private long[] durationArray;
     private String[] shortStringArray;
     private String[] longStringArray;
 
     public static ShareLocationPopupMenu getDurationPopUpMenu(Context context, View anchor) {
         ShareLocationPopupMenu popupMenu = new ShareLocationPopupMenu(context, anchor);
 
-        popupMenu.durationArray = context.getResources().getIntArray(R.array.share_location_duration_values);
+        // convert duration string array to int array
+        String[] stringDurationArray = context.getResources().getStringArray(R.array.share_location_duration_values);
+        popupMenu.durationArray = new long[stringDurationArray.length];
+        for (int i = 0; i < stringDurationArray.length; i++) {
+            popupMenu.durationArray[i] = Long.parseLong(stringDurationArray[i]);
+        }
         popupMenu.shortStringArray = context.getResources().getStringArray(R.array.share_location_duration_short_strings);
         popupMenu.longStringArray = context.getResources().getStringArray(R.array.share_location_duration_long_strings);
 
@@ -47,7 +52,12 @@ public class ShareLocationPopupMenu extends PopupMenu {
     public static ShareLocationPopupMenu getIntervalPopUpMenu(Context context, View anchor) {
         ShareLocationPopupMenu popupMenu = new ShareLocationPopupMenu(context, anchor);
 
-        popupMenu.durationArray = context.getResources().getIntArray(R.array.share_location_interval_values);
+        // convert duration string array to int array
+        String[] stringDurationArray = context.getResources().getStringArray(R.array.share_location_interval_values);
+        popupMenu.durationArray = new long[stringDurationArray.length];
+        for (int i = 0; i < stringDurationArray.length; i++) {
+            popupMenu.durationArray[i] = Long.parseLong(stringDurationArray[i]);
+        }
         popupMenu.shortStringArray = context.getResources().getStringArray(R.array.share_location_interval_short_strings);
         popupMenu.longStringArray = context.getResources().getStringArray(R.array.share_location_interval_long_strings);
 
@@ -68,7 +78,7 @@ public class ShareLocationPopupMenu extends PopupMenu {
         if (durationArray[item.getItemId()] == -1) {
             return null;
         }
-        return (long) durationArray[item.getItemId()];
+        return durationArray[item.getItemId()];
     }
 
     public String getItemLongString(MenuItem item) {

@@ -23,6 +23,7 @@ package io.olvid.engine.metamanager;
 import org.jose4j.jwk.JsonWebKey;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +44,7 @@ import io.olvid.engine.datatypes.containers.GroupInformation;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
+import io.olvid.engine.datatypes.containers.KeycloakGroupV2UpdateOutput;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.containers.UserData;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
@@ -56,6 +58,7 @@ import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
+import io.olvid.engine.identity.datatypes.KeycloakGroupBlob;
 
 public interface IdentityDelegate {
     boolean isOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
@@ -73,7 +76,7 @@ public interface IdentityDelegate {
     String getSerializedPublishedDetailsOfOwnedIdentity(Session session, Identity ownedIdentity);
     JsonIdentityDetailsWithVersionAndPhoto getOwnedIdentityPublishedDetails(Session session, Identity ownedIdentity) throws SQLException;
     boolean isOwnedIdentityKeycloakManaged(Session session, Identity ownedIdentity) throws SQLException;
-    List<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(Session session, String pushTopic) throws SQLException;
+    Collection<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(Session session, String pushTopic) throws SQLException;
     ObvKeycloakState getOwnedIdentityKeycloakState(Session session, Identity ownedIdentity) throws SQLException;
     JsonWebKey getOwnedIdentityKeycloakSignatureKey(Session session, Identity ownedIdentity) throws SQLException;
     void setOwnedIdentityKeycloakSignatureKey(Session session, Identity ownedIdentity, JsonWebKey signatureKey) throws SQLException;
@@ -94,6 +97,7 @@ public interface IdentityDelegate {
     boolean updateKeycloakPushTopicsIfNeeded(Session session, Identity ownedIdentity, String serverUrl, List<String> pushTopics) throws SQLException;
     void setOwnedIdentityKeycloakSelfRevocationTestNonce(Session session, Identity ownedIdentity, String serverUrl, String nonce) throws SQLException;
     String getOwnedIdentityKeycloakSelfRevocationTestNonce(Session session, Identity ownedIdentity, String serverUrl) throws SQLException;
+    void updateKeycloakGroups(Session session, Identity ownedIdentity, List<String> signedGroupBlobs, List<String> signedGroupDeletions, List<String> signedGroupKicks, long keycloakCurrentTimestamp) throws Exception;
     void reactivateOwnedIdentityIfNeeded(Session session, Identity ownedIdentity) throws SQLException;
     void deactivateOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
 
@@ -211,10 +215,15 @@ public interface IdentityDelegate {
     GroupV2.AdministratorsChain getGroupV2AdministratorsChain(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
     boolean getGroupV2AdminStatus(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
     List<ObvGroupV2> getObvGroupsV2ForOwnedIdentity(Session session, Identity ownedIdentity) throws Exception;
-    GroupV2.IdentifierVersionAndKeys[] getGroupsV2IdentifierVersionAndKeysForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
-    GroupV2.IdentifierAndAdminStatus[] getGroupsV2IdentifierAndMyAdminStatusForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
+    GroupV2.IdentifierVersionAndKeys[] getServerGroupsV2IdentifierVersionAndKeysForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
+    GroupV2.IdentifierAndAdminStatus[] getServerGroupsV2IdentifierAndMyAdminStatusForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
     void initiateGroupV2BatchKeysResend(UID currentDeviceUid, Identity contactIdentity, UID contactDeviceUid);
     void forcefullyRemoveMemberOrPendingFromNonAdminGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity) throws SQLException;
+    Long getGroupV2LastModificationTimestamp(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    byte[] createKeycloakGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, KeycloakGroupBlob keycloakGroupBlob);
+    KeycloakGroupV2UpdateOutput updateKeycloakGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, KeycloakGroupBlob keycloakGroupBlob) throws Exception;
+    void rePingOrDemoteContactFromAllKeycloakGroups(Session session, Identity ownedIdentity, Identity contactIdentity, boolean certifiedByOwnKeycloak, String lastKnownSerializedCertifiedDetails) throws SQLException;
+
     // endregion
 
 

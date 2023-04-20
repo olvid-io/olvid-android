@@ -75,12 +75,14 @@ import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder;
+import io.olvid.messenger.openid.jsons.JsonGroupsRequest;
+import io.olvid.messenger.openid.jsons.JsonGroupsResponse;
 import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
 import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
-import io.olvid.messenger.openid.jsons.MeQueryJson;
-import io.olvid.messenger.openid.jsons.MeResponseJson;
-import io.olvid.messenger.openid.jsons.SearchQueryJson;
-import io.olvid.messenger.openid.jsons.SearchResponseJson;
+import io.olvid.messenger.openid.jsons.JsonMeRequest;
+import io.olvid.messenger.openid.jsons.JsonMeResponse;
+import io.olvid.messenger.openid.jsons.JsonSearchRequest;
+import io.olvid.messenger.openid.jsons.JsonSearchResponse;
 
 public class KeycloakTasks {
     private static final String ME_PATH = "olvid-rest/me";
@@ -88,6 +90,7 @@ public class KeycloakTasks {
     private static final String GET_KEY_PATH = "olvid-rest/getKey";
     private static final String SEARCH_PATH = "olvid-rest/search";
     private static final String REVOCATION_TEST_PATH = "olvid-rest/revocationTest";
+    private static final String GROUPS_PATH = "olvid-rest/groups";
 
     public static final int RFC_UNKNOWN_ERROR = 0;
     public static final int RFC_INVALID_AUTH_STATE = 1;
@@ -170,7 +173,7 @@ public class KeycloakTasks {
                         if (latestRevocationListTimestamp == null) {
                             dataToSend = null;
                         } else {
-                            dataToSend = AppSingleton.getJsonObjectMapper().writeValueAsBytes(new MeQueryJson(latestRevocationListTimestamp));
+                            dataToSend = AppSingleton.getJsonObjectMapper().writeValueAsBytes(new JsonMeRequest(latestRevocationListTimestamp));
                         }
 
                         byte[] bytes = keycloakApiRequest(keycloakServerUrl, ME_PATH, accessToken, dataToSend);
@@ -185,7 +188,7 @@ public class KeycloakTasks {
                             }
                             return;
                         }
-                        MeResponseJson response = AppSingleton.getJsonObjectMapper().readValue(bytes, MeResponseJson.class);
+                        JsonMeResponse response = AppSingleton.getJsonObjectMapper().readValue(bytes, JsonMeResponse.class);
                         if (response.signature != null) {
                             Pair<String, JsonWebKey> detailsJsonStringAndSignatureKey = verifySignature(response.signature, jwks, null);
 
@@ -282,6 +285,62 @@ public class KeycloakTasks {
     }
 
 
+    // the server groups download timestamp is returned in the callback
+    public static void getGroups(Context context, String keycloakServerUrl, AuthState authState, String clientSecret, byte[] bytesOwnedIdentity, Long latestGetGroupsTimestamp, KeycloakManager.KeycloakCallbackWrapper<Long> callback) {
+        Logger.d("Fetching keycloak groups");
+
+        final AuthorizationService authorizationService = new AuthorizationService(context, new AppAuthConfiguration.Builder()
+                .setConnectionBuilder(new NoExceptionConnectionBuilder())
+                .build());
+        final AuthState.AuthStateAction action = (accessToken, idToken, ex) -> {
+            authorizationService.dispose();
+            if (ex != null || accessToken == null) {
+                if (ex != null) {
+                    ex.printStackTrace();
+                    if (ex.code == 3) {
+                        callback.failed(RFC_NETWORK_ERROR);
+                        return;
+                    }
+                }
+                // by default, assume an authentication is required
+                callback.failed(RFC_AUTHENTICATION_REQUIRED);
+            } else {
+                App.runThread(() -> {
+                    try {
+                        JsonGroupsRequest request = new JsonGroupsRequest(latestGetGroupsTimestamp);
+                        byte[] bytes;
+                        try {
+                            bytes = keycloakApiRequest(keycloakServerUrl, GROUPS_PATH, accessToken, AppSingleton.getJsonObjectMapper().writeValueAsBytes(request));
+                        } catch (IOException e) {
+                            callback.failed(RFC_NETWORK_ERROR);
+                            return;
+                        }
+
+                        Map<String, Object> output = AppSingleton.getJsonObjectMapper().readValue(bytes, new TypeReference<Map<String, Object>>() {});
+                        Integer error = (Integer) output.get("error");
+                        if (error != null) {
+                            callback.failed(RFC_SERVER_ERROR);
+                        } else {
+                            JsonGroupsResponse response = AppSingleton.getJsonObjectMapper().readValue(bytes, JsonGroupsResponse.class);
+                            if (AppSingleton.getEngine().updateKeycloakGroups(bytesOwnedIdentity, response.getSignedGroupBlobs(), response.getSignedGroupDeletions(), response.getSignedGroupKicks(), response.getCurrentTimestamp())) {
+                                callback.success(response.getCurrentTimestamp());
+                            } else {
+                                callback.failed(RFC_UNKNOWN_ERROR);
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        callback.failed(RFC_UNKNOWN_ERROR);
+                    }
+                });
+            }
+        };
+        if (clientSecret == null) {
+            authState.performActionWithFreshTokens(authorizationService, action);
+        } else {
+            authState.performActionWithFreshTokens(authorizationService, new ClientSecretPost(clientSecret), action);
+        }
+    }
 
 
     static void search(@NonNull Context context, @NonNull String keycloakServerUrl, @NonNull AuthState authState, @Nullable String clientSecret, @Nullable String searchQuery, @NonNull KeycloakManager.KeycloakCallback<Pair<List<JsonKeycloakUserDetails>, Integer>> callback) {
@@ -305,7 +364,7 @@ public class KeycloakTasks {
             } else {
                 App.runThread(() -> {
                     try {
-                        SearchQueryJson query = new SearchQueryJson();
+                        JsonSearchRequest query = new JsonSearchRequest();
                         if (searchQuery == null) {
                             query.filter = null;
                         } else {
@@ -332,7 +391,7 @@ public class KeycloakTasks {
                         } catch (Exception e) {
                             // an exception is normal if there was no error in the server response
                         }
-                        SearchResponseJson response = AppSingleton.getJsonObjectMapper().readValue(bytes, SearchResponseJson.class);
+                        JsonSearchResponse response = AppSingleton.getJsonObjectMapper().readValue(bytes, JsonSearchResponse.class);
                         callback.success(new Pair<>(response.results, response.count));
                     } catch (IOException e) {
                         callback.failed(RFC_NETWORK_ERROR);

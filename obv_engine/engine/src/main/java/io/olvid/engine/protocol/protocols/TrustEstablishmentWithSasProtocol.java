@@ -1280,7 +1280,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
             if (! Arrays.equals(computedSas, receivedMessage.sasEnteredByUser)) {
                 Logger.d("The SAS entered by the user does not match the computed SAS.");
                 // re-display the sas exchange dialog and remain in the same state
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createSasExchangeDialog(startState.contactSerializedDetails, startState.contactIdentity, sasToDisplay, receivedMessage.getServerTimestamp()), startState.dialogUuid));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createSasExchangeDialog(startState.contactSerializedDetails, startState.contactIdentity, sasToDisplay, System.currentTimeMillis()), startState.dialogUuid));
                 ChannelMessageToSend messageToSend = new DialogForSasExchangeMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 return startState;
@@ -1381,8 +1381,8 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
             {
-                // display the mutual trust established dialog
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createMutualTrustConfirmedDialog(startState.contactSerializedDetails, startState.contactIdentity), startState.dialogUuid));
+                // delete dialog
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startState.dialogUuid));
                 ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1420,8 +1420,8 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
 
 
             {
-                // display the mutual trust established dialog
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createMutualTrustConfirmedDialog(startState.contactSerializedDetails, startState.contactIdentity), startState.dialogUuid));
+                // delete dialog
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startState.dialogUuid));
                 ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

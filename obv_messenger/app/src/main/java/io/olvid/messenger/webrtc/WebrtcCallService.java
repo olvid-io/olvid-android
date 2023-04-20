@@ -2707,7 +2707,7 @@ public class WebrtcCallService extends Service {
             byte[] messagePayload = AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
             ObvPostMessageOutput obvPostMessageOutput = AppSingleton.getEngine().post(messagePayload, null, new ObvOutboundAttachment[0], bytesContactIdentities, bytesOwnedIdentity, tagAsVoipMessage, tagAsVoipMessage);
             // do not use the foreground service for this
-            return obvPostMessageOutput.isMessageSent();
+            return obvPostMessageOutput.isMessagePostedForAtLeastOneContact();
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             setFailReason(FailReason.INTERNAL_ERROR);

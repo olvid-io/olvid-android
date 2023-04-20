@@ -26,7 +26,13 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
+import io.olvid.messenger.AppSingleton;
 
 @Entity(
         tableName = RemoteDeleteAndEditRequest.TABLE_NAME,
@@ -57,6 +63,7 @@ public class RemoteDeleteAndEditRequest {
     public static final String SERVER_TIMESTAMP = "server_timestamp";
     public static final String REQUEST_TYPE = "request_type";
     public static final String BODY = "body";
+    public static final String MENTIONS = "mentions";
     public static final String REMOTE_DELETER = "remote_deleter";
 
     public static final int TYPE_DELETE = 0;
@@ -88,12 +95,16 @@ public class RemoteDeleteAndEditRequest {
     @Nullable
     public String body;
 
+    @ColumnInfo(name = MENTIONS)
+    @Nullable
+    public String mentions;
+
     @ColumnInfo(name = REMOTE_DELETER)
     @Nullable
     public byte[] remoteDeleter;
 
     // default constructor required by Room
-    public RemoteDeleteAndEditRequest(long discussionId, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, long senderSequenceNumber, long serverTimestamp, int requestType, @Nullable String body, @Nullable byte[] remoteDeleter) {
+    public RemoteDeleteAndEditRequest(long discussionId, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, long senderSequenceNumber, long serverTimestamp, int requestType, @Nullable String body, @Nullable String mentions, @Nullable byte[] remoteDeleter) {
         this.discussionId = discussionId;
         this.senderIdentifier = senderIdentifier;
         this.senderThreadIdentifier = senderThreadIdentifier;
@@ -101,6 +112,24 @@ public class RemoteDeleteAndEditRequest {
         this.serverTimestamp = serverTimestamp;
         this.requestType = requestType;
         this.body = body;
+        this.mentions = mentions;
         this.remoteDeleter = remoteDeleter;
+    }
+
+    public String getSanitizedSerializedMentions() {
+        if (mentions != null) {
+            try {
+                List<Message.JsonUserMention> jsonUserMentions = AppSingleton.getJsonObjectMapper().readValue(mentions, new TypeReference<List<Message.JsonUserMention>>() {
+                });
+                List<Message.JsonUserMention> sanitizedMentions = new ArrayList<>();
+                for (Message.JsonUserMention mention : jsonUserMentions) {
+                    if (mention.getUserIdentifier() != null) {
+                        sanitizedMentions.add(mention);
+                    }
+                }
+                return AppSingleton.getJsonObjectMapper().writeValueAsString(sanitizedMentions);
+            } catch (Exception ignored) { }
+        }
+        return null;
     }
 }

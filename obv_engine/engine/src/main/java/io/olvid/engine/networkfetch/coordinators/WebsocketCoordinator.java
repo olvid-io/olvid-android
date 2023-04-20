@@ -821,6 +821,23 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                         }
                         break;
                     }
+                    case "keycloak": {
+                        Object identityObject = receivedMessage.get("identity");
+                        if (!(identityObject instanceof String)) {
+                            break;
+                        }
+                        try {
+                            Identity identity = Identity.of(Base64.decode((String) identityObject));
+
+                            HashMap<String, Object> userInfo = new HashMap<>();
+                            userInfo.put(DownloadNotifications.NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED_OWNED_IDENTITY_KEY, identity);
+                            notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED, userInfo);
+                        } catch (IOException | DecodingException e) {
+                            Logger.d("Error decoding identity in keycloak websocket notification");
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -899,7 +916,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             }
             websocketConnected = false;
             existingWebsockets.remove(server);
-            if (webSocket.close(1000, null)) {
+            if (webSocket != null && webSocket.close(1000, null)) {
                 // if we initiated a graceful close, also schedule a cancel to make sure resources are properly released
                 scheduler.schedule(server, webSocket::cancel, "Websocket cancel()", 500);
             }

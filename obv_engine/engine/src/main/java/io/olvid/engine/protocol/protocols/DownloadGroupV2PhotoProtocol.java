@@ -163,8 +163,8 @@ public class DownloadGroupV2PhotoProtocol extends ConcreteProtocol {
             if (list.length != 2) {
                 throw new Exception();
             }
-            this.groupIdentifier= GroupV2.Identifier.of(list[0]);
-            this.serverPhotoInfo= GroupV2.ServerPhotoInfo.of(list[1]);
+            this.groupIdentifier = GroupV2.Identifier.of(list[0]);
+            this.serverPhotoInfo = GroupV2.ServerPhotoInfo.of(list[1]);
         }
 
         @Override
@@ -263,11 +263,19 @@ public class DownloadGroupV2PhotoProtocol extends ConcreteProtocol {
         public DownloadingPhotoState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createGetUserDataQuery(receivedMessage.serverPhotoInfo.serverPhotoIdentity, receivedMessage.serverPhotoInfo.serverPhotoLabel)));
-            ChannelMessageToSend messageToSend = new ServerGetPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
-            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            if (receivedMessage.groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createGetKeycloakDataQuery(receivedMessage.groupIdentifier.serverUrl, receivedMessage.serverPhotoInfo.serverPhotoLabel)));
+                ChannelMessageToSend messageToSend = new ServerGetPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
-            return new DownloadingPhotoState(receivedMessage.groupIdentifier, receivedMessage.serverPhotoInfo);
+                return new DownloadingPhotoState(receivedMessage.groupIdentifier, receivedMessage.serverPhotoInfo);
+            } else {
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createGetUserDataQuery(receivedMessage.serverPhotoInfo.serverPhotoIdentity, receivedMessage.serverPhotoInfo.serverPhotoLabel)));
+                ChannelMessageToSend messageToSend = new ServerGetPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
+                return new DownloadingPhotoState(receivedMessage.groupIdentifier, receivedMessage.serverPhotoInfo);
+            }
         }
     }
 

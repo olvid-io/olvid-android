@@ -30,7 +30,7 @@ public class DialogType {
     public static final int ACCEPT_INVITE_DIALOG_ID = 1;
     public static final int SAS_EXCHANGE_DIALOG_ID = 2;
     public static final int SAS_CONFIRMED_DIALOG_ID = 3;
-    public static final int MUTUAL_TRUST_CONFIRMED_DIALOG_ID = 4;
+    //public static final int MUTUAL_TRUST_CONFIRMED_DIALOG_ID = 4;
     public static final int INVITE_ACCEPTED_DIALOG_ID = 5;
     public static final int ACCEPT_MEDIATOR_INVITE_DIALOG_ID = 6;
     public static final int MEDIATOR_INVITE_ACCEPTED_DIALOG_ID = 7;
@@ -91,10 +91,6 @@ public class DialogType {
 
     public static DialogType createSasConfirmedDialog(String contactSerializedDetails, Identity contactIdentity, byte[] sasToDisplay, byte[] sasEntered) {
         return new DialogType(SAS_CONFIRMED_DIALOG_ID, contactSerializedDetails, contactIdentity, sasToDisplay, sasEntered, null, null, null, null, null, null, null);
-    }
-
-    public static DialogType createMutualTrustConfirmedDialog(String contactSerializedDetails, Identity contactIdentity) {
-        return new DialogType(MUTUAL_TRUST_CONFIRMED_DIALOG_ID, contactSerializedDetails, contactIdentity, null, null, null, null, null, null, null, null, null);
     }
 
     public static DialogType createInviteAcceptedDialog(String contactSerializedDetails, Identity contactIdentity) {

@@ -90,7 +90,7 @@ public class ServerQuery {
         public static final int UPDATE_GROUP_BLOB_QUERY_ID = 7;
         public static final int PUT_GROUP_LOG_QUERY_ID = 8;
         public static final int DELETE_GROUP_BLOB_QUERY_ID = 9;
-
+        public static final int  GET_KEYCLOAK_DATA_QUERY_ID = 10;
 
         private final int id;
         private final String server;
@@ -205,7 +205,9 @@ public class ServerQuery {
             return new Type(DELETE_GROUP_BLOB_QUERY_ID, groupIdentifier.serverUrl, null, groupIdentifier.groupUid, null, null, null, null, null, querySignature, null);
         }
 
-
+        public static Type createGetKeycloakDataQuery(String serverUrl, UID serverLabel) {
+            return new Type(GET_KEYCLOAK_DATA_QUERY_ID, serverUrl, null, serverLabel, null, null, null, null, null, null, null);
+        }
 
         public static Type of(Encoded encoded) throws DecodingException {
             Encoded[] list = encoded.decodeList();
@@ -310,6 +312,14 @@ public class ServerQuery {
                     querySignature = vars[2].decodeBytes();
                     break;
                 }
+                case GET_KEYCLOAK_DATA_QUERY_ID: {
+                    if (vars.length != 2) {
+                        throw new DecodingException();
+                    }
+                    server = vars[0].decodeString();
+                    serverLabel = vars[1].decodeUid();
+                    break;
+                }
             }
             return new Type(id, server, identity, serverLabel, dataUrl, dataKey, signedContactDetails, encodedGroupAdminPublicKey, encryptedBlob, querySignature, nonce);
         }
@@ -391,6 +401,13 @@ public class ServerQuery {
                             Encoded.of(server),
                             Encoded.of(serverLabel),
                             Encoded.of(querySignature),
+                    });
+                    break;
+                }
+                case GET_KEYCLOAK_DATA_QUERY_ID: {
+                    encodedVars = Encoded.of(new Encoded[]{
+                            Encoded.of(server),
+                            Encoded.of(serverLabel),
                     });
                     break;
                 }

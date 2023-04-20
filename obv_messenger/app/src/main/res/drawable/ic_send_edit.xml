@@ -1,0 +1,9 @@
+<vector android:height="24dp"
+    android:viewportHeight="24.0" android:viewportWidth="24.0"
+    android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:autoMirrored="true">
+    <path android:fillColor="@color/olvid_gradient_dark" android:pathData="M2,21L23,12 18.55,10.1 l-1.85,1.85 L17,12 2,14z"/>
+    <path android:fillColor="@color/olvid_gradient_dark" android:pathData="M12,7.3l-0.75,0.75 v3.18 L2,10 2,3z"/>
+    <path android:fillColor="@color/olvid_gradient_dark" android:pathData="M19.01,2.87l0.71,-0.71c0.39,-0.39 1.02,-0.39 1.41,0l0.71,0.71c0.39,0.39 0.39,1.02 0,1.41l-0.71,0.71L19.01,2.87z
+    M18.3,3.58l-5.3,5.3v2.12h2.12l5.3,-5.3z"/>
+</vector>

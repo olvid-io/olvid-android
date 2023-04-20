@@ -45,6 +45,8 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                 IdentityNotifications.NOTIFICATION_GROUP_V2_PHOTO_UPDATED,
                 IdentityNotifications.NOTIFICATION_GROUP_V2_FROZEN_CHANGED,
                 IdentityNotifications.NOTIFICATION_GROUP_V2_DELETED,
+                IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS,
+                IdentityNotifications.NOTIFICATION_NEW_KEYCLOAK_GROUP_V2_PUSH_TOPIC,
         }) {
             notificationManager.addListener(notificationName, this);
         }
@@ -142,6 +144,34 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                 engineInfo.put(EngineNotifications.GROUP_V2_DELETED_BYTES_OWNED_IDENTITY, ownedIdentity.getBytes());
                 engineInfo.put(EngineNotifications.GROUP_V2_DELETED_BYTES_GROUP_IDENTIFIER_KEY, groupIdentifier.getBytes());
                 engine.postEngineNotification(EngineNotifications.GROUP_V2_DELETED, engineInfo);
+                break;
+            }
+            case IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS: {
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_OWNED_IDENTITY_KEY);
+                GroupV2.Identifier groupIdentifier = (GroupV2.Identifier) userInfo.get(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_GROUP_IDENTIFIER_KEY);
+                String serializedSharedSettings = (String) userInfo.get(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_SERIALIZED_SHARED_SETTINGS_KEY);
+                Long latestModificationTimestamp = (Long) userInfo.get(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_MODIFICATION_TIMESTAMP_KEY);
+
+                if (ownedIdentity == null || groupIdentifier == null || latestModificationTimestamp == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS_BYTES_GROUP_IDENTIFIER_KEY, groupIdentifier.getBytes());
+                engineInfo.put(EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS_SHARED_SETTINGS_KEY, serializedSharedSettings);
+                engineInfo.put(EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS_MODIFICATION_TIMESTAMP_KEY, latestModificationTimestamp);
+
+                engine.postEngineNotification(EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS, engineInfo);
+                break;
+            }
+            case IdentityNotifications.NOTIFICATION_NEW_KEYCLOAK_GROUP_V2_PUSH_TOPIC: {
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_OWNED_IDENTITY_KEY);
+                if (ownedIdentity == null) {
+                    break;
+                }
+
+                engine.fetchManager.forceRegisterPushNotification(ownedIdentity);
                 break;
             }
             default:

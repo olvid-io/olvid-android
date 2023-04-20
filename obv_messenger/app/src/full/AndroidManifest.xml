@@ -3,6 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application>
+
+        <!-- google maps integration -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <!-- Override the default theme for OSS to have nicer colors -->
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"

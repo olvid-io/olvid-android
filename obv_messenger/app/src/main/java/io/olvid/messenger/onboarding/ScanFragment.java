@@ -42,8 +42,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.google.zxing.Result;
-
 import java.util.regex.Matcher;
 
 import io.olvid.messenger.App;
@@ -135,8 +133,7 @@ public class ScanFragment extends Fragment implements View.OnClickListener, QRCo
     }
 
     @Override
-    public boolean handleResult(Result result) {
-        String text = result.getText();
+    public boolean handleResult(String text) {
         Vibrator v = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
         if (v != null) {
             v.vibrate(100);

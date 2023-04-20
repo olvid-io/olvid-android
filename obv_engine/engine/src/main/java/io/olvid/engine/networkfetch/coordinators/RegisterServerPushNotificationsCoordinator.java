@@ -223,6 +223,21 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         }
     }
 
+    public Identity getOwnedIdentityFromMaskingUid(String androidMaskingUidString) {
+        if (androidMaskingUidString != null) {
+            try {
+                UID androidIdentityMaskingUid = new UID(androidMaskingUidString);
+                IdentityAndUid identityAndUid = androidIdentityMaskingUids.get(androidIdentityMaskingUid);
+                if (identityAndUid != null) {
+                    return identityAndUid.ownedIdentity;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
     private void storeAndroidIdentityMaskingUid(Identity identity, UID deviceUid, UID identityMaskingUid) {
         androidIdentityMaskingUids.put(identityMaskingUid, new IdentityAndUid(identity, deviceUid));
     }

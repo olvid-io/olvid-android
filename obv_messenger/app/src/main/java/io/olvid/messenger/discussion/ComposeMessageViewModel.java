@@ -40,12 +40,23 @@ import io.olvid.messenger.databases.entity.Message;
 public class ComposeMessageViewModel extends ViewModel {
     private final AppDatabase db;
     private final LiveData<Long> discussionIdLiveData;
-    @NonNull private final MutableLiveData<Boolean> recordingLiveData;
+    @NonNull
+    private final MutableLiveData<Boolean> recordingLiveData;
 
-    @NonNull private final LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> draftMessageFyles;
-    @NonNull private final LiveData<Message> draftMessage;
-    @NonNull private final LiveData<Message> draftMessageReply;
-    @NonNull private final LiveData<Boolean> ephemeralSettingsChanged;
+    @NonNull
+    private final LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> draftMessageFyles;
+    private final MediatorLiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> draftMessageFylesEditMode = new MediatorLiveData<>();
+
+    @NonNull
+    private final LiveData<Message> draftMessage;
+    private final MediatorLiveData<Message> draftMessageEditMode = new MediatorLiveData<>();
+    @NonNull
+    private final LiveData<Message> draftMessageReply;
+    private final MediatorLiveData<Message> draftMessageReplyEditMode = new MediatorLiveData<>();
+    @NonNull
+    private final MutableLiveData<Message> draftMessageEdit = new MutableLiveData<>(null);
+    @NonNull
+    private final LiveData<Boolean> ephemeralSettingsChanged;
 
     private CharSequence newMessageText;
 
@@ -85,7 +96,16 @@ public class ComposeMessageViewModel extends ViewModel {
             return db.messageDao().getBySenderSequenceNumberAsync(jsonReply.getSenderSequenceNumber(), jsonReply.getSenderThreadIdentifier(), jsonReply.getSenderIdentifier(), draftMessage.discussionId);
         });
 
-        ephemeralSettingsChanged = new EphemeralSettingsChangedLiveData(draftMessage, discussionCustomization);
+        draftMessageEditMode.addSource(draftMessage, draft -> draftMessageEditMode.setValue(draftMessageEdit.getValue() != null ? null : draft));
+        draftMessageEditMode.addSource(draftMessageEdit, edit -> draftMessageEditMode.setValue(edit != null ? null : draftMessage.getValue()));
+
+        draftMessageFylesEditMode.addSource(draftMessageFyles, draftFyles -> draftMessageFylesEditMode.setValue(draftMessageEdit.getValue() != null ? null : draftFyles));
+        draftMessageFylesEditMode.addSource(draftMessageEdit, edit -> draftMessageFylesEditMode.setValue(edit != null ? null : draftMessageFyles.getValue()));
+
+        draftMessageReplyEditMode.addSource(draftMessageReply, message -> draftMessageReplyEditMode.setValue(draftMessageEdit.getValue() != null ? null : message));
+        draftMessageReplyEditMode.addSource(draftMessageEdit, edit -> draftMessageReplyEditMode.setValue(edit != null ? null : draftMessageReply.getValue()));
+
+        ephemeralSettingsChanged = new EphemeralSettingsChangedLiveData(draftMessage, discussionCustomization, draftMessageEdit);
     }
 
 
@@ -115,17 +135,30 @@ public class ComposeMessageViewModel extends ViewModel {
 
     @NonNull
     public LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> getDraftMessageFyles() {
-        return draftMessageFyles;
+        return draftMessageFylesEditMode;
     }
 
     @NonNull
     public LiveData<Message> getDraftMessage() {
-        return draftMessage;
+        return draftMessageEditMode;
     }
 
     @NonNull
     public LiveData<Message> getDraftMessageReply() {
-        return draftMessageReply;
+        return draftMessageReplyEditMode;
+    }
+
+    @NonNull
+    public LiveData<Message> getDraftMessageEdit() {
+        return draftMessageEdit;
+    }
+
+    public void setDraftMessageEdit(@NonNull Message message) {
+        draftMessageEdit.setValue(message);
+    }
+
+    public void clearDraftMessageEdit() {
+        draftMessageEdit.setValue(null);
     }
 
     public boolean hasAttachments() {
@@ -140,14 +173,16 @@ public class ComposeMessageViewModel extends ViewModel {
     public static class EphemeralSettingsChangedLiveData extends MediatorLiveData<Boolean> {
         private Message.JsonExpiration draftMessageExpiration;
         private Message.JsonExpiration discussionCustomizationExpiration;
+        private boolean isEditing;
 
-        public EphemeralSettingsChangedLiveData(LiveData<Message> draftMessage, LiveData<DiscussionCustomization> discussionCustomization) {
+        public EphemeralSettingsChangedLiveData(LiveData<Message> draftMessage, LiveData<DiscussionCustomization> discussionCustomization, LiveData<Message> draftMessageEdit) {
             addSource(draftMessage, this::onDraftMessageChanged);
             addSource(discussionCustomization, this::onDiscussionCustomizationChanged);
+            addSource(draftMessageEdit, this::onDraftMessageEditChanged);
         }
 
 
-        public void onDraftMessageChanged(Message message) {
+        private void onDraftMessageChanged(Message message) {
             if (message == null || message.jsonExpiration == null) {
                 draftMessageExpiration = null;
             } else {
@@ -160,7 +195,7 @@ public class ComposeMessageViewModel extends ViewModel {
             compareJsonExpirations();
         }
 
-        public void onDiscussionCustomizationChanged(DiscussionCustomization discussionCustomization) {
+        private void onDiscussionCustomizationChanged(DiscussionCustomization discussionCustomization) {
             if (discussionCustomization == null) {
                 discussionCustomizationExpiration = null;
             } else {
@@ -169,8 +204,13 @@ public class ComposeMessageViewModel extends ViewModel {
             compareJsonExpirations();
         }
 
+        private void onDraftMessageEditChanged(Message editedMessage) {
+            isEditing = editedMessage != null;
+        }
+
         private void compareJsonExpirations() {
-            setValue(draftMessageExpiration != null
+            setValue(!isEditing
+                    && draftMessageExpiration != null
                     && (discussionCustomizationExpiration != null || !draftMessageExpiration.likeNull())
                     && !draftMessageExpiration.equals(discussionCustomizationExpiration));
         }

@@ -70,7 +70,7 @@ public class ContactGroupV2Details implements ObvDatabase {
     static final String PHOTO_URL = "photo_url";
     private Identity photoServerIdentity;
     static final String PHOTO_SERVER_IDENTITY = "photo_server_identity";
-    private UID photoServerLabel;
+    private UID photoServerLabel; // this is the only non-null field for Keycloak groups with a photo
     static final String PHOTO_SERVER_LABEL = "photo_server_label";
     private AuthEncKey photoServerKey;
     static final String PHOTO_SERVER_KEY = "photo_server_key";
@@ -96,7 +96,7 @@ public class ContactGroupV2Details implements ObvDatabase {
     }
 
     public GroupV2.ServerPhotoInfo getServerPhotoInfo() {
-        if ((photoServerIdentity == null) || (photoServerLabel == null) || (photoServerKey == null)) {
+        if ((photoServerLabel == null) || (photoServerKey == null)) {
             return null;
         }
         return new GroupV2.ServerPhotoInfo(photoServerIdentity, photoServerLabel, photoServerKey);
@@ -216,6 +216,47 @@ public class ContactGroupV2Details implements ObvDatabase {
                 contactGroupDetails = new ContactGroupV2Details(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, version, serializedGroupDetails, null, serverPhotoInfo.serverPhotoIdentity, serverPhotoInfo.serverPhotoLabel, serverPhotoInfo.serverPhotoKey);
             }
             contactGroupDetails.insert();
+            return contactGroupDetails;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static ContactGroupV2Details createOrUpdateKeycloak(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, GroupV2.ServerPhotoInfo serverPhotoInfo) {
+        try {
+            // first check if we already have some details
+            ContactGroupV2Details contactGroupDetails = get(identityManagerSession, ownedIdentity, groupIdentifier, 0);
+            if (contactGroupDetails == null) {
+                if (serverPhotoInfo == null) {
+                    contactGroupDetails = new ContactGroupV2Details(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, 0, serializedGroupDetails, null, null, null, null);
+                } else {
+                    contactGroupDetails = new ContactGroupV2Details(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, 0, serializedGroupDetails, null, serverPhotoInfo.serverPhotoIdentity, serverPhotoInfo.serverPhotoLabel, serverPhotoInfo.serverPhotoKey);
+                }
+                contactGroupDetails.insert();
+            } else {
+                contactGroupDetails.serializedJsonDetails = serializedGroupDetails;
+                if (serverPhotoInfo != null) {
+                    // we already have some details, simply update them
+                    if (contactGroupDetails.photoUrl != null) {
+                        // we already have a photo, check if it changed or not
+                        GroupV2.ServerPhotoInfo oldServerPhotoInfo = new GroupV2.ServerPhotoInfo(contactGroupDetails.photoServerIdentity, contactGroupDetails.photoServerLabel, contactGroupDetails.photoServerKey);
+                        if (!Objects.equals(oldServerPhotoInfo, serverPhotoInfo)) {
+                            contactGroupDetails.photoUrl = null;
+                        }
+                    }
+                    contactGroupDetails.photoServerIdentity = serverPhotoInfo.serverPhotoIdentity;
+                    contactGroupDetails.photoServerLabel = serverPhotoInfo.serverPhotoLabel;
+                    contactGroupDetails.photoServerKey = serverPhotoInfo.serverPhotoKey;
+                } else {
+                    contactGroupDetails.photoUrl = null;
+                    contactGroupDetails.photoServerIdentity = null;
+                    contactGroupDetails.photoServerLabel = null;
+                    contactGroupDetails.photoServerKey = null;
+                }
+                contactGroupDetails.update();
+            }
+
             return contactGroupDetails;
         } catch (Exception e) {
             e.printStackTrace();
@@ -418,28 +459,54 @@ public class ContactGroupV2Details implements ObvDatabase {
         if ((ownedIdentity == null) || (groupIdentifier == null) || (serverPhotoInfo == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
-                " WHERE " + GROUP_UID + " = ? " +
-                " AND " + SERVER_URL + " = ? " +
-                " AND " + CATEGORY + " = ? " +
-                " AND " + OWNED_IDENTITY + " = ? " +
-                " AND " + PHOTO_SERVER_IDENTITY + " = ? " +
-                " AND " + PHOTO_SERVER_LABEL + " = ?;")) {
-            statement.setBytes(1, groupIdentifier.groupUid.getBytes());
-            statement.setString(2, groupIdentifier.serverUrl);
-            statement.setInt(3, groupIdentifier.category);
-            statement.setBytes(4, ownedIdentity.getBytes());
-            statement.setBytes(5, serverPhotoInfo.serverPhotoIdentity.getBytes());
-            statement.setBytes(6, serverPhotoInfo.serverPhotoLabel.getBytes());
-            try (ResultSet res = statement.executeQuery()) {
-                List<ContactGroupV2Details> list = new ArrayList<>();
-                while (res.next()) {
-                    ContactGroupV2Details contactGroupV2Details = new ContactGroupV2Details(identityManagerSession, res);
-                    if (Objects.equals(contactGroupV2Details.photoServerKey, serverPhotoInfo.serverPhotoKey)) {
-                        list.add(contactGroupV2Details);
+        if (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                    " WHERE " + GROUP_UID + " = ? " +
+                    " AND " + SERVER_URL + " = ? " +
+                    " AND " + CATEGORY + " = ? " +
+                    " AND " + OWNED_IDENTITY + " = ? " +
+                    " AND " + PHOTO_SERVER_IDENTITY + " IS NULL " +
+                    " AND " + PHOTO_SERVER_LABEL + " = ?;")) {
+                statement.setBytes(1, groupIdentifier.groupUid.getBytes());
+                statement.setString(2, groupIdentifier.serverUrl);
+                statement.setInt(3, groupIdentifier.category);
+                statement.setBytes(4, ownedIdentity.getBytes());
+                statement.setBytes(5, serverPhotoInfo.serverPhotoLabel.getBytes());
+                try (ResultSet res = statement.executeQuery()) {
+                    List<ContactGroupV2Details> list = new ArrayList<>();
+                    while (res.next()) {
+                        ContactGroupV2Details contactGroupV2Details = new ContactGroupV2Details(identityManagerSession, res);
+                        if (Objects.equals(contactGroupV2Details.photoServerKey, serverPhotoInfo.serverPhotoKey)) {
+                            list.add(contactGroupV2Details);
+                        }
                     }
+                    return list;
                 }
-                return list;
+            }
+        } else {
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                    " WHERE " + GROUP_UID + " = ? " +
+                    " AND " + SERVER_URL + " = ? " +
+                    " AND " + CATEGORY + " = ? " +
+                    " AND " + OWNED_IDENTITY + " = ? " +
+                    " AND " + PHOTO_SERVER_IDENTITY + " = ? " +
+                    " AND " + PHOTO_SERVER_LABEL + " = ?;")) {
+                statement.setBytes(1, groupIdentifier.groupUid.getBytes());
+                statement.setString(2, groupIdentifier.serverUrl);
+                statement.setInt(3, groupIdentifier.category);
+                statement.setBytes(4, ownedIdentity.getBytes());
+                statement.setBytes(5, serverPhotoInfo.serverPhotoIdentity.getBytes());
+                statement.setBytes(6, serverPhotoInfo.serverPhotoLabel.getBytes());
+                try (ResultSet res = statement.executeQuery()) {
+                    List<ContactGroupV2Details> list = new ArrayList<>();
+                    while (res.next()) {
+                        ContactGroupV2Details contactGroupV2Details = new ContactGroupV2Details(identityManagerSession, res);
+                        if (Objects.equals(contactGroupV2Details.photoServerKey, serverPhotoInfo.serverPhotoKey)) {
+                            list.add(contactGroupV2Details);
+                        }
+                    }
+                    return list;
+                }
             }
         }
     }
@@ -460,7 +527,8 @@ public class ContactGroupV2Details implements ObvDatabase {
     public static List<ContactGroupV2Details> getAllWithMissingPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
                 " WHERE " + PHOTO_URL + " IS NULL " +
-                " AND " + PHOTO_SERVER_IDENTITY + " IS NOT NULL " +
+                " AND (" + PHOTO_SERVER_IDENTITY + " IS NOT NULL" +
+                " OR " + CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK + ") " +
                 " AND " + PHOTO_SERVER_KEY + " IS NOT NULL " +
                 " AND " + PHOTO_SERVER_LABEL + " IS NOT NULL;")) {
             try (ResultSet res = statement.executeQuery()) {
@@ -535,6 +603,34 @@ public class ContactGroupV2Details implements ObvDatabase {
         }
     }
 
+    public void update() throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + SERIALIZED_JSON_DETAILS + " = ?, " +
+                PHOTO_URL + " = ?, " +
+                PHOTO_SERVER_IDENTITY + " = ?, " +
+                PHOTO_SERVER_LABEL + " = ?, " +
+                PHOTO_SERVER_KEY + " = ? " +
+                " WHERE " + GROUP_UID + " = ? " +
+                " AND " + SERVER_URL + " = ? " +
+                " AND " + CATEGORY + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ? " +
+                " AND " + VERSION + " = ?;")) {
+            statement.setString(1, serializedJsonDetails);
+            statement.setString(2, photoUrl);
+            statement.setBytes(3, photoServerIdentity == null ? null : photoServerIdentity.getBytes());
+            statement.setBytes(4, photoServerLabel == null ? null : photoServerLabel.getBytes());
+            statement.setBytes(5, photoServerKey == null ? null : Encoded.of(photoServerKey).getBytes());
+
+            statement.setBytes(6, groupUid.getBytes());
+            statement.setString(7, serverUrl);
+            statement.setInt(8, category);
+            statement.setBytes(9, ownedIdentity.getBytes());
+            statement.setInt(10, version);
+
+            statement.executeUpdate();
+        }
+    }
+
     @Override
     public void delete() throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
@@ -565,8 +661,8 @@ public class ContactGroupV2Details implements ObvDatabase {
     Pojo_0 backup() {
         Pojo_0 pojo = new Pojo_0();
         pojo.serialized_details = serializedJsonDetails;
-        if (photoServerIdentity != null && photoServerLabel != null && photoServerKey != null) {
-            pojo.photo_server_identity = photoServerIdentity.getBytes();
+        if (photoServerLabel != null && photoServerKey != null) {
+            pojo.photo_server_identity = photoServerIdentity == null ? null : photoServerIdentity.getBytes();
             pojo.photo_server_label = photoServerLabel.getBytes();
             pojo.photo_server_key = Encoded.of(photoServerKey).getBytes();
         }
@@ -575,9 +671,9 @@ public class ContactGroupV2Details implements ObvDatabase {
 
     static void restore(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, Pojo_0 pojo) throws SQLException {
         ContactGroupV2Details contactGroupV2Details = null;
-        if (pojo.photo_server_identity != null && pojo.photo_server_label != null && pojo.photo_server_key != null) {
+        if (pojo.photo_server_label != null && pojo.photo_server_key != null) {
             try {
-                Identity photoServerIdentity = Identity.of(pojo.photo_server_identity);
+                Identity photoServerIdentity = pojo.photo_server_identity == null ? null : Identity.of(pojo.photo_server_identity);
                 UID photoServerLabel = new UID(pojo.photo_server_label);
                 AuthEncKey photoServerKey = (AuthEncKey) new Encoded(pojo.photo_server_key).decodeSymmetricKey();
 

@@ -79,6 +79,11 @@ public class PlusButtonActivity extends LockableActivity implements EngineNotifi
                     plusButtonViewModel.setDeepLinked(true);
                     navHostFragment.getNavController().popBackStack();
                     navHostFragment.getNavController().navigate(R.id.invitation_scanned);
+                } else if (ObvLinkActivity.MUTUAL_SCAN_PATTERN.matcher(uri).find()) {
+                    plusButtonViewModel.setScannedUri(uri);
+                    plusButtonViewModel.setDeepLinked(true);
+                    navHostFragment.getNavController().popBackStack();
+                    navHostFragment.getNavController().navigate(R.id.mutual_scan_invitation_scanned);
                 } else if (ObvLinkActivity.CONFIGURATION_PATTERN.matcher(uri).find()) {
                     plusButtonViewModel.setScannedUri(uri);
                     plusButtonViewModel.setDeepLinked(true);

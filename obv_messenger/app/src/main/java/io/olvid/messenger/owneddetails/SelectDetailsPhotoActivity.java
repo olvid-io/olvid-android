@@ -43,7 +43,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -136,7 +135,7 @@ public class SelectDetailsPhotoActivity extends LockableActivity implements View
 
         try {
             viewModel.setPhotoUri(this.getContentResolver(), intent.getData());
-        } catch (IOException e) {
+        } catch (Exception e) {
             onBackPressed();
         }
     }

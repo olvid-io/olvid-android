@@ -38,8 +38,9 @@ public class ObvKeycloakState {
     public final JsonWebKey signatureKey;
     public final String serializedAuthState;
     public final long latestRevocationListTimestamp; // not included in the serialized version
+    public final long latestGroupUpdateTimestamp; // not included in the serialized version
 
-    public ObvKeycloakState(String keycloakServer, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, String serializedAuthState, long latestRevocationListTimestamp) {
+    public ObvKeycloakState(String keycloakServer, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, String serializedAuthState, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
         this.keycloakServer = keycloakServer;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -47,6 +48,7 @@ public class ObvKeycloakState {
         this.signatureKey = signatureKey;
         this.serializedAuthState = serializedAuthState;
         this.latestRevocationListTimestamp = latestRevocationListTimestamp;
+        this.latestGroupUpdateTimestamp = latestGroupUpdateTimestamp;
     }
 
     public Encoded encode() {
@@ -132,6 +134,6 @@ public class ObvKeycloakState {
             serializedAuthState = null;
         }
 
-        return new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedAuthState, 0);
+        return new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedAuthState, 0, 0);
     }
 }

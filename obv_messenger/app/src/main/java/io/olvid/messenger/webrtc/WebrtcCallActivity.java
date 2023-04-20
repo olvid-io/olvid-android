@@ -20,6 +20,7 @@
 package io.olvid.messenger.webrtc;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -111,7 +112,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
     TextView singleContactNameTextView;
     TextView singlePeerStatusTextView;
     EmptyRecyclerView multipleContactsRecyclerView;
-    MotionLayout rootMotionLayout;
+    ViewGroup rootLayout;
 
     CallParticipantsAdapter callParticipantsAdapter;
 
@@ -125,6 +126,9 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
     View openDiscussionButton;
 
     boolean foreground = false;
+    boolean outputDialogOpen = false;
+    boolean addParticipantDialogOpen = false;
+    boolean loudSpeakerOn = false;
     boolean callEnded = false;
 
     @Override
@@ -226,9 +230,9 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
         showDiscussionButtonObserver = new ShowDiscussionButtonObserver();
         motionLayoutObserver = new MotionLayoutObserver();
 
-        rootMotionLayout = findViewById(R.id.root_motion_layout);
-        if (rootMotionLayout != null) {
-            rootMotionLayout.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> motionLayoutObserver.sizeChanged());
+        rootLayout = findViewById(R.id.root_layout);
+        if (rootLayout instanceof MotionLayout) {
+            rootLayout.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> motionLayoutObserver.sizeChanged());
         }
 
         mediaSession = new MediaSession(this, "Olvid ongoing call");
@@ -286,6 +290,17 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
+    private void refreshProximityLockStatus() {
+        if (webrtcCallService != null) {
+            if (foreground && !outputDialogOpen && !addParticipantDialogOpen && !loudSpeakerOn) {
+                webrtcCallService.acquireWakeLock(WebrtcCallService.WakeLock.PROXIMITY);
+            } else {
+                webrtcCallService.releaseWakeLocks(WebrtcCallService.WakeLock.PROXIMITY);
+            }
+        }
+    }
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -300,18 +315,14 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
     protected void onResume() {
         super.onResume();
         foreground = true;
-        if (webrtcCallService != null) {
-            webrtcCallService.acquireWakeLock(WebrtcCallService.WakeLock.PROXIMITY);
-        }
+        refreshProximityLockStatus();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         foreground = false;
-        if (webrtcCallService != null) {
-            webrtcCallService.releaseWakeLocks(WebrtcCallService.WakeLock.PROXIMITY);
-        }
+        refreshProximityLockStatus();
     }
 
 
@@ -319,13 +330,11 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onAttachFragment(@NonNull FragmentManager fragmentManager, @NonNull Fragment fragment) {
         if (fragment instanceof CallParticipantAdditionDialogFragment) {
-            if (webrtcCallService != null) {
-                webrtcCallService.releaseWakeLocks(WebrtcCallService.WakeLock.PROXIMITY);
-            }
-            ((CallParticipantAdditionDialogFragment) fragment).setLifecycleListener(() -> {
-                if (foreground && webrtcCallService != null) {
-                    webrtcCallService.acquireWakeLock(WebrtcCallService.WakeLock.PROXIMITY);
-                }
+            addParticipantDialogOpen = true;
+            refreshProximityLockStatus();
+            ((CallParticipantAdditionDialogFragment) fragment).setDialogClosedListener(() -> {
+                addParticipantDialogOpen = false;
+                refreshProximityLockStatus();
             });
         }
 
@@ -412,14 +421,12 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
                                 }
                             })
                             .setOnDismissListener((DialogInterface dialog) -> {
-                                if (foreground && webrtcCallService != null) {
-                                    webrtcCallService.acquireWakeLock(WebrtcCallService.WakeLock.PROXIMITY);
-                                }
+                                outputDialogOpen = false;
+                                refreshProximityLockStatus();
                             })
                             .create();
-                    if (webrtcCallService != null) {
-                        webrtcCallService.releaseWakeLocks(WebrtcCallService.WakeLock.PROXIMITY);
-                    }
+                    outputDialogOpen = true;
+                    refreshProximityLockStatus();
                     alertDialog.show();
                 }
             }
@@ -604,6 +611,11 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
     private class SelectedAudioOutputObserver implements Observer<WebrtcCallService.AudioOutput> {
         @Override
         public void onChanged(WebrtcCallService.AudioOutput audioOutput) {
+            if ((audioOutput == WebrtcCallService.AudioOutput.LOUDSPEAKER) != (selectedAudioOutput == WebrtcCallService.AudioOutput.LOUDSPEAKER)) {
+                loudSpeakerOn = audioOutput == WebrtcCallService.AudioOutput.LOUDSPEAKER;
+                refreshProximityLockStatus();
+            }
+
             selectedAudioOutput = audioOutput;
             refresh();
         }
@@ -682,7 +694,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
 
         public void sizeChanged() {
             DisplayMetrics metrics = getResources().getDisplayMetrics();
-            float windowHeightDp = rootMotionLayout.getHeight() / metrics.density;
+            float windowHeightDp = rootLayout.getHeight() / metrics.density;
             threshold = (int) (windowHeightDp - 288) / 80;
             if (threshold < 0) {
                 threshold = 0;
@@ -691,15 +703,15 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
         }
 
         public void transitionLayoutIfNeeded() {
-            if (rootMotionLayout != null) {
+            if (rootLayout instanceof MotionLayout) {
                 boolean newCompact = threshold != -1 && callParticipantCount > threshold;
 
                 if (newCompact != compact) {
                     compact = newCompact;
                     if (compact) {
-                        rootMotionLayout.transitionToEnd();
+                        ((MotionLayout) rootLayout).transitionToEnd();
                     } else {
-                        rootMotionLayout.transitionToStart();
+                        ((MotionLayout) rootLayout).transitionToStart();
                     }
                 }
             }
@@ -806,9 +818,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
             this.webrtcCallService.getMicrophoneMuted().observe(this, microphoneMutedObserver);
             this.webrtcCallService.getSelectedAudioOutput().observe(this, selectedAudioOutputObserver);
             this.webrtcCallService.getAvailableAudioOutputs().observe(this, audioOutputsObserver);
-            if (foreground) {
-                this.webrtcCallService.acquireWakeLock(WebrtcCallService.WakeLock.PROXIMITY);
-            }
+            refreshProximityLockStatus();
         } else {
             if (this.webrtcCallService != null) {
                 // remove observers
@@ -861,6 +871,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
             inflater = LayoutInflater.from(context);
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         @Override
         public void onChanged(List<WebrtcCallService.CallParticipantPojo> callParticipants) {
             if (callParticipants == null || callParticipants.size() == 0) {

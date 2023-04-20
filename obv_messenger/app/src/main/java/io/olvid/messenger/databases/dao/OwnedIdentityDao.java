@@ -90,9 +90,10 @@ public interface OwnedIdentityDao {
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS + " = :prefMuteNotifications, " +
-            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + " = :prefMuteNotificationsTimestamp " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + " = :prefMuteNotificationsTimestamp, " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED + " = :prefMuteNotificationsExceptMentioned " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateMuteNotifications(byte[] bytesOwnedIdentity, boolean prefMuteNotifications, Long prefMuteNotificationsTimestamp);
+    void updateMuteNotifications(byte[] bytesOwnedIdentity, boolean prefMuteNotifications, Long prefMuteNotificationsTimestamp, boolean prefMuteNotificationsExceptMentioned);
 
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +

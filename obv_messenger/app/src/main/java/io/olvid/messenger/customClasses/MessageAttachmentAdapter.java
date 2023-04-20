@@ -98,6 +98,17 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
         smallImagePreviewPixelSize = (metrics.widthPixels - (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 84, metrics))/2;
     }
 
+    // custom click listeners are used to handle clicks on location messages preview
+    public void setCustomOnLongClickListener(View.OnLongClickListener customOnLongClickListener) {
+        this.customOnLongClickListener = customOnLongClickListener;
+    }
+    // custom click listener is only called if attachment had been downloaded and is visible (else it follow normal attachment click process)
+    // used for location messages: replace open preview by open in integrated map if selected an integration
+    public void setCustomOnClickListener(View.OnClickListener customOnClickListener) {
+        this.customOnClickListener = customOnClickListener;
+    }
+
+
     public enum Visibility {
         VISIBLE,
         HIDDEN,
@@ -113,6 +124,9 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
     private NoWipeListener noWipeListener;
     private BlockMessageSwipeListener blockMessageSwipeListener;
     private final AttachmentSpaceItemDecoration itemDecoration;
+
+    private View.OnClickListener customOnClickListener = null;
+    private View.OnLongClickListener customOnLongClickListener = null;
 
     private static final int TYPE_BIG_IMAGE = 0;
     private static final int TYPE_WIDE_IMAGE = 1;
@@ -797,7 +811,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
     }
 
 
-    private void attachmentClicked(int position, int viewType, boolean musicFailed) {
+    private void attachmentClicked(int position, int viewType, boolean musicFailed, View view) {
         if (attachmentFyles == null || position >= attachmentFyles.length) {
             return;
         }
@@ -814,6 +828,10 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
             case FyleMessageJoinWithStatus.STATUS_COMPLETE:
                 switch (visibility) {
                     case VISIBLE:
+                        if (customOnClickListener != null) {
+                            customOnClickListener.onClick(view);
+                            return;
+                        }
                         if (viewType == TYPE_AUDIO && !musicFailed) {
                             audioAttachmentServiceBinding.playPause(fyleAndStatus, discussionId);
                             fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened();
@@ -948,12 +966,17 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
         @Override
         public void onClick(View view) {
             if (attachmentFyles != null) {
-                attachmentClicked(this.getLayoutPosition(), type, musicFailed);
+                attachmentClicked(this.getLayoutPosition(), type, musicFailed, view);
             }
         }
 
         @Override
         public boolean onLongClick(View view) {
+            if (customOnLongClickListener != null) {
+                if (customOnLongClickListener.onLongClick(view)) {
+                    return true;
+                }
+            }
             if (attachmentFyles != null) {
                 attachmentLongClicked(this.getLayoutPosition(), view);
                 return true;

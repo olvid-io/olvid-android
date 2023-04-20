@@ -153,7 +153,8 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
 
                 engine.postEngineNotification(EngineNotifications.GROUP_V2_UPDATE_FAILED, engineInfo);
                 break;
-            }            default:
+            }
+            default:
                 Logger.w("Received notification " + notificationName + " but no handler is set.");
         }
     }

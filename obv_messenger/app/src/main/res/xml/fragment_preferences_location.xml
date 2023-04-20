@@ -1,0 +1,53 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:entries="@array/location_integration"
+        android:entryValues="@array/location_integration_values"
+        android:key="pref_key_location_integration"
+        android:title="@string/pref_location_integration_title"
+        app:useSimpleSummaryProvider="true"
+        android:icon="@drawable/ic_pref_map"
+        android:order="10" />
+
+    <ListPreference
+        android:defaultValue="default"
+        android:entries="@array/location_osm_language_entries"
+        android:entryValues="@array/location_osm_language_values"
+        android:key="pref_key_location_osm_language"
+        android:title="@string/pref_location_osm_language_title"
+        app:useSimpleSummaryProvider="true"
+        android:icon="@drawable/ic_pref_language"
+        app:isPreferenceVisible="false"
+        android:order="15"
+        />
+
+    <ListPreference
+        android:defaultValue="3600000"
+        android:entries="@array/share_location_duration_short_strings"
+        android:entryValues="@array/share_location_duration_values"
+        android:key="pref_key_location_share_duration"
+        android:title="@string/pref_location_share_duration_title"
+        app:useSimpleSummaryProvider="true"
+        android:icon="@drawable/ic_pref_lock_grace_time"
+        android:order="20"
+        />
+
+    <ListPreference
+        android:defaultValue="60000"
+        android:entries="@array/share_location_interval_short_strings"
+        android:entryValues="@array/share_location_interval_values"
+        android:key="pref_key_location_share_interval"
+        android:title="@string/pref_location_share_interval_title"
+        app:useSimpleSummaryProvider="true"
+        android:icon="@drawable/ic_pref_interval"
+        android:order="30"
+        />
+
+    <SwitchPreference
+        android:key="pref_key_location_hide_error_notifications"
+        android:defaultValue="false"
+        android:title="@string/pref_location_hide_notifications_title"
+        android:icon="@drawable/ic_pref_hide_notification_contents"
+        android:order="50" />
+</PreferenceScreen>

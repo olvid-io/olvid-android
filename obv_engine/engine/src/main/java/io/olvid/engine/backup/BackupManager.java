@@ -410,6 +410,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
                     EncryptionPublicKey encryptionPublicKey = backupKey.getEncryptionPublicKey();
                     MACKey macKey = backupKey.getMacKey();
 
+                    // TODO: once all olvid clients can handle uncompressed backups, remove the DeflaterOutputStream
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     DeflaterOutputStream deflater = new DeflaterOutputStream(baos, new Deflater(5, true));
                     deflater.write(fullBackupContent.getBytes(StandardCharsets.UTF_8));
@@ -568,16 +569,16 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
     }
 
     private static class BackupContentAndDerivedKeys {
-        private final byte[] decryptedBackupContent;
+        private final Pojo_0 pojo;
         private final BackupSeed.DerivedKeys derivedKeys;
 
-        public BackupContentAndDerivedKeys(byte[] decryptedBackupContent, BackupSeed.DerivedKeys derivedKeys) {
-            this.decryptedBackupContent = decryptedBackupContent;
+        public BackupContentAndDerivedKeys(Pojo_0 pojo, BackupSeed.DerivedKeys derivedKeys) {
+            this.pojo = pojo;
             this.derivedKeys = derivedKeys;
         }
     }
 
-    private BackupContentAndDerivedKeys decryptBackupContent(String seedString, byte[] backupContent) throws Exception {
+    private BackupContentAndDerivedKeys decryptBackupContent(String seedString, byte[] backupContent, ObjectMapper jsonObjectMapper) throws Exception {
         BackupSeed backupSeed = new BackupSeed(seedString);
         BackupSeed.DerivedKeys derivedKeys = backupSeed.deriveKeys();
         if (derivedKeys == null) {
@@ -592,6 +593,14 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
         PublicKeyEncryption publicKeyEncryption = Suite.getPublicKeyEncryption(derivedKeys.encryptionKeyPair.getPrivateKey());
         byte[] plaintext = publicKeyEncryption.decrypt(derivedKeys.encryptionKeyPair.getPrivateKey(), new EncryptedBytes(ciphertext));
 
+        // If we reach this point, decryption was successful --> we need to distinguish between a compressed backup (legacy) and an uncompressed backup
+        try {
+            // first, try to directly parse our pojo (will fail for compressed backups
+            Pojo_0 pojo = jsonObjectMapper.readValue(plaintext, Pojo_0.class);
+            return new BackupContentAndDerivedKeys(pojo, derivedKeys);
+        } catch (Exception ignored) { }
+
+        // if direct parsing failed, we have a compressed backup -> deflate and parse
         try (ByteArrayInputStream bais = new ByteArrayInputStream(plaintext);
              InflaterInputStream inflater = new InflaterInputStream(bais, new Inflater(true));
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -600,22 +609,23 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
             while ((c = inflater.read(buffer)) != -1) {
                 baos.write(buffer, 0, c);
             }
-            return new BackupContentAndDerivedKeys(baos.toByteArray(), derivedKeys);
+
+            Pojo_0 pojo = jsonObjectMapper.readValue(baos.toByteArray(), Pojo_0.class);
+            return new BackupContentAndDerivedKeys(pojo, derivedKeys);
         }
     }
 
     @Override
     public ObvIdentity[] restoreOwnedIdentitiesFromBackup(String seedString, byte[] backupContent) {
         try {
-            BackupContentAndDerivedKeys backupContentAndDerivedKeys = decryptBackupContent(seedString, backupContent);
+            BackupContentAndDerivedKeys backupContentAndDerivedKeys = decryptBackupContent(seedString, backupContent, jsonObjectMapper);
             if (backupContentAndDerivedKeys == null) {
                 return null;
             }
 
-            Pojo_0 pojo = jsonObjectMapper.readValue(backupContentAndDerivedKeys.decryptedBackupContent, Pojo_0.class);
-            if (pojo.backup_json_version != Constants.CURRENT_BACKUP_JSON_VERSION) {
+            if (backupContentAndDerivedKeys.pojo.backup_json_version != Constants.CURRENT_BACKUP_JSON_VERSION) {
                 // do an upgrade when needed
-                Logger.e("Restoring ownedIdentity with a different backup JSON version:" + pojo.backup_json_version + " (expecting " + Constants.CURRENT_BACKUP_JSON_VERSION + ").");
+                Logger.e("Restoring ownedIdentity with a different backup JSON version:" + backupContentAndDerivedKeys.pojo.backup_json_version + " (expecting " + Constants.CURRENT_BACKUP_JSON_VERSION + ").");
                 return null;
             }
 
@@ -627,7 +637,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
                     backupManagerSession.session.commit();
                 }
             }
-            return identityDelegate.restoreOwnedIdentitiesFromBackup(pojo.engine.identity_manager, prng);
+            return identityDelegate.restoreOwnedIdentitiesFromBackup(backupContentAndDerivedKeys.pojo.engine.identity_manager, prng);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -638,19 +648,18 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
     @Override
     public void restoreContactsAndGroupsFromBackup(String seedString, byte[] backupContent, Identity[] restoredOwnedIdentities) {
         try {
-            BackupContentAndDerivedKeys backupContentAndDerivedKeys = decryptBackupContent(seedString, backupContent);
+            BackupContentAndDerivedKeys backupContentAndDerivedKeys = decryptBackupContent(seedString, backupContent, jsonObjectMapper);
             if (backupContentAndDerivedKeys == null) {
                 return;
             }
 
-            Pojo_0 pojo = jsonObjectMapper.readValue(backupContentAndDerivedKeys.decryptedBackupContent, Pojo_0.class);
-            if (pojo.backup_json_version != Constants.CURRENT_BACKUP_JSON_VERSION) {
+            if (backupContentAndDerivedKeys.pojo.backup_json_version != Constants.CURRENT_BACKUP_JSON_VERSION) {
                 // do an upgrade when needed
-                Logger.e("Restoring contacts and groups with a different backup JSON version:" + pojo.backup_json_version + " (expecting " + Constants.CURRENT_BACKUP_JSON_VERSION + ").");
+                Logger.e("Restoring contacts and groups with a different backup JSON version:" + backupContentAndDerivedKeys.pojo.backup_json_version + " (expecting " + Constants.CURRENT_BACKUP_JSON_VERSION + ").");
                 return;
             }
 
-            identityDelegate.restoreContactsAndGroupsFromBackup(pojo.engine.identity_manager, restoredOwnedIdentities, pojo.backup_timestamp);
+            identityDelegate.restoreContactsAndGroupsFromBackup(backupContentAndDerivedKeys.pojo.engine.identity_manager, restoredOwnedIdentities, backupContentAndDerivedKeys.pojo.backup_timestamp);
 
             notificationPostingDelegate.postNotification(BackupNotifications.NOTIFICATION_BACKUP_RESTORATION_FINISHED, new HashMap<>());
         } catch (Exception e) {
@@ -660,14 +669,13 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
 
     public String decryptAppDataBackup(String seedString, byte[] backupContent) {
         try {
-            BackupContentAndDerivedKeys backupContentAndDerivedKeys = decryptBackupContent(seedString, backupContent);
+            BackupContentAndDerivedKeys backupContentAndDerivedKeys = decryptBackupContent(seedString, backupContent, jsonObjectMapper);
             if (backupContentAndDerivedKeys == null) {
                 return null;
             }
 
-            Pojo_0 pojo = jsonObjectMapper.readValue(backupContentAndDerivedKeys.decryptedBackupContent, Pojo_0.class);
-            if (pojo != null) {
-                return pojo.app;
+            if (backupContentAndDerivedKeys.pojo != null) {
+                return backupContentAndDerivedKeys.pojo.app;
             }
             return null;
         } catch (Exception e) {

@@ -153,6 +153,7 @@ public class KeycloakBindFragment extends Fragment {
                         viewModel.getKeycloakUserDetails().signatureKey,
                         viewModel.getKeycloakSerializedAuthState(),
                         0,
+                        0,
                         true);
 
                 KeycloakManager.getInstance().uploadOwnIdentity(
@@ -169,7 +170,7 @@ public class KeycloakBindFragment extends Fragment {
                                                 viewModel.getKeycloakJwks(),
                                                 viewModel.getKeycloakUserDetails().signatureKey,
                                                 viewModel.getKeycloakSerializedAuthState(),
-                                                0),
+                                                0, 0),
                                         viewModel.getKeycloakUserDetails().userDetails.getId());
 
                                 if (newObvIdentity != null) {

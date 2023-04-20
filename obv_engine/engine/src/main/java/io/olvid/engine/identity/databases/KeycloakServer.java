@@ -71,6 +71,8 @@ public class KeycloakServer implements ObvDatabase {
     static final String SELF_REVOCATION_TEST_NONCE = "self_revocation_test_nonce";
     private long latestRevocationListTimestamp; // the last time a revocation list was retrieved from the keycloak server
     static final String LATEST_REVOCATION_LIST_TIMESTAMP = "latest_revocation_list_timestamp";
+    private long latestGroupUpdateTimestamp; // the last time groups wre retrieved from the keycloak server
+    static final String LATEST_GROUP_UPDATE_TIMESTAMP = "latest_group_update_timestamp";
 
     public String getServerUrl() {
         return serverUrl;
@@ -134,6 +136,10 @@ public class KeycloakServer implements ObvDatabase {
         return latestRevocationListTimestamp;
     }
 
+    public long getLatestGroupUpdateTimestamp() {
+        return latestGroupUpdateTimestamp;
+    }
+
     // region constructors
 
     public static KeycloakServer create(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String serializedJwks, String serializedKey, String clientId, String clientSecret) {
@@ -145,6 +151,7 @@ public class KeycloakServer implements ObvDatabase {
             keycloakServer.insert();
             return keycloakServer;
         } catch (SQLException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -164,6 +171,7 @@ public class KeycloakServer implements ObvDatabase {
         this.serializedSignatureKey = serializedSignatureKey;
         this.selfRevocationTestNonce = null;
         this.latestRevocationListTimestamp = 0;
+        this.latestGroupUpdateTimestamp = 0;
     }
 
     private KeycloakServer(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -183,6 +191,7 @@ public class KeycloakServer implements ObvDatabase {
         this.serializedSignatureKey = res.getString(SERIALIZED_SIGNATURE_KEY);
         this.selfRevocationTestNonce = res.getString(SELF_REVOCATION_TEST_NONCE);
         this.latestRevocationListTimestamp = res.getLong(LATEST_REVOCATION_LIST_TIMESTAMP);
+        this.latestGroupUpdateTimestamp = res.getLong(LATEST_GROUP_UPDATE_TIMESTAMP);
     }
 
     // endregion
@@ -204,6 +213,7 @@ public class KeycloakServer implements ObvDatabase {
                     SERIALIZED_SIGNATURE_KEY + " TEXT, " +
                     SELF_REVOCATION_TEST_NONCE + " TEXT, " +
                     LATEST_REVOCATION_LIST_TIMESTAMP + " BIGINT NOT NULL, " +
+                    LATEST_GROUP_UPDATE_TIMESTAMP + " BIGINT NOT NULL, " +
                     " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + SERVER_URL + ", " + OWNED_IDENTITY + "), " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + " (" + OwnedIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE);");
         }
@@ -239,11 +249,18 @@ public class KeycloakServer implements ObvDatabase {
             }
             oldVersion = 25;
         }
+        if (oldVersion < 34 && newVersion >= 34) {
+            Logger.d("MIGRATING `keycloak_server` DATABASE FROM VERSION " + oldVersion + " TO 34");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE keycloak_server ADD COLUMN `latest_group_update_timestamp` BIGINT NOT NULL DEFAULT 0;");
+            }
+            oldVersion = 34;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
             statement.setString(1, serverUrl);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setString(3, serializedJwks);
@@ -257,6 +274,7 @@ public class KeycloakServer implements ObvDatabase {
             statement.setString(10, selfRevocationTestNonce);
 
             statement.setLong(11, latestRevocationListTimestamp);
+            statement.setLong(12, latestGroupUpdateTimestamp);
             statement.executeUpdate();
         }
     }
@@ -405,8 +423,10 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public static void setSignatureKey(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, JsonWebKey signatureKey) throws SQLException {
+        // everytime we reset the signature key, we also reset the latestGroupUpdateTimestamp to re-download all groups
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
-                " SET " + SERIALIZED_SIGNATURE_KEY + " = ? " +
+                " SET " + SERIALIZED_SIGNATURE_KEY + " = ?, " +
+                LATEST_GROUP_UPDATE_TIMESTAMP + " = 0 " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setString(1, signatureKey == null ? null : signatureKey.toJson());
@@ -425,6 +445,19 @@ public class KeycloakServer implements ObvDatabase {
             statement.setString(2, serverUrl);
             statement.setBytes(3, ownedIdentity.getBytes());
             statement.executeUpdate();
+        }
+    }
+
+    public void setLatestGroupUpdateTimestamp(long latestGroupUpdateTimestamp) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + LATEST_GROUP_UPDATE_TIMESTAMP + " = ? " +
+                " WHERE " + SERVER_URL + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            statement.setLong(1, latestGroupUpdateTimestamp);
+            statement.setString(2, serverUrl);
+            statement.setBytes(3, ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.latestRevocationListTimestamp = latestGroupUpdateTimestamp;
         }
     }
 

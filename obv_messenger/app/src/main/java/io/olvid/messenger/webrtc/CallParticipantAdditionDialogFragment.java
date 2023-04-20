@@ -59,7 +59,7 @@ public class CallParticipantAdditionDialogFragment extends DialogFragment {
     private FilteredContactListFragment filteredContactListFragment;
     private byte[] bytesOwnedIdentity;
     private List<Contact> selectedContacts = null;
-    private LifecycleListener lifecycleListener = null;
+    private DialogClosedListener dialogClosedListener = null;
 
     public static CallParticipantAdditionDialogFragment newInstance(@NonNull byte[] bytesOwnedIdentity) {
         CallParticipantAdditionDialogFragment fragment = new CallParticipantAdditionDialogFragment();
@@ -121,13 +121,13 @@ public class CallParticipantAdditionDialogFragment extends DialogFragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        if (lifecycleListener != null) {
-            lifecycleListener.onClose();
+        if (dialogClosedListener != null) {
+            dialogClosedListener.onClose();
         }
     }
 
-    public void setLifecycleListener(LifecycleListener lifecycleListener) {
-        this.lifecycleListener = lifecycleListener;
+    public void setDialogClosedListener(DialogClosedListener dialogClosedListener) {
+        this.dialogClosedListener = dialogClosedListener;
     }
 
     private void setWebrtcCallService(WebrtcCallService webrtcCallService) {
@@ -210,7 +210,7 @@ public class CallParticipantAdditionDialogFragment extends DialogFragment {
         }
     }
 
-    interface LifecycleListener {
+    interface DialogClosedListener {
         void onClose();
     }
 }

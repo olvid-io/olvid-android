@@ -204,7 +204,7 @@ public class DiscussionOwnedIdentityPopupWindow {
                 otherOwnedIdentitiesAndDiscussionId.removeObserver(separatorAndHeightObserver);
             }
         });
-        popupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        popupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
         readjustWindowSize();
         popupWindow.showAsDropDown(anchorView, -offsetPixelX, -offsetPixelY, Gravity.TOP | Gravity.START);
     }

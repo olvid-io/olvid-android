@@ -1024,8 +1024,8 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                 // display the mutual trust established dialog
                 switch (startState.acceptType) {
                     case ACCEPT_TYPE_MANUAL: {
-                        // only show the dialog if the dialogUuid is not all-0
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createMutualTrustConfirmedDialog(startState.contactSerializedDetails, startState.contactIdentity), startState.dialogUuid));
+                        // delete dialog
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startState.dialogUuid));
                         ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         break;

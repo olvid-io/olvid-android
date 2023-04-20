@@ -42,7 +42,7 @@ public class ProtocolInstance implements ObvDatabase {
     private final ProtocolManagerSession protocolManagerSession;
 
     // TODO: add an expiration timestamp, updated each time a new state is written
-    // --> this timestamp should depend on the protocol type (infinite for group management)
+    //  --> this timestamp should depend on the protocol type (infinite for group management)
 
     private UID uid;
     static final String UID_ = "uid";

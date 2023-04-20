@@ -30,18 +30,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Typeface;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.TextUtils;
-import android.text.style.StyleSpan;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -64,6 +58,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
@@ -82,7 +77,6 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
-import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -94,7 +88,6 @@ import io.olvid.messenger.webrtc.WebrtcCallActivity;
 @SuppressLint("UnspecifiedImmutableFlag")
 public class AndroidNotificationManager {
     private static final String DISCUSSION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "discussion_";
-    private static final String GROUP_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "group_";
     private static final String MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "message_reaction_";
     private static final String DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "discussion_reaction_";
     private static final String KEY_MESSAGE_NOTIFICATION_CHANNEL_VERSION = "message_channel_version";
@@ -109,6 +102,7 @@ public class AndroidNotificationManager {
     public static final String DISCUSSION_NOTIFICATION_CHANNEL_ID_PREFIX = "discussion_";
 
     public static final String KEYCLOAK_NOTIFICATION_CHANNEL_ID = "keycloak";
+    public static final String LOCATION_SHARING_NOTIFICATION_CHANNEL_ID = "location_sharing";
 
     private static final long DELAY_BETWEEN_SAME_CHANNEL_VIBRATE = 3_000; // 3 seconds
 
@@ -121,7 +115,7 @@ public class AndroidNotificationManager {
     public static void clearHiddenIdentityNotifications() {
         executor.execute(() -> {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            for (Integer id: hiddenIdentityNotificationIdsToClear) {
+            for (Integer id : hiddenIdentityNotificationIdsToClear) {
                 notificationManager.cancel(id);
             }
             hiddenIdentityNotificationIdsToClear.clear();
@@ -129,12 +123,9 @@ public class AndroidNotificationManager {
             SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
 
-            for (Long discussionId: hiddenIdentityNotificationDiscussionIdsToClear) {
+            for (Long discussionId : hiddenIdentityNotificationDiscussionIdsToClear) {
                 notificationManager.cancel(getMessageNotificationId(discussionId));
                 editor.remove(DISCUSSION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId);
-
-                notificationManager.cancel(getGroupNotificationId(discussionId));
-                editor.remove(GROUP_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId);
             }
             editor.apply();
             hiddenIdentityNotificationDiscussionIdsToClear.clear();
@@ -229,6 +220,7 @@ public class AndroidNotificationManager {
         }
     }
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.P)
     private static void validateSoundForAndroidPie(Long discussionId) {
         // test if the notification sound works --> bug on Android 9 (Pie) with sounds on SD card
@@ -364,7 +356,8 @@ public class AndroidNotificationManager {
         if (discussionCustomization.prefMessageNotificationVibrationPattern != null) {
             try {
                 pattern = SettingsActivity.intToVibrationPattern(Integer.parseInt(discussionCustomization.prefMessageNotificationVibrationPattern));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         if (pattern == null) {
             discussionChannel.enableVibration(false);
@@ -376,7 +369,8 @@ public class AndroidNotificationManager {
         if (discussionCustomization.prefMessageNotificationRingtone != null) {
             try {
                 uri = Uri.parse(discussionCustomization.prefMessageNotificationRingtone);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         discussionChannel.setSound(uri, new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -424,6 +418,7 @@ public class AndroidNotificationManager {
 
     // region Neutral notification
 
+    @SuppressLint("MissingPermission")
     private static void displayNeutralNotification() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
                 .setSmallIcon(R.drawable.ic_o)
@@ -473,192 +468,6 @@ public class AndroidNotificationManager {
 
     // endregion
 
-
-    // region Group notification
-
-    public static void displayGroupMemberNotification(Group group, Contact contact, boolean added, long discussionId) {
-        executor.execute(() -> {
-            DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussionId);
-            if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
-                return;
-            }
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            String channelId = getChannelId(notificationManager, discussionCustomization);
-            OwnedIdentity ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(group.bytesOwnedIdentity);
-            if (ownedIdentity == null || ownedIdentity.shouldMuteNotifications()) {
-                if (ownedIdentity != null && ownedIdentity.shouldShowNeutralNotification()) {
-                    displayNeutralNotification();
-                }
-                return;
-            }
-            if (SettingsActivity.isNotificationContentHidden()) {
-                displayNeutralNotification();
-                return;
-            }
-
-            JsonPojoGroupNotification groupNotification = loadGroupNotification(discussionId);
-            if (groupNotification == null) {
-                groupNotification = new JsonPojoGroupNotification();
-                groupNotification.addedMembers = new ArrayList<>();
-                groupNotification.removedMembers = new ArrayList<>();
-            }
-            if (added) {
-                groupNotification.addedMembers.add(contact.getCustomDisplayName());
-            } else {
-                groupNotification.removedMembers.add(contact.getCustomDisplayName());
-            }
-            saveGroupNotification(discussionId, groupNotification);
-
-
-            NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), channelId)
-                    .setSmallIcon(R.drawable.ic_o)
-                    .setContentTitle(App.getContext().getString(R.string.notification_public_title_group_member));
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), channelId)
-                    .setSmallIcon(R.drawable.ic_o)
-                    .setColor(ContextCompat.getColor(App.getContext(), R.color.olvid_gradient_dark))
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setPublicVersion(publicBuilder.build())
-                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                    .setContentTitle(group.getCustomName())
-                    .setVibrate(new long[0]);
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
-                    builder.setSound(SettingsActivity.getMessageRingtone());
-                } else {
-                    try {
-                        Uri uri = Uri.parse(discussionCustomization.prefMessageNotificationRingtone);
-                        builder.setSound(uri);
-                    } catch (Exception e) {
-                        builder.setSound(SettingsActivity.getMessageRingtone());
-                    }
-                }
-            }
-
-            String colorString;
-            if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
-                colorString = SettingsActivity.getMessageLedColor();
-            } else {
-                colorString = discussionCustomization.prefMessageNotificationLedColor;
-            }
-            if (colorString != null) {
-                int color = 0xff000000 + Integer.parseInt(colorString.substring(1), 16);
-                builder.setLights(color, 500, 2000);
-            }
-
-
-            InitialView initialView = new InitialView(App.getContext());
-            int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
-            initialView.setSize(size, size);
-            initialView.setGroup(group);
-            Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-            initialView.drawOnCanvas(new Canvas(largeIcon));
-            builder.setLargeIcon(largeIcon);
-
-            SpannableStringBuilder sb = new SpannableStringBuilder();
-            if (groupNotification.addedMembers.size() > 0) {
-                StyleSpan sp = new StyleSpan(Typeface.BOLD);
-                SpannableString ss = new SpannableString(App.getContext().getResources().getQuantityString(R.plurals.notification_text_header_added_count, groupNotification.addedMembers.size(), groupNotification.addedMembers.size()));
-                ss.setSpan(sp, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                sb.append(ss);
-                sb.append(TextUtils.join(App.getContext().getString(R.string.text_contact_names_separator), groupNotification.addedMembers));
-                if (groupNotification.removedMembers.size() > 0) {
-                    sb.append("\n");
-                }
-            }
-
-
-            if (groupNotification.removedMembers.size() > 0) {
-                StyleSpan sp = new StyleSpan(Typeface.BOLD);
-                SpannableString ss = new SpannableString(App.getContext().getResources().getQuantityString(R.plurals.notification_text_header_removed_count, groupNotification.removedMembers.size(), groupNotification.removedMembers.size()));
-                ss.setSpan(sp, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                sb.append(ss);
-                sb.append(TextUtils.join(App.getContext().getString(R.string.text_contact_names_separator), groupNotification.removedMembers));
-            }
-            builder.setContentText(sb);
-
-            int notificationId = getGroupNotificationId(discussionId);
-
-            // CONTENT INTENT
-            Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
-            contentIntent.setAction(MainActivity.FORWARD_ACTION);
-            contentIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
-            contentIntent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
-            contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, group.bytesOwnedIdentity);
-            PendingIntent contentPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            }
-            builder.setContentIntent(contentPendingIntent);
-
-            // DISMISS INTENT
-            Intent dismissIntent = new Intent(App.getContext(), NotificationActionService.class);
-            dismissIntent.setAction(NotificationActionService.ACTION_GROUP_CLEAR);
-            dismissIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussionId);
-            PendingIntent dismissPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            }
-            builder.setDeleteIntent(dismissPendingIntent);
-
-            if (ownedIdentity.isHidden()) {
-                hiddenIdentityNotificationDiscussionIdsToClear.add(discussionId);
-            }
-
-            notificationManager.notify(notificationId, builder.build());
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                vibrate(discussionCustomization);
-            }
-        });
-    }
-
-    public static void clearGroupNotification(final long discussionId) {
-        executor.execute(() -> {
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-            notificationManager.cancel(getGroupNotificationId(discussionId));
-            SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.remove(GROUP_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId);
-            editor.apply();
-        });
-    }
-
-    private static JsonPojoGroupNotification loadGroupNotification(long discussionId) {
-        SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
-        String jsonNotifications = sharedPreferences.getString(GROUP_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId, null);
-        JsonPojoGroupNotification groupNotification = null;
-        if (jsonNotifications != null) {
-            try {
-                groupNotification = AppSingleton.getJsonObjectMapper().readValue(jsonNotifications, JsonPojoGroupNotification.class);
-            } catch (Exception e) {
-                Logger.w("Error parsing JSON from notifications preference.");
-                e.printStackTrace();
-            }
-        }
-        return groupNotification;
-    }
-
-    private static void saveGroupNotification(long discussionId, JsonPojoGroupNotification groupNotification) {
-        try {
-            SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            String jsonNotifications = AppSingleton.getJsonObjectMapper().writeValueAsString(groupNotification);
-            editor.putString(GROUP_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId, jsonNotifications);
-            editor.apply();
-        } catch (Exception e) {
-            Logger.w("Error storing JSON in notifications preference.");
-            e.printStackTrace();
-        }
-    }
-
-    // endregion
-
-
     // region Missed call notification
 
     public static void displayMissedCallNotification(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity) {
@@ -699,6 +508,7 @@ public class AndroidNotificationManager {
         });
     }
 
+    @SuppressLint("MissingPermission")
     private static void displayMissedCallNotificationInternal(@NonNull Discussion discussion, boolean ownedIdentityIsHidden, String message) {
         // this kind of notification only makes sense for one to one discussions
         if (!discussion.canPostMessages() || discussion.discussionType != Discussion.TYPE_CONTACT) {
@@ -839,24 +649,24 @@ public class AndroidNotificationManager {
     // endregion
 
 
-
-
     // region Message & Reactions notification
 
     @SuppressLint("UseSparseArrays")
     private static final HashMap<Integer, Long> messageLastVibrationTimestamp = new HashMap<>();
 
+    @SuppressLint("MissingPermission")
     public static void displayReceivedMessageNotification(@NonNull Discussion discussion, @Nullable Message message, @Nullable Contact contact, @Nullable OwnedIdentity ownedIdentity) {
         executor.execute(() -> {
             if ((currentShowingDiscussionId != null) && (discussion.id == currentShowingDiscussionId)) {
                 return;
             }
+            boolean isMentioned = message != null && ownedIdentity != null && message.isIdentityMentioned(ownedIdentity.bytesOwnedIdentity);
             DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
-            if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
+            if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications(isMentioned)) {
                 return;
             }
-            if (ownedIdentity != null && ownedIdentity.shouldMuteNotifications()) {
-                if (ownedIdentity.shouldShowNeutralNotification()) {
+            if (ownedIdentity != null && ownedIdentity.shouldMuteNotifications(isMentioned)) {
+                if (ownedIdentity.shouldShowNeutralNotification(isMentioned)) {
                     displayNeutralNotification();
                 }
                 return;
@@ -908,6 +718,7 @@ public class AndroidNotificationManager {
         });
     }
 
+    @SuppressLint("MissingPermission")
     public static void remoteDeleteMessageNotification(@NonNull Discussion discussion, long messageId) {
         executor.execute(() -> {
             clearMessageReactionsNotification(messageId);
@@ -935,6 +746,7 @@ public class AndroidNotificationManager {
         });
     }
 
+    @SuppressLint("MissingPermission")
     public static void expireMessageNotification(long discussionId, long messageId) {
         executor.execute(() -> {
             clearMessageReactionsNotification(messageId);
@@ -966,27 +778,36 @@ public class AndroidNotificationManager {
         });
     }
 
-    public static void editMessageNotification(@NonNull Discussion discussion, long messageId, String newContent) {
+    @SuppressLint("MissingPermission")
+    public static void editMessageNotification(@NonNull Discussion discussion, @NonNull Message message, @NonNull Contact contact, String newContent, boolean editMentionsMyself) {
         executor.execute(() -> {
             JsonPojoDiscussionNotification discussionNotification = loadDiscussionNotification(discussion.id);
-            if (discussionNotification == null) {
-                return;
-            }
             boolean modified = false;
-            for (JsonPojoDiscussionNotification.JsonPojoMessageNotification messageNotification : discussionNotification.messageNotifications) {
-                if (messageNotification.messageId == messageId) {
-                    modified = true;
-                    messageNotification.content = newContent;
-                    break;
+            if (discussionNotification != null) {
+                for (JsonPojoDiscussionNotification.JsonPojoMessageNotification messageNotification : discussionNotification.messageNotifications) {
+                    if (messageNotification.messageId == message.id) {
+                        modified = true;
+                        if (editMentionsMyself) {
+                            messageNotification.sender = App.getContext().getString(R.string.notification_title_user_has_mentioned_you, contact.getCustomDisplayName());
+                        }
+                        messageNotification.content = newContent;
+                        break;
+                    }
                 }
             }
+
             if (modified) {
                 saveDiscussionNotification(discussion.id, discussionNotification);
 
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
-                NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(notificationManager, discussion, null, discussionNotification, false);
+                // If I am newly mentioned, force the notification to make sound again
+                NotificationCompat.Builder builder = getEmptyMessageNotificationBuilder(notificationManager, discussion, null, discussionNotification, editMentionsMyself);
                 populateMessageNotificationBuilder(builder, discussion, discussionNotification);
                 notificationManager.notify(getMessageNotificationId(discussion.id), builder.build());
+            } else if (editMentionsMyself) {
+                // If I am newly mentioned and the notification is no longer there, re-notify
+                OwnedIdentity ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(contact.bytesOwnedIdentity);
+                displayReceivedMessageNotification(discussion, message, contact, ownedIdentity);
             }
         });
     }
@@ -1051,9 +872,13 @@ public class AndroidNotificationManager {
         if (message != null) {
             Collections.sort(discussionNotification.messageNotifications);
             if (contact != null) {
-                discussionNotification.messageNotifications.add(new JsonPojoDiscussionNotification.JsonPojoMessageNotification(message.id, (long)message.sortIndex, contact.getCustomDisplayName(), contact.getCustomPhotoUrl(), contact.bytesContactIdentity, message.getStringContent(App.getContext())));
+                String title = contact.getCustomDisplayName();
+                if (ownedIdentity != null && message.isIdentityMentioned(ownedIdentity.bytesOwnedIdentity)) {
+                    title = App.getContext().getString(R.string.notification_title_user_has_mentioned_you, title);
+                }
+                discussionNotification.messageNotifications.add(new JsonPojoDiscussionNotification.JsonPojoMessageNotification(message.id, (long) message.sortIndex, title, contact.getCustomPhotoUrl(), contact.bytesContactIdentity, message.getStringContent(App.getContext())));
             } else {
-                discussionNotification.messageNotifications.add(new JsonPojoDiscussionNotification.JsonPojoMessageNotification(message.id, (long)message.sortIndex, null, null, null, message.getStringContent(App.getContext())));
+                discussionNotification.messageNotifications.add(new JsonPojoDiscussionNotification.JsonPojoMessageNotification(message.id, (long) message.sortIndex, null, null, null, message.getStringContent(App.getContext())));
             }
             saveDiscussionNotification(discussion.id, discussionNotification);
         }
@@ -1101,7 +926,7 @@ public class AndroidNotificationManager {
         } else {
             messagingStyle.setGroupConversation(false);
         }
-        for (JsonPojoDiscussionNotification.JsonPojoMessageNotification messageNotification: discussionNotification.messageNotifications) {
+        for (JsonPojoDiscussionNotification.JsonPojoMessageNotification messageNotification : discussionNotification.messageNotifications) {
             messagingStyle.addMessage(messageNotification.getMessage());
         }
         builder.setStyle(messagingStyle);
@@ -1252,6 +1077,7 @@ public class AndroidNotificationManager {
     }
 
 
+    @SuppressLint("MissingPermission")
     public static void displayReactionNotification(OwnedIdentity ownedIdentity, Discussion discussion, Message message, @Nullable String emoji, Contact contact) {
         executor.execute(() -> {
             DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
@@ -1276,7 +1102,8 @@ public class AndroidNotificationManager {
                         jsonMessageReactionsNotification.reactions = new ArrayList<>();
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             if (jsonMessageReactionsNotification == null) {
                 jsonMessageReactionsNotification = new JsonMessageReactionsNotification();
                 jsonMessageReactionsNotification.reactions = new ArrayList<>();
@@ -1322,7 +1149,8 @@ public class AndroidNotificationManager {
                         if (jsonDiscussionMessageReactionsNotification.messageIds == null) {
                             jsonDiscussionMessageReactionsNotification.messageIds = new ArrayList<>();
                         }
-                    } catch (Exception ignored) { }
+                    } catch (Exception ignored) {
+                    }
                 }
                 if (jsonDiscussionMessageReactionsNotification == null) {
                     jsonDiscussionMessageReactionsNotification = new JsonDiscussionMessageReactionsNotification();
@@ -1332,13 +1160,15 @@ public class AndroidNotificationManager {
                 try {
                     editor.putString(DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussion.id, AppSingleton.getJsonObjectMapper().writeValueAsString(jsonDiscussionMessageReactionsNotification));
                     editor.apply();
-                } catch (Exception ignored) { }
+                } catch (Exception ignored) {
+                }
             }
 
             try {
                 editor.putString(MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + message.id, AppSingleton.getJsonObjectMapper().writeValueAsString(jsonMessageReactionsNotification));
                 editor.apply();
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
 
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
@@ -1477,7 +1307,8 @@ public class AndroidNotificationManager {
                             clearMessageReactionsNotification(messageId);
                         }
                     }
-                } catch (Exception ignored) { }
+                } catch (Exception ignored) {
+                }
             }
         });
     }
@@ -1498,6 +1329,7 @@ public class AndroidNotificationManager {
 
     // region Invitation notification
 
+    @SuppressLint("MissingPermission")
     public static void displayInvitationNotification(Invitation invitation) {
         executor.execute(() -> {
             OwnedIdentity ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(invitation.bytesOwnedIdentity);
@@ -1511,6 +1343,9 @@ public class AndroidNotificationManager {
                 displayNeutralNotification();
                 return;
             }
+            if (Objects.equals(currentShowingDiscussionId, invitation.discussionId)) {
+                return;
+            }
 
             Intent intent = new Intent(App.getContext(), MainActivity.class);
             if (invitation.categoryId == ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY) {
@@ -1521,7 +1356,13 @@ public class AndroidNotificationManager {
                 intent.putExtra(ContactDetailsActivity.CONTACT_BYTES_OWNED_IDENTITY_INTENT_EXTRA, invitation.bytesOwnedIdentity);
                 intent.putExtra(ContactDetailsActivity.CONTACT_BYTES_CONTACT_IDENTITY_INTENT_EXTRA, invitation.bytesContactIdentity);
             } else {
-                intent.putExtra(MainActivity.TAB_TO_SHOW_INTENT_EXTRA, MainActivity.INVITATIONS_TAB);
+                if (invitation.discussionId != null) {
+                    intent.setAction(MainActivity.FORWARD_ACTION);
+                    intent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
+                    intent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, invitation.discussionId);
+                } else {
+                    intent.putExtra(MainActivity.TAB_TO_SHOW_INTENT_EXTRA, MainActivity.DISCUSSIONS_TAB);
+                }
                 intent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, invitation.bytesOwnedIdentity);
             }
             PendingIntent pendingIntent;
@@ -1583,8 +1424,7 @@ public class AndroidNotificationManager {
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_exchange_sas));
                     break;
                 }
-                case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
-                {
+                case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY: {
                     String displayName;
                     try {
                         JsonIdentityDetails identityDetails = AppSingleton.getJsonObjectMapper().readValue(invitation.associatedDialog.getCategory().getContactDisplayNameOrSerializedDetails(), JsonIdentityDetails.class);
@@ -1622,21 +1462,6 @@ public class AndroidNotificationManager {
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_group_invitation));
                     break;
                 }
-                case ObvDialog.Category.MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY: {
-                    String displayName;
-                    try {
-                        JsonIdentityDetails identityDetails = AppSingleton.getJsonObjectMapper().readValue(invitation.associatedDialog.getCategory().getContactDisplayNameOrSerializedDetails(), JsonIdentityDetails.class);
-                        displayName = identityDetails.formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName());
-                    } catch (Exception e) {
-                        return;
-                    }
-                    // we do not have a photoUrl yet, just show the initial
-                    initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(displayName));
-                    builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_contact_added, displayName));
-                    builder.setContentText(App.getContext().getString(R.string.notification_content_contact_added));
-                    publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_contact_added));
-                    break;
-                }
                 case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY: {
                     Contact contact = AppDatabase.getInstance().contactDao().get(invitation.bytesOwnedIdentity, invitation.bytesContactIdentity);
                     if (contact == null) {
@@ -1666,6 +1491,7 @@ public class AndroidNotificationManager {
                         e.printStackTrace();
                     }
                     builder.setContentText(App.getContext().getResources().getString(R.string.notification_content_group_invite, inviter.getCustomDisplayName()));
+                    builder.setOnlyAlertOnce(true);
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_group_invitation));
                     break;
                 }
@@ -1683,6 +1509,7 @@ public class AndroidNotificationManager {
                         e.printStackTrace();
                     }
                     builder.setContentText(App.getContext().getResources().getString(R.string.notification_content_group_v2_frozen_invite));
+                    builder.setOnlyAlertOnce(true);
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_group_invitation));
                     break;
                 }
@@ -1767,6 +1594,7 @@ public class AndroidNotificationManager {
 
     // region webclient
 
+    @SuppressLint("MissingPermission")
     public static void displayWebclientDisconnectedNotification(String notificationTitle) {
         executor.execute(() -> {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
@@ -1796,6 +1624,7 @@ public class AndroidNotificationManager {
         });
     }
 
+    @SuppressLint("MissingPermission")
     public static void displayWebclientActivityAfterInactivityNotification(String notificationTitle) {
         executor.execute(() -> {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion())
@@ -1827,6 +1656,106 @@ public class AndroidNotificationManager {
 
     // endregion
 
+
+
+
+
+    // region location
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private static void createLocationSharingChannel() {
+        NotificationChannel locationSharingChannel = new NotificationChannel(
+                LOCATION_SHARING_NOTIFICATION_CHANNEL_ID,
+                App.getContext().getString(R.string.notification_channel_location_sharing_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        locationSharingChannel.setDescription(App.getContext().getString(R.string.notification_channel_location_sharing_description));
+        locationSharingChannel.setShowBadge(false);
+        locationSharingChannel.enableVibration(true);
+        locationSharingChannel.setVibrationPattern(new long[]{0, 100});
+        locationSharingChannel.enableLights(false);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+        notificationManager.createNotificationChannel(locationSharingChannel);
+    }
+
+    @SuppressLint("MissingPermission")
+    public static void displayLocationErrorNotification(@NonNull LocationErrorType errorType) {
+        if (SettingsActivity.hideLocationErrorsNotifications()) {
+            return;
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            createLocationSharingChannel();
+        }
+        executor.execute(() -> {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), LOCATION_SHARING_NOTIFICATION_CHANNEL_ID)
+                    .setColor(ContextCompat.getColor(App.getContext(), R.color.olvid_gradient_dark))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_ERROR)
+                    .setOnlyAlertOnce(true)
+                    .setVibrate(new long[0]);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            switch (errorType) {
+                case LOCATION_DISABLED: {
+                    builder.setSmallIcon(R.drawable.ic_location_current_location_disabled)
+                            .setContentTitle(App.getContext().getString(R.string.text_notification_location_disabled_title))
+                            .setContentText(App.getContext().getString(R.string.text_notification_location_disabled_message));
+
+                    // on click open settings to enable location
+                    Intent locationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    locationSettingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    PendingIntent contentPendingIntent;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationSettingsIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    } else {
+                        contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationSettingsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    }
+                    builder.setContentIntent(contentPendingIntent);
+                    break;
+                }
+                case LOCATION_PERMISSION_DENIED: {
+                    builder.setSmallIcon(R.drawable.ic_location_sharing_disabled)
+                            .setContentTitle(App.getContext().getString(R.string.text_notification_location_permission_denied_title))
+                            .setContentText(App.getContext().getString(R.string.text_notification_location_permission_denied_message));
+
+                    // on click open settings to grant location permission
+                    Intent locationPermissionIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    locationPermissionIntent.setData(Uri.parse("package:" + App.getContext().getPackageName()));
+                    locationPermissionIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    PendingIntent contentPendingIntent;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationPermissionIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    } else {
+                        contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationPermissionIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    }
+                    builder.setContentIntent(contentPendingIntent);
+                    break;
+                }
+                case UPDATE_TIMEOUT: {
+                    builder.setSmallIcon(R.drawable.ic_location_current_location_disabled)
+                            .setContentTitle(App.getContext().getString(R.string.text_notification_location_updates_unavailable_title))
+                            .setContentText(App.getContext().getString(R.string.text_notification_location_updates_unavailable_message));
+                    break;
+                }
+            }
+            notificationManager.notify(getLocationErrorNotificationId(errorType), builder.build());
+        });
+    }
+
+    public static void clearLocationNotification(@Nullable LocationErrorType errorType) {
+        executor.execute(() -> {
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            if (errorType == null) {
+                clearLocationNotification(LocationErrorType.LOCATION_DISABLED);
+                clearLocationNotification(LocationErrorType.LOCATION_PERMISSION_DENIED);
+                clearLocationNotification(LocationErrorType.UPDATE_TIMEOUT);
+            } else {
+                notificationManager.cancel(getLocationErrorNotificationId(errorType));
+            }
+        });
+    }
+
+    // endregion
+
     // region Keycloak
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -1850,6 +1779,7 @@ public class AndroidNotificationManager {
         return Arrays.hashCode(bytesOwnedIdentity);
     }
 
+    @SuppressLint("MissingPermission")
     public static void displayKeycloakAuthenticationRequiredNotification(byte[] bytesOwnedIdentity) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             createKeycloakChannel();
@@ -1919,6 +1849,7 @@ public class AndroidNotificationManager {
 
     // region blocked certificate
 
+    @SuppressLint("MissingPermission")
     public static void displayConnectionBlockedNotification(long untrustedCertificateId, @Nullable Long lastTrustedCertificateId) {
         executor.execute(() -> {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID  + getCurrentMessageChannelVersion())
@@ -1995,6 +1926,10 @@ public class AndroidNotificationManager {
 
     private static int getCertificateBlockedNotificationId(long untrustedCertificateId) {
         return (int) (0xffffff & untrustedCertificateId) | 0x6000000;
+    }
+
+    private static int getLocationErrorNotificationId(@NonNull LocationErrorType errorType) {
+        return  (int) (0xffffff & errorType.ordinal()) | 0x7000000;
     }
 
     private static void vibrate(@Nullable DiscussionCustomization discussionCustomization) {

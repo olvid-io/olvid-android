@@ -330,23 +330,22 @@ public class MessageListener {
                 }
 
                 // Same mechanism with limited visibility  messages (read once, limited visibility duration), and discussion settings update messages
-                if(message.messageType == Message.TYPE_DISCUSSION_SETTINGS_UPDATE || message.jsonExpiration != null){
+                if(message.messageType == Message.TYPE_DISCUSSION_SETTINGS_UPDATE || message.jsonExpiration != null) {
                     try {
-                        boolean readOnce  = false;
+                        boolean readOnce = false;
                         String visibility = "";
                         String existence = "";
                         Long visibilityDuration = null;
                         Long existenceDuration = null;
 
-                        if(message.messageType == Message.TYPE_DISCUSSION_SETTINGS_UPDATE){
+                        if (message.messageType == Message.TYPE_DISCUSSION_SETTINGS_UPDATE) {
                             DiscussionCustomization.JsonSharedSettings jsonSharedSettings = AppSingleton.getJsonObjectMapper().readValue(message.contentBody, DiscussionCustomization.JsonSharedSettings.class);
                             if (jsonSharedSettings != null && jsonSharedSettings.getJsonExpiration() != null) {
                                 visibilityDuration = jsonSharedSettings.getJsonExpiration().getVisibilityDuration();
                                 existenceDuration = jsonSharedSettings.getJsonExpiration().getExistenceDuration();
                                 readOnce = jsonSharedSettings.getJsonExpiration().getReadOnce() != null && jsonSharedSettings.getJsonExpiration().getReadOnce();
                             }
-                        }
-                        else {
+                        } else {
                             Message.JsonExpiration jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, Message.JsonExpiration.class);
                             visibilityDuration = jsonExpiration.getVisibilityDuration();
                             existenceDuration = jsonExpiration.getExistenceDuration();
@@ -366,22 +365,22 @@ public class MessageListener {
                                 visibility = context.getString(R.string.text_timer_y, visibilityDuration / 31536000);
                             }
                         }
-                            if (existenceDuration != null) {
-                                if (existenceDuration < 60) {
-                                    existence = context.getString(R.string.text_timer_s, existenceDuration);
-                                } else if (existenceDuration < 3600) {
-                                    existence = context.getString(R.string.text_timer_m, existenceDuration / 60);
-                                } else if (existenceDuration < 86400) {
-                                    existence = context.getString(R.string.text_timer_h, existenceDuration / 3600);
-                                } else if (existenceDuration < 31536000) {
-                                    existence = context.getString(R.string.text_timer_d, existenceDuration / 86400);
-                                } else {
-                                    existence = context.getString(R.string.text_timer_y, existenceDuration / 31536000);
-                                }
+                        if (existenceDuration != null) {
+                            if (existenceDuration < 60) {
+                                existence = context.getString(R.string.text_timer_s, existenceDuration);
+                            } else if (existenceDuration < 3600) {
+                                existence = context.getString(R.string.text_timer_m, existenceDuration / 60);
+                            } else if (existenceDuration < 86400) {
+                                existence = context.getString(R.string.text_timer_h, existenceDuration / 3600);
+                            } else if (existenceDuration < 31536000) {
+                                existence = context.getString(R.string.text_timer_d, existenceDuration / 86400);
+                            } else {
+                                existence = context.getString(R.string.text_timer_y, existenceDuration / 31536000);
                             }
-                            messageBuilder.setReadOnce(readOnce);
-                            messageBuilder.setVisibilityDuration(visibility);
-                            messageBuilder.setExistenceDuration(existence);
+                        }
+                        messageBuilder.setReadOnce(readOnce);
+                        messageBuilder.setVisibilityDuration(visibility);
+                        messageBuilder.setExistenceDuration(existence);
                     } catch (Exception e) {
                         Logger.e("Unable to parse jsonExpiration in MessageListener", e);
                     }

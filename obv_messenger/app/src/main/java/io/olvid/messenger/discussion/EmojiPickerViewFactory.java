@@ -443,7 +443,7 @@ public class EmojiPickerViewFactory {
             xOffset = metrics.widthPixels - fortyDp / 5 - pos[0] - rowSize * fortyDp;
         }
 
-        popupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        popupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
         popupWindow.showAtLocation(windowTokenView == null ? anchorView : windowTokenView, Gravity.NO_GRAVITY, pos[0] + xOffset, pos[1] - (2 + (emojiVariants.length - 1) / rowSize) * fortyDp);
     }
 

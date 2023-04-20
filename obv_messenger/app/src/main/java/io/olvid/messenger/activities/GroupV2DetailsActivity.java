@@ -103,6 +103,7 @@ import io.olvid.messenger.fragments.FullScreenImageFragment;
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment;
 import io.olvid.messenger.fragments.dialog.GroupV2MemberAdditionDialogFragment;
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment;
+import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.owneddetails.EditOwnedGroupDetailsDialogFragment;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.viewModels.GroupV2DetailsViewModel;
@@ -149,6 +150,7 @@ public class GroupV2DetailsActivity extends LockableActivity implements EngineNo
     private boolean showEditDetails = false;
     private boolean animationsSet = false;
     private boolean groupAdmin = false;
+    private boolean keycloakGroup = false;
     private boolean editingMembers = false;
     private int updateInProgress = Group2.UPDATE_NONE;
 
@@ -302,8 +304,9 @@ public class GroupV2DetailsActivity extends LockableActivity implements EngineNo
             }
         }
 
-        if (groupAdmin != group.ownPermissionAdmin) {
+        if (groupAdmin != group.ownPermissionAdmin || keycloakGroup != group.keycloakManaged) {
             groupAdmin = group.ownPermissionAdmin;
+            keycloakGroup = group.keycloakManaged;
             invalidateOptionsMenu();
         }
 
@@ -559,6 +562,8 @@ public class GroupV2DetailsActivity extends LockableActivity implements EngineNo
                 spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.red)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 deleteItem.setTitle(spannableString);
             }
+        } else if (keycloakGroup) {
+            getMenuInflater().inflate(R.menu.menu_group_details_keycloak, menu);
         } else {
             getMenuInflater().inflate(R.menu.menu_group_details_joined_v2, menu);
         }
@@ -733,7 +738,11 @@ public class GroupV2DetailsActivity extends LockableActivity implements EngineNo
                 return true;
             }
             try {
-                AppSingleton.getEngine().reDownloadGroupV2(group.bytesOwnedIdentity, group.bytesGroupIdentifier);
+                if (group.keycloakManaged) {
+                    KeycloakManager.forceSyncManagedIdentity(group.bytesOwnedIdentity);
+                } else {
+                    AppSingleton.getEngine().reDownloadGroupV2(group.bytesOwnedIdentity, group.bytesGroupIdentifier);
+                }
             } catch (Exception ignored) {}
             return true;
         } else if (itemId == R.id.action_clone_group) {
@@ -753,7 +762,7 @@ public class GroupV2DetailsActivity extends LockableActivity implements EngineNo
                 sb.append(getString(R.string.debug_label_number_of_members_and_invited)).append(" ");
                 sb.append(groupDetailsViewModel.getMembersCount()).append("/").append(groupDetailsViewModel.getMembersAndPendingCount()).append("\n");
                 try {
-                    int version = AppSingleton.getEngine().getGroupV2Version(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
+                    Integer version = AppSingleton.getEngine().getGroupV2Version(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
                     sb.append(getString(R.string.debug_label_group_version)).append(" ").append(version).append("\n\n");
                 } catch (Exception ignored) { }
                 try {
@@ -917,7 +926,7 @@ public class GroupV2DetailsActivity extends LockableActivity implements EngineNo
                     } else {
                         holder.initialView.setUnknown();
                     }
-                    holder.initialView.setKeycloakCertified(false);
+                    holder.initialView.setKeycloakCertified(keycloakGroup);
                     holder.initialView.setLocked(false);
                     holder.initialView.setInactive(false);
                     holder.initialView.setNullTrustLevel();
@@ -1144,7 +1153,7 @@ public class GroupV2DetailsActivity extends LockableActivity implements EngineNo
 
         @Override
         public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-            if (!groupAdmin) {
+            if (!groupAdmin || !editingMembers) {
                 return 0;
             }
             return super.getMovementFlags(recyclerView, viewHolder);

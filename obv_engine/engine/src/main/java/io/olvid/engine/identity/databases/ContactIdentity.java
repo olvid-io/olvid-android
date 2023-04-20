@@ -155,10 +155,12 @@ public class ContactIdentity implements ObvDatabase {
         }
 
         boolean notifyNewDetails = true;
+        String lastKnownSerializedCertifiedDetails;
 
         if (allowDowngrade && newDetailsVersion <= publishedDetailsVersion) {
             // check whether anything changed
             ContactIdentityDetails publishedDetails = getPublishedDetails();
+            lastKnownSerializedCertifiedDetails = publishedDetails.getSerializedJsonDetails();
             if (newDetailsVersion == publishedDetailsVersion) {
                 if (publishedDetails.getJsonIdentityDetails().equals(jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails())) {
                     // details are the same, check photo labels
@@ -239,6 +241,7 @@ public class ContactIdentity implements ObvDatabase {
             // not in downgrade mode and number is indeed bigger
             ContactIdentityDetails newPublishedDetails = ContactIdentityDetails.create(identityManagerSession, contactIdentity, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto);
             ContactIdentityDetails publishedDetails = getPublishedDetails();
+            lastKnownSerializedCertifiedDetails = publishedDetails.getSerializedJsonDetails();
             if (newPublishedDetails.getPhotoServerLabel() != null &&
                     newPublishedDetails.getPhotoServerKey() != null) {
                 if (newPublishedDetails.getPhotoServerLabel().equals(publishedDetails.getPhotoServerLabel()) &&
@@ -286,7 +289,7 @@ public class ContactIdentity implements ObvDatabase {
 
         if (this.certifiedByOwnKeycloak) {
             // received non-signed (or with invalid signature) details for a keycloak certified contact --> no longer certified
-            setCertifiedByOwnKeycloak(false);
+            setCertifiedByOwnKeycloak(false, lastKnownSerializedCertifiedDetails);
         }
 
         ///////
@@ -311,8 +314,9 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
-
-    public void setCertifiedByOwnKeycloak(boolean certifiedByOwnKeycloak) throws SQLException {
+    // when certifiedByOwnKeycloak is false, if possible, try providing the last known certified details
+    // this allows settings these details for the pending member after a keycloak group member is demoted
+    public void setCertifiedByOwnKeycloak(boolean certifiedByOwnKeycloak, String lastKnownSerializedCertifiedDetails) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + CERTIFIED_BY_OWN_KEYCLOAK + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
@@ -324,6 +328,8 @@ public class ContactIdentity implements ObvDatabase {
             this.certifiedByOwnKeycloak = certifiedByOwnKeycloak;
             commitHookBits |= HOOK_BIT_KEYCLOAK_MANAGED_CHANGED;
             identityManagerSession.session.addSessionCommitListener(this);
+
+            identityManagerSession.identityDelegate.rePingOrDemoteContactFromAllKeycloakGroups(identityManagerSession.session, ownedIdentity, contactIdentity, certifiedByOwnKeycloak, lastKnownSerializedCertifiedDetails);
         }
     }
 
@@ -382,7 +388,7 @@ public class ContactIdentity implements ObvDatabase {
 
         // 1. mark contact as keycloakManaged and add a trust origin
         if (!isCertifiedByOwnKeycloak()) {
-            setCertifiedByOwnKeycloak(true);
+            setCertifiedByOwnKeycloak(true, null);
         }
         // 2. auto-trust if published != trusted
         if (trustedDetailsVersion != publishedDetailsVersion) {
@@ -433,7 +439,9 @@ public class ContactIdentity implements ObvDatabase {
 
         // for each of them, set them as not certified any more
         for (ContactIdentity contactIdentity: certifiedContacts) {
-            contactIdentity.setCertifiedByOwnKeycloak(false);
+            // no need to provide lastKnownSerializedCertifiedDetails as unmarkAllCertifiedByOwnKeycloakContacts is only called when:
+            // - our ownedIdentity is no longer certified
+            contactIdentity.setCertifiedByOwnKeycloak(false, null);
         }
     }
 
@@ -876,7 +884,7 @@ public class ContactIdentity implements ObvDatabase {
 
     // region getters
 
-    public static ContactIdentity get(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity) throws SQLException {
+    public static ContactIdentity get(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
         if ((contactIdentity == null) || (ownedIdentity == null)) {
             return null;
         }
@@ -979,7 +987,7 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
-    public static String getSerializedPublishedDetails(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity) {
+    public static String getSerializedPublishedDetails(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
                 "SELECT details." + ContactIdentityDetails.SERIALIZED_JSON_DETAILS +
                         " FROM " + TABLE_NAME + " AS contact " +
@@ -1173,7 +1181,7 @@ public class ContactIdentity implements ObvDatabase {
 
         JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, trusted_details.getJsonIdentityDetailsWithVersionAndPhoto().getIdentityDetails().getSignedUserDetails());
         if (jsonKeycloakUserDetails != null) {
-            contactIdentityObject.setCertifiedByOwnKeycloak(true);
+            contactIdentityObject.setCertifiedByOwnKeycloak(true, null);
         }
 
         ContactTrustOrigin.restoreAll(identityManagerSession, ownedIdentity, contactIdentity, pojo.trust_origins);

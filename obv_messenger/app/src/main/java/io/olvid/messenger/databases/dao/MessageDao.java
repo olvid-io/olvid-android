@@ -53,7 +53,7 @@ public interface MessageDao {
             "mess." + Message.WIPE_STATUS + " AS mess_" + Message.WIPE_STATUS + ", " +
             "mess." + Message.MESSAGE_TYPE + " AS mess_" + Message.MESSAGE_TYPE + ", " +
             "mess." + Message.DISCUSSION_ID + " AS mess_" + Message.DISCUSSION_ID + ", " +
-            "mess." + Message.ENGINE_MESSAGE_IDENTIFIER + " AS mess_" + Message.ENGINE_MESSAGE_IDENTIFIER + ", " +
+            "mess." + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + " AS mess_" + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + ", " +
             "mess." + Message.SENDER_IDENTIFIER + " AS mess_" + Message.SENDER_IDENTIFIER + ", " +
             "mess." + Message.SENDER_THREAD_IDENTIFIER + " AS mess_" + Message.SENDER_THREAD_IDENTIFIER + ", " +
             "mess." + Message.TOTAL_ATTACHMENT_COUNT + " AS mess_" + Message.TOTAL_ATTACHMENT_COUNT + ", " +
@@ -66,7 +66,10 @@ public interface MessageDao {
             "mess." + Message.MISSED_MESSAGE_COUNT + " AS mess_" + Message.MISSED_MESSAGE_COUNT + ", " +
             "mess." + Message.EXPIRATION_START_TIMESTAMP + " AS mess_" + Message.EXPIRATION_START_TIMESTAMP + ", " +
             "mess." + Message.LIMITED_VISIBILITY + " AS mess_" + Message.LIMITED_VISIBILITY + ", " +
-            "mess." + Message.LINK_PREVIEW_FYLE_ID + " AS mess_" + Message.LINK_PREVIEW_FYLE_ID;
+            "mess." + Message.LINK_PREVIEW_FYLE_ID + " AS mess_" + Message.LINK_PREVIEW_FYLE_ID + ", " +
+            "mess." + Message.JSON_MENTIONS + " AS mess_" + Message.JSON_MENTIONS+ ", " +
+            "mess." + Message.MENTIONED + " AS mess_" + Message.MENTIONED;
+
 
     @Insert
     long insert(Message message);
@@ -117,7 +120,8 @@ public interface MessageDao {
             Message.CONTENT_BODY + " = NULL, " +
             Message.REACTIONS + " = NULL, " +
             Message.JSON_REPLY + " = NULL, " +
-            Message.JSON_LOCATION + " = NULL " +
+            Message.JSON_LOCATION + " = NULL, " +
+            Message.JSON_MENTIONS + " = NULL " +
             " WHERE id = :messageId")
     void updateWipe(long messageId, int wipeStatus);
 
@@ -142,6 +146,16 @@ public interface MessageDao {
             " SET " + Message.REACTIONS + " = :reactions " +
             " WHERE id = :messageId")
     void updateReactions(long messageId, String reactions);
+
+    @Query("UPDATE " + Message.TABLE_NAME +
+            " SET " + Message.JSON_MENTIONS + " = :mentions " +
+            " WHERE id = :messageId")
+    void updateMentions(long messageId, String mentions);
+
+    @Query("UPDATE " + Message.TABLE_NAME +
+            " SET " + Message.MENTIONED + " = :mentioned " +
+            " WHERE id = :messageId")
+    void updateMentioned(long messageId, boolean mentioned);
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.EXPIRATION_START_TIMESTAMP + " = :expirationStartTimestamp " +
@@ -307,7 +321,7 @@ public interface MessageDao {
     @Query("SELECT count(*) FROM " + Message.TABLE_NAME + " AS mess " +
             " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
             " ON mess." + Message.DISCUSSION_ID + " = disc.id " +
-            " WHERE mess." + Message.ENGINE_MESSAGE_IDENTIFIER + " = :engineIdentifier " +
+            " WHERE mess." + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + " = :engineIdentifier " +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
     int getCountForEngineIdentifier(byte[] bytesOwnedIdentity, byte[] engineIdentifier);
 
@@ -448,6 +462,15 @@ public interface MessageDao {
             " AND " + Message.DISCUSSION_ID + " = :discussionId " +
             " ORDER BY " + Message.SORT_INDEX + " ASC ")
     List<Message> getCurrentlySharingOutboundLocationMessagesInDiscussion(long discussionId);
+
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
+            " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND " + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND " + Message.SENDER_IDENTIFIER + " = :senderIdentifier " +
+            " ORDER BY " + Message.SORT_INDEX + " ASC "
+    )
+    List<Message> getCurrentLocationSharingMessagesOfIdentityInDiscussion(byte[] senderIdentifier, long discussionId);
 
     @Query("SELECT id FROM " + Message.TABLE_NAME +
             " WHERE " + Message.LIMITED_VISIBILITY + " = 1")

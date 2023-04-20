@@ -19,28 +19,38 @@
 package io.olvid.messenger.databases.tasks
 
 import android.widget.Toast
+import io.olvid.engine.Logger
 import io.olvid.messenger.App
+import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageMetadata
 
-class UpdateMessageBodyTask(val messageId: Long, val body: String) : Runnable {
+class UpdateMessageBodyTask(val messageId: Long, val body: String, val mentions: List<Message.JsonUserMention>?) : Runnable {
     override fun run() {
         if (body.trim().isEmpty()) {
             return
         }
         val db = AppDatabase.getInstance()
-        val message = db.messageDao()[messageId] ?: return
+        val message = db.messageDao().get(messageId) ?: return
         val newBody = body.trim()
         message.contentBody = newBody
-        val success = Message.postUpdateMessageMessage(message)
+        try {
+            message.jsonMentions = mentions?.let {
+                AppSingleton.getJsonObjectMapper().writeValueAsString(it.filter { jsonUserMention -> jsonUserMention.userIdentifier != null })
+            }
+        } catch (ex: Exception) {
+            Logger.w("Unable to serialize mentions")
+        }
+        val success = Message.postUpdateMessageMessage(message).isMessagePostedForAtLeastOneContact
         if (!success) {
             App.toast(R.string.toast_message_unable_to_update_message, Toast.LENGTH_SHORT)
             return
         }
         CheckLinkPreviewValidityTask(message, newBody).run()
         db.messageDao().updateBody(message.id, body)
+        db.messageDao().updateMentions(message.id, message.jsonMentions)
         db.messageMetadataDao().insert(
             MessageMetadata(
                 message.id,

@@ -90,7 +90,7 @@ public class DiscussionSettingsHeadersFragment extends PreferenceFragmentCompat 
                     Context context = getContext();
                     Long discussionId = discussionSettingsViewModel.getDiscussionId();
                     if (discussionId != null && context != null) {
-                        MuteNotificationDialog muteNotificationDialog = new MuteNotificationDialog(context, (Long muteExpirationTimestamp, boolean muteWholeProfile) -> App.runThread(() -> {
+                        MuteNotificationDialog muteNotificationDialog = new MuteNotificationDialog(context, (Long muteExpirationTimestamp, boolean muteWholeProfile, boolean muteExceptMentioned) -> App.runThread(() -> {
                             DiscussionCustomization discussionCust = AppDatabase.getInstance().discussionCustomizationDao().get(discussionId);
                             boolean insert = false;
                             if (discussionCust == null) {
@@ -99,12 +99,13 @@ public class DiscussionSettingsHeadersFragment extends PreferenceFragmentCompat 
                             }
                             discussionCust.prefMuteNotifications = true;
                             discussionCust.prefMuteNotificationsTimestamp = muteExpirationTimestamp;
+                            discussionCust.prefMuteNotificationsExceptMentioned = muteExceptMentioned;
                             if (insert) {
                                 AppDatabase.getInstance().discussionCustomizationDao().insert(discussionCust);
                             } else {
                                 AppDatabase.getInstance().discussionCustomizationDao().update(discussionCust);
                             }
-                        }), MuteNotificationDialog.MuteType.DISCUSSION);
+                        }), MuteNotificationDialog.MuteType.DISCUSSION, discussionCustomization == null || discussionCustomization.prefMuteNotificationsExceptMentioned);
 
                         muteNotificationDialog.show();
                     }

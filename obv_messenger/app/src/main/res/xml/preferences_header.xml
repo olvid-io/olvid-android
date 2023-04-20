@@ -35,6 +35,12 @@
         android:icon="@drawable/ic_pref_send"
         android:widgetLayout="@layout/preference_widget_header_chevron" />
     <Preference
+        android:title="@string/pref_category_location"
+        android:key="pref_header_key_location"
+        android:fragment="io.olvid.messenger.settings.LocationPreferenceFragment"
+        android:icon="@drawable/ic_pref_location"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
         android:title="@string/pref_category_camera_title"
         android:fragment="io.olvid.messenger.settings.CameraPreferenceFragment"
         android:icon="@drawable/ic_pref_camera"

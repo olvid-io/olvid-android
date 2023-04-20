@@ -19,6 +19,8 @@
 
 package io.olvid.engine.protocol.protocols;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -47,6 +49,7 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.DialogType;
 import io.olvid.engine.datatypes.containers.GroupV2;
+import io.olvid.engine.datatypes.containers.KeycloakGroupV2UpdateOutput;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.containers.ServerQuery;
@@ -59,6 +62,8 @@ import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
+import io.olvid.engine.identity.datatypes.KeycloakGroupBlob;
+import io.olvid.engine.identity.datatypes.KeycloakGroupMemberAndPermissions;
 import io.olvid.engine.protocol.databases.GroupV2SignatureReceived;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
 import io.olvid.engine.protocol.datatypes.CoreProtocolMessage;
@@ -566,7 +571,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     private static final int INITIATE_BATCH_KEYS_RESEND_MESSAGE_ID = 26;
     private static final int BLOB_KEYS_BATCH_AFTER_CHANNEL_CREATION_MESSAGE_ID = 27;
     private static final int BLOB_KEYS_AFTER_CHANNEL_CREATION_MESSAGE_ID = 28;
-
+    private static final int CREATE_OR_UPDATE_KEYCLOAK_GROUP_MESSAGE_ID = 29;
+    private static final int INITIATE_TARGETED_PING_MESSAGE_ID = 30;
 
     @Override
     protected Class<?> getMessageClass(int protocolMessageId) {
@@ -627,6 +633,10 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 return BlobKeysBatchAfterChannelCreationMessage.class;
             case BLOB_KEYS_AFTER_CHANNEL_CREATION_MESSAGE_ID:
                 return BlobKeysAfterChannelCreationMessage.class;
+            case CREATE_OR_UPDATE_KEYCLOAK_GROUP_MESSAGE_ID:
+                return CreateOrUpdateKeycloakGroupMessage.class;
+            case INITIATE_TARGETED_PING_MESSAGE_ID:
+                return InitiateTargetedPingMessage.class;
             default:
                 return null;
         }
@@ -1595,6 +1605,79 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         }
     }
 
+    public static class CreateOrUpdateKeycloakGroupMessage extends ConcreteProtocolMessage {
+        private final GroupV2.Identifier groupIdentifier;
+        private final String serializedKeycloakGroupBlob;
+
+        public CreateOrUpdateKeycloakGroupMessage(CoreProtocolMessage coreProtocolMessage, GroupV2.Identifier groupIdentifier, String serializedKeycloakGroupBlob) {
+            super(coreProtocolMessage);
+            this.groupIdentifier = groupIdentifier;
+            this.serializedKeycloakGroupBlob = serializedKeycloakGroupBlob;
+        }
+
+        @SuppressWarnings("unused")
+        public CreateOrUpdateKeycloakGroupMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(new CoreProtocolMessage(receivedMessage));
+            Encoded[] list = receivedMessage.getInputs();
+            if (list.length != 2) {
+                throw new Exception();
+            }
+            this.groupIdentifier = GroupV2.Identifier.of(list[0]);
+            this.serializedKeycloakGroupBlob = list[1].decodeString();
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return CREATE_OR_UPDATE_KEYCLOAK_GROUP_MESSAGE_ID;
+        }
+
+        @Override
+        public Encoded[] getInputs() {
+            ObjectMapper jsonObjectMapper = new ObjectMapper();
+            jsonObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            return new Encoded[]{
+                    groupIdentifier.encode(),
+                    Encoded.of(serializedKeycloakGroupBlob),
+            };
+        }
+    }
+
+    public static class InitiateTargetedPingMessage extends ConcreteProtocolMessage {
+        private final GroupV2.Identifier groupIdentifier;
+        private final Identity pendingMemberIdentity;
+
+        public InitiateTargetedPingMessage(CoreProtocolMessage coreProtocolMessage, GroupV2.Identifier groupIdentifier, Identity pendingMemberIdentity) {
+            super(coreProtocolMessage);
+            this.groupIdentifier = groupIdentifier;
+            this.pendingMemberIdentity = pendingMemberIdentity;
+        }
+
+        @SuppressWarnings("unused")
+        public InitiateTargetedPingMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(new CoreProtocolMessage(receivedMessage));
+            Encoded[] list = receivedMessage.getInputs();
+            if (list.length != 2) {
+                throw new Exception();
+            }
+            this.groupIdentifier = GroupV2.Identifier.of(list[0]);
+            this.pendingMemberIdentity = list[1].decodeIdentity();
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return INITIATE_TARGETED_PING_MESSAGE_ID;
+        }
+
+        @Override
+        public Encoded[] getInputs() {
+            return new Encoded[] {
+                    groupIdentifier.encode(),
+                    Encoded.of(pendingMemberIdentity),
+            };
+        }
+    }
+
+
     // endregion
 
 
@@ -1610,7 +1693,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     protected Class<?>[] getPossibleStepClasses(int stateId) {
         switch (stateId) {
             case INITIAL_STATE_ID:
-                return new Class[]{InitiateGroupCreationStep.class, ProcessInvitationOrMembersUpdateStep.class, DoNothingAfterServerQueryStep.class, ProcessPingStep.class, InitiateBlobReDownloadStep.class, InitiateGroupUpdateStep.class, GetKickedStep.class, LeaveGroupStep.class, DisbandGroupStep.class, PrepareBatchKeysMessageStep.class, ProcessBatchKeysMessageStep.class };
+                return new Class[]{InitiateGroupCreationStep.class, ProcessInvitationOrMembersUpdateStep.class, DoNothingAfterServerQueryStep.class, ProcessPingStep.class, InitiateBlobReDownloadStep.class, InitiateGroupUpdateStep.class, GetKickedStep.class, LeaveGroupStep.class, DisbandGroupStep.class, PrepareBatchKeysMessageStep.class, ProcessBatchKeysMessageStep.class, ProcessCreateOrUpdateKeycloakGroupMessage.class, SendKeycloakGroupTargetedPingStep.class };
             case UPLOADING_CREATED_GROUP_DATA_STATE_ID:
                 return new Class[]{CheckIfGroupCreationCanBeFinalizedStep.class, FinalizeGroupCreationStep.class};
             case DOWNLOADING_GROUP_BLOB_STATE_ID:
@@ -1622,11 +1705,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             case REJECTING_INVITATION_OR_LEAVING_GROUP_STATE_ID:
                 return new Class[]{NotifyMembersOfRejectionOrGroupLeftStep.class};
             case WAITING_FOR_LOCK_STATE_ID:
-                return new Class[]{PrepareBlobForGroupUpdateStep.class, GetKickedStep.class, LeaveGroupStep.class};
+                return new Class[]{PrepareBlobForGroupUpdateStep.class, GetKickedStep.class, LeaveGroupStep.class, DisbandGroupStep.class};
             case UPLOADING_UPDATED_GROUP_BLOB_STATE_ID:
-                return new Class[]{ProcessGroupUpdateBlobUploadResponseStep.class};
+                return new Class[]{ProcessGroupUpdateBlobUploadResponseStep.class, DisbandGroupStep.class};
             case UPLOADING_UPDATED_GROUP_PHOTO_STATE_ID:
-                return new Class[]{ProcessGroupUpdatePhotoUploadResponseStep.class, FinalizeGroupUpdateStep.class};
+                return new Class[]{ProcessGroupUpdatePhotoUploadResponseStep.class, FinalizeGroupUpdateStep.class, DisbandGroupStep.class};
             case DISBANDING_GROUP_STATE_ID:
                 return new Class[]{FinalizeGroupDisbandStep.class};
             default:
@@ -2716,7 +2799,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationDialogResponseStep(InvitationReceivedState startState, PropagateInvitationDialogResponseMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.startDialogUuid = startState.dialogUuid;
             this.groupIdentifier = startState.groupIdentifier;
@@ -2752,7 +2835,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationDialogResponseStep(DownloadingGroupBlobState startState, PropagateInvitationDialogResponseMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.startDialogUuid = startState.dialogUuid;
             this.groupIdentifier = startState.groupIdentifier;
@@ -2780,7 +2863,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationDialogResponseStep(INeedMoreSeedsState startState, PropagateInvitationDialogResponseMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.startDialogUuid = startState.dialogUuid;
             this.groupIdentifier = startState.groupIdentifier;
@@ -2833,13 +2916,6 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
             }
 
-            {
-                // remove the dialog
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startDialogUuid));
-                ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-            }
-
             if ((startState instanceof InvitationReceivedState) && invitationAccepted) {
                 // force the integrityWasChecked to true
                 ((InvitationReceivedState) startState).serverBlob.administratorsChain.integrityWasChecked = true;
@@ -2882,8 +2958,23 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     }
                 }
 
+                {
+                    // remove the dialog
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startDialogUuid));
+                    ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                }
+
                 return new FinalState();
             } else {
+
+                {
+                    // remove the dialog
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startDialogUuid));
+                    ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                }
+
                 if (propagated) {
                     return new FinalState();
                 } else if (groupMembersToNotify != null) {
@@ -4126,6 +4217,29 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.propagated = false;
         }
 
+        @SuppressWarnings("unused")
+        public DisbandGroupStep(WaitingForLockState startState, GroupDisbandInitialMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.groupIdentifier = receivedMessage.groupIdentifier;
+            this.propagated = false;
+        }
+
+        @SuppressWarnings("unused")
+        public DisbandGroupStep(UploadingUpdatedGroupBlobState startState, GroupDisbandInitialMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.groupIdentifier = receivedMessage.groupIdentifier;
+            this.propagated = false;
+        }
+
+        @SuppressWarnings("unused")
+        public DisbandGroupStep(UploadingUpdatedGroupPhotoState startState, GroupDisbandInitialMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.groupIdentifier = receivedMessage.groupIdentifier;
+            this.propagated = false;
+        }
 
         @SuppressWarnings("unused")
         public DisbandGroupStep(InitialProtocolState startState, PropagatedGroupDisbandMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
@@ -4154,6 +4268,30 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         @SuppressWarnings("unused")
         public DisbandGroupStep(InvitationReceivedState startState, PropagatedGroupDisbandMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
             super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.groupIdentifier = receivedMessage.groupIdentifier;
+            this.propagated = true;
+        }
+
+        @SuppressWarnings("unused")
+        public DisbandGroupStep(WaitingForLockState startState, PropagatedGroupDisbandMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.groupIdentifier = receivedMessage.groupIdentifier;
+            this.propagated = true;
+        }
+
+        @SuppressWarnings("unused")
+        public DisbandGroupStep(UploadingUpdatedGroupBlobState startState, PropagatedGroupDisbandMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.groupIdentifier = receivedMessage.groupIdentifier;
+            this.propagated = true;
+        }
+
+        @SuppressWarnings("unused")
+        public DisbandGroupStep(UploadingUpdatedGroupPhotoState startState, PropagatedGroupDisbandMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.propagated = true;
@@ -4277,7 +4415,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
             // get all shared groups with the contact
-            GroupV2.IdentifierVersionAndKeys[] identifierVersionAndKeys = protocolManagerSession.identityDelegate.getGroupsV2IdentifierVersionAndKeysForContact(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity);
+            GroupV2.IdentifierVersionAndKeys[] identifierVersionAndKeys = protocolManagerSession.identityDelegate.getServerGroupsV2IdentifierVersionAndKeysForContact(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity);
 
             if (identifierVersionAndKeys.length > 0) {
                 CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[] {receivedMessage.contactDeviceUid}, false));
@@ -4320,5 +4458,185 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         }
     }
 
+    public static class ProcessCreateOrUpdateKeycloakGroupMessage extends ProtocolStep {
+        @SuppressWarnings({"unused", "FieldCanBeLocal"})
+        private final InitialProtocolState startState;
+        private final CreateOrUpdateKeycloakGroupMessage receivedMessage;
+
+        public ProcessCreateOrUpdateKeycloakGroupMessage(InitialProtocolState startState, CreateOrUpdateKeycloakGroupMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            // first check that the protocolInstanceUid matches the groupIdentifier
+            if (!getProtocolInstanceUid().equals(receivedMessage.groupIdentifier.computeProtocolInstanceUid())) {
+                return new FinalState();
+            }
+
+            KeycloakGroupBlob keycloakGroupBlob;
+            try {
+                keycloakGroupBlob = protocol.getJsonObjectMapper().readValue(receivedMessage.serializedKeycloakGroupBlob, KeycloakGroupBlob.class);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                // if the json can't be parsed, don't do anything
+                return new FinalState();
+            }
+
+            Long existingGroupTimestamp = protocolManagerSession.identityDelegate.getGroupV2LastModificationTimestamp(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.groupIdentifier);
+
+            if (existingGroupTimestamp == null) {
+                // we need to create this keycloak group
+                byte[] ownGroupInvitationNonce = protocolManagerSession.identityDelegate.createKeycloakGroupV2(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.groupIdentifier, keycloakGroupBlob);
+
+                if (ownGroupInvitationNonce == null) {
+                    // if we were not able to create the group, abort!
+                    return null;
+                }
+
+                // check if a photo download is needed
+                if (keycloakGroupBlob.photoUid != null && keycloakGroupBlob.encodedPhotoKey != null) {
+                    try {
+                        UID photoUid = new UID(keycloakGroupBlob.photoUid);
+                        AuthEncKey photoKey = (AuthEncKey) new Encoded(keycloakGroupBlob.encodedPhotoKey).decodeSymmetricKey();
+
+                        GroupV2.ServerPhotoInfo serverPhotoInfo = new GroupV2.ServerPhotoInfo(null, photoUid, photoKey);
+
+                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                                SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                                DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
+                                new UID(getPrng()),
+                                false
+                        );
+                        ChannelMessageToSend messageToSend = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, receivedMessage.groupIdentifier, serverPhotoInfo).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (Exception e) {
+                        // if photo download fails, do not abort the whole step
+                        e.printStackTrace();
+                    }
+                }
+
+                // send a ping to all members to notify them you indeed joined the group
+                for (KeycloakGroupMemberAndPermissions groupMemberAndPermissions : keycloakGroupBlob.groupMembersAndPermissions) {
+                    Identity groupMemberIdentity = Identity.of(groupMemberAndPermissions.identity);
+                    if (getOwnedIdentity().equals(groupMemberIdentity)) {
+                        continue;
+                    }
+
+                    byte[] pingSignature = protocolManagerSession.identityDelegate.signGroupInvitationNonce(
+                            protocolManagerSession.session,
+                            Constants.SignatureContext.GROUP_JOIN_NONCE,
+                            receivedMessage.groupIdentifier,
+                            ownGroupInvitationNonce,
+                            groupMemberIdentity,
+                            getOwnedIdentity(),
+                            getPrng());
+
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(groupMemberIdentity, getOwnedIdentity()));
+                    ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, receivedMessage.groupIdentifier, ownGroupInvitationNonce, pingSignature, false).generateChannelProtocolMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                }
+            } else if (existingGroupTimestamp < keycloakGroupBlob.timestamp) {
+                // we need to update this keycloak group
+                KeycloakGroupV2UpdateOutput updateOutput = protocolManagerSession.identityDelegate.updateKeycloakGroupV2WithNewBlob(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.groupIdentifier, keycloakGroupBlob);
+
+                if (updateOutput == null) {
+                    // if we were not able to update the group, abort!
+                    return null;
+                }
+
+                // trigger a photo download if needed
+                if (updateOutput.photoNeedsToBeDownloaded) {
+                    try {
+                        UID photoUid = new UID(keycloakGroupBlob.photoUid);
+                        AuthEncKey photoKey = (AuthEncKey) new Encoded(keycloakGroupBlob.encodedPhotoKey).decodeSymmetricKey();
+
+                        GroupV2.ServerPhotoInfo serverPhotoInfo = new GroupV2.ServerPhotoInfo(null, photoUid, photoKey);
+
+                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                                SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                                DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
+                                new UID(getPrng()),
+                                false
+                        );
+                        ChannelMessageToSend messageToSend = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, receivedMessage.groupIdentifier, serverPhotoInfo).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (Exception e) {
+                        // if photo download fails, do not abort the whole step
+                        e.printStackTrace();
+                    }
+                }
+
+                // send a ping to all new members to notify them you joined the group
+                for (Identity groupMemberIdentity : updateOutput.membersWithNewInvitationNonce) {
+                    byte[] pingSignature = protocolManagerSession.identityDelegate.signGroupInvitationNonce(
+                            protocolManagerSession.session,
+                            Constants.SignatureContext.GROUP_JOIN_NONCE,
+                            receivedMessage.groupIdentifier,
+                            updateOutput.ownInvitationNonce,
+                            groupMemberIdentity,
+                            getOwnedIdentity(),
+                            getPrng());
+
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(groupMemberIdentity, getOwnedIdentity()));
+                    ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, receivedMessage.groupIdentifier, updateOutput.ownInvitationNonce, pingSignature, false).generateChannelProtocolMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                }
+            } else if (existingGroupTimestamp > keycloakGroupBlob.timestamp) {
+                // this blob is outdated!
+                Logger.i("Received a keycloak group blob with an older timestamp than our current group");
+            } else {
+                // we received the same blob (same timestamp) --> do nothing
+                Logger.d("Received a keycloak blob we already received. Nothing wrong about that.");
+            }
+
+            return new FinalState();
+        }
+    }
+
+    public static class SendKeycloakGroupTargetedPingStep extends ProtocolStep {
+        @SuppressWarnings({"unused", "FieldCanBeLocal"})
+        private final InitialProtocolState startState;
+        private final InitiateTargetedPingMessage receivedMessage;
+
+        public SendKeycloakGroupTargetedPingStep(InitialProtocolState startState, InitiateTargetedPingMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            // first check that the protocolInstanceUid matches the groupIdentifier
+            if (!getProtocolInstanceUid().equals(receivedMessage.groupIdentifier.computeProtocolInstanceUid())) {
+                return new FinalState();
+            }
+
+            // get the group own invitation nonce
+            byte[] ownInvitationNonce = protocolManagerSession.identityDelegate.getGroupV2OwnGroupInvitationNonce(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.groupIdentifier);
+
+            byte[] pingSignature = protocolManagerSession.identityDelegate.signGroupInvitationNonce(
+                    protocolManagerSession.session,
+                    Constants.SignatureContext.GROUP_JOIN_NONCE,
+                    receivedMessage.groupIdentifier,
+                    ownInvitationNonce,
+                    receivedMessage.pendingMemberIdentity,
+                    getOwnedIdentity(),
+                    getPrng());
+
+            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(receivedMessage.pendingMemberIdentity, getOwnedIdentity()));
+            ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, receivedMessage.groupIdentifier, ownInvitationNonce, pingSignature, false).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
+            return new FinalState();
+        }
+    }
     // endregion
 }

@@ -82,6 +82,7 @@ public class Discussion {
 
     public static final int STATUS_NORMAL = 1;
     public static final int STATUS_LOCKED = 2;
+    public static final int STATUS_PRE_DISCUSSION = 3;
 
     @PrimaryKey(autoGenerate = true)
     public long id;
@@ -184,18 +185,7 @@ public class Discussion {
             discussion.id = db.discussionDao().insert(discussion);
 
             // set default ephemeral message settings
-            Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
-            Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
-            boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
-            if (readOnce || visibilityDuration != null || existenceDuration != null) {
-                DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-                discussionCustomization.settingExistenceDuration = existenceDuration;
-                discussionCustomization.settingVisibilityDuration = visibilityDuration;
-                discussionCustomization.settingReadOnce = readOnce;
-                discussionCustomization.sharedSettingsVersion = 0;
-                db.discussionCustomizationDao().insert(discussionCustomization);
-                db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact.bytesOwnedIdentity, false, 0L));
-            }
+            setDefaultEphemeralMessageSettings(discussion, db, contact.bytesOwnedIdentity);
 
             // insert revoked message if needed
             if (!contact.active) {
@@ -208,6 +198,11 @@ public class Discussion {
             if (discussion.status == STATUS_LOCKED) {
                 Message contactReAdded = Message.createContactReAddedMessage(db, discussion.id, contact.bytesContactIdentity);
                 db.messageDao().insert(contactReAdded);
+            }
+
+            if (discussion.isPreDiscussion()) {
+                // set default ephemeral message settings
+                setDefaultEphemeralMessageSettings(discussion, db, contact.bytesOwnedIdentity);
             }
 
             discussion.title = contact.getCustomDisplayName();
@@ -231,6 +226,21 @@ public class Discussion {
         }
 
         return discussion;
+    }
+
+    private static void setDefaultEphemeralMessageSettings(Discussion discussion, @NonNull AppDatabase db, @NonNull byte[] contact) {
+        Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
+        Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
+        boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
+        if (readOnce || visibilityDuration != null || existenceDuration != null) {
+            DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
+            discussionCustomization.settingExistenceDuration = existenceDuration;
+            discussionCustomization.settingVisibilityDuration = visibilityDuration;
+            discussionCustomization.settingReadOnce = readOnce;
+            discussionCustomization.sharedSettingsVersion = 0;
+            db.discussionCustomizationDao().insert(discussionCustomization);
+            db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact, false, 0L));
+        }
     }
 
     @Ignore
@@ -263,18 +273,7 @@ public class Discussion {
             discussion.id = db.discussionDao().insert(discussion);
 
             if (group.bytesGroupOwnerIdentity == null) {
-                Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
-                Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
-                boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
-                if (readOnce || visibilityDuration != null || existenceDuration != null) {
-                    DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-                    discussionCustomization.settingExistenceDuration = existenceDuration;
-                    discussionCustomization.settingVisibilityDuration = visibilityDuration;
-                    discussionCustomization.settingReadOnce = readOnce;
-                    discussionCustomization.sharedSettingsVersion = 0;
-                    db.discussionCustomizationDao().insert(discussionCustomization);
-                    db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), group.bytesOwnedIdentity, false, 0L));
-                }
+                setDefaultEphemeralMessageSettings(discussion, db, group.bytesOwnedIdentity);
             }
         } else if (!discussion.canPostMessages()) {
             if (discussion.status == STATUS_LOCKED) {
@@ -288,7 +287,7 @@ public class Discussion {
             discussion.keycloakManaged = false;
             discussion.active = true;
             discussion.trustLevel = null;
-            discussion.status = Discussion.STATUS_NORMAL;
+            discussion.status = STATUS_NORMAL;
             db.discussionDao().updateAll(discussion);
 
             ShortcutActivity.updateShortcut(discussion);
@@ -328,18 +327,7 @@ public class Discussion {
 
             // if the is a group we just created, we should apply default ephemeral settings
             if (groupWasJustCreatedByMe) {
-                Long existenceDuration = SettingsActivity.getDefaultDiscussionExistenceDuration();
-                Long visibilityDuration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
-                boolean readOnce = SettingsActivity.getDefaultDiscussionReadOnce();
-                if (readOnce || visibilityDuration != null || existenceDuration != null) {
-                    DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-                    discussionCustomization.settingExistenceDuration = existenceDuration;
-                    discussionCustomization.settingVisibilityDuration = visibilityDuration;
-                    discussionCustomization.settingReadOnce = readOnce;
-                    discussionCustomization.sharedSettingsVersion = 0;
-                    db.discussionCustomizationDao().insert(discussionCustomization);
-                    db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), group2.bytesOwnedIdentity, false, 0L));
-                }
+                setDefaultEphemeralMessageSettings(discussion, db, group2.bytesOwnedIdentity);
             } else {
                 Message reJoinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
                 db.messageDao().insert(reJoinedGroup);
@@ -356,7 +344,7 @@ public class Discussion {
             discussion.keycloakManaged = group2.keycloakManaged;
             discussion.active = true;
             discussion.trustLevel = null;
-            discussion.status = Discussion.STATUS_NORMAL;
+            discussion.status = STATUS_NORMAL;
             db.discussionDao().updateAll(discussion);
 
             ShortcutActivity.updateShortcut(discussion);
@@ -374,6 +362,12 @@ public class Discussion {
         return status == STATUS_NORMAL;
     }
 
+    public boolean canBeLocked() {
+        return status == STATUS_NORMAL;
+    }
+
+    public boolean isPreDiscussion() { return status == STATUS_PRE_DISCUSSION; }
+
     public boolean updateLastMessageTimestamp(long lastMessageTimestamp) {
         if (lastMessageTimestamp > this.lastMessageTimestamp) {
             this.lastMessageTimestamp = lastMessageTimestamp;
@@ -387,8 +381,8 @@ public class Discussion {
             Logger.e("ERROR: running discussion lockWithMessage outside a transaction");
         }
 
-        if (isLocked()) {
-            Logger.w("Locking a discussion which is already locked");
+        if (!canBeLocked()) {
+            Logger.w("Locking a discussion which cannot be locked");
             return;
         }
 
@@ -473,7 +467,7 @@ public class Discussion {
             db.discussionDao().updateAsLocked(id);
 
             if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(id)) {
-                UnifiedForegroundService.LocationSharingSubService.stopSharingLocationSync(id);
+                UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(id, true);
             }
             ShortcutActivity.updateShortcut(this);
         }

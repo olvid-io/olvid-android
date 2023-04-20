@@ -366,7 +366,7 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
                 }
                 Matcher matcher = pattern.matcher(unAccented);
                 if (matcher.find()) {
-                    highlightedString.setSpan(highlightedSpans[i], matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    highlightedString.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(text, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(text, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     i++;
                 }
             }

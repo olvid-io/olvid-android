@@ -1135,16 +1135,6 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
             {
-                // We received a message on the obliviousChannel, so we can confirm it
-                protocolManagerSession.channelDelegate.confirmObliviousChannel(
-                        protocolManagerSession.session,
-                        getOwnedIdentity(),
-                        startState.contactDeviceUid,
-                        startState.contactIdentity
-                );
-            }
-
-            {
                 // update the publishedContactDetails with what we just received
                 try {
                     JsonIdentityDetailsWithVersionAndPhoto contactDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().readValue(receivedMessage.contactSerializedIdentityWithVersionAndPhoto, JsonIdentityDetailsWithVersionAndPhoto.class);
@@ -1169,6 +1159,16 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 }
             }
 
+            {
+                // We received a message on the obliviousChannel, so we can confirm it
+                // we do this after updating the details so that if the contact was to lose their "keycloak certified" status, we know messages in keycloak groups are not sent
+                protocolManagerSession.channelDelegate.confirmObliviousChannel(
+                        protocolManagerSession.session,
+                        getOwnedIdentity(),
+                        startState.contactDeviceUid,
+                        startState.contactIdentity
+                );
+            }
 
             {
                 // send this device capabilities to contact
@@ -1244,13 +1244,6 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            // we can confirm the obliviousChannel
-            protocolManagerSession.channelDelegate.confirmObliviousChannel(
-                    protocolManagerSession.session,
-                    getOwnedIdentity(),
-                    startState.contactDeviceUid,
-                    startState.contactIdentity
-            );
 
             // update the publishedContactDetails with what we just received
             {
@@ -1277,6 +1270,16 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 }
             }
 
+            {
+                // we can confirm the obliviousChannel
+                // we do this after updating the details so that if the contact was to lose their "keycloak certified" status, we know messages in keycloak groups are not sent
+                protocolManagerSession.channelDelegate.confirmObliviousChannel(
+                        protocolManagerSession.session,
+                        getOwnedIdentity(),
+                        startState.contactDeviceUid,
+                        startState.contactIdentity
+                );
+            }
 
             // send this device capabilities to contact
             {

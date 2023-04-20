@@ -294,74 +294,77 @@ public class OwnedIdentityDeletionWithContactNotificationProtocol extends Concre
             {
                 List<ObvGroupV2> groupsV2 = protocolManagerSession.identityDelegate.getObvGroupsV2ForOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
                 for (ObvGroupV2 groupV2 : groupsV2) {
-                    try {
-                        // check if I am the only non-pending admin of this group
-                        boolean iAmTheOnlyAdmin;
-                        if (groupV2.ownPermissions.contains(GroupV2.Permission.GROUP_ADMIN)) {
-                            iAmTheOnlyAdmin = true;
-                            for (ObvGroupV2.ObvGroupV2Member member : groupV2.otherGroupMembers) {
-                                if (member.permissions.contains(GroupV2.Permission.GROUP_ADMIN)) {
-                                    iAmTheOnlyAdmin = false;
-                                    break;
+                    if (groupV2.groupIdentifier.category == GroupV2.Identifier.CATEGORY_SERVER) {
+                        // only consider non-keycloak groups
+                        try {
+                            // check if I am the only non-pending admin of this group
+                            boolean iAmTheOnlyAdmin;
+                            if (groupV2.ownPermissions.contains(GroupV2.Permission.GROUP_ADMIN)) {
+                                iAmTheOnlyAdmin = true;
+                                for (ObvGroupV2.ObvGroupV2Member member : groupV2.otherGroupMembers) {
+                                    if (member.permissions.contains(GroupV2.Permission.GROUP_ADMIN)) {
+                                        iAmTheOnlyAdmin = false;
+                                        break;
+                                    }
                                 }
-                            }
-                        } else {
-                            iAmTheOnlyAdmin = false;
-                        }
-
-                        if (iAmTheOnlyAdmin) {
-                            // delete the blob on the server
-                            GroupV2.BlobKeys blobKeys = protocolManagerSession.identityDelegate.getGroupV2BlobKeys(protocolManagerSession.session, getOwnedIdentity(), groupV2.groupIdentifier);
-                            {
-                                byte[] signature = Signature.sign(Constants.SignatureContext.GROUP_DELETE_ON_SERVER, blobKeys.groupAdminServerAuthenticationPrivateKey.getSignaturePrivateKey(), getPrng());
-                                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createDeleteGroupBlobQuery(groupV2.groupIdentifier, signature)), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, new UID(getPrng()), false);
-                                ChannelMessageToSend messageToSend = new GroupsV2Protocol.DeleteGroupBlobFromServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
-                                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                            } else {
+                                iAmTheOnlyAdmin = false;
                             }
 
-                            // immediately kick all members
-                            byte[] chainPlaintext = protocolManagerSession.identityDelegate.getGroupV2AdministratorsChain(protocolManagerSession.session, getOwnedIdentity(), groupV2.groupIdentifier).encode().getBytes();
-                            AuthEncKey encryptionKey = (AuthEncKey) Suite.getKDF(KDF.KDF_SHA256).gen(blobKeys.blobMainSeed, Suite.getDefaultAuthEnc(0).getKDFDelegate())[0];
-                            EncryptedBytes encryptedChain = Suite.getAuthEnc(encryptionKey).encrypt(encryptionKey, chainPlaintext, getPrng());
-
-                            GroupV2.ServerBlob serverBlob = protocolManagerSession.identityDelegate.getGroupV2ServerBlob(protocolManagerSession.session, getOwnedIdentity(), groupV2.groupIdentifier);
-
-                            for (GroupV2.IdentityAndPermissionsAndDetails member : serverBlob.groupMemberIdentityAndPermissionsAndDetailsList) {
-                                if (member.identity.equals(getOwnedIdentity())) {
-                                    continue;
+                            if (iAmTheOnlyAdmin) {
+                                // delete the blob on the server
+                                GroupV2.BlobKeys blobKeys = protocolManagerSession.identityDelegate.getGroupV2BlobKeys(protocolManagerSession.session, getOwnedIdentity(), groupV2.groupIdentifier);
+                                {
+                                    byte[] signature = Signature.sign(Constants.SignatureContext.GROUP_DELETE_ON_SERVER, blobKeys.groupAdminServerAuthenticationPrivateKey.getSignaturePrivateKey(), getPrng());
+                                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createDeleteGroupBlobQuery(groupV2.groupIdentifier, signature)), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, new UID(getPrng()), false);
+                                    ChannelMessageToSend messageToSend = new GroupsV2Protocol.DeleteGroupBlobFromServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
+                                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                                 }
 
-                                byte[] dataToSign = new byte[encryptedChain.length + member.groupInvitationNonce.length];
-                                System.arraycopy(encryptedChain.getBytes(), 0, dataToSign, 0, encryptedChain.length);
-                                System.arraycopy(member.groupInvitationNonce, 0, dataToSign, encryptedChain.length, member.groupInvitationNonce.length);
+                                // immediately kick all members
+                                byte[] chainPlaintext = protocolManagerSession.identityDelegate.getGroupV2AdministratorsChain(protocolManagerSession.session, getOwnedIdentity(), groupV2.groupIdentifier).encode().getBytes();
+                                AuthEncKey encryptionKey = (AuthEncKey) Suite.getKDF(KDF.KDF_SHA256).gen(blobKeys.blobMainSeed, Suite.getDefaultAuthEnc(0).getKDFDelegate())[0];
+                                EncryptedBytes encryptedChain = Suite.getAuthEnc(encryptionKey).encrypt(encryptionKey, chainPlaintext, getPrng());
 
-                                byte[] signature = protocolManagerSession.identityDelegate.signBlock(protocolManagerSession.session, Constants.SignatureContext.GROUP_KICK, dataToSign, getOwnedIdentity(), getPrng());
+                                GroupV2.ServerBlob serverBlob = protocolManagerSession.identityDelegate.getGroupV2ServerBlob(protocolManagerSession.session, getOwnedIdentity(), groupV2.groupIdentifier);
 
-                                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(member.identity, getOwnedIdentity()), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, groupV2.groupIdentifier.computeProtocolInstanceUid(), false);
-                                ChannelMessageToSend messageToSend = new GroupsV2Protocol.KickMessage(coreProtocolMessage, groupV2.groupIdentifier, encryptedChain, signature).generateChannelProtocolMessageToSend();
-                                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                                for (GroupV2.IdentityAndPermissionsAndDetails member : serverBlob.groupMemberIdentityAndPermissionsAndDetailsList) {
+                                    if (member.identity.equals(getOwnedIdentity())) {
+                                        continue;
+                                    }
+
+                                    byte[] dataToSign = new byte[encryptedChain.length + member.groupInvitationNonce.length];
+                                    System.arraycopy(encryptedChain.getBytes(), 0, dataToSign, 0, encryptedChain.length);
+                                    System.arraycopy(member.groupInvitationNonce, 0, dataToSign, encryptedChain.length, member.groupInvitationNonce.length);
+
+                                    byte[] signature = protocolManagerSession.identityDelegate.signBlock(protocolManagerSession.session, Constants.SignatureContext.GROUP_KICK, dataToSign, getOwnedIdentity(), getPrng());
+
+                                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(member.identity, getOwnedIdentity()), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, groupV2.groupIdentifier.computeProtocolInstanceUid(), false);
+                                    ChannelMessageToSend messageToSend = new GroupsV2Protocol.KickMessage(coreProtocolMessage, groupV2.groupIdentifier, encryptedChain, signature).generateChannelProtocolMessageToSend();
+                                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                                }
+                            } else {
+                                byte[] ownGroupInvitationNonce = protocolManagerSession.identityDelegate.getGroupV2OwnGroupInvitationNonce(protocolManagerSession.session, getOwnedIdentity(), groupV2.groupIdentifier);
+                                if (ownGroupInvitationNonce != null) {
+                                    // put a group left log on server
+                                    // we do not notify the group members: they will refresh the groups when we send them the contact deletion message
+                                    byte[] leaveSignature = protocolManagerSession.identityDelegate.signGroupInvitationNonce(
+                                            protocolManagerSession.session,
+                                            Constants.SignatureContext.GROUP_LEAVE_NONCE,
+                                            groupV2.groupIdentifier,
+                                            ownGroupInvitationNonce,
+                                            null,
+                                            getOwnedIdentity(),
+                                            getPrng());
+
+                                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createPutGroupLogQuery(groupV2.groupIdentifier, leaveSignature)), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, new UID(getPrng()), false);
+                                    ChannelMessageToSend messageToSend = new GroupsV2Protocol.PutGroupLogOnServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
+                                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                                }
                             }
-                        } else {
-                            byte[] ownGroupInvitationNonce = protocolManagerSession.identityDelegate.getGroupV2OwnGroupInvitationNonce(protocolManagerSession.session, getOwnedIdentity(), groupV2.groupIdentifier);
-                            if (ownGroupInvitationNonce != null) {
-                                // put a group left log on server
-                                // we do not notify the group members: they will refresh the groups when we send them the contact deletion message
-                                byte[] leaveSignature = protocolManagerSession.identityDelegate.signGroupInvitationNonce(
-                                        protocolManagerSession.session,
-                                        Constants.SignatureContext.GROUP_LEAVE_NONCE,
-                                        groupV2.groupIdentifier,
-                                        ownGroupInvitationNonce,
-                                        null,
-                                        getOwnedIdentity(),
-                                        getPrng());
-
-                                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createPutGroupLogQuery(groupV2.groupIdentifier, leaveSignature)), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, new UID(getPrng()), false);
-                                ChannelMessageToSend messageToSend = new GroupsV2Protocol.PutGroupLogOnServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
-                                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                            }
+                        } catch (Exception ignored) {
+                            // continue even if there is an exception, contact notification is only best effort!
                         }
-                    } catch (Exception ignored) {
-                        // continue even if there is an exception, contact notification is only best effort!
                     }
                 }
             }
@@ -488,7 +491,7 @@ public class OwnedIdentityDeletionWithContactNotificationProtocol extends Concre
 
             {
                 // deal with group v2
-                for (GroupV2.IdentifierAndAdminStatus identifierAndAdminStatus : protocolManagerSession.identityDelegate.getGroupsV2IdentifierAndMyAdminStatusForContact(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.deletedContactOwnedIdentity)) {
+                for (GroupV2.IdentifierAndAdminStatus identifierAndAdminStatus : protocolManagerSession.identityDelegate.getServerGroupsV2IdentifierAndMyAdminStatusForContact(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.deletedContactOwnedIdentity)) {
                     if (!propagated && identifierAndAdminStatus.iAmAdmin) {
                         // I am a group admin --> start the standard group update protocol
                         ObvGroupV2.ObvGroupV2ChangeSet changeSet = new ObvGroupV2.ObvGroupV2ChangeSet();

@@ -129,10 +129,12 @@ public class UploadMessageAndGetUidsOperation extends Operation {
                         }
                         finished = true;
                         return;
+                    case ServerMethod.PAYLOAD_TOO_LARGE:
                     case ServerMethod.GENERAL_ERROR:
                     default:
-                        if (System.currentTimeMillis() > outboxMessage.getCreationTimestamp() + Constants.OUTBOX_MESSAGE_MAX_SEND_DELAY) {
-                            // message is too old --> we no longer try sending it
+                        if (returnStatus == ServerMethod.PAYLOAD_TOO_LARGE
+                                || System.currentTimeMillis() > outboxMessage.getCreationTimestamp() + Constants.OUTBOX_MESSAGE_MAX_SEND_DELAY) {
+                            // message is too large or too old --> we no longer try sending it
                             outboxMessage.setUidFromServer(new UID(new byte[UID.UID_LENGTH]), new byte[0], 0);
                             for (OutboxAttachment attachment: attachments) {
                                 attachment.setCancelExternallyRequested();

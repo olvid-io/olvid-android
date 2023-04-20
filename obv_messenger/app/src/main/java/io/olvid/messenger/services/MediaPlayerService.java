@@ -55,6 +55,7 @@ import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.BytesKey;
+import io.olvid.messenger.customClasses.LockScreenOrNotActivity;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.main.MainActivity;
@@ -457,11 +458,22 @@ public class MediaPlayerService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
+        if (UnifiedForegroundService.removingExtraTasks) {
+            return;
+        }
+
         ComponentName intentComponent = rootIntent.getComponent();
         if (intentComponent != null) {
             if (WebrtcCallActivity.class.getName().equals(intentComponent.getClassName())
                     || WebrtcIncomingCallActivity.class.getName().equals(intentComponent.getClassName())) {
                 return;
+            }
+
+            try {
+                if (LockScreenOrNotActivity.class.isAssignableFrom(Class.forName(intentComponent.getClassName()))) {
+                    return;
+                }
+            } catch (ClassNotFoundException ignored) {
             }
         }
         stopPlayback();

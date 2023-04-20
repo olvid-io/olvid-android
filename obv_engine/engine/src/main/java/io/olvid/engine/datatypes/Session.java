@@ -126,6 +126,7 @@ public class Session implements Connection {
         sessionCommitListeners.add(listener);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isInTransaction() throws SQLException {
         return !connection.getAutoCommit();
     }

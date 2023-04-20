@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingEnd="8dp"
+    android:paddingStart="8dp"
+    app:behavior_hideable="true"
+    android:background="@drawable/background_reaction_bottom_sheet"
+    app:layout_behavior="@string/bottom_sheet_behavior">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/bottom_sheet_fullscreen_map_recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        android:paddingBottom="48dp"
+        android:clipToPadding="false"
+        tools:itemCount="2"
+        tools:listitem="@layout/item_view_fullscreen_map_bottom_sheet_dialog"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

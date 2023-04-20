@@ -184,7 +184,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                         .setTitle(R.string.dialog_title_unmute_notifications)
                         .setPositiveButton(R.string.button_label_unmute_notifications, (dialog, which) -> App.runThread(() -> {
                             identityObserver.ownedIdentity.prefMuteNotifications = false;
-                            AppDatabase.getInstance().ownedIdentityDao().updateMuteNotifications(identityObserver.ownedIdentity.bytesOwnedIdentity, identityObserver.ownedIdentity.prefMuteNotifications, null);
+                            AppDatabase.getInstance().ownedIdentityDao().updateMuteNotifications(identityObserver.ownedIdentity.bytesOwnedIdentity, identityObserver.ownedIdentity.prefMuteNotifications, null, identityObserver.ownedIdentity.prefMuteNotificationsExceptMentioned);
                         }))
                         .setNegativeButton(R.string.button_label_cancel, null);
 
@@ -197,13 +197,14 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             }
             return true;
         } else if (itemId == R.id.action_mute) {
-            MuteNotificationDialog muteNotificationDialog = new MuteNotificationDialog(this, (Long muteExpirationTimestamp, boolean muteWholeProfile) -> App.runThread(() -> {
+            MuteNotificationDialog muteNotificationDialog = new MuteNotificationDialog(this, (Long muteExpirationTimestamp, boolean muteWholeProfile, boolean exceptMentioned) -> App.runThread(() -> {
                 if (identityObserver.ownedIdentity != null) {
                     identityObserver.ownedIdentity.prefMuteNotifications = true;
                     identityObserver.ownedIdentity.prefMuteNotificationsTimestamp = muteExpirationTimestamp;
-                    AppDatabase.getInstance().ownedIdentityDao().updateMuteNotifications(identityObserver.ownedIdentity.bytesOwnedIdentity, identityObserver.ownedIdentity.prefMuteNotifications, identityObserver.ownedIdentity.prefMuteNotificationsTimestamp);
+                    identityObserver.ownedIdentity.prefMuteNotificationsExceptMentioned = exceptMentioned;
+                    AppDatabase.getInstance().ownedIdentityDao().updateMuteNotifications(identityObserver.ownedIdentity.bytesOwnedIdentity, identityObserver.ownedIdentity.prefMuteNotifications, identityObserver.ownedIdentity.prefMuteNotificationsTimestamp, identityObserver.ownedIdentity.prefMuteNotificationsExceptMentioned);
                 }
-            }), MuteNotificationDialog.MuteType.PROFILE);
+            }), MuteNotificationDialog.MuteType.PROFILE, identityObserver.ownedIdentity == null || identityObserver.ownedIdentity.prefMuteNotificationsExceptMentioned);
 
             muteNotificationDialog.show();
             return true;

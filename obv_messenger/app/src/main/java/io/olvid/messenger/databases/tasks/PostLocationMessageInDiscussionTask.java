@@ -19,7 +19,6 @@
 
 package io.olvid.messenger.databases.tasks;
 
-import android.content.Intent;
 import android.location.Location;
 
 import androidx.annotation.Nullable;
@@ -27,7 +26,6 @@ import androidx.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import io.olvid.engine.Logger;
-import io.olvid.messenger.App;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -66,8 +64,8 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
     @Override
     public void run() {
         final Discussion discussion = db.discussionDao().getById(discussionId);
-        if (discussion.isLocked()) {
-            Logger.w("A message was posted in a locked discussion!!!");
+        if (!discussion.canPostMessages()) {
+            Logger.w("A message was posted in a discussion where you cannot post!!!");
             return;
         }
 
@@ -106,21 +104,15 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
                     null,
                     discussion.bytesOwnedIdentity,
                     discussion.senderThreadIdentifier,
-                    0, 0
+                    0,
+                    0
             );
             message.id = db.messageDao().insert(message);
             message.post(showToast, null);
 
             // start sharing location service for this discussion
             if (isSharingLocationMessage) {
-                Intent startSharingPositionIntent = new Intent(App.getContext(), UnifiedForegroundService.class);
-                startSharingPositionIntent.putExtra(UnifiedForegroundService.SUB_SERVICE_INTENT_EXTRA, UnifiedForegroundService.SUB_SERVICE_LOCATION_SHARING);
-                startSharingPositionIntent.setAction(UnifiedForegroundService.LocationSharingSubService.START_SHARING_ACTION);
-                startSharingPositionIntent.putExtra(UnifiedForegroundService.LocationSharingSubService.DISCUSSION_ID_INTENT_EXTRA, this.discussionId);
-                startSharingPositionIntent.putExtra(UnifiedForegroundService.LocationSharingSubService.SHARING_EXPIRATION_INTENT_EXTRA, shareExpirationInMs);
-                startSharingPositionIntent.putExtra(UnifiedForegroundService.LocationSharingSubService.SHARING_INTERVAL_INTENT_EXTRA, shareIntervalInMs);
-                startSharingPositionIntent.putExtra(UnifiedForegroundService.LocationSharingSubService.MESSAGE_ID_INTENT_EXTRA, message.id);
-                App.getContext().startService(startSharingPositionIntent);
+                UnifiedForegroundService.LocationSharingSubService.startSharingInDiscussion(discussionId, shareExpirationInMs, shareIntervalInMs, message.id);
             }
         });
     }

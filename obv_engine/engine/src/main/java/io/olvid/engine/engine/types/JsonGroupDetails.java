@@ -65,10 +65,7 @@ public class JsonGroupDetails {
             return false;
         }
         JsonGroupDetails other = (JsonGroupDetails) obj;
-        if (!(Objects.equals(name, other.name))) {
-            return false;
-        }
-        return Objects.equals(description, other.description);
+        return Objects.equals(name, other.name) && Objects.equals(description, other.description);
     }
 
     private static String nullOrTrim(String in) {

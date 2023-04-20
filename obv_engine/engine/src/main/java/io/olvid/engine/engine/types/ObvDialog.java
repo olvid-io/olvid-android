@@ -148,7 +148,7 @@ public class ObvDialog {
         public static final int ACCEPT_INVITE_DIALOG_CATEGORY = 1;
         public static final int SAS_EXCHANGE_DIALOG_CATEGORY = 2;
         public static final int SAS_CONFIRMED_DIALOG_CATEGORY = 3;
-        public static final int MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY = 4;
+        //public static final int MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY = 4;
         public static final int INVITE_ACCEPTED_DIALOG_CATEGORY = 5;
         public static final int ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY = 6;
         public static final int MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY = 7;
@@ -357,7 +357,6 @@ public class ObvDialog {
             Encoded encodedVars = null;
             switch (id) {
                 case INVITE_SENT_DIALOG_CATEGORY:
-                case MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY:
                 case INVITE_ACCEPTED_DIALOG_CATEGORY: {
                     encodedVars = Encoded.of(new Encoded[]{
                             Encoded.of(bytesContactIdentity),
@@ -469,10 +468,6 @@ public class ObvDialog {
 
         public static Category createSasConfirmed(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] sasToDisplay, byte[] sasEntered) {
             return new Category(SAS_CONFIRMED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, null, null, null, null, null, null);
-        }
-
-        public static Category createMutualTrustConfirmed(byte[] bytesContactIdentity, String contactSerializedDetails) {
-            return new Category(MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY, bytesContactIdentity, contactSerializedDetails, null, null, null, null, null, null, null, null);
         }
 
         public static Category createInviteAccepted(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails) {

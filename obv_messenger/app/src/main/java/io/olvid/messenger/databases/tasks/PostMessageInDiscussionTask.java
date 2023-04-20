@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.tasks;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.List;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
@@ -38,13 +39,15 @@ public class PostMessageInDiscussionTask implements Runnable {
     private final long discussionId;
     private final boolean showToast;
     private final OpenGraph openGraph;
+    private final List<Message.JsonUserMention> mentions;
 
-    public PostMessageInDiscussionTask(String body, long discussionId, boolean showToast, OpenGraph openGraph) {
+    public PostMessageInDiscussionTask(String body, long discussionId, boolean showToast, OpenGraph openGraph, List<Message.JsonUserMention> mentions) {
         this.db = AppDatabase.getInstance();
         this.body = body;
         this.discussionId = discussionId;
         this.showToast = showToast;
         this.openGraph = openGraph;
+        this.mentions = mentions;
     }
 
     @Override
@@ -90,6 +93,7 @@ public class PostMessageInDiscussionTask implements Runnable {
             } else {
                 jsonMessage = new Message.JsonMessage(body);
             }
+            jsonMessage.setJsonUserMentions(mentions);
 
             if (discussionDefaultJsonExpiration != null) {
                 jsonMessage.setJsonExpiration(discussionDefaultJsonExpiration);
@@ -112,14 +116,16 @@ public class PostMessageInDiscussionTask implements Runnable {
                         null,
                         discussion.bytesOwnedIdentity,
                         discussion.senderThreadIdentifier,
-                        0, 0
-                );
+                        0,
+                        0);
+                message.mentioned = message.isIdentityMentioned(message.senderIdentifier);
                 message.id = db.messageDao().insert(message);
                 message.post(showToast, null);
             });
         } else {
             final Message.JsonMessage jsonMessage = draftMessage.getJsonMessage();
             jsonMessage.setBody(body);
+            jsonMessage.setJsonUserMentions(mentions);
 
             if (discussionDefaultJsonExpiration != null) {
                 if (jsonMessage.getJsonExpiration() == null) {
@@ -137,6 +143,7 @@ public class PostMessageInDiscussionTask implements Runnable {
                 db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                 draftMessage.senderSequenceNumber = discussion.lastOutboundMessageSequenceNumber;
                 draftMessage.setJsonMessage(jsonMessage);
+                draftMessage.mentioned = draftMessage.isIdentityMentioned(draftMessage.senderIdentifier);
                 draftMessage.status = Message.STATUS_UNPROCESSED;
                 draftMessage.timestamp = System.currentTimeMillis();
                 draftMessage.computeOutboundSortIndex(db);

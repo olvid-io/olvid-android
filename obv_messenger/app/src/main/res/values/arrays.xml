@@ -337,11 +337,11 @@
         <item>nobody</item>
     </string-array>
 
-    <integer-array name="share_location_duration_values">
-        <item>3600</item>
-        <item>10800</item>
+    <string-array name="share_location_duration_values">
+        <item>3600000</item>
+        <item>10800000</item>
         <item>-1</item>
-    </integer-array>
+    </string-array>
     <string-array name="share_location_duration_short_strings">
         <item>@string/location_sharing_duration_one_hour_short_string</item>
         <item>@string/location_sharing_duration_three_hours_short_string</item>
@@ -353,11 +353,11 @@
         <item>@string/location_sharing_duration_endless_full_string</item>
     </string-array>
 
-    <integer-array name="share_location_interval_values">
-        <item>60</item>
-        <item>300</item>
-        <item>3600</item>
-    </integer-array>
+    <string-array name="share_location_interval_values">
+        <item>60000</item>
+        <item>300000</item>
+        <item>3600000</item>
+    </string-array>
     <string-array name="share_location_interval_short_strings">
         <item>@string/location_sharing_interval_one_minute_short_string</item>
         <item>@string/location_sharing_interval_five_minutes_short_string</item>
@@ -369,6 +369,16 @@
         <item>@string/location_sharing_interval_one_hour_full_string</item>
     </string-array>
 
+    <string-array name="location_osm_language_entries">
+        <item>@string/location_map_language_default</item>
+        <item>@string/location_map_language_english</item>
+        <item>@string/location_map_language_french</item>
+    </string-array>
+    <string-array name="location_osm_language_values">
+        <item>default</item>
+        <item>en</item>
+        <item>fr</item>
+    </string-array>
     <string-array name="app_language_choice">
         <item>@string/pref_text_default_device_language</item>
         <item>@string/pref_text_english</item>

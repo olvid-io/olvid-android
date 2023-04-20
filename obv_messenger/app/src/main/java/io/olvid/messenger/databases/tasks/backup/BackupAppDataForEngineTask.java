@@ -58,6 +58,7 @@ public class BackupAppDataForEngineTask implements Runnable {
                         && (ownedIdentity.prefMuteNotificationsTimestamp == null || ownedIdentity.prefMuteNotificationsTimestamp > System.currentTimeMillis())) {
                     ownedIdentityPojo.mute_notifications = true;
                     ownedIdentityPojo.mute_notification_timestamp = ownedIdentity.prefMuteNotificationsTimestamp;
+                    ownedIdentityPojo.mute_notifications_except_mentioned = ownedIdentity.prefMuteNotificationsExceptMentioned;
                 }
                 ownedIdentityPojo.show_neutral_notification_when_hidden = ownedIdentity.prefShowNeutralNotificationWhenHidden;
                 ownedIdentityPojo.contacts = new ArrayList<>();

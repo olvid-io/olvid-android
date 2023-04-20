@@ -36,10 +36,6 @@ import androidx.room.PrimaryKey;
                         parentColumns = OwnedIdentity.BYTES_OWNED_IDENTITY,
                         childColumns = CallLogItem.BYTES_OWNED_IDENTITY,
                         onDelete = ForeignKey.CASCADE),
-                @ForeignKey(entity = Group.class,
-                        parentColumns = {Group.BYTES_GROUP_OWNER_AND_UID, Group.BYTES_OWNED_IDENTITY},
-                        childColumns = {CallLogItem.BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER, CallLogItem.BYTES_OWNED_IDENTITY},
-                        onDelete = ForeignKey.CASCADE),
         },
         indices = {
                 @Index(value = {CallLogItem.BYTES_OWNED_IDENTITY}),

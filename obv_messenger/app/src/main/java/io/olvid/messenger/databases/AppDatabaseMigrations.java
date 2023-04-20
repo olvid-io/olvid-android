@@ -26,9 +26,12 @@ import androidx.annotation.NonNull;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import java.nio.charset.StandardCharsets;
 import java.text.Collator;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,11 +39,60 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.databases.entity.Message;
 
 class AppDatabaseMigrations {
-    static final Migration[] MIGRATIONS = new Migration[] {
+    static final Migration[] MIGRATIONS = new Migration[]{
+            new Migration(62, 63) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 62 TO 63");
+
+                    database.execSQL("ALTER TABLE `message_table` ADD COLUMN `mentioned` INTEGER NOT NULL DEFAULT 0");
+                 }
+            },
+            new Migration(61, 62) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 61 TO 62");
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS `call_log_table_temp` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `bytes_group_owner_and_uid` BLOB, `timestamp` INTEGER NOT NULL, `call_type` INTEGER NOT NULL, `call_status` INTEGER NOT NULL, `duration` INTEGER NOT NULL, FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+                    database.execSQL("DROP INDEX `index_call_log_table_bytes_owned_identity`");
+                    database.execSQL("DROP INDEX `index_call_log_table_timestamp`");
+                    database.execSQL("DROP INDEX `index_call_log_table_bytes_group_owner_and_uid_bytes_owned_identity`");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_table_bytes_owned_identity` ON `call_log_table_temp` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_table_timestamp` ON `call_log_table_temp` (`timestamp`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_table_bytes_group_owner_and_uid_bytes_owned_identity` ON `call_log_table_temp` (`bytes_group_owner_and_uid`, `bytes_owned_identity`)");
+                    database.execSQL("INSERT INTO `call_log_table_temp` (id, bytes_owned_identity, bytes_group_owner_and_uid, timestamp, call_type, call_status, duration) SELECT id, bytes_owned_identity, bytes_group_owner_and_uid, timestamp, call_type, call_status, duration FROM `call_log_table`");
+
+                    database.execSQL("DROP TABLE `call_log_table`");
+                    database.execSQL("ALTER TABLE `call_log_table_temp` RENAME TO `call_log_table`");
+
+                }
+            },
+            new Migration(60, 61) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 60 TO 61");
+
+                    database.execSQL("ALTER TABLE `invitation_table` ADD COLUMN `discussion_id` INTEGER DEFAULT NULL");
+                }
+            },
+            new Migration(59, 60) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 59 TO 60");
+
+                    database.execSQL("ALTER TABLE `message_table` ADD COLUMN `json_mentions` TEXT DEFAULT NULL");
+                    database.execSQL("ALTER TABLE `remote_delete_and_edit_request_table` ADD COLUMN `mentions` TEXT DEFAULT NULL");
+                    database.execSQL("ALTER TABLE `discussion_customization_table` ADD COLUMN `pref_mute_notifications_except_mentioned` INTEGER NOT NULL DEFAULT 1");
+                    database.execSQL("ALTER TABLE `identity_table` ADD COLUMN `pref_mute_notifications_except_mentioned` INTEGER NOT NULL DEFAULT 1");
+                }
+            },
+
             new Migration(58, 59) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
@@ -71,8 +123,8 @@ class AppDatabaseMigrations {
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `reaction_request_table_new` (`discussion_id` INTEGER NOT NULL, `sender_identifier` BLOB NOT NULL, `sender_thread_identifier` TEXT NOT NULL, `sender_sequence_number` INTEGER NOT NULL, `reacter` BLOB NOT NULL, `server_timestamp` INTEGER NOT NULL, `reaction` TEXT, PRIMARY KEY(`discussion_id`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`, `reacter`), FOREIGN KEY(`discussion_id`) REFERENCES `discussion_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
                     database.execSQL("INSERT INTO `reaction_request_table_new` " +
-                                    " SELECT `discussion_id`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`, `reacter`, `server_timestamp`, `reaction` " +
-                                    " FROM `reaction_request_table`");
+                            " SELECT `discussion_id`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`, `reacter`, `server_timestamp`, `reaction` " +
+                            " FROM `reaction_request_table`");
 
                     database.execSQL("DROP INDEX `index_reaction_request_table_discussion_id`");
                     database.execSQL("DROP INDEX `index_reaction_request_table_server_timestamp`");
@@ -167,7 +219,7 @@ class AppDatabaseMigrations {
                                     " ORDER BY c.sort_display_name ASC ", new Object[]{
                                     joiner,
                                     bytesOwnedIdentity,
-                                    bytesGroupOwnerAndUid })) {
+                                    bytesGroupOwnerAndUid})) {
                                 if (res.moveToNext()) {
                                     String groupMembersNames = res.getString(0);
                                     if (groupMembersNames == null) {
@@ -192,9 +244,9 @@ class AppDatabaseMigrations {
 
             // location messages
             new Migration(54, 55) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
-            Logger.w("ROOM MIGRATING FROM VERSION 54 TO 55");
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 54 TO 55");
 
                     database.execSQL("ALTER TABLE `message_table` ADD COLUMN `json_location` TEXT DEFAULT NULL");
                     database.execSQL("ALTER TABLE `message_table` ADD COLUMN `location_type` INTEGER NOT NULL DEFAULT 0");
@@ -426,6 +478,7 @@ class AppDatabaseMigrations {
                     database.execSQL("CREATE TABLE IF NOT EXISTS `call_log_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `bytes_group_owner_and_uid` BLOB, `timestamp` INTEGER NOT NULL, `call_type` INTEGER NOT NULL, `call_status` INTEGER NOT NULL, `duration` INTEGER NOT NULL, FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`bytes_group_owner_and_uid`, `bytes_owned_identity`) REFERENCES `group_table`(`bytes_group_owner_and_uid`, `bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE )");
                     database.execSQL("DROP INDEX `index_call_log_table_bytes_owned_identity`");
                     database.execSQL("DROP INDEX `index_call_log_table_timestamp`");
+
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_table_bytes_owned_identity` ON `call_log_table` (`bytes_owned_identity`)");
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_table_timestamp` ON `call_log_table` (`timestamp`)");
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_table_bytes_group_owner_and_uid_bytes_owned_identity` ON `call_log_table` (`bytes_group_owner_and_uid`, `bytes_owned_identity`)");
@@ -466,7 +519,7 @@ class AppDatabaseMigrations {
             },
 
 
-            new Migration(35,36) {
+            new Migration(35, 36) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 35 TO 36");
@@ -474,7 +527,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(34,35) {
+            new Migration(34, 35) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 34 TO 35");
@@ -540,7 +593,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(33,34) {
+            new Migration(33, 34) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 33 TO 34");
@@ -550,7 +603,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(32,33) {
+            new Migration(32, 33) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 32 TO 33");
@@ -560,7 +613,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(31,32) {
+            new Migration(31, 32) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 31 TO 32");
@@ -568,7 +621,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(30,31) {
+            new Migration(30, 31) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 30 TO 31");
@@ -579,7 +632,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(29,30) {
+            new Migration(29, 30) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 29 TO 30");
@@ -588,7 +641,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(28,29) {
+            new Migration(28, 29) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 28 TO 29");
@@ -602,7 +655,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(27,28) {
+            new Migration(27, 28) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 27 TO 28");
@@ -624,7 +677,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(26,27) {
+            new Migration(26, 27) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 26 TO 27");
@@ -633,7 +686,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(25,26) {
+            new Migration(25, 26) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 25 TO 26");
@@ -641,7 +694,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(24,25) {
+            new Migration(24, 25) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 24 TO 25");
@@ -652,7 +705,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(23,24) {
+            new Migration(23, 24) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 23 TO 24");
@@ -736,7 +789,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(22,23) {
+            new Migration(22, 23) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 22 TO 23");
@@ -750,7 +803,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(21,22) {
+            new Migration(21, 22) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 21 TO 22");
@@ -758,7 +811,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(20,21) {
+            new Migration(20, 21) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 20 TO 21");
@@ -767,7 +820,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(19,20) {
+            new Migration(19, 20) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 19 TO 20");
@@ -780,7 +833,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(18,19) {
+            new Migration(18, 19) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 18 TO 19");
@@ -789,7 +842,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(17,18) {
+            new Migration(17, 18) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 17 TO 18");
@@ -824,7 +877,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(16,17) {
+            new Migration(16, 17) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 16 TO 17");
@@ -832,7 +885,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(15,16) {
+            new Migration(15, 16) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 15 TO 16");
@@ -854,7 +907,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(14,15) {
+            new Migration(14, 15) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 14 TO 15");
@@ -862,12 +915,12 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(13,14) {
+            new Migration(13, 14) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 13 TO 14");
                     database.execSQL("ALTER TABLE group_table RENAME TO old_group_table");
-                    database.execSQL( "CREATE TABLE IF NOT EXISTS `group_table` (`bytes_group_owner_and_uid` BLOB NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `custom_name` TEXT, `name` TEXT NOT NULL, `new_published_details` INTEGER NOT NULL, `bytes_group_owner_identity` BLOB, PRIMARY KEY(`bytes_group_owner_and_uid`, `bytes_owned_identity`), FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`bytes_group_owner_identity`, `bytes_owned_identity`) REFERENCES `contact_table`(`bytes_contact_identity`, `bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE NO ACTION )");
+                    database.execSQL("CREATE TABLE IF NOT EXISTS `group_table` (`bytes_group_owner_and_uid` BLOB NOT NULL, `bytes_owned_identity` BLOB NOT NULL, `custom_name` TEXT, `name` TEXT NOT NULL, `new_published_details` INTEGER NOT NULL, `bytes_group_owner_identity` BLOB, PRIMARY KEY(`bytes_group_owner_and_uid`, `bytes_owned_identity`), FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`bytes_group_owner_identity`, `bytes_owned_identity`) REFERENCES `contact_table`(`bytes_contact_identity`, `bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE NO ACTION )");
 
                     database.execSQL("DROP  INDEX `index_group_table_name`");
                     database.execSQL("DROP  INDEX `index_group_table_bytes_owned_identity`");
@@ -883,7 +936,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(12,13) {
+            new Migration(12, 13) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 12 TO 13");
@@ -1012,7 +1065,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(11,12) {
+            new Migration(11, 12) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 11 TO 12");
@@ -1020,7 +1073,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(10,11) {
+            new Migration(10, 11) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 10 TO 11");
@@ -1045,7 +1098,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(9,10) {
+            new Migration(9, 10) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 9 TO 10");
@@ -1054,7 +1107,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(8,9) {
+            new Migration(8, 9) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 8 TO 9");
@@ -1062,7 +1115,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(7,8) {
+            new Migration(7, 8) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 7 TO 8");
@@ -1074,7 +1127,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(6,7) {
+            new Migration(6, 7) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 6 TO 7");
@@ -1178,7 +1231,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(5,6) {
+            new Migration(5, 6) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 5 TO 6");
@@ -1192,7 +1245,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(4,5) {
+            new Migration(4, 5) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 4 TO 5");
@@ -1209,7 +1262,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(3,4) {
+            new Migration(3, 4) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 3 TO 4");
@@ -1217,7 +1270,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(2,3) {
+            new Migration(2, 3) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 2 TO 3");
@@ -1225,7 +1278,7 @@ class AppDatabaseMigrations {
                 }
             },
 
-            new Migration(1,2) {
+            new Migration(1, 2) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
                     Logger.w("ROOM MIGRATING FROM VERSION 1 TO 2");

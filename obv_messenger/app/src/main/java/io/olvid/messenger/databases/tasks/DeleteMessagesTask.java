@@ -37,6 +37,7 @@ import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
@@ -96,7 +97,7 @@ public class DeleteMessagesTask implements Runnable {
             }
             // if deleting all discussion stop sharing location if currently sharing
             if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussionId)) {
-                UnifiedForegroundService.LocationSharingSubService.stopSharingLocationSync(discussionId);
+                UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussionId, true);
             }
         } else {
             //noinspection ConstantConditions
@@ -110,7 +111,7 @@ public class DeleteMessagesTask implements Runnable {
                 if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
                         && message.jsonLocation != null
                         && message.locationType == Message.LOCATION_TYPE_SHARE) {
-                    UnifiedForegroundService.LocationSharingSubService.stopSharingLocationSync(message.discussionId);
+                    UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(message.discussionId, true);
                 }
             }
         }
@@ -186,6 +187,9 @@ public class DeleteMessagesTask implements Runnable {
                     case Message.TYPE_GAINED_GROUP_ADMIN:
                     case Message.TYPE_LOST_GROUP_ADMIN:
                     case Message.TYPE_SCREEN_SHOT_DETECTED:
+                    case Message.TYPE_MEDIATOR_INVITATION_SENT:
+                    case Message.TYPE_MEDIATOR_INVITATION_ACCEPTED:
+                    case Message.TYPE_MEDIATOR_INVITATION_IGNORED:
                         infoMessages.add(message);
                         break;
                     default:
@@ -223,8 +227,18 @@ public class DeleteMessagesTask implements Runnable {
         // Check whether this discussion is locked and empty. If so, delete it
         if (wholeDiscussion) {
             if (discussion.isLocked()) {
-                db.discussionDao().delete(discussion);
-                ShortcutActivity.disableShortcut(discussionId);
+                // downgrade to pre discussion if any invitation is pending
+                if (db.invitationDao().discussionHasInvitations(discussionId)) {
+                    db.discussionDao().updateStatus(discussionId, Discussion.STATUS_PRE_DISCUSSION);
+                    // also delete any DiscussionCustomization
+                    DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
+                    if (discussionCustomization != null) {
+                        db.discussionCustomizationDao().delete(discussionCustomization);
+                    }
+                } else {
+                    db.discussionDao().delete(discussion);
+                    ShortcutActivity.disableShortcut(discussionId);
+                }
             } else if (db.messageDao().getDiscussionDraftMessageSync(discussionId) == null) {
                 // only remove discussion from list if there is no draft
                 discussion.lastMessageTimestamp = 0;
@@ -235,8 +249,11 @@ public class DeleteMessagesTask implements Runnable {
                 Discussion aDiscussion = db.discussionDao().getById(discussionId);
                 if (aDiscussion != null && aDiscussion.isLocked()) {
                     if (db.messageDao().countMessagesInDiscussion(discussionId) == 0) {
-                        db.discussionDao().delete(aDiscussion);
-                        ShortcutActivity.disableShortcut(discussionId);
+                        // do not actually delete empty locked discussion if any invitation is pending
+                        if (!db.invitationDao().discussionHasInvitations(discussionId)) {
+                            db.discussionDao().delete(aDiscussion);
+                            ShortcutActivity.disableShortcut(discussionId);
+                        }
                     }
                 }
             }

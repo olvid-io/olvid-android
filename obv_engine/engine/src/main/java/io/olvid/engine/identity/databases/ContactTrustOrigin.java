@@ -247,7 +247,7 @@ public class ContactTrustOrigin implements ObvDatabase {
             }
             Integer mediatorOrGroupOwnerTrustLevelMajor = null;
             if (mediatorOrGroupOwnerIdentity != null) {
-                ContactIdentity mediatorOrGroupOwner = ContactIdentity.get(identityManagerSession, mediatorOrGroupOwnerIdentity, ownedIdentity);
+                ContactIdentity mediatorOrGroupOwner = ContactIdentity.get(identityManagerSession, ownedIdentity, mediatorOrGroupOwnerIdentity);
                 if (mediatorOrGroupOwner == null) {
                     return null;
                 }

@@ -67,7 +67,8 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                         if (ownedIdentityPojo.mute_notifications) {
                             ownedIdentity.prefMuteNotifications = true;
                             ownedIdentity.prefMuteNotificationsTimestamp = ownedIdentityPojo.mute_notification_timestamp;
-                            db.ownedIdentityDao().updateMuteNotifications(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefMuteNotifications, ownedIdentity.prefMuteNotificationsTimestamp);
+                            ownedIdentity.prefMuteNotificationsExceptMentioned = ownedIdentityPojo.mute_notifications_except_mentioned;
+                            db.ownedIdentityDao().updateMuteNotifications(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefMuteNotifications, ownedIdentity.prefMuteNotificationsTimestamp, ownedIdentity.prefMuteNotificationsExceptMentioned);
                         }
                         if (ownedIdentityPojo.show_neutral_notification_when_hidden) {
                             ownedIdentity.prefShowNeutralNotificationWhenHidden = true;

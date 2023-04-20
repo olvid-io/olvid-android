@@ -8,11 +8,38 @@
     android:paddingTop="8dp">
 
     <LinearLayout
+        android:id="@+id/mentioned_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintHeight_min="40sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/custom_time_or_date"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <Switch
+            android:id="@+id/mentioned_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.BlueAccent"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/almostBlack"
+            android:text="@string/dialog_message_mute_except_mentioned"
+            android:layout_marginStart="6dp"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/custom_time_or_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mentioned_view"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/switch_and_label">
@@ -52,6 +79,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        app:layout_constraintHeight_min="40sp"
         android:gravity="center_vertical"
         app:layout_constraintTop_toBottomOf="@id/custom_time_or_date"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -61,6 +89,7 @@
             android:id="@+id/mute_profile_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.BlueAccent"
             tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         <TextView

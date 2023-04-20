@@ -210,6 +210,37 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
         return jsonWellKnown.serverConfig.turnServerUrls;
     }
 
+    @Override
+    public String getOsmUrl(String server) throws NotCachedException {
+        if (!cacheInitialized) {
+            throw new NotCachedException();
+        }
+        JsonWellKnown jsonWellKnown = wellKnownCache.get(server);
+        if (jsonWellKnown == null) {
+            queueNewWellKnownDownloadOperation(server);
+            throw new NotCachedException();
+        }
+        if (jsonWellKnown.serverConfig == null) {
+            return null;
+        }
+        return jsonWellKnown.serverConfig.osmServerUrl;
+    }
+
+    @Override
+    public String getAddressUrl(String server) throws NotCachedException {
+        if (!cacheInitialized) {
+            throw new NotCachedException();
+        }
+        JsonWellKnown jsonWellKnown = wellKnownCache.get(server);
+        if (jsonWellKnown == null) {
+            queueNewWellKnownDownloadOperation(server);
+            throw new NotCachedException();
+        }
+        if (jsonWellKnown.serverConfig == null) {
+            return null;
+        }
+        return jsonWellKnown.serverConfig.addressServerUrl;
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class JsonWellKnown {
@@ -241,6 +272,8 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
     public static class JsonWellKnownServerConfig {
         String webSocketUrl;
         List<String> turnServerUrls;
+        String osmServerUrl;
+        String addressServerUrl;
 
         @JsonProperty("ws_server")
         public String getWebSocketUrl() {
@@ -260,6 +293,26 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
         @JsonProperty("turn_servers")
         public void setTurnServerUrls(List<String> turnServerUrls) {
             this.turnServerUrls = turnServerUrls;
+        }
+
+        @JsonProperty("osm_server")
+        public String getOsmServerUrl() {
+            return osmServerUrl;
+        }
+
+        @JsonProperty("osm_server")
+        public void setOsmServerUrl(String osmServerUrl) {
+            this.osmServerUrl = osmServerUrl;
+        }
+
+        @JsonProperty("address_server")
+        public String getAddressServerUrl() {
+            return addressServerUrl;
+        }
+
+        @JsonProperty("address_server")
+        public void setAddressServerUrl(String addressServerUrl) {
+            this.addressServerUrl = addressServerUrl;
         }
     }
 }

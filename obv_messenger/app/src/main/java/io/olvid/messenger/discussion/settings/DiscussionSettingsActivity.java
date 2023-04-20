@@ -119,19 +119,21 @@ public class DiscussionSettingsActivity extends LockableActivity implements Pref
                     if (preference != null && preference.isEnabled()) {
                         int position = preference.getOrder() - (discussionSettingsViewModel.isLocked() ? 0 : 1);
                         RecyclerView recyclerView = settingsFragment.getListView();
-                        RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
-                        if (viewHolder != null) {
-                            viewHolder.itemView.setPressed(true);
-                            handler.postDelayed(() -> onPreferenceStartFragment(settingsFragment, preference), 600);
-                        } else {
-                            recyclerView.scrollToPosition(position);
-                            handler.postDelayed(() -> {
-                                RecyclerView.ViewHolder reViewHolder = recyclerView.findViewHolderForAdapterPosition(position);
-                                if (reViewHolder != null) {
-                                    reViewHolder.itemView.setPressed(true);
-                                }
-                            }, 100);
-                            handler.postDelayed(() -> onPreferenceStartFragment(settingsFragment, preference), 700);
+                        if (recyclerView != null) {
+                            RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
+                            if (viewHolder != null) {
+                                viewHolder.itemView.setPressed(true);
+                                handler.postDelayed(() -> onPreferenceStartFragment(settingsFragment, preference), 600);
+                            } else {
+                                recyclerView.scrollToPosition(position);
+                                handler.postDelayed(() -> {
+                                    RecyclerView.ViewHolder reViewHolder = recyclerView.findViewHolderForAdapterPosition(position);
+                                    if (reViewHolder != null) {
+                                        reViewHolder.itemView.setPressed(true);
+                                    }
+                                }, 100);
+                                handler.postDelayed(() -> onPreferenceStartFragment(settingsFragment, preference), 700);
+                            }
                         }
                     }
                 }, 400);
@@ -178,7 +180,12 @@ public class DiscussionSettingsActivity extends LockableActivity implements Pref
         if (prefFragmentName == null) {
             return false;
         }
-        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), prefFragmentName);
+        final Fragment fragment;
+        try {
+            fragment = getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), prefFragmentName);
+        } catch (Exception e) {
+            return false;
+        }
 
         try {
             // Replace the existing Fragment with the new Fragment

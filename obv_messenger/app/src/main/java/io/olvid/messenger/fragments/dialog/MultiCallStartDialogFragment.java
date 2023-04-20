@@ -155,7 +155,7 @@ public class MultiCallStartDialogFragment extends DialogFragment {
 
         if (bytesGroupOwnerAndUidOrIdentifier != null) {
             contactListLivedata = Transformations.switchMap(AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUidOrIdentifierLiveData(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier), (Discussion discussion) -> {
-                if (discussion != null) {
+                if (discussion != null && !discussion.isLocked() && !discussion.isPreDiscussion()) {
                     switch (discussion.discussionType) {
                         case Discussion.TYPE_GROUP:
                             groupV2 = false;
@@ -165,7 +165,7 @@ public class MultiCallStartDialogFragment extends DialogFragment {
                             return AppDatabase.getInstance().group2MemberDao().getGroupMemberContactsAndMore(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier, bytesIdentities);
                     }
                 }
-                return new MutableLiveData<>(new ArrayList<>());
+                return AppDatabase.getInstance().contactDao().getWithChannelAsList(bytesOwnedIdentity, bytesIdentities);
             });
         } else {
             contactListLivedata = AppDatabase.getInstance().contactDao().getWithChannelAsList(bytesOwnedIdentity, bytesIdentities);

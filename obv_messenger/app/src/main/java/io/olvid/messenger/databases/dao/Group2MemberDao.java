@@ -111,6 +111,31 @@ public interface Group2MemberDao {
             " SELECT c.*, gm." + Group2Member.BYTES_CONTACT_IDENTITY + " AS bytesContactIdentity, " +
             " c." + Contact.SORT_DISPLAY_NAME + " AS sortDisplayName, " +
             " c." + Contact.IDENTITY_DETAILS + " AS identityDetails, " +
+            " c." + Contact.FULL_SEARCH_DISPLAY_NAME + " AS fullSearchDisplayName " +
+            " FROM " + Group2Member.TABLE_NAME + " AS gm " +
+            " INNER JOIN " + Contact.TABLE_NAME + " AS c " +
+            " ON gm." + Group2Member.BYTES_OWNED_IDENTITY + " = c." + Contact.BYTES_OWNED_IDENTITY +
+            " AND gm." + Group2Member.BYTES_CONTACT_IDENTITY + " = c." + Contact.BYTES_CONTACT_IDENTITY +
+            " WHERE gm." + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND gm." + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+            " UNION " +
+            " SELECT c.*, pm." + Group2PendingMember.BYTES_CONTACT_IDENTITY + " AS bytesContactIdentity, " +
+            " COALESCE(c." + Contact.SORT_DISPLAY_NAME + ", pm." + Group2PendingMember.SORT_DISPLAY_NAME + " ) AS sortDisplayName, " +
+            " COALESCE(c." + Contact.IDENTITY_DETAILS + ", pm." + Group2PendingMember.IDENTITY_DETAILS + " ) AS identityDetails, " +
+            " COALESCE(c." + Contact.FULL_SEARCH_DISPLAY_NAME + ", pm." + Group2PendingMember.FULL_SEARCH_DISPLAY_NAME + " ) AS fullSearchDisplayName " +
+            " FROM " + Group2PendingMember.TABLE_NAME + " AS pm " +
+            " LEFT JOIN " + Contact.TABLE_NAME + " AS c " +
+            " ON pm." + Group2Member.BYTES_OWNED_IDENTITY + " = c." + Contact.BYTES_OWNED_IDENTITY +
+            " AND pm." + Group2Member.BYTES_CONTACT_IDENTITY + " = c." + Contact.BYTES_CONTACT_IDENTITY +
+            " WHERE pm." + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND pm." + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+            " ) ORDER BY sortDisplayName ASC")
+    LiveData<List<Group2MemberOrPendingForMention>> getGroupMembersAndPendingForMention(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+
+    @Query("SELECT * FROM ( " +
+            " SELECT c.*, gm." + Group2Member.BYTES_CONTACT_IDENTITY + " AS bytesContactIdentity, " +
+            " c." + Contact.SORT_DISPLAY_NAME + " AS sortDisplayName, " +
+            " c." + Contact.IDENTITY_DETAILS + " AS identityDetails, " +
             " gm." + Group2Member.PERMISSION_ADMIN + " AS permissionAdmin, " +
             " 0 as pending " +
             " FROM " + Group2Member.TABLE_NAME + " AS gm " +
@@ -177,5 +202,15 @@ public interface Group2MemberDao {
         public String identityDetails;
         public boolean permissionAdmin;
         public boolean pending;
+    }
+
+    class Group2MemberOrPendingForMention {
+        @Embedded
+        public Contact contact;
+
+        public byte[] bytesContactIdentity;
+        public byte[] sortDisplayName;
+        public String identityDetails;
+        public String fullSearchDisplayName;
     }
 }

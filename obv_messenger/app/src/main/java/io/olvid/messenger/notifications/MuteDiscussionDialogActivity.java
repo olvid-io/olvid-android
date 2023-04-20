@@ -23,6 +23,8 @@ package io.olvid.messenger.notifications;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,36 +68,44 @@ public class MuteDiscussionDialogActivity extends AppCompatActivity {
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
             }
             AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId);
-            MuteNotificationDialog muteNotificationDialog = new MuteNotificationDialog(this, (Long muteExpirationTimestamp, boolean muteWholeProfile) -> App.runThread(() -> {
-                if (muteWholeProfile) {
-                    Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);
-                    if (discussion != null) {
-                        OwnedIdentity ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(discussion.bytesOwnedIdentity);
-                        if (ownedIdentity != null) {
-                            ownedIdentity.prefMuteNotifications = true;
-                            ownedIdentity.prefMuteNotificationsTimestamp = muteExpirationTimestamp;
-                            AppDatabase.getInstance().ownedIdentityDao().updateMuteNotifications(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefMuteNotifications, ownedIdentity.prefMuteNotificationsTimestamp);
+            App.runThread(() -> {
+                DiscussionCustomization discussionCust = AppDatabase.getInstance().discussionCustomizationDao().get(discussionId);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    MuteNotificationDialog muteNotificationDialog = new MuteNotificationDialog(this, (Long muteExpirationTimestamp, boolean muteWholeProfile, boolean muteExceptMentioned) -> App.runThread(() -> {
+                        Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);
+                        if (discussion == null || discussion.isLocked() || discussion.isPreDiscussion()) {
+                            return;
                         }
-                    }
-                } else {
-                    DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussionId);
-                    boolean insert = false;
-                    if (discussionCustomization == null) {
-                        discussionCustomization = new DiscussionCustomization(discussionId);
-                        insert = true;
-                    }
-                    discussionCustomization.prefMuteNotifications = true;
-                    discussionCustomization.prefMuteNotificationsTimestamp = muteExpirationTimestamp;
-                    if (insert) {
-                        AppDatabase.getInstance().discussionCustomizationDao().insert(discussionCustomization);
-                    } else {
-                        AppDatabase.getInstance().discussionCustomizationDao().update(discussionCustomization);
-                    }
-                }
-            }), MuteNotificationDialog.MuteType.DISCUSSION_OR_PROFILE);
-            muteNotificationDialog.setOnDismissListener(dialog -> finish());
+                        if (muteWholeProfile) {
+                            OwnedIdentity ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(discussion.bytesOwnedIdentity);
+                            if (ownedIdentity != null) {
+                                ownedIdentity.prefMuteNotifications = true;
+                                ownedIdentity.prefMuteNotificationsTimestamp = muteExpirationTimestamp;
+                                ownedIdentity.prefMuteNotificationsExceptMentioned = muteExceptMentioned;
+                                AppDatabase.getInstance().ownedIdentityDao().updateMuteNotifications(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefMuteNotifications, ownedIdentity.prefMuteNotificationsTimestamp, ownedIdentity.prefMuteNotificationsExceptMentioned);
+                            }
+                        } else {
+                            DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussionId);
+                            boolean insert = false;
+                            if (discussionCustomization == null) {
+                                discussionCustomization = new DiscussionCustomization(discussionId);
+                                insert = true;
+                            }
+                            discussionCustomization.prefMuteNotifications = true;
+                            discussionCustomization.prefMuteNotificationsTimestamp = muteExpirationTimestamp;
+                            discussionCustomization.prefMuteNotificationsExceptMentioned = muteExceptMentioned;
+                            if (insert) {
+                                AppDatabase.getInstance().discussionCustomizationDao().insert(discussionCustomization);
+                            } else {
+                                AppDatabase.getInstance().discussionCustomizationDao().update(discussionCustomization);
+                            }
+                        }
+                    }), MuteNotificationDialog.MuteType.DISCUSSION_OR_PROFILE, discussionCust == null || discussionCust.prefMuteNotificationsExceptMentioned);
+                    muteNotificationDialog.setOnDismissListener(dialog -> finish());
 
-            muteNotificationDialog.show();
+                    muteNotificationDialog.show();
+                });
+            });
         }
     }
 

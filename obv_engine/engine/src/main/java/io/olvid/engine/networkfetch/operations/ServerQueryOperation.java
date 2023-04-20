@@ -195,6 +195,10 @@ public class ServerQueryOperation extends Operation {
                         serverMethod = new DeleteGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getQuerySignature());
                         break;
                     }
+                    case ServerQuery.Type.GET_KEYCLOAK_DATA_QUERY_ID: {
+                        serverMethod = new GetKeycloakDataServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), fetchManagerSession.engineBaseDirectory);
+                        break;
+                    }
                     default:
                         cancel(RFC_BAD_ENCODED_SERVER_QUERY);
                         return;
@@ -235,6 +239,7 @@ public class ServerQueryOperation extends Operation {
                                     finished = true;
                                     return;
                                 case ServerQuery.Type.GET_USER_DATA_QUERY_ID:
+                                case ServerQuery.Type.GET_KEYCLOAK_DATA_QUERY_ID:
                                     serverResponse = Encoded.of(""); // as if it was deleted from the server
                                     finished = true;
                                     return;
@@ -883,3 +888,65 @@ class DeleteGroupBlobServerMethod extends ServerQueryServerMethod {
     }
 }
 
+class GetKeycloakDataServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "olvid-rest/getData";
+
+    private final String server;
+    private final String path;
+    private final UID serverLabel;
+    private final String engineBaseDirectory;
+    private Encoded serverResponse;
+
+    public GetKeycloakDataServerMethod(String keycloakServerUrl, UID serverLabel, String engineBaseDirectory) {
+        this.serverLabel = serverLabel;
+
+        String url = keycloakServerUrl + SERVER_METHOD_PATH;
+        int pos = url.indexOf('/', 8);
+        this.server = url.substring(0, pos);
+        this.path = url.substring(pos);
+        this.engineBaseDirectory = engineBaseDirectory;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return path;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return serverLabel.getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        if (returnStatus == ServerMethod.OK) {
+            try {
+                // write the result to a file
+                EncryptedBytes encryptedData = receivedData[0].decodeEncryptedData();
+                // Ugly hack: the filename contains a timestamp after which the file is considered "orphan" and can be deleted
+                String userDataPath = Constants.DOWNLOADED_USER_DATA_DIRECTORY + File.separator + (System.currentTimeMillis() + Constants.GET_USER_DATA_LOCAL_FILE_LIFESPAN) + "." + Logger.toHexString(serverLabel.getBytes()) + "-" + Logger.getUuidString(UUID.randomUUID());
+                try (FileOutputStream fis = new FileOutputStream(new File(engineBaseDirectory, userDataPath))) {
+                    fis.write(encryptedData.getBytes());
+                }
+                serverResponse = Encoded.of(userDataPath);
+            } catch (DecodingException | IOException e) {
+                e.printStackTrace();
+                returnStatus = ServerMethod.GENERAL_ERROR;
+            }
+        } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER) {
+            returnStatus = ServerMethod.OK;
+            serverResponse = Encoded.of("");
+        }
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return serverResponse;
+    }
+}

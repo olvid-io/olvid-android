@@ -30,7 +30,6 @@
     <string name="button_label_exchange_digits_with_user">Échangez des codes avec %1$s</string>
     <string name="button_label_generate_new_id">Générer un nouvel ID</string>
     <string name="button_label_generate_my_id">Générer mon ID</string>
-    <string name="button_label_go_to_discussion">Voir la discussion</string>
     <string name="button_label_ignore">Ignorer</string>
     <string name="button_label_reject">Refuser</string>
     <string name="button_label_introduce">Présenter</string>
@@ -102,6 +101,7 @@
     <string name="format_identity_details_custom_field">%1$s : %2$s</string>
     <string name="hint_company">Société (facultatif)</string>
     <string name="hint_compose_your_message">Écrire un message</string>
+    <string name="label_edit_your_message">Modifiez votre message</string>
     <string name="hint_contact_name">Nom du contact</string>
     <string name="hint_contact_or_group_name">Nom de contact ou de groupe</string>
     <string name="hint_first_name">Prénom</string>
@@ -113,7 +113,7 @@
     <string name="hint_position">Poste (facultatif)</string>
     <string name="invitation_label_their_code">Son code</string>
     <string name="invitation_label_your_code">Votre code</string>
-    <string name="invitation_status_accept_invite">Invitation en cours</string>
+    <string name="invitation_status_accept_invite">Invitation reçue</string>
     <string name="invitation_status_description_accept_group_invite">Accepter cette invitation de %1$s ?</string>
     <string name="invitation_status_description_contact_or_mediator_deleted">Cette invitation provient d\'un utilisateur inconnu. Il est préférable de l\'ignorer.</string>
     <string name="invitation_status_description_accept_invite">%1$s aimerait entrer en contact avec vous. Cliquez sur «\u00a0accepter\u00a0» si vous êtes d\'accord. Sinon, vous pouver «\u00a0ignorer\u00a0».</string>
@@ -125,8 +125,6 @@
     <string name="invitation_status_description_invite_sent">En attente de confirmation de la part de %1$s.</string>
     <string name="invitation_status_description_mediator_invite_accepted">En attente que %1$s accepte la mise en relation de %2$s.</string>
     <string name="invitation_status_description_mediator_invite_accepted_deleted">En attente que %1$s accepte la mise en relation.</string>
-    <string name="invitation_status_description_mutual_trust_established">Bravo\u00a0! %1$s a été ajouté à vos contacts. Un canal sécurisé entre vous est en cours de création. Dès qu\'il sera prêt, vous pourrez échanger dans votre discussion privée.</string>
-    <string name="invitation_status_description_mutual_trust_established_with_channel">Bravo\u00a0! %1$s fait maintenant partie de vos contacts. Allez dans votre discussion privée pour échanger ensemble.</string>
     <string name="invitation_status_exchange_sas">Échangez vos codes</string>
     <string name="invitation_status_give_him_sas">Code confirmé</string>
     <string name="invitation_status_group_invite">Invitation à un groupe</string>
@@ -134,7 +132,9 @@
     <string name="invitation_status_invite_sent">Invitation en cours</string>
     <string name="invitation_status_mediator_invite">Mise en relation</string>
     <string name="invitation_status_mediator_invite_accepted">Mise en relation acceptée</string>
-    <string name="invitation_status_mutual_trust_established">Utilisateur ajouté à vos contacts</string>
+    <string name="invitation_status_mediator_invite_information_sent">Vous avez présenté %1$s</string>
+    <string name="invitation_status_mediator_invite_information_accepted">Présentation de %1$s acceptée</string>
+    <string name="invitation_status_mediator_invite_information_ignored">Présentation de %1$s ignorée</string>
     <string name="label_copy">Copie</string>
     <string name="label_creating_channel">Création\ndu canal</string>
     <string name="label_download">Téléchargement</string>
@@ -195,17 +195,15 @@
     <string name="notification_content_exchange_sas">Votre code : %1$s</string>
     <string name="notification_content_group_invite">%1$s vous invite à une discussion de groupe</string>
     <string name="notification_content_mediator_invite">Présenté par %1$s</string>
-    <string name="notification_public_title_contact_added">Utilisateur ajouté à vos contacts</string>
     <string name="notification_public_title_exchange_sas">Échangez vos codes</string>
     <string name="notification_public_title_group_invitation">Invitation à rejoindre un groupe</string>
-    <string name="notification_public_title_group_member">Mise à jour des membres d\'un groupe</string>
     <string name="notification_public_title_new_invitation">Invitation reçue</string>
-    <string name="notification_title_contact_added">%1$s a été ajouté à vos contacts</string>
     <string name="notification_title_exchange_sas">Échangez votre code avec %1$s</string>
     <string name="notification_title_group_invitation">Invitation au groupe %1$s</string>
     <string name="notification_title_unnamed_group_invitation">Invitation à un groupe sans nom</string>
     <string name="notification_title_new_invitation">Invitation de %1$s</string>
     <string name="notification_title_one_to_one_invitation">Invitation de %1$s</string>
+    <string name="notification_title_user_has_mentioned_you">%1$s vous mentionne</string>
     <string name="pref_autodownload_size_title">Télécharger automatiquement les pièces jointes…</string>
     <string name="pref_camera_resolution_title">Redimensionner les photos prises dans Olvid\u00a0?</string>
     <string name="pref_category_camera_title">Photos</string>
@@ -295,7 +293,6 @@
     <string name="pref_reset_dialogs_title">Réinitialiser tous les avertissements</string>
     <string name="pref_reset_dialogs_summary">Restaurer les dialogues masqués par «\u00a0ne plus afficher ce message\u00a0»</string>
     <string name="toast_message_dialogs_restored">Avertissements réinitialisés</string>
-    <string name="notification_content_contact_added">Vous pouvez commencer votre discussion</string>
     <string name="menu_action_discussion_settings">Paramètres de la discussion</string>
     <string name="menu_action_discussion_mark_as_read">Marquer comme lue</string>
     <string name="menu_action_discussion_mark_as_unread">Marquer comme non-lue</string>
@@ -501,7 +498,6 @@
     <string name="text_call_duration">(durée %1$02dmin\u00a0%2$02dsec)</string>
     <string name="text_call_duration_short">(durée %1$02dsec)</string>
     <string name="activity_title_call_log">Journal d\'appels</string>
-    <string name="menu_action_call_log">Journal d\'appels</string>
     <string name="dialog_title_clear_call_log">Effacer votre journal d\'appels</string>
     <string name="dialog_message_clear_call_log">Êtes-vous certain de vouloir supprimer toutes les entrées de votre journel d\'appels\u00a0?</string>
     <string name="menu_action_delete_log_entry">Supprimer</string>
@@ -570,7 +566,6 @@
     <string name="content_description_discussions_tab">Onglet discussions</string>
     <string name="content_description_contacts_tab">Onglet contacts</string>
     <string name="content_description_groups_tab">Onglet groupes</string>
-    <string name="content_description_invitations_tab">Onglet invitations</string>
     <string name="content_description_add_contact_button">Bouton ajout de contact</string>
     <string name="content_description_notification_dot">Pastille de notification</string>
     <string name="pref_exif_erase_title">Supprimer les métadonnées JPEG sensibles</string>
@@ -813,8 +808,6 @@
     <string name="text_message_recipients_status">Statut des destinataires</string>
     <string name="text_discussion_remotely_deleted">Discussion effacée à distance</string>
     <string name="text_discussion_remotely_deleted_by">Discussion effacée à distance par %1$s</string>
-    <string name="hint_update_your_message">Mettre à jour un message envoyé</string>
-    <string name="dialog_title_edit_message">Modifiez votre message</string>
     <string name="toast_message_unable_to_update_message">Impossible de mettre à jour le message</string>
     <string name="text_edited">Modifié</string>
     <string name="menu_action_unmute_notifications">Réactiver les notifications</string>
@@ -1013,9 +1006,6 @@
     <string name="text_explanation_invalid_mutual_scan_qr_code">Ce code QR ne peut pas être utilisé pour ajouter %1$s à vos contacts.\nVeuillez essayer à nouveau en vous assurant que %1$s scanne votre code QR avant que vous ne scanniez le sien.</string>
     <string name="label_loading_messages">Chargement des messages…</string>
     <string name="text_explanation_mutual_scan_success">Ajout de contact initié.\n\nLe processus ne devrait prendre que quelques secondes si vous et %1$s êtes tous les deux connectés à internet.\n\nVous et %1$s pouvez maintenant quitter cet écran.</string>
-    <string name="label_loading_discussions">Chargement des discussions…</string>
-    <string name="label_loading_groups">Chargement des groupes…</string>
-    <string name="label_loading_invitations">Chargement des invitations…</string>
     <string name="label_loading_contacts">Chargement des contacts…</string>
     <string name="content_description_authentication_browser_choice">Bouton de sélection du navigateur</string>
     <string name="toast_message_error_querying_for_available_browsers">Impossible de lister les navigateurs installés</string>
@@ -1087,6 +1077,14 @@
     <string name="notification_channel_keycloak_description">Notifications du fournisseur d\'identités de votre société</string>
     <string name="text_notification_keycloak_authentication_required_title">Authentification nécessaire</string>
     <string name="text_notification_keycloak_authentication_required_message">Olvid a besoin que vous vous authentifiiez auprès du fournisseur d\'identités de votre société.</string>
+    <string name="notification_channel_location_sharing_name">Partage de position</string>
+    <string name="notification_channel_location_sharing_description">Affiche des informations utiles lors d\'un partage de position</string>
+    <string name="text_notification_location_disabled_title">Position désactiveée</string>
+    <string name="text_notification_location_disabled_message">Olvid à besoin d\'accéder à votre position pour continuer le partage</string>
+    <string name="text_notification_location_permission_denied_title">Accès à la position désactivé</string>
+    <string name="text_notification_location_permission_denied_message">Olvid à besoin d\'accéder à votre position pour continuer le partage</string>
+    <string name="text_notification_location_updates_unavailable_title">Connection gps perdu</string>
+    <string name="text_notification_location_updates_unavailable_message">Le partage de position reprendra quand le signal GPS sera disponible</string>
     <string name="notification_action_authenticate">S\'authentifier</string>
     <string name="button_label_manage">Gérer</string>
     <string name="button_label_add_new_profile">Ajouter un profil</string>
@@ -1108,6 +1106,7 @@
     <string name="dialog_title_hide_profile">Masquer un profil\u00a0?</string>
     <string name="dialog_message_hide_profile">Vous êtes sur le point de masquer un profil. Si vous oubliez le mot de passe que vous avez choisi pour ce profil, vous y perdrez définitivement accès.\nÊtes vous certain de vouloir poursuivre\u00a0?</string>
     <string name="menu_action_mute_profile_notifications">Désactiver les notifications</string>
+    <string name="dialog_message_mute_except_mentioned">M\'avertir quand mon nom est mentionné</string>
     <string name="dialog_message_mute_all_profile_switch_label">Désactiver les notifications pour le profil complet plutôt que pour la discussion</string>
     <string name="pref_hidden_profile_close_policy_title">Stratégie de fermeture des profils masqués</string>
     <string name="text_close_profile_instantly">fermer le profil immédiatement</string>
@@ -1421,7 +1420,7 @@
     <string name="text_message_location_sent">Position envoyée</string>
     <string name="text_message_location_received">Position reçue</string>
     <string name="toast_message_location_services_unavailable">Localisation impossible</string>
-    <string name="label_send_location">Envoyer votre position</string>
+    <string name="label_send_your_location">Envoyer votre position</string>
     <string name="notification_title_sharing_location">Partage de votre position dans Olvid</string>
     <string name="notification_action_stop_sharing">Arrêter le partage</string>
     <string name="toast_message_impossible_to_open_map">Impossible d\'ouvrir la carte</string>
@@ -1429,7 +1428,7 @@
     <string name="label_location_message_content_altitude">Altitude\u00a0: %1$s</string>
     <string name="label_location_message_content_precision">Précision\u00a0: %1$s</string>
     <string name="label_waiting_for_location">En attente de la position</string>
-    <string name="title_enable_location">Activer la position</string>
+    <string name="dialog_title_enable_location">Activer la position</string>
     <string name="label_enable_location">Merci d\'activer la position pour continuer</string>
     <string name="button_label_open_settings">Ouvrir les paramètres</string>
     <string name="label_metadata_kind_location_sharing_latest_update">Dernière mise à jour de la position</string>
@@ -1478,6 +1477,22 @@
     <string name="dialog_message_background_location_access_api_q">Pour le moment, Olvid n\'a pas accès à votre position en arrière-plan. Pour fonctionner correctement, le partage de position en continu nécessite cette permission. Sinon, votre position ne pourra être partagée que quand l\'application Olvid est ouverte en premier plan sur votre appareil.\n\nPour continuer, appuyez sur «\u00a0Autoriser l\'accès\u000a0» et choisissez l\'option «\u00a0Toujours autoriser\u00a0».</string>
     <string name="text_allow_all_the_time">Toujours autoriser</string>
     <string name="label_attachment_download_failed">Erreur de téléchargement de la pièce jointe</string>
+    <string name="pref_category_location">Partage de position</string>
+    <string name="location_integration_basic">Ne pas utiliser de service de cartographie</string>
+    <string name="location_integration_open_street_map">Utiliser OpenStreetMap (opéré par Olvid)</string>
+    <string name="location_integration_google_maps">Utiliser Google Maps</string>
+    <string name="menu_action_location_message_open_preview">Ouvrir l\'aperçu</string>
+    <string name="dialog_title_google_maps_services_unavailable">Services Google Play absents</string>
+    <string name="dialog_message_google_maps_services_unavailable">Il semble que les services Google Play ne sont pas installés sur votre appareil. Ils sont nécessaires à l\'utilisation du service de cartographie Google Maps. Si vous ne pouvez pas (ou ne souhaitez pas) les installer, vous pouvez choisir un autre service de cartographie.</string>
+    <string name="pref_location_share_interval_title">Fréquence de mise à jour par défaut</string>
+    <string name="pref_location_share_duration_title">Durée par défaut du partage</string>
+    <string name="pref_location_integration_title">Intégration avec un service de cartographie</string>
+    <string name="pref_location_hide_notifications_title">Masquer toutes les notifications d\'erreurs relatives au partage de position</string>
+    <string name="pref_location_osm_language_title">Langue des cartes OpenStreetMap</string>
+    <string name="location_map_language_default">Langue du système</string>
+    <string name="location_map_language_english">Anglais</string>
+    <string name="location_map_language_french">Français</string>
+    <string name="dialog_title_osm_attributions">Attributions</string>
     <string name="message_too_many_attempts">Trop d\'essais, veuillez attendre…</string>
     <string name="x_seconds">%1$02ds</string>
     <string name="pref_unlock_failed_wipe_messages_summary">Quand cette option est activée, saisir 3 mauvais PINs/mots de passe d\'affilée entraîne l\'effacement silencieux de tous les messages à visibilité limitée.</string>
@@ -1542,6 +1557,7 @@
     <string name="text_setting_link_preview_inbound">\u2023 Prévisualisation des liens reçus\u00a0:\u0020</string>
     <string name="text_setting_link_preview_outbound">\u2023 Prévisualisation des liens envoyés\u00a0:\u0020</string>
     <string name="text_setting_block_unknown_certificate">\u2023 Bloquer les connexions utilisant un certificat inconnu\u00a0:\u0020</string>
+    <string name="text_setting_no_notify_certificate_change_for_previews">\u2023 Désactiver les notifications de changement de certificat pour les aperçus de liens\u00a0:\u0020</string>
     <string name="text_setting_connectivity_indicator">\u2023 Indicateur de connexion réseau\u00a0:\u0020</string>
     <string name="text_setting_yes">oui</string>
     <string name="text_setting_no">non</string>
@@ -1580,6 +1596,20 @@
     <string name="text_feature_initiate_secure_calls_from_another_profile">Émettre des appels sécurisés\n(disponible grâce à un autre profil)</string>
     <string name="dialog_title_confirm_open_link">Ouvrir ce lien dans votre navigateur\u00a0?</string>
     <string name="toast_message_unable_to_open_url">Impossible d\'ouvrir l\'URL</string>
+    <string name="text_explanation_location_map_provider">Choisir un service de cartographie vous permet de séléctionner précisément la position que vous souhaitez partager sur une carte. Toutefois, cela peut divulguer votre position (ou celle de vos contacts) à ce fournisseur de service.</string>
+    <string name="text_explanation_location_map_provider_settings">Ce choix peut être modifié par la suite depuis les paramètres de l\'application.</string>
+    <string name="button_label_choose_provider">Choisir un service</string>
+    <string name="button_label_live_share">Partage en direct</string>
+    <string name="label_fetching_address">Recherche de l\'adresse…</string>
+    <string name="label_no_address_found">Aucune adresse trouvée</string>
+    <string name="label_zoom_in_for_address">Zoomez pour chercher l\'adresse</string>
+    <string name="content_description_cancel_message_edit">Annuler l\'édition de message</string>
+    <string name="dialog_title_introducing_mentions">Découvrer les mentions\u00a0!</string>
+    <string name="dialog_message_introducing_mentions">Olvid vous permet maintenant de mentionner une personne dans une discussion\u00a0🫵\u00a0! Saisissez simplement @ suivi d\'une lettre de leur nom pour voir qui peut être mentionné.\nPar ailleurs, quand vous passez une discussion ou un profil en silencieux\u00a0💤, vous pouvez choisir de n\'être notifié que si l\'on vous mentionne explicitement dans un message.\n\nNotez que vos contacts devront avoir la dernière version d\'Olvid pour effectivement voir que vous les avez mentionnés.</string>
+    <string name="pref_no_notify_certificate_change_for_previews_title">Désactiver les notifications de changement de certificat pour les aperçus de liens</string>
+    <string name="pref_no_notify_certificate_change_for_previews_summary">Activez cette option pour désactiver la détection de changement de certificat lors du téléchargement d\'aperçus de liens. Certains sites peuvent présenter un certificat différent à chaque connexion, induisant des notifications fréquentes sans cette option.</string>
+    <string name="pref_use_legacy_zxing_scanner_title">Utiliser ZXing pour scanner les codes QR</string>
+    <string name="pref_use_legacy_zxing_scanner_summary">Par défaut, Olvid utilise ML Kit pour cela. Activez cette option si le scan de codes QR fonctionne mal dans Olvid.</string>
 
 
 
@@ -1652,14 +1682,6 @@
     <plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d nouveau message</item>
         <item quantity="other">%1$d nouveaux messages</item>
-    </plurals>
-    <plurals name="notification_text_header_added_count" tools:ignore="MissingQuantity">
-        <item quantity="one" tools:ignore="ImpliedQuantity">%1$d nouveau membre\u00a0:\u0020</item>
-        <item quantity="other">%1$d nouveaux membres\u00a0:\u0020</item>
-    </plurals>
-    <plurals name="notification_text_header_removed_count" tools:ignore="MissingQuantity">
-        <item quantity="one" tools:ignore="ImpliedQuantity">%1$d membre est parti\u00a0:\u0020</item>
-        <item quantity="other">%1$d membres sont partis\u00a0:\u0020</item>
     </plurals>
     <plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">%3$s va être invité à rejoindre le groupe %2$s.</item>

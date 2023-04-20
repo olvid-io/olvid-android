@@ -276,6 +276,7 @@ public class ColissimoMessageQueue {
                                     body.trim(),
                                     discussionId,
                                     false,
+                                    null,
                                     null
                             ));
                         }
@@ -379,7 +380,7 @@ public class ColissimoMessageQueue {
                     case REQUEST_UPDATE_MESSAGE: {
                         long messageId = colissimo.getRequestUpdateMessage().getMessageId();
                         String newContent = colissimo.getRequestUpdateMessage().getNewContent();
-                        App.runThread(new UpdateMessageBodyTask(messageId, newContent));
+                        App.runThread(new UpdateMessageBodyTask(messageId, newContent, null));
                         break;
                     }
                     case REQUEST_ADD_REACTION_TO_MESSAGE:

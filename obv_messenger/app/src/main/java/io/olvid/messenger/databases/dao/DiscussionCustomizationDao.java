@@ -21,6 +21,7 @@ package io.olvid.messenger.databases.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -36,6 +37,9 @@ public interface DiscussionCustomizationDao {
 
     @Update
     void update(DiscussionCustomization discussionCustomization);
+
+    @Delete
+    void delete(DiscussionCustomization discussionCustomization);
 
     @Query("SELECT * FROM " + DiscussionCustomization.TABLE_NAME + " WHERE " + DiscussionCustomization.DISCUSSION_ID + " = :discussionId;")
     DiscussionCustomization get(long discussionId);

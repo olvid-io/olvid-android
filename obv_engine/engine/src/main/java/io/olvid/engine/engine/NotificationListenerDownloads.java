@@ -73,6 +73,7 @@ public class NotificationListenerDownloads implements NotificationListener {
                 DownloadNotifications.NOTIFICATION_PING_RECEIVED,
                 DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED,
                 DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED,
+                DownloadNotifications.NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED,
         }) {
             notificationManager.addListener(notificationName, this);
         }
@@ -495,6 +496,18 @@ public class NotificationListenerDownloads implements NotificationListener {
                 engineInfo.put(EngineNotifications.PUSH_TOPIC_NOTIFIED_TOPIC_KEY, topic);
 
                 engine.postEngineNotification(EngineNotifications.PUSH_TOPIC_NOTIFIED, engineInfo);
+                break;
+            }
+            case DownloadNotifications.NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED: {
+                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED_OWNED_IDENTITY_KEY);
+                if (ownedIdentity == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.KEYCLOAK_UPDATE_REQUIRED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+
+                engine.postEngineNotification(EngineNotifications.KEYCLOAK_UPDATE_REQUIRED, engineInfo);
                 break;
             }
             default:

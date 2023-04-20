@@ -50,6 +50,7 @@ public class MuteNotificationDialog {
     private Dialog dialog = null;
 
     private boolean muteWholeProfile;
+    private boolean muteExceptMentioned;
 
     public enum MuteType {
         DISCUSSION,
@@ -57,7 +58,7 @@ public class MuteNotificationDialog {
         DISCUSSION_OR_PROFILE,
     }
 
-    public MuteNotificationDialog(@NonNull Context context, @NonNull OnMuteExpirationSelectedListener onMuteExpirationSelectedListener, @NonNull MuteType muteType) {
+    public MuteNotificationDialog(@NonNull Context context, @NonNull OnMuteExpirationSelectedListener onMuteExpirationSelectedListener, @NonNull MuteType muteType, boolean muteExceptMentioned) {
         this.context = context;
         this.onMuteExpirationSelectedListener = onMuteExpirationSelectedListener;
 
@@ -72,8 +73,8 @@ public class MuteNotificationDialog {
                 context.getString(R.string.pref_mute_notifications_one_week),
                 context.getString(R.string.pref_mute_notifications_indefinitely)};
 
-        muteWholeProfile = muteType == MuteType.PROFILE;
-
+        this.muteWholeProfile = muteType == MuteType.PROFILE;
+        this.muteExceptMentioned = muteExceptMentioned;
 
         ArrayAdapter<String> timeoutOptionsAdapter = new ArrayAdapter<>(context, R.layout.dialog_singlechoice, timeoutOptionsLabels);
         builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
@@ -86,7 +87,7 @@ public class MuteNotificationDialog {
                         timestamp = System.currentTimeMillis() + duration;
                     }
 
-                    onMuteExpirationSelectedListener.onMuteExpirationSelected(timestamp, muteWholeProfile);
+                    onMuteExpirationSelectedListener.onMuteExpirationSelected(timestamp, this.muteWholeProfile, this.muteExceptMentioned);
                 })
                 .setNegativeButton(R.string.button_label_cancel, null);
 
@@ -103,7 +104,7 @@ public class MuteNotificationDialog {
             switchAndLabel.setVisibility(View.VISIBLE);
             @SuppressLint("UseSwitchCompatOrMaterialCode")
             Switch switsh = additionalView.findViewById(R.id.mute_profile_switch);
-            switsh.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> muteWholeProfile = isChecked);
+            switsh.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> this.muteWholeProfile = isChecked);
             switchAndLabel.setOnClickListener((View v) -> switsh.toggle());
         } else {
             switchAndLabel.setVisibility(View.GONE);
@@ -113,6 +114,13 @@ public class MuteNotificationDialog {
         customTime.setOnClickListener(v -> openCustomTimeExpirationPicker());
         TextView customDate = additionalView.findViewById(R.id.custom_date);
         customDate.setOnClickListener(v -> openCustomDateExpirationPicker());
+
+        View mentionedSwitchAndLabel = additionalView.findViewById(R.id.mentioned_view);
+        @SuppressLint("UseSwitchCompatOrMaterialCode")
+        Switch switsh = additionalView.findViewById(R.id.mentioned_switch);
+        switsh.setChecked(this.muteExceptMentioned);
+        switsh.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> this.muteExceptMentioned = isChecked);
+        mentionedSwitchAndLabel.setOnClickListener((View v) -> switsh.toggle());
 
         builder.setView(additionalView);
     }
@@ -135,7 +143,7 @@ public class MuteNotificationDialog {
             calendar.set(Calendar.HOUR_OF_DAY, hour);
             calendar.set(Calendar.MINUTE, minute);
             calendar.set(Calendar.SECOND, 0);
-            onMuteExpirationSelectedListener.onMuteExpirationSelected(calendar.getTimeInMillis(), muteWholeProfile);
+            onMuteExpirationSelectedListener.onMuteExpirationSelected(calendar.getTimeInMillis(), muteWholeProfile, muteExceptMentioned);
             if (this.dialog != null) {
                 this.dialog.dismiss();
             }
@@ -146,7 +154,7 @@ public class MuteNotificationDialog {
         final Calendar calendar = Calendar.getInstance();
         new DatePickerDialog(context, (DatePicker datePicker, int year, int month, int dayOfMonth) -> {
             calendar.set(year, month, dayOfMonth, 0, 0, 0);
-            onMuteExpirationSelectedListener.onMuteExpirationSelected(calendar.getTimeInMillis(), muteWholeProfile);
+            onMuteExpirationSelectedListener.onMuteExpirationSelected(calendar.getTimeInMillis(), muteWholeProfile, muteExceptMentioned);
             if (this.dialog != null) {
                 this.dialog.dismiss();
             }
@@ -154,6 +162,6 @@ public class MuteNotificationDialog {
     }
 
     public interface OnMuteExpirationSelectedListener {
-        void onMuteExpirationSelected(Long muteExpirationTimestamp, boolean muteWholeProfile);
+        void onMuteExpirationSelected(Long muteExpirationTimestamp, boolean muteWholeProfile, boolean exceptMentioned);
     }
 }

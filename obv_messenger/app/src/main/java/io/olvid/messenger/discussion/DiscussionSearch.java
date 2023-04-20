@@ -21,7 +21,6 @@ package io.olvid.messenger.discussion;
 
 import android.text.InputType;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -318,25 +317,24 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
 
     private static BackgroundColorSpan[] highlightedSpans = null;
 
-    public static CharSequence highlightString(@NonNull String input, @NonNull List<Pattern> patterns) {
+    public static CharSequence highlightString(@NonNull Spannable input, @NonNull List<Pattern> patterns) {
         if (highlightedSpans == null) {
             return input;
         }
 
         int i = 0;
-        String unAccented = StringUtils.unAccent(input);
-        Spannable output = new SpannableString(input);
+        String unAccented = StringUtils.unAccent(input.toString());
         for (Pattern pattern : patterns) {
             if (i == highlightedSpans.length) {
                 break;
             }
             Matcher matcher = pattern.matcher(unAccented);
             if (matcher.find()) {
-                output.setSpan(highlightedSpans[i], matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                input.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(input, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(input, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 i++;
             }
         }
 
-        return output;
+        return input;
     }
 }

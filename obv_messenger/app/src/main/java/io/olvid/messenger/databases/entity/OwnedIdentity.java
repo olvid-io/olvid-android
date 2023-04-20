@@ -57,6 +57,7 @@ public class OwnedIdentity {
     public static final String UNLOCK_PASSWORD = "unlock_password";
     public static final String UNLOCK_SALT = "unlock_salt";
     public static final String PREF_MUTE_NOTIFICATIONS = "pref_mute_notifications";
+    public static final String PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED = "pref_mute_notifications_except_mentioned";
     public static final String PREF_MUTE_NOTIFICATIONS_TIMESTAMP = "pref_mute_notifications_timestamp"; // when to stop muting notifications, null if unlimited
     public static final String PREF_SHOW_NEUTRAL_NOTIFICATION_WHEN_HIDDEN = "pref_show_neutral_notification_when_hidden"; // if true, even when the profile is hidden you will get an "Olvid requires your attention" notification
     public static final String CAPABILITY_WEBRTC_CONTINUOUS_ICE = "capability_webrtc_continuous_ice";
@@ -129,6 +130,9 @@ public class OwnedIdentity {
     @ColumnInfo(name = PREF_MUTE_NOTIFICATIONS)
     public boolean prefMuteNotifications;
 
+    @ColumnInfo(name = PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED)
+    public boolean prefMuteNotificationsExceptMentioned;
+
     @ColumnInfo(name = PREF_MUTE_NOTIFICATIONS_TIMESTAMP)
     @Nullable
     public Long prefMuteNotificationsTimestamp;
@@ -146,7 +150,7 @@ public class OwnedIdentity {
     public boolean capabilityOneToOneContacts;
 
     // Constructor required by Room
-    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, String customDisplayName, byte[] unlockPassword, byte[] unlockSalt, boolean prefMuteNotifications, @Nullable Long prefMuteNotificationsTimestamp, boolean prefShowNeutralNotificationWhenHidden, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
+    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, String customDisplayName, byte[] unlockPassword, byte[] unlockSalt, boolean prefMuteNotifications, boolean prefMuteNotificationsExceptMentioned, @Nullable Long prefMuteNotificationsTimestamp, boolean prefShowNeutralNotificationWhenHidden, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.displayName = displayName;
         this.identityDetails = identityDetails;
@@ -161,6 +165,7 @@ public class OwnedIdentity {
         this.unlockPassword = unlockPassword;
         this.unlockSalt = unlockSalt;
         this.prefMuteNotifications = prefMuteNotifications;
+        this.prefMuteNotificationsExceptMentioned = prefMuteNotificationsExceptMentioned;
         this.prefMuteNotificationsTimestamp = prefMuteNotificationsTimestamp;
         this.prefShowNeutralNotificationWhenHidden = prefShowNeutralNotificationWhenHidden;
         this.capabilityWebrtcContinuousIce = capabilityWebrtcContinuousIce;
@@ -185,6 +190,7 @@ public class OwnedIdentity {
         this.unlockPassword = null;
         this.unlockSalt = null;
         this.prefMuteNotifications = false;
+        this.prefMuteNotificationsExceptMentioned = true;
         this.prefMuteNotificationsTimestamp = null;
         this.prefShowNeutralNotificationWhenHidden = false;
         this.capabilityWebrtcContinuousIce = false;
@@ -233,12 +239,30 @@ public class OwnedIdentity {
         return false;
     }
 
+    public boolean shouldMuteNotifications(boolean isCurrentIdentityMentioned) {
+        // for hidden identities, never show a notification if the identity is not currently open
+        if (isHidden() && !Arrays.equals(AppSingleton.getBytesCurrentIdentity(), bytesOwnedIdentity)) {
+            return true;
+        }
+        if (isCurrentIdentityMentioned && prefMuteNotificationsExceptMentioned) {
+            return false;
+        }
+        return shouldMuteNotifications();
+    }
+
     // calling this method only makes sense after getting true from shouldMuteNotifications. Otherwise a full notification should be displayed anyway
     public boolean shouldShowNeutralNotification() {
         if (prefMuteNotifications && (prefMuteNotificationsTimestamp == null || prefMuteNotificationsTimestamp > System.currentTimeMillis())) {
             return false;
         }
         return prefShowNeutralNotificationWhenHidden;
+    }
+
+    public boolean shouldShowNeutralNotification(boolean isCurrentIdentityMentioned) {
+        if (!shouldShowNeutralNotification() && prefMuteNotificationsExceptMentioned && isCurrentIdentityMentioned) {
+            return prefShowNeutralNotificationWhenHidden;
+        }
+        return shouldShowNeutralNotification();
     }
 
     public boolean isHidden() {

@@ -110,7 +110,7 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
 )
 @TypeConverters({ObvTypeConverters.class})
 public abstract class AppDatabase extends RoomDatabase {
-    public static final int DB_SCHEMA_VERSION = 59;
+    public static final int DB_SCHEMA_VERSION = 63;
     public static final String DB_FILE_NAME = "app_database";
 
     public abstract ContactDao contactDao();

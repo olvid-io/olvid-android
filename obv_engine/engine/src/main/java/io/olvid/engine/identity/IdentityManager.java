@@ -26,6 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.jwt.consumer.JwtContext;
@@ -38,6 +40,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -72,6 +75,7 @@ import io.olvid.engine.datatypes.containers.GroupInformation;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
+import io.olvid.engine.datatypes.containers.KeycloakGroupV2UpdateOutput;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.containers.UserData;
 import io.olvid.engine.datatypes.key.asymmetric.SignaturePrivateKey;
@@ -111,6 +115,10 @@ import io.olvid.engine.identity.databases.PendingGroupMember;
 import io.olvid.engine.identity.databases.ServerUserData;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
 import io.olvid.engine.identity.datatypes.IdentityManagerSessionFactory;
+import io.olvid.engine.identity.datatypes.KeycloakGroupBlob;
+import io.olvid.engine.identity.datatypes.KeycloakGroupDeletionData;
+import io.olvid.engine.identity.datatypes.KeycloakGroupMemberAndPermissions;
+import io.olvid.engine.identity.datatypes.KeycloakGroupMemberKickedData;
 import io.olvid.engine.metamanager.BackupDelegate;
 import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
@@ -169,6 +177,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         try (IdentityManagerSession identityManagerSession = getSession()) {
             ContactIdentity[] contactIdentities = ContactIdentity.getAllActiveWithoutDevices(identityManagerSession);
             if (contactIdentities.length > 0) {
+                // TODO: do not do this too often
                 Logger.i("Found " + contactIdentities.length + " contacts with no device. Starting corresponding deviceDiscoveryProtocols.");
                 for (ContactIdentity contactIdentity : contactIdentities) {
                     protocolStarterDelegate.startDeviceDiscoveryProtocol(contactIdentity.getOwnedIdentity(), contactIdentity.getContactIdentity());
@@ -236,6 +245,15 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // clean old ContactGroupV2Details
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            for (ContactGroupV2 contactGroupV2 : ContactGroupV2.getAll(identityManagerSession)) {
+                ContactGroupV2Details.cleanup(identityManagerSession, contactGroupV2.getOwnedIdentity(), contactGroupV2.getGroupIdentifier(), contactGroupV2.getVersion(), contactGroupV2.getTrustedDetailsVersion());
+            }
+            identityManagerSession.session.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // get the set of all owned identity, contact, group profile picture photoUrl and remove all photoUrl not in this set
         try (IdentityManagerSession identityManagerSession = getSession()) {
@@ -289,8 +307,23 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // re-notify the app for all Keycloak groups shared settings to make sure it remains synchronized
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            for (ContactGroupV2 contactGroupV2 : ContactGroupV2.getAllKeycloak(identityManagerSession)) {
+                HashMap<String, Object> userInfo = new HashMap<>();
+                userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_OWNED_IDENTITY_KEY, contactGroupV2.getOwnedIdentity());
+                userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_GROUP_IDENTIFIER_KEY, contactGroupV2.getGroupIdentifier());
+                userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_SERIALIZED_SHARED_SETTINGS_KEY, contactGroupV2.getSerializedSharedSettings());
+                userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_MODIFICATION_TIMESTAMP_KEY, contactGroupV2.getLastModificationTimestamp());
+                notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS, userInfo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(CreateSessionDelegate createSessionDelegate) {
         this.createSessionDelegate = createSessionDelegate;
 
@@ -347,14 +380,17 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         ContactGroupV2PendingMember.upgradeTable(session, oldVersion, newVersion);
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(NotificationPostingDelegate notificationPostingDelegate) {
         this.notificationPostingDelegate = notificationPostingDelegate;
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(ProtocolStarterDelegate protocolStarterDelegate) {
         this.protocolStarterDelegate = protocolStarterDelegate;
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(ChannelDelegate channelDelegate) {
         this.channelDelegate = channelDelegate;
     }
@@ -607,11 +643,15 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public List<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(Session session, String pushTopic) throws SQLException {
+    public Collection<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(Session session, String pushTopic) throws SQLException {
         List<KeycloakServer> keycloakServers = KeycloakServer.getAllWithPushTopic(wrapSession(session), pushTopic);
-        List<ObvIdentity> ownedIdentities = new ArrayList<>();
+        List<ContactGroupV2> keycloakGroups = ContactGroupV2.getAllWithPushTopic(wrapSession(session), pushTopic);
+        HashSet<ObvIdentity> ownedIdentities = new HashSet<>();
         for (KeycloakServer keycloakServer: keycloakServers) {
             ownedIdentities.add(new ObvIdentity(session, this, keycloakServer.getOwnedIdentity()));
+        }
+        for (ContactGroupV2 keycloakGroup : keycloakGroups) {
+            ownedIdentities.add(new ObvIdentity(session, this, keycloakGroup.getOwnedIdentity()));
         }
         return ownedIdentities;
     }
@@ -639,6 +679,9 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
         if (ownedIdentityObject != null && ownedIdentityObject.isKeycloakManaged()) {
             KeycloakServer.setSignatureKey(wrapSession(session), ownedIdentityObject.getKeycloakServerUrl(), ownedIdentity, signatureKey);
+            if (signatureKey == null) {
+                ContactGroupV2.deleteAllKeycloakGroupsForOwnedIdentity(wrapSession(session), ownedIdentity);
+            }
             session.addSessionCommitListener(backupNeededSessionCommitListener);
         }
     }
@@ -661,12 +704,13 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                         .setSkipSignatureVerification()
                         .setSkipAllValidators()
                         .build();
-                JwtContext contactContext = noVerificationConsumer.process(contactIdentity.getPublishedDetails().getJsonIdentityDetails().getSignedUserDetails());
-                JsonKeycloakUserDetails jsonKeycloakUserDetails = jsonObjectMapper.readValue(contactContext.getJwtClaims().getRawJson(), JsonKeycloakUserDetails.class);
+                ContactIdentityDetails publishedDetails = contactIdentity.getPublishedDetails();
+                JwtClaims claims = noVerificationConsumer.processToClaims(publishedDetails.getJsonIdentityDetails().getSignedUserDetails());
+                JsonKeycloakUserDetails jsonKeycloakUserDetails = jsonObjectMapper.readValue(claims.getRawJson(), JsonKeycloakUserDetails.class);
 
                 if (jsonKeycloakUserDetails.getTimestamp() != null && jsonKeycloakUserDetails.getTimestamp() < latestRevocationListTimestamp - Constants.KEYCLOAK_SIGNATURE_VALIDITY_MILLIS) {
                     // signature no longer valid --> remove certification
-                    contactIdentity.setCertifiedByOwnKeycloak(false);
+                    contactIdentity.setCertifiedByOwnKeycloak(false, publishedDetails.getSerializedJsonDetails());
                 }
             } catch (Exception ignored) { }
         }
@@ -678,8 +722,18 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (ownedIdentityObject == null || !ownedIdentityObject.isKeycloakManaged()) {
             return new ArrayList<>(0);
         }
+        List<String> pushTopics = new ArrayList<>();
+
         KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), ownedIdentityObject.getKeycloakServerUrl(), ownedIdentity);
-        return keycloakServer == null ? new ArrayList<>(0) : keycloakServer.getPushTopics();
+        if (keycloakServer != null) {
+            pushTopics.addAll(keycloakServer.getPushTopics());
+        }
+        List<String> groupPushTopics = ContactGroupV2.getAllKeycloakPushTopics(wrapSession(session), ownedIdentity);
+        if (groupPushTopics != null) {
+            pushTopics.addAll(groupPushTopics);
+        }
+
+        return pushTopics;
     }
 
     @Override
@@ -737,7 +791,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                         KeycloakRevokedIdentity.create(wrapSession(session), ownedIdentity, keycloakServer.getServerUrl(), revokedIdentity, jsonKeycloakRevocation.getRevocationType(), jsonKeycloakRevocation.getRevocationTimestamp());
 
                         // now, check if the revokedIdentity is part of our contacts
-                        ContactIdentity contactIdentity = ContactIdentity.get(wrapSession(session), revokedIdentity, ownedIdentity);
+                        ContactIdentity contactIdentity = ContactIdentity.get(wrapSession(session), ownedIdentity, revokedIdentity);
                         if (contactIdentity != null) {
                             switch (jsonKeycloakRevocation.getRevocationType()) {
                                 case KeycloakRevokedIdentity.TYPE_LEFT_COMPANY:
@@ -747,12 +801,13 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                                                 .setSkipSignatureVerification()
                                                 .setSkipAllValidators()
                                                 .build();
-                                        JwtContext contactContext = noVerificationConsumer.process(contactIdentity.getPublishedDetails().getJsonIdentityDetails().getSignedUserDetails());
-                                        JsonKeycloakUserDetails jsonKeycloakUserDetails = jsonObjectMapper.readValue(contactContext.getJwtClaims().getRawJson(), JsonKeycloakUserDetails.class);
+                                        ContactIdentityDetails publishedDetails = contactIdentity.getPublishedDetails();
+                                        JwtClaims claims = noVerificationConsumer.processToClaims(publishedDetails.getJsonIdentityDetails().getSignedUserDetails());
+                                        JsonKeycloakUserDetails jsonKeycloakUserDetails = jsonObjectMapper.readValue(claims.getRawJson(), JsonKeycloakUserDetails.class);
 
                                         if (jsonKeycloakUserDetails.getTimestamp() == null || jsonKeycloakRevocation.getRevocationTimestamp() > jsonKeycloakUserDetails.getTimestamp()) {
                                             // the user left the company after the signature of his details --> unmark as certified
-                                            contactIdentity.setCertifiedByOwnKeycloak(false);
+                                            contactIdentity.setCertifiedByOwnKeycloak(false, publishedDetails.getSerializedJsonDetails());
                                         }
                                     }
                                     break;
@@ -763,7 +818,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                                         channelDelegate.deleteObliviousChannelsWithContact(session, ownedIdentity, revokedIdentity);
                                         removeAllDevicesForContactIdentity(session, ownedIdentity, revokedIdentity);
                                     }
-                                    contactIdentity.setCertifiedByOwnKeycloak(false);
+                                    ContactIdentityDetails publishedDetails = contactIdentity.getPublishedDetails();
+                                    contactIdentity.setCertifiedByOwnKeycloak(false, publishedDetails.getSerializedJsonDetails());
                                     contactIdentity.setRevokedAsCompromised(true);
                                     break;
                             }
@@ -1014,6 +1070,126 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return null;
     }
 
+    @Override
+    public void updateKeycloakGroups(Session session, Identity ownedIdentity, List<String> signedGroupBlobs, List<String> signedGroupDeletions, List<String> signedGroupKicks, long keycloakCurrentTimestamp) throws Exception {
+        if (!session.isInTransaction()) {
+            Logger.e("Called updateKeycloakGroups outside a transaction");
+            throw new Exception();
+        }
+        OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
+        if (ownedIdentityObject == null || !ownedIdentityObject.isKeycloakManaged()) {
+            Logger.e("Called updateKeycloakGroups for an identity that is not keycloak managed");
+            throw new Exception();
+        }
+        KeycloakServer keycloakServer = ownedIdentityObject.getKeycloakServer();
+
+        final JwksVerificationKeyResolver jwksResolver;
+        JsonWebKey signatureKey = keycloakServer.getSignatureKey();
+        if (signatureKey != null) {
+            jwksResolver = new JwksVerificationKeyResolver(Collections.singletonList(signatureKey));
+        } else {
+            JsonWebKeySet jwks = keycloakServer.getJwks();
+            jwksResolver = new JwksVerificationKeyResolver(jwks.getJsonWebKeys());
+        }
+        JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                .setExpectedAudience(false)
+                .setVerificationKeyResolver(jwksResolver)
+                .build();
+
+
+        // first process group deletions
+        if (signedGroupDeletions != null) {
+            for (String signedGroupDeletion : signedGroupDeletions) {
+                try {
+                    JwtClaims claims = jwtConsumer.processToClaims(signedGroupDeletion);
+                    if (claims == null) {
+                        // invalid signature --> ignore it
+                        continue;
+                    }
+
+                    KeycloakGroupDeletionData keycloakGroupDeletionData = jsonObjectMapper.readValue(claims.getRawJson(), KeycloakGroupDeletionData.class);
+                    UID groupUid = new UID(keycloakGroupDeletionData.groupUid);
+                    GroupV2.Identifier groupIdentifier = new GroupV2.Identifier(groupUid, keycloakServer.getServerUrl(), GroupV2.Identifier.CATEGORY_KEYCLOAK);
+
+                    Long groupLastModificationTimestamp = ContactGroupV2.getLastModificationTimestamp(wrapSession(session), ownedIdentity, groupIdentifier);
+                    if (groupLastModificationTimestamp == null || groupLastModificationTimestamp > keycloakGroupDeletionData.timestamp) {
+                        // if the group is not found, or is more recent than the signed deletion, do not do anything
+                        continue;
+                    }
+
+                    // group was disbanded, delete it locally
+                    deleteGroupV2(session, ownedIdentity, groupIdentifier);
+                } catch (InvalidJwtException | JsonProcessingException | IllegalArgumentException e) {
+                    // unable to process signed deletion --> ignore it
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // then group kicks
+        if (signedGroupKicks != null) {
+            for (String signedGroupKick : signedGroupKicks) {
+                try {
+                    JwtClaims claims = jwtConsumer.processToClaims(signedGroupKick);
+                    if (claims == null) {
+                        // invalid signature --> ignore it
+                        continue;
+                    }
+
+                    KeycloakGroupMemberKickedData keycloakGroupMemberKickedData = jsonObjectMapper.readValue(claims.getRawJson(), KeycloakGroupMemberKickedData.class);
+                    UID groupUid = new UID(keycloakGroupMemberKickedData.groupUid);
+                    // verify it's indeed me who's getting kicked
+                    if (!Arrays.equals(ownedIdentity.getBytes(), keycloakGroupMemberKickedData.identity)) {
+                        continue;
+                    }
+                    GroupV2.Identifier groupIdentifier = new GroupV2.Identifier(groupUid, keycloakServer.getServerUrl(), GroupV2.Identifier.CATEGORY_KEYCLOAK);
+
+                    Long groupLastModificationTimestamp = ContactGroupV2.getLastModificationTimestamp(wrapSession(session), ownedIdentity, groupIdentifier);
+                    if (groupLastModificationTimestamp == null || groupLastModificationTimestamp > keycloakGroupMemberKickedData.timestamp) {
+                        // if the group is not found, or is more recent than the signed deletion, do not do anything
+                        continue;
+                    }
+
+                    // I was kicked from the group, delete it locally
+                    deleteGroupV2(session, ownedIdentity, groupIdentifier);
+                } catch (InvalidJwtException | JsonProcessingException | IllegalArgumentException e) {
+                    // unable to process signed deletion --> ignore it
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // update group blobs
+        if (signedGroupBlobs != null) {
+            for (String signedGroupBlob : signedGroupBlobs) {
+                try {
+                    JwtClaims claims = jwtConsumer.processToClaims(signedGroupBlob);
+                    if (claims == null) {
+                        // invalid signature --> ignore it
+                        continue;
+                    }
+
+                    String serializedKeycloakGroupBlob = claims.getRawJson();
+                    KeycloakGroupBlob keycloakGroupBlob = jsonObjectMapper.readValue(serializedKeycloakGroupBlob, KeycloakGroupBlob.class);
+                    UID groupUid = new UID(keycloakGroupBlob.bytesGroupUid);
+                    GroupV2.Identifier groupIdentifier = new GroupV2.Identifier(groupUid, keycloakServer.getServerUrl(), GroupV2.Identifier.CATEGORY_KEYCLOAK);
+
+                    if (keycloakGroupBlob.timestamp < keycloakCurrentTimestamp - Constants.KEYCLOAK_SIGNATURE_VALIDITY_MILLIS) {
+                        Logger.w("Received a signed keyclaok groupblob with an outdated signature");
+                        continue;
+                    }
+
+                    protocolStarterDelegate.createOrUpdateKeycloakGroupV2(session, ownedIdentity, groupIdentifier, serializedKeycloakGroupBlob);
+                } catch (InvalidJwtException | JsonProcessingException | IllegalArgumentException e) {
+                    // unable to process signed deletion --> ignore it
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // finally set the lastGroupUpdateTimestamp
+        keycloakServer.setLatestGroupUpdateTimestamp(keycloakCurrentTimestamp);
+    }
 
     @Override
     public void reactivateOwnedIdentityIfNeeded(Session session, Identity ownedIdentity) throws SQLException {
@@ -1143,7 +1319,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void addTrustOriginToContact(Session session, Identity contactIdentity, Identity ownedIdentity, TrustOrigin trustOrigin, boolean markAsOneToOne) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject == null) {
             Logger.e("Error in addTrustOriginToContact: contactIdentity is not a ContactIdentity of ownedIdentity");
             throw new SQLException();
@@ -1176,7 +1352,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void trustPublishedContactDetails(Session session, Identity contactIdentity, Identity ownedIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             contactIdentityObject.trustPublishedDetails();
             session.addSessionCommitListener(backupNeededSessionCommitListener);
@@ -1185,7 +1361,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void setContactPublishedDetails(Session session, Identity contactIdentity, Identity ownedIdentity, JsonIdentityDetailsWithVersionAndPhoto jsonIdentityDetailsWithVersionAndPhoto, boolean allowDowngrade) throws Exception {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             contactIdentityObject.updatePublishedDetails(jsonIdentityDetailsWithVersionAndPhoto, allowDowngrade);
             session.addSessionCommitListener(backupNeededSessionCommitListener);
@@ -1194,7 +1370,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void setContactDetailsDownloadedPhoto(Session session, Identity contactIdentity, Identity ownedIdentity, int version, byte[] photo) throws Exception {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             contactIdentityObject.setDetailsDownloadedPhotoUrl(version, photo);
         }
@@ -1202,12 +1378,12 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public String getSerializedPublishedDetailsOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) {
-        return ContactIdentity.getSerializedPublishedDetails(wrapSession(session), contactIdentity, ownedIdentity);
+        return ContactIdentity.getSerializedPublishedDetails(wrapSession(session), ownedIdentity, contactIdentity);
     }
 
     @Override
     public JsonIdentityDetails getContactIdentityTrustedDetails(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             return contactIdentityObject.getTrustedDetails().getJsonIdentityDetails();
         }
@@ -1216,7 +1392,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public String getContactTrustedDetailsPhotoUrl(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             return contactIdentityObject.getTrustedDetails().getPhotoUrl();
         }
@@ -1225,7 +1401,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public boolean contactHasUntrustedPublishedDetails(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             return contactIdentityObject.getPublishedDetailsVersion() != contactIdentityObject.getTrustedDetailsVersion();
         }
@@ -1235,7 +1411,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public JsonIdentityDetailsWithVersionAndPhoto[] getContactPublishedAndTrustedDetails(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             JsonIdentityDetailsWithVersionAndPhoto[] res;
             if (contactIdentityObject.getPublishedDetailsVersion() == contactIdentityObject.getTrustedDetailsVersion()) {
@@ -1253,7 +1429,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public boolean isContactIdentityCertifiedByOwnKeycloak(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             return contactIdentityObject.isCertifiedByOwnKeycloak();
         }
@@ -1267,30 +1443,30 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void reCheckAllCertifiedByOwnKeycloakContacts(Session session, Identity ownedIdentity) throws SQLException {
-        ContactIdentity.unmarkAllCertifiedByOwnKeycloakContacts(wrapSession(session), ownedIdentity);
-
         for (ContactIdentity contactIdentity : ContactIdentity.getAll(wrapSession(session), ownedIdentity)) {
             ContactIdentityDetails publishedDetails = contactIdentity.getPublishedDetails();
 
-            if (publishedDetails == null) {
-                continue;
+            if (publishedDetails != null) {
+                JsonIdentityDetails identityDetails = publishedDetails.getJsonIdentityDetails();
+                if (identityDetails != null && identityDetails.getSignedUserDetails() != null) {
+                    JsonKeycloakUserDetails jsonKeycloakUserDetails = verifyKeycloakSignature(session, ownedIdentity, identityDetails.getSignedUserDetails());
+
+                    if (jsonKeycloakUserDetails != null) {
+                        // the contact has some valid signed details
+                        try {
+                            JsonIdentityDetails certifiedJsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(identityDetails.getSignedUserDetails());
+                            contactIdentity.markContactAsCertifiedByOwnKeycloak(certifiedJsonIdentityDetails);
+                            continue;
+                        } catch (Exception e) {
+                            // error parsing signed details --> do nothing
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
-            JsonIdentityDetails identityDetails = publishedDetails.getJsonIdentityDetails();
 
-            if (identityDetails != null && identityDetails.getSignedUserDetails() != null) {
-                JsonKeycloakUserDetails jsonKeycloakUserDetails = verifyKeycloakSignature(session, ownedIdentity, identityDetails.getSignedUserDetails());
-
-                if (jsonKeycloakUserDetails == null) {
-                    continue;
-                }
-                // the contact has some signed details
-                try {
-                    JsonIdentityDetails certifiedJsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(identityDetails.getSignedUserDetails());
-                    contactIdentity.markContactAsCertifiedByOwnKeycloak(certifiedJsonIdentityDetails);
-                } catch (Exception e) {
-                    // error parsing signed details --> do nothing
-                    e.printStackTrace();
-                }
+            if (contactIdentity.isCertifiedByOwnKeycloak()) {
+                contactIdentity.setCertifiedByOwnKeycloak(false, null);
             }
         }
     }
@@ -1307,7 +1483,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public TrustLevel getContactTrustLevel(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             return contactIdentityObject.getTrustLevel();
         }
@@ -1316,7 +1492,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void deleteContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, boolean failIfGroup) throws Exception {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject != null) {
             // check there are no Groups where this contact is
             if (failIfGroup) {
@@ -1345,25 +1521,25 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public boolean isIdentityAnActiveContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         return (contactIdentityObject != null && contactIdentityObject.isActive());
     }
 
     @Override
     public boolean isIdentityAContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         return (contactIdentityObject != null);
     }
 
     @Override
     public boolean isIdentityAOneToOneContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         return (contactIdentityObject != null && contactIdentityObject.isOneToOne());
     }
 
     @Override
     public void setContactOneToOne(Session session, Identity ownedIdentity, Identity contactIdentity, boolean oneToOne) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         // only actually call the setter if the oneToOne is changed
         if (contactIdentityObject != null && contactIdentityObject.isOneToOne() != oneToOne) {
             contactIdentityObject.setOneToOne(oneToOne);
@@ -1372,7 +1548,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject == null) {
             return null;
         }
@@ -1388,7 +1564,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public boolean forcefullyUnblockContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject == null) {
             return false;
         }
@@ -1398,7 +1574,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public boolean reBlockForcefullyUnblockedContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contactIdentityObject == null || !contactIdentityObject.isForcefullyTrustedByUser()) {
             return false;
         }
@@ -1419,7 +1595,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid) throws SQLException {
-        ContactIdentity contact = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contact = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contact != null && contact.isActive()) {
             ContactDevice contactDevice = ContactDevice.get(wrapSession(session), deviceUid, contactIdentity, ownedIdentity);
             // only create the contact device if it does not already exist
@@ -1451,7 +1627,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     @Override
     public UID[] getDeviceUidsOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) {
         try {
-            ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+            ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
             if (contactIdentityObject != null) {
                 return contactIdentityObject.getDeviceUids();
             }
@@ -1969,7 +2145,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             throw new Exception();
         }
 
-        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), contactIdentity, ownedIdentity);
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         // check the contactIdentity is indeed a ContactIdentity of the ownedIdentity
         if (contactIdentityObject == null) {
             Logger.e("Error in demoteGroupMemberToDeclinedPendingMember: contactIdentity is not a Contact.");
@@ -2078,7 +2254,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     }
 
                     // create contact if it does not exist
-                    ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), groupMember.identity, ownedIdentity);
+                    ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, groupMember.identity);
                     if (contactIdentityObject == null) {
                         addContactIdentity(session, groupMember.identity, groupMember.serializedDetails, ownedIdentity, TrustOrigin.createGroupTrustOrigin(System.currentTimeMillis(), groupInformation.groupOwnerIdentity), false);
                     } else {
@@ -2401,6 +2577,10 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void createNewGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, String absolutePhotoUrl, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, HashSet<GroupV2.IdentityAndPermissionsAndDetails> otherGroupMembers) throws Exception {
+        if (!ownPermissionStrings.contains(GroupV2.Permission.GROUP_ADMIN.getString())) {
+            Logger.e("Error in createNewContactGroupV2: ownPermissions do not contain GROUP_ADMIN.");
+            throw new Exception();
+        }
         for (GroupV2.IdentityAndPermissionsAndDetails groupMember: otherGroupMembers) {
             if (!isIdentityAContactOfOwnedIdentity(session, ownedIdentity, groupMember.identity)) {
                 Logger.e("Error in createNewContactGroupV2: a groupMember is not a Contact.");
@@ -2408,10 +2588,6 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             if (!getContactCapabilities(wrapSession(session), ownedIdentity, groupMember.identity).contains(ObvCapability.GROUPS_V2)) {
                 Logger.e("Error in createNewContactGroupV2: a groupMember does not have groupV2 capability.");
-                throw new Exception();
-            }
-            if (!ownPermissionStrings.contains(GroupV2.Permission.GROUP_ADMIN.getString())) {
-                Logger.e("Error in createNewContactGroupV2: ownPermissions do not contain GROUP_ADMIN.");
                 throw new Exception();
             }
         }
@@ -2461,7 +2637,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob) throws Exception {
-        if ((ownedIdentity == null) || (groupIdentifier == null) || (serverBlob == null)) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) || (serverBlob == null)) {
             throw new Exception();
         }
 
@@ -2535,7 +2711,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public GroupV2.ServerBlob getGroupV2ServerBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
-        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK)) {
             return null;
         }
 
@@ -2566,7 +2742,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void freezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
-        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK)) {
             return;
         }
         ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
@@ -2577,7 +2753,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void unfreezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
-        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK)) {
             return;
         }
         ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
@@ -2600,7 +2776,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public boolean isGroupV2Frozen(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
-        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK)) {
             return false;
         }
         ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
@@ -2613,7 +2789,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public GroupV2.BlobKeys getGroupV2BlobKeys(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
-        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK)) {
             return null;
         }
         ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
@@ -2640,7 +2816,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public List<Identity> updateGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe) throws SQLException {
-        if ((ownedIdentity == null) || (groupIdentifier == null) || (serverBlob == null) || (blobKeys == null)) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) || (serverBlob == null) || (blobKeys == null)) {
             return null;
         }
         ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
@@ -2798,6 +2974,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         session.addSessionCommitListener(backupNeededSessionCommitListener);
     }
 
+    // only for CATEGORY_SERVER groups. This is only used for UserData management
     @Override
     public GroupV2.ServerPhotoInfo getGroupV2PublishedServerPhotoInfo(Session session, Identity ownedIdentity, byte[] bytesGroupIdentifier) {
         if ((ownedIdentity == null) || (bytesGroupIdentifier == null)) {
@@ -2805,6 +2982,9 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
         try {
             GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+            if (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
+                return null;
+            }
             return ContactGroupV2.getServerPhotoInfo(wrapSession(session), ownedIdentity, groupIdentifier);
         } catch (Exception e) {
             e.printStackTrace();
@@ -2874,7 +3054,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public GroupV2.AdministratorsChain getGroupV2AdministratorsChain(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
-        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK)) {
             return null;
         }
         ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
@@ -2889,7 +3069,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public boolean getGroupV2AdminStatus(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
-        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK)) {
             return false;
         }
         ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
@@ -2920,21 +3100,21 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public GroupV2.IdentifierVersionAndKeys[] getGroupsV2IdentifierVersionAndKeysForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
+    public GroupV2.IdentifierVersionAndKeys[] getServerGroupsV2IdentifierVersionAndKeysForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
         if (ownedIdentity == null || contactIdentity == null) {
             throw new Exception();
         }
 
-        return ContactGroupV2.getGroupsV2IdentifierVersionAndKeysForContact(wrapSession(session), ownedIdentity, contactIdentity);
+        return ContactGroupV2.getServerGroupsV2IdentifierVersionAndKeysForContact(wrapSession(session), ownedIdentity, contactIdentity);
     }
 
     @Override
-    public GroupV2.IdentifierAndAdminStatus[] getGroupsV2IdentifierAndMyAdminStatusForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
+    public GroupV2.IdentifierAndAdminStatus[] getServerGroupsV2IdentifierAndMyAdminStatusForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
         if (ownedIdentity == null || contactIdentity == null) {
             throw new Exception();
         }
 
-        return ContactGroupV2.getGroupsV2IdentifierAndMyAdminStatusForContact(wrapSession(session), ownedIdentity, contactIdentity);
+        return ContactGroupV2.getServerGroupsV2IdentifierAndMyAdminStatusForContact(wrapSession(session), ownedIdentity, contactIdentity);
     }
 
 
@@ -2965,18 +3145,220 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     public void forcefullyRemoveMemberOrPendingFromNonAdminGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity) throws SQLException {
         ContactGroupV2 contactGroupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
         if (contactGroupV2 != null) {
-            contactGroupV2.triggerUpdateNotification();
-
-            ContactGroupV2PendingMember pendingMember = ContactGroupV2PendingMember.get(wrapSession(session), ownedIdentity, groupIdentifier, contactIdentity);
-            if (pendingMember != null) {
-                pendingMember.delete();
-            }
-            ContactGroupV2Member member = ContactGroupV2Member.get(wrapSession(session), ownedIdentity, groupIdentifier, contactIdentity);
-            if (member != null) {
-                member.delete();
+            if (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
+                moveKeycloakMemberToPendingMember(wrapSession(session), groupIdentifier, ownedIdentity, contactIdentity, null);
+            } else {
+                contactGroupV2.triggerUpdateNotification();
+                ContactGroupV2PendingMember pendingMember = ContactGroupV2PendingMember.get(wrapSession(session), ownedIdentity, groupIdentifier, contactIdentity);
+                if (pendingMember != null) {
+                    pendingMember.delete();
+                }
+                ContactGroupV2Member member = ContactGroupV2Member.get(wrapSession(session), ownedIdentity, groupIdentifier, contactIdentity);
+                if (member != null) {
+                    member.delete();
+                }
             }
         }
     }
+
+    @Override
+    public Long getGroupV2LastModificationTimestamp(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        if ((ownedIdentity == null) || (groupIdentifier == null)) {
+            return null;
+        }
+        return ContactGroupV2.getLastModificationTimestamp(wrapSession(session), ownedIdentity, groupIdentifier);
+    }
+
+    @Override
+    public byte[] createKeycloakGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, KeycloakGroupBlob keycloakGroupBlob) {
+        if (ownedIdentity == null || groupIdentifier == null || groupIdentifier.category != GroupV2.Identifier.CATEGORY_KEYCLOAK || keycloakGroupBlob == null) {
+            return null;
+        }
+
+        try {
+            IdentityManagerSession identityManagerSession = wrapSession(session);
+
+            // first, find my own permissions and invitation nonce in the groupMembersAndPermissions set
+            byte[] ownInvitationNonce = null;
+            List<String> ownPermissions = null;
+            List<KeycloakGroupMemberAndPermissions> otherMembers = new ArrayList<>();
+
+            for (KeycloakGroupMemberAndPermissions groupMemberAndPermissions : keycloakGroupBlob.groupMembersAndPermissions) {
+                if (Arrays.equals(ownedIdentity.getBytes(), groupMemberAndPermissions.identity)) {
+                    ownInvitationNonce = groupMemberAndPermissions.groupInvitationNonce;
+                    ownPermissions = groupMemberAndPermissions.permissions;
+                } else {
+                    otherMembers.add(groupMemberAndPermissions);
+                }
+            }
+
+
+            GroupV2.ServerPhotoInfo serverPhotoInfo = null;
+            if (keycloakGroupBlob.photoUid != null && keycloakGroupBlob.encodedPhotoKey != null) {
+                try {
+                    UID photoUid = new UID(keycloakGroupBlob.photoUid);
+                    AuthEncKey photoKey = (AuthEncKey) new Encoded(keycloakGroupBlob.encodedPhotoKey).decodeSymmetricKey();
+                    serverPhotoInfo = new GroupV2.ServerPhotoInfo(null, photoUid, photoKey);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            ContactGroupV2 groupV2 = ContactGroupV2.createKeycloak(
+                    identityManagerSession,
+                    ownedIdentity,
+                    groupIdentifier,
+                    jsonObjectMapper.writeValueAsString(keycloakGroupBlob.groupDetails),
+                    serverPhotoInfo,
+                    ownInvitationNonce,
+                    ownPermissions,
+                    keycloakGroupBlob.pushTopic,
+                    keycloakGroupBlob.serializedSharedSettings,
+                    keycloakGroupBlob.timestamp
+            );
+
+            if (groupV2 == null) {
+                throw new Exception("Called createKeycloakGroupV2 and group already exists");
+            }
+
+            JwtConsumer noVerificationConsumer = new JwtConsumerBuilder()
+                    .setSkipSignatureVerification()
+                    .setSkipAllValidators()
+                    .build();
+
+            for (KeycloakGroupMemberAndPermissions groupMemberAndPermissions: otherMembers) {
+                try {
+                    // the signedUserDetails contained in the KeycloakGroupMemberAndPermissions are a JWT, containing the "raw" details
+                    // we deserialize these raw details and enrich them with the signed details
+                    String serializedUnsignedDetails = noVerificationConsumer.processToClaims(groupMemberAndPermissions.signedUserDetails).getRawJson();
+                    JsonKeycloakUserDetails jsonKeycloakUserDetails = jsonObjectMapper.readValue(serializedUnsignedDetails, JsonKeycloakUserDetails.class);
+                    JsonIdentityDetails jsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(groupMemberAndPermissions.signedUserDetails);
+                    String serializedIdentityDetails = jsonObjectMapper.writeValueAsString(jsonIdentityDetails);
+
+                    Identity groupMemberIdentity = Identity.of(groupMemberAndPermissions.identity);
+
+                    ContactGroupV2PendingMember pendingMember = ContactGroupV2PendingMember.create(
+                            identityManagerSession,
+                            ownedIdentity,
+                            groupIdentifier,
+                            groupMemberIdentity,
+                            serializedIdentityDetails,
+                            groupMemberAndPermissions.permissions,
+                            groupMemberAndPermissions.groupInvitationNonce
+                    );
+
+                    if (pendingMember == null) {
+                        throw new Exception("Unable to create ContactGroupV2PendingMember");
+                    }
+                } catch (InvalidJwtException | JsonProcessingException e) {
+                    Logger.w("Unable to process one keycloak group member --> skipping them");
+                    e.printStackTrace();
+                }
+            }
+
+            if (keycloakGroupBlob.serializedSharedSettings != null) {
+                session.addSessionCommitListener(() -> {
+                    HashMap<String, Object> userInfo = new HashMap<>();
+                    userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_OWNED_IDENTITY_KEY, ownedIdentity);
+                    userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_GROUP_IDENTIFIER_KEY, groupIdentifier);
+                    userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_SERIALIZED_SHARED_SETTINGS_KEY, keycloakGroupBlob.serializedSharedSettings);
+                    userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_MODIFICATION_TIMESTAMP_KEY, keycloakGroupBlob.timestamp);
+                    notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS, userInfo);
+                });
+            }
+
+            session.addSessionCommitListener(backupNeededSessionCommitListener);
+            return ownInvitationNonce;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public KeycloakGroupV2UpdateOutput updateKeycloakGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, KeycloakGroupBlob keycloakGroupBlob) throws Exception {
+        if ((session == null) || (ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category != GroupV2.Identifier.CATEGORY_KEYCLOAK) || (keycloakGroupBlob == null)) {
+            return null;
+        }
+
+        if (!session.isInTransaction()) {
+            throw new SQLException("Calling updateKeycloakGroupV2WithNewBlob outside a transaction!");
+        }
+
+        ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
+        if (groupV2 == null) {
+            return null;
+        }
+
+        session.addSessionCommitListener(backupNeededSessionCommitListener);
+        return groupV2.updateWithNewKeycloakBlob(keycloakGroupBlob, jsonObjectMapper);
+    }
+
+    @Override
+    public void rePingOrDemoteContactFromAllKeycloakGroups(Session session, Identity ownedIdentity, Identity contactIdentity, boolean certifiedByOwnKeycloak, String lastKnownSerializedCertifiedDetails) throws SQLException {
+        if ((session == null) || (ownedIdentity == null) || (contactIdentity == null)) {
+            return;
+        }
+        IdentityManagerSession identityManagerSession = wrapSession(session);
+
+        if (certifiedByOwnKeycloak) {
+            List<GroupV2.Identifier> groupIdentifiers = ContactGroupV2PendingMember.getKeycloakGroupV2IdentifiersWhereContactIsPending(identityManagerSession, ownedIdentity, contactIdentity);
+            if (groupIdentifiers != null) {
+                for (GroupV2.Identifier groupIdentifier : groupIdentifiers) {
+                    try {
+                        protocolStarterDelegate.initiateKeycloakGroupV2TargetedPing(session, ownedIdentity, groupIdentifier, contactIdentity);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            List<GroupV2.Identifier> groupIdentifiers = ContactGroupV2Member.getKeycloakGroupV2IdentifiersWhereContactIsMember(identityManagerSession, ownedIdentity, contactIdentity);
+            if (groupIdentifiers != null) {
+                for (GroupV2.Identifier groupIdentifier : groupIdentifiers) {
+                    try {
+                        moveKeycloakMemberToPendingMember(identityManagerSession, groupIdentifier, ownedIdentity, contactIdentity, lastKnownSerializedCertifiedDetails);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    private void moveKeycloakMemberToPendingMember(IdentityManagerSession identityManagerSession, GroupV2.Identifier groupIdentifier, Identity ownedIdentity, Identity groupMemberIdentity, String lastKnownSerializedCertifiedDetails) throws SQLException {
+        if (groupIdentifier.category != GroupV2.Identifier.CATEGORY_KEYCLOAK) {
+            return;
+        }
+
+        ContactGroupV2Member member = ContactGroupV2Member.get(identityManagerSession, ownedIdentity, groupIdentifier, groupMemberIdentity);
+        String serializedPublishedDetails = lastKnownSerializedCertifiedDetails == null ? ContactIdentity.getSerializedPublishedDetails(identityManagerSession, ownedIdentity, groupMemberIdentity) : lastKnownSerializedCertifiedDetails;
+        if (member == null || serializedPublishedDetails == null) {
+            return;
+        }
+
+        ContactGroupV2PendingMember pendingMember = ContactGroupV2PendingMember.get(identityManagerSession, ownedIdentity, groupIdentifier, groupMemberIdentity);
+        if (pendingMember == null) { // this should always be the case
+            // crate the ContactGroupV2PendingMember
+            pendingMember = ContactGroupV2PendingMember.create(identityManagerSession, ownedIdentity, groupIdentifier, groupMemberIdentity, serializedPublishedDetails, GroupV2.Permission.deserializePermissions(member.getSerializedPermissions()), member.getGroupInvitationNonce());
+
+            if (pendingMember == null) {
+                throw new SQLException("In IdentityManager.moveKeycloakMemberToPendingMember, failed to create ContactGroupV2PendingMember");
+            }
+        }
+
+        // delete the member
+        member.delete();
+
+        identityManagerSession.session.addSessionCommitListener(() -> {
+            HashMap<String, Object> userInfo = new HashMap<>();
+            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_OWNED_IDENTITY_KEY, ownedIdentity);
+            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_GROUP_IDENTIFIER_KEY, groupIdentifier);
+            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_BY_ME_KEY, false);
+            identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED, userInfo);
+        });
+    }
+
 
     // endregion
 

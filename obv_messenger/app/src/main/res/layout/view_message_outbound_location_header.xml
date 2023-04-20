@@ -175,7 +175,7 @@
             android:gravity="start|center"
             android:textSize="12sp"
             tools:text="Sharing location until 16:55"
-            app:drawableStartCompat="@drawable/ic_location_blue_small"
+            app:drawableStartCompat="@drawable/ic_location_blue_16dp"
             android:drawablePadding="4dp"
             />
 
@@ -185,7 +185,6 @@
         android:id="@+id/attachments_card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:maxWidth="400dp"
         app:cardBackgroundColor="@color/transparent"
         app:cardCornerRadius="@dimen/attachment_corner_radius"
@@ -193,7 +192,7 @@
         app:layout_constraintTop_toBottomOf="@id/message_location_content_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/message_location_sharing_stop_button">
+        >
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/attachments_recycler_view"
@@ -214,16 +213,44 @@
         android:maxLines="1"
         android:singleLine="true"
         android:ellipsize="end"
+        android:visibility="gone"
+        tools:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/attachments_card"
-        app:layout_constraintBottom_toTopOf="@id/message_timestamp_bottom_text_view"
+        app:layout_constraintBottom_toTopOf="@id/message_location_address_text_view"
         android:paddingVertical="4dp"
         android:background="?attr/selectableItemBackground"
         android:textAlignment="center"
         android:textColor="@color/red"
         android:textStyle="bold"
         android:text="@string/button_label_end_sharing_location" />
+
+    <TextView
+        android:id="@+id/message_location_address_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:textColor="@color/primary700"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/message_location_sharing_stop_button"
+        app:layout_constraintBottom_toTopOf="@id/timestamp_spacer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0.0"
+        tools:text="2 Boulevard de la République" />
+
+
+    <TextView
+        android:id="@+id/timestamp_spacer"
+        android:layout_width="1dp"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/message_timestamp_bottom_text_view"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/message_timestamp_bottom_text_view"

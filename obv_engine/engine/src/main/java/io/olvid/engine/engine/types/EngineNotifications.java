@@ -348,4 +348,13 @@ public abstract class EngineNotifications {
 
     public static final String PUSH_TOPIC_NOTIFIED = "engine_notification_push_topic_notified";
     public static final String PUSH_TOPIC_NOTIFIED_TOPIC_KEY = "topic"; // String
+
+    public static final String KEYCLOAK_UPDATE_REQUIRED = "engine_notification_keycloak_update_required";
+    public static final String KEYCLOAK_UPDATE_REQUIRED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+
+    public static final String KEYCLOAK_GROUP_V2_SHARED_SETTINGS = "engine_notification_keycloak_group_v2_shared_settings";
+    public static final String KEYCLOAK_GROUP_V2_SHARED_SETTINGS_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String KEYCLOAK_GROUP_V2_SHARED_SETTINGS_BYTES_GROUP_IDENTIFIER_KEY = "bytes_group_identifier"; // byte[]
+    public static final String KEYCLOAK_GROUP_V2_SHARED_SETTINGS_SHARED_SETTINGS_KEY = "shared_settings"; // String, serialized JsonSharedSettings
+    public static final String KEYCLOAK_GROUP_V2_SHARED_SETTINGS_MODIFICATION_TIMESTAMP_KEY = "timestamp"; // long
 }

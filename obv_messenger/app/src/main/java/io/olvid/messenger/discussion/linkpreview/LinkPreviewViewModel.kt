@@ -19,10 +19,6 @@
 
 package io.olvid.messenger.discussion.linkpreview
 
-import android.text.SpannableString
-import android.text.style.URLSpan
-import androidx.core.text.util.LinkifyCompat
-import androidx.core.util.PatternsCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -69,12 +65,12 @@ class LinkPreviewViewModel : ViewModel() {
         }
     }
 
-    fun linkPreviewLoader(fyle: Fyle, messageId: Long, onSuccess: (OpenGraph?) -> Unit) {
+    fun linkPreviewLoader(fyle: Fyle, url: String, messageId: Long, onSuccess: (OpenGraph?) -> Unit) {
         if (loaderJobs[messageId]?.isActive == true) {
             return
         }
         loaderJobs[messageId] = viewModelScope.launch {
-            onSuccess.invoke(linkPreviewRepository.decodeOpenGraph(fyle))
+            onSuccess.invoke(linkPreviewRepository.decodeOpenGraph(fyle).also { it?.url = url })
             loaderJobs.remove(messageId)
         }
     }

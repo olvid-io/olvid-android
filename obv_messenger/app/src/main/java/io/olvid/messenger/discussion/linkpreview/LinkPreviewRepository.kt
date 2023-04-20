@@ -27,6 +27,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.decodeSampledBitmapFromBytes
 import io.olvid.messenger.databases.entity.Fyle
+import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Authenticator
@@ -44,46 +45,48 @@ import javax.net.ssl.X509TrustManager
 private val cache = LruCache<String, OpenGraph>(50)
 private const val MAX_IMAGE_SIZE = 5*1024*1024
 
-private val client = OkHttpClient.Builder()
-    .cache(null)
-    .addInterceptor(UserAgentInterceptor("WhatsApp/2 (${System.getProperty("http.agent")})"))
-    .apply {
-        AppSingleton.getSslSocketFactory()?.let { sslSocketFactory ->
-            try {
-                val trustManagerFactory = TrustManagerFactory.getInstance(
-                    TrustManagerFactory.getDefaultAlgorithm()
-                )
-                trustManagerFactory.init(null as KeyStore?)
-                val trustManagers = trustManagerFactory.trustManagers
-                check(!(trustManagers.size != 1 || trustManagers[0] !is X509TrustManager)) {
-                    ("Unexpected default trust managers:"
-                            + Arrays.toString(trustManagers))
-                }
-                val trustManager = trustManagers[0] as X509TrustManager
-                this.sslSocketFactory(sslSocketFactory, trustManager)
-            } catch (e: java.lang.Exception) {
-                Log.e("LinkPreviewRepository", "Error initializing okHttpClient trustManager")
-            }
-        }
-
-        System.getProperty("http.agent")?.let { systemUserAgent ->
-            this.proxyAuthenticator { route, response ->
-                val request = Authenticator.JAVA_NET_AUTHENTICATOR.authenticate(route, response)
-                request?.newBuilder()?.header("User-Agent", systemUserAgent)?.build()
-                    ?: if (route == null) {
-                        null
-                    } else Request.Builder()
-                        .url(route.address.url)
-                        .method("CONNECT", null)
-                        .header("Host", route.address.url.toHostHeader(true))
-                        .header("Proxy-Connection", "Keep-Alive")
-                        .header("User-Agent", systemUserAgent)
-                        .build()
-            }
-        }
-    }.build()
-
 class LinkPreviewRepository {
+    private val client = OkHttpClient.Builder()
+        .cache(null)
+        .addInterceptor(UserAgentInterceptor("WhatsApp/2 (${System.getProperty("http.agent")})"))
+        .apply {
+            if (!SettingsActivity.getNoNotifyCertificateChangeForPreviews()) {
+                AppSingleton.getSslSocketFactory()?.let { sslSocketFactory ->
+                    try {
+                        val trustManagerFactory = TrustManagerFactory.getInstance(
+                            TrustManagerFactory.getDefaultAlgorithm()
+                        )
+                        trustManagerFactory.init(null as KeyStore?)
+                        val trustManagers = trustManagerFactory.trustManagers
+                        check(!(trustManagers.size != 1 || trustManagers[0] !is X509TrustManager)) {
+                            ("Unexpected default trust managers:"
+                                    + Arrays.toString(trustManagers))
+                        }
+                        val trustManager = trustManagers[0] as X509TrustManager
+                        this.sslSocketFactory(sslSocketFactory, trustManager)
+                    } catch (e: java.lang.Exception) {
+                        Log.e("LinkPreviewRepository", "Error initializing okHttpClient trustManager")
+                    }
+                }
+            }
+
+            System.getProperty("http.agent")?.let { systemUserAgent ->
+                this.proxyAuthenticator { route, response ->
+                    val request = Authenticator.JAVA_NET_AUTHENTICATOR.authenticate(route, response)
+                    request?.newBuilder()?.header("User-Agent", systemUserAgent)?.build()
+                        ?: if (route == null) {
+                            null
+                        } else Request.Builder()
+                            .url(route.address.url)
+                            .method("CONNECT", null)
+                            .header("Host", route.address.url.toHostHeader(true))
+                            .header("Proxy-Connection", "Keep-Alive")
+                            .header("User-Agent", systemUserAgent)
+                            .build()
+                }
+            }
+        }.build()
+
     suspend fun fetchOpenGraph(url: String, imageWidth: Int, imageHeight: Int): OpenGraph {
         return withContext(Dispatchers.IO) {
             cache.get(url) ?: try {

@@ -68,6 +68,7 @@ public class ConfigurationSettingsPojo {
     public Integer ao; // auto_open_limited_visibility;
     public Integer rw; // retain_wiped_outbound;
 
+    public Integer mi; // map_integration
     public Integer rj; // remove_jpeg_metadata;
 
     public Integer wk; // wc_keep_after_close;
@@ -79,6 +80,7 @@ public class ConfigurationSettingsPojo {
     public Integer av; // share_app_version;
     public Integer cc; // notify_certificate_change;
     public Integer bc; // block_unknown_certificate;
+    public Integer clp; // no_notify_certificate_for_link_previews
     public Integer ss; // sending_foreground_service;
     public Integer ci; // connectivity_indicator;
 
@@ -121,19 +123,28 @@ public class ConfigurationSettingsPojo {
         if (ln != null) { pojo.lock_notification = ln != 0; }
         if (lw != null) { pojo.lock_wipe_on_fail = lw != 0; }
 
-        if (ad != null) {
-            pojo.auto_download_size = ad;
-        }
-
+        if (ad != null) { pojo.auto_download_size = ad; }
         if (lpi != null) { pojo.link_preview_inbound = lpi != 0; }
         if (lpo != null) { pojo.link_preview_outbound = lpo != 0; }
-
-        if (rr != null) {
-            pojo.send_read_receipt = rr != 0;
-        }
+        if (rr != null) { pojo.send_read_receipt = rr != 0; }
         if (ao != null) { pojo.auto_open_limited_visibility = ao != 0; }
         if (rw != null) { pojo.retain_wiped_outbound = rw != 0; }
-        
+
+        if (mi != null) {
+            switch (mi) {
+                case 1:
+                    pojo.map_integration = SettingsActivity.PREF_VALUE_LOCATION_INTEGRATION_MAPS;
+                    break;
+                case 2:
+                    pojo.map_integration = SettingsActivity.PREF_VALUE_LOCATION_INTEGRATION_OSM;
+                    break;
+                case 0:
+                default:
+                    pojo.map_integration = SettingsActivity.PREF_VALUE_LOCATION_INTEGRATION_BASIC;
+                    break;
+            }
+        }
+
         if (rj != null) { pojo.remove_jpeg_metadata = rj != 0; }
         
         if (wk != null) { pojo.wc_keep_after_close = wk != 0; }
@@ -158,6 +169,7 @@ public class ConfigurationSettingsPojo {
                     break;
             }
         }
+        if (clp != null) { pojo.no_notify_certificate_for_link_previews = clp != 0; }
         if (ss != null) { pojo.sending_foreground_service = ss != 0; }
         if (ci != null) { 
             switch (ci) {
@@ -290,6 +302,7 @@ public class ConfigurationSettingsPojo {
             }
             sb.append("\n");
         }
+        if (clp != null){ sb.append(highlight(c, R.string.text_setting_no_notify_certificate_change_for_previews)).append(bool(c, clp != 0)).append("\n"); }
         if (ss != null) { sb.append(highlight(c, R.string.text_setting_sending_foreground_service)).append(bool(c, ss != 0)).append("\n"); }
         if (ci != null) {
             sb.append(highlight(c, R.string.text_setting_connectivity_indicator));

@@ -38,7 +38,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.arch.core.util.Function;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
@@ -64,6 +63,7 @@ import io.olvid.messenger.databases.tasks.ForwardMessagesTask;
 import io.olvid.messenger.fragments.FilteredDiscussionListFragment;
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment;
 import io.olvid.messenger.settings.SettingsActivity;
+import kotlin.jvm.functions.Function1;
 
 public class ForwardMessagesDialogFragment extends DialogFragment implements View.OnClickListener {
     private FragmentActivity activity;
@@ -169,11 +169,11 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
 
         FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
 
-        LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(viewModel.getForwardMessageOwnedIdentityLiveData(), new Function<OwnedIdentity, LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>>>() {
+        LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(viewModel.getForwardMessageOwnedIdentityLiveData(), new Function1<OwnedIdentity, LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>>>() {
             byte[] bytesOwnedIdentity = null;
 
             @Override
-            public LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> apply(OwnedIdentity ownedIdentity) {
+            public LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> invoke(OwnedIdentity ownedIdentity) {
                 ForwardMessagesDialogFragment.this.bindOwnedIdentity(ownedIdentity);
                 if (ownedIdentity == null) {
                     if (bytesOwnedIdentity != null) {
@@ -270,7 +270,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
         ownedIdentityListRecyclerView.setAdapter(adapter);
         ownedIdentityListRecyclerView.setEmptyView(popupView.findViewById(R.id.empty_view));
 
-        ownedIdentityPopupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        ownedIdentityPopupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
         ownedIdentityPopupWindow.showAsDropDown(separator);
     }
 

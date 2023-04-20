@@ -78,11 +78,14 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     protected TextView emptyViewTextView;
 
     private Observer<List<Contact>> selectedContactsObserver;
+    private Observer<List<FilteredContactListViewModel.SelectableContact>> filteredContactsObserver;
     private List<Contact> initiallySelectedContacts;
 
 
     private boolean removeBottomPadding = false;
     private boolean selectable = false;
+    private boolean disableEmptyView = false;
+    private boolean disableAnimations = false;
     private String emptyViewText = null;
 
     protected FilteredContactListAdapter filteredContactListAdapter;
@@ -94,6 +97,9 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
 
         if (unfilteredContacts != null) {
             observeUnfiltered();
+        }
+        if (this.filteredContactsObserver != null) {
+            filteredContactListViewModel.getFilteredContacts().observe(this, this.filteredContactsObserver);
         }
         if (this.selectedContactsObserver != null) {
             filteredContactListViewModel.getSelectedContacts().observe(this, this.selectedContactsObserver);
@@ -110,12 +116,17 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         recyclerView = rootView.findViewById(R.id.filtered_contact_list_recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
+        if (disableAnimations) {
+            recyclerView.setItemAnimator(null);
+        }
 
         filteredContactListAdapter = new FilteredContactListAdapter();
         filteredContactListViewModel.getFilteredContacts().observe(getViewLifecycleOwner(), filteredContactListAdapter);
         recyclerView.setAdapter(filteredContactListAdapter);
-        View recyclerEmptyView = rootView.findViewById(R.id.filtered_contact_list_empty_view);
-        recyclerView.setEmptyView(recyclerEmptyView);
+        if (!disableEmptyView) {
+            View recyclerEmptyView = rootView.findViewById(R.id.filtered_contact_list_empty_view);
+            recyclerView.setEmptyView(recyclerEmptyView);
+        }
         emptyViewTextView = rootView.findViewById(R.id.widget_list_empty_view_text_view);
         if (emptyViewText != null) {
             emptyViewTextView.setText(emptyViewText);
@@ -159,6 +170,24 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         this.contactFilterEditText.addTextChangedListener(this);
     }
 
+    public void setFilter(String filter) {
+        if (filteredContactListViewModel != null) {
+            filteredContactListViewModel.setFilter(filter);
+        }
+    }
+
+    public void setFilteredContactObserver(@Nullable Observer<List<FilteredContactListViewModel.SelectableContact>> observer) {
+        if (filteredContactListViewModel != null) {
+            if (this.filteredContactsObserver != null) {
+                filteredContactListViewModel.getFilteredContacts().removeObserver(this.filteredContactsObserver);
+            }
+            if (observer != null) {
+                filteredContactListViewModel.getFilteredContacts().observe(this, observer);
+            }
+        }
+        this.filteredContactsObserver = observer;
+    }
+
     public void setOnClickDelegate(FilteredContactListOnClickDelegate onClickDelegate) {
         this.onClickDelegate = onClickDelegate;
     }
@@ -199,6 +228,13 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         removeBottomPadding = true;
     }
 
+    public void disableEmptyView() {
+        this.disableEmptyView = true;
+    }
+
+    public void disableAnimations() {
+        this.disableAnimations = true;
+    }
 
     @Override
     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
@@ -344,12 +380,14 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
                 }
                 Matcher matcher = pattern.matcher(unAccented);
                 if (matcher.find()) {
-                    highlightedContactName.setSpan(highlightedSpans[i], matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    highlightedContactName.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(contactName, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(contactName, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     i++;
                 }
             }
             textView.setText(highlightedContactName);
         }
+
+
 
         @Override
         public void onBindViewHolder(@NonNull final ContactViewHolder holder, int position, @NonNull List<Object> payloads) {

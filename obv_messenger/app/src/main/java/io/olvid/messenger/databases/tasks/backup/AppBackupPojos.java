@@ -44,6 +44,7 @@ class OwnedIdentityPojo_0 {
     public byte[] unlock_password;
     public byte[] unlock_salt;
     public boolean mute_notifications;
+    public boolean mute_notifications_except_mentioned;
     public Long mute_notification_timestamp;
     public boolean show_neutral_notification_when_hidden;
     public List<ContactPojo_0> contacts;

@@ -20,6 +20,7 @@
 package io.olvid.messenger;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineNotificationListener;
@@ -27,7 +28,9 @@ import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group2;
+import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.tasks.CreateOrUpdateGroupV2Task;
 import io.olvid.messenger.databases.tasks.UpdateGroupV2PhotoFromEngineTask;
 
@@ -46,6 +49,7 @@ public class EngineNotificationProcessorForGroupsV2 implements EngineNotificatio
                 EngineNotifications.GROUP_V2_PHOTO_CHANGED,
                 EngineNotifications.GROUP_V2_UPDATE_IN_PROGRESS_CHANGED,
                 EngineNotifications.GROUP_V2_DELETED,
+                EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS,
         }) {
             engine.addNotificationListener(notificationName, this);
         }
@@ -102,6 +106,65 @@ public class EngineNotificationProcessorForGroupsV2 implements EngineNotificatio
                         }
                         db.group2Dao().delete(group2);
                     });
+                }
+                break;
+            }
+            case EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.KEYCLOAK_UPDATE_REQUIRED_BYTES_OWNED_IDENTITY_KEY);
+                byte[] bytesGroupIdentifier = (byte[]) userInfo.get(EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS_BYTES_GROUP_IDENTIFIER_KEY);
+                String serializedSharedSettings = (String) userInfo.get(EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS_SHARED_SETTINGS_KEY);
+                Long latestModificationTimestamp = (Long) userInfo.get(EngineNotifications.KEYCLOAK_GROUP_V2_SHARED_SETTINGS_MODIFICATION_TIMESTAMP_KEY);
+                if (bytesOwnedIdentity == null || bytesGroupIdentifier == null || latestModificationTimestamp == null) {
+                    break;
+                }
+
+                try {
+                    Message.JsonExpiration jsonExpiration;
+                    if (serializedSharedSettings == null) {
+                        jsonExpiration = null;
+                    } else {
+                        jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(serializedSharedSettings, DiscussionCustomization.JsonSharedSettings.class).getJsonExpiration();
+                    }
+
+                    if (jsonExpiration != null && jsonExpiration.likeNull()) {
+                        jsonExpiration = null;
+                    }
+
+                    Discussion discussion = AppDatabase.getInstance().discussionDao().getByGroupIdentifier(bytesOwnedIdentity, bytesGroupIdentifier);
+                    if (discussion != null) {
+                        DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
+                        if (discussionCustomization == null || !Objects.equals(discussionCustomization.getExpirationJson(), jsonExpiration)) {
+                            // we need to update the shared settings
+                            if (discussionCustomization == null) {
+                                if (jsonExpiration == null) {
+                                    // we don't have any customization, but there is no JsonExpiration --> do nothing
+                                    break;
+                                }
+                                discussionCustomization = new DiscussionCustomization(discussion.id);
+                                db.discussionCustomizationDao().insert(discussionCustomization);
+                            }
+
+                            // always use version 0 for keycloak shared settings
+                            discussionCustomization.sharedSettingsVersion = 0;
+                            if (jsonExpiration != null) {
+                                discussionCustomization.settingReadOnce = jsonExpiration.getReadOnce() != null && jsonExpiration.getReadOnce();
+                                discussionCustomization.settingVisibilityDuration = jsonExpiration.getVisibilityDuration();
+                                discussionCustomization.settingExistenceDuration = jsonExpiration.getExistenceDuration();
+                            } else {
+                                discussionCustomization.settingReadOnce = false;
+                                discussionCustomization.settingVisibilityDuration = null;
+                                discussionCustomization.settingExistenceDuration = null;
+                            }
+
+                            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), new byte[0], false, latestModificationTimestamp);
+                            if (message != null) {
+                                message.id = db.messageDao().insert(message);
+                                db.discussionCustomizationDao().update(discussionCustomization);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 break;
             }

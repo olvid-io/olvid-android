@@ -119,8 +119,18 @@ public class AddFyleToDraftFromUriTask implements Runnable {
         this.webclientProvidedSha256 = webclientProvidedSha256;
     }
 
+    // used for location messages with preview, a new draft message is manually created to insert preview as an attachment
+    public AddFyleToDraftFromUriTask(Message draftMessage, @NonNull Uri uri, @Nullable String fileName, @Nullable String mimeType, long discussionId) {
+        this.draftMessage = draftMessage;
+        this.uri = uri;
+        this.localFile = null;
+        this.discussionId = discussionId;
+        this.mimeType = mimeType;
+        this.fileName = fileName;
+        this.webclientProvidedSha256 = null;
+    }
 
-    private Message draftMessage;
+    private Message draftMessage = null;
 
     @Override
     public void run() {
@@ -130,13 +140,16 @@ public class AddFyleToDraftFromUriTask implements Runnable {
             return;
         }
 
-        db.runInTransaction(() -> {
-            draftMessage = db.messageDao().getDiscussionDraftMessageSync(discussionId);
-            if (draftMessage == null) {
-                draftMessage = Message.createEmptyDraft(discussionId, discussion.bytesOwnedIdentity, discussion.senderThreadIdentifier);
-                draftMessage.id = db.messageDao().insert(draftMessage);
-            }
-        });
+        // always true, except for location messages (when draft message is manually created)
+        if (draftMessage == null) {
+            db.runInTransaction(() -> {
+                draftMessage = db.messageDao().getDiscussionDraftMessageSync(discussionId);
+                if (draftMessage == null) {
+                    draftMessage = Message.createEmptyDraft(discussionId, discussion.bytesOwnedIdentity, discussion.senderThreadIdentifier);
+                    draftMessage.id = db.messageDao().insert(draftMessage);
+                }
+            });
+        }
 
         if (draftMessage == null) {
             Logger.e("Error getting/creating draft for discussion with id " + discussionId);
@@ -189,6 +202,9 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                     fileName = new SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH).format(new Date());
                 }
             }
+
+            // try to correct potentially "generic" mime types like image/*
+            mimeType = PreviewUtils.getNonNullMimeType(mimeType, fileName);
 
             //////////////
             // cleanup JPEG EXIF data if asked

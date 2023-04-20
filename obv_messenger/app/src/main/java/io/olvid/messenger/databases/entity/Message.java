@@ -36,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -78,7 +79,7 @@ import io.olvid.messenger.services.UnifiedForegroundService;
                                   onDelete = ForeignKey.CASCADE),
         indices = {
                 @Index(Message.DISCUSSION_ID),
-                @Index(Message.ENGINE_MESSAGE_IDENTIFIER),
+                @Index(Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER),
                 @Index(Message.SORT_INDEX),
                 @Index(Message.TIMESTAMP),
                 @Index(value = {Message.MESSAGE_TYPE, Message.STATUS}),
@@ -102,7 +103,7 @@ public class Message {
     public static final String WIPE_STATUS = "wipe_status";
     public static final String MESSAGE_TYPE = "message_type";
     public static final String DISCUSSION_ID = "discussion_id";
-    public static final String ENGINE_MESSAGE_IDENTIFIER = "engine_message_identifier";
+    public static final String INBOUND_MESSAGE_ENGINE_IDENTIFIER = "engine_message_identifier";
     public static final String SENDER_IDENTIFIER = "sender_identifier";
     public static final String SENDER_THREAD_IDENTIFIER = "sender_thread_identifier";
     public static final String TOTAL_ATTACHMENT_COUNT = "total_attachment_count";
@@ -110,13 +111,14 @@ public class Message {
     public static final String WIPED_ATTACHMENT_COUNT = "wiped_attachment_count";
     public static final String EDITED = "edited";
     public static final String FORWARDED = "forwarded";
+    public static final String MENTIONED = "mentioned";
     public static final String REACTIONS = "reactions";
     public static final String IMAGE_RESOLUTIONS = "image_resolutions"; // null or "" = no images, "102x234;a340x445" = 2 images, second one is animated
     public static final String MISSED_MESSAGE_COUNT = "missed_message_count"; // only used in inbound messages: the number of missing sequence numbers when this message is received. 0 --> everything is fine
     public static final String EXPIRATION_START_TIMESTAMP = "expiration_start_timestamp"; // set when the message is first marked as sent --> this is when expirations are started. Only set for message with an expiration
     public static final String LIMITED_VISIBILITY = "limited_visibility"; // true for read_once messages and messages with a visibility_duration
     public static final String LINK_PREVIEW_FYLE_ID = "link_preview_fyle_id"; // id of attached link preview
-
+    public static final String JSON_MENTIONS = "json_mentions";
 
 
 
@@ -159,6 +161,9 @@ public class Message {
     public static final int TYPE_GAINED_GROUP_ADMIN = 15;
     public static final int TYPE_LOST_GROUP_ADMIN = 16;
     public static final int TYPE_SCREEN_SHOT_DETECTED = 17;
+    public static final int TYPE_MEDIATOR_INVITATION_SENT = 18;
+    public static final int TYPE_MEDIATOR_INVITATION_ACCEPTED = 19;
+    public static final int TYPE_MEDIATOR_INVITATION_IGNORED = 20;
 
 
     public static final int EDITED_NONE = 0;
@@ -219,8 +224,8 @@ public class Message {
     @ColumnInfo(name = DISCUSSION_ID)
     public long discussionId;
 
-    @ColumnInfo(name = ENGINE_MESSAGE_IDENTIFIER)
-    public byte[] engineMessageIdentifier;
+    @ColumnInfo(name = INBOUND_MESSAGE_ENGINE_IDENTIFIER)
+    public byte[] inboundMessageEngineIdentifier;
 
     @ColumnInfo(name = SENDER_IDENTIFIER)
     @NonNull
@@ -245,6 +250,9 @@ public class Message {
     @ColumnInfo(name = FORWARDED)
     public boolean forwarded;
 
+    @ColumnInfo(name = MENTIONED)
+    public boolean mentioned;
+
     @ColumnInfo(name = REACTIONS)
     @Nullable
     public String reactions;
@@ -265,12 +273,16 @@ public class Message {
     @ColumnInfo(name = LINK_PREVIEW_FYLE_ID)
     public Long linkPreviewFyleId;
 
+    @ColumnInfo(name = JSON_MENTIONS)
+    @Nullable
+    public String jsonMentions;
+
     public boolean hasAttachments() {
         return totalAttachmentCount > 0;
     }
 
     // default constructor required by Room
-    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, byte[] engineMessageIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility, @Nullable Long linkPreviewFyleId) {
+    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility, @Nullable Long linkPreviewFyleId, @Nullable String jsonMentions, boolean mentioned) {
         this.senderSequenceNumber = senderSequenceNumber;
         this.contentBody = contentBody;
         this.jsonReply = jsonReply;
@@ -284,7 +296,7 @@ public class Message {
         this.wipeStatus = wipeStatus;
         this.messageType = messageType;
         this.discussionId = discussionId;
-        this.engineMessageIdentifier = engineMessageIdentifier;
+        this.inboundMessageEngineIdentifier = inboundMessageEngineIdentifier;
         this.senderIdentifier = senderIdentifier;
         this.senderThreadIdentifier = senderThreadIdentifier;
         this.totalAttachmentCount = totalAttachmentCount;
@@ -298,6 +310,8 @@ public class Message {
         this.expirationStartTimestamp = expirationStartTimestamp;
         this.limitedVisibility = limitedVisibility;
         this.linkPreviewFyleId = linkPreviewFyleId;
+        this.jsonMentions = jsonMentions;
+        this.mentioned = mentioned;
     }
 
 
@@ -307,7 +321,7 @@ public class Message {
     // constructor used for inbound and outbound messages
     /////////////////////
     @Ignore
-    public Message(AppDatabase db, long senderSequenceNumber, @NonNull JsonMessage jsonMessage, JsonReturnReceipt jsonReturnReceipt, long timestamp, int status, int messageType, long discussionId, byte[] engineMessageIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount) {
+    public Message(AppDatabase db, long senderSequenceNumber, @NonNull JsonMessage jsonMessage, JsonReturnReceipt jsonReturnReceipt, long timestamp, int status, int messageType, long discussionId, byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount) {
         this.senderSequenceNumber = senderSequenceNumber;
         this.setJsonMessage(jsonMessage);
         try {
@@ -320,7 +334,7 @@ public class Message {
         this.wipeStatus = WIPE_STATUS_NONE;
         this.messageType = messageType;
         this.discussionId = discussionId;
-        this.engineMessageIdentifier = engineMessageIdentifier;
+        this.inboundMessageEngineIdentifier = inboundMessageEngineIdentifier;
         this.senderIdentifier = senderIdentifier;
         this.senderThreadIdentifier = senderThreadIdentifier;
         this.totalAttachmentCount = totalAttachmentCount;
@@ -333,6 +347,7 @@ public class Message {
         this.missedMessageCount = 0;
         this.expirationStartTimestamp = 0;
         this.linkPreviewFyleId = null;
+        this.mentioned = false;
 
         if (messageType == TYPE_OUTBOUND_MESSAGE) {
             computeOutboundSortIndex(db);
@@ -408,7 +423,9 @@ public class Message {
                 0,
                 0,
                 false,
-                null
+                null,
+                null,
+                false
         );
     }
 
@@ -438,7 +455,9 @@ public class Message {
                 0,
                 0,
                 false,
-                null
+                null,
+                null,
+                false
         );
         if (!useActualTimestampForSorting) {
             message.computeOutboundSortIndex(db);
@@ -484,6 +503,12 @@ public class Message {
 
     public static Message createScreenShotDetectedMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity, long serverTimestamp) {
         return createInfoMessage(db, TYPE_SCREEN_SHOT_DETECTED, discussionId, bytesOwnedIdentity, serverTimestamp, false);
+    }
+
+    public static Message createMediatorInvitationMessage(AppDatabase db, int type, long discussionId, byte[] bytesOwnedIdentity, String displayName, long serverTimestamp) {
+        Message message = createInfoMessage(db, type, discussionId, bytesOwnedIdentity, serverTimestamp, false);
+        message.contentBody = displayName;
+        return message;
     }
 
     ///////
@@ -598,7 +623,7 @@ public class Message {
                     false
             );
 
-            return postMessageOutput.isMessageSent();
+            return postMessageOutput.isMessagePostedForAtLeastOneContact();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -655,20 +680,21 @@ public class Message {
                     false
             );
 
-            return postMessageOutput.isMessageSent();
+            return postMessageOutput.isMessagePostedForAtLeastOneContact();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public static boolean postUpdateMessageMessage(Message updatedMessage) {
+    @NonNull
+    public static ObvPostMessageOutput postUpdateMessageMessage(Message updatedMessage) {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(updatedMessage.discussionId);
 
         if (!discussion.canPostMessages()) {
             Logger.e("Trying to update a message in a locked discussion!!! --> locally updating instead");
-            return true;
+            return new ObvPostMessageOutput(true, new HashMap<>());
         }
 
         List<Contact> contacts;
@@ -684,12 +710,12 @@ public class Message {
                 break;
             default:
                 Logger.e("Unknown discussion type!!! --> locally updating instead");
-                return true;
+                return new ObvPostMessageOutput(true, new HashMap<>());
         }
 
         // for group discussions with no members (or discussion with self)
         if (contacts.size() == 0) {
-            return true;
+            return new ObvPostMessageOutput(true, new HashMap<>());
         }
 
         ArrayList<byte[]> byteContactIdentities = new ArrayList<>(contacts.size());
@@ -714,10 +740,14 @@ public class Message {
                     false
             );
 
-            return postMessageOutput.isMessageSent();
+            if (postMessageOutput.isMessagePostedForAtLeastOneContact()) {
+                UnifiedForegroundService.processPostMessageOutput(postMessageOutput);
+            }
+
+            return postMessageOutput;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return new ObvPostMessageOutput(false, new HashMap<>());
         }
     }
 
@@ -772,7 +802,7 @@ public class Message {
                     false
             );
 
-            return postMessageOutput.isMessageSent();
+            return postMessageOutput.isMessagePostedForAtLeastOneContact();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -830,7 +860,7 @@ public class Message {
                         false
                 );
 
-                if (!postMessageOutput.isMessageSent()) {
+                if (!postMessageOutput.isMessagePostedForAtLeastOneContact()) {
                     // sending failed for all contacts, do nothing
                     return;
                 }
@@ -998,7 +1028,7 @@ public class Message {
                 );
 
 
-                if (postMessageOutput.isMessageSent()) {
+                if (postMessageOutput.isMessagePostedForAtLeastOneContact()) {
                     // "sending" successful at least for some contacts --> start the sending service
                     UnifiedForegroundService.processPostMessageOutput(postMessageOutput);
 
@@ -1138,7 +1168,7 @@ public class Message {
             );
 
 
-            if (postMessageOutput.isMessageSent()) {
+            if (postMessageOutput.isMessagePostedForAtLeastOneContact()) {
                 UnifiedForegroundService.processPostMessageOutput(postMessageOutput);
 
                 // update the MessageRecipientInfo with the engine output
@@ -1290,6 +1320,32 @@ public class Message {
         return messageType == TYPE_INBOUND_MESSAGE || messageType == TYPE_INBOUND_EPHEMERAL_MESSAGE;
     }
 
+    public boolean isIdentityMentioned(byte[] ownedIdentity) {
+        try {
+            List<JsonUserMention> mentions = getMentions();
+            if (mentions != null) {
+                for (Message.JsonUserMention mention : mentions) {
+                    if (Arrays.equals(ownedIdentity, mention.getUserIdentifier())) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Logger.e("Error handling mentions");
+        }
+        return false;
+    }
+
+    public boolean isOwnMessageReply(byte[] ownedIdentity) {
+        try {
+            JsonMessageReference reply = getJsonMessage().jsonReply;
+            return (reply != null) && Arrays.equals(ownedIdentity, reply.senderIdentifier);
+        } catch (Exception ex) {
+            Logger.e("Error handling jsonReply");
+        }
+        return false;
+    }
+
     public boolean isLocationMessage() {
         return jsonLocation != null;
     }
@@ -1410,6 +1466,7 @@ public class Message {
                 e.printStackTrace();
             }
         }
+        jsonMessage.jsonUserMentions = getMentions();
         return jsonMessage;
     }
 
@@ -1457,12 +1514,32 @@ public class Message {
                 locationType = LOCATION_TYPE_NONE;
             }
         }
+        if (jsonMessage.jsonUserMentions != null) {
+            try {
+                jsonMessage.sanitizeJsonUserMentions();
+                jsonMentions = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonMessage.jsonUserMentions);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                jsonMentions = null;
+            }
+        }
     }
 
     public JsonReturnReceipt getJsonReturnReceipt() {
         if (jsonReturnReceipt != null) {
             try {
                 return AppSingleton.getJsonObjectMapper().readValue(jsonReturnReceipt, JsonReturnReceipt.class);
+            } catch (Exception e) {
+                Logger.w("Error decoding a return receipt!\n" + jsonReturnReceipt);
+            }
+        }
+        return null;
+    }
+
+    public List<JsonUserMention> getMentions() {
+        if (jsonMentions != null) {
+            try {
+                return AppSingleton.getJsonObjectMapper().readValue(jsonMentions,  new TypeReference<List<Message.JsonUserMention>>() {});
             } catch (Exception e) {
                 Logger.w("Error decoding a return receipt!\n" + jsonReturnReceipt);
             }
@@ -1523,7 +1600,7 @@ public class Message {
 
         // stop sharing location if needed
         if (locationType == LOCATION_TYPE_SHARE) {
-            UnifiedForegroundService.LocationSharingSubService.stopSharingLocation(App.getContext(), discussionId);
+            UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussionId, false);
         }
 
         db.messageDao().delete(this);
@@ -1580,6 +1657,7 @@ public class Message {
             reactions = null;
             imageResolutions = null;
             limitedVisibility = false;
+            jsonMentions = null;
             db.messageDao().updateWipe(id, WIPE_STATUS_WIPED);
             db.reactionDao().deleteAllForMessage(id);
             db.messageMetadataDao().insert(new MessageMetadata(id, MessageMetadata.KIND_WIPED, System.currentTimeMillis()));
@@ -1597,6 +1675,7 @@ public class Message {
         wipeStatus = WIPE_STATUS_REMOTE_DELETED;
         reactions = null;
         imageResolutions = null;
+        jsonMentions = null;
         limitedVisibility = false;
         db.messageDao().updateWipe(id, WIPE_STATUS_REMOTE_DELETED);
         db.reactionDao().deleteAllForMessage(id);
@@ -1744,6 +1823,7 @@ public class Message {
         JsonMessageReference jsonReply;
         JsonExpiration jsonExpiration;
         JsonLocation jsonLocation;
+        List<JsonUserMention> jsonUserMentions;
 
         public JsonMessage(String body) {
             this.body = body;
@@ -1860,9 +1940,33 @@ public class Message {
             this.jsonLocation = jsonLocation;
         }
 
+        @JsonProperty("um")
+        @Nullable
+        public List<JsonUserMention> getJsonUserMentions() {
+            return jsonUserMentions;
+        }
+
+        @JsonProperty("um")
+        public void setJsonUserMentions(@Nullable List<JsonUserMention> jsonUserMentions) {
+            this.jsonUserMentions = jsonUserMentions;
+        }
+
         @JsonIgnore
         public boolean isEmpty() {
             return (body == null || body.trim().length() == 0) && jsonReply == null && jsonLocation == null;
+        }
+
+        @JsonIgnore
+        public void sanitizeJsonUserMentions() {
+            if (jsonUserMentions != null) {
+                ArrayList<JsonUserMention> sanitizedMentions = new ArrayList<>();
+                for (JsonUserMention mention : jsonUserMentions) {
+                    if (mention.getUserIdentifier() != null) {
+                        sanitizedMentions.add(mention);
+                    }
+                }
+                jsonUserMentions = sanitizedMentions;
+            }
         }
 
         @JsonIgnore
@@ -2129,9 +2233,11 @@ public class Message {
         byte[] groupV2Identifier;
         JsonMessageReference messageReference;
         JsonLocation jsonLocation;
+        List<JsonUserMention> jsonUserMentions;
 
         public static JsonUpdateMessage of(Discussion discussion, Message message) throws Exception {
             JsonUpdateMessage jsonUpdateMessage = new JsonUpdateMessage();
+            jsonUpdateMessage.jsonUserMentions = message.getMentions();
             jsonUpdateMessage.messageReference = JsonMessageReference.of(message);
             switch (discussion.discussionType) {
                 case Discussion.TYPE_GROUP:
@@ -2165,6 +2271,15 @@ public class Message {
             this.jsonLocation = jsonLocation;
         }
 
+        @JsonProperty("um")
+        public List<JsonUserMention> getJsonUserMentions() {
+            return jsonUserMentions;
+        }
+
+        @JsonProperty("um")
+        public void setJsonUserMentions(@Nullable List<JsonUserMention> jsonUserMentions) {
+            this.jsonUserMentions = jsonUserMentions;
+        }
         @JsonProperty("guid")
         public byte[] getGroupUid() {
             return groupUid;
@@ -2214,6 +2329,19 @@ public class Message {
             byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
             setGroupOwner(bytesGroupOwner);
             setGroupUid(bytesGroupUid);
+        }
+
+        @JsonIgnore
+        public void sanitizeJsonUserMentions() {
+            if (jsonUserMentions != null) {
+                ArrayList<JsonUserMention> sanitizedMentions = new ArrayList<>();
+                for (JsonUserMention mention : jsonUserMentions) {
+                    if (mention.getUserIdentifier() != null) {
+                        sanitizedMentions.add(mention);
+                    }
+                }
+                jsonUserMentions = sanitizedMentions;
+            }
         }
     }
 
@@ -2369,7 +2497,26 @@ public class Message {
 
         @JsonIgnore
         public String getLocationMessageBody() {
-            return "https://maps.google.com/?q=" + this.getTruncatedLatitudeString() + "+" + this.getTruncatedLongitudeString();
+            StringBuilder stringBuilder = new StringBuilder();
+            if (this.address != null && !this.address.isEmpty()) {
+                stringBuilder.append(address);
+                stringBuilder.append("\n\n");
+            }
+            stringBuilder.append("https://maps.google.com/?q=");
+            stringBuilder.append(this.getTruncatedLatitudeString());
+            stringBuilder.append("+");
+            stringBuilder.append(this.getTruncatedLongitudeString());
+            return stringBuilder.toString();
+        }
+
+        // create an android Location object from jsonLocation content
+        @JsonIgnore
+        public Location getAsLocation() {
+            Location location = new Location("");
+            location.setLatitude(latitude);
+            location.setLongitude(longitude);
+            location.setAltitude(altitude != null ? altitude : 0);
+            return location;
         }
 
         @JsonIgnore
@@ -2396,6 +2543,72 @@ public class Message {
                 return "-";
             }
             return context.getString(R.string.xx_meters, truncated0.format(altitude));
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class JsonUserMention {
+        byte[] userIdentifier;
+        int rangeStart;
+        int rangeEnd;
+
+        public JsonUserMention() {}
+
+        @JsonIgnore
+        public int getLength() {
+            return getRangeEnd() - getRangeStart();
+        }
+
+        public JsonUserMention(byte[] userIdentifier, int rangeStart, int rangeEnd) {
+            this.userIdentifier = userIdentifier;
+            this.rangeStart = rangeStart;
+            this.rangeEnd = rangeEnd;
+        }
+
+        @JsonProperty("uid")
+        public byte[] getUserIdentifier() {
+            return userIdentifier;
+        }
+
+        @JsonProperty("uid")
+        public void setUserIdentifier(byte[] uid) {
+            this.userIdentifier = uid;
+        }
+
+        @JsonProperty("rs")
+        public int getRangeStart() {
+            return rangeStart;
+        }
+
+        @JsonProperty("rs")
+        public void setRangeStart(int index) {
+            this.rangeStart = index;
+        }
+
+        @JsonProperty("re")
+        public int getRangeEnd() {
+            return rangeEnd;
+        }
+
+        @JsonProperty("re")
+        public void setRangeEnd(int index) {
+            this.rangeEnd = index;
+        }
+
+        @JsonIgnore
+        @Override
+        public int hashCode() {
+            return (rangeStart * 31 + rangeEnd) * 31 + Arrays.hashCode(userIdentifier);
+        }
+
+        @JsonIgnore
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (!(obj instanceof JsonUserMention)) {
+                return false;
+            }
+            JsonUserMention other = (JsonUserMention) obj;
+            return (rangeStart == other.rangeStart) && (rangeEnd == other.rangeEnd) && Arrays.equals(userIdentifier, other.userIdentifier);
         }
     }
 

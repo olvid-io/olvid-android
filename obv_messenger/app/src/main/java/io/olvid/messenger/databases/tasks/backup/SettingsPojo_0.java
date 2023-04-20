@@ -81,9 +81,7 @@ public class SettingsPojo_0 {
     public Boolean lock_wipe_on_fail;
 
     public Long auto_download_size;
-
     public Boolean link_preview_inbound;
-
     public Boolean link_preview_outbound;
     public Boolean send_read_receipt;
     public Boolean auto_open_limited_visibility;
@@ -94,6 +92,11 @@ public class SettingsPojo_0 {
     public Long default_visibility_duration;
     public Long default_existence_duration;
 
+    public String map_integration;
+    public String osm_language;
+    public Long location_share_duration;
+    public Long location_share_interval;
+
     public Integer camera_resize_resolution;
     public Boolean remove_jpeg_metadata;
 
@@ -102,6 +105,7 @@ public class SettingsPojo_0 {
     public Boolean share_app_version;
     public Boolean notify_certificate_change;
     public String block_unknown_certificate;
+    public Boolean no_notify_certificate_for_link_previews;
     public Boolean sending_foreground_service;
     public String connectivity_indicator;
     public String qr_correction_level;
@@ -179,6 +183,11 @@ public class SettingsPojo_0 {
         settingsPojo.default_visibility_duration = SettingsActivity.getDefaultDiscussionVisibilityDuration();
         settingsPojo.default_existence_duration = SettingsActivity.getDefaultDiscussionExistenceDuration();
 
+        settingsPojo.map_integration = SettingsActivity.getLocationIntegration().getString();
+        settingsPojo.osm_language = SettingsActivity.getLocationOpenStreetMapRawLanguage();
+        settingsPojo.location_share_duration = SettingsActivity.getLocationDefaultSharingDurationValue();
+        settingsPojo.location_share_interval = SettingsActivity.getLocationDefaultSharingIntervalValue();
+
         settingsPojo.camera_resize_resolution = SettingsActivity.getCameraResolution();
         settingsPojo.remove_jpeg_metadata = SettingsActivity.getMetadataRemovalPreference();
 
@@ -205,6 +214,7 @@ public class SettingsPojo_0 {
             default:
                 break;
         }
+        settingsPojo.no_notify_certificate_for_link_previews = SettingsActivity.getNoNotifyCertificateChangeForPreviews();
         settingsPojo.sending_foreground_service = SettingsActivity.useSendingForegroundService();
         SettingsActivity.PingConnectivityIndicator pingConnectivityIndicator = SettingsActivity.getPingConnectivityIndicator();
         switch (pingConnectivityIndicator) {
@@ -277,18 +287,10 @@ public class SettingsPojo_0 {
         if (lock_notification != null) {SettingsActivity.setKeepLockServiceOpen(lock_notification); }
         if (lock_wipe_on_fail != null) {SettingsActivity.setWipeMessagesOnUnlockFails(lock_wipe_on_fail); }
 
-        if (auto_download_size != null) {
-            SettingsActivity.setAutoDownloadSize(auto_download_size);
-        }
-        if (link_preview_inbound != null) {
-            SettingsActivity.setLinkPreviewInbound(link_preview_inbound);
-        }
-        if (link_preview_outbound != null) {
-            SettingsActivity.setLinkPreviewOutbound(link_preview_outbound);
-        }
-        if (send_read_receipt != null) {
-            SettingsActivity.setDefaultSendReadReceipt(send_read_receipt);
-        }
+        if (auto_download_size != null) { SettingsActivity.setAutoDownloadSize(auto_download_size); }
+        if (link_preview_inbound != null) { SettingsActivity.setLinkPreviewInbound(link_preview_inbound); }
+        if (link_preview_outbound != null) { SettingsActivity.setLinkPreviewOutbound(link_preview_outbound); }
+        if (send_read_receipt != null) { SettingsActivity.setDefaultSendReadReceipt(send_read_receipt); }
         if (auto_open_limited_visibility != null) { SettingsActivity.setDefaultAutoOpenLimitedVisibilityInboundMessages(auto_open_limited_visibility); }
         if (retain_wiped_outbound != null) { SettingsActivity.setDefaultRetainWipedOutboundMessages(retain_wiped_outbound); }
         if (default_retention_count != null) { SettingsActivity.setDefaultDiscussionRetentionCount(default_retention_count); }
@@ -296,6 +298,11 @@ public class SettingsPojo_0 {
         if (default_read_once != null) { SettingsActivity.setDefaultDiscussionReadOnce(default_read_once); }
         if (default_visibility_duration != null && default_visibility_duration > 0) { SettingsActivity.setDefaultDiscussionVisibilityDuration(default_visibility_duration); }
         if (default_existence_duration != null && default_existence_duration > 0) { SettingsActivity.setDefaultDiscussionExistenceDuration(default_existence_duration); }
+
+        if (map_integration != null) { SettingsActivity.setLocationIntegration(map_integration); }
+        if (osm_language != null) { SettingsActivity.setLocationOpenStreetMapRawLanguage(osm_language); }
+        if (location_share_duration != null) { SettingsActivity.setLocationDefaultSharingDurationValue(location_share_duration); }
+        if (location_share_interval != null) { SettingsActivity.setLocationDefaultSharingIntervalValue(location_share_interval); }
 
         if (camera_resize_resolution != null) { SettingsActivity.setCameraResolution(camera_resize_resolution); }
         if (remove_jpeg_metadata != null) { SettingsActivity.setMetadataRemovalPreference(remove_jpeg_metadata); }
@@ -312,6 +319,7 @@ public class SettingsPojo_0 {
         if (share_app_version != null) { SettingsActivity.setShareAppVersion(share_app_version); }
         if (notify_certificate_change != null) { SettingsActivity.setNotifyCertificateChange(notify_certificate_change); }
         if (block_unknown_certificate != null) { SettingsActivity.setBlockUntrustedCertificate(block_unknown_certificate); }
+        if (no_notify_certificate_for_link_previews != null) { SettingsActivity.setNoNotifyCertificateChangeForPreviews(no_notify_certificate_for_link_previews); }
         if (sending_foreground_service != null) { SettingsActivity.setSendingForegroundService(sending_foreground_service); }
         if (connectivity_indicator != null) { SettingsActivity.setPingConnectivityIndicator(connectivity_indicator); }
         if (qr_correction_level != null) { SettingsActivity.setQrCorrectionLevel(qr_correction_level); }

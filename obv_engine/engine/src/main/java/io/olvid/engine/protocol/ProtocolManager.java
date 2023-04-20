@@ -511,6 +511,22 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
 
+    @Override
+    public void initiateKeycloakGroupV2TargetedPing(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity) throws Exception {
+        if (session == null || ownedIdentity == null || groupIdentifier == null || groupIdentifier.category != GroupV2.Identifier.CATEGORY_KEYCLOAK) {
+            throw new Exception();
+        }
+
+        UID protocolInstanceUid = groupIdentifier.computeProtocolInstanceUid();
+
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+
+        ChannelMessageToSend message = new GroupsV2Protocol.InitiateTargetedPingMessage(coreProtocolMessage, groupIdentifier, contactIdentity).generateChannelProtocolMessageToSend();
+        channelDelegate.post(session, message, prng);
+    }
 
     private void startTrustEstablishmentWithSasProtocol(Identity contactIdentity, String contactDisplayName, Identity ownedIdentity) throws Exception {
         if (contactIdentity.equals(ownedIdentity)) {
@@ -749,6 +765,23 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         ChannelMessageToSend message = new GroupsV2Protocol.InitiateBatchKeysResendMessage(coreProtocolMessage, contactIdentity, contactDeviceUid).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
     }
+
+    @Override
+    public void createOrUpdateKeycloakGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedKeycloakGroupBlob) throws Exception {
+        if (session == null || ownedIdentity == null || groupIdentifier == null || serializedKeycloakGroupBlob == null) {
+            throw new Exception();
+        }
+
+        UID protocolInstanceUid = groupIdentifier.computeProtocolInstanceUid();
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+        ChannelMessageToSend message = new GroupsV2Protocol.CreateOrUpdateKeycloakGroupMessage(coreProtocolMessage, groupIdentifier, serializedKeycloakGroupBlob).generateChannelProtocolMessageToSend();
+        channelDelegate.post(session, message, prng);
+    }
+
+
 
     @Override
     public void startIdentityDetailsPublicationProtocol(Session session, Identity ownedIdentity, int version) throws Exception {

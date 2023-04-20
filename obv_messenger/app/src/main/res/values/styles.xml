@@ -8,6 +8,7 @@
         <item name="android:navigationBarColor">@color/navigationBar</item>
         <item name="android:windowBackground">@color/lightGrey</item>
         <item name="android:textColorHint">@color/grey</item>
+        <item name="fontFamily">sans-serif</item>
     </style>
 
     <style name="CustomAlertDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
@@ -102,9 +103,13 @@
 
     <style name="AppTheme.Splashscreen" parent="AppTheme.NoActionBar"/>
 
-    <style name="FadeInAndOutPopupAnimation">
+    <style name="FadeInAndOutAnimation">
         <item name="android:windowEnterAnimation">@anim/fade_in</item>
         <item name="android:windowExitAnimation">@anim/fade_out</item>
+    </style>
+
+    <style name="FadeInAnimation">
+        <item name="android:windowEnterAnimation">@anim/fade_in</item>
     </style>
 
     <!-- OnClick item-->

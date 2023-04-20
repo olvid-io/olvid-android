@@ -122,7 +122,6 @@
         android:id="@+id/message_content_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:autoLink="all"
         android:linksClickable="true"
         android:paddingStart="4dp"
         android:paddingEnd="4dp"

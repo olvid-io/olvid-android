@@ -112,6 +112,15 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             if (blockUntrustedCertificatePreference != null) {
                 screen.removePreference(blockUntrustedCertificatePreference);
             }
+            Preference noNotifyCertificateChangeForPreviewsPreference = screen.findPreference(SettingsActivity.PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS);
+            if (noNotifyCertificateChangeForPreviewsPreference != null) {
+                screen.removePreference(noNotifyCertificateChangeForPreviewsPreference);
+            }
+        } else if (!SettingsActivity.getBetaFeaturesEnabled()) {
+            Preference noNotifyCertificateChangeForPreviewsPreference = screen.findPreference(SettingsActivity.PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS);
+            if (noNotifyCertificateChangeForPreviewsPreference != null) {
+                screen.removePreference(noNotifyCertificateChangeForPreviewsPreference);
+            }
         }
 
         SwitchPreference permanentForegroundPreference = screen.findPreference(SettingsActivity.PREF_KEY_PERMANENT_FOREGROUND_SERVICE);
@@ -160,6 +169,11 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             if (SettingsActivity.getBetaFeaturesEnabled()) {
                 scaledTurnPreference.setVisible(true);
             }
+        }
+
+        SwitchPreference useLegacyZxingScannerPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_LEGACY_ZXING_SCANNER);
+        if (useLegacyZxingScannerPreference != null && !BuildConfig.USE_GOOGLE_LIBS) {
+            screen.removePreference(useLegacyZxingScannerPreference);
         }
 
         Preference exportAppDbPreference = screen.findPreference(SettingsActivity.PREF_KEY_EXPORT_APP_DATABASES);

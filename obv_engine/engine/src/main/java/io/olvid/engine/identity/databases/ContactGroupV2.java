@@ -20,6 +20,10 @@
 package io.olvid.engine.identity.databases;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,6 +37,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
@@ -44,13 +49,18 @@ import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.GroupV2;
+import io.olvid.engine.datatypes.containers.KeycloakGroupV2UpdateOutput;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPrivateKey;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
+import io.olvid.engine.engine.types.JsonIdentityDetails;
+import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
+import io.olvid.engine.identity.datatypes.KeycloakGroupBlob;
+import io.olvid.engine.identity.datatypes.KeycloakGroupMemberAndPermissions;
 import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 
 public class ContactGroupV2 implements ObvDatabase {
@@ -68,16 +78,16 @@ public class ContactGroupV2 implements ObvDatabase {
     static final String OWNED_IDENTITY = "owned_identity";
     private byte[] serializedOwnPermissions; // permission strings separated by 0x00 bytes --> allows storing future permissions
     static final String SERIALIZED_OWN_PERMISSIONS = "serialized_own_permissions";
-    private int version;
+    private int version; // always 0 for a keycloak group
     static final String VERSION = "version";
-    private int trustedDetailsVersion;
+    private int trustedDetailsVersion; // always 0 for a keycloak group
     static final String TRUSTED_DETAILS_VERSION = "trusted_details_version";
 
-    private byte[] verifiedAdministratorsChain;
+    private byte[] verifiedAdministratorsChain; // null for a keycloak group
     static final String VERIFIED_ADMINISTRATORS_CHAIN = "verified_administrators_chain";
-    private Seed blobMainSeed; // used to decrypt the blob on the server
+   private Seed blobMainSeed; // used to decrypt the blob on the server, null for a keycloak group
     static final String BLOB_MAIN_SEED = "blob_main_seed";
-    private Seed blobVersionSeed; // used to decrypt the blob on the server
+    private Seed blobVersionSeed; // used to decrypt the blob on the server, null for a keycloak group
     static final String BLOB_VERSION_SEED = "blob_version_seed";
     private ServerAuthenticationPrivateKey groupAdminServerAuthenticationPrivateKey; // non null for admins --> required to upload the blob
     static final String GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY = "group_admin_server_authentication_private_key";
@@ -85,7 +95,16 @@ public class ContactGroupV2 implements ObvDatabase {
     static final String OWN_GROUP_INVITATION_NONCE = "own_group_invitation_nonce";
     private boolean frozen; // set to true after a backup restore until the blob keys have been verified online
     static final String FROZEN = "frozen";
+    private long lastModificationTimestamp;
+    static final String LAST_MODIFICATION_TIMESTAMP = "last_modification_timestamp";
+    private String pushTopic; // non-null only for keyclaok groups
+    static final String PUSH_TOPIC = "push_topic";
+    private String serializedSharedSettings; // non-null only for keyclaok groups
+    static final String SERIALIZED_SHARED_SETTINGS = "serialized_shared_settings";
 
+    public Identity getOwnedIdentity() {
+        return ownedIdentity;
+    }
 
     public GroupV2.Identifier getGroupIdentifier() {
         return new GroupV2.Identifier(groupUid, serverUrl, category);
@@ -127,6 +146,18 @@ public class ContactGroupV2 implements ObvDatabase {
         return verifiedAdministratorsChain;
     }
 
+    public long getLastModificationTimestamp() {
+        return lastModificationTimestamp;
+    }
+
+    public String getPushTopic() {
+        return pushTopic;
+    }
+
+    public String getSerializedSharedSettings() {
+        return serializedSharedSettings;
+    }
+
     // region constructor
 
     // used only by the group creator to create a new group
@@ -149,7 +180,7 @@ public class ContactGroupV2 implements ObvDatabase {
             byte[] serializedOwnPermissions = GroupV2.Permission.serializePermissionStrings(ownPermissionStrings);
 
             // when first creating the group, it is frozen. It will be unfrozen once the group is successfully uploaded to the server and the members can be notified
-            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, serializedOwnPermissions, contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, true);
+            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, serializedOwnPermissions, contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, true, System.currentTimeMillis(), null, null);
             contactGroup.insert();
             contactGroup.commitHookBits |= HOOK_BIT_INSERTED_AS_NEW | HOOK_BIT_FROZEN_CHANGED; // this way the app also receives a frozen notification to mark the group as updating
             return contactGroup;
@@ -175,7 +206,7 @@ public class ContactGroupV2 implements ObvDatabase {
                 return null;
             }
 
-            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(ownPermissionStrings), contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, false);
+            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(ownPermissionStrings), contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, false, System.currentTimeMillis(), null, null);
             contactGroup.insert();
             return contactGroup;
         } catch (Exception e) {
@@ -184,7 +215,36 @@ public class ContactGroupV2 implements ObvDatabase {
         }
     }
 
-    private ContactGroupV2(IdentityManagerSession identityManagerSession, UID groupUid, String serverUrl, int category, Identity ownedIdentity, byte[] serializedOwnPermission, int version, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, boolean frozen) {
+    public static ContactGroupV2 createKeycloak(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, String pushTopic, String serializedSharedSettings, long lastModificationTimestamp) {
+        if ((ownedIdentity == null) || (groupIdentifier == null) || (serializedGroupDetails == null) || (ownGroupInvitationNonce == null) || (ownPermissionStrings == null)) {
+            return null;
+        }
+        try {
+            if (!identityManagerSession.session.isInTransaction()) {
+                Logger.e("Calling ContactGroupV2.createJoined() outside a transaction");
+                return null;
+            }
+
+            ContactGroupV2Details contactGroupDetails = ContactGroupV2Details.createOrUpdateKeycloak(identityManagerSession, ownedIdentity, groupIdentifier, serializedGroupDetails, serverPhotoInfo);
+            if (contactGroupDetails == null) {
+                Logger.e("Error create contactGroupDetails in ContactGroupV2.createJoined()");
+                return null;
+            }
+
+            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(ownPermissionStrings), contactGroupDetails.getVersion(), null, null, ownGroupInvitationNonce, false, lastModificationTimestamp, pushTopic, serializedSharedSettings);
+            contactGroup.insert();
+            if (pushTopic != null) {
+                contactGroup.commitHookBits |= HOOK_BIT_NEW_PUSH_TOPIC;
+                identityManagerSession.session.addSessionCommitListener(contactGroup);
+            }
+            return contactGroup;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private ContactGroupV2(IdentityManagerSession identityManagerSession, UID groupUid, String serverUrl, int category, Identity ownedIdentity, byte[] serializedOwnPermission, int version, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, boolean frozen, long lastModificationTimestamp, String pushTopic, String serializedSharedSettings) {
         this.identityManagerSession = identityManagerSession;
         this.groupUid = groupUid;
         this.serverUrl = serverUrl;
@@ -194,11 +254,20 @@ public class ContactGroupV2 implements ObvDatabase {
         this.version = version;
         this.trustedDetailsVersion = version;
         this.verifiedAdministratorsChain = verifiedAdministratorsChain;
-        this.blobMainSeed = blobKeys.blobMainSeed;
-        this.blobVersionSeed = blobKeys.blobVersionSeed;
-        this.groupAdminServerAuthenticationPrivateKey = blobKeys.groupAdminServerAuthenticationPrivateKey;
+        if (blobKeys == null) {
+            this.blobMainSeed = null;
+            this.blobVersionSeed = null;
+            this.groupAdminServerAuthenticationPrivateKey = null;
+        } else {
+            this.blobMainSeed = blobKeys.blobMainSeed;
+            this.blobVersionSeed = blobKeys.blobVersionSeed;
+            this.groupAdminServerAuthenticationPrivateKey = blobKeys.groupAdminServerAuthenticationPrivateKey;
+        }
         this.ownGroupInvitationNonce = ownGroupInvitationNonce;
         this.frozen = frozen;
+        this.lastModificationTimestamp = lastModificationTimestamp;
+        this.pushTopic = pushTopic;
+        this.serializedSharedSettings = serializedSharedSettings;
     }
 
     private ContactGroupV2(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -215,9 +284,11 @@ public class ContactGroupV2 implements ObvDatabase {
         this.version = res.getInt(VERSION);
         this.trustedDetailsVersion = res.getInt(TRUSTED_DETAILS_VERSION);
         this.verifiedAdministratorsChain = res.getBytes(VERIFIED_ADMINISTRATORS_CHAIN);
-        this.blobMainSeed = new Seed(res.getBytes(BLOB_MAIN_SEED));
-        this.blobVersionSeed = new Seed(res.getBytes(BLOB_VERSION_SEED));
-        byte[] bytes = res.getBytes(GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY);
+        byte[] bytes = res.getBytes(BLOB_MAIN_SEED);
+        this.blobMainSeed = bytes == null ? null : new Seed(bytes);
+        bytes = res.getBytes(BLOB_VERSION_SEED);
+        this.blobVersionSeed = bytes == null ? null : new Seed(bytes);
+        bytes = res.getBytes(GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY);
         if (bytes == null) {
             this.groupAdminServerAuthenticationPrivateKey = null;
         } else {
@@ -229,6 +300,9 @@ public class ContactGroupV2 implements ObvDatabase {
         }
         this.ownGroupInvitationNonce = res.getBytes(OWN_GROUP_INVITATION_NONCE);
         this.frozen = res.getBoolean(FROZEN);
+        this.lastModificationTimestamp = res.getLong(LAST_MODIFICATION_TIMESTAMP);
+        this.pushTopic = res.getString(PUSH_TOPIC);
+        this.serializedSharedSettings = res.getString(SERIALIZED_SHARED_SETTINGS);
     }
 
 
@@ -383,6 +457,28 @@ public class ContactGroupV2 implements ObvDatabase {
             }
         }
     }
+
+    public static Long getLastModificationTimestamp(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + LAST_MODIFICATION_TIMESTAMP +
+                " FROM " + TABLE_NAME +
+                " WHERE " + GROUP_UID + " = ? " +
+                " AND " + SERVER_URL + " = ? " +
+                " AND " + CATEGORY + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            statement.setBytes(1, groupIdentifier.groupUid.getBytes());
+            statement.setString(2, groupIdentifier.serverUrl);
+            statement.setInt(3, groupIdentifier.category);
+            statement.setBytes(4, ownedIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                if (res.next()) {
+                    return res.getLong(LAST_MODIFICATION_TIMESTAMP);
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
+
 
 
     public static GroupV2.ServerPhotoInfo getServerPhotoInfo(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
@@ -548,6 +644,40 @@ public class ContactGroupV2 implements ObvDatabase {
         }
     }
 
+    public static List<String> getAllKeycloakPushTopics(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
+        if (ownedIdentity == null) {
+            return null;
+        }
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+                " SELECT " + ContactGroupV2.PUSH_TOPIC + " AS pt " +
+                        " FROM " + ContactGroupV2.TABLE_NAME +
+                        " WHERE " + ContactGroupV2.CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK +
+                        " AND " + ContactGroupV2.OWNED_IDENTITY + " = ?;"
+        )) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                List<String> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(res.getString("pt"));
+                }
+                return list;
+            }
+        }
+    }
+
+    public static List<ContactGroupV2> getAllWithPushTopic(IdentityManagerSession identityManagerSession, String pushTopic) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + PUSH_TOPIC + " = ?;")) {
+            statement.setString(1, pushTopic);
+            try (ResultSet res = statement.executeQuery()) {
+                List<ContactGroupV2> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new ContactGroupV2(identityManagerSession, res));
+                }
+                return list;
+            }
+        }
+    }
 
     public static ContactGroupV2 get(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
         if ((ownedIdentity == null) || (groupIdentifier == null)) {
@@ -586,6 +716,45 @@ public class ContactGroupV2 implements ObvDatabase {
         }
     }
 
+    public static List<ContactGroupV2> getAllKeycloakForIdentity(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + OWNED_IDENTITY + " = ? " +
+                " AND " + CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK + ";")) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                List<ContactGroupV2> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new ContactGroupV2(identityManagerSession, res));
+                }
+                return list;
+            }
+        }
+    }
+
+    public static List<ContactGroupV2> getAll(IdentityManagerSession identityManagerSession) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+            try (ResultSet res = statement.executeQuery()) {
+                List<ContactGroupV2> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new ContactGroupV2(identityManagerSession, res));
+                }
+                return list;
+            }
+        }
+    }
+
+    public static List<ContactGroupV2> getAllKeycloak(IdentityManagerSession identityManagerSession) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK + ";")) {
+            try (ResultSet res = statement.executeQuery()) {
+                List<ContactGroupV2> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new ContactGroupV2(identityManagerSession, res));
+                }
+                return list;
+            }
+        }
+    }
 
 
     public void setFrozen(boolean frozen) throws SQLException {
@@ -679,6 +848,7 @@ public class ContactGroupV2 implements ObvDatabase {
         blobMainSeed = blobKeys.blobMainSeed;
         blobVersionSeed = blobKeys.blobVersionSeed;
         groupAdminServerAuthenticationPrivateKey = blobKeys.groupAdminServerAuthenticationPrivateKey;
+        lastModificationTimestamp = System.currentTimeMillis();
 
         // create the new group details
         GroupV2.Identifier groupIdentifier = getGroupIdentifier();
@@ -786,7 +956,7 @@ public class ContactGroupV2 implements ObvDatabase {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Logger.w("Error while update group members from new serverBlob");
+            Logger.w("Error while updating group members from new serverBlob");
             return null;
         }
 
@@ -835,10 +1005,6 @@ public class ContactGroupV2 implements ObvDatabase {
             throw new Exception("Called ContactGroupV2.movePendingMemberToMembers outside a transaction");
         }
 
-        if (category != GroupV2.Identifier.CATEGORY_SERVER) {
-            throw new Exception("Called ContactGroupV2.movePendingMemberToMembers for a group of category " + category);
-        }
-
         ContactGroupV2PendingMember pendingMember = ContactGroupV2PendingMember.get(identityManagerSession, ownedIdentity, getGroupIdentifier(), groupMemberIdentity);
         if (pendingMember == null) {
             return;
@@ -847,29 +1013,42 @@ public class ContactGroupV2 implements ObvDatabase {
         ContactGroupV2Member member = ContactGroupV2Member.get(identityManagerSession, ownedIdentity, getGroupIdentifier(), groupMemberIdentity);
         if (member == null) { // this should always be the case
             // add a contact if we don't have one, or add a trust origin
-            if (!identityManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(identityManagerSession.session, ownedIdentity, groupMemberIdentity)) {
-                identityManagerSession.identityDelegate.addContactIdentity(identityManagerSession.session, groupMemberIdentity, pendingMember.getSerializedContactDetails(), ownedIdentity, TrustOrigin.createServerGroupV2TrustOrigin(System.currentTimeMillis(), getGroupIdentifier()), false);
+            if (category != GroupV2.Identifier.CATEGORY_KEYCLOAK) {
+                if (!identityManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(identityManagerSession.session, ownedIdentity, groupMemberIdentity)) {
+                    identityManagerSession.identityDelegate.addContactIdentity(identityManagerSession.session, groupMemberIdentity, pendingMember.getSerializedContactDetails(), ownedIdentity, TrustOrigin.createServerGroupV2TrustOrigin(System.currentTimeMillis(), getGroupIdentifier()), false);
+                } else {
+                    identityManagerSession.identityDelegate.addTrustOriginToContact(identityManagerSession.session, groupMemberIdentity, ownedIdentity, TrustOrigin.createServerGroupV2TrustOrigin(System.currentTimeMillis(), getGroupIdentifier()), false);
+                }
             } else {
-                identityManagerSession.identityDelegate.addTrustOriginToContact(identityManagerSession.session, groupMemberIdentity, ownedIdentity, TrustOrigin.createServerGroupV2TrustOrigin(System.currentTimeMillis(), getGroupIdentifier()), false);
+                // for keycloak groups, don't add a trust origin for each group, only have one keycloak origin
+                if (!identityManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(identityManagerSession.session, ownedIdentity, groupMemberIdentity)) {
+                    identityManagerSession.identityDelegate.addContactIdentity(identityManagerSession.session, groupMemberIdentity, pendingMember.getSerializedContactDetails(), ownedIdentity, TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), serverUrl), false);
+                }
             }
 
-            // crate the ContactGroupV2Member
-            member = ContactGroupV2Member.create(identityManagerSession, ownedIdentity, getGroupIdentifier(), groupMemberIdentity, GroupV2.Permission.deserializePermissions(pendingMember.getSerializedPermissions()), pendingMember.getGroupInvitationNonce());
-            if (member == null) {
-                throw new Exception("In ContactGroupV2.movePendingMemberToMembers, failed to create ContactGroupV2Member");
+            // for Keycloak groups, before moving a pending member to actual member, check their details are actually keycloak certified
+            // (still, we do add the contact before this so that they have a chance to present new updated and validly signed details)
+            if (category != GroupV2.Identifier.CATEGORY_KEYCLOAK || identityManagerSession.identityDelegate.isContactIdentityCertifiedByOwnKeycloak(identityManagerSession.session, ownedIdentity, groupMemberIdentity)) {
+                // crate the ContactGroupV2Member
+                member = ContactGroupV2Member.create(identityManagerSession, ownedIdentity, getGroupIdentifier(), groupMemberIdentity, GroupV2.Permission.deserializePermissions(pendingMember.getSerializedPermissions()), pendingMember.getGroupInvitationNonce());
+                if (member == null) {
+                    throw new Exception("In ContactGroupV2.movePendingMemberToMembers, failed to create ContactGroupV2Member");
+                }
+                // delete the pending member
+                pendingMember.delete();
             }
+        } else {
+            // only delete the pending member
+            pendingMember.delete();
         }
 
         this.updatedByMe = false;
         commitHookBits |= HOOK_BIT_UPDATED;
         identityManagerSession.session.addSessionCommitListener(this);
-
-        // delete the pending member
-        pendingMember.delete();
     }
 
 
-    public static GroupV2.IdentifierVersionAndKeys[] getGroupsV2IdentifierVersionAndKeysForContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+    public static GroupV2.IdentifierVersionAndKeys[] getServerGroupsV2IdentifierVersionAndKeysForContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
                 "SELECT * FROM (SELECT " + ContactGroupV2Member.GROUP_UID + " AS uid, " +
                         ContactGroupV2Member.SERVER_URL + " AS url, " +
@@ -935,7 +1114,7 @@ public class ContactGroupV2 implements ObvDatabase {
         }
     }
 
-    public static GroupV2.IdentifierAndAdminStatus[] getGroupsV2IdentifierAndMyAdminStatusForContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+    public static GroupV2.IdentifierAndAdminStatus[] getServerGroupsV2IdentifierAndMyAdminStatusForContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
                 "SELECT * FROM (SELECT " + ContactGroupV2Member.GROUP_UID + " AS uid, " +
                         ContactGroupV2Member.SERVER_URL + " AS url " +
@@ -978,6 +1157,172 @@ public class ContactGroupV2 implements ObvDatabase {
         }
     }
 
+    public KeycloakGroupV2UpdateOutput updateWithNewKeycloakBlob(KeycloakGroupBlob keycloakGroupBlob, ObjectMapper jsonObjectMapper) throws Exception {
+        GroupV2.Identifier groupIdentifier = getGroupIdentifier();
+
+        // build a hashmap of group members for easier access
+        HashMap<Identity, KeycloakGroupMemberAndPermissions> groupMembersMap = new HashMap<>();
+        for (KeycloakGroupMemberAndPermissions groupMemberAndPermissions : keycloakGroupBlob.groupMembersAndPermissions) {
+            Identity memberIdentity = Identity.of(groupMemberAndPermissions.identity);
+            groupMembersMap.put(memberIdentity, groupMemberAndPermissions);
+        }
+
+        // get my own updated information
+        KeycloakGroupMemberAndPermissions ownKeycloakGroupMemberAndPermissions = groupMembersMap.remove(ownedIdentity);
+        if (ownKeycloakGroupMemberAndPermissions == null) {
+            return null;
+        }
+
+
+
+        // update the ContactGroupV2
+        this.ownGroupInvitationNonce = ownKeycloakGroupMemberAndPermissions.groupInvitationNonce;
+        this.serializedOwnPermissions = GroupV2.Permission.serializePermissionStrings(ownKeycloakGroupMemberAndPermissions.permissions);
+        this.lastModificationTimestamp = keycloakGroupBlob.timestamp;
+        if (!Objects.equals(this.pushTopic, keycloakGroupBlob.pushTopic)) {
+            this.pushTopic = keycloakGroupBlob.pushTopic;
+            commitHookBits |= HOOK_BIT_NEW_PUSH_TOPIC;
+        }
+        if (!Objects.equals(this.serializedSharedSettings, keycloakGroupBlob.serializedSharedSettings)) {
+            this.serializedSharedSettings = keycloakGroupBlob.serializedSharedSettings;
+            identityManagerSession.session.addSessionCommitListener(() -> {
+                HashMap<String, Object> userInfo = new HashMap<>();
+                userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_OWNED_IDENTITY_KEY, ownedIdentity);
+                userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_GROUP_IDENTIFIER_KEY, groupIdentifier);
+                userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_SERIALIZED_SHARED_SETTINGS_KEY, keycloakGroupBlob.serializedSharedSettings);
+                userInfo.put(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_MODIFICATION_TIMESTAMP_KEY, keycloakGroupBlob.timestamp);
+                identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS, userInfo);
+            });
+        }
+        update();
+
+        // create the new group details
+        GroupV2.ServerPhotoInfo serverPhotoInfo = null;
+        if (keycloakGroupBlob.photoUid != null && keycloakGroupBlob.encodedPhotoKey != null) {
+            try {
+                UID photoUid = new UID(keycloakGroupBlob.photoUid);
+                AuthEncKey photoKey = (AuthEncKey) new Encoded(keycloakGroupBlob.encodedPhotoKey).decodeSymmetricKey();
+
+                serverPhotoInfo = new GroupV2.ServerPhotoInfo(null, photoUid, photoKey);
+            } catch (Exception ignored) {
+                // can't get the photo info --> ignore the photo
+            }
+        }
+
+        ContactGroupV2Details updatedDetails = ContactGroupV2Details.createOrUpdateKeycloak(identityManagerSession, ownedIdentity, groupIdentifier, jsonObjectMapper.writeValueAsString(keycloakGroupBlob.groupDetails), serverPhotoInfo);
+
+        if (updatedDetails == null) {
+            return null;
+        }
+
+        boolean photoNeedsToBeDownloaded = serverPhotoInfo != null && updatedDetails.getPhotoUrl() == null;
+
+        //////////////////////////
+        // Now, update the members and pending members
+
+        List<Identity> membersWithNewInvitationNonce = new ArrayList<>();
+
+        try {
+            for (ContactGroupV2Member contactGroupV2Member : ContactGroupV2Member.getAll(identityManagerSession, ownedIdentity, groupIdentifier)) {
+                KeycloakGroupMemberAndPermissions newPermissionsAndDetails = groupMembersMap.get(contactGroupV2Member.getContactIdentity());
+                if (newPermissionsAndDetails == null) {
+                    // user was removed from the group
+                    contactGroupV2Member.delete();
+                } else if (!Arrays.equals(contactGroupV2Member.getGroupInvitationNonce(), newPermissionsAndDetails.groupInvitationNonce)) {
+                    // nonce changed --> member must be moved to pending members
+                    //  - delete the member
+                    //  - do not remove from groupMembersMap so that it is added to pending members a few lines below
+                    contactGroupV2Member.delete();
+                } else {
+                    // remove the member from the map
+                    groupMembersMap.remove(contactGroupV2Member.getContactIdentity());
+                    // check if permissions are equal
+                    if (!Objects.equals(
+                            new HashSet<>(GroupV2.Permission.deserializePermissions(contactGroupV2Member.getSerializedPermissions())),
+                            new HashSet<>(newPermissionsAndDetails.permissions))) {
+                        contactGroupV2Member.setPermissions(newPermissionsAndDetails.permissions);
+                    }
+                }
+            }
+
+            JwtConsumer noVerificationConsumer = new JwtConsumerBuilder()
+                    .setSkipSignatureVerification()
+                    .setSkipAllValidators()
+                    .build();
+
+            for (ContactGroupV2PendingMember contactGroupV2PendingMember : ContactGroupV2PendingMember.getAll(identityManagerSession, ownedIdentity, groupIdentifier)) {
+                KeycloakGroupMemberAndPermissions newPermissionsAndDetails = groupMembersMap.remove(contactGroupV2PendingMember.getContactIdentity());
+                if (newPermissionsAndDetails == null) {
+                    // pending member was removed from the group
+                    contactGroupV2PendingMember.delete();
+                } else  {
+                    // check if permissions are equal
+                    if (!Objects.equals(
+                            new HashSet<>(GroupV2.Permission.deserializePermissions(contactGroupV2PendingMember.getSerializedPermissions())),
+                            new HashSet<>(newPermissionsAndDetails.permissions))) {
+                        contactGroupV2PendingMember.setPermissions(newPermissionsAndDetails.permissions);
+                    }
+
+                    // check the invitation nonce
+                    if (!Arrays.equals(contactGroupV2PendingMember.getGroupInvitationNonce(), newPermissionsAndDetails.groupInvitationNonce)) {
+                        contactGroupV2PendingMember.setGroupInvitationNonce(newPermissionsAndDetails.groupInvitationNonce);
+                        membersWithNewInvitationNonce.add(contactGroupV2PendingMember.getContactIdentity());
+                    }
+
+                    // check the serialized details
+                    String serializedUnsignedDetails = noVerificationConsumer.processToClaims(newPermissionsAndDetails.signedUserDetails).getRawJson();
+                    JsonKeycloakUserDetails jsonKeycloakUserDetails = jsonObjectMapper.readValue(serializedUnsignedDetails, JsonKeycloakUserDetails.class);
+                    JsonIdentityDetails jsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(newPermissionsAndDetails.signedUserDetails);
+                    String serializedIdentityDetails = jsonObjectMapper.writeValueAsString(jsonIdentityDetails);
+
+                    if (!contactGroupV2PendingMember.getSerializedContactDetails().equals(serializedIdentityDetails)) {
+                        contactGroupV2PendingMember.setSerializedContactDetails(serializedIdentityDetails);
+                    }
+                }
+            }
+
+            // add all remaining members to ContactGroupV2PendingMember db
+            for (Map.Entry<Identity, KeycloakGroupMemberAndPermissions> entrySet : groupMembersMap.entrySet()) {
+                Identity pendingMemberIdentity = entrySet.getKey();
+                KeycloakGroupMemberAndPermissions pendingGroupMember = entrySet.getValue();
+
+                membersWithNewInvitationNonce.add(pendingMemberIdentity);
+
+                String serializedUnsignedDetails = noVerificationConsumer.processToClaims(pendingGroupMember.signedUserDetails).getRawJson();
+                JsonKeycloakUserDetails jsonKeycloakUserDetails = jsonObjectMapper.readValue(serializedUnsignedDetails, JsonKeycloakUserDetails.class);
+                JsonIdentityDetails jsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(pendingGroupMember.signedUserDetails);
+                String serializedIdentityDetails = jsonObjectMapper.writeValueAsString(jsonIdentityDetails);
+
+                ContactGroupV2PendingMember pendingMember = ContactGroupV2PendingMember.create(
+                        identityManagerSession,
+                        ownedIdentity,
+                        groupIdentifier,
+                        pendingMemberIdentity,
+                        serializedIdentityDetails,
+                        pendingGroupMember.permissions,
+                        pendingGroupMember.groupInvitationNonce);
+
+                if (pendingMember == null) {
+                    throw new Exception("Unable to create new ContactGroupV2PendingMember");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Logger.w("Error while updating group members from new serverBlob");
+            return null;
+        }
+
+        commitHookBits |= HOOK_BIT_UPDATED;
+        identityManagerSession.session.addSessionCommitListener(this);
+
+        return new KeycloakGroupV2UpdateOutput(ownGroupInvitationNonce, photoNeedsToBeDownloaded, membersWithNewInvitationNonce);
+    }
+
+    public static void deleteAllKeycloakGroupsForOwnedIdentity(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
+        for (ContactGroupV2 contactGroupV2 : getAllKeycloakForIdentity(identityManagerSession, ownedIdentity)) {
+            contactGroupV2.delete();
+        }
+    }
 
     // endregion
 
@@ -994,12 +1339,15 @@ public class ContactGroupV2 implements ObvDatabase {
                     SERIALIZED_OWN_PERMISSIONS + " BLOB NOT NULL, " +
                     VERSION + " INT NOT NULL, " +
                     TRUSTED_DETAILS_VERSION + " INT NOT NULL, " +
-                    VERIFIED_ADMINISTRATORS_CHAIN + " BLOB NOT NULL, " +
-                    BLOB_MAIN_SEED + " BLOB NOT NULL, " +
-                    BLOB_VERSION_SEED + " BLOB NOT NULL, " +
+                    VERIFIED_ADMINISTRATORS_CHAIN + " BLOB, " +
+                    BLOB_MAIN_SEED + " BLOB, " +
+                    BLOB_VERSION_SEED + " BLOB, " +
                     GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY + " BLOB, " +
                     OWN_GROUP_INVITATION_NONCE + " BLOB NOT NULL, " +
                     FROZEN + " BIT NOT NULL, " +
+                    LAST_MODIFICATION_TIMESTAMP + " INTEGER NOT NULL, " +
+                    PUSH_TOPIC + " TEXT, " +
+                    SERIALIZED_SHARED_SETTINGS + " TEXT, " +
                     " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + GROUP_UID + ", " + SERVER_URL + ", " + CATEGORY + ", " + OWNED_IDENTITY + "), " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + "(" + OwnedIdentity.OWNED_IDENTITY + ")," +
                     " FOREIGN KEY (" + GROUP_UID + ", " + SERVER_URL + ", " + CATEGORY + ", " + OWNED_IDENTITY + ", " + VERSION + ") REFERENCES " + ContactGroupV2Details.TABLE_NAME + "(" + ContactGroupV2Details.GROUP_UID + ", " + ContactGroupV2Details.SERVER_URL + ", " + ContactGroupV2Details.CATEGORY + ", " + ContactGroupV2Details.OWNED_IDENTITY + ", " + ContactGroupV2Details.VERSION + ")," +
@@ -1032,10 +1380,42 @@ public class ContactGroupV2 implements ObvDatabase {
             }
             oldVersion = 32;
         }
+        if (oldVersion < 34 && newVersion >= 34) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `contact_group_v2` DATABASE FROM VERSION " + oldVersion + " to 34");
+                statement.execute("CREATE TABLE contact_group_v2_new (" +
+                        "group_uid BLOB NOT NULL, " +
+                        "server_url TEXT NOT NULL, " +
+                        "category INT NOT NULL, " +
+                        "owned_identity BLOB NOT NULL, " +
+                        "serialized_own_permissions BLOB NOT NULL, " +
+                        "version INT NOT NULL, " +
+                        "trusted_details_version INT NOT NULL, " +
+                        "verified_administrators_chain BLOB, " +
+                        "blob_main_seed BLOB, " +
+                        "blob_version_seed BLOB, " +
+                        "group_admin_server_authentication_private_key BLOB, " +
+                        "own_group_invitation_nonce BLOB NOT NULL, " +
+                        "frozen BIT NOT NULL, " +
+                        "last_modification_timestamp INTEGER NOT NULL, " +
+                        "push_topic TEXT, " +
+                        "serialized_shared_settings TEXT, " +
+                        " CONSTRAINT PK_contact_group_v2 PRIMARY KEY(group_uid, server_url, category, owned_identity), " +
+                        " FOREIGN KEY (owned_identity) REFERENCES owned_identity (identity)," +
+                        " FOREIGN KEY (group_uid, server_url, category, owned_identity, version) REFERENCES contact_group_v2_details (group_uid, server_url, category, owned_identity, version)," +
+                        " FOREIGN KEY (group_uid, server_url, category, owned_identity, trusted_details_version) REFERENCES contact_group_v2_details (group_uid, server_url, category, owned_identity, version) );");
+                statement.execute("INSERT INTO contact_group_v2_new " +
+                        " SELECT group_uid, server_url, category, owned_identity, serialized_own_permissions, version, trusted_details_version, verified_administrators_chain, blob_main_seed, blob_version_seed, group_admin_server_authentication_private_key, own_group_invitation_nonce, frozen, 0, NULL, NULL " +
+                        " FROM contact_group_v2");
+                statement.execute("DROP TABLE contact_group_v2");
+                statement.execute("ALTER TABLE contact_group_v2_new RENAME TO contact_group_v2");
+            }
+            oldVersion = 34;
+        }
     }
 
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?);")) {
             statement.setBytes(1, groupUid.getBytes());
             statement.setString(2, serverUrl);
             statement.setInt(3, category);
@@ -1045,12 +1425,15 @@ public class ContactGroupV2 implements ObvDatabase {
             statement.setInt(6, version);
             statement.setInt(7, trustedDetailsVersion);
             statement.setBytes(8, verifiedAdministratorsChain);
-            statement.setBytes(9, blobMainSeed.getBytes());
-            statement.setBytes(10, blobVersionSeed.getBytes());
+            statement.setBytes(9, blobMainSeed == null ? null : blobMainSeed.getBytes());
+            statement.setBytes(10, blobVersionSeed == null ? null : blobVersionSeed.getBytes());
 
             statement.setBytes(11, groupAdminServerAuthenticationPrivateKey == null ? null : Encoded.of(groupAdminServerAuthenticationPrivateKey).getBytes());
             statement.setBytes(12, ownGroupInvitationNonce);
             statement.setBoolean(13, frozen);
+            statement.setLong(14, lastModificationTimestamp);
+            statement.setString(15, pushTopic);
+            statement.setString(16, serializedSharedSettings);
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_INSERTED;
             identityManagerSession.session.addSessionCommitListener(this);
@@ -1100,7 +1483,10 @@ public class ContactGroupV2 implements ObvDatabase {
                 BLOB_VERSION_SEED + " = ?, " +
                 GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY + " = ?, " +
                 OWN_GROUP_INVITATION_NONCE + " = ?, " +
-                FROZEN + " = ? " +
+                FROZEN + " = ?, " +
+                LAST_MODIFICATION_TIMESTAMP + " = ?, " +
+                PUSH_TOPIC + " = ?, " +
+                SERIALIZED_SHARED_SETTINGS + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -1109,17 +1495,21 @@ public class ContactGroupV2 implements ObvDatabase {
             statement.setInt(2, version);
             statement.setInt(3, trustedDetailsVersion);
             statement.setBytes(4, verifiedAdministratorsChain);
-            statement.setBytes(5, blobMainSeed.getBytes());
+            statement.setBytes(5, blobVersionSeed == null ? null : blobMainSeed.getBytes());
 
-            statement.setBytes(6, blobVersionSeed.getBytes());
+            statement.setBytes(6, blobVersionSeed == null ? null : blobVersionSeed.getBytes());
             statement.setBytes(7, groupAdminServerAuthenticationPrivateKey == null ? null : Encoded.of(groupAdminServerAuthenticationPrivateKey).getBytes());
             statement.setBytes(8, ownGroupInvitationNonce);
             statement.setBoolean(9, frozen);
+            statement.setLong(10, lastModificationTimestamp);
 
-            statement.setBytes(10, groupUid.getBytes());
-            statement.setString(11, serverUrl);
-            statement.setInt(12, category);
-            statement.setBytes(13, ownedIdentity.getBytes());
+            statement.setString(11, pushTopic);
+            statement.setString(12, serializedSharedSettings);
+
+            statement.setBytes(13, groupUid.getBytes());
+            statement.setString(14, serverUrl);
+            statement.setInt(15, category);
+            statement.setBytes(16, ownedIdentity.getBytes());
             statement.executeUpdate();
         }
     }
@@ -1147,6 +1537,7 @@ public class ContactGroupV2 implements ObvDatabase {
     private static final long HOOK_BIT_UPDATED = 0x10;
     private static final long HOOK_BIT_PHOTO_UPDATED = 0x20;
     private static final long HOOK_BIT_SERVER_USER_DATA_CAN_BE_DELETED = 0x40;
+    private static final long HOOK_BIT_NEW_PUSH_TOPIC = 0x80;
 
     @Override
     public void wasCommitted() {
@@ -1191,6 +1582,11 @@ public class ContactGroupV2 implements ObvDatabase {
             userInfo.put(IdentityNotifications.NOTIFICATION_SERVER_USER_DATA_CAN_BE_DELETED_LABEL_KEY, labelToDelete);
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_SERVER_USER_DATA_CAN_BE_DELETED, userInfo);
         }
+        if ((commitHookBits & HOOK_BIT_NEW_PUSH_TOPIC) != 0) {
+            HashMap<String, Object> userInfo = new HashMap<>();
+            userInfo.put(IdentityNotifications.NOTIFICATION_NEW_KEYCLOAK_GROUP_V2_PUSH_TOPIC_OWNED_IDENTITY_KEY, ownedIdentity);
+            identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_NEW_KEYCLOAK_GROUP_V2_PUSH_TOPIC, userInfo);
+        }
         commitHookBits = 0;
     }
 
@@ -1231,12 +1627,15 @@ public class ContactGroupV2 implements ObvDatabase {
         }
 
         pojo.verified_admin_chain = verifiedAdministratorsChain;
-        pojo.main_seed = blobMainSeed.getBytes();
-        pojo.version_seed = blobVersionSeed.getBytes();
+        pojo.main_seed = blobMainSeed == null ? null : blobMainSeed.getBytes();
+        pojo.version_seed = blobVersionSeed == null ? null : blobVersionSeed.getBytes();
         if (groupAdminServerAuthenticationPrivateKey != null) {
             pojo.encoded_admin_key = Encoded.of(groupAdminServerAuthenticationPrivateKey).getBytes();
         }
         pojo.invitation_nonce = ownGroupInvitationNonce;
+        pojo.last_modification_timestamp = lastModificationTimestamp;
+        pojo.push_topic = pushTopic;
+        pojo.serialized_shared_settings = serializedSharedSettings;
 
         pojo.members = ContactGroupV2Member.backupAll(identityManagerSession, ownedIdentity, getGroupIdentifier());
         pojo.pending_members = ContactGroupV2PendingMember.backupAll(identityManagerSession, ownedIdentity, getGroupIdentifier());
@@ -1257,6 +1656,13 @@ public class ContactGroupV2 implements ObvDatabase {
             ContactGroupV2Details.restore(identityManagerSession, ownedIdentity, groupIdentifier, pojo.version - 1, pojo.trusted_details);
         }
 
+        if (Arrays.equals(pojo.details.photo_server_identity, ownedIdentity.getBytes()) && pojo.details.photo_server_label != null) {
+            // If I am the photo owner, also create the corresponding ServerUserData to maintain it
+            try {
+                ServerUserData.createForGroupV2(identityManagerSession, ownedIdentity, new UID(pojo.details.photo_server_label), groupIdentifier.getBytes());
+            } catch (Exception ignored) { }
+        }
+
         // then the group
         ServerAuthenticationPrivateKey serverAuthenticationPrivateKey = null;
         if (pojo.encoded_admin_key != null) {
@@ -1266,8 +1672,23 @@ public class ContactGroupV2 implements ObvDatabase {
                 e.printStackTrace();
             }
         }
-        GroupV2.BlobKeys blobKeys = new GroupV2.BlobKeys(new Seed(pojo.main_seed), new Seed(pojo.version_seed), serverAuthenticationPrivateKey);
-        ContactGroupV2 groupV2 = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, pojo.server_url, pojo.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(Arrays.asList(pojo.permissions)), pojo.version, pojo.verified_admin_chain, blobKeys, pojo.invitation_nonce, false);
+        GroupV2.BlobKeys blobKeys = ((pojo.main_seed == null) || (pojo.version_seed == null)) ? null : new GroupV2.BlobKeys(new Seed(pojo.main_seed), new Seed(pojo.version_seed), serverAuthenticationPrivateKey);
+        ContactGroupV2 groupV2 = new ContactGroupV2(
+                identityManagerSession,
+                groupIdentifier.groupUid,
+                pojo.server_url,
+                pojo.category,
+                ownedIdentity,
+                GroupV2.Permission.serializePermissionStrings(Arrays.asList(pojo.permissions)),
+                pojo.version,
+                pojo.verified_admin_chain,
+                blobKeys,
+                pojo.invitation_nonce,
+                false,
+                pojo.last_modification_timestamp,
+                pojo.push_topic,
+                pojo.serialized_shared_settings
+        );
         groupV2.insert();
 
         // finally the members and pending members
@@ -1298,6 +1719,9 @@ public class ContactGroupV2 implements ObvDatabase {
         public byte[] version_seed;
         public byte[] encoded_admin_key;
         public byte[] invitation_nonce;
+        public long last_modification_timestamp;
+        public String push_topic;
+        public String serialized_shared_settings;
 
         public ContactGroupV2Member.Pojo_0[] members;
         public ContactGroupV2PendingMember.Pojo_0[] pending_members;

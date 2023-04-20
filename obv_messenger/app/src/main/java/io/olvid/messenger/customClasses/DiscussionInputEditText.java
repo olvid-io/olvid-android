@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
 import android.text.Editable;
+import android.text.Spanned;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.View;
@@ -38,10 +39,12 @@ import androidx.core.view.ViewCompat;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.discussion.mention.MentionUrlSpan;
 
 
 public class DiscussionInputEditText extends AppCompatEditText {
     private ImeContentCommittedHandler imeContentCommittedHandler = null;
+    private OnSelectionChangeListener onSelectionChangeListener = null;
 
     public DiscussionInputEditText(Context context) {
         super(context);
@@ -63,7 +66,6 @@ public class DiscussionInputEditText extends AppCompatEditText {
             setBackgroundResource(R.drawable.background_discussion_edit_text);
         }
     }
-
 
 
     public void setImeContentCommittedHandler(ImeContentCommittedHandler imeContentCommittedHandler) {
@@ -94,7 +96,8 @@ public class DiscussionInputEditText extends AppCompatEditText {
                 String clipName = null;
                 try {
                     clipName = clip.getDescription().getLabel().toString();
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
                 String fallbackFileName = clipName;
 
                 for (int i = 0; i < clip.getItemCount(); i++) {
@@ -153,5 +156,44 @@ public class DiscussionInputEditText extends AppCompatEditText {
     public interface ImeContentCommittedHandler {
         // this handler should always be called from a background thread
         void handler(Uri contentUri, String fileName, String mimeType, Runnable callMeWhenDone);
+    }
+
+    @Override
+    protected void onSelectionChanged(int selStart, int selEnd) {
+        if (getText() != null) {
+            Spanned text = getText();
+            MentionUrlSpan[] mentionUrlSpans = getText().getSpans(selStart, selEnd, MentionUrlSpan.class);
+            int newStart = selStart;
+            int newEnd = selEnd;
+            for (MentionUrlSpan mentionUrlSpan : mentionUrlSpans) {
+                if (mentionUrlSpan.getUserIdentifier() != null) {
+                    int mentionStart = text.getSpanStart(mentionUrlSpan);
+                    int mentionEnd = text.getSpanEnd(mentionUrlSpan);
+
+                    if (selStart > mentionStart && selStart < mentionEnd) {
+                        newStart = mentionStart;
+                    }
+                    if (selEnd > mentionStart && selEnd < mentionEnd) {
+                        newEnd = mentionEnd;
+                    }
+                }
+            }
+            if (newStart != selStart || newEnd != selEnd) {
+                setSelection(newStart, newEnd);
+                return;
+            }
+        }
+        super.onSelectionChanged(selStart, selEnd);
+        if (onSelectionChangeListener != null) {
+            onSelectionChangeListener.onSelectionChanged(getText(), selStart, selEnd);
+        }
+    }
+
+    public void setOnSelectionChangeListener(OnSelectionChangeListener onSelectionChangeListener) {
+        this.onSelectionChangeListener = onSelectionChangeListener;
+    }
+
+    public interface OnSelectionChangeListener {
+        void onSelectionChanged(Editable editable, int start, int end);
     }
 }

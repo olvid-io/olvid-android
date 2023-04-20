@@ -65,4 +65,6 @@ public interface NetworkFetchDelegate {
     void startFreeTrial(Identity ownedIdentity);
     void verifyReceipt(Identity ownedIdentity, String storeToken);
     void queryServerWellKnown(String server);
+    String getOsmServerUrl(String server);
+    String getAddressServerUrl(String server);
 }

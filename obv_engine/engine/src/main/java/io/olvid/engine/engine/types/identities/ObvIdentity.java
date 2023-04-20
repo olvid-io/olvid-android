@@ -23,6 +23,7 @@ package io.olvid.engine.engine.types.identities;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Session;
@@ -94,6 +95,10 @@ public class ObvIdentity implements Comparable<ObvIdentity> {
     // endregion
 
 
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(identity.getBytes());
+    }
 
     @Override
     public boolean equals(Object other) {

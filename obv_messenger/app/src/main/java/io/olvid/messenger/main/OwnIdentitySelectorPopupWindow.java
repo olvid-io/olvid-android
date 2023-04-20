@@ -193,7 +193,7 @@ public class OwnIdentitySelectorPopupWindow {
             ownedIdentitiesAndMessageCount.removeObserver(adapter);
             ownedIdentitiesAndMessageCount.removeObserver(separatorObserver);
         });
-        popupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        popupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
         popupWindow.showAsDropDown(anchorView,  -offsetPixelX, -offsetPixelY);
     }
 

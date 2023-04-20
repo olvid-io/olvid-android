@@ -305,7 +305,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                         }
                         Matcher matcher = pattern.matcher(unaccentTitle);
                         if (matcher.find()) {
-                            highlightedTitle.setSpan(highlightedSpans[i], matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            highlightedTitle.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(discussion.title, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(discussion.title, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                             i++;
                         }
                     }
@@ -327,7 +327,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                                 }
                                 Matcher matcher = pattern.matcher(unaccentGroupMemberNames);
                                 if (matcher.find()) {
-                                    highlightedGroupMembers.setSpan(highlightedSpans[i], matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    highlightedGroupMembers.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(discussion.groupMemberNameList, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(discussion.groupMemberNameList, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                     i++;
                                 }
                             }

@@ -107,8 +107,11 @@ public class MessageDateItemDecoration extends RecyclerView.ItemDecoration {
         int childCount = parent.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = parent.getChildAt(i);
-            int position = parent.getChildAdapterPosition(child);
-            if (position == RecyclerView.NO_POSITION || position == 0) {
+            if (child == null) {
+                continue;
+            }
+            int position = parent.getChildViewHolder(child).getBindingAdapterPosition();
+            if (position == RecyclerView.NO_POSITION || position == 0 || position > messageListAdapter.messages.size()) {
                 continue;
             }
             position--;
@@ -231,8 +234,8 @@ public class MessageDateItemDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
         super.getItemOffsets(outRect, view, parent, state);
-        int position = parent.getChildAdapterPosition(view);
-        if (position == RecyclerView.NO_POSITION || position == 0) {
+        int position = parent.getChildViewHolder(view).getBindingAdapterPosition();
+        if (position == RecyclerView.NO_POSITION || position == 0 ||  messageListAdapter.messages == null || position > messageListAdapter.messages.size()) {
             return;
         }
         position--;

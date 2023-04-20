@@ -42,7 +42,6 @@ import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 import io.olvid.messenger.databases.tasks.UpdateGroupNameAndPhotoTask;
-import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class EngineNotificationProcessorForGroups implements EngineNotificationListener {
@@ -183,7 +182,6 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                         if (discussion.updateLastMessageTimestamp(System.currentTimeMillis())) {
                                             db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                                         }
-                                        AndroidNotificationManager.displayGroupMemberNotification(group, contact, true, discussion.id);
                                     }
 
                                     // resend all unsent messages for this contact

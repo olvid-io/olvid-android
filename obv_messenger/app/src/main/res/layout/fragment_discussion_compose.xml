@@ -37,6 +37,79 @@
             android:layout_height="match_parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/compose_message_edit_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_edit_white"
+                android:visibility="gone"
+                tools:visibility="gone"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintVertical_bias="1"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/compose_barrier">
+
+
+                <ImageView
+                    android:id="@+id/message_edit_image"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_pencil"
+                    app:tint="@color/greyTint"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <TextView
+                    android:id="@+id/compose_message_edit_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/label_edit_your_message"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:textAppearance="@style/RobotoMedium"
+                    android:textColor="@color/greyTint"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toStartOf="@+id/compose_message_edit_clear"
+                    app:layout_constraintStart_toEndOf="@+id/message_edit_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/compose_message_edit_body"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textColor="@color/greyTint"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/compose_message_edit_title"
+                    app:layout_constraintTop_toBottomOf="@+id/compose_message_edit_title"
+                    app:layout_goneMarginBottom="4dp"
+                    tools:text="Edited message body" />
+
+                <ImageView
+                    android:id="@+id/compose_message_edit_clear"
+                    android:layout_width="24dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="@string/content_description_cancel_message_edit"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_close" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/compose_message_reply_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -45,11 +118,10 @@
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/background_reply_white"
                 android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/message_link_preview_group"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible">
 
                 <TextView
@@ -128,10 +200,47 @@
                 android:layout_marginTop="4dp"
                 app:layout_goneMarginTop="8dp"
                 android:layout_marginEnd="8dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@id/compose_message_reply_group"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/compose_message_reply_group"
                 app:layout_constraintBottom_toTopOf="@id/compose_barrier" />
+
+            <Space
+                android:id="@+id/mention_candidates_spacer"
+                android:layout_height="4dp"
+                android:layout_width="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/mention_candidates_cardview"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="1"
+                android:visibility="gone" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/mention_candidates_cardview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintHeight_max="160dp"
+                app:cardBackgroundColor="@color/transparent"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                app:layout_constraintBottom_toTopOf="@id/compose_barrier"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintVertical_bias="1">
+
+                <FrameLayout
+                    android:id="@+id/mention_candidates_placeholder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </androidx.cardview.widget.CardView>
+
+
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/compose_barrier"
@@ -139,6 +248,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:constraint_referenced_ids="compose_message_edit_text, owned_identity_initial_view, compose_message_send_button"/>
+
+
 
             <io.olvid.messenger.customClasses.InitialView
                 android:id="@+id/owned_identity_initial_view"

@@ -49,9 +49,15 @@ public class ObvFirebaseMessagingService extends FirebaseMessagingService {
         Map<String, String> data = remoteMessage.getData();
         String identityString = data.get("identity");
         String topic = data.get("topic");
+        String keycloak = data.get("keycloak");
         if (identityString != null) {
             Logger.d("For identity mask: " + identityString);
-            AppSingleton.getEngine().processAndroidPushNotification(identityString);
+            if (keycloak != null) {
+                Logger.d("Is keycloak notification");
+                KeycloakManager.forceSyncManagedIdentity(AppSingleton.getEngine().getOwnedIdentityFromMaskingUid(identityString));
+            } else {
+                AppSingleton.getEngine().processAndroidPushNotification(identityString);
+            }
         } else if (topic != null) {
             Logger.d("For push topic: " + topic);
             KeycloakManager.processPushTopicNotification(topic);

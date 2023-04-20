@@ -142,7 +142,7 @@ public class MessageLongPressPopUp {
         popupWindow = new PopupWindow(popUpView);
         popupWindow.setFocusable(true);
         popupWindow.setElevation(12);
-        popupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        popupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
         popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
         popupWindow.setBackgroundDrawable(new ColorDrawable());
         popupWindow.setOnDismissListener(() -> discussionDelegate.setAdditionalBottomPadding(0));
@@ -284,7 +284,7 @@ public class MessageLongPressPopUp {
             editView.setVisibility(View.GONE);
         } else {
             editView.setOnClickListener(v -> {
-                Utils.launchModifyMessagePopup(activity, message);
+                discussionDelegate.editMessage(message);
                 popupWindow.dismiss();
             });
         }

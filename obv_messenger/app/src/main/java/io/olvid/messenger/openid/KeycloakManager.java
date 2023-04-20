@@ -34,6 +34,7 @@ import org.jose4j.lang.HashUtil;
 import org.json.JSONException;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -88,7 +89,7 @@ public class KeycloakManager {
     // region public methods
 
 
-    public void registerKeycloakManagedIdentity(@NonNull ObvIdentity obvIdentity, String keycloakServerUrl, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, @Nullable String serializedKeycloakState, long latestRevocationListTimestamp, boolean firstKeycloakBinding) {
+    public void registerKeycloakManagedIdentity(@NonNull ObvIdentity obvIdentity, String keycloakServerUrl, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, @Nullable String serializedKeycloakState, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp, boolean firstKeycloakBinding) {
         executor.execute(() -> {
             AuthState authState = null;
             if (serializedKeycloakState != null) {
@@ -98,7 +99,7 @@ public class KeycloakManager {
                     Logger.d("Error deserializing AuthState");
                 }
             }
-            KeycloakManagerState keycloakManagerState = new KeycloakManagerState(obvIdentity, keycloakServerUrl, clientId, clientSecret, jwks, signatureKey, authState, latestRevocationListTimestamp);
+            KeycloakManagerState keycloakManagerState = new KeycloakManagerState(obvIdentity, keycloakServerUrl, clientId, clientSecret, jwks, signatureKey, authState, latestRevocationListTimestamp, latestGroupUpdateTimestamp);
 
             BytesKey identityBytesKey = new BytesKey(keycloakManagerState.bytesOwnedIdentity);
             ownedIdentityStates.put(identityBytesKey, keycloakManagerState);
@@ -135,6 +136,16 @@ public class KeycloakManager {
         }
     }
 
+    public static void resetLatestGroupDownloadTimestamp(byte[] bytesOwnedIdentity) {
+        if (INSTANCE != null) {
+            BytesKey identityBytesKey = new BytesKey(bytesOwnedIdentity);
+            KeycloakManagerState kms = getInstance().ownedIdentityStates.get(identityBytesKey);
+            if (kms != null) {
+                kms.latestGroupUpdateTimestamp = 0;
+            }
+        }
+    }
+
     public static void forceSelfTestAndReauthentication(byte[] bytesOwnedIdentity) {
         if (INSTANCE != null) {
             BytesKey identityBytesKey = new BytesKey(bytesOwnedIdentity);
@@ -148,7 +159,7 @@ public class KeycloakManager {
     public static void processPushTopicNotification(String pushTopic) {
         if (INSTANCE != null) {
             try {
-                List<ObvIdentity> obvIdentities = AppSingleton.getEngine().getOwnedIdentitiesWithKeycloakPushTopic(pushTopic);
+                Collection<ObvIdentity> obvIdentities = AppSingleton.getEngine().getOwnedIdentitiesWithKeycloakPushTopic(pushTopic);
                 for (ObvIdentity obvIdentity : obvIdentities) {
                     forceSyncManagedIdentity(obvIdentity.getBytesIdentity());
                 }
@@ -599,6 +610,21 @@ public class KeycloakManager {
                             kms.latestRevocationListTimestamp = keycloakServerRevocationsAndStuff.currentServerTimestamp;
                         }
 
+                        ///////////////
+                        // now synchronize groups too
+                        KeycloakTasks.getGroups(App.getContext(), kms.serverUrl, kms.authState, kms.clientSecret, kms.bytesOwnedIdentity, Math.max(0, kms.latestGroupUpdateTimestamp - REVOCATION_LIST_LATEST_TIMESTAMP_OVERLAP_MILLIS),  new KeycloakCallbackWrapper<>(identityBytesKey, new KeycloakCallback<Long>() {
+                            @Override
+                            public void success(Long timestamp) {
+                                if (timestamp != null) {
+                                    kms.latestGroupUpdateTimestamp = timestamp;
+                                }
+                            }
+
+                            @Override
+                            public void failed(int rfc) {
+                                // do nothing, this might be an old keycloak server with no groups support
+                            }
+                        }));
 
                         /////////
                         // synchronization finished successfully!!!
@@ -656,8 +682,9 @@ public class KeycloakManager {
         long lastSynchronization;
         boolean autoRevokeOnNextSync;
         long latestRevocationListTimestamp;
+        long latestGroupUpdateTimestamp;
 
-        public KeycloakManagerState(@NonNull ObvIdentity obvIdentity, @NonNull String serverUrl, @NonNull String clientId, @Nullable String clientSecret, @Nullable JsonWebKeySet jwks, @Nullable JsonWebKey signatureKey, @Nullable AuthState authState, long latestRevocationListTimestamp) {
+        public KeycloakManagerState(@NonNull ObvIdentity obvIdentity, @NonNull String serverUrl, @NonNull String clientId, @Nullable String clientSecret, @Nullable JsonWebKeySet jwks, @Nullable JsonWebKey signatureKey, @Nullable AuthState authState, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
             this.bytesOwnedIdentity = obvIdentity.getBytesIdentity();
             this.identityDetails = obvIdentity.getIdentityDetails();
 
@@ -687,6 +714,7 @@ public class KeycloakManager {
             this.lastSynchronization = 0;
             this.autoRevokeOnNextSync = false;
             this.latestRevocationListTimestamp = latestRevocationListTimestamp;
+            this.latestGroupUpdateTimestamp = latestGroupUpdateTimestamp;
         }
     }
 

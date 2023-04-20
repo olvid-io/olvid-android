@@ -19,6 +19,12 @@
 
 package io.olvid.messenger.databases.tasks;
 
+import androidx.annotation.Nullable;
+
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +35,8 @@ import java.util.Objects;
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.engine.types.JsonGroupDetails;
+import io.olvid.engine.engine.types.JsonIdentityDetails;
+import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.messenger.App;
@@ -212,6 +220,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 final HashMap<BytesKey, HashSet<GroupV2.Permission>> membersToAdd = new HashMap<>();
                 final HashMap<BytesKey, Group2PendingMember> pendingToRemove = new HashMap<>();
                 final HashMap<BytesKey, ObvGroupV2.ObvGroupV2PendingMember> pendingToAdd = new HashMap<>();
+
                 for (Group2Member group2Member : db.group2MemberDao().getGroupMembers(groupV2.bytesOwnedIdentity, bytesGroupIdentifier)) {
                     membersToRemove.put(new BytesKey(group2Member.bytesContactIdentity), group2Member);
                 }
@@ -294,20 +303,70 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     }
                 }
 
+
+                // for keycloak groups, keep track of keycloak user Ids to avoid left & join messages when a user updates their key on keycloak
+                final HashSet<String> addedKeycloakUserIds = new HashSet<>();
+                final HashSet<String> removedKeycloakUserIds = new HashSet<>();
+                final HashMap<BytesKey, String> memberBytesIdentityToKeycloakUserIdMap = new HashMap<>();
+                final HashMap<BytesKey, String> pendingMemberBytesIdentityToKeycloakUserIdMap = new HashMap<>();
+                boolean keycloakGroup = groupV2.groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK;
+
+                if (keycloakGroup) {
+                    for (BytesKey key : membersToAdd.keySet()) {
+                        Contact contact = db.contactDao().get(group.bytesOwnedIdentity, key.bytes);
+                        if (contact != null) {
+                            String keycloakUserId = keycloakUserIdFromSerializedDetails(contact.identityDetails);
+                            if (keycloakUserId != null) {
+                                addedKeycloakUserIds.add(keycloakUserId);
+                                memberBytesIdentityToKeycloakUserIdMap.put(key, keycloakUserId);
+                            }
+                        }
+                    }
+                    for (Map.Entry<BytesKey, ObvGroupV2.ObvGroupV2PendingMember> pendingMemberEntry : pendingToAdd.entrySet()) {
+                        String keycloakUserId = keycloakUserIdFromSerializedDetails(pendingMemberEntry.getValue().serializedDetails);
+                        if (keycloakUserId != null) {
+                            addedKeycloakUserIds.add(keycloakUserId);
+                            pendingMemberBytesIdentityToKeycloakUserIdMap.put(pendingMemberEntry.getKey(), keycloakUserId);
+                        }
+                    }
+
+                    for (BytesKey key : membersToRemove.keySet()) {
+                        Contact contact = db.contactDao().get(group.bytesOwnedIdentity, key.bytes);
+                        if (contact != null) {
+                            String keycloakUserId = keycloakUserIdFromSerializedDetails(contact.identityDetails);
+                            if (keycloakUserId != null) {
+                                removedKeycloakUserIds.add(keycloakUserId);
+                                memberBytesIdentityToKeycloakUserIdMap.put(key, keycloakUserId);
+                            }
+                        }
+                    }
+                    for (Map.Entry<BytesKey, Group2PendingMember> pendingMemberEntry : pendingToRemove.entrySet()) {
+                        String keycloakUserId = keycloakUserIdFromSerializedDetails(pendingMemberEntry.getValue().identityDetails);
+                        if (keycloakUserId != null) {
+                            removedKeycloakUserIds.add(keycloakUserId);
+                            pendingMemberBytesIdentityToKeycloakUserIdMap.put(pendingMemberEntry.getKey(), keycloakUserId);
+                        }
+                    }
+                }
+
+
                 // add/remove members
                 for (Map.Entry<BytesKey, Group2Member> mapEntry : membersToRemove.entrySet()) {
                     BytesKey key = mapEntry.getKey();
                     Group2Member group2Member = mapEntry.getValue();
                     db.group2MemberDao().delete(group2Member);
+                    // only take appropriate actions if member did not simply become pending
                     if (!pendingToAdd.containsKey(key)) {
                         if (group2Member.permissionChangeSettings) {
                             listOfUsersWithChangeSettingsPermissionChanged = true;
                         }
 
-                        // only insert a message if member did not simply become pending
-                        messageInserted = true;
-                        Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2Member.bytesContactIdentity);
-                        db.messageDao().insert(groupLeftMessage);
+                        // for keycloak groups, only insert a left group message if the user's keycloakUserId actually left the group
+                        if (!keycloakGroup || !addedKeycloakUserIds.contains(memberBytesIdentityToKeycloakUserIdMap.get(key))) {
+                            messageInserted = true;
+                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2Member.bytesContactIdentity);
+                            db.messageDao().insert(groupLeftMessage);
+                        }
 
                         // get all MessageRecipientInfo for this guy, delete them, and update message status
                         List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoList = db.messageRecipientInfoDao().getUnsentForContactInDiscussion(discussion.id, group2Member.bytesContactIdentity);
@@ -335,7 +394,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                             if (group2Member.permissionChangeSettings) {
                                 listOfUsersWithChangeSettingsPermissionChanged = true;
                             }
-                            if (!groupWasJoinedOrRejoined) {
+                            // for keycloak groups, only insert a joined group message if the user's keycloakUserId actually joined the group
+                            if (!groupWasJoinedOrRejoined && (!keycloakGroup || !removedKeycloakUserIds.contains(memberBytesIdentityToKeycloakUserIdMap.get(key)))) {
                                 messageInserted = true;
                                 Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, key.bytes);
                                 db.messageDao().insert(groupJoinedMessage);
@@ -374,15 +434,18 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     BytesKey key = mapEntry.getKey();
                     Group2PendingMember group2PendingMember = mapEntry.getValue();
                     db.group2PendingMemberDao().delete(group2PendingMember);
+                    // only take appropriate actions if pending member did not simply become a member
                     if (!membersToAdd.containsKey(key)) {
                         if (group2PendingMember.permissionChangeSettings) {
                             listOfUsersWithChangeSettingsPermissionChanged = true;
                         }
 
-                        // only insert a message if pending member did not simply become a member
-                        messageInserted = true;
-                        Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2PendingMember.bytesContactIdentity);
-                        db.messageDao().insert(groupLeftMessage);
+                        // for keycloak groups, only insert a left group message if the user's keycloakUserId actually left the group
+                        if (!keycloakGroup || !addedKeycloakUserIds.contains(pendingMemberBytesIdentityToKeycloakUserIdMap.get(key))) {
+                            messageInserted = true;
+                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2PendingMember.bytesContactIdentity);
+                            db.messageDao().insert(groupLeftMessage);
+                        }
 
                         // get all MessageRecipientInfo for this guy, delete them, and update message status
                         List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoList = db.messageRecipientInfoDao().getUnsentForContactInDiscussion(discussion.id, group2PendingMember.bytesContactIdentity);
@@ -409,7 +472,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         if (group2PendingMember.permissionChangeSettings) {
                             listOfUsersWithChangeSettingsPermissionChanged = true;
                         }
-                        if (!groupWasJoinedOrRejoined) {
+                        // for keycloak groups, only insert a joined group message if the user's keycloakUserId actually joined the group
+                        if (!groupWasJoinedOrRejoined && (!keycloakGroup || !removedKeycloakUserIds.contains(pendingMemberBytesIdentityToKeycloakUserIdMap.get(key)))) {
                             messageInserted = true;
                             Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, obvGroupV2PendingMember.bytesIdentity);
                             db.messageDao().insert(groupJoinedMessage);
@@ -486,5 +550,26 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Nullable
+    private String keycloakUserIdFromSerializedDetails(String serializedDetails) {
+        try {
+            JsonIdentityDetails identityDetails = AppSingleton.getJsonObjectMapper().readValue(serializedDetails, JsonIdentityDetails.class);
+            if (identityDetails.getSignedUserDetails() != null) {
+                JwtConsumer noVerificationConsumer = new JwtConsumerBuilder()
+                        .setSkipSignatureVerification()
+                        .setSkipAllValidators()
+                        .build();
+                JwtClaims claims = noVerificationConsumer.processToClaims(identityDetails.getSignedUserDetails());
+                if (claims != null) {
+                    JsonKeycloakUserDetails keycloakUserDetails = AppSingleton.getJsonObjectMapper().readValue(claims.getRawJson(), JsonKeycloakUserDetails.class);
+                    return keycloakUserDetails.getId();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

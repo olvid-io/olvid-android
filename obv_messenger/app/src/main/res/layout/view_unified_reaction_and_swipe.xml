@@ -55,7 +55,8 @@
         android:baselineAligned="false"
         android:clickable="true"
         android:background="@color/almostWhite"
-        android:elevation="10dp">
+        android:elevation="10dp"
+        android:focusable="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/swipe_menu_reply"
@@ -241,7 +242,8 @@
         android:baselineAligned="false"
         android:clickable="true"
         android:background="@color/almostWhite"
-        android:elevation="10dp">
+        android:elevation="10dp"
+        android:focusable="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/swipe_menu_select"

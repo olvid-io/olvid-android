@@ -63,7 +63,7 @@ public class DiscussionListener {
             Logger.d("Conversation observer already launched, ignoring");
             return ;
         }
-        this.liveData = AppDatabase.getInstance().discussionDao().getAllDiscussionsAndLastMessages(this.manager.getBytesCurrentOwnedIdentity());
+        this.liveData = AppDatabase.getInstance().discussionDao().getAllDiscussionsAndLastMessagesForWebClient(this.manager.getBytesCurrentOwnedIdentity());
         if (this.liveData != null) {
             this.observer = new DiscussionObserver(this.manager, this.liveData);
             this.liveData.observeForever(this.observer);
@@ -270,7 +270,8 @@ public class DiscussionListener {
                     discussionBuilder.setGroupOwnerAndUid(ByteString.copyFrom(discussionAndLastMessage.discussion.bytesDiscussionIdentifier));
                     break;
             }
-            // TODO this is a hot fix for locked discussion, need to update protobuf to feat app modifications
+
+            // This is a hot fix for locked discussion, need to update protobuf to reflect the new way discussions work
             if (discussionAndLastMessage.discussion.isLocked()) {
                 discussionBuilder.clearGroupOwnerAndUid();
                 discussionBuilder.clearContactIdentity();

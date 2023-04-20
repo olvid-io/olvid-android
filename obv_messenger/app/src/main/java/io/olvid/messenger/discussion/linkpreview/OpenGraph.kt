@@ -47,7 +47,8 @@ data class OpenGraph(
                     val dictionary = encoded.decodeDictionary()
                     title = dictionary[DictionaryKey("title")]?.decodeString()
                     description = dictionary[DictionaryKey("desc")]?.decodeString()
-                    url = dictionary[DictionaryKey("url")]?.decodeString()
+                    // we remove url for now. We might want to add siteName at some point...
+                    //                    url = dictionary[DictionaryKey("url")]?.decodeString()
                     dictionary[DictionaryKey("image")]?.decodeBytes()?.let {
                         bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
                     }
@@ -81,9 +82,10 @@ data class OpenGraph(
         description?.let {
             map[DictionaryKey("desc")] = Encoded.of(it)
         }
-        url?.let {
-            map[DictionaryKey("url")] = Encoded.of(it)
-        }
+        // we remove url for now. We might want to add siteName at some point...
+        //        url?.let {
+        //            map[DictionaryKey("url")] = Encoded.of(it)
+        //        }
         bitmap?.let {
             map[DictionaryKey("image")] = Encoded.of(
                 ByteArrayOutputStream().apply {

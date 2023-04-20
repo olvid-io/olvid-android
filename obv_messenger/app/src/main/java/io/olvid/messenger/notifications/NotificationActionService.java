@@ -48,7 +48,6 @@ public class NotificationActionService extends IntentService {
     public static final String ACTION_DISCUSSION_REPLY = "discussion_reply";
     public static final String ACTION_DISCUSSION_CLEAR = "discussion_clear";
     public static final String ACTION_DISCUSSION_MARK_AS_READ = "mark_as_read";
-    public static final String ACTION_GROUP_CLEAR = "group_clear";
     public static final String ACTION_MISSED_CALL_MESSAGE = "discussion_missed_call_message";
     public static final String ACTION_MESSAGE_REACTION_CLEAR = "message_reaction_clear";
 
@@ -145,13 +144,6 @@ public class NotificationActionService extends IntentService {
                 final long messageId = intent.getLongExtra(EXTRA_MESSAGE_ID, -1);
                 if (messageId != -1) {
                     AndroidNotificationManager.clearMessageReactionsNotification(messageId);
-                }
-                break;
-            }
-            case ACTION_GROUP_CLEAR: {
-                final long discussionId = intent.getLongExtra(EXTRA_DISCUSSION_ID, -1);
-                if (discussionId != -1) {
-                    AndroidNotificationManager.clearGroupNotification(discussionId);
                 }
                 break;
             }

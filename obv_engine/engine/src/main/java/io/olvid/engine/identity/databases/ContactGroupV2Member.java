@@ -194,6 +194,34 @@ public class ContactGroupV2Member implements ObvDatabase {
       }
    }
 
+   public static List<GroupV2.Identifier> getKeycloakGroupV2IdentifiersWhereContactIsMember(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+      if ((ownedIdentity == null) || (contactIdentity == null)) {
+         return null;
+      }
+      try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + GROUP_UID + " as uid, " + SERVER_URL + " as url FROM " + TABLE_NAME +
+              " WHERE " + OWNED_IDENTITY + " = ? " +
+              " AND " + CONTACT_IDENTITY + " = ?" +
+              " AND " + CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK + ";")) {
+         statement.setBytes(1, ownedIdentity.getBytes());
+         statement.setBytes(2, contactIdentity.getBytes());
+         try (ResultSet res = statement.executeQuery()) {
+            List<GroupV2.Identifier> list = new ArrayList<>();
+            while (res.next()) {
+               try {
+                  list.add(new GroupV2.Identifier(
+                          new UID(res.getBytes("uid")),
+                          res.getString("url"),
+                          GroupV2.Identifier.CATEGORY_KEYCLOAK
+                  ));
+               } catch (Exception e) {
+                  e.printStackTrace();
+               }
+            }
+            return list;
+         }
+      }
+   }
+
 
    public void setPermissions(List<String> permissionStrings) throws Exception {
       byte[] serializedPermissions = GroupV2.Permission.serializePermissionStrings(permissionStrings);

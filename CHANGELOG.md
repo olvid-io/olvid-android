@@ -1,4 +1,36 @@
+# Build 201 (0.14.0)
+2023-04-19
+
+- dependency updates
+- various fixes
+
+# ~~Build 200 (0.14.0)~~
+2023-04-05
+
+- Support for emoji 15
+- Update sqlite-jdbc and webrtc to latest stable versions
+
+# ~~Build 199 (0.14.0)~~
+2023-04-03
+
+- Support for keycloak groups
+- Invitations in discussions
+
+# ~~Build 197 (0.14)~~
+2023-03-17
+
+- Fixes and improvements for user mentions
+- Integration of ML Kit for QR code scanning
+- [beta] Added precision circle on contact live-shared position
+
+# ~~Build 196 (0.14)~~
+2023-02-21
+
+- Support for user mentions in messages
+- [beta] integration with Google Maps and OpenStreetMap when sharing/receiving location
+
 # Build 195 (0.13.3)
+2023-02-06
 
 - Fix bug with group v2 custom photos being deleted in periodic cleanup task 
 

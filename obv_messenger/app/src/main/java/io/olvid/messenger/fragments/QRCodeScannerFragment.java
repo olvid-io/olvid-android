@@ -40,7 +40,6 @@ import androidx.camera.core.CameraControl;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.FocusMeteringAction;
 import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageProxy;
 import androidx.camera.core.MeteringPoint;
 import androidx.camera.core.MeteringPointFactory;
 import androidx.camera.core.Preview;
@@ -51,31 +50,19 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.MultiFormatReader;
-import com.google.zxing.NotFoundException;
-import com.google.zxing.PlanarYUVLuminanceSource;
-import com.google.zxing.Result;
-import com.google.zxing.common.HybridBinarizer;
 
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.messenger.App;
+import io.olvid.messenger.QRCodeImageAnalyzer;
 import io.olvid.messenger.R;
 
 public class QRCodeScannerFragment extends Fragment {
     private Context context;
     private PreviewView previewView;
     private NoExceptionSingleThreadExecutor executor;
-    private MultiFormatReader reader;
     private ResultHandler resultHandler;
     private CameraControl cameraControl;
     private boolean useFrontCamera = false;
@@ -103,10 +90,6 @@ public class QRCodeScannerFragment extends Fragment {
         super.onAttach(context);
         this.context = context;
         this.executor = new NoExceptionSingleThreadExecutor("QRCodeScannerFragment-ImageAnalysis");
-        this.reader = new MultiFormatReader();
-        Map<DecodeHintType, Object> hints = new EnumMap<>(DecodeHintType.class);
-        hints.put(DecodeHintType.POSSIBLE_FORMATS, Collections.singletonList(BarcodeFormat.QR_CODE));
-        this.reader.setHints(hints);
     }
 
     @Nullable
@@ -168,60 +151,19 @@ public class QRCodeScannerFragment extends Fragment {
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
 
-                imageAnalysis.setAnalyzer(executor, new ImageAnalysis.Analyzer() {
-                    boolean stop = false;
-
-                    @Override
-                    public void analyze(@NonNull ImageProxy image) {
-                        if (stop) {
-                            image.close();
-                            return;
-                        }
-                        // image is YUV --> first plane is luminance
-                        ImageProxy.PlaneProxy plane = image.getPlanes()[0];
-                        ByteBuffer data = plane.getBuffer();
-                        data.rewind();
-                        byte[] bytes = new byte[data.remaining()];
-                        data.get(bytes);
-                        int width = plane.getRowStride()/plane.getPixelStride();
-                        int height = bytes.length * plane.getPixelStride()/plane.getRowStride();
-                        PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(
-                                bytes,
-                                width,
-                                height,
-                                0,
-                                0,
-                                width,
-                                height,
-                                false);
-                        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-                        try {
-                            Result result = reader.decode(bitmap);
-                            if (resultHandler != null) {
-                                if (resultHandler.handleResult(result)) {
-                                    stop = true;
-                                } else {
-                                    Thread.sleep(1000);
-                                }
-                            }
-                        } catch (NotFoundException | InterruptedException e) {
-                            // nothing to do
-                        }
-                        image.close();
-                    }
-                });
+                imageAnalysis.setAnalyzer(executor, new QRCodeImageAnalyzer(resultHandler));
 
                 cameraProvider.unbindAll();
                 Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
                 cameraControl = camera.getCameraControl();
             } catch (ExecutionException | InterruptedException | IllegalArgumentException e) {
-                Logger.e("Unexpected exception in cemaraX preview.");
+                Logger.e("Unexpected exception in cameraX preview.");
                 e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(context));
     }
 
     public interface ResultHandler {
-        boolean handleResult(Result result);
+        boolean handleResult(String text);
     }
 }

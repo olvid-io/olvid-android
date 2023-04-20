@@ -567,6 +567,24 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         wellKnownCoordinator.queueNewWellKnownDownloadOperation(server);
     }
 
+    @Override
+    public String getOsmServerUrl(String server) {
+        try {
+            return wellKnownCoordinator.getOsmUrl(server);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    @Override
+    public String getAddressServerUrl(String server) {
+        try {
+            return wellKnownCoordinator.getAddressUrl(server);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
     // endregion
 
     // region implement PushNotificationDelegate
@@ -619,6 +637,11 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @Override
     public void forceRegisterPushNotification(Identity ownedIdentity) {
         serverPushNotificationsCoordinator.registerServerPushNotification(ownedIdentity);
+    }
+
+    @Override
+    public Identity getOwnedIdentityFromMaskingUid(String maskingUidString) {
+        return serverPushNotificationsCoordinator.getOwnedIdentityFromMaskingUid(maskingUidString);
     }
 
     // endregion

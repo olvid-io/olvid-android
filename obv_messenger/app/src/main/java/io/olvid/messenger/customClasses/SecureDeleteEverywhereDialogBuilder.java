@@ -34,7 +34,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import io.olvid.messenger.R;
-import io.olvid.messenger.settings.SettingsActivity;
 
 public class SecureDeleteEverywhereDialogBuilder extends SecureAlertDialogBuilder {
     private CharSequence message;
@@ -106,17 +105,12 @@ public class SecureDeleteEverywhereDialogBuilder extends SecureAlertDialogBuilde
         TextView messageView = dialogView.findViewById(R.id.dialog_message);
         messageView.setText(this.message);
 
-        final boolean lastDeleteEverywhere = SettingsActivity.getLastDeleteEverywhere();
-
         @SuppressLint("UseSwitchCompatOrMaterialCode")
         Switch everywhereSwitch = dialogView.findViewById(R.id.everywhere_switch);
-        everywhereSwitch.setChecked(lastDeleteEverywhere);
+        everywhereSwitch.setChecked(false);
         setNegativeButton(R.string.button_label_cancel, null);
         setPositiveButton(R.string.button_label_delete, (dialog, which) -> {
             if (deleteCallback != null) {
-                if (lastDeleteEverywhere ^ deleteEverywhere) {
-                    SettingsActivity.setLastDeleteEverywhere(deleteEverywhere);
-                }
                 deleteCallback.performDelete(deleteEverywhere);
             }
         });
@@ -139,7 +133,7 @@ public class SecureDeleteEverywhereDialogBuilder extends SecureAlertDialogBuilde
         AlertDialog alertDialog = super.create();
         alertDialog.setOnShowListener(dialog -> {
             deleteButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            setDeleteEverywhere(lastDeleteEverywhere);
+            setDeleteEverywhere(false);
         });
 
         everywhereSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> setDeleteEverywhere(isChecked));

@@ -21,15 +21,25 @@
             android:summary="@string/pref_notify_certificate_change_summary"
             android:title="@string/pref_notify_certificate_change_title"
             android:icon="@drawable/ic_pref_certificate"
-            android:order="25" />
+            android:order="24" />
         <ListPreference
             android:key="pref_key_block_untrusted_certificate"
             android:defaultValue="issuer"
+            app:singleLineTitle="false"
             app:useSimpleSummaryProvider="true"
             android:title="@string/pref_block_untrusted_certificate_title"
             android:entries="@array/block_untrusted_certificate"
             android:entryValues="@array/block_untrusted_certificate_values"
             android:icon="@drawable/ic_pref_block_untrusted"
+            android:dependency="pref_key_notify_certificate_change"
+            android:shouldDisableView="true"
+            android:order="25" />
+        <SwitchPreference
+            android:key="pref_key_no_notify_certificate_change_for_previews"
+            android:defaultValue="false"
+            android:summary="@string/pref_no_notify_certificate_change_for_previews_summary"
+            android:title="@string/pref_no_notify_certificate_change_for_previews_title"
+            android:icon="@drawable/ic_pref_preview"
             android:dependency="pref_key_notify_certificate_change"
             android:shouldDisableView="true"
             android:order="26" />
@@ -72,6 +82,13 @@
             app:useSimpleSummaryProvider="true"
             android:icon="@drawable/ic_pref_qr"
             android:order="31" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_use_legacy_zxing_scanner"
+            android:title="@string/pref_use_legacy_zxing_scanner_title"
+            android:summary="@string/pref_use_legacy_zxing_scanner_summary"
+            android:icon="@drawable/ic_pref_qr_code"
+            android:order="32" />
         <DropDownPreference
             android:defaultValue="null"
             app:singleLineTitle="false"

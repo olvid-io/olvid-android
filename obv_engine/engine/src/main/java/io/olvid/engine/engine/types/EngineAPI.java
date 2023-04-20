@@ -21,6 +21,7 @@ package io.olvid.engine.engine.types;
 
 import org.jose4j.jwk.JsonWebKey;
 
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,7 +76,7 @@ public interface EngineAPI {
     ObvKeycloakState getOwnedIdentityKeycloakState(byte[] bytesOwnedIdentity) throws Exception;
     void saveKeycloakAuthState(byte[] bytesOwnedIdentity, String serializedAuthState) throws Exception;
     void saveKeycloakJwks(byte[] bytesOwnedIdentity, String serializedJwks) throws Exception;
-    List<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(String pushTopic) throws Exception;
+    Collection<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(String pushTopic) throws Exception;
     String getOwnedIdentityKeycloakUserId(byte[] bytesOwnedIdentity) throws Exception;
     void setOwnedIdentityKeycloakUserId(byte[] bytesOwnedIdentity, String id) throws Exception;
     JsonWebKey getOwnedIdentityKeycloakSignatureKey(byte[] bytesOwnedIdentity) throws Exception;
@@ -86,10 +87,12 @@ public interface EngineAPI {
     void updateKeycloakRevocationList(byte[] bytesOwnedIdentity, long latestRevocationListTimestamp, List<String> signedRevocations);
     void setOwnedIdentityKeycloakSelfRevocationTestNonce(byte[] bytesOwnedIdentity, String serverUrl, String nonce);
     String getOwnedIdentityKeycloakSelfRevocationTestNonce(byte[] bytesOwnedIdentity, String serverUrl);
+    boolean updateKeycloakGroups(byte[] bytesOwnedIdentity, List<String> signedGroupBlobs, List<String> signedGroupDeletions, List<String> signedGroupKicks, long keycloakCurrentTimestamp);
 
     void registerToPushNotification(byte[] bytesOwnedIdentity, String firebaseToken, boolean kickOtherDevices, boolean useMultidevice) throws Exception;
     void unregisterToPushNotification(byte[] bytesOwnedIdentity) throws Exception;
     void processAndroidPushNotification(String maskingUidString);
+    byte[] getOwnedIdentityFromMaskingUid(String maskingUidString);
 
     void updateLatestIdentityDetails(byte[] bytesOwnedIdentity, JsonIdentityDetails jsonIdentityDetails) throws Exception;
     void discardLatestIdentityDetails(byte[] bytesOwnedIdentity);
@@ -135,7 +138,7 @@ public interface EngineAPI {
     void leaveGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
     void disbandGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
     void reDownloadGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
-    int getGroupV2Version(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
+    Integer getGroupV2Version(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
     boolean isGroupV2UpdateInProgress(byte[] bytesOwnedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
 
 
@@ -219,7 +222,8 @@ public interface EngineAPI {
     void startFreeTrial(byte[] bytesOwnedIdentity);
     void verifyReceipt(byte[] bytesOwnedIdentity, String storeToken);
     void queryServerWellKnown(String server);
-
+    String getOsmServerUrl(byte[] bytesOwnedIdentity);
+    String getAddressServerUrl(byte[] bytesOwnedIdentity);
 
 
     // Run once after you upgrade from a version not handling Contact and ContactGroup UserData (profile photos) to a version able to do so

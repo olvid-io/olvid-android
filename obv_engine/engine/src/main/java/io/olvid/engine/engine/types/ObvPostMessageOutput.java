@@ -22,18 +22,18 @@ package io.olvid.engine.engine.types;
 import java.util.HashMap;
 
 public class ObvPostMessageOutput {
-    private final boolean messageSent;
+    private final boolean messagePostedForAtLeastOneContact;
     // the following hashmap contains the messageUid from the engine for contacts to which the message was sent,
     // and null for contacts for which sending failed
     private final HashMap<ObvBytesKey, byte[]> messageIdentifierByContactIdentity;
 
-    public ObvPostMessageOutput(boolean messageSent, HashMap<ObvBytesKey, byte[]> messageIdentifierByContactIdentity) {
-        this.messageSent = messageSent;
+    public ObvPostMessageOutput(boolean messagePostedForAtLeastOneContact, HashMap<ObvBytesKey, byte[]> messageIdentifierByContactIdentity) {
+        this.messagePostedForAtLeastOneContact = messagePostedForAtLeastOneContact;
         this.messageIdentifierByContactIdentity = messageIdentifierByContactIdentity;
     }
 
-    public boolean isMessageSent() {
-        return messageSent;
+    public boolean isMessagePostedForAtLeastOneContact() {
+        return messagePostedForAtLeastOneContact;
     }
 
     public HashMap<ObvBytesKey, byte[]> getMessageIdentifierByContactIdentity() {

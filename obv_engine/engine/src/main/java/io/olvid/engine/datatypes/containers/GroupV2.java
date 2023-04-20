@@ -555,7 +555,7 @@ public class GroupV2 {
 
 
     public static class ServerPhotoInfo {
-        public final Identity serverPhotoIdentity;
+        public final Identity serverPhotoIdentity; // null for keycloak group photo info
         public final UID serverPhotoLabel;
         public final AuthEncKey serverPhotoKey;
 
@@ -566,23 +566,34 @@ public class GroupV2 {
         }
 
         public Encoded encode() {
-            return Encoded.of(new Encoded[]{
-               Encoded.of(serverPhotoIdentity),
-               Encoded.of(serverPhotoLabel),
-               Encoded.of(serverPhotoKey),
-            });
+            if (serverPhotoIdentity == null) {
+                return Encoded.of(new Encoded[]{
+                        Encoded.of(serverPhotoLabel),
+                        Encoded.of(serverPhotoKey),
+                });
+            } else {
+                return Encoded.of(new Encoded[]{
+                        Encoded.of(serverPhotoIdentity),
+                        Encoded.of(serverPhotoLabel),
+                        Encoded.of(serverPhotoKey),
+                });
+            }
         }
 
         public static ServerPhotoInfo of(Encoded encoded) throws DecodingException {
             Encoded[] encodeds = encoded.decodeList();
-            if (encodeds.length != 3) {
-                throw new DecodingException();
+            if (encodeds.length == 2) {
+                return new ServerPhotoInfo(
+                        null,
+                        encodeds[0].decodeUid(),
+                        (AuthEncKey) encodeds[1].decodeSymmetricKey());
+            } else if (encodeds.length == 3) {
+                return new ServerPhotoInfo(
+                        encodeds[0].decodeIdentity(),
+                        encodeds[1].decodeUid(),
+                        (AuthEncKey) encodeds[2].decodeSymmetricKey());
             }
-            return new ServerPhotoInfo(
-                    encodeds[0].decodeIdentity(),
-                    encodeds[1].decodeUid(),
-                    (AuthEncKey) encodeds[2].decodeSymmetricKey()
-            );
+            throw new DecodingException();
         }
 
         @Override
@@ -591,7 +602,7 @@ public class GroupV2 {
                 return false;
             }
             ServerPhotoInfo other = (ServerPhotoInfo) obj;
-            return serverPhotoIdentity.equals(other.serverPhotoIdentity) && serverPhotoLabel.equals(other.serverPhotoLabel) && serverPhotoKey.equals(other.serverPhotoKey);
+            return Objects.equals(serverPhotoIdentity, other.serverPhotoIdentity) && Objects.equals(serverPhotoLabel, other.serverPhotoLabel) && Objects.equals(serverPhotoKey, other.serverPhotoKey);
         }
     }
 

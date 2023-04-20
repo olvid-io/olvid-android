@@ -183,4 +183,13 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_GROUP_V2_PHOTO_UPDATED = "identity_manager_notification_group_v2_photo_updated";
     public static final String NOTIFICATION_GROUP_V2_PHOTO_UPDATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
     public static final String NOTIFICATION_GROUP_V2_PHOTO_UPDATED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
+
+    public static final String NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS = "identity_manager_notification_keycloak_group_v_2_shared_settings";
+    public static final String NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
+    public static final String NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_SERIALIZED_SHARED_SETTINGS_KEY = "serialized_shared_settings"; // String, serialized JsonSharedSettings (may be null when removing shared settings)
+    public static final String NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS_MODIFICATION_TIMESTAMP_KEY = "timestamp"; // long
+
+    public static final String NOTIFICATION_NEW_KEYCLOAK_GROUP_V2_PUSH_TOPIC = "identity_manager_notification_new_keycloak_group_v2_push_topic";
+    public static final String NOTIFICATION_NEW_KEYCLOAK_GROUP_V2_PUSH_TOPIC_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
 }

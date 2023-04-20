@@ -207,7 +207,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         ownedIdentityListRecyclerView.setAdapter(adapter);
         ownedIdentityListRecyclerView.setEmptyView(popupView.findViewById(R.id.empty_view));
 
-        popupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        popupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
         popupWindow.showAsDropDown(separator);
     }
 

@@ -6,21 +6,16 @@ repositories {
 
 dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4'
-    implementation files('libs/sqlite-jdbc-3.39.4.0.jar')
+    implementation files('libs/sqlite-jdbc-3.41.2.1.jar')
 
-    implementation 'org.slf4j:slf4j-api:2.0.6'
-    implementation 'org.slf4j:slf4j-simple:2.0.6'
+    implementation 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'org.slf4j:slf4j-simple:2.0.7'
 
-    implementation 'org.bitbucket.b_c:jose4j:0.9.2'
+    implementation 'org.bitbucket.b_c:jose4j:0.9.3'
 
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'net.iharder:base64:2.3.9'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.xerial:sqlite-jdbc:3.39.4.0' // only here to check if a new version is available
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    testImplementation 'org.xerial:sqlite-jdbc:3.41.2.1' // only here to check if a new version is available
 }

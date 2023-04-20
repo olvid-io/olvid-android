@@ -38,6 +38,8 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.ArrowKeyMovementMethod;
 import android.util.DisplayMetrics;
@@ -72,9 +74,12 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.core.util.Pair;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
@@ -98,6 +103,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
@@ -109,12 +115,14 @@ import io.olvid.messenger.customClasses.DraftAttachmentAdapter;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.JpegUtils;
+import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog;
 import io.olvid.messenger.customClasses.MessageAttachmentAdapter;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
+import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -123,12 +131,18 @@ import io.olvid.messenger.databases.tasks.ClearDraftReplyTask;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.databases.tasks.PostMessageInDiscussionTask;
 import io.olvid.messenger.databases.tasks.SaveDraftTask;
+import io.olvid.messenger.databases.tasks.UpdateMessageBodyTask;
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel;
 import io.olvid.messenger.discussion.location.SendLocationBasicDialogFragment;
+import io.olvid.messenger.discussion.mention.MentionUrlSpan;
+import io.olvid.messenger.discussion.mention.MentionViewModel;
+import io.olvid.messenger.fragments.FilteredContactListFragment;
+import io.olvid.messenger.discussion.location.SendLocationMapDialogFragment;
 import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class ComposeMessageFragment extends Fragment implements View.OnClickListener, MessageAttachmentAdapter.AttachmentLongClickListener, PopupMenu.OnMenuItemClickListener {
+
     public static final int ICON_EPHEMERAL_SETTINGS = 1;
     public static final int ICON_ATTACH_FILE = 2;
     public static final int ICON_ATTACH_PICTURE = 3;
@@ -139,11 +153,11 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
     public static final Integer[] DEFAULT_ICON_ORDER = {ICON_EMOJI, ICON_EPHEMERAL_SETTINGS, ICON_ATTACH_FILE, ICON_ATTACH_PICTURE, ICON_TAKE_PICTURE, ICON_TAKE_VIDEO, ICON_SEND_LOCATION};
 
-
     private FragmentActivity activity;
     private DiscussionViewModel discussionViewModel;
     private ComposeMessageViewModel composeMessageViewModel;
     private LinkPreviewViewModel linkPreviewViewModel;
+    private MentionViewModel mentionViewModel;
     private AudioAttachmentServiceBinding audioAttachmentServiceBinding;
     private InitialView ownedIdentityInitialView;
 
@@ -162,6 +176,9 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     private LinearLayout attachIconsGroup;
     private ImageView directAttachVoiceMessageImageView;
 
+    private ViewGroup composeMessageEditGroup;
+    private TextView composeMessageEditBody;
+
     private ViewGroup composeMessageReplyGroup;
     private long composeMessageReplyMessageId;
     private TextView composeMessageReplySenderName;
@@ -174,6 +191,9 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     private ImageView composeMessageLinkPreviewImage;
 
     private DraftAttachmentAdapter newMessageAttachmentAdapter;
+
+    private View mentionCandidatesSpacer;
+    private FilteredContactListFragment mentionCandidatesFragment;
 
     private final ViewModelProvider.Factory FACTORY = new ViewModelProvider.Factory() {
         @NonNull
@@ -327,7 +347,6 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 });
     }
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -335,6 +354,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         discussionViewModel = new ViewModelProvider(activity, FACTORY).get(DiscussionViewModel.class);
         composeMessageViewModel = new ViewModelProvider(activity, FACTORY).get(ComposeMessageViewModel.class);
         linkPreviewViewModel = new ViewModelProvider(activity, FACTORY).get(LinkPreviewViewModel.class);
+        mentionViewModel = new ViewModelProvider(activity, FACTORY).get(MentionViewModel.class);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -356,6 +376,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             public void afterTextChanged(Editable editable) {
                 composeMessageViewModel.setNewMessageText(editable);
                 hasText = editable != null && editable.length() > 0;
+                mentionViewModel.updateMentions(editable, newMessageEditText.getSelectionEnd());
                 if (hasText) {
                     if (!setShowAttachIcons(false, false)) {
                         updateComposeAreaLayout();
@@ -363,13 +384,21 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 } else {
                     updateComposeAreaLayout();
                 }
-                if (SettingsActivity.isLinkPreviewOutbound()) {
+                if (SettingsActivity.isLinkPreviewOutbound() && !isEditMode()) {
                     linkPreviewViewModel.findLinkPreview(editable == null ? null : editable.toString(), BitmapUtils.MAX_BITMAP_SIZE, BitmapUtils.MAX_BITMAP_SIZE);
                 }
             }
         });
+        newMessageEditText.setOnSelectionChangeListener((Editable editable, int start, int end) -> {
+            if (start == end) {
+                mentionViewModel.updateMentions(editable, start);
+            }
+        });
 
         linkPreviewViewModel.getOpenGraph().observe(activity, openGraph -> {
+            if (composeMessageLinkPreviewGroup == null) {
+                return;
+            }
             if (openGraph != null && !openGraph.isEmpty()) {
                 composeMessageLinkPreviewGroup.setVisibility(View.VISIBLE);
                 final Uri uri = openGraph.getSafeUri();
@@ -396,13 +425,78 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             }
         });
 
+        mentionViewModel.getMentionsStatus().observe(activity, mentionStatus -> {
+            if (mentionCandidatesFragment == null || newMessageEditText == null) {
+                return;
+            }
+
+            if (mentionStatus instanceof MentionViewModel.MentionStatus.None) {
+                // we no longer insert cancelled mentions --> this is already taken care of by the new mention detection technique
+                hideMentionPicker();
+            } else if (mentionStatus instanceof MentionViewModel.MentionStatus.Filter) {
+                showMentionPicker();
+                mentionCandidatesFragment.setFilter(((MentionViewModel.MentionStatus.Filter) mentionStatus).getText());
+            } else if (mentionStatus instanceof MentionViewModel.MentionStatus.End) {
+                hideMentionPicker();
+                Message.JsonUserMention mention = ((MentionViewModel.MentionStatus.End) mentionStatus).getMention();
+                Contact contact = ((MentionViewModel.MentionStatus.End) mentionStatus).getContact();
+                int color = InitialView.getTextColor(activity, mention.getUserIdentifier(), AppSingleton.getContactCustomHue(mention.getUserIdentifier()));
+                if (newMessageEditText.getText() != null) {
+                    String mentionText;
+                    try {
+                        JsonIdentityDetails identityDetails = AppSingleton.getJsonObjectMapper().readValue(contact.identityDetails, JsonIdentityDetails.class);
+                        // use a standardized FIRST_LAST displayName for mentions, independent of the user's setting
+                        mentionText = "@" + identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST, false);
+                    } catch (Exception e) {
+                        // as a fallback, use the precomputed displayName
+                        mentionText = "@" + contact.displayName;
+                    }
+                    mentionText += "\ufeff";
+                    Editable editable = newMessageEditText.getText();
+                    if (editable.length() > mention.getRangeEnd() && editable.charAt(mention.getRangeEnd()) == ' ') {
+                        // if there is already a space after our mention, remove it to avoid pointless double spaces
+                        editable.replace(mention.getRangeEnd(), mention.getRangeEnd() + 1, "");
+                    }
+                    editable.replace(mention.getRangeStart(), mention.getRangeEnd(), mentionText + " ");
+                    mention.setRangeEnd(mention.getRangeStart() + mentionText.length());
+                    editable.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mentionText.length(), color, null), mention.getRangeStart(), mention.getRangeStart() + mentionText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    mentionViewModel.updateMentions(newMessageEditText.getText(), -2);
+                    updateComposeAreaLayout();
+                }
+            }
+        });
+
+        mentionCandidatesSpacer = rootView.findViewById(R.id.mention_candidates_spacer);
+        mentionCandidatesFragment = new FilteredContactListFragment();
+        mentionCandidatesFragment.disableEmptyView();
+        mentionCandidatesFragment.removeBottomPadding();
+        mentionCandidatesFragment.setUnfilteredContacts(discussionViewModel.getMentionCandidatesLiveData());
+        mentionCandidatesFragment.disableAnimations();
+
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.mention_candidates_placeholder, mentionCandidatesFragment);
+        transaction.hide(mentionCandidatesFragment);
+        transaction.commit();
+
+        mentionCandidatesFragment.setOnClickDelegate(new FilteredContactListFragment.FilteredContactListOnClickDelegate() {
+            @Override
+            public void contactClicked(View view, final Contact contact) {
+                mentionViewModel.validateMention(contact);
+            }
+
+            @Override
+            public void contactLongClicked(View view, Contact contact) {
+            }
+        });
+
         newMessageEditText.setOnClickListener(v -> setShowAttachIcons(false, true));
         newMessageEditText.requestFocus();
         activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         newMessageEditText.setImeContentCommittedHandler((contentUri, fileName, mimeType, callMeWhenDone) -> {
             if (composeMessageViewModel.getTrimmedNewMessageText() != null) {
-                new SaveDraftTask(discussionViewModel.getDiscussionId(), composeMessageViewModel.getTrimmedNewMessageText(), composeMessageViewModel.getDraftMessage().getValue()).run();
+                Pair<String, List<Message.JsonUserMention>> trimAndMentions = Utils.removeProtectionFEFFsAndTrim(composeMessageViewModel.getRawNewMessageText(), mentionViewModel.getMentions());
+                new SaveDraftTask(discussionViewModel.getDiscussionId(), trimAndMentions.first, composeMessageViewModel.getDraftMessage().getValue(), trimAndMentions.second).run();
             }
             new AddFyleToDraftFromUriTask(contentUri, fileName, mimeType, discussionViewModel.getDiscussionId()).run();
             if (callMeWhenDone != null) {
@@ -411,7 +505,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         });
         newMessageEditText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND) {
-                sendMessage();
+                onSendAction();
                 if (imm != null) {
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
@@ -423,7 +517,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         if (SettingsActivity.getSendWithHardwareEnter()) {
             newMessageEditText.setOnKeyListener((View v, int keyCode, KeyEvent event) -> {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN && !event.isShiftPressed()) {
-                    sendMessage();
+                    onSendAction();
                     return true;
                 }
                 return false;
@@ -476,6 +570,15 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
         ViewGroup composeMessageCard = rootConstraintLayout.findViewById(R.id.compose_message_card);
 
+        composeMessageEditGroup = rootConstraintLayout.findViewById(R.id.compose_message_edit_group);
+        composeMessageEditBody = rootConstraintLayout.findViewById(R.id.compose_message_edit_body);
+        ImageView composeMessageEditClear = rootConstraintLayout.findViewById(R.id.compose_message_edit_clear);
+        composeMessageEditClear.setOnClickListener(v -> {
+            newMessageEditText.setText("");
+            composeMessageViewModel.clearDraftMessageEdit();
+            composeMessageDelegate.hideSoftInputKeyboard();
+        });
+
         composeMessageReplyGroup = rootConstraintLayout.findViewById(R.id.compose_message_reply_group);
         composeMessageReplySenderName = rootConstraintLayout.findViewById(R.id.compose_message_reply_sender_name);
         composeMessageReplyBody = rootConstraintLayout.findViewById(R.id.compose_message_reply_body);
@@ -521,14 +624,16 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
             @Override
             public void onChanged(Message message) {
-
                 if (message != null && this.message != null) {
                     if (message.id == this.message.id) {
                         String messageEditText = newMessageEditText.getText() == null ? "" : newMessageEditText.getText().toString();
                         String oldMessageText = this.message.contentBody == null ? "" : this.message.contentBody;
                         String newMessageText = message.contentBody == null ? "" : message.contentBody;
+                        String oldMentions = this.message.jsonMentions == null ? "" : this.message.jsonMentions;
+                        String newMentions = message.jsonMentions == null ? "" : message.jsonMentions;
 
-                        if (messageEditText.equals(oldMessageText) && !oldMessageText.equals(newMessageText)) {
+
+                        if (messageEditText.equals(oldMessageText) && !oldMessageText.equals(newMessageText) || !oldMentions.equals(newMentions)) {
                             // the message text changed, but the input did not --> probably an external modification so we load the body from the new draft
                             loadDraft(message);
                         }
@@ -543,8 +648,18 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             private void loadDraft(@Nullable final Message draftMessage) {
                 if (draftMessage != null && draftMessage.contentBody != null) {
                     try {
-                        newMessageEditText.setText(draftMessage.contentBody);
-                        newMessageEditText.setSelection(draftMessage.contentBody.length());
+                        SpannableString spannableString = new SpannableString(draftMessage.contentBody);
+                        if (draftMessage.getMentions() != null) {
+                            for (Message.JsonUserMention mention : draftMessage.getMentions()) {
+                                if (mention.getRangeEnd() <= spannableString.length()) {
+                                    int color = InitialView.getTextColor(activity, mention.getUserIdentifier(), AppSingleton.getContactCustomHue(mention.getUserIdentifier()));
+                                    spannableString.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), color, null), mention.getRangeStart(), mention.getRangeEnd(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                }
+                            }
+                        }
+                        newMessageEditText.setText(Utils.protectMentionUrlSpansWithFEFF(spannableString));
+                        newMessageEditText.setSelection(newMessageEditText.getText() != null ? newMessageEditText.getText().length() : 0);
+                        setShowAttachIcons(true, true);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -552,6 +667,32 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             }
         });
 
+        // edit message
+        composeMessageViewModel.getDraftMessageEdit().observe(activity, (Message editMessage) -> {
+            if (editMessage != null) {
+                composeMessageEditGroup.setVisibility(View.VISIBLE);
+                composeMessageEditBody.setText(editMessage.contentBody);
+                newMessageEditText.setHint(R.string.label_edit_your_message);
+                composeMessageEditGroup.setOnClickListener(v -> {
+                    if (discussionDelegate != null) {
+                        discussionDelegate.scrollToMessage(editMessage.id);
+                    }
+                });
+                linkPreviewViewModel.reset();
+                Utils.applyBodyWithSpans(newMessageEditText, editMessage.senderIdentifier, editMessage, null, false);
+                if (newMessageEditText.getText() != null) {
+                    newMessageEditText.setText(Utils.protectMentionUrlSpansWithFEFF(newMessageEditText.getText()));
+                    newMessageEditText.setSelection(newMessageEditText.getText().length());
+                }
+            } else {
+                composeMessageEditGroup.setVisibility(View.GONE);
+                composeMessageEditGroup.setOnClickListener(null);
+                newMessageEditText.setHint(R.string.hint_compose_your_message);
+            }
+            updateIconsToShow(activity.getResources().getDisplayMetrics().widthPixels);
+        });
+
+        // reply message
         composeMessageViewModel.getDraftMessageReply().observe(activity, draftReplyMessage -> {
             if (draftReplyMessage == null) {
                 composeMessageReplyGroup.setVisibility(View.GONE);
@@ -611,6 +752,20 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         this.audioAttachmentServiceBinding = audioAttachmentServiceBinding;
     }
 
+    private boolean isEditMode() {
+        return composeMessageViewModel.getDraftMessageEdit().getValue() != null;
+    }
+
+    private void onSendAction() {
+        if (isEditMode()) {
+            if (composeMessageViewModel.getDraftMessageEdit().getValue() != null) {
+                editMessage(composeMessageViewModel.getDraftMessageEdit().getValue().id);
+            }
+        } else {
+            sendMessage();
+        }
+    }
+
     private void sendMessage() {
         composeMessageLinkPreviewGroup.setVisibility(View.GONE);
         if (discussionViewModel.getDiscussionId() != null) {
@@ -618,11 +773,13 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 if (discussionDelegate != null) {
                     discussionDelegate.markMessagesRead();
                 }
+                Pair<String, List<Message.JsonUserMention>> trimAndMentions = Utils.removeProtectionFEFFsAndTrim(composeMessageViewModel.getRawNewMessageText(), mentionViewModel.getMentions());
                 App.runThread(new PostMessageInDiscussionTask(
-                        composeMessageViewModel.getTrimmedNewMessageText(),
+                        trimAndMentions.first,
                         discussionViewModel.getDiscussionId(),
                         true,
-                        linkPreviewViewModel.getOpenGraph().getValue()
+                        linkPreviewViewModel.getOpenGraph().getValue(),
+                        trimAndMentions.second
                 ));
                 newMessageEditText.setText("");
                 linkPreviewViewModel.reset();
@@ -630,6 +787,23 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         }
     }
 
+    private void editMessage(long messageId) {
+        composeMessageEditGroup.setVisibility(View.GONE);
+        composeMessageLinkPreviewGroup.setVisibility(View.GONE);
+        if (composeMessageViewModel.getTrimmedNewMessageText() != null) {
+            Pair<String, List<Message.JsonUserMention>> trimAndMentions = Utils.removeProtectionFEFFsAndTrim(composeMessageViewModel.getRawNewMessageText(), mentionViewModel.getMentions());
+
+            App.runThread(new UpdateMessageBodyTask(
+                    messageId,
+                    trimAndMentions.first,
+                    trimAndMentions.second
+            ));
+        }
+        newMessageEditText.setText("");
+        composeMessageViewModel.clearDraftMessageEdit();
+        linkPreviewViewModel.reset();
+        composeMessageDelegate.showSoftInputKeyboard();
+    }
 
     @Override
     public void onResume() {
@@ -662,6 +836,24 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         }
     }
 
+    private void hideMentionPicker() {
+        if (mentionCandidatesFragment != null && mentionCandidatesFragment.isVisible()) {
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.hide(mentionCandidatesFragment);
+            transaction.commit();
+            mentionCandidatesSpacer.setVisibility(View.GONE);
+        }
+    }
+
+    private void showMentionPicker() {
+        if (mentionCandidatesFragment != null && mentionCandidatesFragment.isHidden()) {
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.show(mentionCandidatesFragment);
+            transaction.commit();
+            mentionCandidatesSpacer.setVisibility(View.INVISIBLE);
+        }
+    }
+
     @Override
     public void onClick(View view) {
         int id = view.getId();
@@ -670,8 +862,11 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         } else if (id == R.id.attach_timer) {
             SingleMessageEphemeralSettingsDialogFragment dialogFragment = SingleMessageEphemeralSettingsDialogFragment.newInstance(discussionViewModel.getDiscussionId());
             dialogFragment.show(getChildFragmentManager(), "dialog");
+            if (emojiKeyboardShowing) {
+                hideEmojiKeyboard();
+            }
         } else if (id == R.id.compose_message_send_button) {
-            sendMessage();
+            onSendAction();
         } else if (id == R.id.attach_configure) {
             showIconOrderSelector();
         } else if (id == R.id.attach_file) {
@@ -722,17 +917,42 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                         .setTitle(R.string.title_stop_sharing_location)
                         .setMessage(R.string.label_stop_sharing_location)
-                        .setPositiveButton(R.string.button_label_stop, (dialogInterface, i) -> UnifiedForegroundService.LocationSharingSubService.stopSharingLocation(this.activity, discussionViewModel.getDiscussionId()))
+                        .setPositiveButton(R.string.button_label_stop, (dialogInterface, i) -> UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussionViewModel.getDiscussionId(), false))
                         .setNegativeButton(R.string.button_label_cancel, null)
                         .create()
                         .show();
-            } else {
-                // show send location dialog
-                SendLocationBasicDialogFragment dialogFragment = new SendLocationBasicDialogFragment(discussionViewModel.getDiscussionId());
-                dialogFragment.show(getChildFragmentManager(), "send-location-fragment-basic");
+                return ;
             }
+
+            switch (SettingsActivity.getLocationIntegration()) {
+                case OSM:
+                case MAPS: {
+                    SendLocationMapDialogFragment dialogFragment = SendLocationMapDialogFragment.newInstance(discussionViewModel.getDiscussionId(), SettingsActivity.getLocationIntegration());
+                    dialogFragment.show(getChildFragmentManager(), "send-location-fragment-osm");
+                    break;
+                }
+                case BASIC:  {
+                    SendLocationBasicDialogFragment dialogFragment = new SendLocationBasicDialogFragment(discussionViewModel.getDiscussionId());
+                    dialogFragment.show(getChildFragmentManager(), "send-location-fragment-basic");
+                    break;
+                }
+                case NONE:
+                default: {
+                    new LocationIntegrationSelectorDialog(activity, (SettingsActivity.LocationIntegrationEnum integration) -> {
+                        SettingsActivity.setLocationIntegration(integration.getString());
+                        // re-run onClick if something was selected
+                        if (integration == SettingsActivity.LocationIntegrationEnum.OSM || integration == SettingsActivity.LocationIntegrationEnum.MAPS || integration == SettingsActivity.LocationIntegrationEnum.BASIC) {
+                            onClick(view);
+                        }
+                    }).show();
+                    break;
+                }
+            }
+
         } else if (id == R.id.attach_stuff_plus) {
-            if (showAttachIcons || neverOverflow) {
+            if (isEditMode()) {
+                showEmojiKeyboard();
+            } else if (showAttachIcons || neverOverflow) {
                 InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {
                     imm.hideSoftInputFromWindow(newMessageEditText.getWindowToken(), 0);
@@ -900,9 +1120,11 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         @Override
         public void showSoftInputKeyboard() {
             if (activity != null) {
-                InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null && newMessageEditText != null) {
-                    imm.showSoftInput(newMessageEditText, InputMethodManager.SHOW_IMPLICIT);
+                if (!emojiKeyboardShowing) {
+                    InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null && newMessageEditText != null) {
+                        imm.showSoftInput(newMessageEditText, InputMethodManager.SHOW_IMPLICIT);
+                    }
                 }
                 setShowAttachIcons(false, true);
             }
@@ -1212,7 +1434,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
         for (Integer icon : iconsShown) {
             ImageView imageView = new ImageView(new ContextThemeWrapper(activity, R.style.SubtleBlueRipple));
             imageView.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
-            imageView.setPadding(fourDp, fourDp, fourDp, fourDp);
+            imageView.setPadding(fourDp, 0, 0, 0);
             imageView.setBackgroundResource(R.drawable.background_circular_ripple);
             imageView.setImageResource(getImageResourceForIcon(icon));
             imageView.setId(getViewIdForIcon(icon));
@@ -1224,20 +1446,30 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
     }
 
     ValueAnimator widthAnimator;
-    int currentLayout = 0;
+    private int currentLayout = 0;
 
     void updateComposeAreaLayout() {
-        if (recording || (!hasAttachments && !hasText)) {
+        if ((recording || (!hasAttachments && !hasText)) && !isEditMode()) {
             sendButton.setVisibility(View.GONE);
             directAttachVoiceMessageImageView.setVisibility(View.VISIBLE);
         } else {
+            if (isEditMode()) {
+                sendButton.setImageDrawable(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.ic_send_edit, null));
+            } else {
+                sendButton.setImageDrawable(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.ic_send, null));
+            }
             sendButton.setVisibility(View.VISIBLE);
             directAttachVoiceMessageImageView.setVisibility(View.GONE);
-            sendButton.setEnabled(hasAttachments || composeMessageViewModel.getTrimmedNewMessageText() != null);
+            sendButton.setEnabled((hasAttachments || composeMessageViewModel.getTrimmedNewMessageText() != null) && !identicalEditMessage());
         }
 
         ConstraintLayout.LayoutParams attachIconsGroupParams = (ConstraintLayout.LayoutParams) attachIconsGroup.getLayoutParams();
-        if (showAttachIcons) {
+        // depending on the state, pick the appropriate layout:
+        // 1 - show a (+) and some icons on the side, with a compact message edit zone
+        // 2 - only for "never overflow" mode in very wide screens where all icons are always displayed next to the (+)
+        // 3 - show a (>) with no icons next to it to maximize EditText space
+        // 4 - edit mode, like 3 but with the emoji icon instead of (>)
+        if (showAttachIcons && !isEditMode()) {
             if (currentLayout != 1) {
                 currentLayout = 1;
 
@@ -1245,6 +1477,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 newMessageEditText.setMaxLines(1);
                 newMessageEditText.setVerticalScrollBarEnabled(false);
                 newMessageEditText.setMovementMethod(null);
+                hideMentionPicker();
 
                 if (widthAnimator != null) {
                     widthAnimator.cancel();
@@ -1263,12 +1496,12 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                 }
             }
         } else {
-            if (currentLayout != 2 && currentLayout != 3) {
+            if (currentLayout == 1) {
                 newMessageEditText.setMaxLines(6);
                 newMessageEditText.setVerticalScrollBarEnabled(true);
                 newMessageEditText.setMovementMethod(ArrowKeyMovementMethod.getInstance());
             }
-            if (neverOverflow) {
+            if (neverOverflow && !isEditMode()) {
                 if (currentLayout != 2) {
                     currentLayout = 2;
                     attachStuffPlus.setImageResource(R.drawable.ic_attach_add);
@@ -1290,10 +1523,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                     }
                 }
             } else {
-                if (currentLayout != 3) {
-                    currentLayout = 3;
-                    attachStuffPlus.setImageResource(R.drawable.ic_attach_chevron);
-
+                if (currentLayout != 3 && currentLayout != 4) {
                     if (widthAnimator != null) {
                         widthAnimator.cancel();
                     }
@@ -1310,9 +1540,43 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
                         attachIconsGroup.setLayoutParams(attachIconsGroupParams);
                     }
                 }
+
+                if (!isEditMode()) {
+                    if (currentLayout != 3) {
+                        currentLayout = 3;
+                        attachStuffPlus.setImageResource(R.drawable.ic_attach_chevron);
+                    }
+                } else {
+                    if (currentLayout != 4) {
+                        currentLayout = 4;
+                        attachStuffPlus.setImageResource(R.drawable.ic_attach_emoji);
+                    }
+                }
             }
         }
         hideOrShowEphemeralMarker(showEphemeralMarker);
+    }
+
+    private boolean identicalEditMessage() {
+        if (composeMessageViewModel == null) {
+            return false;
+        }
+        Message draftEdit = composeMessageViewModel.getDraftMessageEdit().getValue();
+        if (draftEdit == null) {
+            return false;
+        }
+        Pair<String, List<Message.JsonUserMention>> trimAndMentions = Utils.removeProtectionFEFFsAndTrim(composeMessageViewModel.getRawNewMessageText(), mentionViewModel.getMentions());
+        if (!Objects.equals(draftEdit.contentBody, trimAndMentions.first)) {
+            return false;
+        }
+        if (mentionViewModel == null) {
+            return false;
+        }
+        List<Message.JsonUserMention> mentions = draftEdit.getMentions();
+        HashSet<Message.JsonUserMention> mentionSet = mentions == null ? null : new HashSet<>(mentions);
+
+        HashSet<Message.JsonUserMention> newMentionSet = trimAndMentions.second == null ? null : new HashSet<>(trimAndMentions.second);
+        return Objects.equals(mentionSet, newMentionSet);
     }
 
     void hideOrShowEphemeralMarker(boolean showMarker) {
@@ -1376,7 +1640,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
 
         int popupHeight = (iconsOverflow.size() + 2) * iconSize + fourDp;
 
-        popupWindow.setAnimationStyle(R.style.FadeInAndOutPopupAnimation);
+        popupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
         popupWindow.showAsDropDown(attachStuffPlus, fourDp / 2, -popupHeight, Gravity.TOP | Gravity.START);
     }
 
@@ -1441,7 +1705,7 @@ public class ComposeMessageFragment extends Fragment implements View.OnClickList
             case ICON_EMOJI:
                 return R.string.label_attach_emoji;
             case ICON_SEND_LOCATION:
-                return R.string.label_send_location;
+                return R.string.label_send_your_location;
             default:
                 return 0;
         }

@@ -214,12 +214,23 @@ public class StringUtils {
         return codePoint == 0x200d;
     }
 
-    public static String unAccent(String source) {
+    public static String unAccent(CharSequence source) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             return UCharacter.toLowerCase(unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFD)).replaceAll(""));
         } else {
             return unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFD)).replaceAll("").toLowerCase(Locale.getDefault());
         }
+    }
+
+    public static int unaccentedOffsetToActualOffset(CharSequence accented, int unaccentedOffset) {
+        int correctedOffset = unaccentedOffset;
+        int missed = 0;
+        try {
+            do {
+                correctedOffset += missed;
+            } while ((missed = unaccentedOffset - StringUtils.unAccent(accented.subSequence(0, correctedOffset)).length()) > 0);
+        } catch (Exception ignored) {}
+        return correctedOffset;
     }
 
     public static boolean isASubstringOfB(@NonNull String a, @NonNull String b) {

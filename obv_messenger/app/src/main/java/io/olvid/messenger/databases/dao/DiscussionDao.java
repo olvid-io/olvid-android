@@ -137,6 +137,7 @@ public abstract class DiscussionDao {
                     "cust." + DiscussionCustomization.BACKGROUND_IMAGE_URL + " AS cust_" + DiscussionCustomization.BACKGROUND_IMAGE_URL + ", " +
                     "cust." + DiscussionCustomization.PREF_SEND_READ_RECEIPT + " AS cust_" + DiscussionCustomization.PREF_SEND_READ_RECEIPT + ", " +
                     "cust." + DiscussionCustomization.PREF_MUTE_NOTIFICATIONS + " AS cust_" + DiscussionCustomization.PREF_MUTE_NOTIFICATIONS + ", " +
+                    "cust." + DiscussionCustomization.PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED + " AS cust_" + DiscussionCustomization.PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED + ", " +
                     "cust." + DiscussionCustomization.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + " AS cust_" + DiscussionCustomization.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + ", " +
                     "cust." + DiscussionCustomization.PREF_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND_MESSAGES + " AS cust_" + DiscussionCustomization.PREF_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND_MESSAGES + ", " +
                     "cust." + DiscussionCustomization.PREF_RETAIN_WIPED_OUTBOUND_MESSAGES + " AS cust_" + DiscussionCustomization.PREF_RETAIN_WIPED_OUTBOUND_MESSAGES + ", " +
@@ -157,7 +158,7 @@ public abstract class DiscussionDao {
 
     @Transaction
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " message.*, unread.count AS unread_count, " +
+            " message.*, unread.count AS unread_count, (unreadMention.count != 0) AS unread_mention, " +
             PREFIX_DISCUSSION_CUSTOMIZATION_COLUMNS +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN ( SELECT id, " + Message.SENDER_SEQUENCE_NUMBER + ", " +
@@ -165,16 +166,18 @@ public abstract class DiscussionDao {
             Message.JSON_LOCATION + ", " + Message.LOCATION_TYPE + ", " +
             Message.CONTENT_BODY + ", " + Message.TIMESTAMP + ", " +
             Message.STATUS + ", " + Message.WIPE_STATUS + ", " + Message.MESSAGE_TYPE + ", " +
-            Message.DISCUSSION_ID + ", " + Message.ENGINE_MESSAGE_IDENTIFIER + ", " +
+            Message.DISCUSSION_ID + ", " + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + ", " +
             Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " +
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
             Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
-            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " +
+            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " + Message.JSON_MENTIONS + ", " + Message.MENTIONED + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
             " ON message." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unread " +
             " ON unread." + Message.DISCUSSION_ID + " = disc.id " +
+            " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " AND " + Message.MENTIONED + " = 1" + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unreadMention " +
+            " ON unreadMention." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN " + DiscussionCustomization.TABLE_NAME + " AS cust " +
             " ON cust." + DiscussionCustomization.DISCUSSION_ID + " = disc.id " +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
@@ -184,8 +187,23 @@ public abstract class DiscussionDao {
     public abstract LiveData<List<DiscussionAndLastMessage>> getNonDeletedDiscussionAndLastMessages(byte[] bytesOwnedIdentity);
 
     @Transaction
-    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " message.*, unread.count AS unread_count, " +
+    @Query("SELECT " +
+            "disc.id AS disc_id, " +
+            " disc." + Discussion.TITLE + " AS disc_" + Discussion.TITLE + ", " +
+            " disc." + Discussion.BYTES_OWNED_IDENTITY + " AS disc_" + Discussion.BYTES_OWNED_IDENTITY + ", " +
+            " disc." + Discussion.DISCUSSION_TYPE + " AS disc_" + Discussion.DISCUSSION_TYPE + ", " +
+            " disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " AS disc_" + Discussion.BYTES_DISCUSSION_IDENTIFIER + ", " +
+            " disc." + Discussion.SENDER_THREAD_IDENTIFIER + " AS disc_" + Discussion.SENDER_THREAD_IDENTIFIER + ", " +
+            " disc." + Discussion.LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER + " AS disc_" + Discussion.LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER + ", " +
+            " (disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " + 1000000000000 * " + Discussion.PINNED + ") AS disc_" + Discussion.LAST_MESSAGE_TIMESTAMP + ", " +
+            " disc." + Discussion.PHOTO_URL + " AS disc_" + Discussion.PHOTO_URL + ", " +
+            " disc." + Discussion.KEYCLOAK_MANAGED + " AS disc_" + Discussion.KEYCLOAK_MANAGED + ", " +
+            " disc." + Discussion.PINNED + " AS disc_" + Discussion.PINNED + ", " +
+            " disc." + Discussion.UNREAD + " AS disc_" + Discussion.UNREAD + ", " +
+            " disc." + Discussion.ACTIVE + " AS disc_" + Discussion.ACTIVE + ", " +
+            " disc." + Discussion.TRUST_LEVEL + " AS disc_" + Discussion.TRUST_LEVEL + ", " +
+            " disc." + Discussion.STATUS + " AS disc_" + Discussion.STATUS + ", " +
+            " message.*, unread.count AS unread_count, (unreadMention.count != 0) AS unread_mention, " +
             PREFIX_DISCUSSION_CUSTOMIZATION_COLUMNS +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN ( SELECT id, " + Message.SENDER_SEQUENCE_NUMBER + ", " +
@@ -193,22 +211,25 @@ public abstract class DiscussionDao {
             Message.JSON_LOCATION + ", " + Message.LOCATION_TYPE + ", " +
             Message.CONTENT_BODY + ", " + Message.TIMESTAMP + ", " +
             Message.STATUS + ", " + Message.WIPE_STATUS + ", " + Message.MESSAGE_TYPE + ", " +
-            Message.DISCUSSION_ID + ", " + Message.ENGINE_MESSAGE_IDENTIFIER + ", " +
+            Message.DISCUSSION_ID + ", " + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + ", " +
             Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " +
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
             Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
-            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " +
+            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " + Message.JSON_MENTIONS + ", " + Message.MENTIONED + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " != " + Message.STATUS_DRAFT + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
             " ON message." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unread " +
             " ON unread." + Message.DISCUSSION_ID + " = disc.id " +
+            " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " AND " + Message.MENTIONED + " = 1" + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unreadMention " +
+            " ON unreadMention." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN " + DiscussionCustomization.TABLE_NAME + " AS cust " +
             " ON cust." + DiscussionCustomization.DISCUSSION_ID + " = disc.id " +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND disc." + Discussion.STATUS + " != " + Discussion.STATUS_PRE_DISCUSSION +
             " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC"
     )
-    public abstract LiveData<List<DiscussionAndLastMessage>> getAllDiscussionsAndLastMessages(byte[] bytesOwnedIdentity);
+    public abstract LiveData<List<DiscussionAndLastMessage>> getAllDiscussionsAndLastMessagesForWebClient(byte[] bytesOwnedIdentity);
 
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME + " WHERE id = :discussionId")
@@ -460,13 +481,18 @@ public abstract class DiscussionDao {
         public Discussion discussion;
 
         @Embedded
+        @Nullable
         public Message message;
 
         @Embedded(prefix = "cust_")
+        @Nullable
         public DiscussionCustomization discussionCustomization;
 
         @ColumnInfo(name = "unread_count")
         public int unreadCount;
+
+        @ColumnInfo(name = "unread_mention")
+        public boolean unreadMention;
     }
 
     public static class DiscussionAndGroupMembersNames {
