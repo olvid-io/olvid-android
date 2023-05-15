@@ -81,7 +81,7 @@ public class NewMessagesItemDecoration extends RecyclerView.ItemDecoration imple
                 continue;
             }
             int position = parent.getChildViewHolder(child).getBindingAdapterPosition();
-            if (position == RecyclerView.NO_POSITION || position == 0 || position > messageListAdapter.messages.size()) {
+            if (position == RecyclerView.NO_POSITION || position == 0 || messageListAdapter.messages == null || position > messageListAdapter.messages.size()) {
                 continue;
             }
             position--;

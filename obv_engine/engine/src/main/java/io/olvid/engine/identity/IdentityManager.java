@@ -1594,7 +1594,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
 
     @Override
-    public void addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid) throws SQLException {
+    public boolean addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid) throws SQLException {
         ContactIdentity contact = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contact != null && contact.isActive()) {
             ContactDevice contactDevice = ContactDevice.get(wrapSession(session), deviceUid, contactIdentity, ownedIdentity);
@@ -1604,8 +1604,10 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 if (contactDevice == null) {
                     throw new SQLException();
                 }
+                return true;
             }
         }
+        return false;
     }
 
     @Override
@@ -3359,6 +3361,15 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         });
     }
 
+    // return true only if the identity is a PendingMember: if it is a GroupMember, it returns false
+    @Override
+    public boolean isIdentityAPendingGroupV2Member(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity identity) throws SQLException {
+        if (session == null || ownedIdentity == null || groupIdentifier == null || identity == null) {
+            return false;
+        }
+
+       return ContactGroupV2PendingMember.get(wrapSession(session), ownedIdentity, groupIdentifier, identity) != null;
+    }
 
     // endregion
 

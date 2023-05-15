@@ -74,7 +74,7 @@ public class Discussion {
     public static final String UNREAD = "unread"; // specify if discussion as been manually marked as unread
     public static final String ACTIVE = "active";
     public static final String TRUST_LEVEL = "trust_level";
-    public static final String STATUS = "status"; // normal, locked, (pre-discussion?)
+    public static final String STATUS = "status"; // normal, locked, or pre-discussion
 
     public static final int TYPE_CONTACT = 1;
     public static final int TYPE_GROUP = 2;

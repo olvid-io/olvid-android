@@ -34,6 +34,7 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class CallLogViewModel : ViewModel() {
@@ -78,7 +79,7 @@ class CallLogViewModel : ViewModel() {
     }
 
     fun delete(callLogItem: CallLogItem) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             AppDatabase.getInstance().callLogItemDao().delete(callLogItem)
         }
     }

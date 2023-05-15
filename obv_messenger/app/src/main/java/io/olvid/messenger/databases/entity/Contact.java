@@ -371,7 +371,9 @@ public class Contact {
                 return null;
             } else {
                 byte[] sortDisplayName = ContactDisplayNameFormatChangedTask.computeSortDisplayName(ownIdentityDetails, ownedIdentity.customDisplayName, SettingsActivity.getSortContactsByLastName());
-                String fullSearchDisplayName = StringUtils.unAccent(ownIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
+                String fullSearchDisplayName = ownedIdentity.customDisplayName == null ?
+                        StringUtils.unAccent(ownIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false)) :
+                        StringUtils.unAccent(ownedIdentity.customDisplayName + " " + ownIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
                 return new Contact(ownedIdentity.bytesOwnedIdentity,
                         ownedIdentity.bytesOwnedIdentity,
                         ownedIdentity.customDisplayName,

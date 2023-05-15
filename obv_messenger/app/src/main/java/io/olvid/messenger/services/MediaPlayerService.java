@@ -257,7 +257,11 @@ public class MediaPlayerService extends Service {
         }
         builder.setDeleteIntent(stopPendingIntent);
 
-        startForeground(SERVICE_ID, builder.build());
+        try {
+            startForeground(SERVICE_ID, builder.build());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void seekMedia(long timeMs) {

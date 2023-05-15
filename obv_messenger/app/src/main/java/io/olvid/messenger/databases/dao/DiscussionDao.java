@@ -312,7 +312,7 @@ public abstract class DiscussionDao {
     public abstract LiveData<List<Discussion>> getLatestDiscussionsInWhichYouWrote();
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " CASE WHEN grp." + Group.GROUP_MEMBERS_NAMES + " IS NULL THEN grpp." + Group2.GROUP_MEMBERS_NAMES + " ELSE grp." + Group.GROUP_MEMBERS_NAMES + " END AS groupMemberNames" +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
             " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grp." + Group.BYTES_GROUP_OWNER_AND_UID +
@@ -353,10 +353,15 @@ public abstract class DiscussionDao {
             " WHERE disc.id = :discussionId ")
     public abstract LiveData<DiscussionAndGroupMembersCount> getWithGroupMembersCount(long discussionId);
 
-    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the columns is_group and status are used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " CASE WHEN grp." + Group.GROUP_MEMBERS_NAMES + " IS NULL THEN grpp." + Group2.GROUP_MEMBERS_NAMES + " ELSE grp." + Group.GROUP_MEMBERS_NAMES + " END AS groupMemberNames, " +
-            " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group " +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group, " +
+            " CASE disc." + Discussion.STATUS +
+              " WHEN " + Discussion.STATUS_NORMAL + " THEN 0 " +
+              " WHEN " + Discussion.STATUS_PRE_DISCUSSION + " THEN 1 " +
+              " ELSE 2 " +
+            " END AS status " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
             " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grp." + Group.BYTES_GROUP_OWNER_AND_UID +
@@ -367,13 +372,18 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = grpp." + Group2.BYTES_OWNED_IDENTITY +
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
-            " ORDER BY is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
+            " ORDER BY status, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWithGroupMembersNames(byte[] ownedIdentityBytes);
 
-    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the columns is_group and status are used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " CASE WHEN grp." + Group.GROUP_MEMBERS_NAMES + " IS NULL THEN grpp." + Group2.GROUP_MEMBERS_NAMES + " ELSE grp." + Group.GROUP_MEMBERS_NAMES + " END AS groupMemberNames, " +
-            " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group " +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group, " +
+            " CASE disc." + Discussion.STATUS +
+              " WHEN " + Discussion.STATUS_NORMAL + " THEN 0 " +
+              " WHEN " + Discussion.STATUS_PRE_DISCUSSION + " THEN 1 " +
+              " ELSE 2 " +
+            " END AS status " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
             " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grp." + Group.BYTES_GROUP_OWNER_AND_UID +
@@ -384,12 +394,12 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = grpp." + Group2.BYTES_OWNED_IDENTITY +
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
-            " ORDER BY disc." + Discussion.PINNED + " DESC, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
+            " ORDER BY disc." + Discussion.PINNED + " DESC, status, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllPinnedFirstWithGroupMembersNames(byte[] ownedIdentityBytes);
 
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " CASE WHEN grp." + Group.GROUP_MEMBERS_NAMES + " IS NULL THEN grpp." + Group2.GROUP_MEMBERS_NAMES + " ELSE grp." + Group.GROUP_MEMBERS_NAMES + " END AS groupMemberNames, " +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
             " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
@@ -406,7 +416,7 @@ public abstract class DiscussionDao {
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllNotLockedWithGroupMembersNames(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " CASE WHEN grp." + Group.GROUP_MEMBERS_NAMES + " IS NULL THEN grpp." + Group2.GROUP_MEMBERS_NAMES + " ELSE grp." + Group.GROUP_MEMBERS_NAMES + " END AS groupMemberNames " +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
             " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grp." + Group.BYTES_GROUP_OWNER_AND_UID +
@@ -422,7 +432,7 @@ public abstract class DiscussionDao {
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllNotLockedWithGroupMembersNamesOrderedByActivity(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " CASE WHEN grp." + Group.GROUP_MEMBERS_NAMES + " IS NULL THEN grpp." + Group2.GROUP_MEMBERS_NAMES + " ELSE grp." + Group.GROUP_MEMBERS_NAMES + " END AS groupMemberNames " +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " INNER JOIN ( SELECT " + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " AS gid, " + Discussion.TYPE_GROUP + " AS dt FROM " + ContactGroupJoin.TABLE_NAME +
             " WHERE " + ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +

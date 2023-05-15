@@ -2,8 +2,14 @@
 <restrictions xmlns:android="http://schemas.android.com/apk/res/android">
     <restriction
         android:key="keycloak_configuration_uri"
-        android:title="@string/restriction_title"
-        android:description="@string/restriction_description"
+        android:title="@string/restriction_keycloak_configuration_uri_title"
+        android:description="@string/restriction_keycloak_configuration_uri_description"
         android:restrictionType="string"
         android:defaultValue="" />
+    <restriction
+        android:key="disable_new_version_notification"
+        android:title="@string/restriction_disable_new_version_notification_title"
+        android:description="@string/restriction_disable_new_version_notification_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
 </restrictions>

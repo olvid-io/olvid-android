@@ -462,7 +462,11 @@ public class UnifiedForegroundService extends Service {
         if (App.isVisible()) {
             stopForeground(true);
         }
-        startForeground(SERVICE_ID, builder.build());
+        try {
+            startForeground(SERVICE_ID, builder.build());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

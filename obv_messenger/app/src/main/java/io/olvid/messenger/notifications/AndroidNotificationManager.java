@@ -698,7 +698,11 @@ public class AndroidNotificationManager {
 
             int notificationId = getMessageNotificationId(discussion.id);
 
-            notificationManager.notify(notificationId, builder.build());
+            try {
+                notificationManager.notify(notificationId, builder.build());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             if (contact != null) {
                 if (messageLastVibrationTimestamp.containsKey(notificationId)) {
                     Long timestamp = messageLastVibrationTimestamp.get(notificationId);

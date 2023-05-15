@@ -35,6 +35,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
@@ -46,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -96,7 +99,7 @@ fun CallLogItemView(
                 modifier = Modifier
                     .padding(
                         horizontal = 16.dp,
-                        vertical = 4.dp,
+                        vertical = 8.dp,
                     )
                     .requiredSize(40.dp),
                 initialViewSetup = initialViewSetup,
@@ -138,13 +141,15 @@ fun CallLogItemView(
 
             Image(
                 modifier = Modifier
+                    .clip(shape = RoundedCornerShape(size = 36.dp))
                     .clickable { onClick.invoke() }
                     .padding(8.dp)
-                    .size(40.dp),
+                    .size(32.dp),
                 painter = painterResource(id = R.drawable.ic_phone_grey),
                 contentDescription = stringResource(id = R.string.button_label_call)
             )
 
+            Spacer(modifier = Modifier.width(4.dp))
         }
     }
 }

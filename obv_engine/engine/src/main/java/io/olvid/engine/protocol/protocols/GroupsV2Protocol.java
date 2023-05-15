@@ -2313,8 +2313,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             }
 
             {
-                // check if we already have a more recent group version invitation
                 if (startState instanceof InvitationReceivedState) {
+                    // if still in InvitationReceivedState, check the version and trigger a re-download if necessary
                     if (((InvitationReceivedState) startState).serverBlob.version >= groupVersion) {
                         return startState;
                     }
@@ -2349,14 +2349,36 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
             }
 
-            // check if we already joined this group and have a larger group version
+            // check if we already joined this group
             Integer dbGroupVersion = protocolManagerSession.identityDelegate.getGroupV2Version(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier);
-            if (dbGroupVersion != null && dbGroupVersion >= groupVersion) {
-                // we already have a more recent version of this group, ignore the message
-                if (startState != null) {
-                    return startState;
-                } else {
-                    return new FinalState();
+            if (dbGroupVersion != null) {
+                // if we joined this group and the obliviousChannelContactIdentity is still a pending member, there is a problem! We send him a ping
+                if (dbGroupVersion <= groupVersion && obliviousChannelContactIdentity != null && protocolManagerSession.identityDelegate.isIdentityAPendingGroupV2Member(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier, obliviousChannelContactIdentity)) {
+                    byte[] ownGroupInvitationNonce = protocolManagerSession.identityDelegate.getGroupV2OwnGroupInvitationNonce(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier);
+                    if (ownGroupInvitationNonce != null) {
+                        byte[] pingSignature = protocolManagerSession.identityDelegate.signGroupInvitationNonce(
+                                protocolManagerSession.session,
+                                Constants.SignatureContext.GROUP_JOIN_NONCE,
+                                groupIdentifier,
+                                ownGroupInvitationNonce,
+                                obliviousChannelContactIdentity,
+                                getOwnedIdentity(),
+                                getPrng());
+
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(obliviousChannelContactIdentity, getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, groupIdentifier, ownGroupInvitationNonce, pingSignature, false).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    }
+                }
+
+
+                if (dbGroupVersion >= groupVersion) {
+                    // we already have a more recent version of this group, ignore the message
+                    if (startState != null) {
+                        return startState;
+                    } else {
+                        return new FinalState();
+                    }
                 }
             }
 
@@ -3037,6 +3059,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         private final UUID dialogUuid;
         private final GroupV2.InvitationCollectedData invitationCollectedData;
         private final boolean propagationNeeded;
+        private final boolean repingAllGroupMembers;
 
 
         @SuppressWarnings("unused")
@@ -3047,6 +3070,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.dialogUuid = UUID.randomUUID();
             this.invitationCollectedData = null;
             this.propagationNeeded = true;
+            this.repingAllGroupMembers = true;
         }
 
         @SuppressWarnings("unused")
@@ -3057,6 +3081,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.dialogUuid = UUID.randomUUID();
             this.invitationCollectedData = null;
             this.propagationNeeded = true;
+            this.repingAllGroupMembers = false;
         }
 
         @SuppressWarnings("unused")
@@ -3067,6 +3092,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.dialogUuid = UUID.randomUUID();
             this.invitationCollectedData = null;
             this.propagationNeeded = false;
+            this.repingAllGroupMembers = false;
         }
 
         @SuppressWarnings("unused")
@@ -3078,6 +3104,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.invitationCollectedData = new GroupV2.InvitationCollectedData();
             this.invitationCollectedData.addBlobKeysCandidates(startState.inviterIdentity, startState.blobKeys);
             this.propagationNeeded = true;
+            this.repingAllGroupMembers = false;
         }
 
         @SuppressWarnings("unused")
@@ -3089,6 +3116,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.invitationCollectedData = new GroupV2.InvitationCollectedData();
             this.invitationCollectedData.addBlobKeysCandidates(startState.inviterIdentity, startState.blobKeys);
             this.propagationNeeded = false;
+            this.repingAllGroupMembers = false;
         }
 
 
@@ -3126,6 +3154,31 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         return startState;
                     } else {
                         return new FinalState();
+                    }
+                }
+
+                if (repingAllGroupMembers) {
+                    try {
+                        // do not fail the step if sending the pings fails
+                        byte[] ownGroupInvitationNonce = protocolManagerSession.identityDelegate.getGroupV2OwnGroupInvitationNonce(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier);
+                        if (ownGroupInvitationNonce != null) {
+                            for (GroupV2.IdentityAndPermissions groupMember : protocolManagerSession.identityDelegate.getGroupV2OtherMembersAndPermissions(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier)) {
+                                byte[] pingSignature = protocolManagerSession.identityDelegate.signGroupInvitationNonce(
+                                        protocolManagerSession.session,
+                                        Constants.SignatureContext.GROUP_JOIN_NONCE,
+                                        groupIdentifier,
+                                        ownGroupInvitationNonce,
+                                        groupMember.identity,
+                                        getOwnedIdentity(),
+                                        getPrng());
+
+                                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(groupMember.identity, getOwnedIdentity()));
+                                ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, groupIdentifier, ownGroupInvitationNonce, pingSignature, false).generateChannelProtocolMessageToSend();
+                                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
 

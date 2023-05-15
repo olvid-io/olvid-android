@@ -605,7 +605,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         if ((commitHookBits & HOOK_BIT_CHANNEL_CONFIRMED) != 0) {
             // refresh members of groups owned by the remoteIdentity (useful after a backup restore)
             channelManagerSession.identityDelegate.refreshMembersOfGroupsOwnedByGroupOwner(currentDeviceUid, remoteIdentity);
-            // reinvite members of groups owned (useful after a backup restore)
+            // re-invite members of groups owned (useful after a backup restore)
             channelManagerSession.identityDelegate.pushMembersOfOwnedGroupsToContact(currentDeviceUid, remoteIdentity);
             // resend a batch of all keys for common groups V2
             channelManagerSession.identityDelegate.initiateGroupV2BatchKeysResend(currentDeviceUid, remoteIdentity, remoteDeviceUid);

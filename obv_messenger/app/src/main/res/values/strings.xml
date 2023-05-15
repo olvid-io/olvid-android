@@ -1057,8 +1057,10 @@
     <string name="dialog_message_remember_to_backup_explanation_no_google">It\'s been more than a week since your last backup. Now is probably a good time for a new one. Keep in mind that an old backup might not contain all your latest contacts.\n\nPress \"setup backups\" to begin.</string>
     <string name="snackbar_message_verify_backup_key">Do you remember your backup key?</string>
     <string name="dialog_message_verify_backup_key_explanation">Having an up to date Olvid backup is essential, but you need your backup key to restore it!\n\nPress \"setup backups\" to verify your key. If you lost it, don\'t worry, you can generate a new one.</string>
-    <string name="restriction_title" translatable="false">Keycloak configuration</string>
-    <string name="restriction_description" translatable="false">Configuration link provided by the Olvid keycloak plugin</string>
+    <string name="restriction_keycloak_configuration_uri_title" translatable="false">Keycloak configuration</string>
+    <string name="restriction_keycloak_configuration_uri_description" translatable="false">Configuration link provided by the Olvid keycloak plugin</string>
+    <string name="restriction_disable_new_version_notification_title" translatable="false">Disable new version notification</string>
+    <string name="restriction_disable_new_version_notification_description" translatable="false">Set to "true" to prevent users from receiving a notification when a new version of Olvid is available on the store. This is especially usefull if the application can only be updated through the MDM.</string>
     <string name="dialog_title_open_external_app_warning">Open with external app</string>
     <string name="dialog_message_open_external_app_warning">You are about to open a file with an external application. The content of this file will be exposed outside of Olvid.\nDo you wish to proceed?</string>
     <string name="menu_action_unblock_discussion">Unblock discussion</string>

@@ -272,9 +272,10 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         }
 
         // if lastKnownLocation is accessible use it to center
-        if (mapboxMap.getLocationComponent().isLocationComponentEnabled() && mapboxMap.getLocationComponent().getLastKnownLocation() != null) {
-            centerOnLocation(mapboxMap.getLocationComponent().getLastKnownLocation(), animate);
-            mapboxMap.getLocationComponent().forceLocationUpdate(mapboxMap.getLocationComponent().getLastKnownLocation());
+        Location lastKnownLocation = mapboxMap.getLocationComponent().getLastKnownLocation();
+        if (mapboxMap.getLocationComponent().isLocationComponentEnabled() &&  lastKnownLocation != null) {
+            centerOnLocation(lastKnownLocation, animate);
+            mapboxMap.getLocationComponent().forceLocationUpdate(lastKnownLocation);
         } else {
             // else try to get best provider last location, and else request current location (can be quite long)
             LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
@@ -291,8 +292,10 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             Executor executor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ? App.getContext().getMainExecutor() : new HandlerExecutor(Looper.getMainLooper());
             if (provider != null) {
                 LocationManagerCompat.getCurrentLocation(locationManager, provider, null, executor, location -> {
-                    centerOnLocation(location, animate);
-                    mapboxMap.getLocationComponent().forceLocationUpdate(location);
+                    if (location != null) {
+                        centerOnLocation(location, animate);
+                        mapboxMap.getLocationComponent().forceLocationUpdate(location);
+                    }
                 });
             }
         }
@@ -332,7 +335,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             onSnapshotReadyCallback.accept(null);
             return;
         }
-        // hide attributions icon
+        // hide attributions icon7
         mapboxMap.getUiSettings().setAttributionEnabled(false);
         mapboxMap.getUiSettings().setCompassEnabled(false);
 

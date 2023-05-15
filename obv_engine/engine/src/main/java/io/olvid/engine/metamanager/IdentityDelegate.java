@@ -137,7 +137,8 @@ public interface IdentityDelegate {
     boolean forcefullyUnblockContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     boolean reBlockForcefullyUnblockedContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
 
-    void addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid) throws SQLException;
+    // return true if a device was indeed added, false if the device already existed, and throws an exception if adding the device failed
+    boolean addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid) throws SQLException;
     void removeDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid) throws SQLException;
     void removeAllDevicesForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     UID[] getDeviceUidsOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
@@ -223,7 +224,7 @@ public interface IdentityDelegate {
     byte[] createKeycloakGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, KeycloakGroupBlob keycloakGroupBlob);
     KeycloakGroupV2UpdateOutput updateKeycloakGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, KeycloakGroupBlob keycloakGroupBlob) throws Exception;
     void rePingOrDemoteContactFromAllKeycloakGroups(Session session, Identity ownedIdentity, Identity contactIdentity, boolean certifiedByOwnKeycloak, String lastKnownSerializedCertifiedDetails) throws SQLException;
-
+    boolean isIdentityAPendingGroupV2Member(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity obliviousChannelContactIdentity) throws SQLException;
     // endregion
 
 

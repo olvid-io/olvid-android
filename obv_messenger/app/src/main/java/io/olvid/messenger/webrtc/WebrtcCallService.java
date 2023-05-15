@@ -2053,8 +2053,11 @@ public class WebrtcCallService extends Service {
                     .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
                     .setCategory(Notification.CATEGORY_CALL)
                     .setContentIntent(callActivityPendingIntent);
-
-            startForeground(SERVICE_ID, builder.build());
+            try {
+                startForeground(SERVICE_ID, builder.build());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, AndroidNotificationManager.WEBRTC_CALL_SERVICE_NOTIFICATION_CHANNEL_ID);
             builder.setContentTitle(getString(R.string.notification_title_webrtc_call))
@@ -2069,7 +2072,11 @@ public class WebrtcCallService extends Service {
 
             builder.addAction(R.drawable.ic_end_call, getString(R.string.notification_action_end_call), endCallPendingIntent);
 
-            startForeground(SERVICE_ID, builder.build());
+            try {
+                startForeground(SERVICE_ID, builder.build());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

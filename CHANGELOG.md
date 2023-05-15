@@ -1,8 +1,13 @@
+# Build 202 (0.14.1)
+2023-05-15
+
+- Bug fixes
+
 # Build 201 (0.14.0)
 2023-04-19
 
-- dependency updates
-- various fixes
+- Dependency updates
+- Various fixes
 
 # ~~Build 200 (0.14.0)~~
 2023-04-05

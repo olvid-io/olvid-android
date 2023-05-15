@@ -997,9 +997,16 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 return new CancelledState();
             }
 
-            // add the contact deviceUid if not already there --> we no longer trigger a device discovery
+            // Add the contactDeviceUid to the contactIdentity if needed --> If the device was indeed added, trigger a device discovery
             try {
-                protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid);
+                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid)) {
+                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                            ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                            new UID(getPrng()),
+                            false);
+                    ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                }
             } catch (Exception e) {
                 Logger.w("Exception when adding a contact device");
             }
@@ -1065,9 +1072,16 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 return new CancelledState();
             }
 
-            // Add the contactDeviceUid to the contactIdentity if needed --> we no longer trigger a device discovery
+            // Add the contactDeviceUid to the contactIdentity if needed --> If the device was indeed added, trigger a device discovery
             try {
-                protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid);
+                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid)) {
+                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                            ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                            new UID(getPrng()),
+                            false);
+                    ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                }
             } catch (Exception e) {
                 Logger.w("Exception when adding a contact device");
             }

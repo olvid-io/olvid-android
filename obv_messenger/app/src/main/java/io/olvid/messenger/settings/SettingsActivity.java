@@ -1003,7 +1003,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             if ("".equals(retentionCountString)) {
                 return null;
             }
-            return Long.parseLong(retentionCountString);
+            long count = Long.parseLong(retentionCountString);
+            return count == 0 ? null : count;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1012,7 +1013,11 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static void setDefaultDiscussionRetentionCount(long count) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
-        editor.putString(PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT, Long.toString(count));
+        if (count == 0) {
+            editor.remove(PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT);
+        } else {
+            editor.putString(PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT, Long.toString(count));
+        }
         editor.apply();
     }
 

@@ -60,15 +60,6 @@ fun CallLogScreen(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            FloatingActionButton(modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 80.dp, end = 16.dp),
-                onClick = onNewCallClick
-            ) {
-                Image(painter = painterResource(id = R.drawable.ic_phone), contentDescription = stringResource(
-                    id = R.string.button_label_call
-                ))
-            }
             callLog?.let { log ->
                 if (log.isEmpty().not()) {
                     LazyColumn(
@@ -110,6 +101,15 @@ fun CallLogScreen(
                 } else {
                     EmptyListCard(stringRes =  R.string.explanation_empty_call_log)
                 }
+            }
+            FloatingActionButton(modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 80.dp, end = 16.dp),
+                onClick = onNewCallClick
+            ) {
+                Image(painter = painterResource(id = R.drawable.ic_phone), contentDescription = stringResource(
+                    id = R.string.button_label_call
+                ))
             }
         }
     }

@@ -19,6 +19,10 @@
 
 package io.olvid.messenger;
 
+import android.content.Context;
+import android.content.RestrictionsManager;
+import android.os.Bundle;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -138,6 +142,21 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 boolean updated = (boolean) userInfo.get(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS_UPDATED_KEY);
 
                 if (appInfo != null) {
+                    try {
+                        RestrictionsManager restrictionsManager = (RestrictionsManager) App.getContext().getSystemService(Context.RESTRICTIONS_SERVICE);
+                        Bundle restrictions =  restrictionsManager.getApplicationRestrictions();
+
+                        if (restrictions != null && restrictions.containsKey("disable_new_version_notification")) {
+                            boolean disableNewVersionNotification = restrictions.getBoolean("disable_new_version_notification");
+                            if (disableNewVersionNotification) {
+                                // if notifications are disable, do not even check if our version is up-to-date
+                                break;
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     if (updated) {
                         Integer latest = appInfo.get("latest_android");
                         if (latest != null && latest > BuildConfig.VERSION_CODE) {

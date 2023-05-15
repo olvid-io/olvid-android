@@ -135,8 +135,8 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                                 ownedIdentity.bytesOwnedIdentity,
                                 contactOrKeycloakDetails.keycloakUserDetails.id,
                                 contactOrKeycloakDetails.keycloakUserDetails.identity,
-                                object : KeycloakCallback<Void> {
-                                    override fun success(result: Void) {
+                                object : KeycloakCallback<Void?> {
+                                    override fun success(result: Void?) {
                                         App.toast(
                                             getString(
                                                 R.string.toast_message_contact_added,

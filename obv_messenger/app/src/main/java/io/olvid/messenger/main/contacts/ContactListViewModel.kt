@@ -32,6 +32,7 @@ import io.olvid.engine.engine.types.JsonKeycloakUserDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
@@ -106,6 +107,7 @@ class ContactListViewModel : ViewModel() {
                 filteredContacts,
                 unfilteredContacts,
                 unfilteredNotOneToOneContacts,
+                keycloakSearchBytesOwnedIdentity,
                 keycloakSearchInProgress,
                 keycloakSearchResults,
                 keycloakSearchAdditionalResults
@@ -127,6 +129,7 @@ class ContactListViewModel : ViewModel() {
         filteredContacts: MutableLiveData<List<ContactOrKeycloakDetails>?>,
         unfilteredContacts: List<Contact>?,
         unfilteredNotOneToOneContacts: List<Contact>?,
+        keycloakSearchBytesOwnedIdentity: ByteArray?,
         keycloakSearchInProgress: Boolean,
         keycloakSearchResults: List<JsonKeycloakUserDetails>?,
         keycloakSearchAdditionalResults: Boolean
@@ -135,6 +138,7 @@ class ContactListViewModel : ViewModel() {
         private val filteredContacts: MutableLiveData<List<ContactOrKeycloakDetails>?>
         private val unfilteredContacts: List<Contact>?
         private val unfilteredNotOneToOneContacts: List<Contact>?
+        private val keycloakSearchBytesOwnedIdentity: ByteArray?
         private val keycloakSearchInProgress: Boolean
         private val keycloakSearchResults: List<JsonKeycloakUserDetails>?
         private val keycloakSearchAdditionalResults: Boolean
@@ -143,6 +147,7 @@ class ContactListViewModel : ViewModel() {
             this.filteredContacts = filteredContacts
             this.unfilteredContacts = unfilteredContacts
             this.unfilteredNotOneToOneContacts = unfilteredNotOneToOneContacts
+            this.keycloakSearchBytesOwnedIdentity = keycloakSearchBytesOwnedIdentity
             this.keycloakSearchInProgress = keycloakSearchInProgress
             this.keycloakSearchResults = keycloakSearchResults
             this.keycloakSearchAdditionalResults = keycloakSearchAdditionalResults
@@ -201,9 +206,8 @@ class ContactListViewModel : ViewModel() {
                     keycloakSearchResults?.let {
                         for (keycloakUserDetails in keycloakSearchResults) {
                             // check if the we know the contact by querying the cache (note that this also filters out our ownedIdentity)
-                            val displayName =
-                                AppSingleton.getContactCustomDisplayName(keycloakUserDetails.identity)
-                            if (displayName == null && keycloakUserDetails.identity != null) {
+                            val trustLevel : Int? = AppSingleton.getContactTrustLevel(keycloakUserDetails.identity)
+                            if (trustLevel == null && keycloakUserDetails.identity != null  && !(keycloakUserDetails.identity contentEquals keycloakSearchBytesOwnedIdentity)) {
                                 // unknown contact --> add them to the list
                                 list.add(ContactOrKeycloakDetails(keycloakUserDetails))
                             }
