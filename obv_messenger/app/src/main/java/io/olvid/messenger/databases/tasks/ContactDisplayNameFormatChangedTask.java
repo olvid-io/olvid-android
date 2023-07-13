@@ -45,27 +45,33 @@ public class ContactDisplayNameFormatChangedTask implements Runnable {
             AppDatabase db = AppDatabase.getInstance();
 
             for (Contact contact : db.contactDao().getAllSync()) {
-                JsonIdentityDetails identityDetails = contact.getIdentityDetails();
-                if (identityDetails == null) {
-                    // at next startup contactDetails will be updated and the names recomputed
-                    continue;
+                try {
+                    JsonIdentityDetails identityDetails = contact.getIdentityDetails();
+                    if (identityDetails == null) {
+                        // at next startup contactDetails will be updated and the names recomputed
+                        continue;
+                    }
+
+                    /////////
+                    // first, compute the displayName
+                    contact.displayName = identityDetails.formatDisplayName(contactDisplayNameFormat, uppercaseLastName);
+
+                    /////////
+                    // then, compute the sortDisplayName
+                    contact.sortDisplayName = computeSortDisplayName(collator, identityDetails, contact.customDisplayName, lastNameSort);
+
+                    db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
+
+                    Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                    if (discussion != null) {
+                        discussion.title = contact.getCustomDisplayName();
+                        db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
+
+                        ShortcutActivity.updateShortcut(discussion);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                /////////
-                // first, compute the displayName
-                contact.displayName = identityDetails.formatDisplayName(contactDisplayNameFormat, uppercaseLastName);
-
-                /////////
-                // then, compute the sortDisplayName
-                contact.sortDisplayName = computeSortDisplayName(collator, identityDetails, contact.customDisplayName, lastNameSort);
-
-                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
-
-                Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                discussion.title = contact.getCustomDisplayName();
-                db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
-
-                ShortcutActivity.updateShortcut(discussion);
             }
 
             new UpdateAllGroupMembersNames().run();

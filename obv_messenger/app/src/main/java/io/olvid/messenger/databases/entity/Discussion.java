@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
@@ -40,6 +41,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
 import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
 import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -390,16 +392,32 @@ public class Discussion {
         db.messageDao().deleteDiscussionDraftMessage(id);
         db.messageDao().deleteAllDiscussionNewPublishedDetailsMessages(id);
 
+        HashSet<Long> messageIdsAlreadyMarkedUndelivered = new HashSet<>();
+
         for (MessageRecipientInfo messageRecipientInfo : db.messageRecipientInfoDao().getAllUnsentForDiscussion(id)) {
-            if (messageRecipientInfo.engineMessageIdentifier == null) {
-                // message was never sent (and will never be) --> delete
-                db.messageRecipientInfoDao().delete(messageRecipientInfo);
-            } else {
-                messageRecipientInfo.timestampSent = 0L;
-                db.messageRecipientInfoDao().update(messageRecipientInfo);
-                Message message = db.messageDao().get(messageRecipientInfo.messageId);
-                if (message != null && message.refreshOutboundStatus()) {
-                    db.messageDao().updateStatus(message.id, message.status);
+            messageRecipientInfo.timestampSent = 0L;
+            db.messageRecipientInfoDao().update(messageRecipientInfo);
+
+            // if message was already treated, do nothing for the recipient info
+            if (messageIdsAlreadyMarkedUndelivered.contains(messageRecipientInfo.messageId)) {
+                continue;
+            }
+
+            messageIdsAlreadyMarkedUndelivered.add(messageRecipientInfo.messageId);
+
+            Message message = db.messageDao().get(messageRecipientInfo.messageId);
+            if (message != null && message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                if (messageRecipientInfo.engineMessageIdentifier != null) {
+                    try {
+                        UnifiedForegroundService.processUploadedMessageIdentifier(messageRecipientInfo.engineMessageIdentifier);
+                        AppSingleton.getEngine().cancelMessageSending(bytesOwnedIdentity, messageRecipientInfo.engineMessageIdentifier);
+                    } catch (Exception ignored) { }
+                }
+                message.status = Message.STATUS_UNDELIVERED;
+                db.messageDao().updateStatus(message.id, message.status);
+                db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_UNDELIVERED, System.currentTimeMillis()));
+                if (message.jsonExpiration != null) {
+                    App.runThread(new ExpiringOutboundMessageSent(message));
                 }
             }
         }
@@ -466,9 +484,15 @@ public class Discussion {
 
             db.discussionDao().updateAsLocked(id);
 
+            // stop sharing location in this discussion
             if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(id)) {
                 UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(id, true);
             }
+            // also mark as ended all currently sharing location messages
+            for (Message message : db.messageDao().getCurrentlySharingInboundLocationMessagesInDiscussion(id)) {
+                db.messageDao().updateLocationType(message.id, Message.LOCATION_TYPE_SHARE_FINISHED);
+            }
+
             ShortcutActivity.updateShortcut(this);
         }
     }

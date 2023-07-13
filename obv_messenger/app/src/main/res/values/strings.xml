@@ -103,6 +103,21 @@
     <string name="hint_company">Company (optional)</string>
     <string name="hint_compose_your_message">Write message</string>
     <string name="label_edit_your_message">Edit your message</string>
+    <string name="label_selection_formatting">Formatting</string>
+    <string name="label_selection_code">Code</string>
+    <string name="label_selection_list">List</string>
+    <string name="label_selection_list_bullet">Bullet</string>
+    <string name="label_selection_list_ordered">Numbered</string>
+    <string name="label_selection_quote">Quote</string>
+    <string name="label_selection_heading">Heading</string>
+    <string name="label_selection_heading_1">Heading1</string>
+    <string name="label_selection_heading_2">Heading2</string>
+    <string name="label_selection_heading_3">Heading3</string>
+    <string name="label_selection_heading_4">Heading4</string>
+    <string name="label_selection_heading_5">Heading5</string>
+    <string name="label_selection_bold">Bold</string>
+    <string name="label_selection_italic">Italic</string>
+    <string name="label_selection_strikethrough">Strikethrough</string>
     <string name="hint_contact_name">Contact Name</string>
     <string name="hint_contact_or_group_name">Contact or Group Name</string>
     <string name="hint_first_name">First Name</string>
@@ -134,8 +149,8 @@
     <string name="invitation_status_mediator_invite">Contact introduction</string>
     <string name="invitation_status_mediator_invite_accepted">Introduction accepted</string>
     <string name="invitation_status_mediator_invite_information_sent">You introduced %1$s</string>
-    <string name="invitation_status_mediator_invite_information_accepted">You accepted %1$s introduction</string>
-    <string name="invitation_status_mediator_invite_information_ignored">You ignored %1$s introduction</string>
+    <string name="invitation_status_mediator_invite_information_accepted">You accepted the introduction of %1$s</string>
+    <string name="invitation_status_mediator_invite_information_ignored">You ignored the introduction of %1$s</string>
     <string name="label_copy">Copy</string>
     <string name="label_creating_channel">Creating\nChannel</string>
     <string name="label_download">Download</string>
@@ -818,6 +833,7 @@
     <string name="text_discussion_remotely_deleted_by">Discussion remotely deleted by %1$s</string>
     <string name="toast_message_unable_to_update_message">Unable to update message</string>
     <string name="text_edited">Edited</string>
+    <string name="menu_action_mute_notifications">Mute notifications</string>
     <string name="menu_action_unmute_notifications">Unmute notifications</string>
     <string name="dialog_title_unmute_notifications">Unmute notifications</string>
     <string name="button_label_unmute_notifications">Unmute</string>
@@ -1060,7 +1076,7 @@
     <string name="restriction_keycloak_configuration_uri_title" translatable="false">Keycloak configuration</string>
     <string name="restriction_keycloak_configuration_uri_description" translatable="false">Configuration link provided by the Olvid keycloak plugin</string>
     <string name="restriction_disable_new_version_notification_title" translatable="false">Disable new version notification</string>
-    <string name="restriction_disable_new_version_notification_description" translatable="false">Set to "true" to prevent users from receiving a notification when a new version of Olvid is available on the store. This is especially usefull if the application can only be updated through the MDM.</string>
+    <string name="restriction_disable_new_version_notification_description" translatable="false">Set to \"true\" to prevent users from receiving a notification when a new version of Olvid is available on the store. This is especially useful if the application can only be updated through the MDM.</string>
     <string name="dialog_title_open_external_app_warning">Open with external app</string>
     <string name="dialog_message_open_external_app_warning">You are about to open a file with an external application. The content of this file will be exposed outside of Olvid.\nDo you wish to proceed?</string>
     <string name="menu_action_unblock_discussion">Unblock discussion</string>
@@ -1450,7 +1466,7 @@
     <string name="label_metadata_kind_location_sharing_end">Sharing ended</string>
     <string name="label_share_location_latest_update">Latest update: %1$s</string>
     <string name="title_stop_sharing_location">Stop location sharing</string>
-    <string name="label_stop_sharing_location">Do you want to stop sharing your location ?</string>
+    <string name="label_stop_sharing_location">Do you want to stop sharing your location?</string>
     <string name="button_label_stop">Stop</string>
     <string name="label_live" translatable="false">live</string>
     <string name="text_message_sharing_location">Location sharing in progress</string>
@@ -1459,8 +1475,8 @@
     <string name="dialog_title_grant_location_access">Grant location access</string>
     <string name="dialog_message_grant_location_access">You have to grant Olvid access to your location to use this feature.</string>
     <string name="button_label_grant_access">Grant access</string>
-    <string name="menu_action_location_message_copy">Copy</string>
-    <string name="menu_action_location_message_open">Open</string>
+    <string name="menu_action_location_message_copy">Copy GPS coordinates</string>
+    <string name="menu_action_location_message_open">Open in external app</string>
     <string name="menu_action_location_message_stop_sharing">Stop sharing</string>
     <string name="toast_location_coordinates_copied_to_clipboard">Coordinates copied to clipboard</string>
     <string name="button_label_send">Send</string>
@@ -1614,8 +1630,8 @@
     <string name="text_feature_initiate_secure_calls_from_another_profile">Initiate secure calls\n(available through another profile)</string>
     <string name="dialog_title_confirm_open_link">Open this link in your browser?</string>
     <string name="toast_message_unable_to_open_url">Unable to open URL</string>
-    <string name="text_explanation_location_map_provider">Choosing a map service allows to precisely pick the location you want to share on a map. However, this may disclose your location (or the location of your contacts) to this service provider.</string>
-    <string name="text_explanation_location_map_provider_settings">This choice may later be changed from the main application settings</string>
+    <string name="text_explanation_location_map_provider">Choosing a map provider allows to precisely pick the location you want to share on a map. However, this may disclose your location (or the location of your contacts) to this service provider.</string>
+    <string name="text_explanation_location_map_provider_settings">This choice can be changed from the application settings</string>
     <string name="button_label_choose_provider">Choose a provider</string>
     <string name="button_label_live_share">Live share</string>
     <string name="label_fetching_address">Fetching address…</string>
@@ -1628,8 +1644,10 @@
     <string name="pref_no_notify_certificate_change_for_previews_summary">Enable this option to disable certificate change detection when fetching a link preview. Some sites may present a different certificate at each connection and you may get frequent notifications with this option off.</string>
     <string name="pref_use_legacy_zxing_scanner_title">Use legacy ZXing library for QR code scanning</string>
     <string name="pref_use_legacy_zxing_scanner_summary">By default, ML Kit is used for QR code scanning. Enable this option if you have issues scanning QR codes from within Olvid.</string>
-
-
+    <string name="dialog_title_remove_background_image">Remove current background image?</string>
+    <string name="dialog_title_introducing_markdown">Introducing message formatting!</string>
+    <string name="dialog_message_introducing_markdown">Olvid now allows formatting your messages using markdown syntax\u00a0🎨!\n\nWrite in **<b>bold</b>**, in *<i>italic</i>*, add #\u00a0<big>HEADINGS</big>, etc.\n\nFind the list of all supported tags\u00a0🦍 at:\nhttps://www.olvid.io/faq/format-your-messages/</string>
+    <string name="menu_action_location_message_change_integration">Change map provider</string>
 
 
     <plurals name="dialog_message_delete_user_impossible_count">

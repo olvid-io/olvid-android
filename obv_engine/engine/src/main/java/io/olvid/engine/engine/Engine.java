@@ -1819,6 +1819,16 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
     }
 
+    @Override
+    public void cancelMessageSending(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier) {
+        try (EngineSession engineSession = getSession()) {
+            engineSession.session.startTransaction();
+            sendManager.cancelMessageSending(engineSession.session, Identity.of(bytesOwnedIdentity), new UID(engineMessageIdentifier));
+            engineSession.session.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public boolean isInboxAttachmentReceived(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier, int attachmentNumber) {

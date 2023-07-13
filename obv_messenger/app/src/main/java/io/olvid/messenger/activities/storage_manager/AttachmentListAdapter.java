@@ -403,7 +403,6 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                         if (AppSingleton.getBytesCurrentIdentity() != null) {
                             String sortOrder;
                             switch (viewModel.getCurrentSortOrder().sortKey) {
-
                                 case SIZE:
                                     sortOrder = "size";
                                     break;
@@ -415,7 +414,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                                     sortOrder = null;
                                     break;
                             }
-                            App.openOwnedIdentityGalleryActivity(activity, AppSingleton.getBytesCurrentIdentity(), sortOrder, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
+                            App.openOwnedIdentityGalleryActivity(activity, AppSingleton.getBytesCurrentIdentity(), sortOrder, viewModel.getCurrentSortOrder().ascending, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
                         }
                     } else if (fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().equals(OpenGraph.MIME_TYPE)) {
                         OpenGraph openGraph = new OpenGraph();

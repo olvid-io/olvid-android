@@ -23,7 +23,7 @@
         android:visibility="gone"
         android:layout_marginBottom="4dp"
         app:layout_goneMarginBottom="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/message_link_preview_group"
+        app:layout_constraintBottom_toTopOf="@+id/message_forwarded_badge"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -84,18 +84,6 @@
             tools:text="7 attachments"
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <include
-        layout="@layout/view_message_link_preview"
-        android:id="@+id/message_link_preview_group"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/message_content_reply_group"
-        app:layout_constraintBottom_toTopOf="@+id/message_forwarded_badge"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_min="wrap" />
 
     <TextView
         android:id="@+id/message_forwarded_badge"
@@ -250,4 +238,5 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_expander_outbound" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

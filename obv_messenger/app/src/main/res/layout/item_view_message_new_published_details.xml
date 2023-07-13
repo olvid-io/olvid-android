@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         app:layout_constrainedWidth="true"
         android:ellipsize="end"
-        android:maxLines="2"
+        android:maxLines="3"
         android:layout_marginStart="16dp"
         android:textColor="@color/primary700"
         android:layout_marginTop="6dp"

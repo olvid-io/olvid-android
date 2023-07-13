@@ -239,8 +239,8 @@ public class DeleteMessagesTask implements Runnable {
                     db.discussionDao().delete(discussion);
                     ShortcutActivity.disableShortcut(discussionId);
                 }
-            } else if (db.messageDao().getDiscussionDraftMessageSync(discussionId) == null) {
-                // only remove discussion from list if there is no draft
+            } else if (db.messageDao().getDiscussionDraftMessageSync(discussionId) == null && !db.invitationDao().discussionHasInvitations(discussionId)) {
+                // only remove discussion from list if there is no draft and no invitation
                 discussion.lastMessageTimestamp = 0;
                 db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
             }

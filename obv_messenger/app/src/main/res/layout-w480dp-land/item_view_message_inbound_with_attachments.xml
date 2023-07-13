@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:id="@+id/message_root_constraint_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/message_root_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    android:paddingBottom="2dp"
     android:paddingTop="2dp"
+    android:paddingBottom="2dp"
     android:theme="@style/SubtleGreyRipple">
 
     <CheckBox
@@ -20,12 +19,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
-        android:theme="@style/AppTheme.OrangeAccent"
         android:clickable="false"
+        android:theme="@style/AppTheme.OrangeAccent"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/message_content_card"
-        tools:visibility="visible"/>
+        tools:visibility="visible" />
 
     <io.olvid.messenger.customClasses.InitialView
         android:id="@+id/sender_initial_view"
@@ -44,9 +43,9 @@
         android:layout_height="5dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"
         tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.Barrier
@@ -68,103 +67,109 @@
         android:layout_width="32dp"
         android:layout_height="5dp"
         android:layout_marginTop="2dp"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="@id/compensator_spacer"
         app:layout_constraintTop_toTopOf="parent"
-        android:visibility="visible"
         tools:visibility="gone" />
 
     <TextView
         android:id="@+id/missing_message_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constrainedWidth="true"
-        android:textSize="12sp"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp"
+        android:layout_marginEnd="32dp"
         android:background="@drawable/background_missing_message"
-        android:textStyle="italic"
+        android:drawablePadding="4dp"
+        android:paddingStart="4dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="2dp"
         android:textColor="@color/greyOverlay"
-        tools:text="1 message missing…"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:visibility="gone"
+        app:drawableStartCompat="@drawable/ic_question_mark"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toStartOf="@id/message_checkbox_compensator"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="@+id/message_content_card"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/message_checkbox_compensator"
-        android:layout_marginEnd="32dp"
-        android:visibility="gone"
-        tools:visibility="visible"
-        app:layout_constraintHorizontal_bias="0"
-        app:drawableStartCompat="@drawable/ic_question_mark"
-        android:drawablePadding="4dp" />
+        tools:text="1 message missing…"
+        tools:visibility="visible" />
 
     <io.olvid.messenger.customClasses.SizeAwareCardView
         android:id="@+id/message_content_card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
         android:clickable="true"
         android:focusable="true"
-        android:layout_marginTop="4dp"
-        app:layout_goneMarginTop="0dp"
         android:foreground="?attr/selectableItemBackground"
         android:theme="@style/SubtleGreyRipple"
         app:cardBackgroundColor="@color/lighterGrey"
         app:cardCornerRadius="8dp"
         app:cardElevation="0dp"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintEnd_toStartOf="@+id/message_checkbox_compensator"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/initial_view_barrier"
-        app:layout_constraintTop_toBottomOf="@id/missing_message_textview">
+        app:layout_constraintTop_toBottomOf="@id/missing_message_textview"
+        app:layout_goneMarginTop="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <include layout="@layout/view_message_inbound_header"/>
-            <include layout="@layout/view_message_inbound_ephemeral_header" android:visibility="gone"/>
-            <include layout="@layout/view_message_attachment_card"/>
+            <include layout="@layout/view_message_inbound_header" />
+
+            <include
+                layout="@layout/view_message_inbound_ephemeral_header"
+                android:visibility="gone" />
+
+            <include layout="@layout/view_message_link_preview"/>
+            <include layout="@layout/view_message_attachment_card" />
         </LinearLayout>
 
     </io.olvid.messenger.customClasses.SizeAwareCardView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_marginTop="-4dp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/message_content_card"
+        android:layout_marginTop="-4dp"
+        app:layout_constraintEnd_toStartOf="@+id/message_checkbox_compensator"
         app:layout_constraintStart_toStartOf="@id/message_content_card"
-        app:layout_constraintEnd_toStartOf="@+id/message_checkbox_compensator">
+        app:layout_constraintTop_toBottomOf="@+id/message_content_card">
+
         <io.olvid.messenger.customClasses.DynamicFlow
             android:id="@+id/reactions_dynamic_flow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:background="@drawable/background_reaction"
             app:flow_horizontalBias="0"
             app:flow_horizontalGap="4dp"
             app:flow_horizontalStyle="packed"
             app:flow_verticalBias="0"
             app:flow_verticalGap="2dp"
-            android:background="@drawable/background_reaction"
-            app:flow_wrapMode="chain" />
+            app:flow_wrapMode="chain"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:id="@+id/message_timer_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:drawableTopCompat="@drawable/ic_timer_small"
-        android:layout_marginTop="6dp"
         android:layout_marginStart="4dp"
+        android:layout_marginTop="6dp"
         android:gravity="center"
-        app:layout_constraintStart_toEndOf="@+id/message_content_card"
-        app:layout_constraintTop_toTopOf="@+id/message_content_card"
         android:textSize="12sp"
         android:visibility="gone"
-        tools:visibility="visible"
-        tools:text="35d" />
+        app:drawableTopCompat="@drawable/ic_timer_small"
+        app:layout_constraintStart_toEndOf="@+id/message_content_card"
+        app:layout_constraintTop_toTopOf="@+id/message_content_card"
+        tools:text="35d"
+        tools:visibility="visible" />
 
 
     <androidx.constraintlayout.widget.Guideline
@@ -186,6 +191,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="end"
-        app:constraint_referenced_ids="guideline_60p, guideline_400"/>
+        app:constraint_referenced_ids="guideline_60p, guideline_400" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

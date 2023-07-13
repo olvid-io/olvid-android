@@ -20,6 +20,7 @@
 package io.olvid.messenger.discussion.settings;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,6 +28,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceFragmentCompat;
@@ -35,6 +37,7 @@ import androidx.preference.PreferenceScreen;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.ImageViewPreference;
+import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.tasks.RemoveDiscussionBackgroundImageTask;
@@ -81,7 +84,11 @@ public class DiscussionCustomizationPreferenceFragment extends PreferenceFragmen
                 if (discussionSettingsViewModel != null) {
                     DiscussionCustomization discussionCustomization = discussionSettingsViewModel.getDiscussionCustomization().getValue();
                     if (discussionCustomization != null && discussionCustomization.backgroundImageUrl != null) {
-                        App.runThread(new RemoveDiscussionBackgroundImageTask(discussionCustomization.discussionId));
+                        final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                                .setTitle(R.string.dialog_title_remove_background_image)
+                                .setPositiveButton(R.string.button_label_ok, (DialogInterface dialog, int which) -> App.runThread(new RemoveDiscussionBackgroundImageTask(discussionCustomization.discussionId)))
+                                .setNegativeButton(R.string.button_label_cancel, null);
+                        builder.create().show();
                     } else {
                         Intent intent = new Intent(Intent.ACTION_GET_CONTENT)
                                 .setType("image/*")

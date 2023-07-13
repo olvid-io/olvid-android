@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 import java.util.Objects;
 
@@ -84,15 +85,15 @@ public class LocationIntegrationSelectorDialog {
         linearLayout.setPadding(3*fourDp, 2*fourDp, 3*fourDp, fourDp);
 
         TextView disclaimerTextView = new TextView(context);
-        disclaimerTextView.setBackgroundResource(R.drawable.background_warning_message);
-        disclaimerTextView.setPadding(fourDp, fourDp, fourDp, fourDp);
+        disclaimerTextView.setBackgroundResource(R.drawable.background_info_message);
+        disclaimerTextView.setPadding(2*fourDp, fourDp, 2*fourDp, fourDp);
         disclaimerTextView.setText(R.string.text_explanation_location_map_provider);
+        disclaimerTextView.setTextColor(ContextCompat.getColor(context, R.color.primary700));
         linearLayout.addView(disclaimerTextView);
 
         TextView settingsTextView = new TextView(context);
-        settingsTextView.setPadding(0, 2*fourDp, 0, 0);
+        settingsTextView.setPadding(2*fourDp, 2*fourDp, 2*fourDp, 0);
         settingsTextView.setText(R.string.text_explanation_location_map_provider_settings);
-        settingsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         linearLayout.addView(settingsTextView);
 
 

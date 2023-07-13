@@ -102,6 +102,21 @@
     <string name="hint_company">Société (facultatif)</string>
     <string name="hint_compose_your_message">Écrire un message</string>
     <string name="label_edit_your_message">Modifiez votre message</string>
+    <string name="label_selection_formatting">Mise en forme</string>
+    <string name="label_selection_code">Code</string>
+    <string name="label_selection_list">Liste</string>
+    <string name="label_selection_list_bullet">Puces</string>
+    <string name="label_selection_list_ordered">Numérotée</string>
+    <string name="label_selection_quote">Citation</string>
+    <string name="label_selection_heading">Titre</string>
+    <string name="label_selection_heading_1">Titre1</string>
+    <string name="label_selection_heading_2">Titre2</string>
+    <string name="label_selection_heading_3">Titre3</string>
+    <string name="label_selection_heading_4">Titre4</string>
+    <string name="label_selection_heading_5">Titre5</string>
+    <string name="label_selection_bold">Gras</string>
+    <string name="label_selection_italic">Italique</string>
+    <string name="label_selection_strikethrough">Barré</string>
     <string name="hint_contact_name">Nom du contact</string>
     <string name="hint_contact_or_group_name">Nom de contact ou de groupe</string>
     <string name="hint_first_name">Prénom</string>
@@ -810,6 +825,7 @@
     <string name="text_discussion_remotely_deleted_by">Discussion effacée à distance par %1$s</string>
     <string name="toast_message_unable_to_update_message">Impossible de mettre à jour le message</string>
     <string name="text_edited">Modifié</string>
+    <string name="menu_action_mute_notifications">Désactiver les notifications</string>
     <string name="menu_action_unmute_notifications">Réactiver les notifications</string>
     <string name="dialog_title_unmute_notifications">Réactiver les notifications</string>
     <string name="button_label_unmute_notifications">Réactiver</string>
@@ -1355,7 +1371,7 @@
     <string name="label_users_below_not_in_contacts">Les utilisateurs ci-dessous ne sont pas dans vos contacts</string>
     <string name="label_users_below_from_keycloak">Les utilisateurs ci-dessous ont été trouvés dans l\'annuaire de votre société</string>
     <string name="label_searching_company_directory">Recherche dans l\'annuaire de votre société…</string>
-    <string name="text_keycloak_missing_some_search_result">… plus de résultats disponibles\nVeuillez afiner votre recherche</string>
+    <string name="text_keycloak_missing_some_search_result">… plus de résultats disponibles\nVeuillez affiner votre recherche</string>
     <string name="notification_action_dismiss">Fermer</string>
     <string name="text_undelivered">Non reçu</string>
     <string name="label_metadata_kind_undelivered">Envoi non abouti</string>
@@ -1443,8 +1459,8 @@
     <string name="dialog_title_grant_location_access">Autoriser l\'accès à la position</string>
     <string name="dialog_message_grant_location_access">Vous devez accorder à Olvid l\'accès à la position pour utiliser cette fonctionnalité.</string>
     <string name="button_label_grant_access">Autoriser l\'accès</string>
-    <string name="menu_action_location_message_copy">Copier</string>
-    <string name="menu_action_location_message_open">Ouvrir</string>
+    <string name="menu_action_location_message_copy">Copier les coordonnées GPS</string>
+    <string name="menu_action_location_message_open">Ouvrir dans une app externe</string>
     <string name="toast_location_coordinates_copied_to_clipboard">Coordonnées copiées</string>
     <string name="menu_action_location_message_stop_sharing">Arrêter le partage</string>
     <string name="button_label_send">Envoyer</string>
@@ -1597,7 +1613,7 @@
     <string name="dialog_title_confirm_open_link">Ouvrir ce lien dans votre navigateur\u00a0?</string>
     <string name="toast_message_unable_to_open_url">Impossible d\'ouvrir l\'URL</string>
     <string name="text_explanation_location_map_provider">Choisir un service de cartographie vous permet de séléctionner précisément la position que vous souhaitez partager sur une carte. Toutefois, cela peut divulguer votre position (ou celle de vos contacts) à ce fournisseur de service.</string>
-    <string name="text_explanation_location_map_provider_settings">Ce choix peut être modifié par la suite depuis les paramètres de l\'application.</string>
+    <string name="text_explanation_location_map_provider_settings">Ce choix peut être modifié dans les paramètres de l\'application.</string>
     <string name="button_label_choose_provider">Choisir un service</string>
     <string name="button_label_live_share">Partage en direct</string>
     <string name="label_fetching_address">Recherche de l\'adresse…</string>
@@ -1610,9 +1626,10 @@
     <string name="pref_no_notify_certificate_change_for_previews_summary">Activez cette option pour désactiver la détection de changement de certificat lors du téléchargement d\'aperçus de liens. Certains sites peuvent présenter un certificat différent à chaque connexion, induisant des notifications fréquentes sans cette option.</string>
     <string name="pref_use_legacy_zxing_scanner_title">Utiliser ZXing pour scanner les codes QR</string>
     <string name="pref_use_legacy_zxing_scanner_summary">Par défaut, Olvid utilise ML Kit pour cela. Activez cette option si le scan de codes QR fonctionne mal dans Olvid.</string>
-
-
-
+    <string name="dialog_title_remove_background_image">Retirer l\'image d\'arrière plan actuelle\u00a0?</string>
+    <string name="dialog_title_introducing_markdown">Découvrez la mise en forme des messages\u00a0!</string>
+    <string name="dialog_message_introducing_markdown">Olvid vous permet maintenant de mettre en forme vos messages en utilisant la syntaxe markdown\u00a0🎨\u00a0!\n\nÉcrivez en **<b>gras</b>**, en *<i>italique</i>*, ajoutez des #\u00a0<big>TITRES</big>, etc.\n\nRetrouvez l\'ensemble des balises\u00a0🦍 possibles à\u00a0:\nhttps://www.olvid.io/faq/mettre-en-forme-vos-messages/</string>
+    <string name="menu_action_location_message_change_integration">Changer de service de cartographie</string>
 
 
     <plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity">
@@ -1708,8 +1725,8 @@
         <item quantity="other">Le stratégie de rétention des messages que vous avez choisie conduirait à la suppression de %1$d messages.\nSouhaitez vous continuer\u00a0?</item>
     </plurals>
     <plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity">
-        <item quantity="one" tools:ignore="ImpliedQuantity">… et un autre résultat\nVeuillez afiner votre recherche</item>
-        <item quantity="other">… et %1$d autres résultats\nVeuillez afiner votre recherche</item>
+        <item quantity="one" tools:ignore="ImpliedQuantity">… et un autre résultat\nVeuillez affiner votre recherche</item>
+        <item quantity="other">… et %1$d autres résultats\nVeuillez affiner votre recherche</item>
     </plurals>
     <plurals name="duration_seconds" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0seconde</item>

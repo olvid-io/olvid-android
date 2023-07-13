@@ -133,11 +133,13 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
             if (changed) {
                 // rename the corresponding one-to-one discussion
                 Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                discussion.title = contact.getCustomDisplayName();
-                discussion.photoUrl = contact.getCustomPhotoUrl();
-                db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
+                if (discussion != null) {
+                    discussion.title = contact.getCustomDisplayName();
+                    discussion.photoUrl = contact.getCustomPhotoUrl();
+                    db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
 
-                ShortcutActivity.updateShortcut(discussion);
+                    ShortcutActivity.updateShortcut(discussion);
+                }
             }
         }
     }

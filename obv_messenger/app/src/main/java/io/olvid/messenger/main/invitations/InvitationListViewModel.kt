@@ -41,6 +41,7 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Invitation
 import io.olvid.messenger.databases.entity.Message
@@ -206,7 +207,7 @@ class InvitationListViewModel : ViewModel() {
                             append(contactAnnotation.name)
                         }
                         pop()
-                    } ?: kotlin.run {
+                    } ifNull {
                         append(
                             contactAnnotation.name
                         )
@@ -264,7 +265,7 @@ class InvitationListViewModel : ViewModel() {
                             append(contactAnnotation.name)
                         }
                         pop()
-                    } ?: kotlin.run {
+                    } ifNull {
                         append(
                             contactAnnotation.name
                         )
@@ -701,7 +702,7 @@ fun Invitation.getAnnotatedTitle(context: Context): AnnotatedString {
                     if (groupDetails.isEmpty) {
                         associatedDialog.category.obvGroupV2.getReadableMembers()?.let {
                             append(it)
-                        } ?: kotlin.run {
+                        } ifNull {
                             withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                                 append(context.getString(R.string.text_unnamed_group))
                             }

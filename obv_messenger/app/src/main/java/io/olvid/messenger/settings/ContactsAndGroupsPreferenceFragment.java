@@ -37,6 +37,7 @@ import androidx.preference.SwitchPreference;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
@@ -50,6 +51,21 @@ import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompat {
     FragmentActivity activity;
     private boolean contactDisplayNameFormatChanged = false;
+    private boolean displayNameHasLastNameFirst = false;
+
+    private static boolean displayNameFormatHasLastNameFirst(String format) {
+        switch (format) {
+            case JsonIdentityDetails.FORMAT_STRING_LAST_FIRST:
+            case JsonIdentityDetails.FORMAT_STRING_LAST_FIRST_COMPANY:
+            case JsonIdentityDetails.FORMAT_STRING_LAST_FIRST_POSITION_COMPANY:
+                return true;
+            case JsonIdentityDetails.FORMAT_STRING_FIRST_LAST:
+            case JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_COMPANY:
+            case JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY:
+            default:
+                return false;
+        }
+    }
 
     @Override
     public void onDestroy() {
@@ -157,8 +173,8 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
         }
 
         {
-            final SwitchPreference sortByLastNamePreference = screen.findPreference(SettingsActivity.PREF_KEY_SORT_CONTACTS_BY_LAST_NAME);
             final ListPreference displayNameFormatPreference = screen.findPreference(SettingsActivity.PREF_KEY_CONTACT_DISPLAY_NAME_FORMAT);
+            final SwitchPreference sortByLastNamePreference = screen.findPreference(SettingsActivity.PREF_KEY_SORT_CONTACTS_BY_LAST_NAME);
             final SwitchPreference uppercaseLastNamePreference = screen.findPreference(SettingsActivity.PREF_KEY_UPPERCASE_LAST_NAME);
 
             Preference.OnPreferenceChangeListener preferenceChangeListener = (Preference preference, Object newValue) -> {
@@ -166,13 +182,21 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
                 return true;
             };
 
-            if (sortByLastNamePreference != null) {
+            if (displayNameFormatPreference != null && sortByLastNamePreference != null && uppercaseLastNamePreference != null) {
+                displayNameHasLastNameFirst = displayNameFormatHasLastNameFirst(SettingsActivity.getContactDisplayNameFormat());
+
+                displayNameFormatPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
+                    boolean newDisplayNameHasLastNameFirst = displayNameFormatHasLastNameFirst((String) newValue);
+                    if (newDisplayNameHasLastNameFirst ^ displayNameHasLastNameFirst) {
+                        if (sortByLastNamePreference.isChecked() == displayNameHasLastNameFirst) {
+                            sortByLastNamePreference.setChecked(newDisplayNameHasLastNameFirst);
+                        }
+                        displayNameHasLastNameFirst = newDisplayNameHasLastNameFirst;
+                    }
+                    contactDisplayNameFormatChanged = true;
+                    return true;
+                });
                 sortByLastNamePreference.setOnPreferenceChangeListener(preferenceChangeListener);
-            }
-            if (displayNameFormatPreference != null) {
-                displayNameFormatPreference.setOnPreferenceChangeListener(preferenceChangeListener);
-            }
-            if (uppercaseLastNamePreference != null) {
                 uppercaseLastNamePreference.setOnPreferenceChangeListener(preferenceChangeListener);
             }
         }

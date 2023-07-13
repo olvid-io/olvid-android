@@ -32,6 +32,7 @@ public interface NetworkSendDelegate {
     void cancelAttachmentUpload(Session session, Identity ownedIdentity, UID messageUid, int attachmentNumber) throws SQLException;
     boolean isOutboxAttachmentSent(Session session, Identity ownedIdentity, UID messageUid, int attachmentNumber) throws SQLException;
     boolean isOutboxMessageSent(Session session, Identity ownedIdentity, UID messageUid) throws SQLException;
+    void cancelMessageSending(Session session, Identity ownedIdentity, UID messageUid) throws SQLException;
 
     void retryScheduledNetworkTasks();
 }

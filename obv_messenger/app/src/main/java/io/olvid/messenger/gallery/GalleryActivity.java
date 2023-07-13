@@ -83,6 +83,7 @@ import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 public class GalleryActivity extends LockableActivity {
     public static final String BYTES_OWNED_IDENTITY_INTENT_EXTRA = "bytes_owned_identity";
     public static final String BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA = "sort_order";
+    public static final String BYTES_OWNED_IDENTITY_ASCENDING_INTENT_EXTRA = "ascending";
     public static final String DISCUSSION_ID_INTENT_EXTRA = "discussion_id";
     public static final String DRAFT_INTENT_EXTRA = "draft";
     public static final String INITIAL_MESSAGE_ID_INTENT_EXTRA = "initial_message_id";
@@ -252,6 +253,7 @@ public class GalleryActivity extends LockableActivity {
         if (viewModel.getCurrentPagerPosition() == null) {
             byte[] bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA);
             String sortOrder = intent.getStringExtra(BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA);
+            Boolean ascending = intent.getBooleanExtra(BYTES_OWNED_IDENTITY_ASCENDING_INTENT_EXTRA, true);
             long discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1);
             boolean draft = intent.getBooleanExtra(DRAFT_INTENT_EXTRA, false);
             long messageId = intent.getLongExtra(INITIAL_MESSAGE_ID_INTENT_EXTRA, -1);
@@ -261,7 +263,7 @@ public class GalleryActivity extends LockableActivity {
             if (discussionId != -1) {
                 viewModel.setDiscussionId(discussionId);
             } else if (bytesOwnedIdentity != null) {
-                viewModel.setBytesOwnedIdentity(bytesOwnedIdentity, sortOrder);
+                viewModel.setBytesOwnedIdentity(bytesOwnedIdentity, sortOrder, ascending);
             } else if (messageId != -1) {
                 viewModel.setMessageId(messageId, draft);
             } else {

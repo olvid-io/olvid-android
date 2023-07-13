@@ -287,7 +287,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                             boolean complete = false;
                             for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
                                 if (messageRecipientInfo.markAttachmentSent(engineNumber)) {
-                                    if (messageRecipientInfo.unsentAttachmentNumbers == null) {
+                                    if (messageRecipientInfo.unsentAttachmentNumbers == null && messageRecipientInfo.timestampSent == null) {
                                         messageRecipientInfo.timestampSent = timestamp;
                                         complete = true;
                                     }

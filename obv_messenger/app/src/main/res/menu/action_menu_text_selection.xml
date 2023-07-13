@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_text_selection_bold"
+        android:title="@string/label_selection_bold" />
+    <item
+        android:id="@+id/action_text_selection_italic"
+        android:title="@string/label_selection_italic" />
+    <item
+        android:id="@+id/action_text_selection_strikethrough"
+        android:title="@string/label_selection_strikethrough" />
+    <item
+        android:id="@+id/action_text_selection_heading"
+        android:title="@string/label_selection_heading">
+        <menu>
+            <item
+                android:id="@+id/action_text_selection_heading_1"
+                android:title="@string/label_selection_heading_1" />
+            <item
+                android:id="@+id/action_text_selection_heading_2"
+                android:title="@string/label_selection_heading_2" />
+            <item
+                android:id="@+id/action_text_selection_heading_3"
+                android:title="@string/label_selection_heading_3" />
+            <item
+                android:id="@+id/action_text_selection_heading_4"
+                android:title="@string/label_selection_heading_4" />
+            <item
+                android:id="@+id/action_text_selection_heading_5"
+                android:title="@string/label_selection_heading_5" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_text_selection_list"
+        android:title="@string/label_selection_list">
+        <menu>
+            <item
+                android:id="@+id/action_text_selection_list_bullet"
+                android:title="@string/label_selection_list_bullet" />
+            <item
+                android:id="@+id/action_text_selection_list_ordered"
+                android:title="@string/label_selection_list_ordered" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_text_selection_quote"
+        android:title="@string/label_selection_quote" />
+    <item
+        android:id="@+id/action_text_selection_code"
+        android:title="@string/label_selection_code" />
+</menu>

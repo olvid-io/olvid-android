@@ -23,6 +23,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.olvid.messenger.customClasses.StringUtils2
+import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Fyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -46,7 +47,7 @@ class LinkPreviewViewModel : ViewModel() {
                 openGraph.value =
                     linkPreviewRepository.fetchOpenGraph(url, imageWidth, imageHeight).apply { originalUrl = original }
             }
-        } ?: kotlin.run {
+        } ifNull {
             reset()
         }
     }

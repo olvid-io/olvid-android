@@ -1047,6 +1047,13 @@ public class UnifiedForegroundService extends Service {
                 case SYNC_SHARING_MESSAGES_ACTION: {
                     List<Message> shareMessages = AppDatabase.getInstance().messageDao().getOutboundSharingLocationMessages();
                     for (Message message : shareMessages) {
+                        // first, check the discussion is "normal"
+                        Discussion discussion = AppDatabase.getInstance().discussionDao().getById(message.discussionId);
+                        if (discussion == null || discussion.status != Discussion.STATUS_NORMAL) {
+                            AppDatabase.getInstance().messageDao().updateLocationType(message.id, Message.LOCATION_TYPE_SHARE_FINISHED);
+                            continue;
+                        }
+
                         Message.JsonLocation jsonLocation = message.getJsonLocation();
 
                         // check if sharing expired (and update message.locationType if needed)

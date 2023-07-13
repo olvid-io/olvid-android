@@ -30,6 +30,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.storage.StorageManager;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -43,6 +46,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.text.util.LinkifyCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -131,6 +135,7 @@ public class AppDialogShowActivity extends LockableActivity {
     public static final String DIALOG_INTRODUCING_MULTI_PROFILE = "introducing_multi_profile";
     public static final String DIALOG_INTRODUCING_GROUPS_V2 = "introducing_groups_v2";
     public static final String DIALOG_INTRODUCING_MENTIONS = "introducing_mentions";
+    public static final String DIALOG_INTRODUCING_MARKDOWN = "introducing_markdown";
 
     AppDialogShowViewModel appDialogShowViewModel;
 
@@ -549,6 +554,24 @@ public class AppDialogShowActivity extends LockableActivity {
                         .setPositiveButton(R.string.button_label_ok, null)
                         .setOnDismissListener(dialog -> continueWithNextDialog());
                 builder.create().show();
+                break;
+            }
+            case DIALOG_INTRODUCING_MARKDOWN: {
+                SpannableString message = new SpannableString(getText(R.string.dialog_message_introducing_markdown));
+                LinkifyCompat.addLinks(message, Linkify.WEB_URLS);
+                AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_introducing_markdown)
+                        .setMessage(message)
+                        .setPositiveButton(R.string.button_label_ok, null)
+                        .setOnDismissListener(dialog -> continueWithNextDialog());
+                AlertDialog dialog = builder.create();
+                dialog.setOnShowListener((DialogInterface dialogInterface) -> {
+                    View messageView = dialog.findViewById(android.R.id.message);
+                    if (messageView instanceof TextView) {
+                        ((TextView) messageView).setMovementMethod(LinkMovementMethod.getInstance());
+                    }
+                });
+                dialog.show();
                 break;
             }
             default: {

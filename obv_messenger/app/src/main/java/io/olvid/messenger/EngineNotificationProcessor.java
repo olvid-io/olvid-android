@@ -40,6 +40,7 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
+import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
@@ -394,6 +395,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                             Discussion discussion = db.discussionDao().getById(existingInvitation.discussionId);
                             if (discussion != null && discussion.isPreDiscussion() && !db.invitationDao().discussionHasInvitations(discussion.id)) {
                                 db.discussionDao().delete(discussion);
+                                ShortcutActivity.disableShortcut(discussion.id);
                             }
                         }
                     }

@@ -26,12 +26,9 @@ import androidx.annotation.NonNull;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import java.nio.charset.StandardCharsets;
 import java.text.Collator;
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,10 +36,8 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.messenger.App;
-import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.StringUtils;
-import io.olvid.messenger.databases.entity.Message;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[]{

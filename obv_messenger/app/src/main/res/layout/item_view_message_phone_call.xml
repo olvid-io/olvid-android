@@ -104,7 +104,7 @@
         android:layout_marginTop="6dp"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
-        android:maxLines="2"
+        android:maxLines="3"
         android:textColor="@color/primary700"
         app:layout_constraintBottom_toTopOf="@id/message_timestamp_bottom_text_view"
         app:layout_constraintEnd_toEndOf="parent"

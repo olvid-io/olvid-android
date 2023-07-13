@@ -872,16 +872,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static boolean isLinkPreviewInbound() {
-        if (!getBetaFeaturesEnabled()) {
-            return false;
-        }
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND, SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND_DEFAULT);
     }
 
     public static boolean isLinkPreviewOutbound() {
-        if (!getBetaFeaturesEnabled()) {
-            return false;
-        }
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(SettingsActivity.PREF_KEY_LINK_PREVIEW_OUTBOUND, SettingsActivity.PREF_KEY_LINK_PREVIEW_OUTBOUND_DEFAULT);
     }
 
@@ -1320,6 +1314,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static BlockUntrustedCertificate getBlockUntrustedCertificate() {
+        // never block a connection for API < 24 as the shutdownInput/shutdownOutput technique we use is not supported yet
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            return BlockUntrustedCertificate.NEVER;
+        }
         String value = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE, null);
         if (value != null) {
             switch (value) {

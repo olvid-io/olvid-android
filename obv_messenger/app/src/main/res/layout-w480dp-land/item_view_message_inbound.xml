@@ -118,8 +118,14 @@
         app:layout_constraintWidth_max="wrap">
 
 
-        <include layout="@layout/view_message_inbound_header" />
         <include layout="@layout/view_message_inbound_ephemeral_header" android:visibility="gone"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <include layout="@layout/view_message_inbound_header" />
+            <include layout="@layout/view_message_link_preview" />
+        </LinearLayout>
 
     </io.olvid.messenger.customClasses.SizeAwareCardView>
 

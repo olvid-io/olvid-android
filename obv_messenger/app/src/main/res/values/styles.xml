@@ -8,7 +8,6 @@
         <item name="android:navigationBarColor">@color/navigationBar</item>
         <item name="android:windowBackground">@color/lightGrey</item>
         <item name="android:textColorHint">@color/grey</item>
-        <item name="fontFamily">sans-serif</item>
     </style>
 
     <style name="CustomAlertDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
@@ -152,6 +151,26 @@
 
     <style name="BlueOrWhiteRipple" parent="AppTheme">
         <item name="colorControlHighlight">@color/blueOrWhiteOverlay</item>
+    </style>
+
+    <style name="Heading1">
+        <item name="android:textSize">36sp</item>
+    </style>
+
+    <style name="Heading2">
+        <item name="android:textSize">33sp</item>
+    </style>
+
+    <style name="Heading3">
+        <item name="android:textSize">30sp</item>
+    </style>
+
+    <style name="Heading4">
+        <item name="android:textSize">27sp</item>
+    </style>
+
+    <style name="Heading5">
+        <item name="android:textSize">24sp</item>
     </style>
 
     <style name="RobotoMedium">

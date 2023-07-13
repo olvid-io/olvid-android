@@ -36,6 +36,7 @@ import android.os.Build;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
+import android.text.SpannableString;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -72,6 +73,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ContactDetailsActivity;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
@@ -2177,9 +2179,9 @@ public class AndroidNotificationManager {
                             .setIcon(IconCompat.createWithBitmap(personIcon))
                             .build();
 
-                    return new NotificationCompat.MessagingStyle.Message(content, timestamp, person);
+                    return new NotificationCompat.MessagingStyle.Message(Markdown.formatMarkdown(SpannableString.valueOf(content)), timestamp, person);
                 } else {
-                    return new NotificationCompat.MessagingStyle.Message(content, timestamp, (Person) null);
+                    return new NotificationCompat.MessagingStyle.Message(Markdown.formatMarkdown(SpannableString.valueOf(content)), timestamp, (Person) null);
                 }
             }
         }

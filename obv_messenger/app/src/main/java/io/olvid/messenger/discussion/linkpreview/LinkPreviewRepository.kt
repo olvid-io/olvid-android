@@ -38,7 +38,7 @@ import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.IOException
 import java.security.KeyStore
-import java.util.*
+import java.util.Arrays
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
@@ -48,7 +48,7 @@ private const val MAX_IMAGE_SIZE = 5*1024*1024
 class LinkPreviewRepository {
     private val client = OkHttpClient.Builder()
         .cache(null)
-        .addInterceptor(UserAgentInterceptor("WhatsApp/2 (${System.getProperty("http.agent")})"))
+        .addInterceptor(UserAgentInterceptor("WhatsApp/2"))
         .apply {
             if (!SettingsActivity.getNoNotifyCertificateChangeForPreviews()) {
                 AppSingleton.getSslSocketFactory()?.let { sslSocketFactory ->

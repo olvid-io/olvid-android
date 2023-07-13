@@ -117,6 +117,9 @@
 
             <include layout="@layout/view_message_inbound_header"/>
             <include layout="@layout/view_message_inbound_ephemeral_header" android:visibility="gone"/>
+
+            <include layout="@layout/view_message_link_preview" />
+
             <include layout="@layout/view_message_attachment_card"/>
         </LinearLayout>
 

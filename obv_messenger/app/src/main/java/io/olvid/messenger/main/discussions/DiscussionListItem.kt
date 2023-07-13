@@ -91,6 +91,7 @@ fun DiscussionListItem(
     onMarkAllDiscussionMessagesRead: () -> Unit,
     onMarkDiscussionAsUnread: () -> Unit,
     onPinDiscussion: (Boolean) -> Unit,
+    onMuteDiscussion: (Boolean) -> Unit,
     onDeleteDiscussion: () -> Unit,
     renameActionName: String,
     onRenameDiscussion: () -> Unit,
@@ -99,22 +100,24 @@ fun DiscussionListItem(
     Box(modifier = Modifier.background(colorResource(id = R.color.almostWhite))) {
         // menu
         var menuOpened by remember { mutableStateOf(false) }
-            if (!isPreDiscussion) {
-                DiscussionMenu(
-                    menuOpened = menuOpened,
-                    onDismissRequest = { menuOpened = false },
-                    unread = unread,
-                    unreadCount = unreadCount,
-                    pinned = pinned,
-                    onOpenSettings = onOpenSettings,
-                    renameActionName = renameActionName,
-                    onRenameDiscussion = onRenameDiscussion,
-                    onDeleteDiscussion = onDeleteDiscussion,
-                    onMarkAllDiscussionMessagesRead = onMarkAllDiscussionMessagesRead,
-                    onMarkDiscussionAsUnread = onMarkDiscussionAsUnread,
-                    onPinDiscussion = onPinDiscussion,
-                )
-            }
+        if (!isPreDiscussion) {
+            DiscussionMenu(
+                menuOpened = menuOpened,
+                onDismissRequest = { menuOpened = false },
+                unread = unread,
+                unreadCount = unreadCount,
+                pinned = pinned,
+                muted = muted,
+                onOpenSettings = onOpenSettings,
+                renameActionName = renameActionName,
+                onRenameDiscussion = onRenameDiscussion,
+                onDeleteDiscussion = onDeleteDiscussion,
+                onMarkAllDiscussionMessagesRead = onMarkAllDiscussionMessagesRead,
+                onMarkDiscussionAsUnread = onMarkDiscussionAsUnread,
+                onPinDiscussion = onPinDiscussion,
+                onMuteDiscussion = onMuteDiscussion,
+            )
+        }
 
         // custom background
         backgroundImageUrl?.let { model ->
@@ -134,7 +137,7 @@ fun DiscussionListItem(
                 .fillMaxWidth()
                 .combinedClickable(
                     onClick = onClick,
-                    onLongClick = { menuOpened = true },
+                    onLongClick = { menuOpened = !isPreDiscussion }, // never open the menu for a preDiscussion, otherwise after the invitation is accepted, the menu is shown
                 ), verticalAlignment = CenterVertically
         ) {
             // custom color
@@ -216,14 +219,14 @@ fun DiscussionListItem(
                         )
                     }
 
-                    AnimatedVisibility(visible = mentioned && locked.not()) {
+                    AnimatedVisibility(visible = mentioned) {
                         Image(
                             modifier = Modifier.size(20.dp),
                             painter = painterResource(id = R.drawable.ic_mentioned),
                             contentDescription = "mentioned"
                         )
                     }
-                    AnimatedVisibility(visible = unreadCount > 0 && locked.not()) {
+                    AnimatedVisibility(visible = unreadCount > 0) {
                         Text(
                             modifier = Modifier
                                 .background(
@@ -264,8 +267,6 @@ fun DiscussionListItem(
 
             }
         }
-
-
     }
 }
 
@@ -274,11 +275,13 @@ fun DiscussionMenu(
     menuOpened: Boolean,
     onDismissRequest: () -> Unit,
     pinned: Boolean,
+    muted: Boolean,
     unread: Boolean,
     unreadCount: Int,
     onMarkAllDiscussionMessagesRead: () -> Unit,
     onMarkDiscussionAsUnread: () -> Unit,
     onPinDiscussion: (Boolean) -> Unit,
+    onMuteDiscussion: (Boolean) -> Unit,
     onDeleteDiscussion: () -> Unit,
     renameActionName: String,
     onRenameDiscussion: () -> Unit,
@@ -292,6 +295,15 @@ fun DiscussionMenu(
             onDismissRequest()
         }) {
             Text(text = stringResource(id = if (pinned) R.string.menu_action_discussion_unpin else R.string.menu_action_discussion_pin))
+        }
+        // mute
+        DropdownMenuItem(onClick = {
+            onMuteDiscussion(
+                muted.not()
+            )
+            onDismissRequest()
+        }) {
+            Text(text = stringResource(id = if (muted) R.string.menu_action_unmute_notifications else R.string.menu_action_mute_notifications))
         }
         // mark read/unread
         if (unread || unreadCount > 0) {
@@ -360,6 +372,7 @@ private fun DiscussionListItemPreview() {
             attachmentCount = 3,
             onClick = {},
             onPinDiscussion = {},
+            onMuteDiscussion = {},
             onMarkDiscussionAsUnread = {},
             onMarkAllDiscussionMessagesRead = {},
             onDeleteDiscussion = {},

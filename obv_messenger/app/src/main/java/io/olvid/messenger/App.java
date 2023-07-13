@@ -296,11 +296,12 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, long messageId, long fyleId) {
+    public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, boolean ascending, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         if (sortOrder != null) {
             intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA, sortOrder);
+            intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_ASCENDING_INTENT_EXTRA, ascending);
         }
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
@@ -842,6 +843,10 @@ public class App extends Application implements DefaultLifecycleObserver {
         showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_MENTIONS, new HashMap<>());
     }
 
+    public static void openAppDialogIntroducingMarkdown() {
+        showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_MARKDOWN, new HashMap<>());
+    }
+
 
     private static void showDialog(@Nullable byte[] bytesDialogOwnedIdentity, String dialogTag, HashMap<String, Object> dialogParameters) {
         dialogsToShowLock.lock();
@@ -924,7 +929,13 @@ public class App extends Application implements DefaultLifecycleObserver {
 
 
     public static void runThread(Runnable runnable) {
-        executorService.submit(runnable);
+        executorService.submit(() -> {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public static void setQrCodeImage(@NonNull ImageView imageView, @NonNull final String qrCodeData) {

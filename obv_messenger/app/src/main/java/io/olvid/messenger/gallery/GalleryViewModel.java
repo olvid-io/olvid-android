@@ -30,6 +30,7 @@ import androidx.lifecycle.ViewModel;
 import java.util.List;
 import java.util.Objects;
 
+import io.olvid.engine.Logger;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Message;
@@ -39,6 +40,7 @@ public class GalleryViewModel extends ViewModel {
     private final MutableLiveData<Long> discussionId;
     private final MutableLiveData<Long> messageId;
     private final MutableLiveData<String> ownedIdentitySortOrder;
+    private final MutableLiveData<Boolean> ownedIdentitySortOrderAscending;
     private final MutableLiveData<byte[]> bytesOwnedIdentity;
     private final LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> imageAndVideoFyleAndStatusList;
     private final MutableLiveData<Integer> currentPagerPosition;
@@ -58,9 +60,10 @@ public class GalleryViewModel extends ViewModel {
         discussionId = new MutableLiveData<>(null);
         messageId = new MutableLiveData<>(null);
         ownedIdentitySortOrder = new MutableLiveData<>(null);
+        ownedIdentitySortOrderAscending = new MutableLiveData<>(null);
         bytesOwnedIdentity = new MutableLiveData<>(null);
 
-        imageAndVideoFyleAndStatusList = new TripleLiveData(discussionId, messageId, ownedIdentitySortOrder, bytesOwnedIdentity);
+        imageAndVideoFyleAndStatusList = new TripleLiveData(discussionId, messageId, ownedIdentitySortOrder, ownedIdentitySortOrderAscending, bytesOwnedIdentity);
 
         currentPagerPosition = new MutableLiveData<>(null);
 
@@ -93,8 +96,9 @@ public class GalleryViewModel extends ViewModel {
         }
     }
 
-    public void setBytesOwnedIdentity(byte[] bytesOwnedIdentity, @Nullable String sortOrder) {
+    public void setBytesOwnedIdentity(byte[] bytesOwnedIdentity, @Nullable String sortOrder, @Nullable Boolean ascending) {
         this.ownedIdentitySortOrder.postValue(sortOrder);
+        this.ownedIdentitySortOrderAscending.postValue(ascending);
         this.bytesOwnedIdentity.postValue(bytesOwnedIdentity);
         galleryType = GalleryType.OWNED_IDENTITY;
     }
@@ -156,12 +160,14 @@ public class GalleryViewModel extends ViewModel {
         private final AppDatabase db;
         private byte[] bytesOwnedIdentity = null;
         private String sortOrder = null;
+        private Boolean ascending = null;
 
-        public TripleLiveData(MutableLiveData<Long> discussionId, MutableLiveData<Long> messageId, MutableLiveData<String> ownedIdentitySortOrder, MutableLiveData<byte[]> bytesOwnedIdentity) {
+        public TripleLiveData(MutableLiveData<Long> discussionId, MutableLiveData<Long> messageId, MutableLiveData<String> ownedIdentitySortOrder, MutableLiveData<Boolean> ascending, MutableLiveData<byte[]> bytesOwnedIdentity) {
             this.db = AppDatabase.getInstance();
             addSource(discussionId, this::onDiscussionChanged);
             addSource(messageId, this::onMessageChanged);
             addSource(ownedIdentitySortOrder, this::onSortOrderChanged);
+            addSource(ascending, this::onAscendingChanged);
             addSource(bytesOwnedIdentity, this::onOwnedIdentityChanged);
         }
 
@@ -208,23 +214,40 @@ public class GalleryViewModel extends ViewModel {
 
         public void onOwnedIdentityChanged(byte[] bytesOwnedIdentity) {
             this.bytesOwnedIdentity = bytesOwnedIdentity;
-            updateOwnedIdentity(bytesOwnedIdentity, sortOrder);
+            updateOwnedIdentity(bytesOwnedIdentity, sortOrder, ascending);
         }
 
         public void onSortOrderChanged(String sortOrder) {
             this.sortOrder = sortOrder;
-            updateOwnedIdentity(bytesOwnedIdentity, sortOrder);
+            updateOwnedIdentity(bytesOwnedIdentity, sortOrder, ascending);
+        }
+        public void onAscendingChanged(Boolean ascending) {
+            this.ascending = ascending;
+            updateOwnedIdentity(bytesOwnedIdentity, sortOrder, ascending);
         }
 
-        private void updateOwnedIdentity(byte[] bytesOwnedIdentity, String sortOrder) {
+        private void updateOwnedIdentity(byte[] bytesOwnedIdentity, String sortOrder, Boolean ascending) {
+            Logger.e("Ascending " + ascending);
             LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> newSource;
             if (bytesOwnedIdentity != null) {
                 if ("size".equals(sortOrder)) {
-                    newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentityBySize(bytesOwnedIdentity);
+                    if (ascending != null && ascending) {
+                        newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentityBySizeAscending(bytesOwnedIdentity);
+                    } else {
+                        newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentityBySize(bytesOwnedIdentity);
+                    }
                 } else if ("name".equals(sortOrder)) {
-                    newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentityByName(bytesOwnedIdentity);
+                    if (ascending != null && !ascending) {
+                        newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentityByName(bytesOwnedIdentity);
+                    } else {
+                        newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentityByNameAscending(bytesOwnedIdentity);
+                    }
                 } else {
-                    newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentity(bytesOwnedIdentity);
+                    if (ascending != null && ascending) {
+                        newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentityAscending(bytesOwnedIdentity);
+                    } else {
+                        newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForOwnedIdentity(bytesOwnedIdentity);
+                    }
                 }
             } else {
                 newSource = null;

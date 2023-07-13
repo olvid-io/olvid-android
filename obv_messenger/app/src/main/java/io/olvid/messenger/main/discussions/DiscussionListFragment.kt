@@ -18,6 +18,7 @@
  */
 package io.olvid.messenger.main.discussions
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -25,6 +26,7 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
@@ -32,17 +34,22 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.MuteNotificationDialog
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder.TYPE.DISCUSSION
+import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
+import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
 import io.olvid.messenger.main.RefreshingFragment
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.notifications.NotificationActionService
+
 
 class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
 
@@ -95,6 +102,67 @@ class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
             AppDatabase.getInstance().discussionDao().updatePinned(
                 discussionId, pinned
             )
+        }
+    }
+
+    override fun muteDiscussion(discussionId: Long, muted: Boolean) {
+        App.runThread {
+            val context: Context = this.context ?: return@runThread
+            val discussionCustomization : DiscussionCustomization? = AppDatabase.getInstance().discussionCustomizationDao()[discussionId];
+            if (muted) {
+                // if discussion already muted, do nothing
+                if (discussionCustomization?.shouldMuteNotifications() == true) {
+                    return@runThread
+                }
+                // else open a mute notification dialog for this discussion only
+                Handler(Looper.getMainLooper()).post {
+                    val muteNotificationDialog = MuteNotificationDialog(context, { muteExpirationTimestamp: Long?, _: Boolean, muteExceptMentioned: Boolean ->
+                        App.runThread {
+                            AppDatabase.getInstance().discussionCustomizationDao()[discussionId]?.let {
+                                AppDatabase.getInstance().discussionCustomizationDao().update(it.apply {
+                                    prefMuteNotifications = muted
+                                    prefMuteNotificationsTimestamp = muteExpirationTimestamp
+                                    prefMuteNotificationsExceptMentioned = muteExceptMentioned
+                                })
+                            } ifNull {
+                                AppDatabase.getInstance().discussionCustomizationDao().insert(DiscussionCustomization(discussionId).apply {
+                                    prefMuteNotifications = muted
+                                    prefMuteNotificationsTimestamp = muteExpirationTimestamp
+                                    prefMuteNotificationsExceptMentioned = muteExceptMentioned
+                                })
+                            }
+                        }
+                    }, MuteNotificationDialog.MuteType.DISCUSSION, discussionCustomization?.prefMuteNotificationsExceptMentioned != false)
+                    muteNotificationDialog.show()
+                }
+            } else {
+                // if discussion is not muted, do nothing
+                if (discussionCustomization?.shouldMuteNotifications() != true) {
+                    return@runThread
+                }
+                // else, show confirmation dialog
+                Handler(Looper.getMainLooper()).post {
+                    val builder: AlertDialog.Builder = SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_unmute_notifications)
+                        .setPositiveButton(R.string.button_label_unmute_notifications) { dialog, which ->
+                            App.runThread {
+                                AppDatabase.getInstance().discussionCustomizationDao()[discussionId]?.let {
+                                    AppDatabase.getInstance().discussionCustomizationDao().update(it.apply {
+                                        prefMuteNotifications = false
+                                    })
+                                }
+                            }
+                        }
+                        .setNegativeButton(R.string.button_label_cancel, null)
+                    val timestamp = discussionCustomization.prefMuteNotificationsTimestamp
+                    if (timestamp == null) {
+                        builder.setMessage(R.string.dialog_message_unmute_notifications)
+                    } else {
+                        builder.setMessage(getString(R.string.dialog_message_unmute_notifications_muted_until, StringUtils.getLongNiceDateString(context, timestamp)))
+                    }
+                    builder.create().show()
+                }
+            }
         }
     }
 
@@ -171,6 +239,7 @@ class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
                         }
                     }
                 }
+
                 Discussion.TYPE_GROUP -> {
                     App.runThread {
                         val group = AppDatabase.getInstance()
@@ -199,6 +268,7 @@ class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
                         }
                     }
                 }
+
                 Discussion.TYPE_GROUP_V2 -> {
                     App.runThread {
                         val group2 = AppDatabase.getInstance()

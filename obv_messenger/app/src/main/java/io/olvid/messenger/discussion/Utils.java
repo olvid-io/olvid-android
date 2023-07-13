@@ -54,8 +54,10 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.customClasses.InitialView;
+import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils2Kt;
+import io.olvid.messenger.customClasses.spans.OrderedListItemSpan;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.discussion.mention.MentionUrlSpan;
@@ -133,8 +135,7 @@ public class Utils {
             });
         });
     }
-
-    static void applyBodyWithSpans(@NonNull TextView textView, @Nullable byte[] bytesOwnedIdentity, @NonNull Message message, @Nullable List<Pattern> searchPatterns, boolean linkifyLinks) {
+    static void applyBodyWithSpans(@NonNull TextView textView, @Nullable byte[] bytesOwnedIdentity, @NonNull Message message, @Nullable List<Pattern> searchPatterns, boolean linkifyLinks, boolean markdown) {
         SpannableString result = new SpannableString(message.getStringContent(textView.getContext()));
         try {
             // call linkify first as it removes existing spans
@@ -150,7 +151,13 @@ public class Utils {
         } catch (Exception ex) {
             Logger.w("Error while applying spans to message content body");
         }
-        textView.setText(result);
+        if (markdown) {
+            SpannableStringBuilder spannableString = Markdown.formatMarkdown(result);
+            OrderedListItemSpan.Companion.measure(textView, spannableString);
+            textView.setText(spannableString);
+        } else {
+            textView.setText(result);
+        }
     }
 
     private static void applyMentionSpans(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull Message message, SpannableString result) {

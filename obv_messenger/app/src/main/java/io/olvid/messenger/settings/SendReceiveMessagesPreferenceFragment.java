@@ -51,20 +51,6 @@ public class SendReceiveMessagesPreferenceFragment extends PreferenceFragmentCom
             return;
         }
 
-        SwitchPreference linkPreviewPreferenceOutbound = screen.findPreference(SettingsActivity.PREF_KEY_LINK_PREVIEW_OUTBOUND);
-        if (linkPreviewPreferenceOutbound != null) {
-            if (!SettingsActivity.getBetaFeaturesEnabled()) {
-                screen.removePreference(linkPreviewPreferenceOutbound);
-            }
-        }
-
-        SwitchPreference linkPreviewPreferenceInbound = screen.findPreference(SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND);
-        if (linkPreviewPreferenceInbound != null) {
-            if (!SettingsActivity.getBetaFeaturesEnabled()) {
-                screen.removePreference(linkPreviewPreferenceInbound);
-            }
-        }
-
         EditTextPreference defaultDiscussionRetentionCountPreference = screen.findPreference(SettingsActivity.PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT);
         if (defaultDiscussionRetentionCountPreference != null) {
             defaultDiscussionRetentionCountPreference.setSummaryProvider(preference -> {

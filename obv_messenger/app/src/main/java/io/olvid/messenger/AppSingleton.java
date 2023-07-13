@@ -31,6 +31,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
@@ -71,6 +72,7 @@ import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.CheckLinkPreviewValidityTask;
+import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
 import io.olvid.messenger.discussion.ComposeMessageFragment;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
@@ -150,6 +152,11 @@ public class AppSingleton {
                 icons.add(0, ComposeMessageFragment.ICON_EMOJI);
                 SettingsActivity.setComposeMessageIconPreferredOrder(icons);
             }
+        }
+
+        if (lastBuildExecuted != 0 && lastBuildExecuted < 205) {
+            // we fixed the rename task, run it again to fix all user displaynames
+            App.runThread(new ContactDisplayNameFormatChangedTask());
         }
 
         // TODO: enable this once location is no longer in beta
@@ -243,14 +250,30 @@ public class AppSingleton {
             return null;
         });
         availableIdentities = db.ownedIdentityDao().getAllNotHiddenLiveData();
-        aNonHiddenIdentityHasCallsPermission = Transformations.map(availableIdentities, (List<OwnedIdentity> availableIdentities) -> {
-            for (OwnedIdentity ownedIdentity : availableIdentities) {
-                if (ownedIdentity.getApiKeyPermissions().contains(EngineAPI.ApiKeyPermission.CALL)) {
-                    return true;
+        aNonHiddenIdentityHasCallsPermission = new MediatorLiveData<>();
+        Callable<Boolean> computeOtherIdentityHasCallsPermission = () -> {
+            List<OwnedIdentity> ownedIdentities = availableIdentities.getValue();
+            if (ownedIdentities != null) {
+                for (OwnedIdentity ownedIdentity : ownedIdentities) {
+                    if (!Arrays.equals(ownedIdentity.bytesOwnedIdentity, bytesCurrentIdentityLiveData.getValue())
+                            && ownedIdentity.getApiKeyPermissions().contains(EngineAPI.ApiKeyPermission.CALL)) {
+                        return true;
+                    }
                 }
             }
             return false;
+        };
+        aNonHiddenIdentityHasCallsPermission.addSource(availableIdentities, ownedIdentities -> {
+            try {
+                aNonHiddenIdentityHasCallsPermission.setValue(computeOtherIdentityHasCallsPermission.call());
+            } catch (Exception ignored) {}
         });
+        aNonHiddenIdentityHasCallsPermission.addSource(bytesCurrentIdentityLiveData, ownedIdentities -> {
+            try {
+                aNonHiddenIdentityHasCallsPermission.setValue(computeOtherIdentityHasCallsPermission.call());
+            } catch (Exception ignored) {}
+        });
+
         // add a dummy observer to this liveData, so that it is indeed computed
         new Handler(Looper.getMainLooper()).post(() -> aNonHiddenIdentityHasCallsPermission.observeForever((Boolean canCall) -> Logger.d("aNonHiddenIdentityHasCallsPermission changed " + canCall)));
         if (this.sslSocketFactory != null) {
@@ -258,7 +281,7 @@ public class AppSingleton {
         }
 
         // this observer is used in case there is no latest identity, or the latest identity cannot be found
-        firstIdentitySelector = new Observer<List<OwnedIdentity>>() {
+        firstIdentitySelector = new Observer<>() {
             @Override
             public void onChanged(List<OwnedIdentity> ownedIdentities) {
                 if (ownedIdentities != null) {
@@ -350,7 +373,7 @@ public class AppSingleton {
     @NonNull private final MutableLiveData<byte[]> bytesCurrentIdentityLiveData;
     @NonNull private final LiveData<OwnedIdentity> currentIdentityLiveData;
     @NonNull private final LiveData<List<OwnedIdentity>> availableIdentities;
-    @NonNull private final LiveData<Boolean> aNonHiddenIdentityHasCallsPermission;
+    @NonNull private final MediatorLiveData<Boolean> aNonHiddenIdentityHasCallsPermission;
 
     public interface IdentitySelectedCallback {
 
@@ -1186,7 +1209,10 @@ public class AppSingleton {
                 Logger.i("Build 193 link-preview migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
             }
             if (lastBuildExecuted != 0 && lastBuildExecuted < 197) {
-                    App.openAppDialogIntroducingMentions();
+                App.openAppDialogIntroducingMentions();
+            }
+            if (lastBuildExecuted != 0 && lastBuildExecuted < 204) {
+                App.openAppDialogIntroducingMarkdown();
             }
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
             saveLastExecutedVersions(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);

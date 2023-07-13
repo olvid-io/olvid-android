@@ -191,11 +191,12 @@ public class CustomSSLSocketFactory extends SSLSocketFactory implements Handshak
             synchronized (knownCertificatesByDomainCache) {
                 if (!cacheInitialized || !verifySllCertificateAndAllowConnection(hostname, certificates)) {
                     Logger.e("Connection to " + hostname + " was blocked");
-                    App.runThread(() -> { // we close the connection from another thread to avoid crashed on API 27 & 28
-                        try {
-                            event.getSocket().close();
-                        } catch (Exception ignored) { }
-                    });
+                    try {
+                        event.getSocket().shutdownOutput();
+                        event.getSocket().shutdownInput();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         } catch (Exception e) {

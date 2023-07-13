@@ -271,7 +271,10 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     }
 
     private void internalDisconnectWebsockets() {
-        List<WebSocketClient> webSocketClients = new ArrayList<>(existingWebsockets.values());
+        List<WebSocketClient> webSocketClients;
+        synchronized (existingWebsockets) {
+            webSocketClients = new ArrayList<>(existingWebsockets.values());
+        }
         for (WebSocketClient webSocketClient: webSocketClients) {
             webSocketClient.close();
         }
@@ -331,7 +334,6 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 rfc = Operation.RFC_NULL;
             }
             switch (rfc) {
-                case IdentityRegistrationOperation.RFC_WEBSOCKET_NOT_CONNECTED:
                 case IdentityRegistrationOperation.RFC_WEBSOCKET_NOT_FOUND: {
                     resetWebsockets();
                     break;
@@ -343,8 +345,9 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                     createServerSessionDelegate.createServerSession(identity);
                     break;
                 }
-                default:
-                    // What should we do? nothing
+            case IdentityRegistrationOperation.RFC_WEBSOCKET_NOT_CONNECTED:
+            default:
+                    // we do nothing: a ping will fail at some point and the websocket will reconnect and automatically re-register identities
                     break;
             }
         }
@@ -602,11 +605,15 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         private long lastPingCounter = -1;
         private long lastPingTimestamp = -1;
 
+        private static final int INTERNAL_CLOSING_CODE = 4547;
+
         WebSocketClient(String server, String wsUrl) {
             this.wsUrl = wsUrl;
             this.server = server;
+            synchronized (existingWebsockets) {
+                existingWebsockets.put(server, this);
+            }
             this.webSocket = okHttpClient.newWebSocket(new Request.Builder().url(wsUrl).build(), this);
-            existingWebsockets.put(server, this);
         }
 
         public void send(String message) {
@@ -892,7 +899,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         @SuppressWarnings("NullableProblems")
         @Override
         public void onClosing(WebSocket webSocket, int code, String reason) {
-            remotelyInitiatedClosing = true;
+            remotelyInitiatedClosing = INTERNAL_CLOSING_CODE != code;
         }
 
         @SuppressWarnings("NullableProblems")
@@ -915,8 +922,12 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
             }
             websocketConnected = false;
-            existingWebsockets.remove(server);
-            if (webSocket != null && webSocket.close(1000, null)) {
+            synchronized (existingWebsockets) {
+                if (existingWebsockets.get(server) == this) {
+                    existingWebsockets.remove(server);
+                }
+            }
+            if (webSocket != null && webSocket.close(INTERNAL_CLOSING_CODE, null)) {
                 // if we initiated a graceful close, also schedule a cancel to make sure resources are properly released
                 scheduler.schedule(server, webSocket::cancel, "Websocket cancel()", 500);
             }

@@ -486,6 +486,10 @@ public abstract class DiscussionDao {
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
     public abstract List<Long> getAllDiscussionIdsForOwnedIdentity(byte[] bytesOwnedIdentity);
 
+    @Query("SELECT * FROM " + Discussion.TABLE_NAME +
+            " WHERE " + Discussion.STATUS + " = " + Discussion.STATUS_PRE_DISCUSSION)
+    public abstract List<Discussion> getAllPreDiscussions();
+
     public static class DiscussionAndLastMessage {
         @Embedded(prefix = "disc_")
         public Discussion discussion;

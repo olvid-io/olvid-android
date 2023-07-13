@@ -40,6 +40,8 @@ import net.openid.appauth.CodeVerifierUtil;
 import net.openid.appauth.GrantTypeValues;
 import net.openid.appauth.ResponseTypeValues;
 import net.openid.appauth.TokenRequest;
+import net.openid.appauth.browser.BrowserDescriptor;
+import net.openid.appauth.browser.BrowserSelector;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -71,7 +73,23 @@ public class KeycloakAuthenticationActivity extends AppCompatActivity {
 
         String preferredBrowser = SettingsActivity.getPreferredKeycloakBrowser();
         if (preferredBrowser != null) {
-            appAuthConfigBuilder.setBrowserMatcher(descriptor -> descriptor.packageName.equals(preferredBrowser));
+            boolean found = false;
+            try {
+                // first check that the chosen preferred browser is still available
+                for (BrowserDescriptor browserDescriptor : BrowserSelector.getAllBrowsers(this)) {
+                    if (preferredBrowser.equals(browserDescriptor.packageName)) {
+                        found = true;
+                        break;
+                    }
+                }
+            } catch (Exception ignored) {
+                // default to using the preferredBrowser in case our check failed
+                found = true;
+            }
+
+            if (found) {
+                appAuthConfigBuilder.setBrowserMatcher(descriptor -> descriptor.packageName.equals(preferredBrowser));
+            }
         }
 
         authorizationService = new AuthorizationService(this, appAuthConfigBuilder.build());

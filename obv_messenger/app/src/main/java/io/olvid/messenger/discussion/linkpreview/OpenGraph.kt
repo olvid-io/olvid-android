@@ -22,11 +22,14 @@ package io.olvid.messenger.discussion.linkpreview
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.compose.ui.text.toLowerCase
 import io.olvid.engine.datatypes.DictionaryKey
 import io.olvid.engine.encoder.DecodingException
 import io.olvid.engine.encoder.Encoded
 import io.olvid.messenger.customClasses.StringUtils2
+import io.olvid.messenger.customClasses.ifNull
 import java.io.ByteArrayOutputStream
+import java.util.Locale
 
 data class OpenGraph(
     var title: String? = null,
@@ -47,8 +50,7 @@ data class OpenGraph(
                     val dictionary = encoded.decodeDictionary()
                     title = dictionary[DictionaryKey("title")]?.decodeString()
                     description = dictionary[DictionaryKey("desc")]?.decodeString()
-                    // we remove url for now. We might want to add siteName at some point...
-                    //                    url = dictionary[DictionaryKey("url")]?.decodeString()
+                    siteName = dictionary[DictionaryKey("site")]?.decodeString()
                     dictionary[DictionaryKey("image")]?.decodeBytes()?.let {
                         bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
                     }
@@ -56,9 +58,17 @@ data class OpenGraph(
                     title = null
                     description = null
                     bitmap = null
+                    siteName = null
                 }
             }
         }
+
+        val DOMAINS_WITH_LONG_DESCRIPTION = listOf(
+            ".twitter.com",
+            ".fxtwitter.com",
+            ".vxtwitter.com",
+            ".mastodon.social",
+        )
     }
 
     // tests if the OpenGraph object actually contains anything interesting to display
@@ -66,12 +76,36 @@ data class OpenGraph(
         return title.isNullOrEmpty() && description.isNullOrEmpty() && bitmap == null
     }
 
+    fun hasLargeImageToDisplay() : Boolean {
+        return (bitmap?.width ?: 0) >= 400
+    }
+
+
+    fun shouldShowCompleteDescription() : Boolean {
+        return url?.let {
+            try {
+                Uri.parse(it).host?.let { host ->
+                    val dottedHost = ".$host".lowercase(locale = Locale.ENGLISH)
+                    Companion.DOMAINS_WITH_LONG_DESCRIPTION.any { dottedHost.endsWith(it) }
+                }
+            } catch (e : Exception) {
+                null
+            }
+        } ?: false
+    }
+
     fun fileName(): String {
         return originalUrl ?: "link-preview"
     }
 
-    fun getSafeUri() : Uri? {
-        return StringUtils2.getLink(url)?.second?.let { Uri.parse(it).takeIf { uri -> uri.scheme != null } }
+    fun getSafeUri(): Uri? {
+        return StringUtils2.getLink(url)?.second?.let {
+            Uri.parse(it).takeIf { uri -> uri.scheme != null }
+        }
+    }
+
+    fun buildDescription() : String {
+        return description.takeIf { it.isNullOrEmpty().not() } ?: siteName.takeIf { it.isNullOrEmpty().not() } ?: url ?: ""
     }
 
     fun encode(): Encoded {
@@ -82,10 +116,9 @@ data class OpenGraph(
         description?.let {
             map[DictionaryKey("desc")] = Encoded.of(it)
         }
-        // we remove url for now. We might want to add siteName at some point...
-        //        url?.let {
-        //            map[DictionaryKey("url")] = Encoded.of(it)
-        //        }
+        siteName?.let {
+            map[DictionaryKey("site")] = Encoded.of(it)
+        }
         bitmap?.let {
             map[DictionaryKey("image")] = Encoded.of(
                 ByteArrayOutputStream().apply {

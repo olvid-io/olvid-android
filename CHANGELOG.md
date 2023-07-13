@@ -1,3 +1,26 @@
+# Build 205 (0.14.2)
+2023-07-13
+
+- Link previews support no longer in beta
+- Fix an issue with contact display name format and sorting
+- Changed the order of images in the gallery
+- Last few fixes for markdown formatting
+- [beta] Improved location integration selection 
+
+# ~~Build 204 (0.14.2)~~
+2023-06-16
+
+- Update WebRTC
+- Some markdown fixes
+- Fix discussion background image rotation issue
+
+
+# ~~Build 203 (0.14.2)~~
+2023-06-05
+
+- Markdown support
+- Bug fixes
+
 # Build 202 (0.14.1)
 2023-05-15
 

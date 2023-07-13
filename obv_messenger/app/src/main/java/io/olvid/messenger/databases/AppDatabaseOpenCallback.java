@@ -146,6 +146,19 @@ public class AppDatabaseOpenCallback implements Runnable {
             Logger.w("Error syncing Room invitations with Engine dialogs.");
         }
 
+        // Clean up any pre-discussion with no invitation
+        try {
+            for (Discussion discussion : db.discussionDao().getAllPreDiscussions()) {
+                if (!db.invitationDao().discussionHasInvitations(discussion.id)) {
+                    db.discussionDao().delete(discussion);
+                    ShortcutActivity.disableShortcut(discussion.id);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Logger.w("Error cleaning up pre-discussions without invitation.");
+        }
+
         // Update all Messages/attachments
         try {
             engine.resendAllAttachmentNotifications();
@@ -431,12 +444,14 @@ public class AppDatabaseOpenCallback implements Runnable {
                                 db.contactDao().updatePhotoUrl(contact.bytesOwnedIdentity, contact.bytesContactIdentity, photoUrl);
 
                                 Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                                discussion.title = contact.getCustomDisplayName();
-                                db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
+                                if (discussion != null) {
+                                    discussion.title = contact.getCustomDisplayName();
+                                    db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
 
-                                ShortcutActivity.updateShortcut(discussion);
+                                    ShortcutActivity.updateShortcut(discussion);
 
-                                new UpdateAllGroupMembersNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity).run();
+                                    new UpdateAllGroupMembersNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity).run();
+                                }
                             } catch (Exception e) {
                                 // do nothing
                             }

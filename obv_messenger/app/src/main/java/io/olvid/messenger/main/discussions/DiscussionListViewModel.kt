@@ -28,16 +28,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import io.olvid.messenger.AppSingleton
-import io.olvid.messenger.R
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.DiscussionDao.DiscussionAndLastMessage
 import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.OwnedIdentity
-import java.util.*
+import java.util.Arrays
 
 class DiscussionListViewModel : ViewModel() {
 
@@ -90,17 +91,19 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                     if (message.status == Message.STATUS_DRAFT) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                             append(
-                                context.getString(
-                                    string.text_draft_message_prefix,
-                                    body
-                                )
+                                    context.getString(
+                                        string.text_draft_message_prefix,
+                                        ""
+                                    )
                             )
+                            append(AnnotatedString(body).formatMarkdown())
+
                         }
                     } else if (message.wipeStatus == Message.WIPE_STATUS_WIPED
                         || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
                     ) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                            append(body)
+                            append(AnnotatedString(body).formatMarkdown())
                         }
                     } else {
                         if (message.isLocationMessage) {
@@ -116,7 +119,15 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                                 length - body.length
                             )
                         } else {
-                            append(context.getString(R.string.text_outbound_message_prefix, body))
+                            append(context.getString(
+                                string.text_outbound_message_prefix,
+                                ""
+                            ))
+                            append(
+                                AnnotatedString(
+                                    body
+                                ).formatMarkdown()
+                            )
                         }
                     }
                 }
@@ -289,32 +300,47 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                 }
                 Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                        append(message.getStringContent(context))
+                        append(AnnotatedString(message.getStringContent(context)).formatMarkdown())
                     }
                 }
                 Message.TYPE_MEDIATOR_INVITATION_SENT -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                        append(context.getString(string.invitation_status_mediator_invite_information_sent, message.contentBody))
+                        append(
+                            context.getString(
+                                string.invitation_status_mediator_invite_information_sent,
+                                message.contentBody
+                            )
+                        )
                     }
                 }
                 Message.TYPE_MEDIATOR_INVITATION_ACCEPTED -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                        append(context.getString(string.invitation_status_mediator_invite_information_accepted, message.contentBody))
+                        append(
+                            context.getString(
+                                string.invitation_status_mediator_invite_information_accepted,
+                                message.contentBody
+                            )
+                        )
                     }
                 }
                 Message.TYPE_MEDIATOR_INVITATION_IGNORED -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                        append(context.getString(string.invitation_status_mediator_invite_information_ignored, message.contentBody))
+                        append(
+                            context.getString(
+                                string.invitation_status_mediator_invite_information_ignored,
+                                message.contentBody
+                            )
+                        )
                     }
                 }
                 else -> {
                     val body = message.getStringContent(context)
                     if (message.wipeStatus == Message.WIPE_STATUS_WIPED || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED || message.isLocationMessage) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                            append(body)
+                            append(AnnotatedString(body).formatMarkdown())
                         }
                     } else {
-                        append(body)
+                        append(AnnotatedString(body).formatMarkdown())
                     }
                 }
             }
@@ -322,7 +348,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
             if (discussion.status == Discussion.STATUS_LOCKED) {
                 addStyle(SpanStyle(fontStyle = FontStyle.Italic), 0, length)
             }
-        } ?: kotlin.run {
+        } ifNull {
             withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                 append(context.getString(string.text_no_messages))
             }

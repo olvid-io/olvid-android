@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -116,10 +117,10 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             if (noNotifyCertificateChangeForPreviewsPreference != null) {
                 screen.removePreference(noNotifyCertificateChangeForPreviewsPreference);
             }
-        } else if (!SettingsActivity.getBetaFeaturesEnabled()) {
-            Preference noNotifyCertificateChangeForPreviewsPreference = screen.findPreference(SettingsActivity.PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS);
-            if (noNotifyCertificateChangeForPreviewsPreference != null) {
-                screen.removePreference(noNotifyCertificateChangeForPreviewsPreference);
+        } else {
+            Preference blockUntrustedCertificatePreference = screen.findPreference(SettingsActivity.PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE);
+            if (blockUntrustedCertificatePreference != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                screen.removePreference(blockUntrustedCertificatePreference);
             }
         }
 

@@ -194,6 +194,26 @@ public class SendManager implements NetworkSendDelegate, SendManagerSessionFacto
         return (outboxMessage == null) || outboxMessage.isAcknowledged();
     }
 
+    @Override
+    public void cancelMessageSending(Session session, Identity ownedIdentity, UID messageUid) throws SQLException {
+        OutboxMessage outboxMessage = OutboxMessage.get(wrapSession(session), ownedIdentity, messageUid);
+        if (outboxMessage != null) {
+            if (outboxMessage.isAcknowledged()) {
+                // if message is already sent, cancel all attachments (if any)
+                for (OutboxAttachment outboxAttachment : outboxMessage.getAttachments()) {
+                    outboxAttachment.setCancelExternallyRequested();
+                }
+            } else {
+                // simply simulate a messageUidFromServer so the operation finishes
+                outboxMessage.setUidFromServer(new UID(new byte[UID.UID_LENGTH]), new byte[0], 0);
+                for (OutboxAttachment outboxAttachment : outboxMessage.getAttachments()) {
+                    outboxAttachment.setCancelExternallyRequested();
+                    outboxAttachment.setCancelProcessed();
+                }
+            }
+        }
+    }
+
     public void sendReturnReceipt(Session session, Identity ownedIdentity, Identity contactIdentity, UID[] contactDeviceUids, int status, byte[] returnReceiptNonce, AuthEncKey returnReceiptKey, Integer attachmentNumber) {
         // send is auto triggered on insertion commit
         ReturnReceipt.create(wrapSession(session), ownedIdentity, contactIdentity, contactDeviceUids, status, returnReceiptNonce, returnReceiptKey, attachmentNumber);

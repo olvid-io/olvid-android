@@ -181,6 +181,7 @@ public interface EngineAPI {
     void sendReturnReceipt(byte[] bytesOwnedIdentity, byte[] senderIdentifier, int status, byte[] returnReceiptNonce, byte[] returnReceiptKey, Integer attachmentNumber);
     boolean isOutboxAttachmentSent(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier, int engineNumber);
     boolean isOutboxMessageSent(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier);
+    void cancelMessageSending(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier);
 
     boolean isInboxAttachmentReceived(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier, int engineNumber);
     void downloadMessages(byte[] bytesOwnedIdentity);

@@ -27,10 +27,8 @@ import android.net.Uri;
 import androidx.exifinterface.media.ExifInterface;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
-import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
@@ -59,6 +57,15 @@ public class SetDiscussionBackgroundImageTask implements Runnable {
         String relativeOutputFile = discussionCustomization.buildBackgroundImagePath();
         String outputFile = App.absolutePathFromRelative(relativeOutputFile);
 
+        int orientation = ExifInterface.ORIENTATION_NORMAL;
+        // first get the orientation
+        try (InputStream is = contentResolver.openInputStream(uri)) {
+            if (is != null) {
+                ExifInterface exifInterface = new ExifInterface(is);
+                orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            }
+        } catch (Exception ignored) {}
+
         // copy the file
         try (InputStream is = contentResolver.openInputStream(uri)) {
             if (is == null) {
@@ -76,15 +83,7 @@ public class SetDiscussionBackgroundImageTask implements Runnable {
                 }
             }
 
-            try {
-                is.reset();
-                ExifInterface exifInterface = new ExifInterface(is);
-                int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                bitmap = PreviewUtils.rotateBitmap(bitmap, orientation);
-            } catch (IOException e) {
-                Logger.d("Error creating ExifInterface");
-            }
-
+            bitmap = PreviewUtils.rotateBitmap(bitmap, orientation);
 
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 75, fos);

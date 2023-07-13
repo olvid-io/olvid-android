@@ -56,8 +56,11 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
 
     private val contactListViewModel: ContactListViewModel by activityViewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         val unfilteredContacts =
             AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
                 if (ownedIdentity == null) {
@@ -66,7 +69,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                 AppDatabase.getInstance().contactDao()
                     .getAllOneToOneForOwnedIdentity(ownedIdentity.bytesOwnedIdentity)
             }
-        unfilteredContacts.observe(requireActivity()) { contacts: List<Contact>? ->
+        unfilteredContacts.observe(viewLifecycleOwner) { contacts: List<Contact>? ->
             contactListViewModel.setUnfilteredContacts(
                 contacts
             )
@@ -79,18 +82,11 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                 AppDatabase.getInstance().contactDao()
                     .getAllNotOneToOneForOwnedIdentity(ownedIdentity.bytesOwnedIdentity)
             }
-        unfilteredNotOneToOneContacts.observe(requireActivity()) { contacts: List<Contact>? ->
+        unfilteredNotOneToOneContacts.observe(viewLifecycleOwner) { contacts: List<Contact>? ->
             contactListViewModel.setUnfilteredNotOneToOneContacts(
                 contacts
             )
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
         return ComposeView(requireContext()).apply {
             consumeWindowInsets = false
             setContent {
@@ -116,6 +112,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                         contactOrKeycloakDetails.contact.bytesContactIdentity
                     )
                 }
+
                 KEYCLOAK -> if (contactOrKeycloakDetails.keycloakUserDetails != null && contactOrKeycloakDetails.keycloakUserDetails.identity != null) {
                     val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value ?: return
                     val identityDetails =
@@ -155,6 +152,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                         }
                     builder.create().show()
                 }
+
                 KEYCLOAK_SEARCHING, KEYCLOAK_MORE_RESULTS -> {}
             }
         }
@@ -199,12 +197,12 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                 }
 
                 override fun onQueryTextChange(newText: String): Boolean {
-                        contactListViewModel.setFilter(newText)
+                    contactListViewModel.setFilter(newText)
                     return true
                 }
             })
             searchView.setOnCloseListener(SearchView.OnCloseListener {
-                    contactListViewModel.setFilter(null)
+                contactListViewModel.setFilter(null)
                 false
             })
             contactListViewModel.setFilter(null)

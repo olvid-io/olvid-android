@@ -26,8 +26,20 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize.Min
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
@@ -39,12 +51,19 @@ import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
@@ -75,7 +94,11 @@ import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.databases.entity.Invitation
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action
-import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.*
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.ABORT
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.ACCEPT
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.IGNORE
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.REJECT
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.VALIDATE_SAS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
@@ -257,7 +280,8 @@ fun InvitationListItem(
 
                             LaunchedEffect(invitationListViewModel.lastSas) {
                                 invitationListViewModel.lastSas?.let {
-                                    sas = TextFieldValue(it).copy(selection = TextRange(0, it.length))
+                                    sas =
+                                        TextFieldValue(it).copy(selection = TextRange(0, it.length))
                                     sasInputField.requestFocus()
                                 }
                             }
@@ -450,131 +474,133 @@ fun InvitationListItem(
             }
 
             // bottom buttons
-            AnimatedVisibility(
-                visible = listOf(
-                    Category.INVITE_SENT_DIALOG_CATEGORY,
-                    Category.INVITE_ACCEPTED_DIALOG_CATEGORY,
-                    Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY,
-                    Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY,
-                    Category.SAS_CONFIRMED_DIALOG_CATEGORY,
-                ).contains(invitation?.associatedDialog?.category?.id)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+            Row(modifier = Modifier.focusProperties { canFocus = false }) {
+                AnimatedVisibility(
+                    visible = listOf(
+                        Category.INVITE_SENT_DIALOG_CATEGORY,
+                        Category.INVITE_ACCEPTED_DIALOG_CATEGORY,
+                        Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY,
+                        Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY,
+                        Category.SAS_CONFIRMED_DIALOG_CATEGORY,
+                    ).contains(invitation?.associatedDialog?.category?.id)
                 ) {
-                    TextButton(onClick = { onClick(ABORT, invitation!!, null) }) {
-                        Text(
-                            stringResource(id = R.string.button_label_abort).uppercase(),
-                            color = colorResource(id = R.color.accent)
-                        )
-                    }
-                }
-            }
-            AnimatedVisibility(
-                visible = listOf(
-                    Category.ACCEPT_INVITE_DIALOG_CATEGORY,
-                    Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY,
-                    Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY,
-                ).contains(invitation?.associatedDialog?.category?.id)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
-                ) {
-                    TextButton(onClick = { onClick(IGNORE, invitation!!, null) }) {
-                        Text(
-                            stringResource(id = R.string.button_label_ignore).uppercase(),
-                            color = colorResource(id = R.color.accent)
-                        )
-                    }
-                    TextButton(onClick = { onClick(ACCEPT, invitation!!, null) }) {
-                        Text(
-                            stringResource(id = R.string.button_label_accept).uppercase(),
-                            color = colorResource(id = R.color.accent)
-                        )
-                    }
-                }
-            }
-            AnimatedVisibility(
-                visible = listOf(
-                    Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY,
-                ).contains(invitation?.associatedDialog?.category?.id)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
-                ) {
-                    TextButton(onClick = { onClick(REJECT, invitation!!, null) }) {
-                        Text(
-                            stringResource(id = R.string.button_label_reject).uppercase(),
-                            color = colorResource(id = R.color.accent)
-                        )
-                    }
-                    TextButton(onClick = { onClick(ACCEPT, invitation!!, null) }) {
-                        Text(
-                            stringResource(id = R.string.button_label_accept).uppercase(),
-                            color = colorResource(id = R.color.accent)
-                        )
-                    }
-                }
-            }
-            AnimatedVisibility(
-                visible = listOf(
-                    Category.SAS_EXCHANGE_DIALOG_CATEGORY,
-                ).contains(invitation?.associatedDialog?.category?.id)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    TextButton(onClick = { onClick(ABORT, invitation!!, null) }) {
-                        Text(
-                            stringResource(id = R.string.button_label_abort).uppercase(),
-                            color = colorResource(id = R.color.accent)
-                        )
-                    }
-                    val enabled = sas.text.length == Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS
-                    TextButton(
-                        onClick = { validateSas() },
-                        enabled = enabled
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            stringResource(id = R.string.button_label_validate).uppercase(),
-                            color = colorResource(id = R.color.accent).copy(alpha = if (enabled) 1f else ContentAlpha.disabled),
-                        )
+                        TextButton(onClick = { onClick(ABORT, invitation!!, null) }) {
+                            Text(
+                                stringResource(id = R.string.button_label_abort).uppercase(),
+                                color = colorResource(id = R.color.accent)
+                            )
+                        }
                     }
                 }
-            }
+                AnimatedVisibility(
+                    visible = listOf(
+                        Category.ACCEPT_INVITE_DIALOG_CATEGORY,
+                        Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY,
+                        Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY,
+                    ).contains(invitation?.associatedDialog?.category?.id)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    ) {
+                        TextButton(onClick = { onClick(IGNORE, invitation!!, null) }) {
+                            Text(
+                                stringResource(id = R.string.button_label_ignore).uppercase(),
+                                color = colorResource(id = R.color.accent)
+                            )
+                        }
+                        TextButton(onClick = { onClick(ACCEPT, invitation!!, null) }) {
+                            Text(
+                                stringResource(id = R.string.button_label_accept).uppercase(),
+                                color = colorResource(id = R.color.accent)
+                            )
+                        }
+                    }
+                }
+                AnimatedVisibility(
+                    visible = listOf(
+                        Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY,
+                    ).contains(invitation?.associatedDialog?.category?.id)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    ) {
+                        TextButton(onClick = { onClick(REJECT, invitation!!, null) }) {
+                            Text(
+                                stringResource(id = R.string.button_label_reject).uppercase(),
+                                color = colorResource(id = R.color.accent)
+                            )
+                        }
+                        TextButton(onClick = { onClick(ACCEPT, invitation!!, null) }) {
+                            Text(
+                                stringResource(id = R.string.button_label_accept).uppercase(),
+                                color = colorResource(id = R.color.accent)
+                            )
+                        }
+                    }
+                }
+                AnimatedVisibility(
+                    visible = listOf(
+                        Category.SAS_EXCHANGE_DIALOG_CATEGORY,
+                    ).contains(invitation?.associatedDialog?.category?.id)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(onClick = { onClick(ABORT, invitation!!, null) }) {
+                            Text(
+                                stringResource(id = R.string.button_label_abort).uppercase(),
+                                color = colorResource(id = R.color.accent)
+                            )
+                        }
+                        val enabled = sas.text.length == Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS
+                        TextButton(
+                            onClick = { validateSas() },
+                            enabled = enabled
+                        ) {
+                            Text(
+                                stringResource(id = R.string.button_label_validate).uppercase(),
+                                color = colorResource(id = R.color.accent).copy(alpha = if (enabled) 1f else ContentAlpha.disabled),
+                            )
+                        }
+                    }
+                }
 
-            AnimatedVisibility(
-                visible = listOf(
-                    Category.GROUP_V2_INVITATION_DIALOG_CATEGORY,
-                    Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY,
-                ).contains(invitation?.associatedDialog?.category?.id)
-            ) {
-                val enabled =
-                    invitation?.associatedDialog?.category?.id == Category.GROUP_V2_INVITATION_DIALOG_CATEGORY
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                AnimatedVisibility(
+                    visible = listOf(
+                        Category.GROUP_V2_INVITATION_DIALOG_CATEGORY,
+                        Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY,
+                    ).contains(invitation?.associatedDialog?.category?.id)
                 ) {
-                    TextButton(onClick = { onClick(REJECT, invitation!!, null) }) {
-                        Text(
-                            stringResource(id = R.string.button_label_reject).uppercase(),
-                            color = colorResource(id = R.color.accent)
-                        )
-                    }
-                    TextButton(
-                        onClick = { onClick(ACCEPT, invitation!!, null) },
-                        enabled = enabled
+                    val enabled =
+                        invitation?.associatedDialog?.category?.id == Category.GROUP_V2_INVITATION_DIALOG_CATEGORY
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                     ) {
-                        Text(
-                            stringResource(id = R.string.button_label_accept).uppercase(),
-                            color = if (enabled) colorResource(id = R.color.accent) else colorResource(
-                                id = R.color.accent
-                            ).copy(alpha = ContentAlpha.disabled)
-                        )
+                        TextButton(onClick = { onClick(REJECT, invitation!!, null) }) {
+                            Text(
+                                stringResource(id = R.string.button_label_reject).uppercase(),
+                                color = colorResource(id = R.color.accent)
+                            )
+                        }
+                        TextButton(
+                            onClick = { onClick(ACCEPT, invitation!!, null) },
+                            enabled = enabled
+                        ) {
+                            Text(
+                                stringResource(id = R.string.button_label_accept).uppercase(),
+                                color = if (enabled) colorResource(id = R.color.accent) else colorResource(
+                                    id = R.color.accent
+                                ).copy(alpha = ContentAlpha.disabled)
+                            )
+                        }
                     }
                 }
             }

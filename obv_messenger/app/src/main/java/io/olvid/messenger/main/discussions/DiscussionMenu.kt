@@ -25,6 +25,7 @@ interface DiscussionMenu {
     fun markAllDiscussionMessagesRead(discussionId: Long)
     fun markDiscussionAsUnread(discussionId: Long)
     fun pinDiscussion(discussionId: Long, pinned: Boolean)
+    fun muteDiscussion(discussionId: Long, muted: Boolean)
     fun deleteDiscussion(discussion: Discussion)
     fun renameDiscussion(discussion: Discussion)
     fun openSettings(discussionId: Long)

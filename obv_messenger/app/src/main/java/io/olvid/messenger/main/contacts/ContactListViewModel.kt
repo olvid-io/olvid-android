@@ -360,7 +360,7 @@ fun ContactOrKeycloakDetails.getAnnotatedDescription(): AnnotatedString? {
                     if (contact.customDisplayName != null) {
                         append(
                             identityDetails.formatDisplayName(
-                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
+                                SettingsActivity.getContactDisplayNameFormat(),
                                 SettingsActivity.getUppercaseLastName()
                             )
                         )

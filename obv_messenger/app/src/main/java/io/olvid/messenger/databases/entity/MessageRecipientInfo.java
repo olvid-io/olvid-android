@@ -154,7 +154,19 @@ public class MessageRecipientInfo {
     }
 
     public int status() {
-        return (engineMessageIdentifier == null?0:1) + (timestampSent == null?0:1) + (timestampDelivered == null?0:1) + (timestampRead == null?0:1);
+        if (timestampRead != null) {
+            return 4;
+        }
+        if (timestampDelivered != null) {
+            return 3;
+        }
+        if (timestampSent != null && timestampSent > 0) {
+            return 2;
+        }
+        if (engineMessageIdentifier != null) {
+            return 1;
+        }
+        return 0;
     }
 
 

@@ -458,6 +458,13 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
             " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_INBOUND_MESSAGE +
+            " AND " + Message.DISCUSSION_ID + " = :discussionId")
+    List<Message> getCurrentlySharingInboundLocationMessagesInDiscussion(long discussionId);
+
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
+            " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
             " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE +
             " AND " + Message.DISCUSSION_ID + " = :discussionId " +
             " ORDER BY " + Message.SORT_INDEX + " ASC ")

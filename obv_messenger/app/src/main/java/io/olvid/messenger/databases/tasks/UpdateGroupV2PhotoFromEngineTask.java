@@ -61,11 +61,13 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
                     e.printStackTrace();
                 }
             } else if ((group.newPublishedDetails == Group2.PUBLISHED_DETAILS_NOTHING_NEW) && userShouldBeNotifiedOfNewPublishedDetails(detailsAndPhotos)) {
-                // group indicates there is nothing new, still, after the photo download we realize that he should be notified --> notify him
-                Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, discussion.bytesOwnedIdentity);
-                db.messageDao().insert(newDetailsMessage);
-                if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
-                    db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                if (discussion != null) {
+                    // group indicates there is nothing new, still, after the photo download we realize that he should be notified --> notify him
+                    Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                    db.messageDao().insert(newDetailsMessage);
+                    if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
+                        db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                    }
                 }
 
                 group.newPublishedDetails = Group2.PUBLISHED_DETAILS_NEW_UNSEEN;

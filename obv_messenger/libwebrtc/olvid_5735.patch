@@ -1,0 +1,227 @@
+diff --git a/p2p/base/basic_packet_socket_factory.cc b/p2p/base/basic_packet_socket_factory.cc
+index 5bc02dd0f0..977866f6ce 100644
+--- a/p2p/base/basic_packet_socket_factory.cc
++++ b/p2p/base/basic_packet_socket_factory.cc
+@@ -207,4 +207,58 @@ int BasicPacketSocketFactory::BindSocket(Socket* socket,
+   return ret;
+ }
+ 
++
++
++
++// Proxy support
++ProxyPacketSocketFactory::ProxyPacketSocketFactory(SocketFactory* socket_factory, SocketAddress proxy_socket_address, std::string& user_agent) :
++  basic_packet_socket_factory_(new BasicPacketSocketFactory(socket_factory))
++{
++  if (proxy_socket_address.IsComplete()) {
++    proxy_info_.type = PROXY_HTTPS;
++    proxy_info_.address = proxy_socket_address;
++  } else {
++    proxy_info_.type = PROXY_NONE;
++  }
++  user_agent_ = user_agent;
++}
++
++ProxyPacketSocketFactory::~ProxyPacketSocketFactory() {}
++
++AsyncPacketSocket* ProxyPacketSocketFactory::CreateUdpSocket(
++    const SocketAddress& address,
++    uint16_t min_port,
++    uint16_t max_port) {
++  return basic_packet_socket_factory_->CreateUdpSocket(address, min_port, max_port);
++}
++
++AsyncListenSocket* ProxyPacketSocketFactory::CreateServerTcpSocket(const SocketAddress& local_address,
++                                        uint16_t min_port,
++                                        uint16_t max_port,
++                                        int opts) {
++  return basic_packet_socket_factory_->CreateServerTcpSocket(local_address, min_port, max_port, opts);
++}
++
++AsyncPacketSocket* ProxyPacketSocketFactory::CreateClientTcpSocket(
++    const SocketAddress& local_address,
++    const SocketAddress& remote_address,
++    const ProxyInfo& proxy_info,
++    const std::string& user_agent,
++    const PacketSocketTcpOptions& tcp_options) {
++  if (user_agent_.empty()) {
++    return basic_packet_socket_factory_->CreateClientTcpSocket(local_address, remote_address, proxy_info_, user_agent, tcp_options);
++  } else {
++    return basic_packet_socket_factory_->CreateClientTcpSocket(local_address, remote_address, proxy_info_, user_agent_, tcp_options);
++  }
++}
++
++AsyncResolverInterface* ProxyPacketSocketFactory::CreateAsyncResolver() {
++  return basic_packet_socket_factory_->CreateAsyncResolver();
++}
++
++std::unique_ptr<webrtc::AsyncDnsResolverInterface> ProxyPacketSocketFactory::CreateAsyncDnsResolver() {
++  return basic_packet_socket_factory_->CreateAsyncDnsResolver();
++}
++
++
+ }  // namespace rtc
+diff --git a/p2p/base/basic_packet_socket_factory.h b/p2p/base/basic_packet_socket_factory.h
+index f4282e1ad0..c5d6f3ba93 100644
+--- a/p2p/base/basic_packet_socket_factory.h
++++ b/p2p/base/basic_packet_socket_factory.h
+@@ -63,6 +63,40 @@ class BasicPacketSocketFactory : public PacketSocketFactory {
+   SocketFactory* socket_factory_;
+ };
+ 
++
++// Proxy support
++class RTC_EXPORT ProxyPacketSocketFactory : public PacketSocketFactory {
++ public:
++  explicit ProxyPacketSocketFactory(SocketFactory* socket_factory, SocketAddress proxy_socket_address, std::string& user_agent);
++  ~ProxyPacketSocketFactory() override;
++
++  AsyncPacketSocket* CreateUdpSocket(const SocketAddress& local_address,
++                                     uint16_t min_port,
++                                     uint16_t max_port) override;
++  AsyncListenSocket* CreateServerTcpSocket(const SocketAddress& local_address,
++                                           uint16_t min_port,
++                                           uint16_t max_port,
++                                           int opts) override;
++  AsyncPacketSocket* CreateClientTcpSocket(
++      const SocketAddress& local_address,
++      const SocketAddress& remote_address,
++      const ProxyInfo& proxy_info,
++      const std::string& user_agent,
++      const PacketSocketTcpOptions& tcp_options) override;
++
++  // TODO(bugs.webrtc.org/12598) Remove when downstream stops using it.
++  ABSL_DEPRECATED("Use CreateAsyncDnsResolver")
++  AsyncResolverInterface* CreateAsyncResolver() override;
++
++  std::unique_ptr<webrtc::AsyncDnsResolverInterface> CreateAsyncDnsResolver()
++      override;
++
++ private:
++  BasicPacketSocketFactory* basic_packet_socket_factory_;
++  ProxyInfo proxy_info_;
++  std::string user_agent_;
++};
++
+ }  // namespace rtc
+ 
+ #endif  // P2P_BASE_BASIC_PACKET_SOCKET_FACTORY_H_
+diff --git a/sdk/android/api/org/webrtc/PeerConnectionFactory.java b/sdk/android/api/org/webrtc/PeerConnectionFactory.java
+index ca67b3afc1..b0826cbff4 100644
+--- a/sdk/android/api/org/webrtc/PeerConnectionFactory.java
++++ b/sdk/android/api/org/webrtc/PeerConnectionFactory.java
+@@ -176,6 +176,10 @@ public class PeerConnectionFactory {
+     @Nullable private NetworkControllerFactoryFactory networkControllerFactoryFactory;
+     @Nullable private NetworkStatePredictorFactoryFactory networkStatePredictorFactoryFactory;
+     @Nullable private NetEqFactoryFactory neteqFactoryFactory;
++    // Proxy support
++    @Nullable private String proxyAddress;
++    private int proxyPort;
++    @Nullable private String userAgent;
+ 
+     private Builder() {}
+ 
+@@ -257,6 +261,18 @@ public class PeerConnectionFactory {
+       return this;
+     }
+ 
++    // Proxy support
++    public Builder setHttpsProxy(String proxyAddress, int proxyPort) {
++      this.proxyAddress = proxyAddress;
++      this.proxyPort = proxyPort;
++      return this;
++    }
++
++    public Builder setUserAgent(String userAgent) {
++      this.userAgent = userAgent;
++      return this;
++    }
++
+     public PeerConnectionFactory createPeerConnectionFactory() {
+       checkInitializeHasBeenCalled();
+       if (audioDeviceModule == null) {
+@@ -276,7 +292,9 @@ public class PeerConnectionFactory {
+           networkStatePredictorFactoryFactory == null
+               ? 0
+               : networkStatePredictorFactoryFactory.createNativeNetworkStatePredictorFactory(),
+-          neteqFactoryFactory == null ? 0 : neteqFactoryFactory.createNativeNetEqFactory());
++          neteqFactoryFactory == null ? 0 : neteqFactoryFactory.createNativeNetEqFactory(),
++          // Proxy support
++          proxyAddress, proxyPort, userAgent);
+     }
+   }
+ 
+@@ -595,7 +613,8 @@ public class PeerConnectionFactory {
+       long audioDecoderFactory, VideoEncoderFactory encoderFactory,
+       VideoDecoderFactory decoderFactory, long nativeAudioProcessor,
+       long nativeFecControllerFactory, long nativeNetworkControllerFactory,
+-      long nativeNetworkStatePredictorFactory, long neteqFactory);
++      long nativeNetworkStatePredictorFactory, long neteqFactory,
++      String proxyAddress, int proxyPort, String userAgent); // Proxy support
+ 
+   private static native long nativeCreatePeerConnection(long factory,
+       PeerConnection.RTCConfiguration rtcConfig, MediaConstraints constraints, long nativeObserver,
+diff --git a/sdk/android/src/jni/pc/peer_connection_factory.cc b/sdk/android/src/jni/pc/peer_connection_factory.cc
+index c2950b31cf..74266342d6 100644
+--- a/sdk/android/src/jni/pc/peer_connection_factory.cc
++++ b/sdk/android/src/jni/pc/peer_connection_factory.cc
+@@ -32,6 +32,10 @@
+ #include "rtc_base/event_tracer.h"
+ #include "rtc_base/physical_socket_server.h"
+ #include "rtc_base/thread.h"
++// Proxy support
++#include "rtc_base/socket_address.h"
++#include "p2p/base/basic_packet_socket_factory.h"
++
+ #include "sdk/android/generated_peerconnection_jni/PeerConnectionFactory_jni.h"
+ #include "sdk/android/native_api/jni/java_types.h"
+ #include "sdk/android/native_api/stacktrace/stacktrace.h"
+@@ -243,7 +247,11 @@ ScopedJavaLocalRef<jobject> CreatePeerConnectionFactoryForJava(
+         network_controller_factory,
+     std::unique_ptr<NetworkStatePredictorFactoryInterface>
+         network_state_predictor_factory,
+-    std::unique_ptr<NetEqFactory> neteq_factory) {
++    std::unique_ptr<NetEqFactory> neteq_factory,
++    // Proxy support
++    std::string proxyAddress,
++    jint proxyPort,
++    std::string userAgent) {
+   // talk/ assumes pretty widely that the current Thread is ThreadManager'd, but
+   // ThreadManager only WrapCurrentThread()s the thread where it is first
+   // created.  Since the semantics around when auto-wrapping happens in
+@@ -287,6 +295,10 @@ ScopedJavaLocalRef<jobject> CreatePeerConnectionFactoryForJava(
+     dependencies.network_monitor_factory =
+         std::make_unique<AndroidNetworkMonitorFactory>();
+   }
++  // Proxy support
++  if ((!proxyAddress.empty() && proxyPort != 0) || !userAgent.empty()) {
++    dependencies.packet_socket_factory = std::make_unique<rtc::ProxyPacketSocketFactory>(socket_server.get(), rtc::SocketAddress(proxyAddress, proxyPort), userAgent);
++  }
+ 
+   cricket::MediaEngineDependencies media_dependencies;
+   media_dependencies.task_queue_factory = dependencies.task_queue_factory.get();
+@@ -330,7 +342,10 @@ JNI_PeerConnectionFactory_CreatePeerConnectionFactory(
+     jlong native_fec_controller_factory,
+     jlong native_network_controller_factory,
+     jlong native_network_state_predictor_factory,
+-    jlong native_neteq_factory) {
++    jlong native_neteq_factory,
++    const JavaParamRef<jstring>& proxyAddress, // Proxy support
++    jint proxyPort,
++    const JavaParamRef<jstring>& userAgent) {
+   rtc::scoped_refptr<AudioProcessing> audio_processor(
+       reinterpret_cast<AudioProcessing*>(native_audio_processor));
+   return CreatePeerConnectionFactoryForJava(
+@@ -347,7 +362,11 @@ JNI_PeerConnectionFactory_CreatePeerConnectionFactory(
+           native_network_controller_factory),
+       TakeOwnershipOfUniquePtr<NetworkStatePredictorFactoryInterface>(
+           native_network_state_predictor_factory),
+-      TakeOwnershipOfUniquePtr<NetEqFactory>(native_neteq_factory));
++      TakeOwnershipOfUniquePtr<NetEqFactory>(native_neteq_factory),
++      // Proxy support
++      proxyAddress.is_null() ? "" : JavaToStdString(jni, proxyAddress),
++      proxyPort,
++      userAgent.is_null() ? "" : JavaToStdString(jni, userAgent));
+ }
+ 
+ static void JNI_PeerConnectionFactory_FreeFactory(JNIEnv*, jlong j_p) {

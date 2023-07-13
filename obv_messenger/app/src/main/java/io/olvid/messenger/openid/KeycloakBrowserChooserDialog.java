@@ -150,6 +150,8 @@ public class KeycloakBrowserChooserDialog {
         map.put("com.UCMobile.intl", "UC Browser");
         map.put("org.chromium.webview_shell", "Chromium WebView Shell");
         map.put("org.lineageos.jelly", "LineageOS Jelly Browser");
+        map.put("org.mozilla.fennec_fdroid", "Fennec F-Droid");
+        map.put("com.stoutner.privacybrowser.standard", "Privacy Browser");
         return map;
     }
 

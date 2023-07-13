@@ -17,4 +17,8 @@
         android:orderInCategory="4"
         android:visible="false"
         android:title="@string/menu_action_location_message_stop_sharing" />
+    <item
+        android:id="@+id/popup_action_location_message_change_integration"
+        android:orderInCategory="5"
+        android:title="@string/menu_action_location_message_change_integration" />
 </menu>

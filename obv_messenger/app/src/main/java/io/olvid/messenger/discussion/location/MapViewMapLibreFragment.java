@@ -259,7 +259,11 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         }
         // enable location component if needed
         if (mapboxMap.getLocationComponent().isLocationComponentEnabled() != enabled) {
-            mapboxMap.getLocationComponent().setLocationComponentEnabled(enabled);
+            try {
+                mapboxMap.getLocationComponent().setLocationComponentEnabled(enabled);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return true;
     }

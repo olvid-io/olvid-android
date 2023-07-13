@@ -52,6 +52,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.R.string
+import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.main.EmptyListCard
 import io.olvid.messenger.main.RefreshingIndicator
@@ -101,21 +102,21 @@ fun DiscussionListScreen(
                                         }
                                     }
                                     DiscussionListItem(
-                                        title = invitation?.getAnnotatedTitle(LocalContext.current)
+                                        title = invitation?.getAnnotatedTitle(LocalContext.current).takeIf { discussion.isPreDiscussion }
                                             ?: getAnnotatedTitle(LocalContext.current),
                                         body = invitation?.let { AnnotatedString(it.statusText) }
                                             ?: getAnnotatedBody(LocalContext.current),
                                         date = invitation?.getAnnotatedDate(LocalContext.current)
                                             ?: getAnnotatedDate(LocalContext.current),
                                         initialViewSetup = { initialView ->
-                                            invitation?.let {
-                                                invitationListViewModel.initialViewSetup(
-                                                    initialView,
-                                                    it
-                                                )
-                                            } ?: kotlin.run {
-                                                initialView.setDiscussion(discussion)
-                                            }
+                                                invitation?.takeIf { discussion.isPreDiscussion }?.let {
+                                                    invitationListViewModel.initialViewSetup(
+                                                        initialView,
+                                                        it
+                                                    )
+                                                } ifNull {
+                                                    initialView.setDiscussion(discussion)
+                                                }
                                         },
                                         customColor = discussionCustomization?.colorJson?.color?.minus(
                                             0x1000000
@@ -146,6 +147,12 @@ fun DiscussionListScreen(
                                             discussionMenu.pinDiscussion(
                                                 discussionId = discussion.id,
                                                 pinned = pinned
+                                            )
+                                        },
+                                        onMuteDiscussion = { muted ->
+                                            discussionMenu.muteDiscussion(
+                                                discussionId = discussion.id,
+                                                muted = muted
                                             )
                                         },
                                         onDeleteDiscussion = {

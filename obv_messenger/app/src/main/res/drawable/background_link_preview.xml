@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/reply_color_border"
+        android:right="@dimen/attachment_corner_radius">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/greyTint" />
+            <corners
+                android:bottomLeftRadius="@dimen/attachment_corner_radius"
+                android:topLeftRadius="@dimen/attachment_corner_radius" />
+        </shape>
+    </item>
+    <item android:left="4dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/almostWhite"/>
+            <corners android:bottomRightRadius="@dimen/attachment_corner_radius"
+                android:topRightRadius="@dimen/attachment_corner_radius"/>
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:color="@color/attachmentBorder"
+                android:width="1dp"/>
+            <corners android:radius="@dimen/attachment_corner_radius"/>
+        </shape>
+    </item>
+</layer-list>

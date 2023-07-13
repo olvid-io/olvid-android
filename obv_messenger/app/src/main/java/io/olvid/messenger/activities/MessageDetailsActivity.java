@@ -759,7 +759,7 @@ public class MessageDetailsActivity extends LockableActivity {
                 holder.recipientInfoTimestampTextView.setText(StringUtils.getPreciseAbsoluteDateString(MessageDetailsActivity.this, messageRecipientInfo.timestampRead));
             } else if (messageRecipientInfo.timestampDelivered != null) {
                 holder.recipientInfoTimestampTextView.setText(StringUtils.getPreciseAbsoluteDateString(MessageDetailsActivity.this, messageRecipientInfo.timestampDelivered));
-            } else if (messageRecipientInfo.timestampSent != null) {
+            } else if (messageRecipientInfo.timestampSent != null && messageRecipientInfo.timestampSent != 0) {
                 holder.recipientInfoTimestampTextView.setText(StringUtils.getPreciseAbsoluteDateString(MessageDetailsActivity.this, messageRecipientInfo.timestampSent));
             } else {
                 holder.recipientInfoTimestampTextView.setText(R.string.text_null_timestamp);
@@ -819,7 +819,7 @@ public class MessageDetailsActivity extends LockableActivity {
             headerHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 28, metrics);
             separatorHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, metrics);
             itemRect = new Rect();
-            bitmapCache = new Bitmap[5];
+            bitmapCache = new Bitmap[6];
         }
 
         @Override
@@ -862,7 +862,7 @@ public class MessageDetailsActivity extends LockableActivity {
                                 textView.setText(R.string.text_read);
                                 imageView.setImageResource(R.drawable.ic_message_status_delivered_and_read);
                                 break;
-                            case 5: // 4 is for undelivered message
+                            case 5: // 5 is for undelivered message
                                 textView.setText(R.string.text_undelivered);
                                 imageView.setImageResource(R.drawable.ic_message_status_undelivered);
                                 break;

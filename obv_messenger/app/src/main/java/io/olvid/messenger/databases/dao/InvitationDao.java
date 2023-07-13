@@ -69,7 +69,6 @@ public interface InvitationDao {
     LiveData<Invitation> getContactOneToOneInvitation(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
 
     @Query("SELECT COUNT(*) > 0 FROM " + Invitation.TABLE_NAME +
-            " WHERE " + Invitation.DISCUSSION_ID + " = :discussionId"
-    )
+            " WHERE " + Invitation.DISCUSSION_ID + " = :discussionId")
     boolean discussionHasInvitations(long discussionId);
 }

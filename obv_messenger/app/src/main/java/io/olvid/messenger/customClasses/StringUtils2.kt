@@ -31,18 +31,29 @@ class StringUtils2 {
             return getLink(body)?.first == link
         }
 
-        fun getLink(s: String?): Pair<String,String?>? {
-            s?.let {_s ->
+        fun getLink(s: String?): Pair<String, String?>? {
+            s?.let { _s ->
                 val source = SpannableString(_s)
                 val urlSpan = source
-                    .apply { LinkifyCompat.addLinks(this, PatternsCompat.WEB_URL, "https://", { s: CharSequence?, start: Int, end: Int ->
-                        s?.let {
-                            (start == 0) || (it[start-1] != '@')
-                        } ?: false
-                    }, null) }
+                    .apply {
+                        LinkifyCompat.addLinks(
+                            this,
+                            PatternsCompat.WEB_URL,
+                            "https://",
+                            { s: CharSequence?, start: Int, end: Int ->
+                                s?.let {
+                                    (start == 0) || (it[start - 1] != '@')
+                                } ?: false
+                            },
+                            null
+                        )
+                    }
                     .getSpans(0, _s.length, URLSpan::class.java).firstOrNull()
                 return urlSpan?.let {
-                    Pair(_s.subSequence(source.getSpanStart(it), source.getSpanEnd(it)).toString(), it.url)
+                    Pair(
+                        _s.subSequence(source.getSpanStart(it), source.getSpanEnd(it)).toString(),
+                        it.url
+                    )
                 }
             }
             return null
@@ -58,6 +69,11 @@ class StringUtils2 {
     }
 }
 
-fun SpannableString.linkify() : SpannableString {
-   return apply { LinkifyCompat.addLinks(this, Linkify.WEB_URLS or Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS) }
+fun SpannableString.linkify(): SpannableString {
+    return apply {
+        LinkifyCompat.addLinks(
+            this,
+            Linkify.WEB_URLS or Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS
+        )
+    }
 }
