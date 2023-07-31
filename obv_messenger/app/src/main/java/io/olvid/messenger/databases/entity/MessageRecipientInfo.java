@@ -50,7 +50,7 @@ public class MessageRecipientInfo {
     public static final String TABLE_NAME = "message_recipient_info_table";
 
     public static final String MESSAGE_ID = "message_id";
-    public static final String BYTES_CONTACT_IDENTITY = "bytes_contact_identity";
+    public static final String BYTES_CONTACT_IDENTITY = "bytes_contact_identity"; // this may also be our owned identity in a multi-device context
     public static final String RETURN_RECEIPT_NONCE = "return_receipt_nonce"; // set at the same time as the ENGINE_MESSAGE_IDENTIFIER
     public static final String RETURN_RECEIPT_KEY = "return_receipt_key"; // set at the same time as the ENGINE_MESSAGE_IDENTIFIER
     public static final String ENGINE_MESSAGE_IDENTIFIER = "engine_message_identifier"; // null means the message was not passed to the engine

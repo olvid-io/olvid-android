@@ -116,7 +116,7 @@ public class ExponentialBackoffRepeatingScheduler<T> {
         return scheduler.scheduleAtFixedRate(runnable, i, delay, timeUnit);
     }
 
-    private long computeReschedulingDelay(int failedAttemptCount) {
+    protected long computeReschedulingDelay(int failedAttemptCount) {
         return (long) ((Constants.BASE_RESCHEDULING_TIME << failedAttemptCount) * (1 + random.nextFloat()));
     }
 }

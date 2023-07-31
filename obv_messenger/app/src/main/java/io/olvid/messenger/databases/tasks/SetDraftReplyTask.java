@@ -24,6 +24,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonMessageReference;
 
 public class SetDraftReplyTask implements Runnable {
     private final Long discussionId;
@@ -57,7 +58,7 @@ public class SetDraftReplyTask implements Runnable {
             draftMessage.contentBody = draftBody;
             draftMessage.id = db.messageDao().insert(draftMessage);
         }
-        Message.JsonMessageReference jsonReply = Message.JsonMessageReference.of(message);
+        JsonMessageReference jsonReply = JsonMessageReference.of(message);
         try {
             draftMessage.jsonReply = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonReply);
             draftMessage.timestamp = System.currentTimeMillis();

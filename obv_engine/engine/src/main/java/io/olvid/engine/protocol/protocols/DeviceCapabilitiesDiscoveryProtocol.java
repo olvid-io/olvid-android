@@ -29,6 +29,7 @@ import java.util.Objects;
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
@@ -421,9 +422,11 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
 
             int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
             if (numberOfOtherDevices > 0) {
-               CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-               ChannelMessageToSend messageToSend = new OwnCapabilitiesToSelfMessage(coreProtocolMessage, ObvCapability.capabilityListToStringArray(receivedMessage.newOwnCapabilities), false).generateChannelProtocolMessageToSend();
-               protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+               try {
+                  CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                  ChannelMessageToSend messageToSend = new OwnCapabilitiesToSelfMessage(coreProtocolMessage, ObvCapability.capabilityListToStringArray(receivedMessage.newOwnCapabilities), false).generateChannelProtocolMessageToSend();
+                  protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+               } catch (NoAcceptableChannelException ignored) { }
             }
          }
 

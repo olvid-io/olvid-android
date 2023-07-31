@@ -37,8 +37,10 @@ import androidx.preference.SwitchPreference;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvDialog;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
@@ -97,6 +99,12 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
                         if (newCategory == previousCategory
                                 || newCategory == SettingsActivity.AutoJoinGroupsCategory.NOBODY
                                 || newCategory == SettingsActivity.AutoJoinGroupsCategory.CONTACTS && previousCategory == SettingsActivity.AutoJoinGroupsCategory.EVERYONE) {
+                            try {
+                                AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingAutoJoinGroups(newCategory.getStringValue()));
+                            } catch (Exception e) {
+                                Logger.w("Failed to propagate auto join group setting change to other devices");
+                                e.printStackTrace();
+                            }
                             return true;
                         }
 
@@ -123,6 +131,12 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
                             if (invitationsToAccept.isEmpty()) {
                                 // directly update the setting
                                 SettingsActivity.setAutoJoinGroups(newCategory);
+                                try {
+                                    AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingAutoJoinGroups(newCategory.getStringValue()));
+                                } catch (Exception e) {
+                                    Logger.w("Failed to propagate auto join group setting change to other devices");
+                                    e.printStackTrace();
+                                }
                                 // in order not to trigger this listener in a loop, we remove it, set the value, and re-add the listener...
                                 new Handler(Looper.getMainLooper()).post(() -> {
                                     Preference.OnPreferenceChangeListener listener = autoJoinPreference.getOnPreferenceChangeListener();
@@ -137,6 +151,13 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
                                         .setMessage(activity.getResources().getQuantityString(R.plurals.dialog_message_auto_join_pending_groups, invitationsToAccept.size(), invitationsToAccept.size()))
                                         .setNegativeButton(R.string.button_label_cancel, null)
                                         .setPositiveButton(R.string.button_label_ok, (DialogInterface dialogInterface, int which) -> {
+                                            SettingsActivity.setAutoJoinGroups(newCategory);
+                                            try {
+                                                AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingAutoJoinGroups(newCategory.getStringValue()));
+                                            } catch (Exception e) {
+                                                Logger.w("Failed to propagate auto join group setting change to other devices");
+                                                e.printStackTrace();
+                                            }
                                             for (Invitation groupInvitation: invitationsToAccept) {
                                                 try {
                                                     ObvDialog obvDialog = groupInvitation.associatedDialog;

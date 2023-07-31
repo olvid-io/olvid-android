@@ -20,7 +20,6 @@
 package io.olvid.messenger.databases.entity;
 
 import android.content.Context;
-import android.location.Location;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,23 +31,15 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -65,6 +56,22 @@ import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.dao.MessageDao;
+import io.olvid.messenger.databases.entity.jsons.JsonDeleteDiscussion;
+import io.olvid.messenger.databases.entity.jsons.JsonDeleteMessages;
+import io.olvid.messenger.databases.entity.jsons.JsonDiscussionRead;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonLimitedVisibilityMessageOpened;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
+import io.olvid.messenger.databases.entity.jsons.JsonMessageReference;
+import io.olvid.messenger.databases.entity.jsons.JsonOneToOneMessageIdentifier;
+import io.olvid.messenger.databases.entity.jsons.JsonPayload;
+import io.olvid.messenger.databases.entity.jsons.JsonQuerySharedSettings;
+import io.olvid.messenger.databases.entity.jsons.JsonReaction;
+import io.olvid.messenger.databases.entity.jsons.JsonReturnReceipt;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
+import io.olvid.messenger.databases.entity.jsons.JsonUpdateMessage;
+import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
 import io.olvid.messenger.databases.tasks.ComputeAttachmentPreviewsAndPostMessageTask;
 import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
@@ -133,6 +140,8 @@ public class Message {
     public static final int STATUS_DELIVERED_AND_READ = 7;
     public static final int STATUS_COMPUTING_PREVIEW = 8; // computing a preview of the image/video attachments before passing to engine
     public static final int STATUS_UNDELIVERED = 9; // for outbound messages, the message could not be uploaded/delivered and will never be
+    public static final int STATUS_SENT_FROM_ANOTHER_DEVICE = 10; // for outbound messages sent from another device. If some day we synchronize outbound status, this should no longer be used.
+
 
     public static final int WIPE_STATUS_NONE = 0;
     public static final int WIPE_STATUS_WIPE_ON_READ = 1;
@@ -164,6 +173,8 @@ public class Message {
     public static final int TYPE_MEDIATOR_INVITATION_SENT = 18;
     public static final int TYPE_MEDIATOR_INVITATION_ACCEPTED = 19;
     public static final int TYPE_MEDIATOR_INVITATION_IGNORED = 20;
+    public static final int TYPE_GAINED_GROUP_SEND_MESSAGE = 21;
+    public static final int TYPE_LOST_GROUP_SEND_MESSAGE = 22;
 
 
     public static final int EDITED_NONE = 0;
@@ -349,7 +360,7 @@ public class Message {
         this.linkPreviewFyleId = null;
         this.mentioned = false;
 
-        if (messageType == TYPE_OUTBOUND_MESSAGE) {
+        if (messageType == TYPE_OUTBOUND_MESSAGE && status != STATUS_SENT_FROM_ANOTHER_DEVICE) {
             computeOutboundSortIndex(db);
         } else {
             computeSortIndex(db);
@@ -501,8 +512,16 @@ public class Message {
         return createInfoMessage(db, TYPE_LOST_GROUP_ADMIN, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createScreenShotDetectedMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity, long serverTimestamp) {
-        return createInfoMessage(db, TYPE_SCREEN_SHOT_DETECTED, discussionId, bytesOwnedIdentity, serverTimestamp, false);
+    public static Message createGainedGroupSendMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+        return createInfoMessage(db, TYPE_GAINED_GROUP_SEND_MESSAGE, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    }
+
+    public static Message createLostGroupSendMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+        return createInfoMessage(db, TYPE_LOST_GROUP_SEND_MESSAGE, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    }
+
+    public static Message createScreenShotDetectedMessage(AppDatabase db, long discussionId, byte[] bytesIdentity, long serverTimestamp) {
+        return createInfoMessage(db, TYPE_SCREEN_SHOT_DETECTED, discussionId, bytesIdentity, serverTimestamp, false);
     }
 
     public static Message createMediatorInvitationMessage(AppDatabase db, int type, long discussionId, byte[] bytesOwnedIdentity, String displayName, long serverTimestamp) {
@@ -522,7 +541,7 @@ public class Message {
         return message;
     }
 
-    public static Message createDiscussionSettingsUpdateMessage(AppDatabase db, long discussionId, DiscussionCustomization.JsonSharedSettings jsonSharedSettings, byte[] bytesIdentityOfInitiator, boolean outbound, Long messageTimestamp) {
+    public static Message createDiscussionSettingsUpdateMessage(AppDatabase db, long discussionId, JsonSharedSettings jsonSharedSettings, byte[] bytesIdentityOfInitiator, boolean outbound, Long messageTimestamp) {
         try {
             double sortIndex;
             long timestamp;
@@ -577,7 +596,7 @@ public class Message {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(discussionId);
 
-        if (!discussion.canPostMessages()) {
+        if (!discussion.isNormalOrReadOnly()) {
             Logger.e("Trying to delete everywhere in a locked discussion!!! --> locally deleting instead");
             return true;
         }
@@ -598,14 +617,20 @@ public class Message {
                 return true;
         }
 
-        // for group discussions with no members (or discussion with self)
-        if (contacts.size() == 0) {
-            return true;
-        }
 
         ArrayList<byte[]> byteContactIdentities = new ArrayList<>(contacts.size());
         for (Contact contact : contacts) {
             byteContactIdentities.add(contact.bytesContactIdentity);
+        }
+
+        // also notify other owned devices
+        if (db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(discussion.bytesOwnedIdentity)) {
+            byteContactIdentities.add(discussion.bytesOwnedIdentity);
+        }
+
+        // for group discussions with no members (or discussion with self)
+        if (byteContactIdentities.size() == 0) {
+            return true;
         }
 
         try {
@@ -634,7 +659,7 @@ public class Message {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(discussionId);
 
-        if (!discussion.canPostMessages()) {
+        if (!discussion.isNormalOrReadOnly()) {
             Logger.e("Trying to delete everywhere a locked discussion!!! --> locally deleting instead");
             return true;
         }
@@ -655,14 +680,20 @@ public class Message {
                 return true;
         }
 
-        // for group discussions with no members (or discussion with self)
-        if (contacts.size() == 0) {
-            return true;
-        }
 
         ArrayList<byte[]> byteContactIdentities = new ArrayList<>(contacts.size());
         for (Contact contact : contacts) {
             byteContactIdentities.add(contact.bytesContactIdentity);
+        }
+
+        // also notify other owned devices
+        if (db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(discussion.bytesOwnedIdentity)) {
+            byteContactIdentities.add(discussion.bytesOwnedIdentity);
+        }
+
+        // for group discussions with no members (or discussion with self)
+        if (byteContactIdentities.size() == 0) {
+            return true;
         }
 
         try {
@@ -692,7 +723,7 @@ public class Message {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(updatedMessage.discussionId);
 
-        if (!discussion.canPostMessages()) {
+        if (!discussion.isNormal()) {
             Logger.e("Trying to update a message in a locked discussion!!! --> locally updating instead");
             return new ObvPostMessageOutput(true, new HashMap<>());
         }
@@ -713,14 +744,19 @@ public class Message {
                 return new ObvPostMessageOutput(true, new HashMap<>());
         }
 
-        // for group discussions with no members (or discussion with self)
-        if (contacts.size() == 0) {
-            return new ObvPostMessageOutput(true, new HashMap<>());
-        }
-
         ArrayList<byte[]> byteContactIdentities = new ArrayList<>(contacts.size());
         for (Contact contact : contacts) {
             byteContactIdentities.add(contact.bytesContactIdentity);
+        }
+
+        // also notify other owned devices
+        if (db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(discussion.bytesOwnedIdentity)) {
+            byteContactIdentities.add(discussion.bytesOwnedIdentity);
+        }
+
+        // for group discussions with no members (or discussion with self)
+        if (byteContactIdentities.size() == 0) {
+            return new ObvPostMessageOutput(true, new HashMap<>());
         }
 
         try {
@@ -755,7 +791,7 @@ public class Message {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(message.discussionId);
 
-        if (!discussion.canPostMessages()) {
+        if (!discussion.isNormal()) {
             Logger.e("Trying to react a message in a locked discussion!!!");
             return true;
         }
@@ -776,14 +812,19 @@ public class Message {
                 return true;
         }
 
-        // for group discussions with no members (or discussion with self)
-        if (contacts.size() == 0) {
-            return true;
-        }
-
         ArrayList<byte[]> byteContactIdentities = new ArrayList<>(contacts.size());
         for (Contact contact : contacts) {
             byteContactIdentities.add(contact.bytesContactIdentity);
+        }
+
+        // also notify other owned devices
+        if (db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(discussion.bytesOwnedIdentity)) {
+            byteContactIdentities.add(discussion.bytesOwnedIdentity);
+        }
+
+        // for group discussions with no members (or discussion with self)
+        if (byteContactIdentities.size() == 0) {
+            return true;
         }
 
         try {
@@ -818,7 +859,7 @@ public class Message {
             AppDatabase db = AppDatabase.getInstance();
             Discussion discussion = db.discussionDao().getById(discussionId);
 
-            if (!discussion.canPostMessages()) {
+            if (!discussion.isNormalOrReadOnly()) {
                 Logger.e("Trying to post settings message in a locked discussion!!!");
                 return;
             }
@@ -849,9 +890,16 @@ public class Message {
                 hasChannels |= contact.establishedChannelCount > 0;
             }
 
+            // also notify other owned devices
+            if ((bytesTargetContactIdentity == null || Arrays.equals(bytesTargetContactIdentity, discussion.bytesOwnedIdentity)
+                    && db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(discussion.bytesOwnedIdentity))) {
+                byteContactIdentities.add(discussion.bytesOwnedIdentity);
+                hasChannels = true;
+            }
+
             if (hasChannels) {
                 ObvPostMessageOutput postMessageOutput = AppSingleton.getEngine().post(
-                        getDiscussionSettingsUpdatePayloadAsBytes(discussion.discussionType, discussion.bytesDiscussionIdentifier),
+                        getDiscussionSettingsUpdatePayloadAsBytes(discussion.discussionType, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier),
                         null,
                         new ObvOutboundAttachment[0],
                         byteContactIdentities,
@@ -875,7 +923,35 @@ public class Message {
         }
     }
 
+    public static void postDiscussionReadMessage(@NonNull Discussion discussion, long timestamp) {
+        try {
+            JsonDiscussionRead discussionRead = JsonDiscussionRead.of(discussion);
+            discussionRead.setLastReadMessageServerTimestamp(timestamp);
 
+            JsonPayload jsonPayload = new JsonPayload();
+            jsonPayload.setJsonDiscussionRead(discussionRead);
+
+            byte[] messagePayload = AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
+            AppSingleton.getEngine().post(messagePayload, null, new ObvOutboundAttachment[0], Collections.singletonList(discussion.bytesOwnedIdentity), discussion.bytesOwnedIdentity, false, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void postLimitedVisibilityMessageOpenedMessage(@NonNull Discussion discussion, @NonNull Message message) {
+        try {
+            JsonLimitedVisibilityMessageOpened jsonLimitedVisibilityMessageOpened = JsonLimitedVisibilityMessageOpened.of(discussion);
+            jsonLimitedVisibilityMessageOpened.setMessageReference(JsonMessageReference.of(message));
+
+            JsonPayload jsonPayload = new JsonPayload();
+            jsonPayload.setJsonLimitedVisibilityMessageOpened(jsonLimitedVisibilityMessageOpened);
+
+            byte[] messagePayload = AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
+            AppSingleton.getEngine().post(messagePayload, null, new ObvOutboundAttachment[0], Collections.singletonList(discussion.bytesOwnedIdentity), discussion.bytesOwnedIdentity, false, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void post(boolean showToasts, byte[] extendedPayload) {
         if (messageType != TYPE_OUTBOUND_MESSAGE) {
@@ -891,7 +967,7 @@ public class Message {
                 Logger.e("Called Message.post() outside a transaction");
             }
 
-            if (!discussion.canPostMessages()) {
+            if (!discussion.isNormal()) {
                 Logger.e("Trying to post in a locked discussion!!!");
                 return;
             }
@@ -914,7 +990,7 @@ public class Message {
 
             ////////////////////
             // compute the contacts to which the message should be sent (the MessageRecipientInfo)
-            // compute the contacts to which the message can be send NOW (byteContactIdentitiesToWhichMessageCanBeSentNow)
+            // compute the contacts to which the message can be sent NOW (byteContactIdentitiesToWhichMessageCanBeSentNow)
             HashMap<BytesKey, MessageRecipientInfo> messageRecipientInfoHashMap = new HashMap<>();
             List<byte[]> byteContactIdentitiesToWhichMessageCanBeSentNow = new ArrayList<>();
             boolean markMessageSent = true;
@@ -967,6 +1043,13 @@ public class Message {
                     return;
             }
 
+            /////////////////
+            // if I have other devices, also add a recipient info for myself
+            if (db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(discussion.bytesOwnedIdentity)) {
+                messageRecipientInfoHashMap.put(new BytesKey(discussion.bytesOwnedIdentity), new MessageRecipientInfo(id, attachmentFylesAndStatuses.size(), discussion.bytesOwnedIdentity));
+                byteContactIdentitiesToWhichMessageCanBeSentNow.add(discussion.bytesOwnedIdentity);
+                markMessageSent = false;
+            }
 
 
             /////////////////
@@ -1018,7 +1101,7 @@ public class Message {
                 final byte[] returnReceiptNonce = AppSingleton.getEngine().getReturnReceiptNonce();
                 final byte[] returnReceiptKey = AppSingleton.getEngine().getReturnReceiptKey();
                 final ObvPostMessageOutput postMessageOutput = AppSingleton.getEngine().post(
-                        getMessagePayloadAsBytes(discussion.discussionType, discussion.bytesDiscussionIdentifier, returnReceiptNonce, returnReceiptKey, null),
+                        getMessagePayloadAsBytes(discussion.discussionType, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier, returnReceiptNonce, returnReceiptKey, null),
                         (hasAttachmentWithPreview && extendedPayload.length > 0) ? extendedPayload : null,
                         attachments,
                         byteContactIdentitiesToWhichMessageCanBeSentNow,
@@ -1093,7 +1176,7 @@ public class Message {
             AppDatabase db = AppDatabase.getInstance();
             Discussion discussion = db.discussionDao().getById(discussionId);
             if (discussion == null
-                    || !discussion.canPostMessages()
+                    || !discussion.isNormal()
                     || wipeStatus == WIPE_STATUS_WIPED
                     || wipeStatus == WIPE_STATUS_REMOTE_DELETED) {
                 // message cannot be reposted, simply mark the MessageRecipientInfo as processed
@@ -1158,7 +1241,7 @@ public class Message {
             final byte[] returnReceiptNonce = AppSingleton.getEngine().getReturnReceiptNonce();
             final byte[] returnReceiptKey = AppSingleton.getEngine().getReturnReceiptKey();
             final ObvPostMessageOutput postMessageOutput = AppSingleton.getEngine().post(
-                    getMessagePayloadAsBytes(discussion.discussionType, discussion.bytesDiscussionIdentifier, returnReceiptNonce, returnReceiptKey, originalServerTimestamp),
+                    getMessagePayloadAsBytes(discussion.discussionType, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier, returnReceiptNonce, returnReceiptKey, originalServerTimestamp),
                     (hasAttachmentWithPreview && extendedPayload.length > 0) ? extendedPayload : null,
                     attachments,
                     Collections.singletonList(messageRecipientInfo.bytesContactIdentity),
@@ -1222,13 +1305,25 @@ public class Message {
         if (messageRecipientInfos.size() == 0) {
             return false;
         }
+        // we fetch the discussion only to get our ownedIdentity
+        Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);
+        if (discussion == null) {
+            return false;
+        }
+        // when computing the message status, do not take the recipient info of my other owned devices into account, unless this is the only recipient info (discussion with myself)
+        boolean ignoreOwnRecipientInfo = messageRecipientInfos.size() > 1;
         int newStatus = 100000;
         boolean passedToEngineForEveryone = true;
         for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
+            if (ignoreOwnRecipientInfo && Arrays.equals(messageRecipientInfo.bytesContactIdentity, discussion.bytesOwnedIdentity)) {
+                continue;
+            }
+
             if (messageRecipientInfo.engineMessageIdentifier == null) {
                 passedToEngineForEveryone = false;
                 continue;
             }
+
             if (messageRecipientInfo.timestampSent == null) {
                 newStatus = STATUS_PROCESSING;
                 break;
@@ -1277,7 +1372,9 @@ public class Message {
             if (locationType == LOCATION_TYPE_SHARE_FINISHED) {
                 return context.getString(R.string.text_message_sharing_location_finished);
             } else if (locationType == LOCATION_TYPE_SHARE) {
-                if (messageType == TYPE_OUTBOUND_MESSAGE) {
+                if (messageType == TYPE_OUTBOUND_MESSAGE && status == Message.STATUS_SENT_FROM_ANOTHER_DEVICE) {
+                    return context.getString(R.string.text_message_sharing_location_on_other_device);
+                } else if (messageType == TYPE_OUTBOUND_MESSAGE) {
                     return context.getString(R.string.text_message_sharing_location);
                 } else {
                     return context.getString(R.string.text_message_receiving_shared_location);
@@ -1324,7 +1421,7 @@ public class Message {
         try {
             List<JsonUserMention> mentions = getMentions();
             if (mentions != null) {
-                for (Message.JsonUserMention mention : mentions) {
+                for (JsonUserMention mention : mentions) {
                     if (Arrays.equals(ownedIdentity, mention.getUserIdentifier())) {
                         return true;
                     }
@@ -1350,6 +1447,12 @@ public class Message {
         return jsonLocation != null;
     }
 
+    public boolean isCurrentSharingOutboundLocationMessage() {
+        return messageType == Message.TYPE_OUTBOUND_MESSAGE
+                && locationType == Message.LOCATION_TYPE_SHARE
+                && status != Message.STATUS_SENT_FROM_ANOTHER_DEVICE;
+    }
+
     public boolean isForwardable() {
         return (messageType == Message.TYPE_INBOUND_MESSAGE || messageType == Message.TYPE_OUTBOUND_MESSAGE)
                 && wipeStatus == Message.WIPE_STATUS_NONE
@@ -1367,7 +1470,7 @@ public class Message {
         return false;
     }
 
-    public byte[] getMessagePayloadAsBytes(int discussionType, byte[] bytesDiscussionIdentifier, byte[] returnReceiptNonce, byte[] returnReceiptKey, Long originalServerTimestamp) throws Exception {
+    public byte[] getMessagePayloadAsBytes(int discussionType, byte[] bytesOwnedIdentity, byte[] bytesDiscussionIdentifier, byte[] returnReceiptNonce, byte[] returnReceiptKey, Long originalServerTimestamp) throws Exception {
         JsonMessage jsonMessage = getJsonMessage();
         switch (discussionType) {
             case Discussion.TYPE_GROUP:
@@ -1378,6 +1481,7 @@ public class Message {
                 break;
             case Discussion.TYPE_CONTACT:
             default:
+                jsonMessage.oneToOneIdentifier = new JsonOneToOneMessageIdentifier(bytesOwnedIdentity, bytesDiscussionIdentifier);
                 break;
         }
         jsonMessage.setOriginalServerTimestamp(originalServerTimestamp);
@@ -1386,17 +1490,18 @@ public class Message {
         return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
     }
 
-    public byte[] getDiscussionSettingsUpdatePayloadAsBytes(int discussionType, byte[] bytesDiscussionIdentifier) throws Exception {
-        DiscussionCustomization.JsonSharedSettings jsonSharedSettings = AppSingleton.getJsonObjectMapper().readValue(contentBody, DiscussionCustomization.JsonSharedSettings.class);
+    public byte[] getDiscussionSettingsUpdatePayloadAsBytes(int discussionType, byte[] bytesOwnedIdentity, byte[] bytesDiscussionIdentifier) throws Exception {
+        JsonSharedSettings jsonSharedSettings = AppSingleton.getJsonObjectMapper().readValue(contentBody, JsonSharedSettings.class);
         switch (discussionType) {
             case Discussion.TYPE_GROUP:
                 jsonSharedSettings.setGroupOwnerAndUid(bytesDiscussionIdentifier);
                 break;
             case Discussion.TYPE_GROUP_V2:
-                jsonSharedSettings.groupV2Identifier = bytesDiscussionIdentifier;
+                jsonSharedSettings.setGroupV2Identifier(bytesDiscussionIdentifier);
                 break;
             case Discussion.TYPE_CONTACT:
             default:
+                jsonSharedSettings.setOneToOneIdentifier(new JsonOneToOneMessageIdentifier(bytesOwnedIdentity, bytesDiscussionIdentifier));
                 break;
         }
         JsonPayload jsonPayload = new JsonPayload();
@@ -1404,9 +1509,13 @@ public class Message {
         return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
     }
 
-    public static byte[] getGroupV2DiscussionQuerySharedSettingsPayloadAsBytes(byte[] bytesGroupIdentifier, Integer knownSharedSettingsVersion, JsonExpiration knownSharedExpiration) throws Exception {
+    public static byte[] getDiscussionQuerySharedSettingsPayloadAsBytes(Discussion discussion, Integer knownSharedSettingsVersion, JsonExpiration knownSharedExpiration) throws Exception {
+        JsonQuerySharedSettings jsonQuerySharedSettings = JsonQuerySharedSettings.of(discussion);
+        jsonQuerySharedSettings.setKnownSharedSettingsVersion(knownSharedSettingsVersion);
+        jsonQuerySharedSettings.setKnownSharedExpiration(knownSharedExpiration);
+
         JsonPayload jsonPayload = new JsonPayload();
-        jsonPayload.setJsonQuerySharedSettings(new JsonQuerySharedSettings(bytesGroupIdentifier, knownSharedSettingsVersion, knownSharedExpiration));
+        jsonPayload.setJsonQuerySharedSettings(jsonQuerySharedSettings);
         return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
     }
 
@@ -1539,7 +1648,7 @@ public class Message {
     public List<JsonUserMention> getMentions() {
         if (jsonMentions != null) {
             try {
-                return AppSingleton.getJsonObjectMapper().readValue(jsonMentions,  new TypeReference<List<Message.JsonUserMention>>() {});
+                return AppSingleton.getJsonObjectMapper().readValue(jsonMentions,  new TypeReference<List<JsonUserMention>>() {});
             } catch (Exception e) {
                 Logger.w("Error decoding a return receipt!\n" + jsonReturnReceipt);
             }
@@ -1599,7 +1708,7 @@ public class Message {
         deleteAttachments(db);
 
         // stop sharing location if needed
-        if (locationType == LOCATION_TYPE_SHARE) {
+        if (isCurrentSharingOutboundLocationMessage()) {
             UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussionId, false);
         }
 
@@ -1685,1233 +1794,5 @@ public class Message {
         }
         db.messageMetadataDao().insert(new MessageMetadata(id, MessageMetadata.KIND_REMOTE_DELETED, serverTimestamp, bytesRemoteIdentity));
         db.messageExpirationDao().deleteWipeExpiration(id);
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonPayload {
-        JsonMessage jsonMessage;
-        JsonReturnReceipt jsonReturnReceipt;
-        JsonWebrtcMessage jsonWebrtcMessage;
-        DiscussionCustomization.JsonSharedSettings jsonSharedSettings;
-        JsonQuerySharedSettings jsonQuerySharedSettings;
-        JsonUpdateMessage jsonUpdateMessage;
-        JsonDeleteMessages jsonDeleteMessages;
-        JsonDeleteDiscussion jsonDeleteDiscussion;
-        JsonReaction jsonReaction;
-        JsonScreenCaptureDetection jsonScreenCaptureDetection;
-
-        public JsonPayload(JsonMessage jsonMessage, JsonReturnReceipt jsonReturnReceipt) {
-            this.jsonMessage = jsonMessage;
-            this.jsonReturnReceipt = jsonReturnReceipt;
-        }
-
-        public JsonPayload() {
-        }
-
-        @JsonProperty("message")
-        public JsonMessage getJsonMessage() {
-            return jsonMessage;
-        }
-
-        @JsonProperty("message")
-        public void setJsonMessage(JsonMessage jsonMessage) {
-            this.jsonMessage = jsonMessage;
-        }
-
-        @JsonProperty("rr")
-        public JsonReturnReceipt getJsonReturnReceipt() {
-            return jsonReturnReceipt;
-        }
-
-        @JsonProperty("rr")
-        public void setJsonReturnReceipt(JsonReturnReceipt jsonReturnReceipt) {
-            this.jsonReturnReceipt = jsonReturnReceipt;
-        }
-
-        @JsonProperty("rtc")
-        public JsonWebrtcMessage getJsonWebrtcMessage() {
-            return jsonWebrtcMessage;
-        }
-
-        @JsonProperty("rtc")
-        public void setJsonWebrtcMessage(JsonWebrtcMessage jsonWebrtcMessage) {
-            this.jsonWebrtcMessage = jsonWebrtcMessage;
-        }
-
-        @JsonProperty("settings")
-        public DiscussionCustomization.JsonSharedSettings getJsonSharedSettings() {
-            return jsonSharedSettings;
-        }
-
-        @JsonProperty("settings")
-        public void setJsonSharedSettings(DiscussionCustomization.JsonSharedSettings jsonSharedSettings) {
-            this.jsonSharedSettings = jsonSharedSettings;
-        }
-
-        @JsonProperty("qss")
-        public JsonQuerySharedSettings getJsonQuerySharedSettings() {
-            return jsonQuerySharedSettings;
-        }
-
-        @JsonProperty("qss")
-        public void setJsonQuerySharedSettings(JsonQuerySharedSettings jsonQuerySharedSettings) {
-            this.jsonQuerySharedSettings = jsonQuerySharedSettings;
-        }
-
-        @JsonProperty("upm")
-        public JsonUpdateMessage getJsonUpdateMessage() {
-            return jsonUpdateMessage;
-        }
-
-        @JsonProperty("upm")
-        public void setJsonUpdateMessage(JsonUpdateMessage jsonUpdateMessage) {
-            this.jsonUpdateMessage = jsonUpdateMessage;
-        }
-
-        @JsonProperty("delm")
-        public JsonDeleteMessages getJsonDeleteMessages() {
-            return jsonDeleteMessages;
-        }
-
-        @JsonProperty("delm")
-        public void setJsonDeleteMessages(JsonDeleteMessages jsonDeleteMessages) {
-            this.jsonDeleteMessages = jsonDeleteMessages;
-        }
-
-        @JsonProperty("deld")
-        public JsonDeleteDiscussion getJsonDeleteDiscussion() {
-            return jsonDeleteDiscussion;
-        }
-
-        @JsonProperty("deld")
-        public void setJsonDeleteDiscussion(JsonDeleteDiscussion jsonDeleteDiscussion) {
-            this.jsonDeleteDiscussion = jsonDeleteDiscussion;
-        }
-
-        @JsonProperty("reacm")
-        public JsonReaction getJsonReaction() {
-            return jsonReaction;
-        }
-
-        @JsonProperty("reacm")
-        public void setJsonReaction(JsonReaction jsonReaction) {
-            this.jsonReaction = jsonReaction;
-        }
-
-        @JsonProperty("scd")
-        public JsonScreenCaptureDetection getJsonScreenCaptureDetection() {
-            return jsonScreenCaptureDetection;
-        }
-
-        @JsonProperty("scd")
-        public void setJsonScreenCaptureDetection(JsonScreenCaptureDetection jsonScreenCaptureDetection) {
-            this.jsonScreenCaptureDetection = jsonScreenCaptureDetection;
-        }
-    }
-
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonMessage {
-        String body;
-        long senderSequenceNumber;
-        UUID senderThreadIdentifier;
-        byte[] groupUid;
-        byte[] groupOwner;
-        byte[] groupV2Identifier;
-        Boolean forwarded;
-        Long originalServerTimestamp;
-        JsonMessageReference jsonReply;
-        JsonExpiration jsonExpiration;
-        JsonLocation jsonLocation;
-        List<JsonUserMention> jsonUserMentions;
-
-        public JsonMessage(String body) {
-            this.body = body;
-        }
-
-        public JsonMessage() {
-        }
-
-        public String getBody() {
-            return body;
-        }
-
-        public void setBody(String body) {
-            this.body = body;
-        }
-
-        @JsonProperty("ssn")
-        public long getSenderSequenceNumber() {
-            return senderSequenceNumber;
-        }
-
-        @JsonProperty("ssn")
-        public void setSenderSequenceNumber(long senderSequenceNumber) {
-            this.senderSequenceNumber = senderSequenceNumber;
-        }
-
-        @JsonProperty("sti")
-        public UUID getSenderThreadIdentifier() {
-            return senderThreadIdentifier;
-        }
-
-        @JsonProperty("sti")
-        public void setSenderThreadIdentifier(UUID senderThreadIdentifier) {
-            this.senderThreadIdentifier = senderThreadIdentifier;
-        }
-
-        @JsonProperty("guid")
-        public byte[] getGroupUid() {
-            return groupUid;
-        }
-
-        @JsonProperty("guid")
-        public void setGroupUid(byte[] groupUid) {
-            this.groupUid = groupUid;
-        }
-
-        @JsonProperty("go")
-        public byte[] getGroupOwner() {
-            return groupOwner;
-        }
-
-        @JsonProperty("go")
-        public void setGroupOwner(byte[] groupOwner) {
-            this.groupOwner = groupOwner;
-        }
-
-        @JsonProperty("gid2")
-        public byte[] getGroupV2Identifier() {
-            return groupV2Identifier;
-        }
-
-        @JsonProperty("gid2")
-        public void setGroupV2Identifier(byte[] groupV2Identifier) {
-            this.groupV2Identifier = groupV2Identifier;
-        }
-
-        @JsonProperty("fw")
-        public Boolean isForwarded() {
-            return forwarded;
-        }
-
-        @JsonProperty("fw")
-        public void setForwarded(Boolean forwarded) {
-            this.forwarded = forwarded;
-        }
-
-        @JsonProperty("ost")
-        public Long getOriginalServerTimestamp() {
-            return originalServerTimestamp;
-        }
-
-        @JsonProperty("ost")
-        public void setOriginalServerTimestamp(Long originalServerTimestamp) {
-            this.originalServerTimestamp = originalServerTimestamp;
-        }
-
-        @JsonProperty("re")
-        public JsonMessageReference getJsonReply() {
-            return jsonReply;
-        }
-
-        @JsonProperty("re")
-        public void setJsonReply(JsonMessageReference jsonMessageReference) {
-            this.jsonReply = jsonMessageReference;
-        }
-
-        @JsonProperty("exp")
-        public JsonExpiration getJsonExpiration() {
-            return jsonExpiration;
-        }
-
-        @JsonProperty("exp")
-        public void setJsonExpiration(JsonExpiration jsonExpiration) {
-            this.jsonExpiration = jsonExpiration;
-        }
-
-        @JsonProperty("loc")
-        public JsonLocation getJsonLocation() {
-            return jsonLocation;
-        }
-
-        @JsonProperty("loc")
-        public void setJsonLocation(JsonLocation jsonLocation) {
-            this.jsonLocation = jsonLocation;
-        }
-
-        @JsonProperty("um")
-        @Nullable
-        public List<JsonUserMention> getJsonUserMentions() {
-            return jsonUserMentions;
-        }
-
-        @JsonProperty("um")
-        public void setJsonUserMentions(@Nullable List<JsonUserMention> jsonUserMentions) {
-            this.jsonUserMentions = jsonUserMentions;
-        }
-
-        @JsonIgnore
-        public boolean isEmpty() {
-            return (body == null || body.trim().length() == 0) && jsonReply == null && jsonLocation == null;
-        }
-
-        @JsonIgnore
-        public void sanitizeJsonUserMentions() {
-            if (jsonUserMentions != null) {
-                ArrayList<JsonUserMention> sanitizedMentions = new ArrayList<>();
-                for (JsonUserMention mention : jsonUserMentions) {
-                    if (mention.getUserIdentifier() != null) {
-                        sanitizedMentions.add(mention);
-                    }
-                }
-                jsonUserMentions = sanitizedMentions;
-            }
-        }
-
-        @JsonIgnore
-        public void setGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) throws Exception {
-            if (bytesGroupOwnerAndUid.length < 32) {
-                throw new Exception();
-            }
-            byte[] bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
-            byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
-            setGroupOwner(bytesGroupOwner);
-            setGroupUid(bytesGroupUid);
-        }
-    }
-
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonMessageReference {
-        long senderSequenceNumber;
-        UUID senderThreadIdentifier;
-        byte[] senderIdentifier;
-
-        public static JsonMessageReference of(Message message) {
-            JsonMessageReference jsonMessageReference = new JsonMessageReference();
-            jsonMessageReference.senderSequenceNumber = message.senderSequenceNumber;
-            jsonMessageReference.senderThreadIdentifier = message.senderThreadIdentifier;
-            jsonMessageReference.senderIdentifier = message.senderIdentifier;
-            return jsonMessageReference;
-        }
-
-        @JsonProperty("ssn")
-        public long getSenderSequenceNumber() {
-            return senderSequenceNumber;
-        }
-
-        @JsonProperty("ssn")
-        public void setSenderSequenceNumber(long senderSequenceNumber) {
-            this.senderSequenceNumber = senderSequenceNumber;
-        }
-
-        @JsonProperty("sti")
-        public UUID getSenderThreadIdentifier() {
-            return senderThreadIdentifier;
-        }
-
-        @JsonProperty("sti")
-        public void setSenderThreadIdentifier(UUID senderThreadIdentifier) {
-            this.senderThreadIdentifier = senderThreadIdentifier;
-        }
-
-        @JsonProperty("si")
-        public byte[] getSenderIdentifier() {
-            return senderIdentifier;
-        }
-
-        @JsonProperty("si")
-        public void setSenderIdentifier(byte[] senderIdentifier) {
-            this.senderIdentifier = senderIdentifier;
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonExpiration {
-        Long existenceDuration; // in seconds
-        Long visibilityDuration; // in seconds
-        Boolean readOnce;
-
-        @JsonProperty("ex")
-        public Long getExistenceDuration() {
-            return existenceDuration;
-        }
-
-        @JsonProperty("ex")
-        public void setExistenceDuration(Long existenceDuration) {
-            this.existenceDuration = existenceDuration;
-        }
-
-        @JsonProperty("vis")
-        public Long getVisibilityDuration() {
-            return visibilityDuration;
-        }
-
-        @JsonProperty("vis")
-        public void setVisibilityDuration(Long visibilityDuration) {
-            this.visibilityDuration = visibilityDuration;
-        }
-
-        @JsonProperty("ro")
-        public Boolean getReadOnce() {
-            return readOnce;
-        }
-
-        @JsonProperty("ro")
-        public void setReadOnce(Boolean readOnce) {
-            this.readOnce = readOnce;
-        }
-
-        @JsonIgnore
-        @NonNull
-        public JsonExpiration computeGcd(@Nullable JsonExpiration jsonExpiration) {
-            if (jsonExpiration != null) {
-                readOnce = (readOnce != null && readOnce) || (jsonExpiration.getReadOnce() != null && jsonExpiration.getReadOnce());
-                if (jsonExpiration.getVisibilityDuration() != null) {
-                    if (visibilityDuration == null) {
-                        visibilityDuration = jsonExpiration.getVisibilityDuration();
-                    } else {
-                        visibilityDuration = Math.min(visibilityDuration, jsonExpiration.getVisibilityDuration());
-                    }
-                }
-                if (jsonExpiration.getExistenceDuration() != null) {
-                    if (existenceDuration == null) {
-                        existenceDuration = jsonExpiration.getExistenceDuration();
-                    } else {
-                        existenceDuration = Math.min(existenceDuration, jsonExpiration.getExistenceDuration());
-                    }
-                }
-            }
-            return this;
-        }
-
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (!(obj instanceof JsonExpiration)) {
-                return false;
-            }
-            JsonExpiration other = (JsonExpiration) obj;
-            if ((readOnce != null && readOnce) ^ (other.readOnce != null && other.readOnce)) {
-                return false;
-            }
-            if (!Objects.equals(visibilityDuration, other.visibilityDuration)) {
-                return false;
-            }
-            return Objects.equals(existenceDuration, other.existenceDuration);
-        }
-
-        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-        public boolean likeNull() {
-            return (readOnce == null || !readOnce) && (visibilityDuration == null) && (existenceDuration == null);
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonReturnReceipt {
-        byte[] nonce;
-        byte[] key;
-
-        @SuppressWarnings("unused")
-        public JsonReturnReceipt() {
-        }
-
-        public JsonReturnReceipt(byte[] nonce, byte[] key) {
-            this.nonce = nonce;
-            this.key = key;
-        }
-
-        public byte[] getNonce() {
-            return nonce;
-        }
-
-        public void setNonce(byte[] nonce) {
-            this.nonce = nonce;
-        }
-
-        public byte[] getKey() {
-            return key;
-        }
-
-        public void setKey(byte[] key) {
-            this.key = key;
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonWebrtcMessage {
-        UUID callIdentifier;
-        Integer messageType;
-        String serializedMessagePayload;
-
-        public JsonWebrtcMessage() {
-        }
-
-        @JsonProperty("ci")
-        public UUID getCallIdentifier() {
-            return callIdentifier;
-        }
-
-        @JsonProperty("ci")
-        public void setCallIdentifier(UUID callIdentifier) {
-            this.callIdentifier = callIdentifier;
-        }
-
-        @JsonProperty("mt")
-        public Integer getMessageType() {
-            return messageType;
-        }
-
-        @JsonProperty("mt")
-        public void setMessageType(Integer messageType) {
-            this.messageType = messageType;
-        }
-
-        @JsonProperty("smp")
-        public String getSerializedMessagePayload() {
-            return serializedMessagePayload;
-        }
-
-        @JsonProperty("smp")
-        public void setSerializedMessagePayload(String serializedMessagePayload) {
-            this.serializedMessagePayload = serializedMessagePayload;
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonQuerySharedSettings {
-        byte[] groupV2Identifier;
-        Integer knownSharedSettingsVersion;
-        JsonExpiration knownSharedExpiration;
-
-        public JsonQuerySharedSettings() {
-        }
-
-        public JsonQuerySharedSettings(byte[] groupV2Identifier, Integer knownSharedSettingsVersion, JsonExpiration knownSharedExpiration) {
-            this.groupV2Identifier = groupV2Identifier;
-            this.knownSharedSettingsVersion = knownSharedSettingsVersion;
-            this.knownSharedExpiration = knownSharedExpiration;
-        }
-
-        @JsonProperty("gid2")
-        public byte[] getGroupV2Identifier() {
-            return groupV2Identifier;
-        }
-
-        @JsonProperty("gid2")
-        public void setGroupV2Identifier(byte[] groupV2Identifier) {
-            this.groupV2Identifier = groupV2Identifier;
-        }
-
-        @JsonProperty("ksv")
-        public Integer getKnownSharedSettingsVersion() {
-            return knownSharedSettingsVersion;
-        }
-
-        @JsonProperty("ksv")
-        public void setKnownSharedSettingsVersion(Integer knownSharedSettingsVersion) {
-            this.knownSharedSettingsVersion = knownSharedSettingsVersion;
-        }
-
-        @JsonProperty("exp")
-        public JsonExpiration getKnownSharedExpiration() {
-            return knownSharedExpiration;
-        }
-
-        @JsonProperty("exp")
-        public void setKnownSharedExpiration(JsonExpiration knownSharedExpiration) {
-            this.knownSharedExpiration = knownSharedExpiration;
-        }
-    }
-
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonUpdateMessage {
-        String body;
-        byte[] groupUid;
-        byte[] groupOwner;
-        byte[] groupV2Identifier;
-        JsonMessageReference messageReference;
-        JsonLocation jsonLocation;
-        List<JsonUserMention> jsonUserMentions;
-
-        public static JsonUpdateMessage of(Discussion discussion, Message message) throws Exception {
-            JsonUpdateMessage jsonUpdateMessage = new JsonUpdateMessage();
-            jsonUpdateMessage.jsonUserMentions = message.getMentions();
-            jsonUpdateMessage.messageReference = JsonMessageReference.of(message);
-            switch (discussion.discussionType) {
-                case Discussion.TYPE_GROUP:
-                    jsonUpdateMessage.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
-                    break;
-                case Discussion.TYPE_GROUP_V2:
-                    jsonUpdateMessage.groupV2Identifier = discussion.bytesDiscussionIdentifier;
-                    break;
-                case Discussion.TYPE_CONTACT:
-                default:
-                    break;
-            }
-            return jsonUpdateMessage;
-        }
-
-        public String getBody() {
-            return body;
-        }
-
-        public void setBody(String body) {
-            this.body = body;
-        }
-
-        @JsonProperty("loc")
-        public JsonLocation getJsonLocation() {
-            return jsonLocation;
-        }
-
-        @JsonProperty("loc")
-        public void setJsonLocation(JsonLocation jsonLocation) {
-            this.jsonLocation = jsonLocation;
-        }
-
-        @JsonProperty("um")
-        public List<JsonUserMention> getJsonUserMentions() {
-            return jsonUserMentions;
-        }
-
-        @JsonProperty("um")
-        public void setJsonUserMentions(@Nullable List<JsonUserMention> jsonUserMentions) {
-            this.jsonUserMentions = jsonUserMentions;
-        }
-        @JsonProperty("guid")
-        public byte[] getGroupUid() {
-            return groupUid;
-        }
-
-        @JsonProperty("guid")
-        public void setGroupUid(byte[] groupUid) {
-            this.groupUid = groupUid;
-        }
-
-        @JsonProperty("go")
-        public byte[] getGroupOwner() {
-            return groupOwner;
-        }
-
-        @JsonProperty("go")
-        public void setGroupOwner(byte[] groupOwner) {
-            this.groupOwner = groupOwner;
-        }
-
-        @JsonProperty("gid2")
-        public byte[] getGroupV2Identifier() {
-            return groupV2Identifier;
-        }
-
-        @JsonProperty("gid2")
-        public void setGroupV2Identifier(byte[] groupV2Identifier) {
-            this.groupV2Identifier = groupV2Identifier;
-        }
-
-        @JsonProperty("ref")
-        public JsonMessageReference getMessageReference() {
-            return messageReference;
-        }
-
-        @JsonProperty("ref")
-        public void setMessageReference(JsonMessageReference messageReference) {
-            this.messageReference = messageReference;
-        }
-
-        @JsonIgnore
-        public void setGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) throws Exception {
-            if (bytesGroupOwnerAndUid.length < 32) {
-                throw new Exception();
-            }
-            byte[] bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
-            byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
-            setGroupOwner(bytesGroupOwner);
-            setGroupUid(bytesGroupUid);
-        }
-
-        @JsonIgnore
-        public void sanitizeJsonUserMentions() {
-            if (jsonUserMentions != null) {
-                ArrayList<JsonUserMention> sanitizedMentions = new ArrayList<>();
-                for (JsonUserMention mention : jsonUserMentions) {
-                    if (mention.getUserIdentifier() != null) {
-                        sanitizedMentions.add(mention);
-                    }
-                }
-                jsonUserMentions = sanitizedMentions;
-            }
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonLocation {
-        @JsonIgnore
-        public static final int TYPE_SEND = 1;
-        @JsonIgnore
-        public static final int TYPE_SHARING = 2;
-        @JsonIgnore
-        public static final int TYPE_END_SHARING = 3;
-
-        // -- message metadata --
-        int type;
-        long timestamp; // location timestamp
-        // -- sharing message fields --
-        Long count; // null if not sharing
-        Long sharingInterval; // null if not sharing (else in ms)
-        Long sharingExpiration; // can be null if endless sharing (else in ms)
-        // -- location --
-        double latitude;
-        double longitude;
-        // -- optional metadata --
-        Double altitude; // meters (default value null)
-        Float precision; // meters (default value null)
-        String address; // (default value empty string or null)
-
-        public JsonLocation() {}
-
-        private JsonLocation(int type, @Nullable Long sharingExpiration, @Nullable Long sharingInterval, @Nullable Long count, double latitude, double longitude, Double altitude, Float precision, long timestamp) {
-            this.latitude = latitude;
-            this.longitude = longitude;
-            this.altitude = altitude;
-            this.precision = precision;
-            this.timestamp = timestamp;
-            this.type = type;
-            this.count = count;
-            this.sharingExpiration = sharingExpiration;
-            this.sharingInterval = sharingInterval;
-        }
-
-        public static JsonLocation startSharingLocationMessage(@Nullable Long sharingExpiration, @NotNull Long interval, @NotNull Location location) {
-            return new JsonLocation(
-                    TYPE_SHARING,
-                    sharingExpiration,
-                    interval,
-                    1L,
-                    location.getLatitude(),
-                    location.getLongitude(),
-                    location.hasAltitude() ? location.getAltitude() : null,
-                    location.hasAccuracy() ? location.getAccuracy() : null,
-                    location.getTime()
-            );
-        }
-
-        public static JsonLocation updateSharingLocationMessage(@NotNull JsonLocation originalJsonLocation, @NotNull Location location) {
-            return new JsonLocation(
-                    TYPE_SHARING,
-                    originalJsonLocation.getSharingExpiration(),
-                    originalJsonLocation.getSharingInterval(),
-                    originalJsonLocation.getCount() + 1,
-                    location.getLatitude(),
-                    location.getLongitude(),
-                    location.hasAltitude() ? location.getAltitude() : null,
-                    location.hasAccuracy() ? location.getAccuracy() : null,
-                    location.getTime()
-            );
-        }
-
-        public static JsonLocation endOfSharingLocationMessage(@NotNull Long count) {
-            JsonLocation endOfSharingJsonLocation = new JsonLocation();
-            endOfSharingJsonLocation.type = TYPE_END_SHARING;
-            endOfSharingJsonLocation.count = count;
-            return endOfSharingJsonLocation;
-        }
-
-        public static JsonLocation sendLocationMessage(@NotNull Location location) {
-            return new JsonLocation(
-                    TYPE_SEND,
-                    null,
-                    null,
-                    null,
-                    location.getLatitude(),
-                    location.getLongitude(),
-                    location.hasAltitude() ? location.getAltitude() : null,
-                    location.hasAccuracy() ? location.getAccuracy() : null,
-                    location.getTime()
-            );
-        }
-
-        // ----- sharing message metadata -----
-        @JsonProperty("c")
-        public Long getCount() { return count; }
-        @JsonProperty("c")
-        public void setCount(Long count) { this.count = count; }
-
-        @JsonProperty("se")
-        public Long getSharingExpiration() { return sharingExpiration; }
-        @JsonProperty("se")
-        public void setSharingExpiration(Long sharingExpiration) { this.sharingExpiration = sharingExpiration; }
-
-        @JsonProperty("i")
-        public Long getSharingInterval() { return sharingInterval; }
-        @JsonProperty("i")
-        public void setSharingInterval(Long sharingInterval) { this.sharingInterval = sharingInterval; }
-
-        // -- message metadata --
-        @JsonProperty("t")
-        public int getType() { return type; }
-        @JsonProperty("t")
-        public void setType(int type) { this.type = type; }
-
-        @JsonProperty("ts")
-        public long getTimestamp() { return timestamp; }
-        @JsonProperty("ts")
-        public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
-
-        // ----- location -----
-        @JsonProperty("long")
-        public double getLongitude() { return longitude; }
-        @JsonProperty("long")
-        public void setLongitude(double longitude) { this.longitude = longitude; }
-
-        @JsonProperty("lat")
-        public double getLatitude() { return latitude; }
-        @JsonProperty("lat")
-        public void setLatitude(double latitude) { this.latitude = latitude; }
-
-        // ----- optional metadata -----
-        @JsonProperty("alt")
-        public Double getAltitude() { return altitude; }
-        @JsonProperty("alt")
-        public void setAltitude(Double altitude) { this.altitude = altitude; }
-
-        @JsonProperty("prec")
-        public Float getPrecision() { return precision; }
-        @JsonProperty("prec")
-        public void setPrecision(Float accuracy) { this.precision = accuracy; }
-
-        @JsonProperty("add")
-        public String getAddress() { return address; }
-        @JsonProperty("add")
-        public void setAddress(String address) { this.address = address; }
-
-
-        ////////////
-        // formatters
-
-        private final static DecimalFormatSymbols decimalSymbols = new DecimalFormatSymbols(Locale.US);
-        private final static DecimalFormat truncated5 = new DecimalFormat("#0.00000", decimalSymbols);
-        private final static DecimalFormat truncated1 = new DecimalFormat("#0.0", decimalSymbols);
-        private final static DecimalFormat truncated0 = new DecimalFormat("#0", decimalSymbols);
-
-        @JsonIgnore
-        public String getLocationMessageBody() {
-            StringBuilder stringBuilder = new StringBuilder();
-            if (this.address != null && !this.address.isEmpty()) {
-                stringBuilder.append(address);
-                stringBuilder.append("\n\n");
-            }
-            stringBuilder.append("https://maps.google.com/?q=");
-            stringBuilder.append(this.getTruncatedLatitudeString());
-            stringBuilder.append("+");
-            stringBuilder.append(this.getTruncatedLongitudeString());
-            return stringBuilder.toString();
-        }
-
-        // create an android Location object from jsonLocation content
-        @JsonIgnore
-        public Location getAsLocation() {
-            Location location = new Location("");
-            location.setLatitude(latitude);
-            location.setLongitude(longitude);
-            location.setAltitude(altitude != null ? altitude : 0);
-            return location;
-        }
-
-        @JsonIgnore
-        public String getTruncatedLatitudeString() {
-            return truncated5.format(latitude);
-        }
-
-        @JsonIgnore
-        public String getTruncatedLongitudeString() {
-            return truncated5.format(longitude);
-        }
-
-        @JsonIgnore
-        public String getTruncatedPrecisionString(Context context) {
-            if (precision == null) {
-                return "-";
-            }
-            return context.getString(R.string.xx_meters, truncated1.format(precision));
-        }
-
-        @JsonIgnore
-        public String getTruncatedAltitudeString(Context context) {
-            if (altitude == null) {
-                return "-";
-            }
-            return context.getString(R.string.xx_meters, truncated0.format(altitude));
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonUserMention {
-        byte[] userIdentifier;
-        int rangeStart;
-        int rangeEnd;
-
-        public JsonUserMention() {}
-
-        @JsonIgnore
-        public int getLength() {
-            return getRangeEnd() - getRangeStart();
-        }
-
-        public JsonUserMention(byte[] userIdentifier, int rangeStart, int rangeEnd) {
-            this.userIdentifier = userIdentifier;
-            this.rangeStart = rangeStart;
-            this.rangeEnd = rangeEnd;
-        }
-
-        @JsonProperty("uid")
-        public byte[] getUserIdentifier() {
-            return userIdentifier;
-        }
-
-        @JsonProperty("uid")
-        public void setUserIdentifier(byte[] uid) {
-            this.userIdentifier = uid;
-        }
-
-        @JsonProperty("rs")
-        public int getRangeStart() {
-            return rangeStart;
-        }
-
-        @JsonProperty("rs")
-        public void setRangeStart(int index) {
-            this.rangeStart = index;
-        }
-
-        @JsonProperty("re")
-        public int getRangeEnd() {
-            return rangeEnd;
-        }
-
-        @JsonProperty("re")
-        public void setRangeEnd(int index) {
-            this.rangeEnd = index;
-        }
-
-        @JsonIgnore
-        @Override
-        public int hashCode() {
-            return (rangeStart * 31 + rangeEnd) * 31 + Arrays.hashCode(userIdentifier);
-        }
-
-        @JsonIgnore
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (!(obj instanceof JsonUserMention)) {
-                return false;
-            }
-            JsonUserMention other = (JsonUserMention) obj;
-            return (rangeStart == other.rangeStart) && (rangeEnd == other.rangeEnd) && Arrays.equals(userIdentifier, other.userIdentifier);
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonReaction {
-        @Nullable String reaction; // reaction is null to remove previous reaction
-        byte[] groupUid;
-        byte[] groupOwner;
-        byte[] groupV2Identifier;
-        JsonMessageReference messageReference;
-
-        public static JsonReaction of(Discussion discussion, Message message) throws Exception {
-            JsonReaction jsonReaction = new JsonReaction();
-
-            jsonReaction.messageReference = JsonMessageReference.of(message);
-            switch (discussion.discussionType) {
-                case Discussion.TYPE_GROUP:
-                    jsonReaction.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
-                    break;
-                case Discussion.TYPE_GROUP_V2:
-                    jsonReaction.groupV2Identifier = discussion.bytesDiscussionIdentifier;
-                    break;
-                case Discussion.TYPE_CONTACT:
-                default:
-                    break;
-            }
-            return jsonReaction;
-        }
-
-        @JsonProperty("reac")
-        @Nullable
-        public String getReaction() {
-            return reaction;
-        }
-
-        @JsonProperty("reac")
-        public void setReaction(@Nullable String reaction) {
-            this.reaction = reaction;
-        }
-
-        @JsonProperty("guid")
-        public byte[] getGroupUid() {
-            return groupUid;
-        }
-
-        @JsonProperty("guid")
-        public void setGroupUid(byte[] groupUid) {
-            this.groupUid = groupUid;
-        }
-
-        @JsonProperty("go")
-        public byte[] getGroupOwner() {
-            return groupOwner;
-        }
-
-        @JsonProperty("go")
-        public void setGroupOwner(byte[] groupOwner) {
-            this.groupOwner = groupOwner;
-        }
-
-        @JsonProperty("gid2")
-        public byte[] getGroupV2Identifier() {
-            return groupV2Identifier;
-        }
-
-        @JsonProperty("gid2")
-        public void setGroupV2Identifier(byte[] groupV2Identifier) {
-            this.groupV2Identifier = groupV2Identifier;
-        }
-
-        @JsonProperty("ref")
-        public JsonMessageReference getMessageReference() {
-            return messageReference;
-        }
-
-        @JsonProperty("ref")
-        public void setMessageReference(JsonMessageReference messageReference) {
-            this.messageReference = messageReference;
-        }
-
-        @JsonIgnore
-        public void setGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) throws Exception {
-            if (bytesGroupOwnerAndUid.length < 32) {
-                throw new Exception();
-            }
-            byte[] bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
-            byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
-            setGroupOwner(bytesGroupOwner);
-            setGroupUid(bytesGroupUid);
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonDeleteMessages {
-        byte[] groupUid;
-        byte[] groupOwner;
-        byte[] groupV2Identifier;
-        List<JsonMessageReference> messageReferences;
-
-        public static JsonDeleteMessages of(Discussion discussion, List<Message> messages) throws Exception {
-            JsonDeleteMessages jsonDeleteMessages = new JsonDeleteMessages();
-            jsonDeleteMessages.messageReferences = new ArrayList<>(messages.size());
-            for (Message message: messages) {
-                switch (message.messageType) {
-                    case TYPE_INBOUND_MESSAGE:
-                    case TYPE_OUTBOUND_MESSAGE:
-                    case TYPE_INBOUND_EPHEMERAL_MESSAGE:
-                        jsonDeleteMessages.messageReferences.add(JsonMessageReference.of(message));
-                        break;
-                }
-            }
-            switch (discussion.discussionType) {
-                case Discussion.TYPE_GROUP:
-                    jsonDeleteMessages.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
-                    break;
-                case Discussion.TYPE_GROUP_V2:
-                    jsonDeleteMessages.groupV2Identifier = discussion.bytesDiscussionIdentifier;
-                    break;
-                case Discussion.TYPE_CONTACT:
-                default:
-                    break;
-            }
-            return jsonDeleteMessages;
-        }
-
-        @JsonProperty("guid")
-        public byte[] getGroupUid() {
-            return groupUid;
-        }
-
-        @JsonProperty("guid")
-        public void setGroupUid(byte[] groupUid) {
-            this.groupUid = groupUid;
-        }
-
-        @JsonProperty("go")
-        public byte[] getGroupOwner() {
-            return groupOwner;
-        }
-
-        @JsonProperty("go")
-        public void setGroupOwner(byte[] groupOwner) {
-            this.groupOwner = groupOwner;
-        }
-
-        @JsonProperty("gid2")
-        public byte[] getGroupV2Identifier() {
-            return groupV2Identifier;
-        }
-
-        @JsonProperty("gid2")
-        public void setGroupV2Identifier(byte[] groupV2Identifier) {
-            this.groupV2Identifier = groupV2Identifier;
-        }
-
-        @JsonProperty("refs")
-        public List<JsonMessageReference> getMessageReferences() {
-            return messageReferences;
-        }
-
-        @JsonProperty("refs")
-        public void setMessageReferences(List<JsonMessageReference> messageReferences) {
-            this.messageReferences = messageReferences;
-        }
-
-        @JsonIgnore
-        public void setGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) throws Exception {
-            if (bytesGroupOwnerAndUid.length < 32) {
-                throw new Exception();
-            }
-            byte[] bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
-            byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
-            setGroupOwner(bytesGroupOwner);
-            setGroupUid(bytesGroupUid);
-        }
-    }
-
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonDeleteDiscussion {
-        byte[] groupUid;
-        byte[] groupOwner;
-        byte[] groupV2Identifier;
-
-        public static JsonDeleteDiscussion of(Discussion discussion) throws Exception {
-            JsonDeleteDiscussion jsonDeleteDiscussion = new JsonDeleteDiscussion();
-            switch (discussion.discussionType) {
-                case Discussion.TYPE_GROUP:
-                    jsonDeleteDiscussion.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
-                    break;
-                case Discussion.TYPE_GROUP_V2:
-                    jsonDeleteDiscussion.groupV2Identifier = discussion.bytesDiscussionIdentifier;
-                    break;
-                case Discussion.TYPE_CONTACT:
-                default:
-                    break;
-            }
-            return jsonDeleteDiscussion;
-        }
-
-        @JsonProperty("guid")
-        public byte[] getGroupUid() {
-            return groupUid;
-        }
-
-        @JsonProperty("guid")
-        public void setGroupUid(byte[] groupUid) {
-            this.groupUid = groupUid;
-        }
-
-        @JsonProperty("go")
-        public byte[] getGroupOwner() {
-            return groupOwner;
-        }
-
-        @JsonProperty("go")
-        public void setGroupOwner(byte[] groupOwner) {
-            this.groupOwner = groupOwner;
-        }
-
-        @JsonProperty("gid2")
-        public byte[] getGroupV2Identifier() {
-            return groupV2Identifier;
-        }
-
-        @JsonProperty("gid2")
-        public void setGroupV2Identifier(byte[] groupV2Identifier) {
-            this.groupV2Identifier = groupV2Identifier;
-        }
-
-        @JsonIgnore
-        public void setGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) throws Exception {
-            if (bytesGroupOwnerAndUid.length < 32) {
-                throw new Exception();
-            }
-            byte[] bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
-            byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
-            setGroupOwner(bytesGroupOwner);
-            setGroupUid(bytesGroupUid);
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonScreenCaptureDetection {
-        byte[] groupUid;
-        byte[] groupOwner;
-        byte[] groupV2Identifier;
-
-        public static JsonScreenCaptureDetection of(Discussion discussion) throws Exception {
-            JsonScreenCaptureDetection jsonScreenCaptureDetection = new JsonScreenCaptureDetection();
-            switch (discussion.discussionType) {
-                case Discussion.TYPE_GROUP:
-                    jsonScreenCaptureDetection.setGroupOwnerAndUid(discussion.bytesDiscussionIdentifier);
-                    break;
-                case Discussion.TYPE_GROUP_V2:
-                    jsonScreenCaptureDetection.groupV2Identifier = discussion.bytesDiscussionIdentifier;
-                    break;
-                case Discussion.TYPE_CONTACT:
-                default:
-                    break;
-            }
-            return jsonScreenCaptureDetection;
-        }
-
-        @JsonProperty("guid")
-        public byte[] getGroupUid() {
-            return groupUid;
-        }
-
-        @JsonProperty("guid")
-        public void setGroupUid(byte[] groupUid) {
-            this.groupUid = groupUid;
-        }
-
-        @JsonProperty("go")
-        public byte[] getGroupOwner() {
-            return groupOwner;
-        }
-
-        @JsonProperty("go")
-        public void setGroupOwner(byte[] groupOwner) {
-            this.groupOwner = groupOwner;
-        }
-
-        @JsonProperty("gid2")
-        public byte[] getGroupV2Identifier() {
-            return groupV2Identifier;
-        }
-
-        @JsonProperty("gid2")
-        public void setGroupV2Identifier(byte[] groupV2Identifier) {
-            this.groupV2Identifier = groupV2Identifier;
-        }
-
-        @JsonIgnore
-        public void setGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) throws Exception {
-            if (bytesGroupOwnerAndUid.length < 32) {
-                throw new Exception();
-            }
-            byte[] bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
-            byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
-            setGroupOwner(bytesGroupOwner);
-            setGroupUid(bytesGroupUid);
-        }
     }
 }

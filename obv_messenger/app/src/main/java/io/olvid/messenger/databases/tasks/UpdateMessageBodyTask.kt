@@ -26,8 +26,9 @@ import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageMetadata
+import io.olvid.messenger.databases.entity.jsons.JsonUserMention
 
-class UpdateMessageBodyTask(val messageId: Long, val body: String, val mentions: List<Message.JsonUserMention>?) : Runnable {
+class UpdateMessageBodyTask(val messageId: Long, val body: String, val mentions: List<JsonUserMention>?) : Runnable {
     override fun run() {
         if (body.trim().isEmpty()) {
             return

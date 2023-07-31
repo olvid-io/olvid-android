@@ -59,7 +59,8 @@ public class ChannelCreationProtocolInstance implements ObvDatabase {
             return null;
         }
         ProtocolInstance protocolInstance = ProtocolInstance.get(protocolManagerSession, protocolInstanceUid, ownedIdentity);
-        if ((protocolInstance == null) || (protocolInstance.getProtocolId() != ConcreteProtocol.CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID)) {
+        if ((protocolInstance == null)
+                || (protocolInstance.getProtocolId() != ConcreteProtocol.CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID && protocolInstance.getProtocolId() != ConcreteProtocol.CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID)) {
             return null;
         }
         try {

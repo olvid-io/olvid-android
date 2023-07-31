@@ -127,7 +127,7 @@ public class DiscussionViewModel extends ViewModel {
             if (discussion == null || discussion.isLocked()) {
                 return new MutableLiveData<>(null);
             }
-            if (discussion.canPostMessages()) {
+            if (discussion.isNormalOrReadOnly()) {
                 switch (discussion.discussionType) {
                     case Discussion.TYPE_CONTACT:
                         return db.contactDao().getAsList(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
@@ -155,7 +155,7 @@ public class DiscussionViewModel extends ViewModel {
         });
 
         newDetailsUpdate = Transformations.switchMap(discussionLiveData, discussion -> {
-            if (discussion != null && discussion.canPostMessages()) {
+            if (discussion != null && discussion.isNormalOrReadOnly()) {
                 switch (discussion.discussionType) {
                     case Discussion.TYPE_CONTACT:
                         return Transformations.map(AppDatabase.getInstance().contactDao().getAsync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier), (Contact contact) -> {
@@ -264,7 +264,7 @@ public class DiscussionViewModel extends ViewModel {
                 if (discussion == null || discussion.isLocked()) {
                     return new MutableLiveData<>(new ArrayList<>());
                 }
-                if (discussion.canPostMessages()) {
+                if (discussion.isNormal()) {
                     switch (discussion.discussionType) {
                         case Discussion.TYPE_CONTACT:
                             return db.contactDao().getAsList(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);

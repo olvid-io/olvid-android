@@ -61,6 +61,7 @@ public class NotificationListenerIdentity implements NotificationListener {
                 IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED,
                 IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED,
                 IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED,
+                IdentityNotifications.NOTIFICATION_OWNED_DEVICE_LIST_CHANGED,
         }) {
             notificationManager.addListener(notificationName, this);
         }
@@ -337,6 +338,18 @@ public class NotificationListenerIdentity implements NotificationListener {
                 engineInfo.put(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY, oneToOne);
 
                 engine.postEngineNotification(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED, engineInfo);
+                break;
+            }
+            case IdentityNotifications.NOTIFICATION_OWNED_DEVICE_LIST_CHANGED: {
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_OWNED_DEVICE_LIST_CHANGED_OWNED_IDENTITY_KEY);
+
+                if (ownedIdentity == null) {
+                    break;
+                }
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.OWNED_IDENTITY_DEVICE_LIST_CHANGED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+
+                engine.postEngineNotification(EngineNotifications.OWNED_IDENTITY_DEVICE_LIST_CHANGED, engineInfo);
                 break;
             }
             default:

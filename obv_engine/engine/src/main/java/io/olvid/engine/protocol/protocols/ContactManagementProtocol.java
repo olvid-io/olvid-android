@@ -25,6 +25,7 @@ import java.util.HashSet;
 
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.GroupInformation;
@@ -37,6 +38,7 @@ import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocol;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocolMessage;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocolState;
+import io.olvid.engine.protocol.protocol_engine.EmptyProtocolMessage;
 import io.olvid.engine.protocol.protocol_engine.InitialProtocolState;
 import io.olvid.engine.protocol.protocol_engine.ProtocolStep;
 
@@ -112,6 +114,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
     private static final int INITIATE_CONTACT_DOWNGRADE_MESSAGE_ID = 3;
     private static final int CONTACT_DOWNGRADE_NOTIFICATION_MESSAGE_ID = 4;
     private static final int PROPAGATE_CONTACT_DOWNGRADE_MESSAGE_ID = 5;
+    private static final int PERFORM_CONTACT_DEVICE_DISCOVERY_MESSAGE_ID = 6;
 
 
     @Override
@@ -129,6 +132,8 @@ public class ContactManagementProtocol extends ConcreteProtocol {
                 return ContactDowngradeNotificationMessage.class;
             case PROPAGATE_CONTACT_DOWNGRADE_MESSAGE_ID:
                 return PropagateContactDowngradeMessage.class;
+            case PERFORM_CONTACT_DEVICE_DISCOVERY_MESSAGE_ID:
+                return PerformContactDeviceDiscoveryMessage.class;
             default:
                 return null;
         }
@@ -165,27 +170,19 @@ public class ContactManagementProtocol extends ConcreteProtocol {
     }
 
 
-    public static class ContactDeletionNotificationMessage extends ConcreteProtocolMessage {
+    public static class ContactDeletionNotificationMessage extends EmptyProtocolMessage {
         public ContactDeletionNotificationMessage(CoreProtocolMessage coreProtocolMessage) {
             super(coreProtocolMessage);
         }
 
         @SuppressWarnings("unused")
         public ContactDeletionNotificationMessage(ReceivedMessage receivedMessage) throws Exception {
-            super(new CoreProtocolMessage(receivedMessage));
-            if (receivedMessage.getInputs().length != 0) {
-                throw new Exception();
-            }
+            super(receivedMessage);
         }
 
         @Override
         public int getProtocolMessageId() {
             return CONTACT_DELETION_NOTIFICATION_MESSAGE_ID;
-        }
-
-        @Override
-        public Encoded[] getInputs() {
-            return new Encoded[0];
         }
     }
 
@@ -250,27 +247,19 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         }
     }
 
-    public static class ContactDowngradeNotificationMessage extends ConcreteProtocolMessage {
+    public static class ContactDowngradeNotificationMessage extends EmptyProtocolMessage {
         public ContactDowngradeNotificationMessage(CoreProtocolMessage coreProtocolMessage) {
             super(coreProtocolMessage);
         }
 
         @SuppressWarnings("unused")
         public ContactDowngradeNotificationMessage(ReceivedMessage receivedMessage) throws Exception {
-            super(new CoreProtocolMessage(receivedMessage));
-            if (receivedMessage.getInputs().length != 0) {
-                throw new Exception();
-            }
+            super(receivedMessage);
         }
 
         @Override
         public int getProtocolMessageId() {
             return CONTACT_DOWNGRADE_NOTIFICATION_MESSAGE_ID;
-        }
-
-        @Override
-        public Encoded[] getInputs() {
-            return new Encoded[0];
         }
     }
 
@@ -304,6 +293,23 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         }
     }
 
+
+    public static class PerformContactDeviceDiscoveryMessage extends EmptyProtocolMessage {
+        protected PerformContactDeviceDiscoveryMessage(CoreProtocolMessage coreProtocolMessage) {
+            super(coreProtocolMessage);
+        }
+
+        @SuppressWarnings("unused")
+        public PerformContactDeviceDiscoveryMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(receivedMessage);
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return PERFORM_CONTACT_DEVICE_DISCOVERY_MESSAGE_ID;
+        }
+    }
+
     // endregion
 
 
@@ -324,6 +330,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
                     DowngradeContactStep.class,
                     ProcessContactDowngradeNotificationStep.class,
                     ProcessPropagatedContactDowngradeStep.class,
+                    ProcessPerformContactDeviceDiscoveryMessageStep.class,
             };
         }
         return new Class[0];
@@ -349,9 +356,11 @@ public class ContactManagementProtocol extends ConcreteProtocol {
             {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateContactDeletionMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateContactDeletionMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -509,9 +518,11 @@ public class ContactManagementProtocol extends ConcreteProtocol {
                 // propagate downgrade to other owned devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateContactDowngradeMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateContactDowngradeMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -564,6 +575,32 @@ public class ContactManagementProtocol extends ConcreteProtocol {
                 // mark contact as not oneToOne
                 protocolManagerSession.identityDelegate.setContactOneToOne(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity, false);
             }
+
+            return new FinalState();
+        }
+    }
+
+    public static class ProcessPerformContactDeviceDiscoveryMessageStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
+        private final InitialProtocolState startState;
+        private final PerformContactDeviceDiscoveryMessage receivedMessage;
+
+        public ProcessPerformContactDeviceDiscoveryMessageStep(InitialProtocolState startState, PerformContactDeviceDiscoveryMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                    ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                    new UID(getPrng()),
+                    false);
+            ChannelMessageToSend message = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, receivedMessage.getReceptionChannelInfo().getRemoteIdentity()).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, getPrng());
 
             return new FinalState();
         }

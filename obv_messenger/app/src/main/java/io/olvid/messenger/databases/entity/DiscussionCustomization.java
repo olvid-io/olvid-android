@@ -28,14 +28,13 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.File;
-import java.util.Arrays;
 
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 
 @SuppressWarnings("CanBeFinal")
 @Entity(tableName = DiscussionCustomization.TABLE_NAME,
@@ -274,7 +273,7 @@ public class DiscussionCustomization {
     }
 
     @Nullable
-    public Message.JsonExpiration getExpirationJson() {
+    public JsonExpiration getExpirationJson() {
         if (sharedSettingsVersion == null) {
             return null;
         }
@@ -283,7 +282,7 @@ public class DiscussionCustomization {
                 && settingExistenceDuration == null) {
             return null;
         }
-        Message.JsonExpiration expiration = new Message.JsonExpiration();
+        JsonExpiration expiration = new JsonExpiration();
         expiration.setReadOnce(settingReadOnce);
         expiration.setVisibilityDuration(settingVisibilityDuration);
         expiration.setExistenceDuration(settingExistenceDuration);
@@ -304,71 +303,4 @@ public class DiscussionCustomization {
         }
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JsonSharedSettings {
-        int version;
-        byte[] groupUid;
-        byte[] groupOwner;
-        byte[] groupV2Identifier;
-        Message.JsonExpiration jsonExpiration;
-
-        public int getVersion() {
-            return version;
-        }
-
-        public void setVersion(int version) {
-            this.version = version;
-        }
-
-        @JsonProperty("guid")
-        public byte[] getGroupUid() {
-            return groupUid;
-        }
-
-        @JsonProperty("guid")
-        public void setGroupUid(byte[] groupUid) {
-            this.groupUid = groupUid;
-        }
-
-        @JsonProperty("go")
-        public byte[] getGroupOwner() {
-            return groupOwner;
-        }
-
-        @JsonProperty("go")
-        public void setGroupOwner(byte[] groupOwner) {
-            this.groupOwner = groupOwner;
-        }
-
-        @JsonProperty("gid2")
-        public byte[] getGroupV2Identifier() {
-            return groupV2Identifier;
-        }
-
-        @JsonProperty("gid2")
-        public void setGroupV2Identifier(byte[] groupV2Identifier) {
-            this.groupV2Identifier = groupV2Identifier;
-        }
-
-        @JsonProperty("exp")
-        public Message.JsonExpiration getJsonExpiration() {
-            return jsonExpiration;
-        }
-
-        @JsonProperty("exp")
-        public void setJsonExpiration(Message.JsonExpiration jsonExpiration) {
-            this.jsonExpiration = jsonExpiration;
-        }
-
-        @JsonIgnore
-        public void setGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) throws Exception {
-            if (bytesGroupOwnerAndUid.length < 32) {
-                throw new Exception();
-            }
-            byte[] bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
-            byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
-            setGroupOwner(bytesGroupOwner);
-            setGroupUid(bytesGroupUid);
-        }
-    }
 }

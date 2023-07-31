@@ -27,6 +27,7 @@ import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
@@ -408,9 +409,11 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 // send propagate messages
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new AlicePropagatesQrCodeMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.signature).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new AlicePropagatesQrCodeMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.signature).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -488,11 +491,11 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 // signature is valid and fresh --> create the contact (if it does not already exists)
                 if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity)) {
                     protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, receivedMessage.aliceIdentity, receivedMessage.serializedAliceDetails, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
-                }  else {
+                } else {
                     protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.aliceIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }
-                for (UID contactDeviceUid: receivedMessage.aliceDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid);
+                for (UID contactDeviceUid : receivedMessage.aliceDeviceUids) {
+                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid, false);
                 }
             }
 
@@ -511,9 +514,11 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 // propagate the message to other devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new BobPropagatesSignatureMessage(coreProtocolMessage, receivedMessage.aliceIdentity, receivedMessage.signature, receivedMessage.serializedAliceDetails, receivedMessage.aliceDeviceUids).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new BobPropagatesSignatureMessage(coreProtocolMessage, receivedMessage.aliceIdentity, receivedMessage.signature, receivedMessage.serializedAliceDetails, receivedMessage.aliceDeviceUids).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -577,7 +582,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                     protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.aliceIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }
                 for (UID contactDeviceUid : receivedMessage.aliceDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid);
+                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid, false);
                 }
             }
 
@@ -618,7 +623,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                     protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.bobIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }
                 for (UID contactDeviceUid : receivedMessage.bobDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.bobIdentity, contactDeviceUid);
+                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.bobIdentity, contactDeviceUid, false);
                 }
             }
 

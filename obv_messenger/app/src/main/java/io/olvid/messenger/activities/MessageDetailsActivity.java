@@ -92,6 +92,9 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageExpiration;
 import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
+import io.olvid.messenger.databases.entity.jsons.JsonMessageReference;
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel;
 import io.olvid.messenger.viewModels.MessageDetailsViewModel;
 
@@ -101,6 +104,7 @@ public class MessageDetailsActivity extends LockableActivity {
     public static final String MESSAGE_ID_INTENT_EXTRA = "message_id";
     public static final String HAS_ATTACHMENT_INTENT_EXTRA = "has_attachments";
     public static final String IS_INBOUND_INTENT_EXTRA = "is_inbound";
+    public static final String SENT_FROM_OTHER_DEVICE_INTENT_EXTRA = "sent_from_other_device";
 
     MessageDetailsViewModel messageDetailsViewModel;
     AudioAttachmentServiceBinding audioAttachmentServiceBinding;
@@ -112,6 +116,7 @@ public class MessageDetailsActivity extends LockableActivity {
     View messageDetailsActivityRoot;
     boolean hasAttachments;
     boolean isInbound;
+    boolean sendFromOtherDevice;
 
     // message views
     View messageScrollView;
@@ -165,6 +170,7 @@ public class MessageDetailsActivity extends LockableActivity {
         }
         hasAttachments  = getIntent().getBooleanExtra(HAS_ATTACHMENT_INTENT_EXTRA, false);
         isInbound = getIntent().getBooleanExtra(IS_INBOUND_INTENT_EXTRA, false);
+        sendFromOtherDevice = getIntent().getBooleanExtra(SENT_FROM_OTHER_DEVICE_INTENT_EXTRA, false);
 
         if (hasAttachments) {
             if (isInbound) {
@@ -242,7 +248,7 @@ public class MessageDetailsActivity extends LockableActivity {
 
         // metadata
         metadataRecyclerView = findViewById(R.id.message_metadata_recycler_view);
-        if (isInbound) {
+        if (isInbound || sendFromOtherDevice) {
             metadataRecyclerView.setEmptyView(findViewById(R.id.empty_metadata_textview));
         }
         messageMetadataAdapter = new MessageMetadataAdapter(this);
@@ -255,13 +261,25 @@ public class MessageDetailsActivity extends LockableActivity {
 
         // recipients
         if (!isInbound) {
+            TextView recipientsStatusTextView = findViewById(R.id.recipient_status_text_view);
+            TextView otherDeviceExplanationTextView = findViewById(R.id.sent_from_other_device_text_view);
             recipientInfosRecyclerView = findViewById(R.id.recipient_infos_recycler_view);
-            recipientInfosAdapter = new RecipientInfosAdapter(this);
+            if (sendFromOtherDevice) {
+                recipientsStatusTextView.setVisibility(View.GONE);
+                recipientInfosRecyclerView.setVisibility(View.GONE);
+                otherDeviceExplanationTextView.setVisibility(View.VISIBLE);
+            } else {
+                recipientsStatusTextView.setVisibility(View.VISIBLE);
+                recipientInfosRecyclerView.setVisibility(View.VISIBLE);
+                otherDeviceExplanationTextView.setVisibility(View.GONE);
 
-            recipientInfosRecyclerView.setAdapter(recipientInfosAdapter);
-            recipientInfosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            recipientInfosRecyclerView.addItemDecoration(new RecipientInfoHeaderAndSeparatorDecoration());
-            messageDetailsViewModel.getMessageRecipientInfos().observe(this, recipientInfosAdapter);
+                recipientInfosAdapter = new RecipientInfosAdapter(this);
+
+                recipientInfosRecyclerView.setAdapter(recipientInfosAdapter);
+                recipientInfosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+                recipientInfosRecyclerView.addItemDecoration(new RecipientInfoHeaderAndSeparatorDecoration());
+                messageDetailsViewModel.getMessageRecipientInfos().observe(this, recipientInfosAdapter);
+            }
         }
 
 
@@ -383,7 +401,7 @@ public class MessageDetailsActivity extends LockableActivity {
 
             ephemeralTimestampTextView.setText(StringUtils.getLongNiceDateString(getApplicationContext(), message.timestamp));
 
-            Message.JsonExpiration expiration = message.getJsonMessage().getJsonExpiration();
+            JsonExpiration expiration = message.getJsonMessage().getJsonExpiration();
             boolean readOnce = expiration.getReadOnce() != null && expiration.getReadOnce();
 
             if (message.isWithoutText()) {
@@ -458,7 +476,9 @@ public class MessageDetailsActivity extends LockableActivity {
                 messageSenderTextView.setMinWidth(0);
             }
         } else {
-            messageMetadataAdapter.setSentTimestamp(message.timestamp, false);
+            if (!sendFromOtherDevice) {
+                messageMetadataAdapter.setSentTimestamp(message.timestamp, false);
+            }
             switch (message.status) {
                 case Message.STATUS_SENT: {
                     messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_sent));
@@ -480,6 +500,11 @@ public class MessageDetailsActivity extends LockableActivity {
                     messageStatusImageView.clearAnimation();
                     break;
                 }
+                case Message.STATUS_SENT_FROM_ANOTHER_DEVICE: {
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_sent_from_other_device));
+                    messageStatusImageView.clearAnimation();
+                    break;
+                }
                 default: {
                     messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_sync));
                     messageStatusImageView.startAnimation(rotateAnimation);
@@ -491,7 +516,7 @@ public class MessageDetailsActivity extends LockableActivity {
             }
         }
 
-        Message.JsonMessage jsonMessage = message.getJsonMessage();
+        JsonMessage jsonMessage = message.getJsonMessage();
         String body = message.getStringContent(this);
 
         if (wipedAttachmentCountTextView != null) {
@@ -559,7 +584,7 @@ public class MessageDetailsActivity extends LockableActivity {
                 messageReplyGroup.setBackground(drawable);
             }
 
-            Message.JsonMessageReference jsonReply = jsonMessage.getJsonReply();
+            JsonMessageReference jsonReply = jsonMessage.getJsonReply();
             repliedToMessage = AppDatabase.getInstance().messageDao().getBySenderSequenceNumberAsync(jsonReply.getSenderSequenceNumber(), jsonReply.getSenderThreadIdentifier(), jsonReply.getSenderIdentifier(), message.discussionId);
             repliedToMessage.observe(this, replyMessage -> {
                 if (replyMessage == null) {

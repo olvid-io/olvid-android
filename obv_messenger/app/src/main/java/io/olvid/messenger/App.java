@@ -83,10 +83,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.EngineAPI;
+import io.olvid.engine.engine.types.ObvPushNotificationType;
+import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.activities.ContactDetailsActivity;
-import io.olvid.messenger.activities.GroupCreationActivity;
-import io.olvid.messenger.activities.GroupDetailsActivity;
-import io.olvid.messenger.activities.GroupV2DetailsActivity;
+import io.olvid.messenger.group.GroupCreationActivity;
+import io.olvid.messenger.group.GroupDetailsActivity;
+import io.olvid.messenger.group.GroupV2DetailsActivity;
 import io.olvid.messenger.activities.LockScreenActivity;
 import io.olvid.messenger.activities.MessageDetailsActivity;
 import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
@@ -105,6 +107,7 @@ import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.entity.jsons.JsonWebrtcMessage;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.gallery.GalleryActivity;
 import io.olvid.messenger.main.MainActivity;
@@ -314,13 +317,16 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openGroupCreationActivityForCloning(Context activityContext, String absolutePhotoUrl, String serializedGroupDetails, List<Contact> preselectedGroupMembers) {
+    public static void openGroupCreationActivityForCloning(Context activityContext, String absolutePhotoUrl, String serializedGroupDetails, String serializedGroupType, List<Contact> preselectedGroupMembers) {
         Intent intent = new Intent(getContext(), GroupCreationActivity.class);
         if (absolutePhotoUrl != null) {
             intent.putExtra(GroupCreationActivity.ABSOLUTE_PHOTO_URL_INTENT_EXTRA, absolutePhotoUrl);
         }
         if (serializedGroupDetails != null) {
             intent.putExtra(GroupCreationActivity.SERIALIZED_GROUP_DETAILS_INTENT_EXTRA, serializedGroupDetails);
+        }
+        if (serializedGroupType != null) {
+            intent.putExtra(GroupCreationActivity.SERIALIZED_GROUP_TYPE_INTENT_EXTRA, serializedGroupType);
         }
         if (preselectedGroupMembers != null) {
             ArrayList<Parcelable> parcelables = new ArrayList<>(preselectedGroupMembers.size());
@@ -391,7 +397,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         context.startActivity(activityIntent);
     }
 
-    public static void handleWebrtcMessage(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, Message.JsonWebrtcMessage jsonWebrtcMessage, long downloadTimestamp, long serverTimestamp) {
+    public static void handleWebrtcMessage(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, JsonWebrtcMessage jsonWebrtcMessage, long downloadTimestamp, long serverTimestamp) {
         if (jsonWebrtcMessage.getCallIdentifier() == null || jsonWebrtcMessage.getMessageType() == null|| jsonWebrtcMessage.getSerializedMessagePayload() == null) {
             return;
         }
@@ -431,7 +437,8 @@ public class App extends Application implements DefaultLifecycleObserver {
 
         if (messageType == WebrtcCallService.START_CALL_MESSAGE_TYPE
                 || messageType == WebrtcCallService.NEW_ICE_CANDIDATE_MESSAGE_TYPE
-                || messageType == WebrtcCallService.REMOVE_ICE_CANDIDATES_MESSAGE_TYPE) {
+                || messageType == WebrtcCallService.REMOVE_ICE_CANDIDATES_MESSAGE_TYPE
+                || messageType == WebrtcCallService.ANSWERED_OR_REJECTED_ON_OTHER_DEVICE_MESSAGE_TYPE) {
             getContext().startService(intent);
         } else {
             LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
@@ -468,11 +475,12 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openMessageDetails(Context activityContext, long messageId, boolean hasAttachments, boolean isInbound) {
+    public static void openMessageDetails(Context activityContext, long messageId, boolean hasAttachments, boolean isInbound, boolean sentFromOtherDevice) {
         Intent intent = new Intent(getContext(), MessageDetailsActivity.class);
         intent.putExtra(MessageDetailsActivity.MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(MessageDetailsActivity.HAS_ATTACHMENT_INTENT_EXTRA, hasAttachments);
         intent.putExtra(MessageDetailsActivity.IS_INBOUND_INTENT_EXTRA, isInbound);
+        intent.putExtra(MessageDetailsActivity.SENT_FROM_OTHER_DEVICE_INTENT_EXTRA, sentFromOtherDevice);
         activityContext.startActivity(intent);
     }
 
@@ -993,16 +1001,19 @@ public class App extends Application implements DefaultLifecycleObserver {
     }
 
     public static void refreshRegisterToPushNotification() {
-        String token = AppSingleton.retrieveFirebaseToken();
-        for (OwnedIdentity ownedIdentity : AppDatabase.getInstance().ownedIdentityDao().getAll()) {
-            for (int i = 0; i < 5; i++) {
-                try {
-                    AppSingleton.getEngine().registerToPushNotification(ownedIdentity.bytesOwnedIdentity, token, false, false);
-                    break;
-                } catch (Exception e) {
-                    e.printStackTrace();
+        try {
+            String token = AppSingleton.retrieveFirebaseToken();
+            for (ObvIdentity obvOwnedIdentity : AppSingleton.getEngine().getOwnedIdentities()) {
+                if (obvOwnedIdentity.isActive()) {
+                    try {
+                        AppSingleton.getEngine().registerToPushNotification(obvOwnedIdentity.getBytesIdentity(), ObvPushNotificationType.createAndroid(token), false, null);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 

@@ -36,12 +36,15 @@ import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.identities.ObvMutualScanUrl;
+import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 import io.olvid.engine.engine.types.identities.ObvTrustOrigin;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 
 public interface EngineAPI {
     enum ApiKeyPermission {
         CALL,
         WEB_CLIENT,
+        MULTI_DEVICE,
     }
 
     enum ApiKeyStatus {
@@ -67,15 +70,15 @@ public interface EngineAPI {
     String getServerOfIdentity(byte[] bytesIdentity);
     ObvIdentity[] getOwnedIdentities() throws Exception;
     ObvIdentity getOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception;
-    ObvIdentity generateOwnedIdentity(String server, JsonIdentityDetails jsonIdentityDetails, UUID apiKey, ObvKeycloakState keycloakState);
-    UUID getApiKeyForOwnedIdentity(byte[] bytesOwnedIdentity);
-    boolean updateApiKeyForOwnedIdentity(byte[] bytesOwnedIdentity, UUID apiKey);
+    ObvIdentity generateOwnedIdentity(String server, JsonIdentityDetails jsonIdentityDetails, ObvKeycloakState keycloakState, String deviceDisplayName);
+    RegisterApiKeyResult registerOwnedIdentityApiKeyOnServer(byte[] bytesOwnedIdentity, UUID apiKey);
     void recreateServerSession(byte[] bytesOwnedIdentity);
     void deleteOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception;
     JsonIdentityDetailsWithVersionAndPhoto[] getOwnedIdentityPublishedAndLatestDetails(byte[] bytesOwnedOdentity) throws Exception;
     ObvKeycloakState getOwnedIdentityKeycloakState(byte[] bytesOwnedIdentity) throws Exception;
     void saveKeycloakAuthState(byte[] bytesOwnedIdentity, String serializedAuthState) throws Exception;
     void saveKeycloakJwks(byte[] bytesOwnedIdentity, String serializedJwks) throws Exception;
+    void saveKeycloakApiKey(byte[] bytesOwnedIdentity, String apiKey) throws Exception;
     Collection<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(String pushTopic) throws Exception;
     String getOwnedIdentityKeycloakUserId(byte[] bytesOwnedIdentity) throws Exception;
     void setOwnedIdentityKeycloakUserId(byte[] bytesOwnedIdentity, String id) throws Exception;
@@ -89,10 +92,10 @@ public interface EngineAPI {
     String getOwnedIdentityKeycloakSelfRevocationTestNonce(byte[] bytesOwnedIdentity, String serverUrl);
     boolean updateKeycloakGroups(byte[] bytesOwnedIdentity, List<String> signedGroupBlobs, List<String> signedGroupDeletions, List<String> signedGroupKicks, long keycloakCurrentTimestamp);
 
-    void registerToPushNotification(byte[] bytesOwnedIdentity, String firebaseToken, boolean kickOtherDevices, boolean useMultidevice) throws Exception;
-    void unregisterToPushNotification(byte[] bytesOwnedIdentity) throws Exception;
+    void registerToPushNotification(byte[] bytesOwnedIdentity, ObvPushNotificationType pushNotificationType, boolean reactivateCurrentDevice, byte[] bytesDeviceUidToReplace) throws Exception;
     void processAndroidPushNotification(String maskingUidString);
     byte[] getOwnedIdentityFromMaskingUid(String maskingUidString);
+    void processDeviceManagementRequest(byte[] bytesOwnedIdentity, ObvDeviceManagementRequest deviceManagementRequest) throws Exception;
 
     void updateLatestIdentityDetails(byte[] bytesOwnedIdentity, JsonIdentityDetails jsonIdentityDetails) throws Exception;
     void discardLatestIdentityDetails(byte[] bytesOwnedIdentity);
@@ -102,6 +105,12 @@ public interface EngineAPI {
     byte[] getServerAuthenticationToken(byte[] bytesOwnedIdentity);
 
     List<ObvCapability> getOwnCapabilities(byte[] bytesOwnedIdentity); // returns null in case of error, empty list if there are no capabilities
+    List<ObvOwnedDevice> getOwnedDevices(byte[] bytesOwnedIdentity);
+    ObvDeviceList queryRegisteredOwnedDevicesFromServer(byte[] bytesOwnedIdentity);
+    void refreshOwnedDeviceList(byte[] bytesOwnedIdentity);
+    void recreateOwnedDeviceChannel(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid);
+//    void resynchronizeAllOwnedDevices(byte[] bytesOwnedIdentity);
+
 
     // ObvContactIdentity
     ObvIdentity[] getContactsOfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception;
@@ -134,6 +143,7 @@ public interface EngineAPI {
     List<ObvGroupV2> getGroupsV2OfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception;
     void trustGroupV2PublishedDetails(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
     ObvGroupV2.ObvGroupV2DetailsAndPhotos getGroupV2DetailsAndPhotos(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    String getGroupV2JsonType(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
     void initiateGroupV2Update(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, ObvGroupV2.ObvGroupV2ChangeSet changeSet) throws Exception;
     void leaveGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
     void disbandGroupV2(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) throws Exception;
@@ -157,7 +167,7 @@ public interface EngineAPI {
     void startMutualScanTrustEstablishmentProtocol(byte[] bytesOwnedIdentity, byte[] bytesRemoteIdentity, byte[] signature) throws Exception;
     void startContactMutualIntroductionProtocol(byte[] bytesOwnedIdentity, byte[] bytesContactIdentityA, byte[][] bytesContactIdentities) throws Exception;
     void startGroupCreationProtocol(String serializedGroupDetailsWithVersionAndPhoto, String absolutePhotoUrl, byte[] bytesOwnedIdentity, byte[][] bytesRemoteIdentities) throws Exception;
-    void startGroupV2CreationProtocol(String serializedGroupDetails, String absolutePhotoUrl, byte[] bytesOwnedIdentity, HashSet<GroupV2.Permission> ownPermissions, HashMap<ObvBytesKey, HashSet<GroupV2.Permission>> otherGroupMembers) throws Exception;
+    void startGroupV2CreationProtocol(String serializedGroupDetails, String absolutePhotoUrl, byte[] bytesOwnedIdentity, HashSet<GroupV2.Permission> ownPermissions, HashMap<ObvBytesKey, HashSet<GroupV2.Permission>> otherGroupMembers, String serializedGroupType) throws Exception;
     void restartAllOngoingChannelEstablishmentProtocols(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void recreateAllChannels(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void inviteContactsToGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, byte[][] bytesNewMemberIdentities) throws Exception;
@@ -168,7 +178,7 @@ public interface EngineAPI {
     void deleteContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void downgradeOneToOneContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void startOneToOneInvitationProtocol(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
-    void deleteOwnedIdentityAndNotifyContacts(byte[] bytesOwnedIdentity) throws Exception;
+    void deleteOwnedIdentityAndNotifyContacts(byte[] bytesOwnedIdentity, boolean deleteEverywhere) throws Exception;
     void queryGroupOwnerForLatestGroupMembers(byte[] bytesGroupOwnerAndUid, byte[] bytesOwnedIdentity) throws Exception;
     void addKeycloakContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String signedContactDetails) throws Exception;
 
@@ -194,7 +204,7 @@ public interface EngineAPI {
     void markMessageForDeletion(byte[] bytesOwnedIdentity, byte[] messageIdentifier);
     void cancelAttachmentUpload(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber);
     void resendAllAttachmentNotifications() throws Exception;
-    void connectWebsocket(String os, String osVersion, int appBuild, String appVersion);
+    void connectWebsocket(boolean relyOnWebsocketForNetworkDetection, String os, String osVersion, int appBuild, String appVersion);
     void disconnectWebsocket();
     void pingWebsocket(byte[] bytesOwnedIdentity);
     void retryScheduledNetworkTasks();
@@ -209,7 +219,7 @@ public interface EngineAPI {
     void discardBackup(byte[] backupKeyUid, int version);
     ObvBackupKeyVerificationOutput validateBackupSeed(String backupSeed, byte[] backupContent);
     ObvBackupKeyVerificationOutput verifyBackupSeed(String backupSeed);
-    ObvIdentity[] restoreOwnedIdentitiesFromBackup(String backupSeed, byte[] backupContent);
+    ObvIdentity[] restoreOwnedIdentitiesFromBackup(String backupSeed, byte[] backupContent, String deviceDisplayName);
     void restoreContactsAndGroupsFromBackup(String backupSeed, byte[] backupContent,  ObvIdentity[] restoredOwnedIdentities);
     String decryptAppDataBackup(String backupSeed, byte[] backupContent);
     void appBackupSuccess(byte[] bytesBackupKeyUid, int version, String appBackupContent);
@@ -226,9 +236,12 @@ public interface EngineAPI {
     String getOsmServerUrl(byte[] bytesOwnedIdentity);
     String getAddressServerUrl(byte[] bytesOwnedIdentity);
 
+    void propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom obvSyncAtom) throws Exception;
+    void propagateAppSyncAtomToOtherDevicesIfNeeded(byte[] bytesOwnedIdentity, ObvSyncAtom obvSyncAtom) throws Exception;
 
     // Run once after you upgrade from a version not handling Contact and ContactGroup UserData (profile photos) to a version able to do so
     void downloadAllUserData() throws Exception;
+    void setAllOwnedDeviceNames(String deviceName);
 
     void vacuumDatabase() throws Exception;
 }

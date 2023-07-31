@@ -8,338 +8,226 @@
     android:fitsSystemWindows="true"
     tools:context=".activities.OwnedIdentityDetailsActivity">
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:animateLayoutChanges="true">
+
+            <io.olvid.messenger.customClasses.InitialView
+                android:id="@+id/myid_initial_view"
+                android:layout_width="112dp"
+                android:layout_height="112dp"/>
+
+            <TextView
+                android:id="@+id/myid_name_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:animateLayoutChanges="true">
+                android:layout_marginTop="16dp"
+                android:textAlignment="center"
+                android:textAppearance="@style/RobotoMedium"
+                android:textColor="@color/primary700"
+                android:textSize="20sp"
+                tools:text="Eric Diaz (ACME - Tech lead)"/>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/identity_inactive_card_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/almostWhite"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="4dp"
+                tools:visibility="gone">
 
-                <io.olvid.messenger.customClasses.InitialView
-                    android:id="@+id/myid_initial_view"
-                    android:layout_width="112dp"
-                    android:layout_height="112dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/myid_name_text_view"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/RobotoMedium"
-                    android:textColor="@color/primary700"
-                    android:textSize="20sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/myid_initial_view"
-                    tools:text="Eric Diaz (ACME - Tech lead)"/>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/identity_inactive_card_view"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:visibility="gone"
-                    app:cardBackgroundColor="@color/almostWhite"
-                    app:cardCornerRadius="4dp"
-                    app:cardElevation="4dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/myid_name_text_view"
-                    tools:visibility="visible">
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <LinearLayout
-                            android:id="@+id/identity_inactive_title"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginTop="8dp"
-                            android:orientation="horizontal"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:layout_editor_absoluteY="10dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="8dp"
-                                android:layout_weight="1"
-                                android:text="@string/label_owned_identity_inactive"
-                                android:textColor="@color/primary700"
-                                android:textSize="18sp"/>
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                app:srcCompat="@drawable/ic_block"/>
-                        </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/identity_inactive_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:layout_editor_absoluteY="10dp">
 
                         <TextView
-                            android:id="@+id/identity_inactive_explanation"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="8dp"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginTop="8dp"
-                            android:text="@string/explanation_owned_identity_inactive"
-                            android:textSize="12sp"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@+id/identity_inactive_title"/>
+                            android:layout_weight="1"
+                            android:text="@string/label_owned_identity_inactive"
+                            android:textColor="@color/primary700"
+                            android:textSize="18sp"/>
 
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            app:srcCompat="@drawable/ic_block"/>
+                    </LinearLayout>
 
-                        <Button
-                            android:id="@+id/button_reactivate_identity"
-                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginStart="8dp"
-                            android:text="@string/button_label_reactivate_identity"
-                            app:layout_constraintTop_toBottomOf="@id/identity_inactive_explanation"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"/>
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-                </androidx.cardview.widget.CardView>
-
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/latest_details_cardview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:visibility="visible"
-                    app:cardBackgroundColor="@color/almostWhite"
-                    app:cardCornerRadius="4dp"
-                    app:cardElevation="4dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/identity_inactive_card_view">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/identity_inactive_explanation"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <TextView
-                                android:id="@+id/latest_details_title"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/background_identity_title_new"
-                                android:paddingEnd="8dp"
-                                android:paddingStart="8dp"
-                                android:text="@string/label_olvid_card_unpublished_draft"
-                                android:textAllCaps="true"
-                                android:textColor="@color/almostWhite"
-                                android:textSize="12sp"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                tools:ignore="SpUsage"/>
-
-                            <io.olvid.messenger.customClasses.InitialView
-                                android:id="@+id/latest_details_initial_view"
-                                android:layout_width="56dp"
-                                android:layout_height="56dp"
-                                android:layout_marginBottom="8dp"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginTop="8dp"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toBottomOf="@+id/latest_details_title"
-                                app:layout_constraintVertical_bias="0.0"/>
-
-                            <LinearLayout
-                                android:id="@+id/latest_details_textviews"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="8dp"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginTop="8dp"
-                                android:orientation="vertical"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintStart_toEndOf="@+id/latest_details_initial_view"
-                                app:layout_constraintTop_toBottomOf="@+id/latest_details_title"
-                                app:layout_constraintVertical_bias="0.0">
-
-                            </LinearLayout>
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/explanation_owned_identity_inactive"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/identity_inactive_title"/>
 
 
-                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    <Button
+                        android:id="@+id/button_reactivate_identity"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/button_label_reactivate_identity"
+                        app:layout_constraintTop_toBottomOf="@id/identity_inactive_explanation"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="end"
-                            android:orientation="horizontal"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            >
 
-                            <Button
-                                android:id="@+id/button_discard"
-                                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/button_label_discard"/>
+            <androidx.cardview.widget.CardView
+                android:id="@+id/latest_details_cardview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="visible"
+                app:cardBackgroundColor="@color/almostWhite"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="4dp">
 
-                            <Button
-                                android:id="@+id/button_publish"
-                                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/button_label_publish"/>
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/published_details_cardview"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    app:cardBackgroundColor="@color/almostWhite"
-                    app:cardCornerRadius="4dp"
-                    app:cardElevation="4dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/latest_details_cardview">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical">
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <TextView
-                                android:id="@+id/published_details_title"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/background_identity_title"
-                                android:paddingStart="8dp"
-                                android:paddingEnd="8dp"
-                                android:text="@string/label_olvid_card_published"
-                                android:textAllCaps="true"
-                                android:textColor="@color/almostWhite"
-                                android:textSize="12sp"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                tools:ignore="SpUsage" />
-
-                            <io.olvid.messenger.customClasses.InitialView
-                                android:id="@+id/published_details_initial_view"
-                                android:layout_width="56dp"
-                                android:layout_height="56dp"
-                                android:layout_marginBottom="8dp"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginTop="8dp"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toBottomOf="@+id/published_details_title"
-                                app:layout_constraintVertical_bias="0.0"/>
-
-                            <LinearLayout
-                                android:id="@+id/published_details_textviews"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="8dp"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginTop="8dp"
-                                android:orientation="vertical"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintStart_toEndOf="@+id/published_details_initial_view"
-                                app:layout_constraintTop_toBottomOf="@+id/published_details_title"
-                                app:layout_constraintVertical_bias="0.0">
-
-
-                            </LinearLayout>
-
-
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="end"
-                            android:orientation="horizontal">
-
-                            <Button
-                                android:id="@+id/add_contact_button"
-                                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:drawableStart="@drawable/tab_add_contact_button"
-                                android:drawablePadding="8dp"
-                                android:text="@string/button_label_add_contact"
-                                android:theme="@style/AppTheme.BlueAccent" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    app:cardBackgroundColor="@color/almostWhite"
-                    app:cardCornerRadius="4dp"
-                    app:cardElevation="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/published_details_cardview">
+                    android:orientation="vertical">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
                         <TextView
-                            android:id="@+id/api_key_status_title"
+                            android:id="@+id/latest_details_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/background_identity_title_primary"
+                            android:background="@drawable/background_identity_title_new"
+                            android:paddingEnd="8dp"
+                            android:paddingStart="8dp"
+                            android:text="@string/label_olvid_card_unpublished_draft"
+                            android:textAllCaps="true"
+                            android:textColor="@color/almostWhite"
+                            android:textSize="12sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:ignore="SpUsage"/>
+
+                        <io.olvid.messenger.customClasses.InitialView
+                            android:id="@+id/latest_details_initial_view"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/latest_details_title"
+                            app:layout_constraintVertical_bias="0.0"/>
+
+                        <LinearLayout
+                            android:id="@+id/latest_details_textviews"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/latest_details_initial_view"
+                            app:layout_constraintTop_toBottomOf="@+id/latest_details_title"
+                            app:layout_constraintVertical_bias="0.0">
+
+                        </LinearLayout>
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:orientation="horizontal"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        >
+
+                        <Button
+                            android:id="@+id/button_discard"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/button_label_discard"/>
+
+                        <Button
+                            android:id="@+id/button_publish"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/button_label_publish"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/published_details_cardview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/almostWhite"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/published_details_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/background_identity_title"
                             android:paddingStart="8dp"
                             android:paddingEnd="8dp"
-                            android:text="@string/label_subscription_status"
+                            android:text="@string/label_olvid_card_published"
                             android:textAllCaps="true"
                             android:textColor="@color/almostWhite"
                             android:textSize="12sp"
@@ -347,23 +235,168 @@
                             app:layout_constraintTop_toTopOf="parent"
                             tools:ignore="SpUsage" />
 
-                        <FrameLayout
-                            android:id="@+id/subscription_status_placeholder"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:layout_marginBottom="16dp"
+                        <io.olvid.messenger.customClasses.InitialView
+                            android:id="@+id/published_details_initial_view"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginStart="8dp"
                             android:layout_marginTop="8dp"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@+id/api_key_status_title" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-                </androidx.cardview.widget.CardView>
+                            app:layout_constraintTop_toBottomOf="@+id/published_details_title"
+                            app:layout_constraintVertical_bias="0.0"/>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </ScrollView>
+                        <LinearLayout
+                            android:id="@+id/published_details_textviews"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/published_details_initial_view"
+                            app:layout_constraintTop_toBottomOf="@+id/published_details_title"
+                            app:layout_constraintVertical_bias="0.0">
+
+
+                        </LinearLayout>
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/add_contact_button"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawableStart="@drawable/tab_add_contact_button"
+                            android:drawablePadding="8dp"
+                            android:text="@string/button_label_add_contact"
+                            android:theme="@style/AppTheme.BlueAccent" />
+                    </LinearLayout>
+                </LinearLayout>
+
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/device_list_cardview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/almostWhite"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="4dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/device_list_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/background_identity_title_primary"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/label_my_devices"
+                        android:textAllCaps="true"
+                        android:textColor="@color/almostWhite"
+                        android:textSize="12sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="SpUsage" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/device_list_recycler_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@+id/device_list_title"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        tools:itemCount="2"
+                        tools:listitem="@layout/item_view_owned_device"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/loading_spinner"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@color/whiteOverlay"
+                        app:layout_constraintTop_toBottomOf="@+id/device_list_title"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+                        <ProgressBar
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:indeterminate="true"
+                            android:theme="@style/AppTheme.BlueAccent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/api_key_status_cardview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/almostWhite"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="4dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/api_key_status_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/background_identity_title_primary"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="@string/label_subscription_status"
+                        android:textAllCaps="true"
+                        android:textColor="@color/almostWhite"
+                        android:textSize="12sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="SpUsage" />
+
+                    <FrameLayout
+                        android:id="@+id/subscription_status_placeholder"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/api_key_status_title" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
     <FrameLayout
         android:id="@+id/overlay"
         app:layout_insetEdge="top"

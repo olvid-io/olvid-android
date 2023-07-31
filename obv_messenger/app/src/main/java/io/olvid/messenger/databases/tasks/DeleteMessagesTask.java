@@ -108,9 +108,7 @@ public class DeleteMessagesTask implements Runnable {
             }
             for (Message message : messages) {
                 // we found an outbound sharing location message, stop sharing in this discussion
-                if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                        && message.jsonLocation != null
-                        && message.locationType == Message.LOCATION_TYPE_SHARE) {
+                if (message.isCurrentSharingOutboundLocationMessage()) {
                     UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(message.discussionId, true);
                 }
             }
@@ -190,6 +188,8 @@ public class DeleteMessagesTask implements Runnable {
                     case Message.TYPE_MEDIATOR_INVITATION_SENT:
                     case Message.TYPE_MEDIATOR_INVITATION_ACCEPTED:
                     case Message.TYPE_MEDIATOR_INVITATION_IGNORED:
+                    case Message.TYPE_GAINED_GROUP_SEND_MESSAGE:
+                    case Message.TYPE_LOST_GROUP_SEND_MESSAGE:
                         infoMessages.add(message);
                         break;
                     default:

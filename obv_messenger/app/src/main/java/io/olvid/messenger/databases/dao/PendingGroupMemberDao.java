@@ -46,7 +46,7 @@ public interface PendingGroupMemberDao {
     @Query("SELECT * FROM " + PendingGroupMember.TABLE_NAME + " WHERE " + PendingGroupMember.BYTES_IDENTITY + " = :bytesIdentity AND " +
             PendingGroupMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity AND " +
             PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    PendingGroupMember get(byte[] bytesIdentity, byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    PendingGroupMember get(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, byte[] bytesIdentity);
 
     @Query("SELECT * FROM " + PendingGroupMember.TABLE_NAME + " WHERE " +
             PendingGroupMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity AND " +

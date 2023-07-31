@@ -19,9 +19,17 @@
 
 package io.olvid.engine.engine.types;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+
+import java.io.IOException;
 import java.util.Arrays;
 
-public class ObvBytesKey {
+public class ObvBytesKey implements Comparable<ObvBytesKey> {
     final byte[] bytes;
 
     public ObvBytesKey(byte[] bytes) {
@@ -41,5 +49,40 @@ public class ObvBytesKey {
     @Override
     public int hashCode() {
         return Arrays.hashCode(bytes);
+    }
+
+    @Override
+    public int compareTo(ObvBytesKey other) {
+        if (bytes.length != other.bytes.length) {
+            return bytes.length - other.bytes.length;
+        }
+        for (int i=0; i<bytes.length; i++) {
+            if (bytes[i] != other.bytes[i]) {
+                return (bytes[i] & 0xff) - (other.bytes[i] & 0xff);
+            }
+        }
+        return 0;
+    }
+
+
+    public static class Serializer extends JsonSerializer<ObvBytesKey> {
+        @Override
+        public void serialize(ObvBytesKey value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeFieldName(serializers.getConfig().getBase64Variant().encode(value.bytes));
+        }
+    }
+
+    public static class KeyDeserializer extends com.fasterxml.jackson.databind.KeyDeserializer {
+        @Override
+        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
+            return new ObvBytesKey(ctxt.getConfig().getBase64Variant().decode(key));
+        }
+    }
+
+    public static class Deserializer extends JsonDeserializer<ObvBytesKey> {
+        @Override
+        public ObvBytesKey deserialize(JsonParser p, DeserializationContext context) throws IOException {
+            return new ObvBytesKey(context.getConfig().getBase64Variant().decode(p.getValueAsString()));
+        }
     }
 }

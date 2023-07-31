@@ -31,6 +31,7 @@ import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Authenticator
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.internal.toHostHeader
@@ -48,7 +49,7 @@ private const val MAX_IMAGE_SIZE = 5*1024*1024
 class LinkPreviewRepository {
     private val client = OkHttpClient.Builder()
         .cache(null)
-        .addInterceptor(UserAgentInterceptor("WhatsApp/2"))
+        .addInterceptor(UserAgentInterceptor(this::userAgentForUrl))
         .apply {
             if (!SettingsActivity.getNoNotifyCertificateChangeForPreviews()) {
                 AppSingleton.getSslSocketFactory()?.let { sslSocketFactory ->
@@ -87,6 +88,12 @@ class LinkPreviewRepository {
             }
         }.build()
 
+    @Suppress("UNUSED_PARAMETER")
+    fun userAgentForUrl(url: HttpUrl) : String {
+        // we could use "facebookexternalhit/1.1" for some specific sites
+        return "WhatsApp/2"
+    }
+
     suspend fun fetchOpenGraph(url: String, imageWidth: Int, imageHeight: Int): OpenGraph {
         return withContext(Dispatchers.IO) {
             cache.get(url) ?: try {
@@ -94,8 +101,9 @@ class LinkPreviewRepository {
                 openGraph?.image?.let {
                     openGraph.bitmap = fetchImage(it, imageWidth, imageHeight)
                 }
-                openGraph.also { cache.put(url, it) } ?: OpenGraph()
+                openGraph?.also { cache.put(url, it) } ?: OpenGraph()
             } catch (ex: Exception) {
+                ex.printStackTrace()
                 OpenGraph()
             }
         }

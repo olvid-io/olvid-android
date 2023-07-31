@@ -78,8 +78,10 @@ public class OwnedIdentity {
     public static final int API_KEY_STATUS_FREE_TRIAL_KEY_EXPIRED = 8;
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    public static final long API_KEY_PERMISSION_CALL = 1L<<0;
-    public static final long API_KEY_PERMISSION_WEB_CLIENT = 1L<<1;
+    public static final long API_KEY_PERMISSION_CALL = 1L << 0;
+    public static final long API_KEY_PERMISSION_WEB_CLIENT = 1L << 1;
+    public static final long API_KEY_PERMISSION_MULTI_DEVICE = 1L << 2;
+
 
     @PrimaryKey
     @ColumnInfo(name = BYTES_OWNED_IDENTITY)
@@ -283,6 +285,10 @@ public class OwnedIdentity {
         return Arrays.hashCode(bytesOwnedIdentity);
     }
 
+    public boolean hasMultiDeviceApiKeyPermission() {
+        return (apiKeyPermissions & API_KEY_PERMISSION_MULTI_DEVICE) != 0;
+    }
+
     public List<EngineAPI.ApiKeyPermission> getApiKeyPermissions() {
         return deserializeApiKeyPermissions(apiKeyPermissions);
     }
@@ -294,6 +300,9 @@ public class OwnedIdentity {
         }
         if ((apiKeyPermissions & API_KEY_PERMISSION_WEB_CLIENT) != 0) {
             list.add(EngineAPI.ApiKeyPermission.WEB_CLIENT);
+        }
+        if ((apiKeyPermissions & API_KEY_PERMISSION_MULTI_DEVICE) != 0) {
+            list.add(EngineAPI.ApiKeyPermission.MULTI_DEVICE);
         }
         return list;
     }
@@ -311,6 +320,9 @@ public class OwnedIdentity {
                     break;
                 case WEB_CLIENT:
                     apiKeyPermissions |= API_KEY_PERMISSION_WEB_CLIENT;
+                    break;
+                case MULTI_DEVICE:
+                    apiKeyPermissions |= API_KEY_PERMISSION_MULTI_DEVICE;
                     break;
             }
         }

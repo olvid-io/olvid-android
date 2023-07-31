@@ -32,10 +32,12 @@ import androidx.annotation.NonNull;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.BuildConfig;
+import io.olvid.messenger.billing.BillingUtils;
 import io.olvid.messenger.openid.KeycloakManager;
 
 public class NetworkStateMonitorReceiver extends BroadcastReceiver {
-    private static long latestNetworkRestart = 0;
+    private static long latestNetworkRestart = System.currentTimeMillis();
 
     private final static ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
@@ -64,6 +66,9 @@ public class NetworkStateMonitorReceiver extends BroadcastReceiver {
             BackupCloudProviderService.networkAvailable();
             // try to reconnect websocket in case connection was lost for a long time and exponential backup may take some time top try again
             UnifiedForegroundService.connectOrDisconnectWebSocket();
+            if (BuildConfig.USE_BILLING_LIB) {
+                BillingUtils.reconnect();
+            }
         }
     }
 

@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
@@ -39,13 +40,15 @@ public class UpdateGroupCustomNameAndPhotoTask implements Runnable {
     private final String customName;
     private final String absoluteCustomPhotoUrl;
     private final String personalNote;
+    private final boolean propagated;
 
-    public UpdateGroupCustomNameAndPhotoTask(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String customName, String absoluteCustomPhotoUrl, String personalNote) {
+    public UpdateGroupCustomNameAndPhotoTask(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String customName, String absoluteCustomPhotoUrl, String personalNote, boolean propagated) {
         this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customName = customName;
         this.absoluteCustomPhotoUrl = absoluteCustomPhotoUrl;
         this.personalNote = personalNote;
+        this.propagated = propagated;
     }
 
     @Override
@@ -53,12 +56,21 @@ public class UpdateGroupCustomNameAndPhotoTask implements Runnable {
         AppDatabase db = AppDatabase.getInstance();
         Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
         // only for groups you do not own
-        if (group != null && group.bytesGroupOwnerIdentity != null) {
+        if (group != null) {
             boolean changed = false;
             if (!Objects.equals(group.customName, customName)) {
                 changed = true;
                 group.customName = customName;
                 db.groupDao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.customName);
+
+                if (!propagated) {
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createGroupV1NicknameChange(group.bytesGroupOwnerAndUid, customName));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate group nickname change to other devices");
+                        e.printStackTrace();
+                    }
+                }
             }
 
             if (!Objects.equals(App.absolutePathFromRelative(group.customPhotoUrl), absoluteCustomPhotoUrl)) {
@@ -116,6 +128,15 @@ public class UpdateGroupCustomNameAndPhotoTask implements Runnable {
             if (!Objects.equals(group.personalNote, personalNote)) {
                 group.personalNote = personalNote;
                 db.groupDao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.personalNote);
+
+                if (!propagated) {
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createGroupV1PersonalNoteChange(group.bytesGroupOwnerAndUid, personalNote));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate group nickname change to other devices");
+                        e.printStackTrace();
+                    }
+                }
             }
 
             if (changed) {

@@ -228,10 +228,10 @@ public class ConfigurationSettingsPojo {
             sb.append(highlight(c, R.string.text_setting_auto_join_groups));
             switch (aj) {
                 case 0:
-                    sb.append(c.getString(R.string.text_setting_nobody));
+                    sb.append(c.getString(R.string.value_group_remote_delete_setting_nobody));
                     break;
                 case 2:
-                    sb.append(c.getString(R.string.text_setting_everyone));
+                    sb.append(c.getString(R.string.value_group_remote_delete_setting_everyone));
                     break;
                 case 1:
                 default:

@@ -29,8 +29,8 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.Message
-import io.olvid.messenger.databases.entity.Message.JsonExpiration
-import io.olvid.messenger.databases.entity.Message.JsonMessageReference
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration
+import io.olvid.messenger.databases.entity.jsons.JsonMessageReference
 import java.io.File
 
 class ComposeMessageViewModel(
@@ -123,7 +123,7 @@ class ComposeMessageViewModel(
             draftMessage,
             discussionCustomization,
             draftMessageEdit
-        ) as LiveData<Boolean>
+        )
     }
 
     fun setRecording(recording: Boolean) {
@@ -177,23 +177,16 @@ class ComposeMessageViewModel(
         draftMessage: LiveData<Message>,
         discussionCustomization: LiveData<DiscussionCustomization?>,
         draftMessageEdit: LiveData<Message?>
-    ) : MediatorLiveData<Boolean?>() {
+    ) : MediatorLiveData<Boolean>() {
         private var draftMessageExpiration: JsonExpiration? = null
         private var discussionCustomizationExpiration: JsonExpiration? = null
         private var isEditing = false
 
         init {
-            addSource(
-                draftMessage
-            ) { message: Message? -> onDraftMessageChanged(message) }
-            addSource(
-                discussionCustomization
-            ) { customization -> onDiscussionCustomizationChanged(customization) }
-            addSource(
-                draftMessageEdit
-            ) { editedMessage: Message? ->
-                onDraftMessageEditChanged(editedMessage)
-            }
+            addSource(draftMessage) { message: Message? -> onDraftMessageChanged(message) }
+            addSource(discussionCustomization) { customization -> onDiscussionCustomizationChanged(customization) }
+            addSource(draftMessageEdit) { editedMessage: Message? -> onDraftMessageEditChanged(editedMessage) }
+            value = false
         }
 
         private fun onDraftMessageChanged(message: Message?) {

@@ -69,6 +69,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -254,7 +255,7 @@ fun InvitationListItem(
                         Spacer(modifier = Modifier.requiredHeight(4.dp))
 
                         Text(
-                            modifier = Modifier.requiredWidth(72.dp),
+                            modifier = Modifier.requiredWidth(with(LocalDensity.current) { 72.sp.toDp() } ),
                             text = String(
                                 invitation?.associatedDialog?.category?.sasToDisplay
                                     ?: byteArrayOf(), StandardCharsets.UTF_8
@@ -290,7 +291,7 @@ fun InvitationListItem(
 
                                 BasicTextField(
                                     modifier = Modifier
-                                        .requiredWidth(72.dp)
+                                        .requiredWidth(with(LocalDensity.current) { 72.sp.toDp() } )
                                         .onKeyEvent {
                                             if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
                                                 validateSas()
@@ -371,7 +372,7 @@ fun InvitationListItem(
                             ) {
                                 Text(
                                     modifier = Modifier
-                                        .width(72.dp)
+                                        .width(with(LocalDensity.current) { 72.sp.toDp() } )
                                         .wrapContentWidth(CenterHorizontally, true)
                                         .padding(vertical = 8.dp),
                                     text = stringResource(id = R.string.message_wrong_code),

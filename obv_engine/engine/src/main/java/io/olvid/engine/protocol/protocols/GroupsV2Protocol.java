@@ -44,6 +44,7 @@ import io.olvid.engine.crypto.exceptions.DecryptionException;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -375,7 +376,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         int i = 0;
         for (Map.Entry<Identity, byte[]> entry : membersToKick.entrySet()) {
             encodeds[i] = Encoded.of(entry.getKey());
-            encodeds[i+1] = Encoded.of(entry.getValue());
+            encodeds[i + 1] = Encoded.of(entry.getValue());
             i += 2;
         }
         return Encoded.of(encodeds);
@@ -385,7 +386,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         HashMap<Identity, byte[]> membersToKick = new HashMap<>();
         Encoded[] encodeds = encoded.decodeList();
         for (int i = 0; i < encodeds.length; i += 2) {
-            membersToKick.put(encodeds[i].decodeIdentity(), encodeds[i+1].decodeBytes());
+            membersToKick.put(encodeds[i].decodeIdentity(), encodeds[i + 1].decodeBytes());
         }
         return membersToKick;
     }
@@ -535,11 +536,6 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     // endregion
 
 
-
-
-
-
-
     // region Messages
 
     private static final int GROUP_CREATION_INITIAL_MESSAGE_ID = 0;
@@ -648,34 +644,52 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         private final HashSet<GroupV2.IdentityAndPermissions> otherGroupMembers; // does not include the group creator identity
         private final String serializedGroupDetails; // serialized JsonGroupDetails
         private final String absolutePhotoUrl;
+        private final String serializedGroupType; // serialized JsonGroupType, may be NULL
 
 
-        public GroupCreationInitialMessage(CoreProtocolMessage coreProtocolMessage, HashSet<GroupV2.Permission> ownPermissions, HashSet<GroupV2.IdentityAndPermissions> otherGroupMembers, String serializedGroupDetails, String absolutePhotoUrl) {
+        public GroupCreationInitialMessage(CoreProtocolMessage coreProtocolMessage, HashSet<GroupV2.Permission> ownPermissions, HashSet<GroupV2.IdentityAndPermissions> otherGroupMembers, String serializedGroupDetails, String absolutePhotoUrl, String serializedGroupType) {
             super(coreProtocolMessage);
             this.ownPermissions = ownPermissions;
             this.otherGroupMembers = otherGroupMembers;
             this.serializedGroupDetails = serializedGroupDetails;
             this.absolutePhotoUrl = absolutePhotoUrl;
+            this.serializedGroupType = serializedGroupType;
         }
 
         @SuppressWarnings("unused")
         public GroupCreationInitialMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             Encoded[] inputs = receivedMessage.getInputs();
-            if (inputs.length != 4) {
-                throw new Exception();
-            }
-            this.ownPermissions = GroupV2.Permission.deserializeKnownPermissions(inputs[0].decodeBytes());
-            this.otherGroupMembers = new HashSet<>();
-            for (Encoded encodedGroupMember : inputs[1].decodeList()) {
-                this.otherGroupMembers.add(GroupV2.IdentityAndPermissions.of(encodedGroupMember));
-            }
-            this.serializedGroupDetails = inputs[2].decodeString();
-            String url = inputs[3].decodeString();
-            if (url.length() == 0) {
-                this.absolutePhotoUrl = null;
+            if (inputs.length == 5) {
+                this.ownPermissions = GroupV2.Permission.deserializeKnownPermissions(inputs[0].decodeBytes());
+                this.otherGroupMembers = new HashSet<>();
+                for (Encoded encodedGroupMember : inputs[1].decodeList()) {
+                    this.otherGroupMembers.add(GroupV2.IdentityAndPermissions.of(encodedGroupMember));
+                }
+                this.serializedGroupDetails = inputs[2].decodeString();
+                String url = inputs[3].decodeString();
+                if (url.length() == 0) {
+                    this.absolutePhotoUrl = null;
+                } else {
+                    this.absolutePhotoUrl = url;
+                }
+                this.serializedGroupType = inputs[4].decodeString();
+            } else if (inputs.length == 4) { // null serializedGroupType
+                this.ownPermissions = GroupV2.Permission.deserializeKnownPermissions(inputs[0].decodeBytes());
+                this.otherGroupMembers = new HashSet<>();
+                for (Encoded encodedGroupMember : inputs[1].decodeList()) {
+                    this.otherGroupMembers.add(GroupV2.IdentityAndPermissions.of(encodedGroupMember));
+                }
+                this.serializedGroupDetails = inputs[2].decodeString();
+                String url = inputs[3].decodeString();
+                if (url.length() == 0) {
+                    this.absolutePhotoUrl = null;
+                } else {
+                    this.absolutePhotoUrl = url;
+                }
+                this.serializedGroupType = null;
             } else {
-                this.absolutePhotoUrl = url;
+                throw new Exception();
             }
         }
 
@@ -690,13 +704,24 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             for (GroupV2.IdentityAndPermissions groupMember : otherGroupMembers) {
                 encodedGroupMembers.add(groupMember.encode());
             }
-            //noinspection ConstantConditions
-            return new Encoded[] {
-                    Encoded.of(GroupV2.Permission.serializePermissions(ownPermissions)),
-                    Encoded.of(encodedGroupMembers.toArray(new Encoded[0])),
-                    Encoded.of(serializedGroupDetails),
-                    Encoded.of(absolutePhotoUrl == null ? "" : absolutePhotoUrl),
-            };
+            if (serializedGroupType == null) {
+                //noinspection ConstantConditions
+                return new Encoded[]{
+                        Encoded.of(GroupV2.Permission.serializePermissions(ownPermissions)),
+                        Encoded.of(encodedGroupMembers.toArray(new Encoded[0])),
+                        Encoded.of(serializedGroupDetails),
+                        Encoded.of(absolutePhotoUrl == null ? "" : absolutePhotoUrl),
+                };
+            } else {
+                //noinspection ConstantConditions
+                return new Encoded[]{
+                        Encoded.of(GroupV2.Permission.serializePermissions(ownPermissions)),
+                        Encoded.of(encodedGroupMembers.toArray(new Encoded[0])),
+                        Encoded.of(serializedGroupDetails),
+                        Encoded.of(absolutePhotoUrl == null ? "" : absolutePhotoUrl),
+                        Encoded.of(serializedGroupType),
+                };
+            }
         }
     }
 
@@ -1161,7 +1186,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     }
 
 
-        public static class PropagateInvitationDialogResponseMessage extends ConcreteProtocolMessage {
+    public static class PropagateInvitationDialogResponseMessage extends ConcreteProtocolMessage {
         private final boolean invitationAccepted;
         private final byte[] ownGroupInvitationNonce;
 
@@ -1292,7 +1317,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
+            return new Encoded[]{
                     groupIdentifier.encode(),
                     changeSet.encode(),
             };
@@ -1342,7 +1367,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
+            return new Encoded[]{
                     groupIdentifier.encode(),
             };
         }
@@ -1378,7 +1403,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
+            return new Encoded[]{
                     groupIdentifier.encode(),
                     Encoded.of(ownInvitationNonce),
             };
@@ -1413,7 +1438,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
+            return new Encoded[]{
                     groupIdentifier.encode(),
             };
         }
@@ -1445,7 +1470,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
+            return new Encoded[]{
                     groupIdentifier.encode(),
             };
         }
@@ -1477,12 +1502,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
+            return new Encoded[]{
                     groupIdentifier.encode(),
             };
         }
     }
-
 
 
     public static class InitiateBatchKeysResendMessage extends ConcreteProtocolMessage {
@@ -1514,7 +1538,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
+            return new Encoded[]{
                     Encoded.of(contactIdentity),
                     Encoded.of(contactDeviceUid),
             };
@@ -1539,7 +1563,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             }
             Encoded[] encodeds = inputs[0].decodeList();
             this.groupInfos = new GroupV2.IdentifierVersionAndKeys[encodeds.length];
-            for (int i=0; i< encodeds.length; i++) {
+            for (int i = 0; i < encodeds.length; i++) {
                 this.groupInfos[i] = new GroupV2.IdentifierVersionAndKeys(encodeds[i]);
             }
         }
@@ -1552,10 +1576,10 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         @Override
         public Encoded[] getInputs() {
             Encoded[] encodeds = new Encoded[groupInfos.length];
-            for (int i=0; i< groupInfos.length; i++) {
+            for (int i = 0; i < groupInfos.length; i++) {
                 encodeds[i] = groupInfos[i].encode();
             }
-            return new Encoded[] {
+            return new Encoded[]{
                     Encoded.of(encodeds),
             };
         }
@@ -1670,7 +1694,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @Override
         public Encoded[] getInputs() {
-            return new Encoded[] {
+            return new Encoded[]{
                     groupIdentifier.encode(),
                     Encoded.of(pendingMemberIdentity),
             };
@@ -1681,19 +1705,13 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     // endregion
 
 
-
-
-
-
-
-
     // region Steps
 
     @Override
     protected Class<?>[] getPossibleStepClasses(int stateId) {
         switch (stateId) {
             case INITIAL_STATE_ID:
-                return new Class[]{InitiateGroupCreationStep.class, ProcessInvitationOrMembersUpdateStep.class, DoNothingAfterServerQueryStep.class, ProcessPingStep.class, InitiateBlobReDownloadStep.class, InitiateGroupUpdateStep.class, GetKickedStep.class, LeaveGroupStep.class, DisbandGroupStep.class, PrepareBatchKeysMessageStep.class, ProcessBatchKeysMessageStep.class, ProcessCreateOrUpdateKeycloakGroupMessage.class, SendKeycloakGroupTargetedPingStep.class };
+                return new Class[]{InitiateGroupCreationStep.class, ProcessInvitationOrMembersUpdateStep.class, DoNothingAfterServerQueryStep.class, ProcessPingStep.class, InitiateBlobReDownloadStep.class, InitiateGroupUpdateStep.class, GetKickedStep.class, LeaveGroupStep.class, DisbandGroupStep.class, PrepareBatchKeysMessageStep.class, ProcessBatchKeysMessageStep.class, ProcessCreateOrUpdateKeycloakGroupMessage.class, SendKeycloakGroupTargetedPingStep.class};
             case UPLOADING_CREATED_GROUP_DATA_STATE_ID:
                 return new Class[]{CheckIfGroupCreationCanBeFinalizedStep.class, FinalizeGroupCreationStep.class};
             case DOWNLOADING_GROUP_BLOB_STATE_ID:
@@ -1801,7 +1819,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                 (ServerAuthenticationPrivateKey) groupAdminServerAuthenticationKeyPair.getPrivateKey()),
                         ownGroupInvitationNonce,
                         ownPermissionStrings,
-                        otherGroupMembers
+                        otherGroupMembers,
+                        receivedMessage.serializedGroupType
                 );
             }
 
@@ -1904,7 +1923,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             boolean waitingForBlobUpload = startState.waitingForBlobUpload;
             boolean waitingForPhotoUpload = startState.waitingForPhotoUpload;
 
-            switch (uploadType){
+            switch (uploadType) {
                 case BLOB: {
                     if (uploadResult == 0) {
                         waitingForBlobUpload = false;
@@ -1950,11 +1969,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
 
             {
-                // for each group member & pending member, send
-                //  - for new members the main seed
-                //  - the version seed for everyone
+                // for each group member send
+                //  - the main seed
+                //  - the version seed
                 //  - for admins the groupAdmin private key
-                // send the message through oblivious channel when possible (required for new members), asymmetric broadcast otherwise
+                // send the message through oblivious channel
 
                 GroupV2.BlobKeys blobKeys = protocolManagerSession.identityDelegate.getGroupV2BlobKeys(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
                 HashSet<GroupV2.IdentityAndPermissions> groupMembersAndPermissions = protocolManagerSession.identityDelegate.getGroupV2OtherMembersAndPermissions(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
@@ -1966,6 +1985,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                 UID invitationProtocolInstanceUid = startState.groupIdentifier.computeProtocolInstanceUid();
 
+                // here we loop on OTHER group members, not ourself
                 for (GroupV2.IdentityAndPermissions groupMembersAndPermission : groupMembersAndPermissions) {
                     UID[] contactDeviceUidsWithChannel = protocolManagerSession.channelDelegate.getConfirmedObliviousChannelDeviceUids(protocolManagerSession.session, getOwnedIdentity(), groupMembersAndPermission.identity);
                     if (contactDeviceUidsWithChannel.length > 0) {
@@ -1997,6 +2017,27 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                         return new FinalState();
                     }
+                }
+
+                // also notify other owned devices
+                UID[] allOwnedDeviceUids = protocolManagerSession.identityDelegate.getDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
+                if (allOwnedDeviceUids.length > 1) {
+                    try {
+                        GroupV2.BlobKeys keysToSend = new GroupV2.BlobKeys(
+                                blobKeys.blobMainSeed,
+                                blobKeys.blobVersionSeed,
+                                blobKeys.groupAdminServerAuthenticationPrivateKey
+                        );
+
+                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                                SendChannelInfo.createAllConfirmedObliviousChannelsInfo(getOwnedIdentity(), getOwnedIdentity()),
+                                getProtocolId(),
+                                invitationProtocolInstanceUid,
+                                false);
+                        // we send the full set of owned devices, not only "other" own device uid, so that receiving devices know if all devices were notified
+                        ChannelMessageToSend messageToSend = new InvitationOrMembersUpdateMessage(coreProtocolMessage, startState.groupIdentifier, startState.groupVersion, keysToSend, allOwnedDeviceUids).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -2093,8 +2134,6 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         }
 
 
-
-
         @SuppressWarnings("unused")
         public ProcessInvitationOrMembersUpdateStep(INeedMoreSeedsState startState, InvitationOrMembersUpdateMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
             super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
@@ -2159,8 +2198,6 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.notifiedDeviceUids = new UID[0];
             this.propagateIfNeeded = false;
         }
-
-
 
 
         @SuppressWarnings("unused")
@@ -2277,8 +2314,6 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         }
 
 
-
-
         @Override
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
@@ -2300,14 +2335,16 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     UID[] otherOwnedDeviceUids = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
 
                     HashSet<UID> notNotifiedUids = new HashSet<>(Arrays.asList(otherOwnedDeviceUids));
-                    for (UID deviceUid : notifiedDeviceUids){
+                    for (UID deviceUid : notifiedDeviceUids) {
                         notNotifiedUids.remove(deviceUid);
                     }
 
                     if (notNotifiedUids.size() > 0) {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(getOwnedIdentity(), getOwnedIdentity(), notNotifiedUids.toArray(new UID[0]), true));
-                        ChannelMessageToSend messageToSend = new InvitationOrMembersUpdatePropagatedMessage(coreProtocolMessage, groupIdentifier, groupVersion, blobKeys, obliviousChannelContactIdentity).generateChannelProtocolMessageToSend();
-                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                        try {
+                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(getOwnedIdentity(), getOwnedIdentity(), notNotifiedUids.toArray(new UID[0]), true));
+                            ChannelMessageToSend messageToSend = new InvitationOrMembersUpdatePropagatedMessage(coreProtocolMessage, groupIdentifier, groupVersion, blobKeys, obliviousChannelContactIdentity).generateChannelProtocolMessageToSend();
+                            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                        } catch (NoAcceptableChannelException ignored) { }
                     }
                 }
             }
@@ -2554,7 +2591,6 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                             }
 
 
-
                             ///////////////
                             // from here we have everything:
                             //  - the blob
@@ -2574,6 +2610,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                 if (newGroupMembers == null) {
                                     // We were not able to update the group, return null to retry...
                                     return null;
+                                }
+
+                                // if the update was initiated by another of our own devices, auto-trust the details
+                                if (Objects.equals(signerIdentity, getOwnedIdentity())) {
+                                    protocolManagerSession.identityDelegate.trustGroupV2PublishedDetails(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
                                 }
 
                                 protocolManagerSession.identityDelegate.unfreezeGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
@@ -2603,6 +2644,50 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                                 getPrng());
 
                                         CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(groupMemberIdentity, getOwnedIdentity()));
+                                        ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, startState.groupIdentifier, ownIdentityAndPermissions.groupInvitationNonce, pingSignature, false).generateChannelProtocolMessageToSend();
+                                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                                    }
+                                }
+
+                                return new FinalState();
+                            } else if (serverBlob.administratorsChain.isChainCreatedBy(getOwnedIdentity()) && startState.invitationCollectedData.inviterIdentityAndBlobMainSeedCandidates.containsKey(getOwnedIdentity())) {
+                                // check who signed the first block of the administrator chain --> this is the group creator
+                                // also check that one of the seed was sent by me --> this means I am the group creator (on another device)
+                                // => in this case, create the group directly and start the photo download
+
+                                // create the group in DB (we use the createJoinedGroupV2 method which is better suited here, even if another of my devices created the group)
+                                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, blobKeys, serverBlob, true);
+
+                                // if success == false, this is not a retry-able failure, so we do nothing
+                                if (success) {
+                                    // getGroupV2PhotoUrl will always return null here, but we check anyways
+                                    if (serverBlob.serverPhotoInfo != null && protocolManagerSession.identityDelegate.getGroupV2PhotoUrl(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier) == null) {
+                                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                                                SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                                                DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
+                                                new UID(getPrng()),
+                                                false
+                                        );
+                                        ChannelMessageToSend messageToSend = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, startState.groupIdentifier, serverBlob.serverPhotoInfo).generateChannelProtocolMessageToSend();
+                                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                                    }
+
+                                    // send a ping to all members to notify them you indeed joined the group
+                                    for (GroupV2.IdentityAndPermissionsAndDetails groupMember : serverBlob.groupMemberIdentityAndPermissionsAndDetailsList) {
+                                        if (groupMember.identity.equals(getOwnedIdentity())) {
+                                            continue;
+                                        }
+
+                                        byte[] pingSignature = protocolManagerSession.identityDelegate.signGroupInvitationNonce(
+                                                protocolManagerSession.session,
+                                                Constants.SignatureContext.GROUP_JOIN_NONCE,
+                                                startState.groupIdentifier,
+                                                ownIdentityAndPermissions.groupInvitationNonce,
+                                                groupMember.identity,
+                                                getOwnedIdentity(),
+                                                getPrng());
+
+                                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(groupMember.identity, getOwnedIdentity()));
                                         ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, startState.groupIdentifier, ownIdentityAndPermissions.groupInvitationNonce, pingSignature, false).generateChannelProtocolMessageToSend();
                                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                                     }
@@ -2726,9 +2811,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 // propagate the ping to other own devices, if any
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagatedPingMessage(coreProtocolMessage, receivedMessage.groupIdentifier, receivedMessage.groupMemberInvitationNonce, receivedMessage.signature, receivedMessage.isResponse).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagatedPingMessage(coreProtocolMessage, receivedMessage.groupIdentifier, receivedMessage.groupMemberInvitationNonce, receivedMessage.signature, receivedMessage.isResponse).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -2932,9 +3019,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 // propagate the dialog response to other devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateInvitationDialogResponseMessage(coreProtocolMessage, this.invitationAccepted, ownGroupInvitationNonce).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateInvitationDialogResponseMessage(coreProtocolMessage, this.invitationAccepted, ownGroupInvitationNonce).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -2943,7 +3032,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 ((InvitationReceivedState) startState).serverBlob.administratorsChain.integrityWasChecked = true;
 
                 // create the group in db
-                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier, ((InvitationReceivedState) startState).blobKeys, ((InvitationReceivedState) startState).serverBlob);
+                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier, ((InvitationReceivedState) startState).blobKeys, ((InvitationReceivedState) startState).serverBlob, false);
 
                 // if success == false, this is not a retry-able failure, so we do nothing
                 if (success) {
@@ -3139,9 +3228,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             if (propagationNeeded) {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateInvitationRejectedMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateInvitationRejectedMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -3438,7 +3529,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     for (byte[] bytesIdentity : startState.changeSet.removedMembers) {
                         try {
                             removedMembersSet.add(Identity.of(bytesIdentity));
-                        } catch (DecodingException ignored) {}
+                        } catch (DecodingException ignored) {
+                        }
                     }
 
                     List<GroupV2.IdentityAndPermissionsAndDetails> toRemove = new ArrayList<>();
@@ -3480,7 +3572,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                             for (GroupV2.Permission permission : newPermissions) {
                                 member.permissionStrings.add(permission.getString());
                             }
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
                     }
                 }
 
@@ -3490,12 +3583,12 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     String serializedDetails;
                     if (Objects.equals(member.identity, getOwnedIdentity())) {
                         serializedDetails = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
-                    } else{
+                    } else {
                         serializedDetails = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), member.identity);
                     }
                     if (serializedDetails != null && !Objects.equals(member.serializedIdentityDetails, serializedDetails)) {
-                            GroupV2.IdentityAndPermissionsAndDetails updatedMember = new GroupV2.IdentityAndPermissionsAndDetails(member.identity, member.permissionStrings, serializedDetails, member.groupInvitationNonce);
-                            updatedMembers.add(updatedMember);
+                        GroupV2.IdentityAndPermissionsAndDetails updatedMember = new GroupV2.IdentityAndPermissionsAndDetails(member.identity, member.permissionStrings, serializedDetails, member.groupInvitationNonce);
+                        updatedMembers.add(updatedMember);
                     }
                 }
                 for (GroupV2.IdentityAndPermissionsAndDetails updatedMember : updatedMembers) {
@@ -3531,14 +3624,19 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         changed = true;
                         members.add(newMember);
                         membersToInvite.add(memberIdentity);
-                    } catch (Exception ignored) {}
-               }
+                    } catch (Exception ignored) {
+                    }
+                }
 
                 // group details
                 if (startState.changeSet.updatedSerializedGroupDetails != null && !Objects.equals(startState.changeSet.updatedSerializedGroupDetails, initialServerBlob.serializedGroupDetails)) {
                     changed = true;
                 }
 
+                // group type
+                if (startState.changeSet.updatedJsonGroupType != null && !Objects.equals(startState.changeSet.updatedJsonGroupType, initialServerBlob.serializedGroupType)) {
+                    changed = true;
+                }
                 // group photoUrl
                 if (startState.changeSet.updatedPhotoUrl != null && (initialServerBlob.serverPhotoInfo != null || startState.changeSet.updatedPhotoUrl.length() > 0)) {
                     changed = true;
@@ -3605,6 +3703,13 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     updatedSerializedGroupDetails = initialServerBlob.serializedGroupDetails;
                 }
 
+                String updatedJsonGroupType;
+                if (startState.changeSet.updatedJsonGroupType != null) {
+                    updatedJsonGroupType = startState.changeSet.updatedJsonGroupType;
+                } else {
+                    updatedJsonGroupType = initialServerBlob.serializedGroupType;
+                }
+
                 GroupV2.ServerPhotoInfo updatedServerPhotoInfo;
                 if (startState.changeSet.updatedPhotoUrl != null && startState.changeSet.updatedPhotoUrl.length() == 0) {
                     // photo was removed
@@ -3643,7 +3748,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         members,
                         initialServerBlob.version + 1,
                         updatedSerializedGroupDetails,
-                        updatedServerPhotoInfo
+                        updatedServerPhotoInfo,
+                        updatedJsonGroupType
                 );
             }
 
@@ -3775,7 +3881,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 return new WaitingForLockState(startState.groupIdentifier, startState.changeSet, lockNonce, startState.failedUploadCounter + 1);
             }
 
-            
+
             if (startState.absolutePhotoUrlToUpload == null) {
                 // if there is no photo to upload, post a message to initiate the finalization of the group update
                 CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()));
@@ -3857,11 +3963,12 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 //  - the version seed for everyone
                 //  - for admins the groupAdmin private key
 
+                // here we loop on ALL group members, including ourself
                 for (GroupV2.IdentityAndPermissionsAndDetails groupMember : startState.updatedBlob.groupMemberIdentityAndPermissionsAndDetailsList) {
-                    UID[] contactDeviceUidsWithChannel = protocolManagerSession.channelDelegate.getConfirmedObliviousChannelDeviceUids(protocolManagerSession.session, getOwnedIdentity(), groupMember.identity);
+                    UID[] contactOrOwnedDeviceUidsWithChannel = protocolManagerSession.channelDelegate.getConfirmedObliviousChannelDeviceUids(protocolManagerSession.session, getOwnedIdentity(), groupMember.identity);
                     boolean isAdmin = groupMember.permissionStrings.contains(GroupV2.Permission.GROUP_ADMIN.getString());
 
-                    if (contactDeviceUidsWithChannel.length > 0) {
+                    if (contactOrOwnedDeviceUidsWithChannel.length > 0) {
                         // send through oblivious channel
                         GroupV2.BlobKeys keysToSend;
                         if (isAdmin) {
@@ -3875,9 +3982,9 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         }
 
                         CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(groupMember.identity, getOwnedIdentity()));
-                        ChannelMessageToSend messageToSend = new InvitationOrMembersUpdateMessage(coreProtocolMessage, startState.groupIdentifier, startState.updatedBlob.version, keysToSend, contactDeviceUidsWithChannel).generateChannelProtocolMessageToSend();
+                        ChannelMessageToSend messageToSend = new InvitationOrMembersUpdateMessage(coreProtocolMessage, startState.groupIdentifier, startState.updatedBlob.version, keysToSend, contactOrOwnedDeviceUidsWithChannel).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                    } else {
+                    } else if (!Objects.equals(groupMember.identity, getOwnedIdentity())) { // never send a broadcast message to our own devices
                         // send through broadcast channel
                         GroupV2.BlobKeys keysToSend = new GroupV2.BlobKeys(
                                 null,
@@ -4023,9 +4130,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 // propagate the kick message
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagatedKickMessage(coreProtocolMessage, receivedMessage.groupIdentifier, receivedMessage.encryptedAdministratorsChain, receivedMessage.signature).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagatedKickMessage(coreProtocolMessage, receivedMessage.groupIdentifier, receivedMessage.encryptedAdministratorsChain, receivedMessage.signature).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -4206,10 +4315,13 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             }
 
             {
-                // check I am not the only admin
-                boolean admin = protocolManagerSession.identityDelegate.getGroupV2AdminStatus(protocolManagerSession.session, getOwnedIdentity(), this.groupIdentifier);
-                if (admin && !protocolManagerSession.identityDelegate.getGroupV2HasOtherAdminMember(protocolManagerSession.session, getOwnedIdentity(), this.groupIdentifier)) {
-                    return startState;
+                // if group is not frozen, check I am not the only admin
+                boolean frozen = protocolManagerSession.identityDelegate.isGroupV2Frozen(protocolManagerSession.session, getOwnedIdentity(), this.groupIdentifier);
+                if (!frozen) {
+                    boolean admin = protocolManagerSession.identityDelegate.getGroupV2AdminStatus(protocolManagerSession.session, getOwnedIdentity(), this.groupIdentifier);
+                    if (admin && !protocolManagerSession.identityDelegate.getGroupV2HasOtherAdminMember(protocolManagerSession.session, getOwnedIdentity(), this.groupIdentifier)) {
+                        return startState;
+                    }
                 }
             }
 
@@ -4219,9 +4331,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 // propagate the group leave message to other devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagatedGroupLeaveMessage(coreProtocolMessage, this.groupIdentifier, ownGroupInvitationNonce).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagatedGroupLeaveMessage(coreProtocolMessage, this.groupIdentifier, ownGroupInvitationNonce).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
 
                 // put a group left log on server
@@ -4412,9 +4526,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 // propagate the disband request
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagatedGroupDisbandMessage(coreProtocolMessage, startState.groupIdentifier).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagatedGroupDisbandMessage(coreProtocolMessage, startState.groupIdentifier).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -4471,7 +4587,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             GroupV2.IdentifierVersionAndKeys[] identifierVersionAndKeys = protocolManagerSession.identityDelegate.getServerGroupsV2IdentifierVersionAndKeysForContact(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity);
 
             if (identifierVersionAndKeys.length > 0) {
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[] {receivedMessage.contactDeviceUid}, false));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, false));
                 ChannelMessageToSend messageToSend = new BlobKeysBatchAfterChannelCreationMessage(coreProtocolMessage, identifierVersionAndKeys).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -4479,7 +4595,6 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             return new FinalState();
         }
     }
-
 
 
     public static class ProcessBatchKeysMessageStep extends ProtocolStep {

@@ -41,6 +41,14 @@ import io.olvid.messenger.customClasses.StringUtils;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[]{
+            new Migration(63, 64) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 63 TO 64");
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS `owned_device_table` (`bytes_owned_identity` BLOB NOT NULL, `bytes_device_uid` BLOB NOT NULL, `display_name` TEXT, `current_device` INTEGER NOT NULL, `channel_confirmed` INTEGER NOT NULL, `last_registration_timestamp` INTEGER, `expiration_timestamp` INTEGER, PRIMARY KEY(`bytes_owned_identity`, `bytes_device_uid`), FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+                }
+            },
             new Migration(62, 63) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

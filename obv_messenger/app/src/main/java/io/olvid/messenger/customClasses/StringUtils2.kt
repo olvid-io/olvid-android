@@ -40,7 +40,7 @@ class StringUtils2 {
                             this,
                             PatternsCompat.WEB_URL,
                             "https://",
-                            { s: CharSequence?, start: Int, end: Int ->
+                            { s: CharSequence?, start: Int, _: Int ->
                                 s?.let {
                                     (start == 0) || (it[start - 1] != '@')
                                 } ?: false

@@ -25,6 +25,9 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceScreen;
 
 public class BillingUtils {
-    public static void verifyPurchases(byte[] bytesOwnedIdentity, Context context) {}
+    public static void initializeBillingClient(Context context) {}
+    public static void reconnect() {}
+    public static void refreshSubscriptions() {}
+    public static void newIdentityAvailableForSubscription(byte[] bytesOwnedIdentity) {}
     public static void loadSubscriptionSettingsHeader(FragmentActivity activity, PreferenceScreen preferenceScreen) {}
 }

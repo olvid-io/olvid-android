@@ -75,7 +75,6 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
     static final int WAITING_FOR_K1_STATE_ID = 3;
     static final int WAITING_FOR_K2_STATE_ID = 4;
     static final int WAIT_FOR_FIRST_ACK_STATE_ID = 5;
-    static final int WAIT_UNTIL_CONTACT_IS_TRUSTED_STATE_ID = 6;
     static final int WAIT_FOR_SECOND_ACK_STATE_ID = 7;
     static final int CHANNEL_CONFIRMED_STATE_ID = 8;
 
@@ -245,39 +244,6 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
         }
     }
 
-
-    public static class WaitUntilContactIsTrustedState extends ConcreteProtocolState {
-        private final Identity contactIdentity;
-        private final UID contactDeviceUid;
-        private final Seed seed;
-
-        public WaitUntilContactIsTrustedState(Encoded encodedState) throws Exception {
-            super(WAIT_UNTIL_CONTACT_IS_TRUSTED_STATE_ID);
-            Encoded[] list = encodedState.decodeList();
-            if (list.length != 3) {
-                throw new Exception();
-            }
-            this.contactIdentity = list[0].decodeIdentity();
-            this.contactDeviceUid = list[1].decodeUid();
-            this.seed = list[2].decodeSeed();
-        }
-
-        WaitUntilContactIsTrustedState(Identity contactIdentity, UID contactDeviceUid, Seed seed) {
-            super(WAIT_UNTIL_CONTACT_IS_TRUSTED_STATE_ID);
-            this.contactIdentity = contactIdentity;
-            this.contactDeviceUid = contactDeviceUid;
-            this.seed = seed;
-        }
-
-        @Override
-        public Encoded encode() {
-            return Encoded.of(new Encoded[]{
-                    Encoded.of(contactIdentity),
-                    Encoded.of(contactDeviceUid),
-                    Encoded.of(seed),
-            });
-        }
-    }
 
 
     public static class WaitForSecondAckState extends ConcreteProtocolState {
@@ -788,8 +754,6 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
 
 
             // Compute a signature to prove we trust the contact and don't have any channel/ongoing protocol with him
-
-            // only rewrite the end of the prefix
             byte[] signature = protocolManagerSession.identityDelegate.signChannel(
                     protocolManagerSession.session,
                     Constants.SignatureContext.CHANNEL_CREATION,
@@ -999,7 +963,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
 
             // Add the contactDeviceUid to the contactIdentity if needed --> If the device was indeed added, trigger a device discovery
             try {
-                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid)) {
+                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid, true)) {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
                             new UID(getPrng()),
@@ -1074,7 +1038,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
 
             // Add the contactDeviceUid to the contactIdentity if needed --> If the device was indeed added, trigger a device discovery
             try {
-                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid)) {
+                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid, true)) {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
                             new UID(getPrng()),

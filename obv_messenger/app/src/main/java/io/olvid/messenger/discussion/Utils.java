@@ -60,6 +60,7 @@ import io.olvid.messenger.customClasses.StringUtils2Kt;
 import io.olvid.messenger.customClasses.spans.OrderedListItemSpan;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
 import io.olvid.messenger.discussion.mention.MentionUrlSpan;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -161,9 +162,9 @@ public class Utils {
     }
 
     private static void applyMentionSpans(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull Message message, SpannableString result) {
-        List<Message.JsonUserMention> mentions = message.getMentions();
+        List<JsonUserMention> mentions = message.getMentions();
         if (mentions != null && !mentions.isEmpty()) {
-            for (Message.JsonUserMention mention : mentions) {
+            for (JsonUserMention mention : mentions) {
                 if (mention.getRangeStart() >= 0 && mention.getRangeEnd() <= result.length()) {
                     // this test also considers groupV2 pending members as contacts --> need to check this at click time
                     if (mention.getUserIdentifier() == null || AppSingleton.getContactCustomDisplayName(mention.getUserIdentifier()) == null) {
@@ -211,9 +212,9 @@ public class Utils {
         return ssb;
     }
 
-    static Pair<String, List<Message.JsonUserMention>> removeProtectionFEFFsAndTrim(@NonNull CharSequence protectedMessageBody, @Nullable Collection<Message.JsonUserMention> mentions) {
+    static Pair<String, List<JsonUserMention>> removeProtectionFEFFsAndTrim(@NonNull CharSequence protectedMessageBody, @Nullable Collection<JsonUserMention> mentions) {
         // sort the mentions
-        ArrayList<Message.JsonUserMention> sortedMentions = mentions == null ? new ArrayList<>() : new ArrayList<>(mentions);
+        ArrayList<JsonUserMention> sortedMentions = mentions == null ? new ArrayList<>() : new ArrayList<>(mentions);
         //noinspection ComparatorCombinators
         Collections.sort(sortedMentions, (o1, o2) -> Integer.compare(o1.getRangeStart(), o2.getRangeStart()));
 
@@ -225,8 +226,8 @@ public class Utils {
             offset++;
         }
         int mentionRangeCorrection = offset;
-        ArrayList<Message.JsonUserMention> correctedMentions = new ArrayList<>(sortedMentions.size());
-        for (Message.JsonUserMention mention : sortedMentions) {
+        ArrayList<JsonUserMention> correctedMentions = new ArrayList<>(sortedMentions.size());
+        for (JsonUserMention mention : sortedMentions) {
             if (mention.getRangeEnd() <= offset || mention.getRangeEnd() > protectedMessageBody.length()) {
                 // this can happen after deleting a mention
                 continue;
@@ -234,12 +235,12 @@ public class Utils {
             if (protectedMessageBody.charAt(mention.getRangeEnd()-1) == '\ufeff') {
                 sb.append(protectedMessageBody.subSequence(offset, mention.getRangeEnd() - 1));
                 offset = mention.getRangeEnd();
-                correctedMentions.add(new Message.JsonUserMention(mention.getUserIdentifier(), mention.getRangeStart() - mentionRangeCorrection, mention.getRangeEnd() - mentionRangeCorrection - 1));
+                correctedMentions.add(new JsonUserMention(mention.getUserIdentifier(), mention.getRangeStart() - mentionRangeCorrection, mention.getRangeEnd() - mentionRangeCorrection - 1));
                 mentionRangeCorrection++;
             } else {
                 sb.append(protectedMessageBody.subSequence(offset, mention.getRangeEnd()));
                 offset = mention.getRangeEnd();
-                correctedMentions.add(new Message.JsonUserMention(mention.getUserIdentifier(), mention.getRangeStart() - mentionRangeCorrection, mention.getRangeEnd() - mentionRangeCorrection));
+                correctedMentions.add(new JsonUserMention(mention.getUserIdentifier(), mention.getRangeStart() - mentionRangeCorrection, mention.getRangeEnd() - mentionRangeCorrection));
             }
         }
         // trim the String end

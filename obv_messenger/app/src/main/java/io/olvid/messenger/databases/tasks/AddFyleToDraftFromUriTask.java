@@ -222,6 +222,12 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                 // --> copy the file locally before computing its hash
                 // there is a bug with some phone (Oppo Find X2 Lite) where the input stream given by openInputStream is not always the same
                 File photoDir = new File(App.getContext().getCacheDir(), App.CAMERA_PICTURE_FOLDER);
+                try {
+                    //noinspection ResultOfMethodCallIgnored
+                    photoDir.mkdirs();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 localFile = new File(photoDir, Logger.getUuidString(UUID.randomUUID()));
 
 

@@ -72,6 +72,7 @@
                 tools:listitem="@layout/item_view_message_metadata"/>
 
             <TextView
+                android:id="@+id/recipient_status_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAllCaps="true"
@@ -87,6 +88,21 @@
                 android:layout_height="wrap_content"
                 tools:itemCount="2"
                 tools:listitem="@layout/item_view_message_recipient_info"/>
+
+            <TextView
+                android:id="@+id/sent_from_other_device_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/grey"
+                android:background="@drawable/background_info_message"
+                android:textSize="14sp"
+                android:text="@string/explanation_message_sent_from_other_device"
+                android:gravity="center"
+                android:padding="2dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="8dp"
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

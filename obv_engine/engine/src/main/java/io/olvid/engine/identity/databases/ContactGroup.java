@@ -122,7 +122,7 @@ public class ContactGroup implements ObvDatabase {
 
     // update details of a group you do not own. Returns true if details were indeed updated
     public boolean updatePublishedDetails(JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto, boolean allowDowngrade) throws Exception {
-        if (groupOwner == null || jsonGroupDetailsWithVersionAndPhoto == null) {
+        if (jsonGroupDetailsWithVersionAndPhoto == null) {
             return false;
         }
         final int newDetailsVersion = jsonGroupDetailsWithVersionAndPhoto.getVersion();
@@ -236,15 +236,18 @@ public class ContactGroup implements ObvDatabase {
                 this.publishedDetailsVersion = newPublishedDetails.getVersion();
             }
         }
-        commitHookBits |= HOOK_BIT_NEW_PUBLISHED_DETAILS;
-        identityManagerSession.session.addSessionCommitListener(this);
+        // no need to notify if I am the group owner processing a propagated message
+        if (groupOwner != null) {
+            commitHookBits |= HOOK_BIT_NEW_PUBLISHED_DETAILS;
+            identityManagerSession.session.addSessionCommitListener(this);
+        }
         return true;
     }
 
     // trust the details of a group you do not own
-    public void trustPublishedDetails() throws SQLException {
-        if (groupOwner == null || latestOrTrustedDetailsVersion == publishedDetailsVersion) {
-            return;
+    public JsonGroupDetailsWithVersionAndPhoto trustPublishedDetails() throws SQLException {
+        if (latestOrTrustedDetailsVersion == publishedDetailsVersion) {
+            return null;
         }
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + LATEST_OR_TRUSTED_DETAILS_VERSION + " = ? " +
@@ -259,6 +262,7 @@ public class ContactGroup implements ObvDatabase {
         hookDetails = getLatestOrTrustedDetails().getJsonGroupDetailsWithVersionAndPhoto();
         commitHookBits |= HOOK_BIT_PUBLISHED_DETAILS_TRUSTED;
         identityManagerSession.session.addSessionCommitListener(this);
+        return hookDetails;
     }
 
     // set details of a group you own
@@ -426,7 +430,7 @@ public class ContactGroup implements ObvDatabase {
         }
     }
 
-    // usually for group you do not own, but can be for owned groups after a backup restore
+    // usually for group you do not own, but can be for owned groups after a backup restore or in multi-device
     public void setDetailsDownloadedPhotoUrl(int version, byte[] photo) throws Exception {
         ContactGroupDetails contactGroupDetails = ContactGroupDetails.get(identityManagerSession, groupOwnerAndUid, ownedIdentity, version);
 
@@ -500,7 +504,7 @@ public class ContactGroup implements ObvDatabase {
 
     // region constructors
 
-    public static ContactGroup create(IdentityManagerSession identityManagerSession, byte[] groupUid, Identity ownedIdentity, String serializedGroupDetailsWithVersionAndPhoto, Identity groupOwner) {
+    public static ContactGroup create(IdentityManagerSession identityManagerSession, byte[] groupUid, Identity ownedIdentity, String serializedGroupDetailsWithVersionAndPhoto, Identity groupOwner, boolean createdByMeOnOtherDevice) {
         if ((groupUid == null) || (serializedGroupDetailsWithVersionAndPhoto == null) || (ownedIdentity == null)) {
             return null;
         }
@@ -524,6 +528,9 @@ public class ContactGroup implements ObvDatabase {
             }
             ContactGroup contactGroup = new ContactGroup(identityManagerSession, groupUid, ownedIdentity, groupOwner, contactGroupDetails.getVersion());
             contactGroup.insert();
+            if (createdByMeOnOtherDevice) {
+                contactGroup.commitHookBits |= HOOK_BIT_CREATED_ON_OTHER_DEVICE;
+            }
             return contactGroup;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -810,6 +817,7 @@ public class ContactGroup implements ObvDatabase {
     private static final long HOOK_BIT_PHOTO_SET = 0x10;
     private static final long HOOK_BIT_DETAILS_PUBLISHED = 0x20;
     private static final long HOOK_BIT_SERVER_USER_DATA_CAN_BE_DELETED = 0x40;
+    private static final long HOOK_BIT_CREATED_ON_OTHER_DEVICE = 0x80;
 
     @Override
     public void wasCommitted() {
@@ -817,6 +825,7 @@ public class ContactGroup implements ObvDatabase {
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_CREATED_GROUP_OWNER_AND_UID_KEY, groupOwnerAndUid);
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_CREATED_OWNED_IDENTITY_KEY, ownedIdentity);
+            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_CREATED_ON_OTHER_DEVICE_KEY, (commitHookBits & HOOK_BIT_CREATED_ON_OTHER_DEVICE) != 0);
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_GROUP_CREATED, userInfo);
         }
         if ((commitHookBits & HOOK_BIT_DELETED) != 0) {

@@ -120,6 +120,7 @@ public class GroupCloningTasks {
         return new ClonabilityOutput(
                 groupDisplayName,
                 serializedGroupDetails,
+                null,
                 absolutePhotoUrl,
                 clonableGroupContacts,
                 nonGroupV2CapableContacts,
@@ -132,6 +133,7 @@ public class GroupCloningTasks {
         String groupDisplayName = group2.getCustomName();
         String absolutePhotoUrl = App.absolutePathFromRelative(group2.getCustomPhotoUrl());
         String serializedGroupDetails = groupV2DetailsAndPhotos.serializedGroupDetails;
+        String serializedGroupType = AppSingleton.getEngine().getGroupV2JsonType(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
 
         if (group2.customName != null) {
             try {
@@ -160,6 +162,7 @@ public class GroupCloningTasks {
         return new ClonabilityOutput(
                 groupDisplayName,
                 serializedGroupDetails,
+                serializedGroupType,
                 absolutePhotoUrl,
                 clonableGroupContacts,
                 new ArrayList<>(),
@@ -171,15 +174,17 @@ public class GroupCloningTasks {
     public static class ClonabilityOutput {
         public final String groupDisplayName; // only used in dialogs displayed before the cloning: may be members names for unnamed groups v2
         public final String serializedGroupDetails; // contains the actual group name (or custom name), never the members names
+        public final String serializedGroupType;
         public final String absolutePhotoUrl;
         public final List<Contact> clonableGroupContacts; // list of contacts in the group (or pending) with whom I have a channel and that have group v2 capability
         public final List<Contact> nonGroupV2CapableContacts; // contacts without group v2 capability
         public final List<String> nonContactOrNonChanelSerializedDetails; // serializedIdentityDetails of group members without a channel or with whom I am not in contact
 
 
-        public ClonabilityOutput(String groupDisplayName, String serializedGroupDetails, String absolutePhotoUrl, List<Contact> clonableGroupContacts, List<Contact> nonGroupV2CapableContacts, List<String> nonContactOrNonChanelSerializedDetails) {
+        public ClonabilityOutput(String groupDisplayName, String serializedGroupDetails, String serializedGroupType, String absolutePhotoUrl, List<Contact> clonableGroupContacts, List<Contact> nonGroupV2CapableContacts, List<String> nonContactOrNonChanelSerializedDetails) {
             this.groupDisplayName = groupDisplayName;
             this.serializedGroupDetails = serializedGroupDetails;
+            this.serializedGroupType = serializedGroupType;
             this.absolutePhotoUrl = absolutePhotoUrl;
             this.clonableGroupContacts = clonableGroupContacts;
             this.nonGroupV2CapableContacts = nonGroupV2CapableContacts;
@@ -223,11 +228,11 @@ public class GroupCloningTasks {
                     .setMessage(activity.getString(R.string.dialog_message_clone_group_warning_missing_members,
                             clonabilityOutput.groupDisplayName,
                             sb.toString()))
-                    .setPositiveButton(R.string.button_label_proceed, ((DialogInterface dialog, int which) -> App.openGroupCreationActivityForCloning(activity, clonabilityOutput.absolutePhotoUrl, clonabilityOutput.serializedGroupDetails, clonabilityOutput.clonableGroupContacts)))
+                    .setPositiveButton(R.string.button_label_proceed, ((DialogInterface dialog, int which) -> App.openGroupCreationActivityForCloning(activity, clonabilityOutput.absolutePhotoUrl, clonabilityOutput.serializedGroupDetails, clonabilityOutput.serializedGroupType, clonabilityOutput.clonableGroupContacts)))
                     .setNegativeButton(R.string.button_label_cancel, null);
             confirmationBuilder.create().show();
         } else {
-            App.openGroupCreationActivityForCloning(activity, clonabilityOutput.absolutePhotoUrl, clonabilityOutput.serializedGroupDetails, clonabilityOutput.clonableGroupContacts);
+            App.openGroupCreationActivityForCloning(activity, clonabilityOutput.absolutePhotoUrl, clonabilityOutput.serializedGroupDetails, clonabilityOutput.serializedGroupType, clonabilityOutput.clonableGroupContacts);
         }
     }
 }

@@ -125,7 +125,10 @@ class VoiceMessageRecorder implements View.OnTouchListener {
                     mediaRecorder = null;
                 }
 
-                audioFile = new File(new File(activity.getCacheDir(), App.CAMERA_PICTURE_FOLDER), new SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH).format(new Date()) + ".m4a");
+                File cacheDir = new File(activity.getCacheDir(), App.CAMERA_PICTURE_FOLDER);
+                //noinspection ResultOfMethodCallIgnored
+                cacheDir.mkdirs();
+                audioFile = new File(cacheDir, new SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH).format(new Date()) + ".m4a");
 
                 mediaRecorder = new MediaRecorder();
                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);

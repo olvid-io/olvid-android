@@ -29,7 +29,7 @@ import java.util.List;
 
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
-import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class AppBackupPojo_0 {
@@ -43,10 +43,10 @@ class OwnedIdentityPojo_0 {
     public String custom_name;
     public byte[] unlock_password;
     public byte[] unlock_salt;
-    public boolean mute_notifications;
-    public boolean mute_notifications_except_mentioned;
+    public Boolean mute_notifications;
+    public Boolean mute_notifications_except_mentioned;
     public Long mute_notification_timestamp;
-    public boolean show_neutral_notification_when_hidden;
+    public Boolean show_neutral_notification_when_hidden;
     public List<ContactPojo_0> contacts;
     public List<GroupPojo_0> groups;
     public List<Group2Pojo_0> groups2;
@@ -59,8 +59,8 @@ class OwnedIdentityPojo_0 {
                 custom_name == null &&
                 unlock_password == null &&
                 unlock_salt == null &&
-                !mute_notifications &&
-                !show_neutral_notification_when_hidden;
+                (mute_notifications == null || !mute_notifications) &&
+                (show_neutral_notification_when_hidden == null || !show_neutral_notification_when_hidden);
     }
 }
 
@@ -162,7 +162,7 @@ class DiscussionCustomizationPojo_0 {
             discussionCustomizationPojo.retention_count = discussionCustomization.prefDiscussionRetentionCount;
             discussionCustomizationPojo.retention_duration = discussionCustomization.prefDiscussionRetentionDuration;
             if (backupSharedSettings) {
-                Message.JsonExpiration expiration = discussionCustomization.getExpirationJson();
+                JsonExpiration expiration = discussionCustomization.getExpirationJson();
                 if (expiration != null) {
                     discussionCustomizationPojo.settings_existence_duration = expiration.getExistenceDuration();
                     discussionCustomizationPojo.settings_visibility_duration = expiration.getVisibilityDuration();

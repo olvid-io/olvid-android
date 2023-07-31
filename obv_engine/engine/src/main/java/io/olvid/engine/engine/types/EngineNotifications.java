@@ -106,6 +106,8 @@ public abstract class EngineNotifications {
     public static final String GROUP_CREATED_GROUP_KEY = "group"; // ObvGroup
     public static final String GROUP_CREATED_HAS_MULTIPLE_DETAILS_KEY = "has_multiple_details"; // boolean
     public static final String GROUP_CREATED_PHOTO_URL_KEY = "photo_url"; // String
+    public static final String GROUP_CREATED_ON_OTHER_DEVICE_KEY = "on_other_device"; // boolean --> true if I am the group owner and the group was created on another device
+
 
     public static final String GROUP_DELETED = "engine_notification_group_deleted";
     public static final String GROUP_DELETED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
@@ -303,6 +305,8 @@ public abstract class EngineNotifications {
     public static final String WEBSOCKET_CONNECTION_STATE_CHANGED = "engine_notification_websocket_connection_state_changed";
     public static final String WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY = "state"; // int
 
+    public static final String WEBSOCKET_DETECTED_SOME_NETWORK = "engine_notification_websocket_detected_some_network";
+
     public static final String CONTACT_CAPABILITIES_UPDATED = "engine_notification_contact_capabilities_updated"; // List<ObvCapabilities>
     public static final String CONTACT_CAPABILITIES_UPDATED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
     public static final String CONTACT_CAPABILITIES_UPDATED_BYTES_CONTACT_IDENTITY_KEY = "bytes_contact_identity"; // byte[]
@@ -324,8 +328,9 @@ public abstract class EngineNotifications {
 
     public static final String GROUP_V2_CREATED_OR_UPDATED = "engine_notification_group_v2_created_or_updated";
     public static final String GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY = "group"; // ObvGroupV2
-    public static final String GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY = "new_group"; // boolean
+    public static final String GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY = "new_group"; // boolean --> if true, the group was created by be (as opposed to joined groups created by someone else)
     public static final String GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY = "by_me"; // boolean
+    public static final String GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE = "created_on_other_device"; // boolean --> only meaningful for new groups created by be ("new_group" == true). true if created on another device, false if created on this device
 
     public static final String GROUP_V2_PHOTO_CHANGED = "engine_notification_group_v2_photo_changed";
     public static final String GROUP_V2_PHOTO_CHANGED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
@@ -357,4 +362,26 @@ public abstract class EngineNotifications {
     public static final String KEYCLOAK_GROUP_V2_SHARED_SETTINGS_BYTES_GROUP_IDENTIFIER_KEY = "bytes_group_identifier"; // byte[]
     public static final String KEYCLOAK_GROUP_V2_SHARED_SETTINGS_SHARED_SETTINGS_KEY = "shared_settings"; // String, serialized JsonSharedSettings
     public static final String KEYCLOAK_GROUP_V2_SHARED_SETTINGS_MODIFICATION_TIMESTAMP_KEY = "timestamp"; // long
+
+    public static final String OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE = "engine_notification_owned_identity_deleted_from_another_device";
+    public static final String OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+
+    public static final String OWNED_IDENTITY_DEVICE_LIST_CHANGED = "engine_notification_owned_identity_device_list_changed";
+    public static final String OWNED_IDENTITY_DEVICE_LIST_CHANGED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+
+    public static final String KEYCLOAK_SYNCHRONIZATION_REQUIRED = "engine_notification_keycloak_synchronization_required";
+    public static final String KEYCLOAK_SYNCHRONIZATION_REQUIRED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+
+    public static final String CONTACT_INTRODUCTION_INVITATION_SENT = "engine_notification_contact_introduction_invitation_sent";
+    public static final String CONTACT_INTRODUCTION_INVITATION_SENT_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String CONTACT_INTRODUCTION_INVITATION_SENT_BYTES_CONTACT_IDENTITY_A_KEY = "bytes_contact_identity_a"; // byte[]
+    public static final String CONTACT_INTRODUCTION_INVITATION_SENT_BYTES_CONTACT_IDENTITY_B_KEY = "bytes_contact_identity_b"; // byte[]
+
+    public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE = "engine_notification_contact_introduction_invitation_response";
+    public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_MEDIATOR_IDENTITY_KEY = "bytes_mediator_identity"; // byte[]
+    public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY = "contact_serialized_Details"; // String
+    public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY = "accepted"; // boolean
+    public static final String PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE = "engine_notification_push_register_failed_bad_device_uid_to_replace";
+    public static final String PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity";
 }

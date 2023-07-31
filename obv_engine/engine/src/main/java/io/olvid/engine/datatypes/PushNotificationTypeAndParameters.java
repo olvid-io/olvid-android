@@ -23,44 +23,61 @@ import java.util.Arrays;
 
 public class PushNotificationTypeAndParameters {
     public static final byte PUSH_NOTIFICATION_TYPE_ANDROID = 0x01;
-    public static final byte PUSH_NOTIFICATION_TYPE_NONE = (byte) 0xff;
+    public static final byte PUSH_NOTIFICATION_TYPE_WEBSOCKET_ANDROID = 0x10;
+    public static final byte PUSH_NOTIFICATION_TYPE_WEBSOCKET_WINDOWS = 0x11;
+    public static final byte PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX = 0x12;
+    public static final byte PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON = 0x13;
+
+    //    public static final byte PUSH_NOTIFICATION_TYPE_NONE = (byte) 0xff;
 
     public final byte pushNotificationType;
     public final byte[] token;
     public UID identityMaskingUid; // not taken into account when comparing, this is supposed to always be random. Not final so we can sometimes copy old maskingUid
-    public boolean kickOtherDevices; // not taken into account when comparing. Not final so we can sometimes preserve the previous kickMode
-    public final boolean useMultiDevice;
+    public boolean reactivateCurrentDevice; // not taken into account when comparing. Not final so we can sometimes preserve the previous kickMode
+    public UID deviceUidToReplace; // deviceUID of the device to deactivate when reactivateCurrentDevice is set.
 
-    public PushNotificationTypeAndParameters(byte pushNotificationType, byte[] token, UID identityMaskingUid, boolean kickOtherDevices, boolean useMultiDevice) {
+    public PushNotificationTypeAndParameters(byte pushNotificationType, byte[] token, UID identityMaskingUid, boolean reactivateCurrentDevice, UID deviceUidToReplace) {
         this.pushNotificationType = pushNotificationType;
         this.token = token;
         this.identityMaskingUid = identityMaskingUid;
-        this.kickOtherDevices = kickOtherDevices;
-        this.useMultiDevice = useMultiDevice;
+        this.reactivateCurrentDevice = reactivateCurrentDevice;
+        this.deviceUidToReplace = deviceUidToReplace;
     }
 
-    public static PushNotificationTypeAndParameters createWebsocketOnly(boolean kickOtherDevices, boolean useMultidevice) {
-        return new PushNotificationTypeAndParameters(PUSH_NOTIFICATION_TYPE_NONE, null, null, kickOtherDevices, useMultidevice);
+    public static PushNotificationTypeAndParameters createWebsocketOnlyAndroid(boolean reactivateCurrentDevice, UID deviceUidToReplace) {
+        return new PushNotificationTypeAndParameters(PUSH_NOTIFICATION_TYPE_WEBSOCKET_ANDROID, null, null, reactivateCurrentDevice, deviceUidToReplace);
     }
 
-    public static PushNotificationTypeAndParameters createFirebaseAndroid(byte[] token, UID identityMaskingUid, boolean kickOtherDevices, boolean useMultidevice) {
-        return new PushNotificationTypeAndParameters(PUSH_NOTIFICATION_TYPE_ANDROID, token, identityMaskingUid, kickOtherDevices, useMultidevice);
+    public static PushNotificationTypeAndParameters createWindows(boolean reactivateCurrentDevice, UID deviceUidToReplace) {
+        return new PushNotificationTypeAndParameters(PUSH_NOTIFICATION_TYPE_WEBSOCKET_WINDOWS, null, null, reactivateCurrentDevice, deviceUidToReplace);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof PushNotificationTypeAndParameters) {
-            PushNotificationTypeAndParameters other = (PushNotificationTypeAndParameters) o;
-            if (pushNotificationType != other.pushNotificationType || useMultiDevice != other.useMultiDevice) {
-                return false;
-            }
-            switch (pushNotificationType) {
-                case PUSH_NOTIFICATION_TYPE_NONE:
-                    return true;
-                case PUSH_NOTIFICATION_TYPE_ANDROID:
-                    return Arrays.equals(token, other.token);
-            }
+    public static PushNotificationTypeAndParameters createLinux(boolean reactivateCurrentDevice, UID deviceUidToReplace) {
+        return new PushNotificationTypeAndParameters(PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX, null, null, reactivateCurrentDevice, deviceUidToReplace);
+    }
+
+    public static PushNotificationTypeAndParameters createDaemon(boolean reactivateCurrentDevice, UID deviceUidToReplace) {
+        return new PushNotificationTypeAndParameters(PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON, null, null, reactivateCurrentDevice, deviceUidToReplace);
+    }
+
+    public static PushNotificationTypeAndParameters createFirebaseAndroid(byte[] token, UID identityMaskingUid, boolean reactivateCurrentDevice, UID deviceUidToReplace) {
+        return new PushNotificationTypeAndParameters(PUSH_NOTIFICATION_TYPE_ANDROID, token, identityMaskingUid, reactivateCurrentDevice, deviceUidToReplace);
+    }
+
+    public boolean sameTypeAndToken(PushNotificationTypeAndParameters other) {
+        if (pushNotificationType != other.pushNotificationType) {
+            return false;
         }
-        return false;
+        switch (pushNotificationType) {
+            case PUSH_NOTIFICATION_TYPE_WEBSOCKET_ANDROID:
+            case PUSH_NOTIFICATION_TYPE_WEBSOCKET_WINDOWS:
+            case PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX:
+            case PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON:
+                return true;
+            case PUSH_NOTIFICATION_TYPE_ANDROID:
+                return Arrays.equals(token, other.token);
+            default:
+                return false;
+        }
     }
 }

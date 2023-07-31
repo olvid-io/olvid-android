@@ -27,6 +27,7 @@ import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelApplicationMessageToSend;
@@ -66,7 +67,7 @@ public abstract class NetworkChannel extends Channel {
 
         if (networkChannels.length == 0) {
             Logger.i("No acceptable channels were found for posting");
-            throw new Exception();
+            throw new NoAcceptableChannelException();
         }
 
         // get the minimum suite version of all network channels
@@ -125,6 +126,7 @@ public abstract class NetworkChannel extends Channel {
                 });
                 ////////
                 // Add a padding to message to obfuscate content length. Commented out for now
+                // TODO: uncomment once all clients can handle padded messages
 //                byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
 //                System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
 //                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);
@@ -153,6 +155,7 @@ public abstract class NetworkChannel extends Channel {
                 });
                 ////////
                 // Add a padding to message to obfuscate content length. Commented out for now
+                // TODO: uncomment once all clients can handle padded messages
 //                byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
 //                System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
 //                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);

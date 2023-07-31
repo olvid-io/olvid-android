@@ -73,13 +73,14 @@ public class ContactDevice implements ObvDatabase {
         return ObvCapability.deserializeDeviceCapabilities(serializedDeviceCapabilities);
     }
 
-    public static ContactDevice create(IdentityManagerSession identityManagerSession, UID uid, Identity contactIdentity, Identity ownedIdentity) {
+    public static ContactDevice create(IdentityManagerSession identityManagerSession, UID uid, Identity contactIdentity, Identity ownedIdentity, boolean channelCreationAlreadyInProgress) {
         if ((uid == null) || (contactIdentity == null) || (ownedIdentity == null)) {
             return null;
         }
         try {
             ContactDevice contactDevice = new ContactDevice(identityManagerSession, uid, contactIdentity, ownedIdentity, null);
             contactDevice.insert();
+            contactDevice.channelCreationAlreadyInProgress = channelCreationAlreadyInProgress;
             return contactDevice;
         } catch (SQLException e) {
             return null;
@@ -256,6 +257,7 @@ public class ContactDevice implements ObvDatabase {
 
     // endregion
 
+    boolean channelCreationAlreadyInProgress = false;
     private long commitHookBits = 0;
     private static final long HOOK_BIT_INSERTED = 0x1;
     private static final long HOOK_BIT_CAPABILITIES_UPDATED = 0x2;
@@ -267,6 +269,7 @@ public class ContactDevice implements ObvDatabase {
             userInfo.put(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_CONTACT_DEVICE_UID_KEY, uid);
             userInfo.put(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY, ownedIdentity);
             userInfo.put(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_CONTACT_IDENTITY_KEY, contactIdentity);
+            userInfo.put(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_CHANNEL_CREATION_ALREADY_IN_PROGRESS_KEY, channelCreationAlreadyInProgress);
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE, userInfo);
         }
         if ((commitHookBits & HOOK_BIT_CAPABILITIES_UPDATED) != 0) {

@@ -46,6 +46,7 @@ import io.olvid.messenger.databases.dao.MessageDao;
 import io.olvid.messenger.databases.dao.MessageExpirationDao;
 import io.olvid.messenger.databases.dao.MessageMetadataDao;
 import io.olvid.messenger.databases.dao.MessageRecipientInfoDao;
+import io.olvid.messenger.databases.dao.OwnedDeviceDao;
 import io.olvid.messenger.databases.dao.OwnedIdentityDao;
 import io.olvid.messenger.databases.dao.PendingGroupMemberDao;
 import io.olvid.messenger.databases.dao.RawDao;
@@ -72,6 +73,7 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageExpiration;
 import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
+import io.olvid.messenger.databases.entity.OwnedDevice;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 import io.olvid.messenger.databases.entity.Reaction;
@@ -94,6 +96,7 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
                 MessageMetadata.class,
                 MessageRecipientInfo.class,
                 OwnedIdentity.class,
+                OwnedDevice.class,
                 CallLogItem.class,
                 CallLogItemContactJoin.class,
                 Reaction.class,
@@ -110,7 +113,7 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
 )
 @TypeConverters({ObvTypeConverters.class})
 public abstract class AppDatabase extends RoomDatabase {
-    public static final int DB_SCHEMA_VERSION = 63;
+    public static final int DB_SCHEMA_VERSION = 64;
     public static final String DB_FILE_NAME = "app_database";
 
     public abstract ContactDao contactDao();
@@ -127,6 +130,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract MessageMetadataDao messageMetadataDao();
     public abstract MessageRecipientInfoDao messageRecipientInfoDao();
     public abstract OwnedIdentityDao ownedIdentityDao();
+    public abstract OwnedDeviceDao ownedDeviceDao();
     public abstract CallLogItemDao callLogItemDao();
     public abstract RawDao rawDao();
     public abstract ReactionDao reactionDao();

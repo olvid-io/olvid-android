@@ -20,6 +20,8 @@
 package io.olvid.engine.protocol.protocol_engine;
 
 
+import java.util.Objects;
+
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
@@ -41,7 +43,7 @@ public abstract class ProtocolStep extends Operation {
     public ProtocolStep(ReceptionChannelInfo expectedReceptionChannelInfo, ConcreteProtocolMessage receivedMessage, ConcreteProtocol protocol) throws Exception {
         if (expectedReceptionChannelInfo.getChannelType() == ReceptionChannelInfo.ANY_OBLIVIOUS_CHANNEL_WITH_OWNED_DEVICE_TYPE) {
             if ((receivedMessage.getReceptionChannelInfo().getChannelType() != ReceptionChannelInfo.OBLIVIOUS_CHANNEL_TYPE) ||
-                    (receivedMessage.getReceptionChannelInfo().getRemoteIdentity() != getOwnedIdentity())) {
+                    (!Objects.equals(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), protocol.getOwnedIdentity()))) {
                 Logger.d("Protocol expected ReceptionChannelInfo mismatch.");
                 throw new Exception();
             }

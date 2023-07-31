@@ -41,8 +41,10 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
@@ -211,6 +213,12 @@ public class EditOwnedIdentityDetailsDialogFragment extends DialogFragment {
             }
             if (viewModel.nicknameChanged()) {
                 AppDatabase.getInstance().ownedIdentityDao().updateCustomDisplayName(viewModel.getBytesOwnedIdentity(), viewModel.getNickname());
+                try {
+                    AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(viewModel.getBytesOwnedIdentity(), ObvSyncAtom.createOwnProfileNicknameChange(viewModel.getNickname()));
+                } catch (Exception e) {
+                    Logger.w("Failed to propagate own profile nickname change to other devices");
+                    e.printStackTrace();
+                }
             }
             if (viewModel.profileHiddenChanged()) {
                 AppDatabase.getInstance().ownedIdentityDao().updateUnlockPasswordAndSalt(viewModel.getBytesOwnedIdentity(), viewModel.getPassword(), viewModel.getSalt());

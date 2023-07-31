@@ -249,7 +249,7 @@ public class StringUtils {
     }
 
     @NonNull
-    public static String joinGroupMemberNames(String[] groupMembersNames) {
+    public static String joinContactDisplayNames(String[] groupMembersNames, int limit) {
         if (groupMembersNames == null || groupMembersNames.length == 0) {
             return "";
         } else if (groupMembersNames.length == 1) {
@@ -258,14 +258,32 @@ public class StringUtils {
             String joiner = App.getContext().getString(R.string.text_contact_names_separator);
             String lastJoiner = App.getContext().getString(R.string.text_contact_names_last_separator);
             StringBuilder sb = new StringBuilder(groupMembersNames[0]);
-            for (int i = 1; i < groupMembersNames.length - 1; i++) {
+            int length;
+            int others;
+            if (limit > 0 && groupMembersNames.length - 1 > limit) { // we consider the last " & 2 others" as a name counting towards the limit, so others should never be 1
+                length = limit;
+                others = groupMembersNames.length - limit;
+            } else {
+                length = groupMembersNames.length - 1;
+                others = 0;
+            }
+            for (int i = 1; i < length; i++) {
                 sb.append(joiner);
                 sb.append(groupMembersNames[i]);
             }
-            sb.append(lastJoiner);
-            sb.append(groupMembersNames[groupMembersNames.length - 1]);
+            if (others > 0) {
+                sb.append(App.getContext().getResources().getQuantityString(R.plurals.text_contact_names_last_separator_x_other, others, others));
+            } else {
+                sb.append(lastJoiner);
+                sb.append(groupMembersNames[groupMembersNames.length - 1]);
+            }
             return sb.toString();
         }
+    }
+
+    @NonNull
+    public static String joinContactDisplayNames(String[] groupMembersNames) {
+        return  joinContactDisplayNames(groupMembersNames, 0);
     }
 
 

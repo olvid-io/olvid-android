@@ -47,6 +47,7 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
+import io.olvid.engine.engine.types.RegisterApiKeyResult;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
@@ -89,7 +90,7 @@ public class KeycloakManager {
     // region public methods
 
 
-    public void registerKeycloakManagedIdentity(@NonNull ObvIdentity obvIdentity, String keycloakServerUrl, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, @Nullable String serializedKeycloakState, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp, boolean firstKeycloakBinding) {
+    public void registerKeycloakManagedIdentity(@NonNull ObvIdentity obvIdentity, String keycloakServerUrl, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, @Nullable String serializedKeycloakState, @Nullable String ownApiKey, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp, boolean firstKeycloakBinding) {
         executor.execute(() -> {
             AuthState authState = null;
             if (serializedKeycloakState != null) {
@@ -99,7 +100,7 @@ public class KeycloakManager {
                     Logger.d("Error deserializing AuthState");
                 }
             }
-            KeycloakManagerState keycloakManagerState = new KeycloakManagerState(obvIdentity, keycloakServerUrl, clientId, clientSecret, jwks, signatureKey, authState, latestRevocationListTimestamp, latestGroupUpdateTimestamp);
+            KeycloakManagerState keycloakManagerState = new KeycloakManagerState(obvIdentity, keycloakServerUrl, clientId, clientSecret, jwks, signatureKey, authState, ownApiKey, latestRevocationListTimestamp, latestGroupUpdateTimestamp);
 
             BytesKey identityBytesKey = new BytesKey(keycloakManagerState.bytesOwnedIdentity);
             ownedIdentityStates.put(identityBytesKey, keycloakManagerState);
@@ -588,13 +589,21 @@ public class KeycloakManager {
                         }
 
                         // update API key if needed
-                        UUID currentApiKey = AppSingleton.getEngine().getApiKeyForOwnedIdentity(identityBytesKey.bytes);
                         if (keycloakUserDetailsAndStuff.apiKey != null) {
                             // update API key if needed
                             try {
                                 UUID newApiKey = UUID.fromString(keycloakUserDetailsAndStuff.apiKey);
-                                if (!newApiKey.equals(currentApiKey)) {
-                                    AppSingleton.getEngine().updateApiKeyForOwnedIdentity(identityBytesKey.bytes, newApiKey);
+                                if (!Objects.equals(Logger.getUuidString(newApiKey), kms.ownApiKey)) {
+                                    App.runThread(() -> {
+                                        if (AppSingleton.getEngine().registerOwnedIdentityApiKeyOnServer(identityBytesKey.bytes, newApiKey) == RegisterApiKeyResult.SUCCESS) {
+                                            try {
+                                                AppSingleton.getEngine().saveKeycloakApiKey(identityBytesKey.bytes, keycloakUserDetailsAndStuff.apiKey);
+                                                kms.ownApiKey = keycloakUserDetailsAndStuff.apiKey;
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
                                 }
                             } catch (Exception e) {
                                 // do nothing
@@ -679,12 +688,13 @@ public class KeycloakManager {
         @Nullable JsonWebKeySet jwks;
         @Nullable JsonWebKey signatureKey;
         @Nullable AuthState authState;
+        @Nullable String ownApiKey;
         long lastSynchronization;
         boolean autoRevokeOnNextSync;
         long latestRevocationListTimestamp;
         long latestGroupUpdateTimestamp;
 
-        public KeycloakManagerState(@NonNull ObvIdentity obvIdentity, @NonNull String serverUrl, @NonNull String clientId, @Nullable String clientSecret, @Nullable JsonWebKeySet jwks, @Nullable JsonWebKey signatureKey, @Nullable AuthState authState, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
+        public KeycloakManagerState(@NonNull ObvIdentity obvIdentity, @NonNull String serverUrl, @NonNull String clientId, @Nullable String clientSecret, @Nullable JsonWebKeySet jwks, @Nullable JsonWebKey signatureKey, @Nullable AuthState authState, @Nullable String ownApiKey, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
             this.bytesOwnedIdentity = obvIdentity.getBytesIdentity();
             this.identityDetails = obvIdentity.getIdentityDetails();
 
@@ -711,6 +721,7 @@ public class KeycloakManager {
             this.jwks = jwks;
             this.signatureKey = signatureKey;
             this.authState = authState;
+            this.ownApiKey = ownApiKey;
             this.lastSynchronization = 0;
             this.autoRevokeOnNextSync = false;
             this.latestRevocationListTimestamp = latestRevocationListTimestamp;

@@ -241,7 +241,8 @@ public class IdentityCreationFragment extends Fragment {
             return;
         }
         UUID apiKey = viewModel.getApiKey();
-        if (apiKey == null) {
+        //noinspection ConstantConditions
+        if (apiKey == null && BuildConfig.HARDCODED_API_KEY != null) {
             apiKey = UUID.fromString(BuildConfig.HARDCODED_API_KEY);
         }
 

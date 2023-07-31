@@ -361,6 +361,8 @@ public class SelectDetailsPhotoActivity extends LockableActivity implements View
                 File photoDir = new File(getCacheDir(), App.CAMERA_PICTURE_FOLDER);
                 File photoFile = new File(photoDir, new SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH).format(new Date()) + "_cropped.jpg");
                 try (FileOutputStream out = new FileOutputStream(photoFile)) {
+                    //noinspection ResultOfMethodCallIgnored
+                    photoDir.mkdirs();
                     cropped.compress(Bitmap.CompressFormat.JPEG, 75, out);
                     out.flush();
                     Intent returnIntent = new Intent();

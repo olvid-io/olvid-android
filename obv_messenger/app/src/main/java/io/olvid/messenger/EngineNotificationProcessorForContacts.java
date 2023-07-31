@@ -36,7 +36,9 @@ import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
+import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.UpdateContactActiveTask;
 import io.olvid.messenger.databases.tasks.UpdateContactDisplayNameAndPhotoTask;
 import io.olvid.messenger.databases.tasks.UpdateContactKeycloakManagedTask;
@@ -76,54 +78,59 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
             case EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED: {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED_OWNED_IDENTITY_KEY);
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED_CONTACT_IDENTITY_KEY);
-                Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
-                if (contact != null) {
-                    try {
-                        contact.establishedChannelCount = engine.getContactEstablishedChannelsCount(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                        db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount);
+                if (bytesOwnedIdentity != null && Arrays.equals(bytesOwnedIdentity, bytesContactIdentity)) {
+                    new OwnedDevicesSynchronisationWithEngineTask(bytesOwnedIdentity).run();
+                } else {
+                    Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                    if (contact != null) {
+                        try {
+                            contact.establishedChannelCount = engine.getContactEstablishedChannelsCount(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                            contact.deviceCount = engine.getContactDeviceCount(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                            db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount);
 
-                        if (contact.establishedChannelCount > 0) {
-                            // Search for MessageRecipientInfo indicating a message was not sent to this user
-                            List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoAndMessages = db.messageRecipientInfoDao().getAllUnsentForContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                            App.runThread(() -> db.runInTransaction(() -> {
-                                for (MessageRecipientInfoDao.MessageRecipientInfoAndMessage messageRecipientInfoAndMessage : messageRecipientInfoAndMessages) {
-                                    messageRecipientInfoAndMessage.message.repost(messageRecipientInfoAndMessage.messageRecipientInfo, null);
+                            if (contact.establishedChannelCount > 0) {
+                                // Search for MessageRecipientInfo indicating a message was not sent to this user
+                                List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoAndMessages = db.messageRecipientInfoDao().getAllUnsentForContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                App.runThread(() -> db.runInTransaction(() -> {
+                                    for (MessageRecipientInfoDao.MessageRecipientInfoAndMessage messageRecipientInfoAndMessage : messageRecipientInfoAndMessages) {
+                                        messageRecipientInfoAndMessage.message.repost(messageRecipientInfoAndMessage.messageRecipientInfo, null);
+                                    }
+                                }));
+
+                                // resend all discussion shared ephemeral message settings
+                                List<Long> discussionIds = new ArrayList<>();
+                                // direct discussion
+                                Discussion directDiscussion = db.discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
+                                if (directDiscussion != null) {
+                                    discussionIds.add(directDiscussion.id);
                                 }
-                            }));
+                                // owned group discussions
+                                discussionIds.addAll(db.contactGroupJoinDao().getAllOwnedGroupDiscussionIdsWithSpecificContact(bytesOwnedIdentity, bytesContactIdentity));
 
-                            // resend all discussion shared ephemeral message settings
-                            List<Long> discussionIds = new ArrayList<>();
-                            // direct discussion
-                            Discussion directDiscussion = db.discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
-                            if (directDiscussion != null) {
-                                discussionIds.add(directDiscussion.id);
-                            }
-                            // owned group discussions
-                            discussionIds.addAll(db.contactGroupJoinDao().getAllOwnedGroupDiscussionIdsWithSpecificContact(bytesOwnedIdentity, bytesContactIdentity));
+                                // managed group V2 discussions
+                                discussionIds.addAll(db.group2MemberDao().getGroupV2DiscussionIdsWithSettingsPermissionWithContact(bytesOwnedIdentity, bytesContactIdentity));
 
-                            // managed group V2 discussions
-                            discussionIds.addAll(db.group2MemberDao().getGroupV2DiscussionIdsWithSettingsPermissionWithContact(bytesOwnedIdentity, bytesContactIdentity));
-
-                            for (Long discussionId : discussionIds) {
-                                if (discussionId == null) {
-                                    continue;
-                                }
-                                DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
-                                if (discussionCustomization == null) {
-                                    continue;
-                                }
-                                DiscussionCustomization.JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
-                                if (jsonSharedSettings != null) {
-                                    // send the json to contact
-                                    Message message = Message.createDiscussionSettingsUpdateMessage(db, discussionId, jsonSharedSettings, bytesOwnedIdentity, true, null);
-                                    if (message != null) {
-                                        message.postSettingsMessage(true, bytesContactIdentity);
+                                for (Long discussionId : discussionIds) {
+                                    if (discussionId == null) {
+                                        continue;
+                                    }
+                                    DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
+                                    if (discussionCustomization == null) {
+                                        continue;
+                                    }
+                                    JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
+                                    if (jsonSharedSettings != null) {
+                                        // send the json to contact
+                                        Message message = Message.createDiscussionSettingsUpdateMessage(db, discussionId, jsonSharedSettings, bytesOwnedIdentity, true, null);
+                                        if (message != null) {
+                                            message.postSettingsMessage(true, null);
+                                        }
                                     }
                                 }
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
                 break;

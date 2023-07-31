@@ -7,7 +7,7 @@
     android:animateLayoutChanges="true"
     android:background="@color/almostWhite"
     android:fitsSystemWindows="true"
-    tools:context=".activities.GroupCreationActivity">
+    tools:context=".group.GroupCreationActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -63,7 +63,9 @@
 
                     <TextView
                         android:id="@+id/title"
-                        style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                        android:textAppearance="@style/RobotoMedium"
+                        android:textColor="@color/alwaysWhite"
+                        android:textSize="@dimen/title_font_size"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
@@ -73,11 +75,13 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_chainStyle="packed"
-                        android:text="@string/activity_title_create_group" />
+                        android:text="@string/activity_title_create_group"
+                        tools:ignore="SpUsage" />
 
                     <TextView
                         android:id="@+id/subtitle"
-                        style="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+                        android:textColor="@color/alwaysWhite"
+                        android:textSize="@dimen/subtitle_font_size"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
@@ -86,7 +90,8 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/title"
-                        tools:text="@string/subtitle_select_group_members"/>
+                        tools:text="@string/subtitle_select_group_members"
+                        tools:ignore="SpUsage" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -202,4 +207,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/admin_selection_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -23,9 +23,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -81,7 +83,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
     }
 
     public static class WaitingForChildProtocolState extends ConcreteProtocolState {
-        private final Identity contactIdentity; // The contact uid we seek to trust
+        private final Identity contactIdentity;
 
         public WaitingForChildProtocolState(Encoded encodedState) throws Exception {
             super(WAITING_FOR_CHILD_PROTOCOL_STATE_ID);
@@ -313,12 +315,13 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
                 return new CancelledState();
             }
 
-            HashSet<UID> newContactDeviceUids = new HashSet<>(Arrays.asList(deviceUidsReceivedState.getDeviceUids()));
-            if (newContactDeviceUids.isEmpty()) {
-                Logger.w("Device discovery did not find any device! Probably an expired query.");
+            if (deviceUidsReceivedState.getDeviceUids().length == 1
+                    && Objects.equals(deviceUidsReceivedState.getDeviceUids()[0], Constants.BROADCAST_UID)) {
+                Logger.w("Device discovery query expired.");
                 return new CancelledState();
             }
 
+            HashSet<UID> newContactDeviceUids = new HashSet<>(Arrays.asList(deviceUidsReceivedState.getDeviceUids()));
             HashSet<UID> oldContactDeviceUids = new HashSet<>(Arrays.asList(protocolManagerSession.identityDelegate.getDeviceUidsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity)));
             for (UID contactDeviceUid: oldContactDeviceUids) {
                 if (!newContactDeviceUids.contains(contactDeviceUid)) {
@@ -330,7 +333,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
             for (UID contactDeviceUid: newContactDeviceUids) {
                 if (!oldContactDeviceUids.contains(contactDeviceUid)) {
                     // a new deviceUid was found --> add it, this will trigger the channel creation
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity, contactDeviceUid);
+                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity, contactDeviceUid, false);
                 }
             }
 

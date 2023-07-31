@@ -160,7 +160,7 @@ fun DiscussionListScreen(
                                                 discussion
                                             )
                                         },
-                                        renameActionName = if (discussion.canPostMessages()) {
+                                        renameActionName = if (discussion.isNormalOrReadOnly) {
                                             when (discussion.discussionType) {
                                                 Discussion.TYPE_CONTACT ->
                                                     stringResource(id = string.menu_action_rename_contact)

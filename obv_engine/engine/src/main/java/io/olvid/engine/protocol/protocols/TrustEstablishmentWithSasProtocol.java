@@ -32,6 +32,7 @@ import io.olvid.engine.crypto.SAS;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -68,7 +69,6 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
 
 
     // region States
-
     // Alice's side
     static final int WAITING_FOR_SEED_STATE_ID = 1;
     // Bob's side
@@ -905,9 +905,11 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 // Propagate invitation to other owned devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateInvitationToAliceDevicesMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.contactDisplayName, commitmentOutput.decommitment, seedAliceForSas).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateInvitationToAliceDevicesMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.contactDisplayName, commitmentOutput.decommitment, seedAliceForSas).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -996,9 +998,11 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 // Propagate invitation to other owned devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateCommitmentToBobDevicesMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.contactSerializedDetails, receivedMessage.contactDeviceUids, receivedMessage.commitment).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateCommitmentToBobDevicesMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.contactSerializedDetails, receivedMessage.contactDeviceUids, receivedMessage.commitment).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -1069,9 +1073,11 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 // Propagate the accept/reject to other owned devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateConfirmationToBobDevicesMessage(coreProtocolMessage, receivedMessage.invitationAccepted).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateConfirmationToBobDevicesMessage(coreProtocolMessage, receivedMessage.invitationAccepted).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -1290,9 +1296,11 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 // propagate the entered sas to other owned devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateEnteredSasToOtherDevicesMessage(coreProtocolMessage, receivedMessage.sasEnteredByUser).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateEnteredSasToOtherDevicesMessage(coreProtocolMessage, receivedMessage.sasEnteredByUser).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -1415,7 +1423,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
             }
             for (UID contactDeviceUid: startState.contactDeviceUids) {
-                protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid);
+                protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, false);
             }
 
 

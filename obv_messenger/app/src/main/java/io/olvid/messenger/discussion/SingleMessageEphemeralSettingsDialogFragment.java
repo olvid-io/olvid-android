@@ -52,6 +52,7 @@ import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.tasks.SetDraftJsonExpirationTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -207,7 +208,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
         setTimeAndUnit(viewModel.getExistence(), VISEX.EXISTENCE);
     }
 
-    private void discussionCustomizationChanged(Message.JsonExpiration discussionJsonExpiration) {
+    private void discussionCustomizationChanged(JsonExpiration discussionJsonExpiration) {
         // first display the proper default in discussion settings
         boolean ephemeral = false;
         if (discussionJsonExpiration == null) {
@@ -267,7 +268,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
         // second update the values to match the new constraints
         if (discussionJsonExpiration != null) {
             // compute the gcd of what is already entered and what the discussion forces
-            Message.JsonExpiration jsonExpiration = new Message.JsonExpiration();
+            JsonExpiration jsonExpiration = new JsonExpiration();
             jsonExpiration.setReadOnce(viewModel.getReadOnce());
             jsonExpiration.setVisibilityDuration(viewModel.getVisibility());
             jsonExpiration.setExistenceDuration(viewModel.getExistence());
@@ -287,7 +288,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
             visibilityDropdown.setAlpha(1f);
             existenceDropdown.setAlpha(1f);
 
-            Message.JsonExpiration draftJsonExpiration = viewModel.getDraftJsonExpiration();
+            JsonExpiration draftJsonExpiration = viewModel.getDraftJsonExpiration();
             if (draftJsonExpiration != null) {
                 readOnceSwitch.setChecked(draftJsonExpiration.getReadOnce() != null && draftJsonExpiration.getReadOnce());
                 if (draftJsonExpiration.getVisibilityDuration() != null) {
@@ -450,7 +451,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
         int id = v.getId();
         if (id == R.id.ok_button) {
             if (viewModel.valid.getValue() != null && viewModel.valid.getValue()) {
-                Message.JsonExpiration jsonExpiration = new Message.JsonExpiration();
+                JsonExpiration jsonExpiration = new JsonExpiration();
                 if (viewModel.readOnce) {
                     jsonExpiration.setReadOnce(true);
                 }
@@ -509,8 +510,8 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
     public static class EphemeralViewModel extends ViewModel {
         private final MutableLiveData<Long> discussionIdLiveData = new MutableLiveData<>();
         private final MutableLiveData<Boolean> draftLoaded = new MutableLiveData<>(false);
-        private Message.JsonExpiration draftJsonExpiration;
-        private Message.JsonExpiration discussionJsonExpiration;
+        private JsonExpiration draftJsonExpiration;
+        private JsonExpiration discussionJsonExpiration;
 
         private boolean readOnce = false;
         private Long visibility = null;
@@ -518,7 +519,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
 
         private final MutableLiveData<Boolean> valid = new MutableLiveData<>(false);
 
-        private final LiveData<Message.JsonExpiration> discussionJsonExpirationLiveData = Transformations.switchMap(discussionIdLiveData, (Long discussionId) -> {
+        private final LiveData<JsonExpiration> discussionJsonExpirationLiveData = Transformations.switchMap(discussionIdLiveData, (Long discussionId) -> {
             if (discussionId != null) {
                 return Transformations.map(AppDatabase.getInstance().discussionCustomizationDao().getLiveData(discussionId), (DiscussionCustomization discussionCustomization) -> {
                     if (discussionCustomization != null) {
@@ -545,7 +546,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
                 Message draftMessage = AppDatabase.getInstance().messageDao().getDiscussionDraftMessageSync(discussionId);
                 if (draftMessage != null) {
                     try {
-                        draftJsonExpiration = AppSingleton.getJsonObjectMapper().readValue(draftMessage.jsonExpiration, Message.JsonExpiration.class);
+                        draftJsonExpiration = AppSingleton.getJsonObjectMapper().readValue(draftMessage.jsonExpiration, JsonExpiration.class);
                     } catch (Exception e) {
                         // do nothing
                     }
@@ -555,7 +556,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
             discussionIdLiveData.postValue(discussionId);
         }
 
-        public LiveData<Message.JsonExpiration> getDiscussionJsonExpirationLiveData() {
+        public LiveData<JsonExpiration> getDiscussionJsonExpirationLiveData() {
             return discussionJsonExpirationLiveData;
         }
 
@@ -567,7 +568,7 @@ public class SingleMessageEphemeralSettingsDialogFragment extends DialogFragment
             return valid;
         }
 
-        public Message.JsonExpiration getDraftJsonExpiration() {
+        public JsonExpiration getDraftJsonExpiration() {
             return draftJsonExpiration;
         }
 

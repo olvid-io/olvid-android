@@ -152,7 +152,6 @@ class MarkdownQuote :
 }
 
 fun EditText.insertMarkdown(markdownSpan: MarkdownSpan?) {
-    // TODO insert delimited on each lines
     if (markdownSpan != null && text != null && selectionStart > -1 && selectionEnd > selectionStart && selectionEnd <= length()) {
         if (markdownSpan is MarkdownListItem || markdownSpan is MarkdownOrderedListItem) {
             var index = selectionStart

@@ -21,13 +21,18 @@ package io.olvid.engine.protocol.protocols;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.jose4j.jwk.JsonWebKey;
+import org.jose4j.jwk.JsonWebKeySet;
+
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
+import io.olvid.engine.datatypes.notifications.ProtocolNotifications;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
@@ -40,6 +45,8 @@ import io.olvid.engine.protocol.protocol_engine.InitialProtocolState;
 import io.olvid.engine.protocol.protocol_engine.ProtocolStep;
 
 import static io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol.FINISHED_STATE_ID;
+
+import java.util.HashMap;
 
 public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
     public KeycloakBindingAndUnbindingProtocol(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, int currentStateId, Encoded encodedCurrentState, Identity ownedIdentity, PRNGService prng, ObjectMapper jsonObjectMapper) throws Exception {
@@ -99,13 +106,11 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
     // endregion
 
 
-
-
-
     // region messages
     static final int OWNED_IDENTITY_KEYCLOAK_BINDING_MESSAGE_ID = 0;
     static final int OWNED_IDENTITY_KEYCLOAK_UNBINDING_MESSAGE_ID = 1;
-
+    static final int PROPAGATE_KEYCLOAK_BINDING_MESSAGE_ID = 2;
+    static final int PROPAGATE_KEYCLOAK_UNBINDING_MESSAGE_ID = 3;
 
     @Override
     protected Class<?> getMessageClass(int protocolMessageId) {
@@ -114,6 +119,10 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
                 return OwnedIdentityKeycloakBindingMessage.class;
             case OWNED_IDENTITY_KEYCLOAK_UNBINDING_MESSAGE_ID:
                 return OwnedIdentityKeycloakUnbindingMessage.class;
+            case PROPAGATE_KEYCLOAK_BINDING_MESSAGE_ID:
+                return PropagateKeycloakBindingMessage.class;
+            case PROPAGATE_KEYCLOAK_UNBINDING_MESSAGE_ID:
+                return PropagateKeycloakUnbindingMessage.class;
             default:
                 return null;
         }
@@ -179,11 +188,82 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
         }
     }
 
+
+    public static class PropagateKeycloakBindingMessage extends ConcreteProtocolMessage {
+        public final String keycloakUserId;
+        public final String keycloakServer;
+        public final String clientId;
+        public final String clientSecret; // may be null --> encoded as an empty String in this case
+        public final String jwks;
+        public final String signatureKey;
+
+        public PropagateKeycloakBindingMessage(CoreProtocolMessage coreProtocolMessage, String keycloakUserId, ObvKeycloakState keycloakState) {
+            super(coreProtocolMessage);
+            this.keycloakUserId = keycloakUserId;
+            this.keycloakServer = keycloakState.keycloakServer;
+            this.clientId = keycloakState.clientId;
+            this.clientSecret = keycloakState.clientSecret;
+            this.jwks = keycloakState.jwks.toJson();
+            this.signatureKey = keycloakState.signatureKey.toJson();
+        }
+
+        @SuppressWarnings({"unused", "RedundantSuppression"})
+        public PropagateKeycloakBindingMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(new CoreProtocolMessage(receivedMessage));
+            if (receivedMessage.getInputs().length != 6) {
+                throw new Exception();
+            }
+            this.keycloakUserId = receivedMessage.getInputs()[0].decodeString();
+            this.keycloakServer = receivedMessage.getInputs()[1].decodeString();
+            this.clientId = receivedMessage.getInputs()[2].decodeString();
+            String clientSecret = receivedMessage.getInputs()[3].decodeString();
+            this.clientSecret = clientSecret.length() == 0 ? null : clientSecret;
+            this.jwks = receivedMessage.getInputs()[4].decodeString();
+            this.signatureKey = receivedMessage.getInputs()[5].decodeString();
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return PROPAGATE_KEYCLOAK_BINDING_MESSAGE_ID;
+        }
+
+        @Override
+        public Encoded[] getInputs() {
+            return new Encoded[]{
+                    Encoded.of(keycloakUserId),
+                    Encoded.of(keycloakServer),
+                    Encoded.of(clientId),
+                    Encoded.of(clientSecret == null ? "" : clientSecret),
+                    Encoded.of(jwks),
+                    Encoded.of(signatureKey),
+            };
+        }
+    }
+
+    public static class PropagateKeycloakUnbindingMessage extends ConcreteProtocolMessage {
+        public PropagateKeycloakUnbindingMessage(CoreProtocolMessage coreProtocolMessage) {
+            super(coreProtocolMessage);
+        }
+
+        @SuppressWarnings({"unused", "RedundantSuppression"})
+        public PropagateKeycloakUnbindingMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(new CoreProtocolMessage(receivedMessage));
+            if (receivedMessage.getInputs().length != 0) {
+                throw new Exception();
+            }
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return PROPAGATE_KEYCLOAK_UNBINDING_MESSAGE_ID;
+        }
+
+        @Override
+        public Encoded[] getInputs() {
+            return new Encoded[0];
+        }
+    }
     // endregion
-
-
-
-
 
 
     // region steps
@@ -200,12 +280,35 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
 
     public static class OwnedIdentityKeycloakBindingStep extends ProtocolStep {
         InitialProtocolState startState;
-        OwnedIdentityKeycloakBindingMessage receivedMessage;
+        String keycloakUserId;
+        ObvKeycloakState keycloakState;
+        boolean propagationNeeded;
+
 
         public OwnedIdentityKeycloakBindingStep(InitialProtocolState startState, OwnedIdentityKeycloakBindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
             super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
-            this.receivedMessage = receivedMessage;
+            this.keycloakUserId = receivedMessage.keycloakUserId;
+            this.keycloakState = receivedMessage.keycloakState;
+            this.propagationNeeded = true;
+        }
+
+        public OwnedIdentityKeycloakBindingStep(InitialProtocolState startState, PropagateKeycloakBindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.keycloakUserId = receivedMessage.keycloakUserId;
+            this.keycloakState = new ObvKeycloakState(
+                    receivedMessage.keycloakServer,
+                    receivedMessage.clientId,
+                    receivedMessage.clientSecret,
+                    new JsonWebKeySet(receivedMessage.jwks),
+                    JsonWebKey.Factory.newJwk(receivedMessage.signatureKey),
+                    null,
+                    null,
+                    0,
+                    0
+            );
+            this.propagationNeeded = false;
         }
 
         @Override
@@ -214,10 +317,10 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
 
             /////////
             // re-check all inputs
-            if (receivedMessage.keycloakUserId == null
-                    || receivedMessage.keycloakState == null
-                    || receivedMessage.keycloakState.keycloakServer == null
-                    || receivedMessage.keycloakState.jwks == null) {
+            if (keycloakUserId == null
+                    || keycloakState == null
+                    || keycloakState.keycloakServer == null
+                    || keycloakState.jwks == null) {
                 Logger.w("Bad inputs for OwnedIdentityKeycloakBindingStep, aborting.");
                 return new FinishedProtocolState();
             }
@@ -229,13 +332,34 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
             protocolManagerSession.identityDelegate.bindOwnedIdentityToKeycloak(
                     protocolManagerSession.session,
                     getOwnedIdentity(),
-                    receivedMessage.keycloakUserId,
-                    receivedMessage.keycloakState);
+                    keycloakUserId,
+                    keycloakState);
 
 
             /////////
             // re-check all contacts
             protocolManagerSession.identityDelegate.reCheckAllCertifiedByOwnKeycloakContacts(protocolManagerSession.session, getOwnedIdentity());
+
+            //////////
+            // propagate the binding to other owned devices (if any)
+            if (propagationNeeded) {
+                int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
+                if (numberOfOtherDevices > 0) {
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateKeycloakBindingMessage(coreProtocolMessage, keycloakUserId, keycloakState).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) {
+                    }
+                }
+            } else {
+                // notify the app that a keycloak registration & synchronization is required
+                protocolManagerSession.session.addSessionCommitListener(() -> {
+                    HashMap<String, Object> userInfo = new HashMap<>();
+                    userInfo.put(ProtocolNotifications.NOTIFICATION_KEYCLOAK_SYNCHRONIZATION_REQUIRED_OWNED_IDENTITY_KEY, getOwnedIdentity());
+                    protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_KEYCLOAK_SYNCHRONIZATION_REQUIRED, userInfo);
+                });
+            }
 
             return new FinishedProtocolState();
         }
@@ -244,12 +368,18 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
 
     public static class OwnedIdentityKeycloakUnbindingStep extends ProtocolStep {
         InitialProtocolState startState;
-        OwnedIdentityKeycloakUnbindingMessage receivedMessage;
+        boolean propagationNeeded;
 
         public OwnedIdentityKeycloakUnbindingStep(InitialProtocolState startState, OwnedIdentityKeycloakUnbindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
             super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
-            this.receivedMessage = receivedMessage;
+            this.propagationNeeded = true;
+        }
+
+        public OwnedIdentityKeycloakUnbindingStep(InitialProtocolState startState, PropagateKeycloakUnbindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.propagationNeeded = false;
         }
 
         @Override
@@ -288,6 +418,20 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
             // unmark all certified contacts
             {
                 protocolManagerSession.identityDelegate.unmarkAllCertifiedByOwnKeycloakContacts(protocolManagerSession.session, getOwnedIdentity());
+            }
+
+            //////////
+            // propagate the unbinding to other owned devices (if any)
+            if (propagationNeeded) {
+                int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
+                if (numberOfOtherDevices > 0) {
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateKeycloakUnbindingMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) {
+                    }
+                }
             }
 
             return new FinishedProtocolState();

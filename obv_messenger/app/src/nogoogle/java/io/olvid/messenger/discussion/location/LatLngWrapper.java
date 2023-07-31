@@ -23,6 +23,7 @@ package io.olvid.messenger.discussion.location;
 import android.location.Location;
 
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 
 // class used to encapsulate maplibre or google maps LatLng classes
 public class LatLngWrapper {
@@ -46,7 +47,7 @@ public class LatLngWrapper {
     }
 
     // JsonLocation version
-    public LatLngWrapper(Message.JsonLocation jsonLocation) {
+    public LatLngWrapper(JsonLocation jsonLocation) {
         latitude = jsonLocation.getLatitude();
         longitude = jsonLocation.getLongitude();
     }

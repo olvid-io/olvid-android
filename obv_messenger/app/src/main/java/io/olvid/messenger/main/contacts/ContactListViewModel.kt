@@ -32,7 +32,6 @@ import io.olvid.engine.engine.types.JsonKeycloakUserDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.entity.Contact
-import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
@@ -235,8 +234,8 @@ class ContactListViewModel : ViewModel() {
             filter,
             object : KeycloakCallback<Pair<List<JsonKeycloakUserDetails>?, Int?>?> {
                 override fun success(searchResult: Pair<List<JsonKeycloakUserDetails>?, Int?>?) {
-                    val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
-                    if (this@ContactListViewModel._filter != filter || ownedIdentity == null || !ownedIdentity.bytesOwnedIdentity.contentEquals(
+                    val reOwnedIdentity = AppSingleton.getCurrentIdentityLiveData().value
+                    if (this@ContactListViewModel._filter != filter || reOwnedIdentity == null || !reOwnedIdentity.bytesOwnedIdentity.contentEquals(
                             bytesOwnedIdentity
                         )
                     ) {
@@ -262,8 +261,8 @@ class ContactListViewModel : ViewModel() {
                 }
 
                 override fun failed(rfc: Int) {
-                    val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
-                    if (this@ContactListViewModel._filter != filter || ownedIdentity == null || !ownedIdentity.bytesOwnedIdentity.contentEquals(
+                    val reOwnedIdentity = AppSingleton.getCurrentIdentityLiveData().value
+                    if (this@ContactListViewModel._filter != filter || reOwnedIdentity == null || !reOwnedIdentity.bytesOwnedIdentity.contentEquals(
                             bytesOwnedIdentity
                         )
                     ) {

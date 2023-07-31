@@ -120,6 +120,8 @@ import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.entity.jsons.JsonPayload;
+import io.olvid.messenger.databases.entity.jsons.JsonWebrtcMessage;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 
 public class WebrtcCallService extends Service {
@@ -231,6 +233,7 @@ public class WebrtcCallService extends Service {
     public static final int KICK_MESSAGE_TYPE = 9;
     public static final int NEW_ICE_CANDIDATE_MESSAGE_TYPE = 10;
     public static final int REMOVE_ICE_CANDIDATES_MESSAGE_TYPE = 11;
+    public static final int ANSWERED_OR_REJECTED_ON_OTHER_DEVICE_MESSAGE_TYPE = 12;
 
     public static final int MUTED_DATA_MESSAGE_TYPE = 0;
     public static final int UPDATE_PARTICIPANTS_DATA_MESSAGE_TYPE = 1;
@@ -246,6 +249,7 @@ public class WebrtcCallService extends Service {
     // HashMap containing ICE candidates received while outside a call: callIdentifier -> (bytesContactIdentity -> candidate)
     // with continuous gathering, we may send/receive candidates before actually sending/receiving the startCall message
     private static final HashMap<UUID, HashMap<BytesKey, HashSet<JsonIceCandidate>>> uncalledReceivedIceCandidates = new HashMap<>();
+    private static final HashMap<UUID, Boolean> uncalledAnsweredOrRejectedOnOtherDevice = new HashMap<>();
 
     private final WebrtcCallServiceBinder webrtcCallServiceBinder = new WebrtcCallServiceBinder();
     private final NetworkMonitorObserver networkMonitorObserver = new NetworkMonitorObserver();
@@ -352,7 +356,8 @@ public class WebrtcCallService extends Service {
                     int messageType = intent.getIntExtra(MESSAGE_TYPE_INTENT_EXTRA, -1);
                     if (messageType != START_CALL_MESSAGE_TYPE
                             && messageType != NEW_ICE_CANDIDATE_MESSAGE_TYPE
-                            && messageType != REMOVE_ICE_CANDIDATES_MESSAGE_TYPE) {
+                            && messageType != REMOVE_ICE_CANDIDATES_MESSAGE_TYPE
+                            && messageType != ANSWERED_OR_REJECTED_ON_OTHER_DEVICE_MESSAGE_TYPE) {
                         break;
                     }
                     byte[] bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA);
@@ -383,6 +388,14 @@ public class WebrtcCallService extends Service {
                                 if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
                                     JsonRemoveIceCandidatesMessage jsonRemoveIceCandidatesMessage = objectMapper.readValue(serializedMessagePayload, JsonRemoveIceCandidatesMessage.class);
                                     handleRemoveIceCandidatesMessage(callIdentifier, bytesOwnedIdentity, bytesContactIdentity, jsonRemoveIceCandidatesMessage.candidates);
+                                }
+                                return START_NOT_STICKY;
+                            }
+                            case ANSWERED_OR_REJECTED_ON_OTHER_DEVICE_MESSAGE_TYPE: {
+                                // only accept this type of message from other owned devices
+                                if (bytesOwnedIdentity != null && bytesContactIdentity != null && Arrays.equals(bytesOwnedIdentity, bytesContactIdentity)) {
+                                    JsonAnsweredOrRejectedOnOtherDeviceMessage jsonAnsweredOrRejectedOnOtherDeviceMessage = objectMapper.readValue(serializedMessagePayload, JsonAnsweredOrRejectedOnOtherDeviceMessage.class);
+                                    handleAnsweredOrRejectedOnOtherDeviceMessage(callIdentifier, bytesOwnedIdentity, jsonAnsweredOrRejectedOnOtherDeviceMessage.answered);
                                 }
                                 return START_NOT_STICKY;
                             }
@@ -1008,6 +1021,32 @@ public class WebrtcCallService extends Service {
                 return;
             }
 
+            Boolean alreadyAnsweredOrRejectedOnOtherDevice = uncalledAnsweredOrRejectedOnOtherDevice.remove(callIdentifier);
+            if (alreadyAnsweredOrRejectedOnOtherDevice != null) {
+                App.runThread(() -> {
+                    CallLogItem callLogItem = new CallLogItem(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier, CallLogItem.TYPE_INCOMING, alreadyAnsweredOrRejectedOnOtherDevice ? CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE : CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE);
+                    callLogItem.id = AppDatabase.getInstance().callLogItemDao().insert(callLogItem);
+                    CallLogItemContactJoin callLogItemContactJoin = new CallLogItemContactJoin(callLogItem.id, bytesOwnedIdentity, bytesContactIdentity);
+                    AppDatabase.getInstance().callLogItemDao().insert(callLogItemContactJoin);
+
+                    Discussion discussion = null;
+                    if (bytesGroupOwnerAndUidOrIdentifier != null) {
+                        discussion = AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUidOrIdentifier(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier);
+                    }
+                    if (discussion == null) {
+                        discussion = AppDatabase.getInstance().discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
+                    }
+                    if (discussion != null) {
+                        Message callMessage = Message.createPhoneCallMessage(AppDatabase.getInstance(), discussion.id, bytesContactIdentity, callLogItem);
+                        AppDatabase.getInstance().messageDao().insert(callMessage);
+                        if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
+                            AppDatabase.getInstance().discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                        }
+                    }
+                });
+                return;
+            }
+
             String peerSdpDescription;
             try {
                 peerSdpDescription = gunzip(gzippedPeerSdpDescription);
@@ -1126,7 +1165,7 @@ public class WebrtcCallService extends Service {
                 return;
             }
 
-            rejectCallInternal();
+            rejectCallInternal(false, false);
         });
     }
 
@@ -1136,11 +1175,14 @@ public class WebrtcCallService extends Service {
                 return;
             }
 
-            rejectCallInternal();
+            rejectCallInternal(false, false);
         });
     }
 
-    private void rejectCallInternal() {
+    ///////////
+    // endedFromOtherDevice indicates the call should be ended because it was answered or rejected from another device
+    // answered indicates that this other device picked up the call (this is ignored if endedFromOtherDevice is false)
+    private void rejectCallInternal(boolean endedFromOtherDevice, boolean answered) {
         // stop ringing and listening for power button
         incomingCallRinger.stop();
         unregisterScreenOffReceiver();
@@ -1152,11 +1194,19 @@ public class WebrtcCallService extends Service {
             return;
         }
 
-        // notify peer of rejected call
-        sendRejectCallMessage(callerCallParticipant);
+        if (!endedFromOtherDevice) {
+            // notify peer of rejected call
+            sendRejectCallMessage(callerCallParticipant);
 
-        // create log entry
-        createLogEntry(CallLogItem.STATUS_REJECTED);
+            // create log entry
+            createLogEntry(CallLogItem.STATUS_REJECTED);
+        } else {
+            if (answered) {
+                createLogEntry(CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE);
+            } else {
+                createLogEntry(CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE);
+            }
+        }
 
         callerCallParticipant.setPeerState(PeerState.CALL_REJECTED);
         setState(State.CALL_ENDED);
@@ -1484,6 +1534,24 @@ public class WebrtcCallService extends Service {
                         }
                     }
                 }
+            }
+        });
+    }
+
+    private void handleAnsweredOrRejectedOnOtherDeviceMessage(@NonNull UUID callIdentifier, @NonNull byte[] bytesOwnedIdentity, boolean answered) {
+        executor.execute(() -> {
+            Logger.d("☎ Call handled on other owned device: " + (answered? "answered" : "rejected"));
+            if (Arrays.equals(bytesOwnedIdentity, this.bytesOwnedIdentity) &&
+                    callIdentifier.equals(this.callIdentifier)) {
+                // we are in the right call, handle the message directly
+                if (state != State.RINGING) {
+                    return;
+                }
+
+                rejectCallInternal(true, answered);
+            } else {
+                // this is not the right call, remove the candidate from the side
+                uncalledAnsweredOrRejectedOnOtherDevice.put(callIdentifier, answered);
             }
         });
     }
@@ -1863,6 +1931,8 @@ public class WebrtcCallService extends Service {
             case CallLogItem.STATUS_BUSY:
             case CallLogItem.STATUS_FAILED:
             case CallLogItem.STATUS_REJECTED:
+            case CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE:
+            case CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE:
                 callLogItem = new CallLogItem(bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier, type, callLogItemStatus);
                 break;
         }
@@ -2589,6 +2659,9 @@ public class WebrtcCallService extends Service {
     public void sendAnswerCallMessage(CallParticipant callParticipant, String sessionDescriptionType, String sessionDescription) throws IOException {
         JsonAnswerCallMessage answerCallMessage = new JsonAnswerCallMessage(sessionDescriptionType, gzip(sessionDescription));
         postMessage(Collections.singletonList(callParticipant), answerCallMessage);
+        if (AppDatabase.getInstance().ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(bytesOwnedIdentity)) {
+            postMessage(new JsonAnsweredOrRejectedOnOtherDeviceMessage(true), bytesOwnedIdentity, Collections.singletonList(bytesOwnedIdentity), callIdentifier);
+        }
     }
 
     public void sendRingingMessage(CallParticipant callParticipant) {
@@ -2597,6 +2670,9 @@ public class WebrtcCallService extends Service {
 
     public void sendRejectCallMessage(CallParticipant callParticipant) {
         postMessage(Collections.singletonList(callParticipant), new JsonRejectCallMessage());
+        if (AppDatabase.getInstance().ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(bytesOwnedIdentity)) {
+            postMessage(new JsonAnsweredOrRejectedOnOtherDeviceMessage(false), bytesOwnedIdentity, Collections.singletonList(bytesOwnedIdentity), callIdentifier);
+        }
     }
 
     public void sendBusyMessage(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, UUID callIdentifier, @Nullable byte[] bytesGroupOwnerAndUid) {
@@ -2609,7 +2685,13 @@ public class WebrtcCallService extends Service {
             AndroidNotificationManager.displayMissedCallNotification(bytesOwnedIdentity, bytesContactIdentity);
             postMessage(new JsonBusyMessage(), bytesOwnedIdentity, Collections.singletonList(bytesContactIdentity), callIdentifier);
 
-            Discussion discussion = AppDatabase.getInstance().discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
+            Discussion discussion = null;
+            if (bytesGroupOwnerAndUid != null) {
+                discussion = AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUidOrIdentifier(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+            }
+            if (discussion == null) {
+                discussion = AppDatabase.getInstance().discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
+            }
             if (discussion != null) {
                 Message busyCallMessage = Message.createPhoneCallMessage(AppDatabase.getInstance(), discussion.id, bytesContactIdentity, callLogItem);
                 AppDatabase.getInstance().messageDao().insert(busyCallMessage);
@@ -2700,12 +2782,12 @@ public class WebrtcCallService extends Service {
 
     private boolean postMessage(JsonWebrtcProtocolMessage protocolMessage, byte[] bytesOwnedIdentity, List<byte[]> bytesContactIdentities, UUID callIdentifier) {
         try {
-            Message.JsonWebrtcMessage jsonWebrtcMessage = new Message.JsonWebrtcMessage();
+            JsonWebrtcMessage jsonWebrtcMessage = new JsonWebrtcMessage();
             jsonWebrtcMessage.setMessageType(protocolMessage.getMessageType());
             jsonWebrtcMessage.setCallIdentifier(callIdentifier);
             jsonWebrtcMessage.setSerializedMessagePayload(objectMapper.writeValueAsString(protocolMessage));
 
-            Message.JsonPayload jsonPayload = new Message.JsonPayload();
+            JsonPayload jsonPayload = new JsonPayload();
             jsonPayload.setJsonWebrtcMessage(jsonWebrtcMessage);
 
             // only mark START_CALL_MESSAGE_TYPE messages as voip
@@ -3681,6 +3763,33 @@ public class WebrtcCallService extends Service {
 
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static final class JsonAnsweredOrRejectedOnOtherDeviceMessage extends JsonWebrtcProtocolMessage {
+        boolean answered;
+
+        public JsonAnsweredOrRejectedOnOtherDeviceMessage() {
+        }
+
+        public JsonAnsweredOrRejectedOnOtherDeviceMessage(boolean answered) {
+            this.answered = answered;
+        }
+
+        @JsonProperty("ans")
+        public boolean isAnswered() {
+            return answered;
+        }
+
+        @JsonProperty("ans")
+        public void setAnswered(boolean answered) {
+            this.answered = answered;
+        }
+
+        @Override
+        @JsonIgnore
+        int getMessageType() {
+            return ANSWERED_OR_REJECTED_ON_OTHER_DEVICE_MESSAGE_TYPE;
+        }
+    }
 
     // endregion
 

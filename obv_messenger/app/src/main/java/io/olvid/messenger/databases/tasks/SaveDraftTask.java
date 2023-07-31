@@ -26,14 +26,16 @@ import java.util.Objects;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
+import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
 
 public class SaveDraftTask implements Runnable {
     private final long discussionId;
     private final String text;
     private final Message previousDraftMessage;
-    private final List<Message.JsonUserMention> mentions;
+    private final List<JsonUserMention> mentions;
 
-    public SaveDraftTask(long discussionId, String text, Message previousDraftMessage, List<Message.JsonUserMention> mentions) {
+    public SaveDraftTask(long discussionId, String text, Message previousDraftMessage, List<JsonUserMention> mentions) {
         this.discussionId = discussionId;
         this.text = text;
         this.previousDraftMessage = previousDraftMessage;
@@ -44,7 +46,7 @@ public class SaveDraftTask implements Runnable {
     public void run() {
         final AppDatabase db = AppDatabase.getInstance();
         final Discussion discussion = db.discussionDao().getById(discussionId);
-        if (discussion  == null || !discussion.canPostMessages()) {
+        if (discussion  == null || !discussion.isNormal()) {
             return;
         }
         db.runInTransaction(() -> {
@@ -63,10 +65,10 @@ public class SaveDraftTask implements Runnable {
                 }
             }
 
-            Message.JsonMessage jsonMessage = draftMessage.getJsonMessage();
+            JsonMessage jsonMessage = draftMessage.getJsonMessage();
             // build sets to be able to check if mentions changed
-            HashSet<Message.JsonUserMention> mentionSet = jsonMessage.getJsonUserMentions() == null ? null : new HashSet<>(jsonMessage.getJsonUserMentions());
-            HashSet<Message.JsonUserMention> newMentionSet = mentions == null ? null : new HashSet<>(mentions);
+            HashSet<JsonUserMention> mentionSet = jsonMessage.getJsonUserMentions() == null ? null : new HashSet<>(jsonMessage.getJsonUserMentions());
+            HashSet<JsonUserMention> newMentionSet = mentions == null ? null : new HashSet<>(mentions);
             if (text != null && Objects.equals(jsonMessage.getBody(), text) && Objects.equals(mentionSet, newMentionSet)) {
                 // the draft did not change, no need to do anything here
                 return;

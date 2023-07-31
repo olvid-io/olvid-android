@@ -96,9 +96,9 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             shareAppVersionPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 boolean checked = (Boolean) newValue;
                 if (checked) {
-                    AppSingleton.getEngine().connectWebsocket("android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME);
+                    AppSingleton.getEngine().connectWebsocket(false, "android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME);
                 } else {
-                    AppSingleton.getEngine().connectWebsocket(null, null, 0, null);
+                    AppSingleton.getEngine().connectWebsocket(false, null, null, 0, null);
                 }
                 return true;
             });

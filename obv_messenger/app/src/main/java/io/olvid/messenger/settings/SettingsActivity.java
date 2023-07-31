@@ -216,7 +216,19 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public enum AutoJoinGroupsCategory {
         EVERYONE,
         CONTACTS,
-        NOBODY,
+        NOBODY;
+
+        public String getStringValue() {
+            switch (this) {
+                case NOBODY:
+                    return  "nobody";
+                case EVERYONE:
+                    return  "everyone";
+                case CONTACTS:
+                default:
+                    return  "contacts";
+            }
+        }
     }
 
     static final String PREF_KEY_SHOW_TRUST_LEVELS = "pref_key_show_trust_levels";
@@ -1137,21 +1149,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     public static void setAutoJoinGroups(@NonNull AutoJoinGroupsCategory autoJoinGroups) {
-        final String stringValue;
-        switch (autoJoinGroups) {
-            case NOBODY:
-                stringValue = "nobody";
-                break;
-            case EVERYONE:
-                stringValue = "everyone";
-                break;
-            case CONTACTS:
-            default:
-                stringValue = "contacts";
-                break;
-        }
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
-        editor.putString(PREF_KEY_AUTO_JOIN_GROUPS, stringValue);
+        editor.putString(PREF_KEY_AUTO_JOIN_GROUPS, autoJoinGroups.getStringValue());
         editor.apply();
     }
 

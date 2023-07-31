@@ -31,7 +31,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.ObvDialog;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
@@ -69,7 +71,7 @@ public class SettingsPojo_0 {
     public Boolean disable_push_notifications;
     public Boolean permanent_websocket;
 
-    public String auto_join_groups;
+    public String auto_join_groups; // sync
     public Boolean show_trust_level;
     public Boolean contact_sort_last_name;
     public Boolean contact_uppercase_last_name;
@@ -83,7 +85,7 @@ public class SettingsPojo_0 {
     public Long auto_download_size;
     public Boolean link_preview_inbound;
     public Boolean link_preview_outbound;
-    public Boolean send_read_receipt;
+    public Boolean send_read_receipt; // sync
     public Boolean auto_open_limited_visibility;
     public Boolean retain_wiped_outbound;
     public Long default_retention_count;
@@ -276,6 +278,13 @@ public class SettingsPojo_0 {
         if (auto_join_groups != null) {
             oldAutoJoinGroupsCategory = SettingsActivity.getAutoJoinGroups();
             SettingsActivity.setAutoJoinGroups(SettingsActivity.getAutoJoinGroupsFromString(auto_join_groups));
+
+            try {
+                AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingAutoJoinGroups(auto_join_groups));
+            } catch (Exception e) {
+                Logger.w("Failed to propagate auto join group setting change to other devices");
+                e.printStackTrace();
+            }
         }
         if (show_trust_level != null) { SettingsActivity.setShowTrustLevels(show_trust_level); }
         if (contact_sort_last_name != null) { SettingsActivity.setSortContactsByLastName(contact_sort_last_name); }
@@ -290,7 +299,16 @@ public class SettingsPojo_0 {
         if (auto_download_size != null) { SettingsActivity.setAutoDownloadSize(auto_download_size); }
         if (link_preview_inbound != null) { SettingsActivity.setLinkPreviewInbound(link_preview_inbound); }
         if (link_preview_outbound != null) { SettingsActivity.setLinkPreviewOutbound(link_preview_outbound); }
-        if (send_read_receipt != null) { SettingsActivity.setDefaultSendReadReceipt(send_read_receipt); }
+        if (send_read_receipt != null) {
+            SettingsActivity.setDefaultSendReadReceipt(send_read_receipt);
+
+            try {
+                AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts(send_read_receipt));
+            } catch (Exception e) {
+                Logger.w("Failed to propagate default send read receipt setting change to other devices");
+                e.printStackTrace();
+            }
+        }
         if (auto_open_limited_visibility != null) { SettingsActivity.setDefaultAutoOpenLimitedVisibilityInboundMessages(auto_open_limited_visibility); }
         if (retain_wiped_outbound != null) { SettingsActivity.setDefaultRetainWipedOutboundMessages(retain_wiped_outbound); }
         if (default_retention_count != null) { SettingsActivity.setDefaultDiscussionRetentionCount(default_retention_count); }
@@ -397,9 +415,9 @@ public class SettingsPojo_0 {
         // update share app version
         if (share_app_version != null) {
             if (SettingsActivity.shareAppVersion()) {
-                AppSingleton.getEngine().connectWebsocket("android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME);
+                AppSingleton.getEngine().connectWebsocket(false, "android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME);
             } else {
-                AppSingleton.getEngine().connectWebsocket(null, null, 0, null);
+                AppSingleton.getEngine().connectWebsocket(false, null, null, 0, null);
             }
         }
 

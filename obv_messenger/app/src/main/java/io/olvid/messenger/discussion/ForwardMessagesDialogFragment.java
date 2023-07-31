@@ -186,7 +186,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
                         bytesOwnedIdentity = ownedIdentity.bytesOwnedIdentity;
                         filteredDiscussionListFragment.deselectAll();
                     }
-                    return AppDatabase.getInstance().discussionDao().getAllNotLockedWithGroupMembersNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity);
+                    return AppDatabase.getInstance().discussionDao().getAllWritableWithGroupMembersNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity);
                 }
             }
         });

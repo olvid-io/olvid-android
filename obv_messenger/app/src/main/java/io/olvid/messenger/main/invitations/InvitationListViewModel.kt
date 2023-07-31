@@ -44,13 +44,15 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Invitation
-import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.OwnedIdentity
-import io.olvid.messenger.databases.tasks.InsertMediatorInvitationMessageTask
-import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.*
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.ABORT
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.GO_TO
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.IGNORE
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.REJECT
+import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.VALIDATE_SAS
 import io.olvid.messenger.settings.SettingsActivity
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.UUID
 import kotlin.math.min
 
 class InvitationListViewModel : ViewModel() {
@@ -522,22 +524,6 @@ class InvitationListViewModel : ViewModel() {
                         try {
                             dialog.setResponseToAcceptMediatorInvite(true)
                             AppSingleton.getEngine().respondToDialog(dialog)
-                            val displayName = AppSingleton.getJsonObjectMapper().readValue(
-                                dialog.category
-                                    .contactDisplayNameOrSerializedDetails,
-                                JsonIdentityDetails::class.java
-                            ).formatDisplayName(
-                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
-                            )
-                            App.runThread(
-                                InsertMediatorInvitationMessageTask(
-                                    bytesOwnedIdentity = invitation.bytesOwnedIdentity,
-                                    bytesContactIdentity = invitation.associatedDialog.category.bytesMediatorOrGroupOwnerIdentity,
-                                    type = Message.TYPE_MEDIATOR_INVITATION_ACCEPTED,
-                                    displayName = displayName
-                                )
-                            )
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -600,22 +586,6 @@ class InvitationListViewModel : ViewModel() {
                         try {
                             dialog.setResponseToAcceptMediatorInvite(false)
                             AppSingleton.getEngine().respondToDialog(dialog)
-                            val displayName = AppSingleton.getJsonObjectMapper().readValue(
-                                dialog.category
-                                    .contactDisplayNameOrSerializedDetails,
-                                JsonIdentityDetails::class.java
-                            ).formatDisplayName(
-                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
-                            )
-                            App.runThread(
-                                InsertMediatorInvitationMessageTask(
-                                    bytesOwnedIdentity = invitation.bytesOwnedIdentity,
-                                    bytesContactIdentity = invitation.associatedDialog.category.bytesMediatorOrGroupOwnerIdentity,
-                                    type = Message.TYPE_MEDIATOR_INVITATION_IGNORED,
-                                    displayName = displayName
-                                )
-                            )
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -787,7 +757,7 @@ fun Invitation.getTimestamp(): Long {
 
 fun ObvGroupV2.getReadableMembers(): String? {
     return try {
-        StringUtils.joinGroupMemberNames(
+        StringUtils.joinContactDisplayNames(
             otherGroupMembers?.map {
                 AppSingleton.getContactCustomDisplayName(it.bytesIdentity)
             }.orEmpty()

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.AuthEnc;
@@ -30,6 +31,7 @@ import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.GroupMembersChangedCallback;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.Group;
@@ -130,6 +132,9 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     private static final int TRIGGER_REINVITE_MESSAGE_ID = 13;
     private static final int TRIGGER_UPDATE_MEMBERS_MESSAGE_ID = 14;
     private static final int UPLOAD_GROUP_PHOTO_MESSAGE_MESSAGE_ID = 15;
+    private static final int PROPAGATE_REINVITE_PENDING_MEMBER_MESSAGE_ID = 16;
+    private static final int PROPAGATE_DISBAND_GROUP_MESSAGE_ID = 17;
+    private static final int PROPAGATE_LEAVE_GROUP_MESSAGE_ID = 18;
 
     @Override
     protected Class<?> getMessageClass(int protocolMessageId) {
@@ -166,6 +171,12 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 return TriggerUpdateMembersMessage.class;
             case UPLOAD_GROUP_PHOTO_MESSAGE_MESSAGE_ID:
                 return UploadGroupPhotoMessage.class;
+            case PROPAGATE_REINVITE_PENDING_MEMBER_MESSAGE_ID:
+                return PropagateReinvitePendingMemberMessage.class;
+            case PROPAGATE_DISBAND_GROUP_MESSAGE_ID:
+                return PropagateDisbandGroupMessage.class;
+            case PROPAGATE_LEAVE_GROUP_MESSAGE_ID:
+                return PropagateLeaveGroupMessage.class;
             default:
                 return null;
         }
@@ -447,8 +458,8 @@ public class GroupManagementProtocol extends ConcreteProtocol {
     }
 
     public static class ReinvitePendingMemberMessage extends ConcreteProtocolMessage {
-        private final GroupInformation groupInformation;
-        private final Identity pendingMemberIdentity;
+        protected final GroupInformation groupInformation;
+        protected final Identity pendingMemberIdentity;
 
         public ReinvitePendingMemberMessage(CoreProtocolMessage coreProtocolMessage, GroupInformation groupInformation, Identity pendingMemberIdentity) {
             super(coreProtocolMessage);
@@ -679,6 +690,57 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             };
         }
     }
+
+
+    public static class PropagateReinvitePendingMemberMessage extends ReinvitePendingMemberMessage {
+        public PropagateReinvitePendingMemberMessage(CoreProtocolMessage coreProtocolMessage, GroupInformation groupInformation, Identity pendingMemberIdentity) {
+            super(coreProtocolMessage, groupInformation, pendingMemberIdentity);
+        }
+
+        @SuppressWarnings("unused")
+        public PropagateReinvitePendingMemberMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(receivedMessage);
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return PROPAGATE_REINVITE_PENDING_MEMBER_MESSAGE_ID;
+        }
+    }
+
+    public static class PropagateDisbandGroupMessage extends GroupInformationOnlyMessage {
+        public PropagateDisbandGroupMessage(CoreProtocolMessage coreProtocolMessage, GroupInformation groupInformation) {
+            super(coreProtocolMessage, groupInformation);
+        }
+
+        @SuppressWarnings("unused")
+        public PropagateDisbandGroupMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(receivedMessage);
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return PROPAGATE_DISBAND_GROUP_MESSAGE_ID;
+        }
+    }
+
+    public static class PropagateLeaveGroupMessage extends GroupInformationOnlyMessage {
+        public PropagateLeaveGroupMessage(CoreProtocolMessage coreProtocolMessage, GroupInformation groupInformation) {
+            super(coreProtocolMessage, groupInformation);
+        }
+
+        @SuppressWarnings("unused")
+        public PropagateLeaveGroupMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(receivedMessage);
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return PROPAGATE_LEAVE_GROUP_MESSAGE_ID;
+        }
+    }
+
+
     // endregion
 
 
@@ -690,14 +752,18 @@ public class GroupManagementProtocol extends ConcreteProtocol {
         if (stateId == INITIAL_STATE_ID) {
             return new Class[]{
                     InitiateGroupCreationStep.class,
+                    ProcessPropagateGroupCreationMessage.class,
                     NotifyMembersChangedStep.class,
                     ProcessNewMembersStep.class,
                     AddGroupMembersStep.class,
                     RemoveGroupMembersStep.class,
                     GetKickedStep.class,
                     ReinvitePendingMemberStep.class,
+                    ProcessPropagateReinvitePendingMemberStep.class,
                     DisbandGroupStep.class,
+                    ProcessPropagateDisbandGroupMessageStep.class,
                     LeaveGroupStep.class,
+                    ProcessPropagateLeaveGroupMessageStep.class,
                     ProcessGroupLeftStep.class,
                     QueryGroupMembersStep.class,
                     SendGroupMembersStep.class,
@@ -747,7 +813,8 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                     getOwnedIdentity(),
                     groupInformation,
                     new Identity[0],
-                    receivedMessage.groupMemberIdentitiesAndSerializedDetails.toArray(new IdentityWithSerializedDetails[0])
+                    receivedMessage.groupMemberIdentitiesAndSerializedDetails.toArray(new IdentityWithSerializedDetails[0]),
+                    false
             );
 
             if (receivedMessage.absolutePhotoUrl != null && receivedMessage.absolutePhotoUrl.length() > 0) {
@@ -783,9 +850,11 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 // Propagate the group creation to other owned devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateGroupCreationMessage(coreProtocolMessage, groupInformation, receivedMessage.groupMemberIdentitiesAndSerializedDetails).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateGroupCreationMessage(coreProtocolMessage, groupInformation, receivedMessage.groupMemberIdentitiesAndSerializedDetails).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -808,6 +877,70 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             return new FinalState();
         }
     }
+
+
+    public static class ProcessPropagateGroupCreationMessage extends ProtocolStep {
+        @SuppressWarnings({"unused", "FieldCanBeLocal"})
+        private final InitialProtocolState startState;
+        private final PropagateGroupCreationMessage receivedMessage;
+
+        public ProcessPropagateGroupCreationMessage(InitialProtocolState startState, PropagateGroupCreationMessage receivedMessage, GroupManagementProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            if (receivedMessage.groupMemberIdentitiesAndSerializedDetails.contains(new IdentityWithSerializedDetails(getOwnedIdentity(), ""))) {
+                Logger.w("Error: the groupMemberIdentitiesAndSerializedDetails contains the ownedIdentity");
+                return null;
+            }
+
+            if (!receivedMessage.groupInformation.groupOwnerIdentity.equals(getOwnedIdentity())) {
+                Logger.w("Error: the groupInformation contains a different Identity than ownedIdentity");
+                return null;
+            }
+
+            if (!receivedMessage.groupInformation.computeProtocolUid().equals(protocol.getProtocolInstanceUid())) {
+                Logger.w("Error: protocolUid mismatch");
+                return null;
+            }
+
+            // Create the ContactGroup in database
+            protocolManagerSession.identityDelegate.createContactGroup(
+                    protocolManagerSession.session,
+                    getOwnedIdentity(),
+                    receivedMessage.groupInformation,
+                    new Identity[0],
+                    receivedMessage.groupMemberIdentitiesAndSerializedDetails.toArray(new IdentityWithSerializedDetails[0]),
+                    true
+            );
+
+
+            // check if a group photo needs to be downloaded
+            JsonGroupDetailsWithVersionAndPhoto jsonGroupDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().readValue(receivedMessage.groupInformation.serializedGroupDetailsWithVersionAndPhoto, JsonGroupDetailsWithVersionAndPhoto.class);
+
+            if (jsonGroupDetailsWithVersionAndPhoto.getPhotoServerLabel() != null && jsonGroupDetailsWithVersionAndPhoto.getPhotoServerKey() != null) {
+                // even though another device created the group, we create a ServerUserData to ensure this photo is retained on server
+                protocolManagerSession.identityDelegate.createGroupV1ServerUserData(protocolManagerSession.session, getOwnedIdentity(), new UID(jsonGroupDetailsWithVersionAndPhoto.getPhotoServerLabel()), receivedMessage.groupInformation.getGroupOwnerAndUid());
+
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                        SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        DOWNLOAD_GROUP_PHOTO_CHILD_PROTOCOL_ID,
+                        new UID(getPrng()),
+                        false
+                );
+                ChannelMessageToSend messageToSend = new DownloadGroupPhotoChildProtocol.InitialMessage(coreProtocolMessage, receivedMessage.groupInformation).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            }
+
+            return new FinalState();
+        }
+    }
+
 
     public static class NotifyMembersChangedStep extends ProtocolStep {
         @SuppressWarnings("unused")
@@ -881,10 +1014,20 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             // also add yourself (group owner) to the group
             groupMembers.add(new IdentityWithSerializedDetails(getOwnedIdentity(), protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity())));
 
+            // compute the identities to which the message should be sent (include myself in multi-device)
+            final Identity[] recipientIdentities;
+            if (protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length > 0) {
+                recipientIdentities = new Identity[group.getGroupMembers().length + 1];
+                recipientIdentities[0] = getOwnedIdentity();
+                System.arraycopy(group.getGroupMembers(), 0, recipientIdentities, 1, group.getGroupMembers().length);
+            } else {
+                recipientIdentities = group.getGroupMembers();
+            }
+
             {
-                if (group.getGroupMembers().length > 0) {
+                if (recipientIdentities.length > 0) {
                     // notify all group members (not the pending group members) with a single message
-                    SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(group.getGroupMembers(), getOwnedIdentity());
+                    SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(recipientIdentities, getOwnedIdentity());
                     for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
                         try {
                             CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(sendChannelInfo);
@@ -924,6 +1067,8 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 return null;
             }
 
+            boolean receivedFromOtherOwnedDevice = Objects.equals(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), getOwnedIdentity());
+
             // get the group
             Group group = protocolManagerSession.identityDelegate.getGroup(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.groupInformation.getGroupOwnerAndUid());
 
@@ -931,8 +1076,11 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 return null;
             }
 
-            if (group.getGroupOwner() == null) {
-                Logger.w("Error: received a NewMembersMessage for a group you own");
+            if (!receivedFromOtherOwnedDevice && group.getGroupOwner() == null) {
+                Logger.w("Error: received a NewMembersMessage from someone else for a group you own");
+                return null;
+            } else if (receivedFromOtherOwnedDevice && group.getGroupOwner() != null) {
+                Logger.w("Error: received a NewMembersMessage from another owned device and for a group you do not own");
                 return null;
             }
 
@@ -953,8 +1101,14 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                             ((jsonGroupDetailsWithVersionAndPhoto.getPhotoServerKey() == null && publishedDetails.getPhotoServerKey() == null) ||
                                     (jsonGroupDetailsWithVersionAndPhoto.getPhotoServerKey() != null && publishedDetails.getPhotoServerKey() != null && new Encoded(jsonGroupDetailsWithVersionAndPhoto.getPhotoServerKey()).decodeSymmetricKey().equals(new Encoded(publishedDetails.getPhotoServerKey()).decodeSymmetricKey()))) &&
                             publishedDetails.getPhotoUrl() != null)) {
-                        // we need to download the photo, so we start a child protocol
+                        // we need to download the photo
 
+                        // if we are the owner, create a server user data
+                        if (receivedFromOtherOwnedDevice) {
+                            protocolManagerSession.identityDelegate.createGroupV1ServerUserData(protocolManagerSession.session, getOwnedIdentity(), new UID(jsonGroupDetailsWithVersionAndPhoto.getPhotoServerLabel()), receivedMessage.groupInformation.getGroupOwnerAndUid());
+                        }
+
+                        // we start a child protocol
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                 SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                 DOWNLOAD_GROUP_PHOTO_CHILD_PROTOCOL_ID,
@@ -1194,9 +1348,58 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
+
+            {
+                // Propagate the group re-invite to other owned devices
+                int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
+                if (numberOfOtherDevices > 0) {
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateReinvitePendingMemberMessage(coreProtocolMessage, receivedMessage.groupInformation, receivedMessage.pendingMemberIdentity).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
+                }
+            }
+
             return new FinalState();
         }
     }
+
+
+    public static class ProcessPropagateReinvitePendingMemberStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
+        private final InitialProtocolState startState;
+        private final PropagateReinvitePendingMemberMessage receivedMessage;
+
+        public ProcessPropagateReinvitePendingMemberStep(InitialProtocolState startState, PropagateReinvitePendingMemberMessage receivedMessage, GroupManagementProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            final ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            if (!receivedMessage.groupInformation.groupOwnerIdentity.equals(getOwnedIdentity())) {
+                Logger.w("Error: the groupInformation contains a different Identity than ownedIdentity");
+                return null;
+            }
+
+            if (!receivedMessage.groupInformation.computeProtocolUid().equals(protocol.getProtocolInstanceUid())) {
+                Logger.w("Error: protocolUid mismatch");
+                return null;
+            }
+
+            {
+                // mark the pending member as "not declined"
+                protocolManagerSession.identityDelegate.setPendingMemberDeclined(protocolManagerSession.session, receivedMessage.groupInformation.getGroupOwnerAndUid(), getOwnedIdentity(), receivedMessage.pendingMemberIdentity, false);
+            }
+
+            return new FinalState();
+        }
+    }
+
 
     public static class DisbandGroupStep extends ProtocolStep {
         @SuppressWarnings({"FieldCanBeLocal", "unused"})
@@ -1264,6 +1467,52 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             }
 
             {
+                // Propagate the disband to other owned devices
+                int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
+                if (numberOfOtherDevices > 0) {
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateDisbandGroupMessage(coreProtocolMessage, receivedMessage.groupInformation).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
+                }
+            }
+
+            {
+                // delete the group
+                protocolManagerSession.identityDelegate.deleteGroup(protocolManagerSession.session, receivedMessage.groupInformation.getGroupOwnerAndUid(), getOwnedIdentity());
+            }
+
+            return new FinalState();
+        }
+    }
+
+    public static class ProcessPropagateDisbandGroupMessageStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
+        private final InitialProtocolState startState;
+        private final PropagateDisbandGroupMessage receivedMessage;
+
+        public ProcessPropagateDisbandGroupMessageStep(InitialProtocolState startState, PropagateDisbandGroupMessage receivedMessage, GroupManagementProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            final ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            if (!receivedMessage.groupInformation.groupOwnerIdentity.equals(getOwnedIdentity())) {
+                Logger.w("Error: the groupInformation contains a different Identity than ownedIdentity");
+                return null;
+            }
+
+            if (!receivedMessage.groupInformation.computeProtocolUid().equals(protocol.getProtocolInstanceUid())) {
+                Logger.w("Error: protocolUid mismatch");
+                return null;
+            }
+
+            {
                 // delete the group
                 protocolManagerSession.identityDelegate.deleteGroup(protocolManagerSession.session, receivedMessage.groupInformation.getGroupOwnerAndUid(), getOwnedIdentity());
             }
@@ -1307,9 +1556,56 @@ public class GroupManagementProtocol extends ConcreteProtocol {
             }
 
             {
+                // Propagate the disband to other owned devices
+                int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
+                if (numberOfOtherDevices > 0) {
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateLeaveGroupMessage(coreProtocolMessage, receivedMessage.groupInformation).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
+                }
+            }
+
+            {
                 // simply delete the group on the engine side, everything will follow!
                 protocolManagerSession.identityDelegate.leaveGroup(protocolManagerSession.session, receivedMessage.groupInformation.getGroupOwnerAndUid(), getOwnedIdentity());
             }
+
+            return new FinalState();
+        }
+    }
+
+    public static class ProcessPropagateLeaveGroupMessageStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
+        private final InitialProtocolState startState;
+        private final PropagateLeaveGroupMessage receivedMessage;
+
+        public ProcessPropagateLeaveGroupMessageStep(InitialProtocolState startState, PropagateLeaveGroupMessage receivedMessage, GroupManagementProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            final ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            if (receivedMessage.groupInformation.groupOwnerIdentity.equals(getOwnedIdentity())) {
+                Logger.w("Error: cannot leave a group you own");
+                return null;
+            }
+
+            if (!receivedMessage.groupInformation.computeProtocolUid().equals(protocol.getProtocolInstanceUid())) {
+                Logger.w("Error: protocolUid mismatch");
+                return null;
+            }
+
+            {
+                // simply delete the group on the engine side, everything will follow!
+                protocolManagerSession.identityDelegate.leaveGroup(protocolManagerSession.session, receivedMessage.groupInformation.getGroupOwnerAndUid(), getOwnedIdentity());
+            }
+
             return new FinalState();
         }
     }

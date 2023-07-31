@@ -50,6 +50,10 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
                 ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_DELETED,
                 ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED,
                 ProtocolNotifications.NOTIFICATION_GROUP_V2_UPDATE_FAILED,
+                ProtocolNotifications.NOTIFICATION_OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE,
+                ProtocolNotifications.NOTIFICATION_KEYCLOAK_SYNCHRONIZATION_REQUIRED,
+                ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_SENT,
+                ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE,
         }) {
             notificationManager.addListener(notificationName, this);
         }
@@ -88,7 +92,7 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
                     }
 
                     HashMap<String, Object> engineInfo = new HashMap<>();
-                    Identity ownedIdentity = engine.identityManager.getOwnedIdentityForDeviceUid(engineSession.session, currentDeviceUid);
+                    Identity ownedIdentity = engine.identityManager.getOwnedIdentityForCurrentDeviceUid(engineSession.session, currentDeviceUid);
                     engineInfo.put(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
                     engineInfo.put(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
 
@@ -107,7 +111,7 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
                     }
 
                     HashMap<String, Object> engineInfo = new HashMap<>();
-                    Identity ownedIdentity = engine.identityManager.getOwnedIdentityForDeviceUid(engineSession.session, currentDeviceUid);
+                    Identity ownedIdentity = engine.identityManager.getOwnedIdentityForCurrentDeviceUid(engineSession.session, currentDeviceUid);
                     if (ownedIdentity == null) {
                         break;
                     }
@@ -152,6 +156,64 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
                 engineInfo.put(EngineNotifications.GROUP_V2_UPDATE_FAILED_ERROR_KEY, error);
 
                 engine.postEngineNotification(EngineNotifications.GROUP_V2_UPDATE_FAILED, engineInfo);
+                break;
+            }
+            case ProtocolNotifications.NOTIFICATION_OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE: {
+                Identity ownedIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE_OWNED_IDENTITY_KEY);
+                if (ownedIdentity == null) {
+                    break;
+                }
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+
+                engine.postEngineNotification(EngineNotifications.OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE, engineInfo);
+                break;
+            }
+            case ProtocolNotifications.NOTIFICATION_KEYCLOAK_SYNCHRONIZATION_REQUIRED: {
+                Identity ownedIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_KEYCLOAK_SYNCHRONIZATION_REQUIRED_OWNED_IDENTITY_KEY);
+                if (ownedIdentity == null) {
+                    break;
+                }
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.KEYCLOAK_SYNCHRONIZATION_REQUIRED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+
+                engine.postEngineNotification(EngineNotifications.KEYCLOAK_SYNCHRONIZATION_REQUIRED, engineInfo);
+                break;
+            }
+            case ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_SENT: {
+                Identity ownedIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_SENT_OWNED_IDENTITY_KEY);
+                Identity contactIdentityA = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_SENT_CONTACT_IDENTITY_A_KEY);
+                Identity contactIdentityB = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_SENT_CONTACT_IDENTITY_B_KEY);
+
+                if (ownedIdentity == null || contactIdentityA == null || contactIdentityB == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT_BYTES_CONTACT_IDENTITY_A_KEY, contactIdentityA.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT_BYTES_CONTACT_IDENTITY_B_KEY, contactIdentityB.getBytes());
+
+                engine.postEngineNotification(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT, engineInfo);
+                break;
+            }
+            case ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE: {
+                Identity ownedIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_OWNED_IDENTITY_KEY);
+                Identity mediatorIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_MEDIATOR_IDENTITY_KEY);
+                String contactSerializedDetails = (String) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY);
+                Boolean accepted = (Boolean) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY);
+
+                if (ownedIdentity == null || mediatorIdentity == null || contactSerializedDetails == null || accepted == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_MEDIATOR_IDENTITY_KEY, mediatorIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY, contactSerializedDetails);
+                engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY, accepted);
+
+                engine.postEngineNotification(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE, engineInfo);
                 break;
             }
             default:

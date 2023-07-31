@@ -56,6 +56,9 @@ public class ServerQueryOperation extends Operation {
     public static final int RFC_INVALID_SERVER_SESSION = 3;
     public static final int RFC_IDENTITY_IS_INACTIVE = 4;
     public static final int RFC_USER_DATA_TOO_LARGE = 5;
+    public static final int RFC_DEVICE_DOES_NOT_EXIST = 6;
+    public static final int RFC_DEVICE_NOT_YET_REGISTERED = 7;
+    public static final int RFC_MALFORMED_URL = 8;
 
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
@@ -82,11 +85,6 @@ public class ServerQueryOperation extends Operation {
 
     public Encoded getServerResponse() {
         return serverResponse;
-    }
-
-    @Override
-    public void doCancel() {
-        // Nothings special to do on cancel
     }
 
     @Override
@@ -155,11 +153,11 @@ public class ServerQueryOperation extends Operation {
                         AuthEnc authEnc = Suite.getAuthEnc(serverQuery.getType().getDataKey());
                         EncryptedBytes encryptedPhoto = authEnc.encrypt(serverQuery.getType().getDataKey(), buffer, prng);
 
-                        serverMethod = new PutUserDataServerMethod(serverQuery.getType().getIdentity(), serverSessionToken, serverQuery.getType().getServerLabel(), encryptedPhoto);
+                        serverMethod = new PutUserDataServerMethod(serverQuery.getType().getIdentity(), serverSessionToken, serverQuery.getType().getServerLabelOrDeviceUid(), encryptedPhoto);
                         break;
                     }
                     case ServerQuery.Type.GET_USER_DATA_QUERY_ID: {
-                        serverMethod = new GetUserDataServerMethod(serverQuery.getType().getIdentity(), serverQuery.getType().getServerLabel(), fetchManagerSession.engineBaseDirectory);
+                        serverMethod = new GetUserDataServerMethod(serverQuery.getType().getIdentity(), serverQuery.getType().getServerLabelOrDeviceUid(), fetchManagerSession.engineBaseDirectory);
                         break;
                     }
                     case ServerQuery.Type.CHECK_KEYCLOAK_REVOCATION_QUERY_ID: {
@@ -172,31 +170,46 @@ public class ServerQueryOperation extends Operation {
                             cancel(RFC_INVALID_SERVER_SESSION);
                             return;
                         }
-                        serverMethod = new CreateGroupBlobServerMethod(serverQuery.getOwnedIdentity(), serverSessionToken, serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getEncodedGroupAdminPublicKey(), serverQuery.getType().getEncryptedBlob());
+                        serverMethod = new CreateGroupBlobServerMethod(serverQuery.getOwnedIdentity(), serverSessionToken, serverQuery.getType().getServer(), serverQuery.getType().getServerLabelOrDeviceUid(), serverQuery.getType().getEncodedGroupAdminPublicKey(), serverQuery.getType().getEncryptedBlob());
                         break;
                     }
                     case ServerQuery.Type.GET_GROUP_BLOB_QUERY_ID: {
-                        serverMethod = new GetGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getNonce());
+                        serverMethod = new GetGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabelOrDeviceUid(), serverQuery.getType().getNonce());
                         break;
                     }
                     case ServerQuery.Type.LOCK_GROUP_BLOB_QUERY_ID: {
-                        serverMethod = new LockGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getNonce(), serverQuery.getType().getQuerySignature());
+                        serverMethod = new LockGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabelOrDeviceUid(), serverQuery.getType().getNonce(), serverQuery.getType().getQuerySignature());
                         break;
                     }
                     case ServerQuery.Type.UPDATE_GROUP_BLOB_QUERY_ID: {
-                        serverMethod = new UpdateGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getNonce(), serverQuery.getType().getEncryptedBlob(), serverQuery.getType().getEncodedGroupAdminPublicKey(), serverQuery.getType().getQuerySignature());
+                        serverMethod = new UpdateGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabelOrDeviceUid(), serverQuery.getType().getNonce(), serverQuery.getType().getEncryptedBlob(), serverQuery.getType().getEncodedGroupAdminPublicKey(), serverQuery.getType().getQuerySignature());
                         break;
                     }
                     case ServerQuery.Type.PUT_GROUP_LOG_QUERY_ID: {
-                        serverMethod = new PutGroupLogServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getQuerySignature());
+                        serverMethod = new PutGroupLogServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabelOrDeviceUid(), serverQuery.getType().getQuerySignature());
                         break;
                     }
                     case ServerQuery.Type.DELETE_GROUP_BLOB_QUERY_ID: {
-                        serverMethod = new DeleteGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), serverQuery.getType().getQuerySignature());
+                        serverMethod = new DeleteGroupBlobServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabelOrDeviceUid(), serverQuery.getType().getQuerySignature());
                         break;
                     }
                     case ServerQuery.Type.GET_KEYCLOAK_DATA_QUERY_ID: {
-                        serverMethod = new GetKeycloakDataServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabel(), fetchManagerSession.engineBaseDirectory);
+                        serverMethod = new GetKeycloakDataServerMethod(serverQuery.getType().getServer(), serverQuery.getType().getServerLabelOrDeviceUid(), fetchManagerSession.engineBaseDirectory);
+                        break;
+                    }
+                    case ServerQuery.Type.OWNED_DEVICE_DISCOVERY_QUERY_ID: {
+                        serverMethod = new OwnedDeviceDiscoveryServerMethod(serverQuery.getType().getIdentity());
+                        break;
+                    }
+                    case ServerQuery.Type.DEVICE_MANAGEMENT_SET_NICKNAME_QUERY_ID:
+                    case ServerQuery.Type.DEVICE_MANAGEMENT_DEACTIVATE_DEVICE_QUERY_ID:
+                    case ServerQuery.Type.DEVICE_MANAGEMENT_SET_UNEXPIRING_DEVICE_QUERY_ID: {
+                        byte[] serverSessionToken = ServerSession.getToken(fetchManagerSession, serverQuery.getOwnedIdentity());
+                        if (serverSessionToken == null) {
+                            cancel(RFC_INVALID_SERVER_SESSION);
+                            return;
+                        }
+                        serverMethod = new DeviceManagementServerMethod(serverQuery.getOwnedIdentity(), serverSessionToken, serverQuery.getType().getId(),  serverQuery.getType().getServerLabelOrDeviceUid(), serverQuery.getType().getEncryptedBlob());
                         break;
                     }
                     default:
@@ -223,12 +236,32 @@ public class ServerQueryOperation extends Operation {
                     case ServerMethod.PAYLOAD_TOO_LARGE:
                         cancel(RFC_USER_DATA_TOO_LARGE);
                         return;
+                    case ServerMethod.DEVICE_IS_NOT_REGISTERED: {
+                        // if the device is not registered:
+                        // - cancel if this is a remote device
+                        // - retry later if this is our current device for a set nickname request
+                        if (serverQuery.getType().getId() == ServerQuery.Type.DEVICE_MANAGEMENT_SET_NICKNAME_QUERY_ID && serverQuery.getType().isCurrentDevice()) {
+                            cancel(RFC_DEVICE_NOT_YET_REGISTERED);
+                        } else {
+                            cancel(RFC_DEVICE_DOES_NOT_EXIST);
+                        }
+                        return;
+                    }
+                    case ServerMethod.MALFORMED_URL:
+                        cancel(RFC_MALFORMED_URL);
+                        return;
                     default:
                         // check if the serverQuery has expired
                         if (System.currentTimeMillis() > pendingServerQuery.getCreationTimestamp() + Constants.SERVER_QUERY_EXPIRATION_DELAY) {
                             switch (serverQuery.getType().getId()) {
                                 case ServerQuery.Type.DEVICE_DISCOVERY_QUERY_ID:
-                                    serverResponse = Encoded.of(new Encoded[0]); // return an empty deviceUid list
+                                    serverResponse = Encoded.of(new Encoded[]{
+                                            Encoded.of(Constants.BROADCAST_UID),
+                                    }); // return the broadcast deviceUid so we know it's not a real output
+                                    finished = true;
+                                    return;
+                                case ServerQuery.Type.OWNED_DEVICE_DISCOVERY_QUERY_ID:
+                                    serverResponse = Encoded.of(new byte[0]); // return an empty byte array
                                     finished = true;
                                     return;
                                 case ServerQuery.Type.PUT_USER_DATA_QUERY_ID:
@@ -272,6 +305,11 @@ public class ServerQueryOperation extends Operation {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void doCancel() {
+        // Nothings special to do on cancel
     }
 }
 
@@ -326,6 +364,57 @@ class DeviceDiscoveryServerMethod extends ServerQueryServerMethod {
             try {
                 // check that decoding works properly
                 receivedData[0].decodeUidArray();
+                serverResponse = receivedData[0];
+            } catch (DecodingException e) {
+                e.printStackTrace();
+                returnStatus = ServerMethod.GENERAL_ERROR;
+            }
+        }
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return serverResponse;
+    }
+}
+
+class OwnedDeviceDiscoveryServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "/ownedDeviceDiscovery";
+
+    private final String server;
+    private final Identity identity;
+
+    private Encoded serverResponse;
+
+    public OwnedDeviceDiscoveryServerMethod(Identity identity) {
+        this.server = identity.getServer();
+        this.identity = identity;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(identity)
+        }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        if (returnStatus == ServerMethod.OK) {
+            try {
+                // check that decoding works properly
+                receivedData[0].decodeEncryptedData();
                 serverResponse = receivedData[0];
             } catch (DecodingException e) {
                 e.printStackTrace();
@@ -948,5 +1037,140 @@ class GetKeycloakDataServerMethod extends ServerQueryServerMethod {
     @Override
     public Encoded getServerResponse() {
         return serverResponse;
+    }
+}
+
+class DeviceManagementServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "/deviceManagement";
+
+    private final String server;
+    private final Identity identity;
+    private final byte[] token;
+    private final int queryType;
+    private final UID deviceUid;
+    private final EncryptedBytes encryptedDeviceName;
+
+    private Encoded serverResponse;
+
+    public DeviceManagementServerMethod(Identity identity, byte[] token, int queryType, UID deviceUid, EncryptedBytes encryptedDeviceName) {
+        this.server = identity.getServer();
+        this.identity = identity;
+        this.token = token;
+        this.queryType = queryType;
+        this.deviceUid = deviceUid;
+        this.encryptedDeviceName = encryptedDeviceName;
+    }
+
+    public UID getDeviceUid() {
+        return deviceUid;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        switch (queryType) {
+            case ServerQuery.Type.DEVICE_MANAGEMENT_SET_NICKNAME_QUERY_ID: {
+                return Encoded.of(new Encoded[]{
+                        Encoded.of(identity),
+                        Encoded.of(token),
+                        Encoded.of(new byte[]{(byte) 0x00}),
+                        Encoded.of(deviceUid),
+                        Encoded.of(encryptedDeviceName),
+                }).getBytes();
+            }
+            case ServerQuery.Type.DEVICE_MANAGEMENT_DEACTIVATE_DEVICE_QUERY_ID: {
+                return Encoded.of(new Encoded[]{
+                        Encoded.of(identity),
+                        Encoded.of(token),
+                        Encoded.of(new byte[]{(byte) 0x01}),
+                        Encoded.of(deviceUid),
+                }).getBytes();
+            }
+            case ServerQuery.Type.DEVICE_MANAGEMENT_SET_UNEXPIRING_DEVICE_QUERY_ID: {
+                return Encoded.of(new Encoded[]{
+                        Encoded.of(identity),
+                        Encoded.of(token),
+                        Encoded.of(new byte[]{(byte) 0x02}),
+                        Encoded.of(deviceUid),
+                }).getBytes();
+            }
+            default: {
+                // invalid query type
+                return new byte[0];
+            }
+        }
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        if (returnStatus == ServerMethod.OK) {
+            if (receivedData.length == 0) {
+                // check that decoding works properly
+                serverResponse = null;
+            } else {
+                returnStatus = ServerMethod.GENERAL_ERROR;
+            }
+        }
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return serverResponse;
+    }
+}
+
+
+class RegisterApiKeyServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "/registerApiKey";
+
+    private final String server;
+    private final Identity ownedIdentity;
+    private final byte[] token;
+    private  final String apiKeyString;
+
+    public RegisterApiKeyServerMethod(Identity ownedIdentity, byte[] token, String apiKeyString) {
+        this.server = ownedIdentity.getServer();
+        this.ownedIdentity = ownedIdentity;
+        this.token = token;
+        this.apiKeyString = apiKeyString;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(ownedIdentity),
+                Encoded.of(token),
+                Encoded.of(apiKeyString),
+        }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return null;
     }
 }

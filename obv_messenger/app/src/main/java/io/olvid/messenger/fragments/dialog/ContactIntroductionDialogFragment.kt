@@ -39,11 +39,10 @@ import io.olvid.messenger.R.layout
 import io.olvid.messenger.R.string
 import io.olvid.messenger.R.style
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
+import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
-import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.OwnedIdentity
-import io.olvid.messenger.databases.tasks.InsertMediatorInvitationMessageTask
 import io.olvid.messenger.fragments.FilteredContactListFragment
 import io.olvid.messenger.settings.SettingsActivity
 
@@ -103,17 +102,9 @@ class ContactIntroductionDialogFragment : DialogFragment() {
             if (selectedContacts.isNullOrEmpty()) {
                 return@setOnClickListener
             }
-            val bytesNewMemberIdentities = arrayOfNulls<ByteArray>(
-                selectedContacts!!.size
-            )
-            val sb = StringBuilder()
-            for ((i, selectedContact) in selectedContacts!!.withIndex()) {
-                if (i != 0) {
-                    sb.append(getString(string.text_contact_names_separator))
-                }
-                sb.append(selectedContact.getCustomDisplayName())
-                bytesNewMemberIdentities[i] = selectedContact.bytesContactIdentity
-            }
+            val bytesNewMemberIdentities = selectedContacts!!.map { it.bytesContactIdentity }.toTypedArray()
+            val introducedDisplayNames = StringUtils.joinContactDisplayNames(selectedContacts!!.map { it.getCustomDisplayName() }.toTypedArray())
+
             val builder = SecureAlertDialogBuilder(view.context, style.CustomAlertDialog)
                 .setTitle(string.dialog_title_contact_introduction)
                 .setPositiveButton(string.button_label_ok) { _, _ ->
@@ -123,10 +114,6 @@ class ContactIntroductionDialogFragment : DialogFragment() {
                             bytesContactIdentityA,
                             bytesNewMemberIdentities
                         )
-                        App.runThread(InsertMediatorInvitationMessageTask(bytesOwnedIdentity = bytesOwnedIdentity!!, bytesContactIdentity = bytesContactIdentityA!!, type = Message.TYPE_MEDIATOR_INVITATION_SENT, displayName = sb.toString()))
-                        selectedContacts?.forEach { contact ->
-                            App.runThread(InsertMediatorInvitationMessageTask(bytesOwnedIdentity = bytesOwnedIdentity!!, bytesContactIdentity = contact.bytesContactIdentity, type = Message.TYPE_MEDIATOR_INVITATION_SENT, displayName = AppSingleton.getContactCustomDisplayName(bytesContactIdentityA)))
-                        }
                         App.toast(
                             string.toast_message_contacts_introduction_started,
                             Toast.LENGTH_SHORT
@@ -141,7 +128,7 @@ class ContactIntroductionDialogFragment : DialogFragment() {
                     getString(
                         string.dialog_message_contact_introduction,
                         displayNameA,
-                        sb.toString()
+                        introducedDisplayNames
                     )
                 )
             } else {
@@ -150,7 +137,7 @@ class ContactIntroductionDialogFragment : DialogFragment() {
                         string.dialog_message_contact_introduction_multiple,
                         displayNameA,
                         bytesNewMemberIdentities.size,
-                        sb.toString()
+                        introducedDisplayNames
                     )
                 )
             }

@@ -53,6 +53,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
@@ -72,12 +73,15 @@ fun ContactListItem(
     initialViewSetup: (initialView: InitialView) -> Unit,
     publishedDetails: Boolean = false,
     publishedDetailsNotification: Boolean = false,
+    endContent : (@Composable () -> Unit)? = null,
     shouldAnimateChannel: Boolean = false,
     onRenameContact: (() -> Unit)? = null,
     onCallContact: (() -> Unit)? = null,
     onDeleteContact: (() -> Unit)? = null,
+    useDialogBackgroundColor: Boolean = false,
+    additionalHorizontalPadding: Dp = 0.dp,
 ) {
-    Box(modifier = Modifier.background(colorResource(id = R.color.almostWhite))) {
+    Box(modifier = Modifier.background(colorResource(id = if (useDialogBackgroundColor) R.color.dialogBackground else R.color.almostWhite))) {
 
         // menu
         var menuOpened by remember { mutableStateOf(false) }
@@ -95,11 +99,12 @@ fun ContactListItem(
             modifier = Modifier
                 .height(Min)
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = { menuOpened = true },
-                ), verticalAlignment = CenterVertically
+                )
+                .padding(horizontal = 8.dp + additionalHorizontalPadding),
+            verticalAlignment = CenterVertically
         ) {
 
             // InitialView
@@ -144,37 +149,42 @@ fun ContactListItem(
 
             Row(verticalAlignment = CenterVertically) {
 
-                AnimatedVisibility(visible = publishedDetails) {
-                    BoxWithConstraints(
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .size(width = 24.dp, height = 18.dp)
-
-                    ) {
-                        Image(
+                endContent?.let {
+                    it.invoke()
+                } ?: kotlin.run {
+                    AnimatedVisibility(visible = publishedDetails) {
+                        BoxWithConstraints(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomStart),
-                            painter = painterResource(id = drawable.ic_olvid_card),
-                            contentDescription = ""
-                        )
-                        if (publishedDetailsNotification) {
+                                .padding(end = 8.dp)
+                                .size(width = 24.dp, height = 18.dp)
+
+                        ) {
                             Image(
                                 modifier = Modifier
-                                    .size(maxWidth.times(0.4f))
-                                    .align(Alignment.TopEnd)
-                                    .offset(x = 4.dp, y = (-4).dp),
-                                painter = painterResource(id = drawable.ic_dot_white_bordered),
-                                contentDescription = stringResource(
-                                    id = string.content_description_message_status
-                                )
+                                    .fillMaxWidth()
+                                    .align(Alignment.BottomStart),
+                                painter = painterResource(id = drawable.ic_olvid_card),
+                                contentDescription = ""
                             )
+                            if (publishedDetailsNotification) {
+                                Image(
+                                    modifier = Modifier
+                                        .size(maxWidth.times(0.4f))
+                                        .align(Alignment.TopEnd)
+                                        .offset(x = 4.dp, y = (-4).dp),
+                                    painter = painterResource(id = drawable.ic_dot_white_bordered),
+                                    contentDescription = stringResource(
+                                        id = string.content_description_message_status
+                                    )
+                                )
+                            }
                         }
                     }
-                }
 
-                AnimatedVisibility(visible = shouldAnimateChannel) {
-                    EstablishingChannel()
+                    AnimatedVisibility(visible = shouldAnimateChannel) {
+                        EstablishingChannel()
+                    }
+
                 }
             }
         }
@@ -206,7 +216,7 @@ fun ContactMenu(
         }
         // delete
         DropdownMenuItem(onClick = {
-           onDeleteContact()
+            onDeleteContact()
             onDismissRequest()
         }) {
             Text(

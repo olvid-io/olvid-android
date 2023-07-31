@@ -182,7 +182,7 @@ public class Session implements Connection {
     @Override
     public void close() throws SQLException {
         if (!sessionCommitListeners.isEmpty() ) {
-            Logger.e("This Session cannot yet be closed: some modifications were committed and the corresponding hooks have not been called.");
+            Logger.e("This Session was not properly closed: some modifications were committed and the corresponding hooks have not been called.");
             for (SessionCommitListener sessionCommitListener: sessionCommitListeners) {
                 Logger.e("Not committed entity: " + sessionCommitListener.getClass());
             }
@@ -488,7 +488,16 @@ class DeferrableStatement implements Statement {
 
     @Override
     public int executeUpdate(final String s) throws SQLException {
-        throw new SQLException("Not implemented");
+        if (session.getAutoCommit()) {
+            try {
+                Session.globalWriteLock.lock();
+                return statement.executeUpdate(s);
+            } finally {
+                Session.globalWriteLock.unlock();
+            }
+        } else {
+            return statement.executeUpdate(s);
+        }
     }
 
     @Override

@@ -140,7 +140,7 @@ public final class ProtocolOperation extends Operation {
 
 
                 // run the step
-                Logger.d("Executing step " + stepToExecute.getClass());
+                Logger.d("Executing step " + stepToExecute.getClass().getName() + "\n  - state: " + protocol.currentState.getClass().getName() + "\n  - message: " + concreteProtocolMessage.getClass().getName());
                 OperationQueue queue = new OperationQueue();
                 queue.queue(stepToExecute);
                 queue.execute(1, "Engine-ProtocolOperation");
@@ -152,7 +152,7 @@ public final class ProtocolOperation extends Operation {
                     cancel(RFC_THE_STEP_TO_EXECUTE_FAILED);
                     return;
                 }
-                Logger.d("Finished step " + stepToExecute.getClass() + ". It reached state " + stepToExecute.getEndState().getClass());
+                Logger.d("Finished step " + stepToExecute.getClass().getName() + ". It reached state " + stepToExecute.getEndState().getClass().getName());
 
                 ConcreteProtocolState endState = stepToExecute.getEndState();
                 protocolInstance.updateCurrentState(endState);

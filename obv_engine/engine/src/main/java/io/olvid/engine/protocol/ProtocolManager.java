@@ -47,18 +47,23 @@ import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.ObvDeviceManagementRequest;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
+import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
 import io.olvid.engine.metamanager.EncryptionForIdentityDelegate;
+import io.olvid.engine.metamanager.EngineOwnedIdentityCleanupDelegate;
 import io.olvid.engine.metamanager.FullRatchetProtocolStarterDelegate;
 import io.olvid.engine.metamanager.IdentityDelegate;
-import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.MetaManager;
+import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.metamanager.ObvManager;
 import io.olvid.engine.metamanager.ProtocolDelegate;
+import io.olvid.engine.metamanager.PushNotificationDelegate;
 import io.olvid.engine.protocol.coordinators.ProtocolStepCoordinator;
 import io.olvid.engine.protocol.databases.ChannelCreationPingSignatureReceived;
 import io.olvid.engine.protocol.databases.ChannelCreationProtocolInstance;
@@ -78,6 +83,8 @@ import io.olvid.engine.protocol.datatypes.ProtocolManagerSessionFactory;
 import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocol;
 import io.olvid.engine.protocol.protocols.ChannelCreationWithContactDeviceProtocol;
+import io.olvid.engine.protocol.protocols.ChannelCreationWithOwnedDeviceProtocol;
+import io.olvid.engine.protocol.protocols.ContactManagementProtocol;
 import io.olvid.engine.protocol.protocols.ContactMutualIntroductionProtocol;
 import io.olvid.engine.protocol.protocols.DeviceCapabilitiesDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.DeviceDiscoveryProtocol;
@@ -90,9 +97,11 @@ import io.olvid.engine.protocol.protocols.GroupsV2Protocol;
 import io.olvid.engine.protocol.protocols.IdentityDetailsPublicationProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakBindingAndUnbindingProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol;
-import io.olvid.engine.protocol.protocols.ContactManagementProtocol;
 import io.olvid.engine.protocol.protocols.OneToOneContactInvitationProtocol;
-import io.olvid.engine.protocol.protocols.OwnedIdentityDeletionWithContactNotificationProtocol;
+import io.olvid.engine.protocol.protocols.OwnedDeviceDiscoveryProtocol;
+import io.olvid.engine.protocol.protocols.OwnedDeviceManagementProtocol;
+import io.olvid.engine.protocol.protocols.OwnedIdentityDeletionProtocol;
+import io.olvid.engine.protocol.protocols.SynchronizationProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithMutualScanProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithSasProtocol;
 
@@ -101,32 +110,43 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     private CreateSessionDelegate createSessionDelegate;
     private ChannelDelegate channelDelegate;
     private IdentityDelegate identityDelegate;
+    private ObvBackupAndSyncDelegate identityBackupAndSyncDelegate;
     private EncryptionForIdentityDelegate encryptionForIdentityDelegate;
     private NotificationPostingDelegate notificationPostingDelegate;
+    private EngineOwnedIdentityCleanupDelegate engineOwnedIdentityCleanupDelegate;
+    private PushNotificationDelegate pushNotificationDelegate;
 
     private final ProtocolStepCoordinator protocolStepCoordinator;
     private final String engineBaseDirectory;
     private final PRNGService prng;
     private final ObjectMapper jsonObjectMapper;
-    private final NewContactListener newContactListener;
+    private final NewDeviceListener newDeviceListener;
     private final ContactDeletedListener contactDeletedListener;
     private final ContactTrustLevelListener contactTrustLevelListener;
+    private final ObvBackupAndSyncDelegate appBackupAndSyncDelegate;
 
-    public ProtocolManager(MetaManager metaManager, String engineBaseDirectory, PRNGService prng, ObjectMapper jsonObjectMapper) {
+//    private final ScheduledExecutorService schedulerForPeriodicSync;
+
+    public ProtocolManager(MetaManager metaManager, ObvBackupAndSyncDelegate appBackupAndSyncDelegate, String engineBaseDirectory, PRNGService prng, ObjectMapper jsonObjectMapper) {
+        this.appBackupAndSyncDelegate = appBackupAndSyncDelegate;
         this.engineBaseDirectory = engineBaseDirectory;
         this.prng = prng;
         this.jsonObjectMapper = jsonObjectMapper;
         this.protocolStepCoordinator = new ProtocolStepCoordinator(this, this.prng, this.jsonObjectMapper);
-        this.newContactListener = new NewContactListener();
+        this.newDeviceListener = new NewDeviceListener();
         this.contactDeletedListener = new ContactDeletedListener();
         this.contactTrustLevelListener = new ContactTrustLevelListener();
+//        this.schedulerForPeriodicSync = Executors.newScheduledThreadPool(1);
 
         metaManager.requestDelegate(this, CreateSessionDelegate.class);
         metaManager.requestDelegate(this, ChannelDelegate.class);
         metaManager.requestDelegate(this, EncryptionForIdentityDelegate.class);
         metaManager.requestDelegate(this, IdentityDelegate.class);
+        metaManager.requestDelegate(this, ObvBackupAndSyncDelegate.class);
         metaManager.requestDelegate(this, NotificationListeningDelegate.class);
         metaManager.requestDelegate(this, NotificationPostingDelegate.class);
+        metaManager.requestDelegate(this, EngineOwnedIdentityCleanupDelegate.class);
+        metaManager.requestDelegate(this, PushNotificationDelegate.class);
         metaManager.registerImplementedDelegates(this);
 
     }
@@ -144,11 +164,54 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message.generateChannelProtocolMessageToSend(), prng);
                 }
             }
+
+//            // trigger all SynchronizationProtocol instances to detect new changes and re-notify the app of current diffs
+//            for (ProtocolInstance protocolInstance : ProtocolInstance.getAllForProtocolId(protocolManagerSession, ConcreteProtocol.SYNCHRONIZATION_PROTOCOL_ID)) {
+//                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(protocolInstance.getOwnedIdentity()),
+//                        ConcreteProtocol.SYNCHRONIZATION_PROTOCOL_ID,
+//                        protocolInstance.getUid(),
+//                        false);
+//                ChannelMessageToSend message = new SynchronizationProtocol.TriggerSyncMessage(coreProtocolMessage, false).generateChannelProtocolMessageToSend();
+//                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+//            }
+//
+//            // for all confirmed oblivious channels, initiate a SynchronizationProtocol in case one is not already running (message is ignored if protocol is already running)
+//            for (Identity ownedIdentity : identityDelegate.getOwnedIdentities(protocolManagerSession.session)) {
+//                UID currentDeviceUid = identityDelegate.getCurrentDeviceUidOfOwnedIdentity(protocolManagerSession.session, ownedIdentity);
+//                for (UID otherDeviceUid : channelDelegate.getConfirmedObliviousChannelDeviceUids(protocolManagerSession.session, ownedIdentity, ownedIdentity)) {
+//                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+//                            ConcreteProtocol.SYNCHRONIZATION_PROTOCOL_ID,
+//                            SynchronizationProtocol.computeOngoingProtocolInstanceUid(ownedIdentity, currentDeviceUid, otherDeviceUid),
+//                            false);
+//                    ChannelMessageToSend message = new SynchronizationProtocol.InitiateSyncMessage(coreProtocolMessage, otherDeviceUid).generateChannelProtocolMessageToSend();
+//                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+//                }
+//            }
+
             protocolManagerSession.session.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+//        schedulerForPeriodicSync.scheduleAtFixedRate(this::triggerOwnedDevicesSync, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, TimeUnit.MILLISECONDS);
     }
+
+//    private void triggerOwnedDevicesSync() {
+//        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+//            for (ProtocolInstance protocolInstance : ProtocolInstance.getAllForProtocolId(protocolManagerSession, ConcreteProtocol.SYNCHRONIZATION_PROTOCOL_ID)) {
+//                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(protocolInstance.getOwnedIdentity()),
+//                        ConcreteProtocol.SYNCHRONIZATION_PROTOCOL_ID,
+//                        protocolInstance.getUid(),
+//                        false);
+//                ChannelMessageToSend message = new SynchronizationProtocol.TriggerSyncMessage(coreProtocolMessage, false).generateChannelProtocolMessageToSend();
+//                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+//            }
+//
+//            protocolManagerSession.session.commit();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     // region SetDelegate
 
@@ -193,13 +256,17 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     public void setDelegate(IdentityDelegate identityDelegate) {
         this.identityDelegate = identityDelegate;
     }
+    public void setDelegate(ObvBackupAndSyncDelegate identityBackupAndSyncDelegate) {
+        this.identityBackupAndSyncDelegate = identityBackupAndSyncDelegate;
+    }
 
     public void setDelegate(EncryptionForIdentityDelegate encryptionForIdentityDelegate) {
         this.encryptionForIdentityDelegate = encryptionForIdentityDelegate;
     }
 
     public void setDelegate(NotificationListeningDelegate notificationListeningDelegate) {
-        notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE, newContactListener);
+        notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE, newDeviceListener);
+        notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_NEW_OWNED_DEVICE, newDeviceListener);
         notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED, contactDeletedListener);
         notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED, contactTrustLevelListener);
     }
@@ -208,22 +275,47 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         this.notificationPostingDelegate = notificationPostingDelegate;
     }
 
+    public void setDelegate(EngineOwnedIdentityCleanupDelegate engineOwnedIdentityCleanupDelegate) {
+        this.engineOwnedIdentityCleanupDelegate = engineOwnedIdentityCleanupDelegate;
+    }
+
+    public void setDelegate(PushNotificationDelegate pushNotificationDelegate) {
+        this.pushNotificationDelegate = pushNotificationDelegate;
+    }
+
     // endregion
 
-    class NewContactListener implements NotificationListener {
+    class NewDeviceListener implements NotificationListener {
         @Override
         public void callback(String notificationName, HashMap<String, Object> userInfo) {
             switch (notificationName) {
-                case IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE:
+                case IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE: {
                     try {
                         UID contactDeviceUid = (UID) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_CONTACT_DEVICE_UID_KEY);
                         Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_CONTACT_IDENTITY_KEY);
                         Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY);
-                        startChannelCreationWithContactDeviceProtocol(ownedIdentity, contactIdentity, contactDeviceUid);
+                        Boolean channelCreationAlreadyInProgress = (Boolean) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_CHANNEL_CREATION_ALREADY_IN_PROGRESS_KEY);
+                        if (channelCreationAlreadyInProgress == null || !channelCreationAlreadyInProgress) {
+                            startChannelCreationWithContactDeviceProtocol(ownedIdentity, contactIdentity, contactDeviceUid);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                     break;
+                }
+                case IdentityNotifications.NOTIFICATION_NEW_OWNED_DEVICE: {
+                    try {
+                        UID ownedDeviceUid = (UID) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_OWNED_DEVICE_DEVICE_UID_KEY);
+                        Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_OWNED_DEVICE_OWNED_IDENTITY_KEY);
+                        Boolean channelCreationAlreadyInProgress = (Boolean) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_OWNED_DEVICE_CHANNEL_CREATION_ALREADY_IN_PROGRESS_KEY);
+                        if (channelCreationAlreadyInProgress == null || !channelCreationAlreadyInProgress) {
+                            startChannelCreationWithOwnedDeviceProtocol(ownedIdentity, ownedDeviceUid);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
             }
         }
     }
@@ -245,7 +337,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                                 abortProtocol(protocolManagerSession.session, channelCreationProtocolInstance.getProtocolInstanceUid(), ownedIdentity);
                             }
                         }
-                        // TODO: delete any other protocol related to this contact
+                        // To improve: delete any other protocol related to this contact
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -281,11 +373,11 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         }
     }
 
-    public void deleteOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+    public void deleteOwnedIdentity(Session session, Identity ownedIdentity, UID excludedProtocolInstanceUid) throws SQLException {
         // delete ReceivedMessage
         ReceivedMessage.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete ProtocolInstance
-        ProtocolInstance.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
+        ProtocolInstance.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity, excludedProtocolInstanceUid);
         // delete TrustEstablishmentCommitmentReceived
         TrustEstablishmentCommitmentReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete MutualScanNonceReceived
@@ -300,6 +392,8 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         ChannelCreationPingSignatureReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete WaitingForTrustLevelIncreaseProtocolInstance
         WaitingForOneToOneContactProtocolInstance.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
+        // delete IdentityDeletionSignatureReceived
+        IdentityDeletionSignatureReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
     }
 
     // region Implement ProtocolDelegate
@@ -307,7 +401,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void abortProtocol(Session session, UID protocolInstanceUid, Identity ownedIdentity) throws Exception {
-        // TODO: execute this on the protocol step execution thread
+        // To improve: execute this on the protocol step execution thread
         //       move this to the ProtocolReceivedMessageProcessorDelegate API instead (in the ProtocolStepCoordinator)
         //       do something "protocol specific" to notify other devices that protocol was aborted when necessary.
         ProtocolManagerSession protocolManagerSession = wrapSession(session);
@@ -319,7 +413,9 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
         // Delete the associated ProtocolInstance
         ProtocolInstance protocolInstance = ProtocolInstance.get(protocolManagerSession, protocolInstanceUid, ownedIdentity);
-        protocolInstance.delete();
+        if (protocolInstance != null) {
+            protocolInstance.delete();
+        }
 
         // Delete all remaining ReceivedMessage for this protocol
         for (ReceivedMessage receivedMessage: ReceivedMessage.getAll(protocolManagerSession, protocolInstanceUid, ownedIdentity)) {
@@ -391,11 +487,11 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         if (createSessionDelegate == null) {
             throw new SQLException("No CreateSessionDelegate was set in ChannelManager.");
         }
-        return new ProtocolManagerSession(createSessionDelegate.getSession(), channelDelegate, identityDelegate, encryptionForIdentityDelegate, protocolStepCoordinator, this, this, notificationPostingDelegate, engineBaseDirectory);
+        return new ProtocolManagerSession(createSessionDelegate.getSession(), channelDelegate, identityDelegate, encryptionForIdentityDelegate, protocolStepCoordinator, this, this, notificationPostingDelegate, engineOwnedIdentityCleanupDelegate, pushNotificationDelegate, engineBaseDirectory, identityBackupAndSyncDelegate, appBackupAndSyncDelegate);
     }
 
     private ProtocolManagerSession wrapSession(Session session) {
-        return new ProtocolManagerSession(session, channelDelegate, identityDelegate, encryptionForIdentityDelegate, protocolStepCoordinator, this, this, notificationPostingDelegate, engineBaseDirectory);
+        return new ProtocolManagerSession(session, channelDelegate, identityDelegate, encryptionForIdentityDelegate, protocolStepCoordinator, this, this, notificationPostingDelegate, engineOwnedIdentityCleanupDelegate, pushNotificationDelegate, engineBaseDirectory, identityBackupAndSyncDelegate, appBackupAndSyncDelegate);
     }
     // endregion
 
@@ -435,6 +531,44 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                 false);
         ChannelMessageToSend message = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+    }
+
+    @Override
+    public void startOwnedDeviceDiscoveryProtocol(Identity ownedIdentity) throws Exception {
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = new UID(prng);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+            ChannelMessageToSend message = new OwnedDeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
+    @Override
+    public void startOwnedDeviceDiscoveryProtocolWithinTransaction(Session session, Identity ownedIdentity) throws Exception {
+        ProtocolManagerSession protocolManagerSession = wrapSession(session);
+        UID protocolInstanceUid = new UID(prng);
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+        ChannelMessageToSend message = new OwnedDeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
+        protocolManagerSession.channelDelegate.post(session, message, prng);
+    }
+
+    @Override
+    public void startChannelCreationProtocolWithOwnedDevice(Session session, Identity ownedIdentity, UID ownedDeviceUid) throws Exception {
+        ProtocolManagerSession protocolManagerSession = wrapSession(session);
+        UID protocolInstanceUid = new UID(prng);
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+        ChannelMessageToSend message = new ChannelCreationWithOwnedDeviceProtocol.InitialMessage(coreProtocolMessage, ownedDeviceUid).generateChannelProtocolMessageToSend();
+        protocolManagerSession.channelDelegate.post(session, message, prng);
     }
 
     @Override
@@ -570,8 +704,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     }
 
-    @Override
-    public void startChannelCreationWithContactDeviceProtocol(Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception {
+    private void startChannelCreationWithContactDeviceProtocol(Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception {
         if (contactIdentity.equals(ownedIdentity)) {
             Logger.w("Cannot start a protocol with contactIdentity == ownedIdentity");
             return;
@@ -583,6 +716,19 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                     protocolInstanceUid,
                     false);
             ChannelMessageToSend message = new ChannelCreationWithContactDeviceProtocol.InitialMessage(coreProtocolMessage, contactIdentity, contactDeviceUid).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
+    public void startChannelCreationWithOwnedDeviceProtocol(Identity ownedIdentity, UID ownedDeviceUid) throws Exception {
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = new UID(prng);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+            ChannelMessageToSend message = new ChannelCreationWithOwnedDeviceProtocol.InitialMessage(coreProtocolMessage, ownedDeviceUid).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
             protocolManagerSession.session.commit();
         }
@@ -641,7 +787,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
 
-    public void startGroupV2CreationProtocol(Identity ownedIdentity, String serializedGroupDetails, String absolutePhotoUrl, HashSet<GroupV2.Permission> ownPermissions, HashSet<GroupV2.IdentityAndPermissions> otherGroupMembers) throws Exception {
+    public void startGroupV2CreationProtocol(Identity ownedIdentity, String serializedGroupDetails, String absolutePhotoUrl, HashSet<GroupV2.Permission> ownPermissions, HashSet<GroupV2.IdentityAndPermissions> otherGroupMembers, String serializedGroupType) throws Exception {
         if (serializedGroupDetails == null || ownedIdentity == null || ownPermissions == null || otherGroupMembers == null) {
             throw new Exception();
         }
@@ -664,7 +810,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                     protocolInstanceUid,
                     false);
 
-            ChannelMessageToSend message = new GroupsV2Protocol.GroupCreationInitialMessage(coreProtocolMessage, ownPermissions, otherGroupMembers, serializedGroupDetails, absolutePhotoUrl).generateChannelProtocolMessageToSend();
+            ChannelMessageToSend message = new GroupsV2Protocol.GroupCreationInitialMessage(coreProtocolMessage, ownPermissions, otherGroupMembers, serializedGroupDetails, absolutePhotoUrl, serializedGroupType).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
             protocolManagerSession.session.commit();
         }
@@ -692,7 +838,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void initiateGroupV2Leave(Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
-        if (ownedIdentity == null || groupIdentifier == null) {
+        if (ownedIdentity == null || groupIdentifier == null || groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
             throw new Exception();
         }
 
@@ -712,7 +858,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void initiateGroupV2Disband(Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception {
-        if (ownedIdentity == null || groupIdentifier == null) {
+        if (ownedIdentity == null || groupIdentifier == null || groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
             throw new Exception();
         }
 
@@ -782,6 +928,20 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
 
+    @Override
+    public void processDeviceManagementRequest(Session session, Identity ownedIdentity, ObvDeviceManagementRequest deviceManagementRequest) throws Exception {
+        if (session == null || ownedIdentity == null || deviceManagementRequest == null) {
+            throw new Exception();
+        }
+
+        UID protocolInstanceUid = new UID(prng);
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.OWNED_DEVICE_MANAGEMENT_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+        ChannelMessageToSend message = new OwnedDeviceManagementProtocol.InitialMessage(coreProtocolMessage, deviceManagementRequest).generateChannelProtocolMessageToSend();
+        channelDelegate.post(session, message, prng);
+    }
 
     @Override
     public void startIdentityDetailsPublicationProtocol(Session session, Identity ownedIdentity, int version) throws Exception {
@@ -1217,7 +1377,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     @Override
-    public void deleteOwnedIdentityAndNotifyContacts(Session session, Identity ownedIdentity) throws Exception {
+    public void startOwnedIdentityDeletionProtocol(Session session, Identity ownedIdentity, boolean deleteEverywhere) throws Exception {
         if (session == null || ownedIdentity == null) {
             throw new Exception();
         }
@@ -1225,13 +1385,48 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
 
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
-                ConcreteProtocol.OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID,
+                ConcreteProtocol.OWNED_IDENTITY_DELETION_PROTOCOL_ID,
                 protocolInstanceUid,
                 false);
 
-        ChannelMessageToSend message = new OwnedIdentityDeletionWithContactNotificationProtocol.InitialMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
+        ChannelMessageToSend message = new OwnedIdentityDeletionProtocol.InitialMessage(coreProtocolMessage, deleteEverywhere).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
     }
+
+
+    @Override
+    public void initiateSingleItemSync(Session session, Identity ownedIdentity, ObvSyncAtom obvSyncAtom) throws Exception {
+        if (session == null || ownedIdentity == null || obvSyncAtom == null) {
+            throw new Exception();
+        }
+
+        UID protocolInstanceUid = new UID(prng);
+
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.SYNCHRONIZATION_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+
+        ChannelMessageToSend message = new SynchronizationProtocol.InitiateSingleItemSyncMessage(coreProtocolMessage, obvSyncAtom).generateChannelProtocolMessageToSend();
+        channelDelegate.post(session, message, prng);
+    }
+
+//    @Override
+//    public void triggerOwnedDevicesSync(Session session, Identity ownedIdentity) {
+//        try {
+//            ProtocolManagerSession protocolManagerSession = wrapSession(session);
+//            for (ProtocolInstance protocolInstance : ProtocolInstance.getAllForOwnedIdentityProtocolId(protocolManagerSession, ownedIdentity, ConcreteProtocol.SYNCHRONIZATION_PROTOCOL_ID)) {
+//                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+//                        ConcreteProtocol.SYNCHRONIZATION_PROTOCOL_ID,
+//                        protocolInstance.getUid(),
+//                        false);
+//                ChannelMessageToSend message = new SynchronizationProtocol.TriggerSyncMessage(coreProtocolMessage, true).generateChannelProtocolMessageToSend();
+//                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     // endregion
 
@@ -1239,7 +1434,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     @Override
     public void startFullRatchetProtocolForObliviousChannel(UID currentDeviceUid, UID remoteDeviceUid, Identity remoteIdentity) throws Exception {
         try (ProtocolManagerSession protocolManagerSession = getSession()) {
-            Identity ownedIdentity = identityDelegate.getOwnedIdentityForDeviceUid(protocolManagerSession.session, currentDeviceUid);
+            Identity ownedIdentity = identityDelegate.getOwnedIdentityForCurrentDeviceUid(protocolManagerSession.session, currentDeviceUid);
             if (ownedIdentity != null) {
                 UID protocolInstanceUid = FullRatchetProtocol.computeProtocolUid(ownedIdentity, remoteIdentity, currentDeviceUid, remoteDeviceUid);
 

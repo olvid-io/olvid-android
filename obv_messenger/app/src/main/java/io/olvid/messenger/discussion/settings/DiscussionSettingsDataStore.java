@@ -23,8 +23,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceDataStore;
 
+import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -89,20 +93,43 @@ public class DiscussionSettingsDataStore extends PreferenceDataStore {
                 if (value == null) {
                     break;
                 }
-                performUpdateOnPossiblyNullDiscussionCustomization((DiscussionCustomization discussionCustomization) -> {
-                    switch (value) {
-                        case "0":
-                            discussionCustomization.prefSendReadReceipt = false;
-                            break;
-                        case "1":
-                            discussionCustomization.prefSendReadReceipt = true;
-                            break;
-                        case "null":
-                        default:
-                            discussionCustomization.prefSendReadReceipt = null;
-                            break;
+
+                final Boolean targetSendReadReceipt;
+                switch (value) {
+                    case "0":
+                        targetSendReadReceipt = false;
+                        break;
+                    case "1":
+                        targetSendReadReceipt = true;
+                        break;
+                    case "null":
+                    default:
+                        targetSendReadReceipt = null;
+                        break;
+                }
+
+                performUpdateOnPossiblyNullDiscussionCustomization((DiscussionCustomization discussionCustomization) -> discussionCustomization.prefSendReadReceipt = targetSendReadReceipt);
+
+                try {
+                    // propagate change to other owned devices if needed
+                    Discussion discussion = discussionSettingsViewModel.getDiscussionLiveData().getValue();
+                    if (discussion != null) {
+                        switch (discussion.discussionType) {
+                            case Discussion.TYPE_CONTACT:
+                                AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(discussion.bytesOwnedIdentity, ObvSyncAtom.createContactSendReadReceiptChange(discussion.bytesDiscussionIdentifier, targetSendReadReceipt));
+                                break;
+                            case Discussion.TYPE_GROUP:
+                                AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(discussion.bytesOwnedIdentity, ObvSyncAtom.createGroupV1SendReadReceiptChange(discussion.bytesDiscussionIdentifier, targetSendReadReceipt));
+                                break;
+                            case Discussion.TYPE_GROUP_V2:
+                                AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(discussion.bytesOwnedIdentity, ObvSyncAtom.createGroupV2SendReadReceiptChange(discussion.bytesDiscussionIdentifier, targetSendReadReceipt));
+                                break;
+                        }
                     }
-                });
+                } catch (Exception e) {
+                    Logger.w("Failed to propagate send read receipt change to other devices");
+                    e.printStackTrace();
+                }
                 break;
             }
             case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND: {

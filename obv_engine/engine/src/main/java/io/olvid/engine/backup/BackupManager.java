@@ -34,8 +34,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
@@ -50,7 +48,6 @@ import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.BackupSeed;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
-import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.Session;
@@ -410,15 +407,15 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
                     EncryptionPublicKey encryptionPublicKey = backupKey.getEncryptionPublicKey();
                     MACKey macKey = backupKey.getMacKey();
 
-                    // TODO: once all olvid clients can handle uncompressed backups, remove the DeflaterOutputStream
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    DeflaterOutputStream deflater = new DeflaterOutputStream(baos, new Deflater(5, true));
-                    deflater.write(fullBackupContent.getBytes(StandardCharsets.UTF_8));
-                    deflater.close();
-                    byte[] compressedBackup = baos.toByteArray();
-                    baos.close();
+                    // we no longer compress backups as all up-to-date Olvid clients can handle it.
+//                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                    DeflaterOutputStream deflater = new DeflaterOutputStream(baos, new Deflater(5, true));
+//                    deflater.write(fullBackupContent.getBytes(StandardCharsets.UTF_8));
+//                    deflater.close();
+//                    byte[] compressedBackup = baos.toByteArray();
+//                    baos.close();
 
-                    EncryptedBytes encryptedBackup = Suite.getPublicKeyEncryption(encryptionPublicKey).encrypt(encryptionPublicKey, compressedBackup, prng);
+                    EncryptedBytes encryptedBackup = Suite.getPublicKeyEncryption(encryptionPublicKey).encrypt(encryptionPublicKey, fullBackupContent.getBytes(StandardCharsets.UTF_8), prng);
                     byte[] mac = Suite.getMAC(macKey).digest(macKey, encryptedBackup.getBytes());
 
                     byte[] macedEncryptedBackup = new byte[encryptedBackup.getBytes().length + mac.length];
@@ -616,7 +613,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
     }
 
     @Override
-    public ObvIdentity[] restoreOwnedIdentitiesFromBackup(String seedString, byte[] backupContent) {
+    public ObvIdentity[] restoreOwnedIdentitiesFromBackup(String seedString, byte[] backupContent, String deviceDisplayName) {
         try {
             BackupContentAndDerivedKeys backupContentAndDerivedKeys = decryptBackupContent(seedString, backupContent, jsonObjectMapper);
             if (backupContentAndDerivedKeys == null) {
@@ -637,7 +634,8 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
                     backupManagerSession.session.commit();
                 }
             }
-            return identityDelegate.restoreOwnedIdentitiesFromBackup(backupContentAndDerivedKeys.pojo.engine.identity_manager, prng);
+
+            return identityDelegate.restoreOwnedIdentitiesFromBackup(backupContentAndDerivedKeys.pojo.engine.identity_manager, deviceDisplayName, prng);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -646,7 +644,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
 
 
     @Override
-    public void restoreContactsAndGroupsFromBackup(String seedString, byte[] backupContent, Identity[] restoredOwnedIdentities) {
+    public void restoreContactsAndGroupsFromBackup(String seedString, byte[] backupContent, ObvIdentity[] restoredOwnedIdentities) {
         try {
             BackupContentAndDerivedKeys backupContentAndDerivedKeys = decryptBackupContent(seedString, backupContent, jsonObjectMapper);
             if (backupContentAndDerivedKeys == null) {

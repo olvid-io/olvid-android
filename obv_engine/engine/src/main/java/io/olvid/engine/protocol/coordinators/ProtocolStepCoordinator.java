@@ -68,7 +68,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
 
     public void initialQueueing() {
         try (ProtocolManagerSession protocolManagerSession = protocolManagerSessionFactory.getSession()) {
-            // TODO: also cleanup protocol instances: implement a clean abort in each protocol, and call it when the protocol is stalled
+            // To improve: also cleanup protocol instances: implement a clean abort in each protocol, and call it when the protocol is stalled
             ReceivedMessage.deleteExpiredMessagesWithNoProtocol(protocolManagerSession);
 
             ReceivedMessage[] receivedMessages = ReceivedMessage.getAll(protocolManagerSession);
@@ -123,12 +123,12 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
             case ProtocolOperation.RFC_THE_STEP_TO_EXECUTE_FAILED: {
                 // check how many times this step has failed before
                 UID messageUid = ((ProtocolOperation) operation).getReceivedMessageUid();
-                Integer failedAttemps = stepFailedAttemptCount.get(messageUid);
-                if (failedAttemps == null) {
-                    failedAttemps = 0;
+                Integer failedAttempts = stepFailedAttemptCount.get(messageUid);
+                if (failedAttempts == null) {
+                    failedAttempts = 0;
                 }
-                failedAttemps++;
-                if (failedAttemps >= 5) {
+                failedAttempts++;
+                if (failedAttempts >= 5) {
                     // the step failed 5 times --> we can delete it
                     try (ProtocolManagerSession protocolManagerSession = protocolManagerSessionFactory.getSession()) {
                         ReceivedMessage message = ReceivedMessage.get(protocolManagerSession, ((ProtocolOperation) operation).getReceivedMessageUid());
@@ -139,7 +139,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
                     }
                 } else {
                     // retry to execute the step
-                    stepFailedAttemptCount.put(messageUid, failedAttemps);
+                    stepFailedAttemptCount.put(messageUid, failedAttempts);
                     queueNewProtocolOperation(messageUid);
                 }
                 break;

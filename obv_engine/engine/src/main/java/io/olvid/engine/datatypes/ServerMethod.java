@@ -59,6 +59,7 @@ public abstract class ServerMethod {
     public static final byte GROUP_IS_LOCKED = 0x13;
     public static final byte INVALID_SIGNATURE = 0x14;
     public static final byte GROUP_NOT_LOCKED = 0x15;
+    public static final byte INVALID_API_KEY = 0x16;
 
     public static final byte GENERAL_ERROR = (byte) 0xff;
 

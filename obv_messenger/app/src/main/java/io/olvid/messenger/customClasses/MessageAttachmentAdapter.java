@@ -858,7 +858,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                         break;
                     case HIDDEN:
                         if (openOnClick) {
-                            App.runThread(new InboundEphemeralMessageClicked(fyleAndStatus.fyleMessageJoinWithStatus.messageId));
+                            App.runThread(new InboundEphemeralMessageClicked(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.messageId));
                         }
                         break;
                 }

@@ -53,18 +53,24 @@ import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Group2Member;
 import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 
 public class CreateOrUpdateGroupV2Task implements Runnable {
     private final ObvGroupV2 groupV2;
-    private final boolean groupWasJustCreatedByMe; // true only if I just created the group
+    private final boolean groupWasJustCreatedByMe; // true only if I just created the group (on this device, or on another)
     private final boolean updatedByMe; // true if I just created the group, or if I updated the group
+    private final boolean createdOnOtherDevice; // true only if groupWasJustCreatedByMe is true and it was created on another device
     private final boolean synchronizeUpdateInProgressWithEngine;
+    private final JsonExpiration jsonExpirationSettings;
 
-    public CreateOrUpdateGroupV2Task(ObvGroupV2 groupV2, boolean groupWasJustCreatedByMe, boolean updatedByMe, boolean synchronizeUpdateInProgressWithEngine) {
+    public CreateOrUpdateGroupV2Task(ObvGroupV2 groupV2, boolean groupWasJustCreatedByMe, boolean updatedByMe, boolean createdOnOtherDevice, boolean synchronizeUpdateInProgressWithEngine, JsonExpiration jsonExpirationSettings) {
         this.groupV2 = groupV2;
         this.groupWasJustCreatedByMe = groupWasJustCreatedByMe;
         this.updatedByMe = updatedByMe;
+        this.createdOnOtherDevice = createdOnOtherDevice;
         this.synchronizeUpdateInProgressWithEngine = synchronizeUpdateInProgressWithEngine;
+        this.jsonExpirationSettings = jsonExpirationSettings;
     }
 
     @Override
@@ -77,9 +83,9 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 boolean groupWasJoinedOrRejoined = false;
                 boolean hasUntrustedDetails = false;
                 boolean messageInserted = false;
-                boolean groupHasMembersWithChannels = false;
-                boolean listOfUsersWithChangeSettingsPermissionChanged = false;
-                List<byte[]> bytesIdentitiesOfUsersWithChangeSettingsPermission = new ArrayList<>();
+                boolean needToPostSettingsUpdateMessage = groupWasJustCreatedByMe && !createdOnOtherDevice && db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(groupV2.bytesOwnedIdentity);
+                boolean thereAreNewMembersWithChangeSettingsPermissionChanged = false;
+                List<byte[]> bytesIdentitiesOfMembersWithChangeSettingsPermission = new ArrayList<>();
 
                 byte[] bytesGroupIdentifier = groupV2.groupIdentifier.getBytes();
 
@@ -113,6 +119,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 boolean insertDetailsUpdatedMessage = false;
                 boolean insertGainedAdminMessage = false;
                 boolean insertLostAdminMessage = false;
+                boolean insertGainedSendMessage = false;
+                boolean insertLostSendMessage = false;
                 Group2 group = db.group2Dao().get(groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
                 if (group == null) {
                     // if the group does not exist yet, create it
@@ -127,6 +135,12 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     db.group2Dao().insert(group);
                     if (!groupWasJustCreatedByMe && groupV2.ownPermissions.contains(GroupV2.Permission.GROUP_ADMIN)) {
                         insertGainedAdminMessage = true;
+                    }
+                    if (!groupWasJustCreatedByMe && !groupV2.ownPermissions.contains(GroupV2.Permission.SEND_MESSAGE)) {
+                        insertLostSendMessage = true;
+                    }
+                    if (groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
+                        thereAreNewMembersWithChangeSettingsPermissionChanged = true;
                     }
                 } else {
                     // if it exists, update any field that might have changed
@@ -146,11 +160,25 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     group.ownPermissionAdmin = groupV2.ownPermissions.contains(GroupV2.Permission.GROUP_ADMIN);
                     group.ownPermissionRemoteDeleteAnything = groupV2.ownPermissions.contains(GroupV2.Permission.REMOTE_DELETE_ANYTHING);
                     group.ownPermissionEditOrRemoteDeleteOwnMessages = groupV2.ownPermissions.contains(GroupV2.Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES);
+                    if (!group.ownPermissionChangeSettings && groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
+                        thereAreNewMembersWithChangeSettingsPermissionChanged = true;
+                    }
                     group.ownPermissionChangeSettings = groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS);
+                    if (group.ownPermissionSendMessage != groupV2.ownPermissions.contains(GroupV2.Permission.SEND_MESSAGE)) {
+                        if (groupV2.ownPermissions.contains(GroupV2.Permission.SEND_MESSAGE)) {
+                            insertGainedSendMessage = true;
+                        } else {
+                            insertLostSendMessage = true;
+                        }
+                    }
                     group.ownPermissionSendMessage = groupV2.ownPermissions.contains(GroupV2.Permission.SEND_MESSAGE);
                     db.group2Dao().update(group);
                 }
 
+                if (group.ownPermissionChangeSettings) {
+                    // add myself to users with change settings permission, so I can query my other devices for shared settings
+                    bytesIdentitiesOfMembersWithChangeSettingsPermission.add(group.bytesOwnedIdentity);
+                }
 
                 //////////
                 // create (or reuse) the associated discussion if there is none
@@ -158,18 +186,28 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
                 Discussion discussion = db.discussionDao().getByGroupIdentifier(groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
                 if (discussion == null) {
-                    discussion = Discussion.createOrReuseGroupV2Discussion(db, group, groupWasJustCreatedByMe);
+                    discussion = Discussion.createOrReuseGroupV2Discussion(db, group, groupWasJustCreatedByMe, createdOnOtherDevice, jsonExpirationSettings);
                     groupWasJoinedOrRejoined = true;
 
                     if (discussion == null) {
                         Logger.e("Failed to createOrReuseGroupV2Discussion");
                         throw new Exception();
                     }
+                    if (db.messageDao().countMessagesInDiscussion(discussion.id) == 0) {
+                        // never insert a "lost write" message in an empty discussion
+                        insertLostSendMessage = false;
+                    }
                 } else {
                     // update the corresponding group discussion
                     discussion.title = group.getCustomName();
                     discussion.photoUrl = group.getCustomPhotoUrl();
                     db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
+                    if (!group.ownPermissionSendMessage && discussion.status != Discussion.STATUS_READ_ONLY) {
+                        db.discussionDao().updateStatus(discussion.id, Discussion.STATUS_READ_ONLY);
+                    }
+                    if (group.ownPermissionSendMessage && discussion.status != Discussion.STATUS_NORMAL) {
+                        db.discussionDao().updateStatus(discussion.id, Discussion.STATUS_NORMAL);
+                    }
 
                     ShortcutActivity.updateShortcut(discussion);
                 }
@@ -191,10 +229,24 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     if (discussion.updateLastMessageTimestamp(adminMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }
-                } else if (insertLostAdminMessage) {
+                } else if (insertLostAdminMessage && !insertLostSendMessage) { // only insert lost admin if we did not lose write permission too
                     Message adminMessage = Message.createLostGroupAdminMessage(db, discussion.id, discussion.bytesOwnedIdentity);
                     db.messageDao().insert(adminMessage);
                     if (discussion.updateLastMessageTimestamp(adminMessage.timestamp)) {
+                        db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                    }
+                }
+
+                if (!insertGainedAdminMessage && insertGainedSendMessage) { // only insert a "can write" message if we are not an admin
+                    Message gainedSendMessage = Message.createGainedGroupSendMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                    db.messageDao().insert(gainedSendMessage);
+                    if (discussion.updateLastMessageTimestamp(gainedSendMessage.timestamp)) {
+                        db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                    }
+                } else if (insertLostSendMessage) {
+                    Message lostSendMessage = Message.createLostGroupSendMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                    db.messageDao().insert(lostSendMessage);
+                    if (discussion.updateLastMessageTimestamp(lostSendMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }
                 }
@@ -230,15 +282,15 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
                 for (ObvGroupV2.ObvGroupV2Member obvGroupV2Member : groupV2.otherGroupMembers) {
                     // check if we have at least one group member with channels (to post an ephemeral settings message)
-                    if (groupWasJustCreatedByMe && !groupHasMembersWithChannels) {
+                    if (groupWasJustCreatedByMe && !createdOnOtherDevice && !needToPostSettingsUpdateMessage) {
                         Contact contact = db.contactDao().get(group.bytesOwnedIdentity, obvGroupV2Member.bytesIdentity);
                         if (contact != null && contact.establishedChannelCount > 0) {
-                            groupHasMembersWithChannels = true;
+                            needToPostSettingsUpdateMessage = true;
                         }
                     }
 
                     if (obvGroupV2Member.permissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
-                        bytesIdentitiesOfUsersWithChangeSettingsPermission.add(obvGroupV2Member.bytesIdentity);
+                        bytesIdentitiesOfMembersWithChangeSettingsPermission.add(obvGroupV2Member.bytesIdentity);
                     }
 
                     BytesKey key = new BytesKey(obvGroupV2Member.bytesIdentity);
@@ -254,7 +306,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                                 existingMember.permissionSendMessage != obvGroupV2Member.permissions.contains(GroupV2.Permission.SEND_MESSAGE)) {
 
                             if (existingMember.permissionChangeSettings != obvGroupV2Member.permissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
-                                listOfUsersWithChangeSettingsPermissionChanged = true;
+                                thereAreNewMembersWithChangeSettingsPermissionChanged = true;
                             }
                             existingMember.permissionAdmin = obvGroupV2Member.permissions.contains(GroupV2.Permission.GROUP_ADMIN);
                             existingMember.permissionRemoteDeleteAnything = obvGroupV2Member.permissions.contains(GroupV2.Permission.REMOTE_DELETE_ANYTHING);
@@ -280,9 +332,6 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                                 existingPending.permissionChangeSettings != obvGroupV2PendingMember.permissions.contains(GroupV2.Permission.CHANGE_SETTINGS) ||
                                 existingPending.permissionSendMessage != obvGroupV2PendingMember.permissions.contains(GroupV2.Permission.SEND_MESSAGE)) {
 
-                            if (existingPending.permissionChangeSettings != obvGroupV2PendingMember.permissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
-                                listOfUsersWithChangeSettingsPermissionChanged = true;
-                            }
                             existingPending.permissionAdmin = obvGroupV2PendingMember.permissions.contains(GroupV2.Permission.GROUP_ADMIN);
                             existingPending.permissionRemoteDeleteAnything = obvGroupV2PendingMember.permissions.contains(GroupV2.Permission.REMOTE_DELETE_ANYTHING);
                             existingPending.permissionEditOrRemoteDeleteOwnMessages = obvGroupV2PendingMember.permissions.contains(GroupV2.Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES);
@@ -357,10 +406,6 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     db.group2MemberDao().delete(group2Member);
                     // only take appropriate actions if member did not simply become pending
                     if (!pendingToAdd.containsKey(key)) {
-                        if (group2Member.permissionChangeSettings) {
-                            listOfUsersWithChangeSettingsPermissionChanged = true;
-                        }
-
                         // for keycloak groups, only insert a left group message if the user's keycloakUserId actually left the group
                         if (!keycloakGroup || !addedKeycloakUserIds.contains(memberBytesIdentityToKeycloakUserIdMap.get(key))) {
                             messageInserted = true;
@@ -390,10 +435,11 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     } else {
                         Group2Member group2Member = new Group2Member(groupV2.bytesOwnedIdentity, bytesGroupIdentifier, key.bytes, permissions);
                         db.group2MemberDao().insert(group2Member);
+                        if (group2Member.permissionChangeSettings) {
+                            thereAreNewMembersWithChangeSettingsPermissionChanged = true;
+                        }
+
                         if (!pendingToRemove.containsKey(key)) {
-                            if (group2Member.permissionChangeSettings) {
-                                listOfUsersWithChangeSettingsPermissionChanged = true;
-                            }
                             // for keycloak groups, only insert a joined group message if the user's keycloakUserId actually joined the group
                             if (!groupWasJoinedOrRejoined && (!keycloakGroup || !removedKeycloakUserIds.contains(memberBytesIdentityToKeycloakUserIdMap.get(key)))) {
                                 messageInserted = true;
@@ -410,7 +456,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                                     // send discussion ephemeral settings to new member
                                     DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
                                     if (discussionCustomization != null) {
-                                        DiscussionCustomization.JsonSharedSettings sharedSettings = discussionCustomization.getSharedSettingsJson();
+                                        JsonSharedSettings sharedSettings = discussionCustomization.getSharedSettingsJson();
                                         if (sharedSettings != null) {
                                             Message message = Message.createDiscussionSettingsUpdateMessage(db, discussionId, sharedSettings, contact.bytesOwnedIdentity, true, null);
                                             if (message != null) {
@@ -436,10 +482,6 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     db.group2PendingMemberDao().delete(group2PendingMember);
                     // only take appropriate actions if pending member did not simply become a member
                     if (!membersToAdd.containsKey(key)) {
-                        if (group2PendingMember.permissionChangeSettings) {
-                            listOfUsersWithChangeSettingsPermissionChanged = true;
-                        }
-
                         // for keycloak groups, only insert a left group message if the user's keycloakUserId actually left the group
                         if (!keycloakGroup || !addedKeycloakUserIds.contains(pendingMemberBytesIdentityToKeycloakUserIdMap.get(key))) {
                             messageInserted = true;
@@ -469,9 +511,6 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         AppSingleton.updateCachedCustomDisplayName(group2PendingMember.bytesContactIdentity, group2PendingMember.displayName);
                     }
                     if (!membersToRemove.containsKey(key)) {
-                        if (group2PendingMember.permissionChangeSettings) {
-                            listOfUsersWithChangeSettingsPermissionChanged = true;
-                        }
                         // for keycloak groups, only insert a joined group message if the user's keycloakUserId actually joined the group
                         if (!groupWasJoinedOrRejoined && (!keycloakGroup || !removedKeycloakUserIds.contains(pendingMemberBytesIdentityToKeycloakUserIdMap.get(key)))) {
                             messageInserted = true;
@@ -483,7 +522,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
 
                 // update the group members name field
-                group.groupMembersNames = StringUtils.joinGroupMemberNames(db.group2Dao().getGroupMembersNames(groupV2.bytesOwnedIdentity, bytesGroupIdentifier));
+                group.groupMembersNames = StringUtils.joinContactDisplayNames(db.group2Dao().getGroupMembersNames(groupV2.bytesOwnedIdentity, bytesGroupIdentifier));
                 db.group2Dao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.groupMembersNames);
 
                 if (!Objects.equals(discussion.title, group.getCustomName())) {
@@ -492,11 +531,11 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 }
 
 
-                if (groupWasJustCreatedByMe && groupHasMembersWithChannels) {
-                    // this code block should normally never be executed: when creating a group, there are no members initially
+                if (groupWasJustCreatedByMe && !createdOnOtherDevice && needToPostSettingsUpdateMessage) {
+                    // this code block should normally never be of any use: when creating a group, there are no members initially and my other devices are not yet aware the group exists
                     DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
                     if (discussionCustomization != null) {
-                        DiscussionCustomization.JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
+                        JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
                         if (jsonSharedSettings != null) {
                             Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, group.bytesOwnedIdentity, true, null);
                             if (message != null) {
@@ -510,11 +549,11 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                 }
 
-                if (!updatedByMe && listOfUsersWithChangeSettingsPermissionChanged && !bytesIdentitiesOfUsersWithChangeSettingsPermission.isEmpty()) {
+                if (((groupWasJustCreatedByMe && createdOnOtherDevice) || (!updatedByMe && thereAreNewMembersWithChangeSettingsPermissionChanged)) && !bytesIdentitiesOfMembersWithChangeSettingsPermission.isEmpty()) {
                     // the list of users with the permission to change group shared settings has changed
                     //    --> send a query shared settings message to them to have the most up to date shared settings
                     Integer jsonSharedSettingsVersion;
-                    Message.JsonExpiration jsonExpiration;
+                    JsonExpiration jsonExpiration;
                     DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
                     if (discussionCustomization != null) {
                         jsonSharedSettingsVersion = discussionCustomization.sharedSettingsVersion;
@@ -524,13 +563,14 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         jsonExpiration = null;
                     }
 
+                    final Discussion finalDiscussion = discussion;
                     runAfterTransaction.add(() -> {
                         try {
                             AppSingleton.getEngine().post(
-                                    Message.getGroupV2DiscussionQuerySharedSettingsPayloadAsBytes(bytesGroupIdentifier, jsonSharedSettingsVersion, jsonExpiration),
+                                    Message.getDiscussionQuerySharedSettingsPayloadAsBytes(finalDiscussion, jsonSharedSettingsVersion, jsonExpiration),
                                     null,
                                     new ObvOutboundAttachment[0],
-                                    bytesIdentitiesOfUsersWithChangeSettingsPermission,
+                                    bytesIdentitiesOfMembersWithChangeSettingsPermission,
                                     groupV2.bytesOwnedIdentity,
                                     false,
                                     false

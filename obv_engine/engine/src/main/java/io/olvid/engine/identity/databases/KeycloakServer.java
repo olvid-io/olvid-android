@@ -73,6 +73,8 @@ public class KeycloakServer implements ObvDatabase {
     static final String LATEST_REVOCATION_LIST_TIMESTAMP = "latest_revocation_list_timestamp";
     private long latestGroupUpdateTimestamp; // the last time groups wre retrieved from the keycloak server
     static final String LATEST_GROUP_UPDATE_TIMESTAMP = "latest_group_update_timestamp";
+    private String ownApiKey; // the api key given to us by keycloak, non null only for the keycloak server of a managed identity
+    static final String OWN_API_KEY = "own_api_key";
 
     public String getServerUrl() {
         return serverUrl;
@@ -94,6 +96,10 @@ public class KeycloakServer implements ObvDatabase {
         return new JsonWebKeySet(serializedJwks);
     }
 
+    public String getSerializedJwks() {
+        return serializedJwks;
+    }
+
     public String getClientId() {
         return clientId;
     }
@@ -109,8 +115,16 @@ public class KeycloakServer implements ObvDatabase {
         return JsonWebKey.Factory.newJwk(serializedSignatureKey);
     }
 
+    public String getSerializedSignatureKey() {
+        return serializedSignatureKey;
+    }
+
     public String getSelfRevocationTestNonce() {
         return selfRevocationTestNonce;
+    }
+
+    public String getOwnApiKey() {
+        return ownApiKey;
     }
 
     public List<String> getPushTopics() {
@@ -172,6 +186,7 @@ public class KeycloakServer implements ObvDatabase {
         this.selfRevocationTestNonce = null;
         this.latestRevocationListTimestamp = 0;
         this.latestGroupUpdateTimestamp = 0;
+        this.ownApiKey = null;
     }
 
     private KeycloakServer(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -192,6 +207,7 @@ public class KeycloakServer implements ObvDatabase {
         this.selfRevocationTestNonce = res.getString(SELF_REVOCATION_TEST_NONCE);
         this.latestRevocationListTimestamp = res.getLong(LATEST_REVOCATION_LIST_TIMESTAMP);
         this.latestGroupUpdateTimestamp = res.getLong(LATEST_GROUP_UPDATE_TIMESTAMP);
+        this.ownApiKey = res.getString(OWN_API_KEY);
     }
 
     // endregion
@@ -214,6 +230,7 @@ public class KeycloakServer implements ObvDatabase {
                     SELF_REVOCATION_TEST_NONCE + " TEXT, " +
                     LATEST_REVOCATION_LIST_TIMESTAMP + " BIGINT NOT NULL, " +
                     LATEST_GROUP_UPDATE_TIMESTAMP + " BIGINT NOT NULL, " +
+                    OWN_API_KEY + " TEXT, " +
                     " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + SERVER_URL + ", " + OWNED_IDENTITY + "), " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + " (" + OwnedIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE);");
         }
@@ -256,11 +273,18 @@ public class KeycloakServer implements ObvDatabase {
             }
             oldVersion = 34;
         }
+        if (oldVersion < 35 && newVersion >= 35) {
+            Logger.d("MIGRATING `keycloak_server` DATABASE FROM VERSION " + oldVersion + " TO 35");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE keycloak_server ADD COLUMN `own_api_key` TEXT DEFAULT NULL;");
+            }
+            oldVersion = 35;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?);")) {
             statement.setString(1, serverUrl);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setString(3, serializedJwks);
@@ -275,6 +299,7 @@ public class KeycloakServer implements ObvDatabase {
 
             statement.setLong(11, latestRevocationListTimestamp);
             statement.setLong(12, latestGroupUpdateTimestamp);
+            statement.setString(13, ownApiKey);
             statement.executeUpdate();
         }
     }
@@ -352,6 +377,18 @@ public class KeycloakServer implements ObvDatabase {
         }
     }
 
+    public static void saveApiKey(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String apiKey) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + OWN_API_KEY + " = ? " +
+                " WHERE " + SERVER_URL + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            statement.setString(1, apiKey);
+            statement.setString(2, serverUrl);
+            statement.setBytes(3, ownedIdentity.getBytes());
+            statement.executeUpdate();
+        }
+    }
+
     public static void setKeycloakUserId(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String userId) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + KEYCLOAK_USER_ID + " = ? " +
@@ -374,6 +411,19 @@ public class KeycloakServer implements ObvDatabase {
             statement.setBytes(3, this.ownedIdentity.getBytes());
             statement.executeUpdate();
             this.keycloakUserId = userId;
+        }
+    }
+
+    public void setOwnApiKey(String apiKey) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + OWN_API_KEY + " = ? " +
+                " WHERE " + SERVER_URL + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            statement.setString(1, apiKey);
+            statement.setString(2, this.serverUrl);
+            statement.setBytes(3, this.ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.ownApiKey = apiKey;
         }
     }
 

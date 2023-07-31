@@ -38,6 +38,8 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 import io.olvid.messenger.databases.tasks.CreateReadMessageMetadata;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -168,7 +170,7 @@ public class NotificationActionService extends IntentService {
                             if (discussion != null) {
                                 if (response.length() > 0) {
                                     DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
-                                    final Message.JsonExpiration jsonExpiration;
+                                    final JsonExpiration jsonExpiration;
                                     if (discussionCustomization != null) {
                                         jsonExpiration = discussionCustomization.getExpirationJson();
                                     } else {
@@ -180,7 +182,7 @@ public class NotificationActionService extends IntentService {
                                         discussion.updateLastMessageTimestamp(System.currentTimeMillis());
                                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
 
-                                        Message.JsonMessage jsonMessage = new Message.JsonMessage(response);
+                                        JsonMessage jsonMessage = new JsonMessage(response);
                                         if (jsonExpiration != null) {
                                             jsonMessage.setJsonExpiration(jsonExpiration);
                                         }
@@ -231,7 +233,7 @@ public class NotificationActionService extends IntentService {
                                 AndroidNotificationManager.displayMissedCallNotification(discussion, response);
                                 if (response.length() > 0) {
                                     DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
-                                    final Message.JsonExpiration jsonExpiration;
+                                    final JsonExpiration jsonExpiration;
                                     if (discussionCustomization != null) {
                                         jsonExpiration = discussionCustomization.getExpirationJson();
                                     } else {
@@ -242,7 +244,7 @@ public class NotificationActionService extends IntentService {
                                         db.discussionDao().updateLastOutboundMessageSequenceNumber(discussion.id, discussion.lastOutboundMessageSequenceNumber);
                                         discussion.updateLastMessageTimestamp(System.currentTimeMillis());
                                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
-                                        Message.JsonMessage jsonMessage = new Message.JsonMessage(response);
+                                        JsonMessage jsonMessage = new JsonMessage(response);
                                         if (jsonExpiration != null) {
                                             jsonMessage.setJsonExpiration(jsonExpiration);
                                         }
@@ -278,6 +280,11 @@ public class NotificationActionService extends IntentService {
 
 
     public static void markAllDiscussionMessagesRead(long discussionId) {
+        Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);
+        if (discussion == null) {
+            return;
+        }
+
         DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussionId);
         boolean sendReadReceipt;
         if (discussionCustomization != null && discussionCustomization.prefSendReadReceipt != null) {
@@ -288,7 +295,6 @@ public class NotificationActionService extends IntentService {
         if (sendReadReceipt) {
             final List<Message> messages = AppDatabase.getInstance().messageDao().getAllUnreadDiscussionMessagesSync(discussionId);
             App.runThread(() -> {
-                Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);
                 for (Message message : messages) {
                     if (message.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
                         message.sendMessageReturnReceipt(discussion, Message.RETURN_RECEIPT_STATUS_READ);
@@ -296,6 +302,12 @@ public class NotificationActionService extends IntentService {
                     new CreateReadMessageMetadata(message.id).run();
                 }
             });
+        }
+        if (AppDatabase.getInstance().ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(discussion.bytesOwnedIdentity)) {
+            Long timestamp = AppDatabase.getInstance().messageDao().getServerTimestampOfLatestUnreadInboundMessageInDiscussion(discussionId);
+            if (timestamp != null) {
+                Message.postDiscussionReadMessage(discussion, timestamp);
+            }
         }
         AppDatabase.getInstance().messageDao().markAllDiscussionMessagesRead(discussionId);
         AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(discussionId, false);

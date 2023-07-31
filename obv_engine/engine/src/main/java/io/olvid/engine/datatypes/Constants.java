@@ -23,8 +23,8 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 34;
-    public static final int SERVER_API_VERSION = 13;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 35;
+    public static final int SERVER_API_VERSION = 15;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
     // files / folders
@@ -49,6 +49,7 @@ public abstract class Constants {
     @SuppressWarnings("PointlessBitwiseExpression")
     public static final long API_KEY_PERMISSION_CALL = 1L << 0;
     public static final long API_KEY_PERMISSION_WEB_CLIENT = 1L << 1;
+    public static final long API_KEY_PERMISSION_MULTI_DEVICE = 1L << 2;
 
 
     // full ratcheting thresholds
@@ -71,6 +72,7 @@ public abstract class Constants {
     // backups
     public static final long AUTOBACKUP_MAX_INTERVAL = 86_400_000L; // 1 day
     public static final long AUTOBACKUP_START_DELAY = 60_000L * 2; // 2 minutes
+    public static final long PERIODIC_OWNED_DEVICE_SYNC_INTERVAL = 86_400_000L; // 1 day
 
     public static final int SERVER_SESSION_NONCE_LENGTH = 32;
     public static final int SERVER_SESSION_CHALLENGE_LENGTH = 32;
@@ -93,6 +95,7 @@ public abstract class Constants {
 
     public static final long BASE_RESCHEDULING_TIME = 250L;
     public static final long WEBSOCKET_PING_INTERVAL_MILLIS = 20_000L;
+    public static final long NO_DEVICE_CONTACT_DEVICE_DISCOVERY_INTERVAL = 3 * 86_400_000;
 
     // Keycloak
     public static final long KEYCLOAK_SIGNATURE_VALIDITY_MILLIS = 60 * 86_400_000L;

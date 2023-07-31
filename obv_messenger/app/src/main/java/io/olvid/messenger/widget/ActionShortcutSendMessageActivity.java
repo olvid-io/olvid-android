@@ -42,6 +42,8 @@ import io.olvid.messenger.databases.entity.ActionShortcutConfiguration;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 
 public class ActionShortcutSendMessageActivity extends AppCompatActivity {
     public static final String APP_WIDGET_ID_INTENT_EXTRA = "app_widget_id";
@@ -61,7 +63,7 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
                     ActionShortcutConfiguration.JsonConfiguration configuration = actionShortcutConfiguration.getJsonConfiguration();
                     if (configuration != null) {
                         Discussion discussion = AppDatabase.getInstance().discussionDao().getById(actionShortcutConfiguration.discussionId);
-                        if (discussion != null && discussion.active && discussion.canPostMessages()) {
+                        if (discussion != null && discussion.active && discussion.isNormal()) {
                             if (configuration.confirmBeforeSend) {
                                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                                         .setTitle(R.string.dialog_title_send_predefined_message)
@@ -105,7 +107,7 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
         AppDatabase db = AppDatabase.getInstance();
 
         DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-        final Message.JsonExpiration jsonExpiration;
+        final JsonExpiration jsonExpiration;
         if (discussionCustomization != null) {
             jsonExpiration = discussionCustomization.getExpirationJson();
         } else {
@@ -118,7 +120,7 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
             discussion.updateLastMessageTimestamp(System.currentTimeMillis());
             db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
 
-            Message.JsonMessage jsonMessage = new Message.JsonMessage(configuration.messageToSend);
+            JsonMessage jsonMessage = new JsonMessage(configuration.messageToSend);
             if (jsonExpiration != null) {
                 jsonMessage.setJsonExpiration(jsonExpiration);
             }

@@ -38,18 +38,20 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.Reaction;
 
 public class UpdateReactionsTask implements Runnable {
-    final long messageId;
+    private final long messageId;
     @Nullable
-    final String emoji; // emoji is null to remove a previous reaction
-    final byte[] bytesIdentity;
+    private final String emoji; // emoji is null to remove a previous reaction
+    @Nullable
+    private final byte[] bytesIdentity; // null for my own reactions (on this device, or another)
     private final long reactionTimestamp;
+    private final boolean postReactionMessageToDiscussionParticipants;
 
-    // bytesIdentity is null if my own reaction
-    public UpdateReactionsTask(long messageId, @Nullable String emoji, byte[] bytesIdentity, long reactionTimestamp) {
+    public UpdateReactionsTask(long messageId, @Nullable String emoji, @Nullable byte[] bytesIdentity, long reactionTimestamp, boolean postReactionMessageToDiscussionParticipants) {
         this.messageId = messageId;
         this.emoji = emoji;
         this.bytesIdentity = bytesIdentity;
         this.reactionTimestamp = reactionTimestamp;
+        this.postReactionMessageToDiscussionParticipants = postReactionMessageToDiscussionParticipants;
     }
 
     @Override
@@ -70,7 +72,7 @@ public class UpdateReactionsTask implements Runnable {
         }
 
         // if reaction is mine, send notification to other contacts
-        if (bytesIdentity == null) {
+        if (postReactionMessageToDiscussionParticipants) {
             boolean success = Message.postReactionMessage(message, emoji);
             if (!success) {
                 return;

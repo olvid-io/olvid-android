@@ -59,7 +59,7 @@ import java.util.concurrent.Executor;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.HandlerExecutor;
-import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.databases.tasks.PostLocationMessageInDiscussionTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -324,7 +324,7 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
         currentLocation = location;
 
         // truncate float to show
-        Message.JsonLocation jsonLocation = Message.JsonLocation.sendLocationMessage(currentLocation);
+        JsonLocation jsonLocation = JsonLocation.sendLocationMessage(currentLocation);
 
         locationTextView.setText(getString(R.string.label_location_message_content_position, jsonLocation.getTruncatedLatitudeString(), jsonLocation.getTruncatedLongitudeString()));
         altitudeTextView.setText(getString(R.string.label_location_message_content_altitude, jsonLocation.getTruncatedAltitudeString(activity)));

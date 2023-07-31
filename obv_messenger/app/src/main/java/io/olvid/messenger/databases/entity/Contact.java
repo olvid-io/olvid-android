@@ -300,6 +300,9 @@ public class Contact {
         return customPhotoUrl;
     }
 
+    public boolean shouldShowChannelCreationSpinner() {
+        return establishedChannelCount == 0 && deviceCount != 0;
+    }
 
     public void delete() {
         AppDatabase db = AppDatabase.getInstance();

@@ -64,6 +64,7 @@ import io.olvid.engine.networkfetch.datatypes.DownloadMessagesAndListAttachments
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
 import io.olvid.engine.networkfetch.datatypes.WellKnownCacheDelegate;
+import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 import okhttp3.Authenticator;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -105,10 +106,12 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     @SuppressWarnings("FieldCanBeLocal")
     private NotificationListeningDelegate notificationListeningDelegate;
     private NotificationPostingDelegate notificationPostingDelegate;
+    private ProtocolStarterDelegate protocolStarterDelegate;
 
     private final OkHttpClient okHttpClient;
 
     private boolean doConnect = false;
+    private boolean relyOnWebsocketForNetworkDetection = false;
 
     private String os;
     private String osVersion;
@@ -134,7 +137,16 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         identityRegistrationOperationQueue = new NoDuplicateOperationQueue();
         identityRegistrationOperationQueue.execute(1, "Engine-WebsocketCoordinator-register");
 
-        scheduler = new ExponentialBackoffRepeatingScheduler<>();
+        scheduler = new ExponentialBackoffRepeatingScheduler<>() {
+            @Override
+            protected long computeReschedulingDelay(int failedAttemptCount) {
+                // if in aggressive mode (for Desktop), never reschedule too far in the future
+                if (relyOnWebsocketForNetworkDetection) {
+                    return Math.min(super.computeReschedulingDelay(failedAttemptCount), Constants.WEBSOCKET_PING_INTERVAL_MILLIS);
+                }
+                return super.computeReschedulingDelay(failedAttemptCount);
+            }
+        };
         awaitingServerSessionIdentities = new HashSet<>();
         awaitingServerSessionIdentitiesLock = new Object();
 
@@ -210,6 +222,11 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         this.notificationPostingDelegate = notificationPostingDelegate;
     }
 
+
+    public void setProtocolStarterDelegate(ProtocolStarterDelegate protocolStarterDelegate) {
+        this.protocolStarterDelegate = protocolStarterDelegate;
+    }
+
     public void initialQueueing() {
         synchronized (ownedIdentityAndUidsLock) {
             if (initialQueueingPerformed) {
@@ -241,8 +258,9 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         resetWebsockets();
     }
 
-    public void connectWebsockets(String os, String osVersion, int appBuild, String appVersion) {
-        doConnect = true;
+    public void connectWebsockets(boolean relyOnWebsocketForNetworkDetection, String os, String osVersion, int appBuild, String appVersion) {
+        this.doConnect = true;
+        this.relyOnWebsocketForNetworkDetection = relyOnWebsocketForNetworkDetection;
         this.os = os;
         this.osVersion = osVersion;
         this.appBuild = appBuild;
@@ -252,7 +270,8 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     }
 
     public void disconnectWebsockets() {
-        doConnect = false;
+        this.doConnect = false;
+        this.relyOnWebsocketForNetworkDetection = false;
         internalDisconnectWebsockets();
     }
 
@@ -630,6 +649,9 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 1);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
+                if (relyOnWebsocketForNetworkDetection) {
+                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_DETECTED_SOME_NETWORK, new HashMap<>());
+                }
             }
 
             List<IdentityAndUid> identityAndUids = ownedIdentityAndUidsByServer.get(server);
@@ -841,6 +863,27 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                             notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED, userInfo);
                         } catch (IOException | DecodingException e) {
                             Logger.d("Error decoding identity in keycloak websocket notification");
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                    case "ownedDevices": {
+                        Object identityObject = receivedMessage.get("identity");
+                        if (!(identityObject instanceof String)) {
+                            break;
+                        }
+                        try {
+                            Identity identity = Identity.of(Base64.decode((String) identityObject));
+
+                            if (protocolStarterDelegate != null) {
+                                try {
+                                    protocolStarterDelegate.startOwnedDeviceDiscoveryProtocol(identity);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } catch (IOException | DecodingException e) {
+                            Logger.d("Error decoding identity in ownedDevices websocket notification");
                             e.printStackTrace();
                         }
                         break;

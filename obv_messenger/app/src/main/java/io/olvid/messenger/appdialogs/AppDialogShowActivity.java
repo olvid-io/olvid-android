@@ -54,6 +54,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.HashMap;
 
 import io.olvid.engine.engine.types.EngineAPI;
+import io.olvid.engine.engine.types.ObvDeviceList;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
@@ -183,8 +184,24 @@ public class AppDialogShowActivity extends LockableActivity {
                 if (!(ownedIdentityObject instanceof OwnedIdentity)) {
                     continueWithNextDialog();
                 } else {
-                    IdentityDeactivatedDialogFragment dialogFragment = IdentityDeactivatedDialogFragment.newInstance((OwnedIdentity) ownedIdentityObject, this::continueWithNextDialog);
-                    dialogFragment.show(getSupportFragmentManager(), DIALOG_IDENTITY_DEACTIVATED);
+                    View spinnerView = getLayoutInflater().inflate(R.layout.dialog_view_deactivated_spinner, null);
+
+                    AlertDialog spinnerDialog = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                            .setTitle(R.string.dialog_title_identity_deactivated)
+                            .setView(spinnerView)
+                            .setNegativeButton(R.string.button_label_cancel, (dialog, which) -> continueWithNextDialog()).create();
+                    spinnerDialog.show();
+
+                    App.runThread(() -> {
+                        ObvDeviceList deviceList = AppSingleton.getEngine().queryRegisteredOwnedDevicesFromServer(((OwnedIdentity) ownedIdentityObject).bytesOwnedIdentity);
+                        runOnUiThread(() -> {
+                            if (spinnerDialog.isShowing()) {
+                                spinnerDialog.dismiss();
+                                IdentityDeactivatedDialogFragment dialogFragment = IdentityDeactivatedDialogFragment.newInstance((OwnedIdentity) ownedIdentityObject, deviceList, this::continueWithNextDialog);
+                                dialogFragment.show(getSupportFragmentManager(), DIALOG_IDENTITY_DEACTIVATED);
+                            }
+                        });
+                    });
                 }
                 break;
             }
@@ -239,6 +256,9 @@ public class AppDialogShowActivity extends LockableActivity {
                             break;
                         case WEB_CLIENT:
                             subscriptionMessageTextView.setText(R.string.dialog_message_subscription_required_web_client);
+                            break;
+                        case MULTI_DEVICE:
+                            subscriptionMessageTextView.setText(R.string.dialog_message_subscription_required_multi_device);
                             break;
                     }
                     dialog.show();

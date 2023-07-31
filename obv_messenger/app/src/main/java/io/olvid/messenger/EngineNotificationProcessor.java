@@ -40,13 +40,20 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
+import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.messenger.activities.ShortcutActivity;
+import io.olvid.messenger.billing.BillingUtils;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Invitation;
+import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.tasks.ApplySyncAtomTask;
+import io.olvid.messenger.databases.tasks.DeleteOwnedIdentityAndEverythingRelatedToItTask;
+import io.olvid.messenger.databases.tasks.InsertMediatorInvitationMessageTask;
+import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.backup.BackupAppDataForEngineTask;
 import io.olvid.messenger.main.invitations.InvitationListViewModelKt;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
@@ -82,6 +89,11 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 EngineNotifications.OWNED_IDENTITY_LATEST_DETAILS_UPDATED,
                 EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED,
                 EngineNotifications.OWN_CAPABILITIES_UPDATED,
+                EngineNotifications.OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE,
+                EngineNotifications.OWNED_IDENTITY_DEVICE_LIST_CHANGED,
+                EngineNotifications.KEYCLOAK_SYNCHRONIZATION_REQUIRED,
+                EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT,
+                EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE,
         }) {
             engine.addNotificationListener(notificationName, this);
         }
@@ -204,7 +216,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 UUID dialogUuid = (UUID) userInfo.get(EngineNotifications.UI_DIALOG_UUID_KEY);
                 ObvDialog dialog = (ObvDialog) userInfo.get(EngineNotifications.UI_DIALOG_DIALOG_KEY);
                 Long creationTimestamp = (Long) userInfo.get(EngineNotifications.UI_DIALOG_CREATION_TIMESTAMP_KEY);
-                if (dialog == null || creationTimestamp == null) {
+                if (dialogUuid == null || dialog == null || creationTimestamp == null) {
                     break;
                 }
 
@@ -381,6 +393,11 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         }
                         break;
                     }
+                    case ObvDialog.Category.SYNC_ITEM_TO_APPLY_DIALOG_CATEGORY: {
+                        // start a task to apply the sync item
+                        new ApplySyncAtomTask(dialogUuid, dialog.getBytesOwnedIdentity(), dialog.getCategory().getObvSyncItem()).run();
+                        break;
+                    }
                 }
                 break;
             }
@@ -390,6 +407,8 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                     Invitation existingInvitation = db.invitationDao().getByDialogUuid(dialogUuid);
                     if (existingInvitation != null) {
                         db.invitationDao().delete(existingInvitation);
+                        // clear any notification (useful only in multi-device)
+                        AndroidNotificationManager.clearInvitationNotification(dialogUuid);
                         // delete pre discussion
                         if (existingInvitation.discussionId != null) {
                             Discussion discussion = db.discussionDao().getById(existingInvitation.discussionId);
@@ -414,21 +433,29 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                     OwnedIdentity identity = db.ownedIdentityDao().get(bytesOwnedIdentity);
                     if (identity != null) {
                         boolean changed = false;
+                        boolean showDialog = false;
                         if (identity.getApiKeyStatus() != apiKeyStatus) {
                             changed = true;
+                            showDialog = true;
                             identity.setApiKeyStatus(apiKeyStatus);
                         }
                         if (!Objects.equals(identity.apiKeyExpirationTimestamp, apiKeyExpirationTimestamp)) {
                             changed = true;
+                            // only show a dialog if expiration was lost, gained, or was reduced
+                            showDialog |= identity.apiKeyExpirationTimestamp == null || apiKeyExpirationTimestamp == null
+                                    || identity.apiKeyExpirationTimestamp > apiKeyExpirationTimestamp;
                             identity.apiKeyExpirationTimestamp = apiKeyExpirationTimestamp;
                         }
                         long oldPermissions = identity.apiKeyPermissions;
                         identity.setApiKeyPermissions(apiKeyPermissions);
                         if (oldPermissions != identity.apiKeyPermissions) {
                             changed = true;
+                            showDialog = true;
                         }
                         if (changed) {
                             db.ownedIdentityDao().updateApiKey(identity.bytesOwnedIdentity, identity.apiKeyStatus, identity.apiKeyPermissions, identity.apiKeyExpirationTimestamp);
+                        }
+                        if (showDialog) {
                             App.openAppDialogApiKeyPermissionsUpdated(identity);
                         }
                     }
@@ -454,6 +481,14 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                 if (obvIdentity.isKeycloakManaged() != appOwnedIdentity.keycloakManaged) {
                                     appOwnedIdentity.keycloakManaged = obvIdentity.isKeycloakManaged();
                                     AppDatabase.getInstance().ownedIdentityDao().updateKeycloakManaged(appOwnedIdentity.bytesOwnedIdentity, appOwnedIdentity.keycloakManaged);
+
+                                    // if no longer keycloak managed, unregister from
+                                    if (!appOwnedIdentity.keycloakManaged) {
+                                        KeycloakManager.getInstance().unregisterKeycloakManagedIdentity(appOwnedIdentity.bytesOwnedIdentity);
+                                        if (BuildConfig.USE_BILLING_LIB) {
+                                            BillingUtils.newIdentityAvailableForSubscription(appOwnedIdentity.bytesOwnedIdentity);
+                                        }
+                                    }
 
                                     if (Arrays.equals(appOwnedIdentity.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
                                         AppSingleton.updateCachedKeycloakManaged(appOwnedIdentity.bytesOwnedIdentity, appOwnedIdentity.keycloakManaged);
@@ -551,6 +586,98 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         }
                     }
                 }
+                break;
+            }
+            case EngineNotifications.OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE_BYTES_OWNED_IDENTITY_KEY);
+                if (bytesOwnedIdentity == null) {
+                    break;
+                }
+
+                App.runThread(new DeleteOwnedIdentityAndEverythingRelatedToItTask(bytesOwnedIdentity));
+                break;
+            }
+            case EngineNotifications.OWNED_IDENTITY_DEVICE_LIST_CHANGED: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.OWNED_IDENTITY_DELETED_FROM_ANOTHER_DEVICE_BYTES_OWNED_IDENTITY_KEY);
+                if (bytesOwnedIdentity == null) {
+                    break;
+                }
+
+                new OwnedDevicesSynchronisationWithEngineTask(bytesOwnedIdentity).run();
+                break;
+            }
+            case EngineNotifications.KEYCLOAK_SYNCHRONIZATION_REQUIRED: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.KEYCLOAK_SYNCHRONIZATION_REQUIRED_BYTES_OWNED_IDENTITY_KEY);
+                if (bytesOwnedIdentity == null) {
+                    break;
+                }
+
+                try {
+                    ObvIdentity obvIdentity = engine.getOwnedIdentity(bytesOwnedIdentity);
+                    ObvKeycloakState keycloakState = engine.getOwnedIdentityKeycloakState(bytesOwnedIdentity);
+                    if (obvIdentity != null && keycloakState != null) {
+                        KeycloakManager.getInstance().registerKeycloakManagedIdentity(
+                                obvIdentity,
+                                keycloakState.keycloakServer,
+                                keycloakState.clientId,
+                                keycloakState.clientSecret,
+                                keycloakState.jwks,
+                                keycloakState.signatureKey,
+                                keycloakState.serializedAuthState,
+                                keycloakState.ownApiKey,
+                                keycloakState.latestRevocationListTimestamp,
+                                keycloakState.latestGroupUpdateTimestamp,
+                                false
+                        );
+                    }
+                } catch (Exception ignored) {}
+                break;
+            }
+            case EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT_BYTES_OWNED_IDENTITY_KEY);
+                byte[] bytesContactIdentityA = (byte[]) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT_BYTES_CONTACT_IDENTITY_A_KEY);
+                byte[] bytesContactIdentityB = (byte[]) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT_BYTES_CONTACT_IDENTITY_B_KEY);
+                if (bytesOwnedIdentity == null || bytesContactIdentityA == null || bytesContactIdentityB == null) {
+                    break;
+                }
+
+                Contact contactA = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, bytesContactIdentityA);
+                Contact contactB = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, bytesContactIdentityB);
+                if (contactA == null || contactB == null) {
+                    break;
+                }
+
+                new InsertMediatorInvitationMessageTask(bytesOwnedIdentity, bytesContactIdentityA, Message.TYPE_MEDIATOR_INVITATION_SENT, contactB.getCustomDisplayName()).run();
+                new InsertMediatorInvitationMessageTask(bytesOwnedIdentity, bytesContactIdentityB, Message.TYPE_MEDIATOR_INVITATION_SENT, contactA.getCustomDisplayName()).run();
+                break;
+            }
+            case EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_OWNED_IDENTITY_KEY);
+                byte[] bytesMediatorIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_MEDIATOR_IDENTITY_KEY);
+                String contactSerializedDetails = (String) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY);
+                Boolean accepted = (Boolean) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY);
+                if (bytesOwnedIdentity == null || bytesMediatorIdentity == null || contactSerializedDetails == null || accepted == null) {
+                    break;
+                }
+
+                JsonIdentityDetails contactDetails;
+                try {
+                    contactDetails = AppSingleton.getJsonObjectMapper().readValue(contactSerializedDetails, JsonIdentityDetails.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    break;
+                }
+                Contact mediator = AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, bytesMediatorIdentity);
+                if (contactDetails == null || mediator == null) {
+                    break;
+                }
+
+                new InsertMediatorInvitationMessageTask(
+                        bytesOwnedIdentity,
+                        bytesMediatorIdentity,
+                        accepted ? Message.TYPE_MEDIATOR_INVITATION_ACCEPTED : Message.TYPE_MEDIATOR_INVITATION_IGNORED,
+                        contactDetails.formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName())
+                ).run();
                 break;
             }
         }

@@ -45,5 +45,6 @@ public interface ChannelDelegate {
     void deleteObliviousChannelsWithContact(Session session, Identity ownedIdentity, Identity remoteIdentity) throws Exception;
     void deleteObliviousChannelIfItExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws Exception;
     void deleteAllChannelsForOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
-    boolean checkIfObliviousChannelExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws Exception;
+    boolean checkIfObliviousChannelExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws SQLException;
+    boolean checkIfObliviousChannelIsConfirmed(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws SQLException;
 }

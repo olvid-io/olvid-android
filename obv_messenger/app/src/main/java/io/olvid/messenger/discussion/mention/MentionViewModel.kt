@@ -24,7 +24,7 @@ import androidx.core.text.getSpans
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.olvid.messenger.databases.entity.Contact
-import io.olvid.messenger.databases.entity.Message.JsonUserMention
+import io.olvid.messenger.databases.entity.jsons.JsonUserMention
 import java.util.regex.Pattern
 import kotlin.math.max
 
@@ -61,11 +61,12 @@ class MentionViewModel : ViewModel() {
             val mentionsFromSpans = ArrayList<JsonUserMention>()
             // iterate in reverse order so that editable.delete always uses the correct offsets
             editable.getSpans<MentionUrlSpan>().asList().asReversed().forEach { mentionUrlSpan ->
-                val mention = JsonUserMention(
-                    mentionUrlSpan.userIdentifier,
-                    editable.getSpanStart(mentionUrlSpan),
-                    editable.getSpanEnd(mentionUrlSpan)
-                )
+                val mention =
+                    JsonUserMention(
+                        mentionUrlSpan.userIdentifier,
+                        editable.getSpanStart(mentionUrlSpan),
+                        editable.getSpanEnd(mentionUrlSpan)
+                    )
                 if (mention.length != mentionUrlSpan.length) {
                     // length mismatch, delete existing mention entirely or span only for cancelled
                     editable.removeSpan(mentionUrlSpan)
@@ -107,7 +108,12 @@ class MentionViewModel : ViewModel() {
                 continue
             }
             foundOngoing = true
-            ongoingMention = JsonUserMention(null, startMention, endMention)
+            ongoingMention =
+                JsonUserMention(
+                    null,
+                    startMention,
+                    endMention
+                )
             mentionsStatus.value = MentionStatus.Filter(mentionMatcher.group().replaceFirst("@", ""))
             break
         }

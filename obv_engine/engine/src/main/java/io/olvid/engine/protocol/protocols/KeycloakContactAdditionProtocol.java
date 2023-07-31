@@ -26,6 +26,7 @@ import java.util.Objects;
 
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
@@ -602,7 +603,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
                 protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(trustTimestamp, startState.keycloakServerUrl), true);
 
                 for (UID contactDeviceUid : contactDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid);
+                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, false);
                 }
             } else {
                 contactCreated = false;
@@ -617,9 +618,11 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateContactAdditionToOtherDevicesMessage(coreProtocolMessage, startState.contactIdentity, startState.keycloakServerUrl, startState.contactSerializedDetails, contactDeviceUids, trustTimestamp).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateContactAdditionToOtherDevicesMessage(coreProtocolMessage, startState.contactIdentity, startState.keycloakServerUrl, startState.contactSerializedDetails, contactDeviceUids, trustTimestamp).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -665,7 +668,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
                 protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, receivedMessage.contactIdentity, receivedMessage.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(receivedMessage.trustTimestamp, receivedMessage.keycloakServerUrl), true);
 
                 for (UID contactDeviceUid : receivedMessage.contactDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity, contactDeviceUid);
+                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity, contactDeviceUid, false);
                 }
             } else {
                 protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(receivedMessage.trustTimestamp, receivedMessage.keycloakServerUrl), true);
@@ -766,7 +769,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
                 protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), startState.keycloakServerUrl), true);
 
                 for (UID contactDeviceUid : startState.contactDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid);
+                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, false);
                 }
             } else {
                 protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), startState.keycloakServerUrl), true);

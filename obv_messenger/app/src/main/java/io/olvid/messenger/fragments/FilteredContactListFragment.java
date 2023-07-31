@@ -324,8 +324,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
                                 || !(Objects.equals(oldItem.contact.identityDetails, newItem.contact.identityDetails))) {
                             changesMask |= DISPLAY_NAME_OR_PHOTO_CHANGE_MASK;
                         }
-                        if ((oldItem.contact.establishedChannelCount > 0 && newItem.contact.establishedChannelCount == 0) ||
-                                (newItem.contact.establishedChannelCount > 0 && oldItem.contact.establishedChannelCount == 0)) {
+                        if (oldItem.contact.shouldShowChannelCreationSpinner() != newItem.contact.shouldShowChannelCreationSpinner()) {
                             changesMask |= ESTABLISHED_CHANNEL_CHANGE_MASK;
                         }
                         if (oldItem.contact.active ^ newItem.contact.active) {
@@ -469,7 +468,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
                 }
 
                 if ((changesMask & ESTABLISHED_CHANNEL_CHANGE_MASK) != 0 || (changesMask & ACTIVE_CHANGE_MASK) != 0) {
-                    if (selectableContact.contact.establishedChannelCount == 0 && selectableContact.contact.active) {
+                    if (selectableContact.contact.shouldShowChannelCreationSpinner() && selectableContact.contact.active) {
                         holder.shouldAnimateChannelImageView = true;
                         holder.establishingChannelGroup.setVisibility(View.VISIBLE);
                         final AnimatedVectorDrawableCompat animated = AnimatedVectorDrawableCompat.create(App.getContext(), R.drawable.dots);

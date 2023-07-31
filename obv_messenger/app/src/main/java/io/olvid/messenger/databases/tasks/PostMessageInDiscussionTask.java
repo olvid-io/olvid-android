@@ -31,6 +31,9 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
+import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 public class PostMessageInDiscussionTask implements Runnable {
@@ -39,9 +42,9 @@ public class PostMessageInDiscussionTask implements Runnable {
     private final long discussionId;
     private final boolean showToast;
     private final OpenGraph openGraph;
-    private final List<Message.JsonUserMention> mentions;
+    private final List<JsonUserMention> mentions;
 
-    public PostMessageInDiscussionTask(String body, long discussionId, boolean showToast, OpenGraph openGraph, List<Message.JsonUserMention> mentions) {
+    public PostMessageInDiscussionTask(String body, long discussionId, boolean showToast, OpenGraph openGraph, List<JsonUserMention> mentions) {
         this.db = AppDatabase.getInstance();
         this.body = body;
         this.discussionId = discussionId;
@@ -53,7 +56,7 @@ public class PostMessageInDiscussionTask implements Runnable {
     @Override
     public void run() {
         final Discussion discussion = db.discussionDao().getById(discussionId);
-        if (!discussion.canPostMessages()) {
+        if (!discussion.isNormal()) {
             Logger.w("A message was posted in a locked discussion!!!");
             return;
         }
@@ -63,6 +66,7 @@ public class PostMessageInDiscussionTask implements Runnable {
             try {
                 File cacheDir = new File(App.getContext().getCacheDir(), App.CAMERA_PICTURE_FOLDER);
                 File payloadFile = new File(cacheDir, Logger.getUuidString(UUID.randomUUID()));
+                //noinspection ResultOfMethodCallIgnored
                 cacheDir.mkdirs();
                 if (!payloadFile.createNewFile()) {
                     throw new FileNotFoundException();
@@ -79,7 +83,7 @@ public class PostMessageInDiscussionTask implements Runnable {
             }
         }
 
-        Message.JsonExpiration discussionDefaultJsonExpiration = null;
+        JsonExpiration discussionDefaultJsonExpiration = null;
         DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
         if (discussionCustomization != null) {
             discussionDefaultJsonExpiration = discussionCustomization.getExpirationJson();
@@ -87,11 +91,11 @@ public class PostMessageInDiscussionTask implements Runnable {
 
         final Message draftMessage = db.messageDao().getDiscussionDraftMessageSync(discussionId);
         if (draftMessage == null) {
-            final Message.JsonMessage jsonMessage;
+            final JsonMessage jsonMessage;
             if (body == null) {
-                jsonMessage = new Message.JsonMessage();
+                jsonMessage = new JsonMessage();
             } else {
-                jsonMessage = new Message.JsonMessage(body);
+                jsonMessage = new JsonMessage(body);
             }
             jsonMessage.setJsonUserMentions(mentions);
 
@@ -123,7 +127,7 @@ public class PostMessageInDiscussionTask implements Runnable {
                 message.post(showToast, null);
             });
         } else {
-            final Message.JsonMessage jsonMessage = draftMessage.getJsonMessage();
+            final JsonMessage jsonMessage = draftMessage.getJsonMessage();
             jsonMessage.setBody(body);
             jsonMessage.setJsonUserMentions(mentions);
 

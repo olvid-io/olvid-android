@@ -47,8 +47,8 @@ public interface ContactGroupJoinDao {
             " ON contact." + Contact.BYTES_CONTACT_IDENTITY + " = CGjoin." + ContactGroupJoin.BYTES_CONTACT_IDENTITY +
             " AND contact." + Contact.BYTES_OWNED_IDENTITY + " = CGjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
             " WHERE CGjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND CGjoin." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :groupOwnedAndUid")
-    List<Contact> getGroupContactsSync(final byte[] bytesOwnedIdentity, final byte[] groupOwnedAndUid);
+            " AND CGjoin." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :groupOwnerAndUid")
+    List<Contact> getGroupContactsSync(final byte[] bytesOwnedIdentity, final byte[] groupOwnerAndUid);
 
     @Query("SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
             " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS CGjoin " +

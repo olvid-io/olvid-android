@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/dialogBackground">
 
     <TextView
@@ -24,9 +25,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/button_reactivate_identity"
         app:layout_constraintEnd_toEndOf="parent"
@@ -34,10 +33,35 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dialog_title">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/dialog_message_identity_deactivated" />
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/explanation_profile_inactive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:text="@string/dialog_message_identity_deactivated" />
+
+            <TextView
+                android:id="@+id/label_active_devices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textSize="16sp"
+                android:textAppearance="@style/RobotoMedium"
+                android:textColor="@color/primary700"
+                android:layout_marginHorizontal="16dp"
+                android:text="@string/label_active_devices" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/device_list_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                tools:listitem="@layout/item_view_selectable_owned_device"
+                tools:itemCount="2"/>
+        </LinearLayout>
     </ScrollView>
 
     <Button
@@ -47,20 +71,18 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/button_label_reactivate_identity"
-        app:layout_constraintBottom_toTopOf="@+id/button_ok"
+        app:layout_constraintBottom_toTopOf="@+id/button_cancel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/button_ok"
+        android:id="@+id/button_cancel"
         style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/button_label_ok"
+        android:text="@string/button_label_cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

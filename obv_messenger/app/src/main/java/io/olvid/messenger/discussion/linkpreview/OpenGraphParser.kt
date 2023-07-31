@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.discussion.linkpreview
 
+import io.olvid.engine.Logger
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
@@ -86,6 +87,7 @@ class OpenGraphParser {
                             .select(DOC_SELECT_ITEMPROP).firstOrNull()?.attr("content")
             }
         } catch (e: Exception) {
+            Logger.w("Opengraph parser error: " + e.message)
             return null
         }
 

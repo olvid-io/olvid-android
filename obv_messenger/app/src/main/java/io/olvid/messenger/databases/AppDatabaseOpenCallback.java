@@ -53,8 +53,10 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.tasks.ApplyDiscussionRetentionPoliciesTask;
 import io.olvid.messenger.databases.tasks.CreateOrUpdateGroupV2Task;
+import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -340,7 +342,12 @@ public class AppDatabaseOpenCallback implements Runnable {
                 }
                 identitiesHashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
 
+                ////////////////
+                // synchronize OwnedDevices
+                new OwnedDevicesSynchronisationWithEngineTask(ownedIdentity.getBytesIdentity()).run();
 
+
+                ////////////////
                 // synchronize Contacts for this OwnedIdentity
                 {
                     HashMap<BytesKey, Contact> subMap = contactsHashMap.get(new BytesKey(ownedIdentity.getBytesIdentity()));
@@ -521,7 +528,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                                     Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid);
                                     if (discussion == null) {
                                         Logger.d("Creating associated group discussion");
-                                        discussion = Discussion.createOrReuseGroupDiscussion(db, newGroup);
+                                        discussion = Discussion.createOrReuseGroupDiscussion(db, newGroup, false);
 
                                         if (discussion == null) {
                                             throw new RuntimeException("Unable to create group discussion");
@@ -543,7 +550,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         }
                                     }
 
-                                    newGroup.groupMembersNames = StringUtils.joinGroupMemberNames(db.groupDao().getGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid));
+                                    newGroup.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid));
                                     db.groupDao().updateGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid, newGroup.groupMembersNames);
 
                                     HashSet<BytesKey> declinedSet = new HashSet<>();
@@ -566,7 +573,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                                     Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid);
                                     if (discussion == null) {
                                         Logger.d("Creating missing discussion for existing group !!!");
-                                        discussion = Discussion.createOrReuseGroupDiscussion(db, finalGroup);
+                                        discussion = Discussion.createOrReuseGroupDiscussion(db, finalGroup, false);
 
                                         if (discussion == null) {
                                             throw new RuntimeException("Unable to create group discussion");
@@ -604,13 +611,13 @@ public class AppDatabaseOpenCallback implements Runnable {
                                             db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                                         }
 
-                                        finalGroup.groupMembersNames = StringUtils.joinGroupMemberNames(db.groupDao().getGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid));
+                                        finalGroup.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid));
                                         db.groupDao().updateGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid, finalGroup.groupMembersNames);
 
                                         if (finalGroup.bytesGroupOwnerIdentity == null && !contactToAdd.isEmpty()) { // owned group --> check the customization
                                             DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
                                             if (discussionCustomization != null) {
-                                                DiscussionCustomization.JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
+                                                JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
 
                                                 if (jsonSharedSettings != null) {
                                                     Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, finalGroup.bytesOwnedIdentity, true, null);
@@ -679,7 +686,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                         if (subMap != null) {
                             subMap.remove(new BytesKey(obvGroupV2.groupIdentifier.getBytes()));
                         }
-                        new CreateOrUpdateGroupV2Task(obvGroupV2, false, false, true).run();
+                        new CreateOrUpdateGroupV2Task(obvGroupV2, false, false, false,true, null).run();
                     }
 
                     if (subMap != null && subMap.size() == 0) {

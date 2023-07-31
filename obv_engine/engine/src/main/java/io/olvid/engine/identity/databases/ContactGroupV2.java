@@ -85,7 +85,7 @@ public class ContactGroupV2 implements ObvDatabase {
 
     private byte[] verifiedAdministratorsChain; // null for a keycloak group
     static final String VERIFIED_ADMINISTRATORS_CHAIN = "verified_administrators_chain";
-   private Seed blobMainSeed; // used to decrypt the blob on the server, null for a keycloak group
+    private Seed blobMainSeed; // used to decrypt the blob on the server, null for a keycloak group
     static final String BLOB_MAIN_SEED = "blob_main_seed";
     private Seed blobVersionSeed; // used to decrypt the blob on the server, null for a keycloak group
     static final String BLOB_VERSION_SEED = "blob_version_seed";
@@ -101,6 +101,9 @@ public class ContactGroupV2 implements ObvDatabase {
     static final String PUSH_TOPIC = "push_topic";
     private String serializedSharedSettings; // non-null only for keyclaok groups
     static final String SERIALIZED_SHARED_SETTINGS = "serialized_shared_settings";
+    private String serializedJsonGroupType;
+    static final String SERIALIZED_JSON_GROUP_TYPE = "serialized_json_group_type";
+
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
@@ -158,10 +161,14 @@ public class ContactGroupV2 implements ObvDatabase {
         return serializedSharedSettings;
     }
 
+    public String getSerializedJsonGroupType() {
+        return serializedJsonGroupType;
+    }
+
     // region constructor
 
     // used only by the group creator to create a new group
-    public static ContactGroupV2 createNew(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, String absolutePhotoUrl, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings) {
+    public static ContactGroupV2 createNew(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, String absolutePhotoUrl, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, String serializedGroupType) {
         if ((groupIdentifier == null) || (ownedIdentity == null) || (serializedGroupDetails == null) || (verifiedAdministratorsChain == null) || (blobKeys == null) || (ownGroupInvitationNonce == null)) {
             return null;
         }
@@ -180,7 +187,7 @@ public class ContactGroupV2 implements ObvDatabase {
             byte[] serializedOwnPermissions = GroupV2.Permission.serializePermissionStrings(ownPermissionStrings);
 
             // when first creating the group, it is frozen. It will be unfrozen once the group is successfully uploaded to the server and the members can be notified
-            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, serializedOwnPermissions, contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, true, System.currentTimeMillis(), null, null);
+            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, serializedOwnPermissions, contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, true, System.currentTimeMillis(), null, null, serializedGroupType);
             contactGroup.insert();
             contactGroup.commitHookBits |= HOOK_BIT_INSERTED_AS_NEW | HOOK_BIT_FROZEN_CHANGED; // this way the app also receives a frozen notification to mark the group as updating
             return contactGroup;
@@ -191,7 +198,7 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
 
-    public static ContactGroupV2 createJoined(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String serializedGroupDetails, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings) {
+    public static ContactGroupV2 createJoined(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String serializedGroupDetails, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, String serializedGroupType, boolean createdByMeOnOtherDevice) {
         if ((ownedIdentity == null) || (groupIdentifier == null) || (serializedGroupDetails == null) || (verifiedAdministratorsChain == null) || (blobKeys == null) || (ownGroupInvitationNonce == null) || (ownPermissionStrings == null)) {
             return null;
         }
@@ -206,8 +213,11 @@ public class ContactGroupV2 implements ObvDatabase {
                 return null;
             }
 
-            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(ownPermissionStrings), contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, false, System.currentTimeMillis(), null, null);
+            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(ownPermissionStrings), contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, false, System.currentTimeMillis(), null, null, serializedGroupType);
             contactGroup.insert();
+            if (createdByMeOnOtherDevice) {
+                contactGroup.commitHookBits |= HOOK_BIT_INSERTED_AS_NEW | HOOK_BIT_CREATED_ON_OTHER_DEVICE;
+            }
             return contactGroup;
         } catch (Exception e) {
             e.printStackTrace();
@@ -231,7 +241,7 @@ public class ContactGroupV2 implements ObvDatabase {
                 return null;
             }
 
-            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(ownPermissionStrings), contactGroupDetails.getVersion(), null, null, ownGroupInvitationNonce, false, lastModificationTimestamp, pushTopic, serializedSharedSettings);
+            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(ownPermissionStrings), contactGroupDetails.getVersion(), null, null, ownGroupInvitationNonce, false, lastModificationTimestamp, pushTopic, serializedSharedSettings, null);
             contactGroup.insert();
             if (pushTopic != null) {
                 contactGroup.commitHookBits |= HOOK_BIT_NEW_PUSH_TOPIC;
@@ -244,7 +254,7 @@ public class ContactGroupV2 implements ObvDatabase {
         }
     }
 
-    private ContactGroupV2(IdentityManagerSession identityManagerSession, UID groupUid, String serverUrl, int category, Identity ownedIdentity, byte[] serializedOwnPermission, int version, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, boolean frozen, long lastModificationTimestamp, String pushTopic, String serializedSharedSettings) {
+    private ContactGroupV2(IdentityManagerSession identityManagerSession, UID groupUid, String serverUrl, int category, Identity ownedIdentity, byte[] serializedOwnPermission, int version, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, boolean frozen, long lastModificationTimestamp, String pushTopic, String serializedSharedSettings, String serializedJsonGroupType) {
         this.identityManagerSession = identityManagerSession;
         this.groupUid = groupUid;
         this.serverUrl = serverUrl;
@@ -268,6 +278,7 @@ public class ContactGroupV2 implements ObvDatabase {
         this.lastModificationTimestamp = lastModificationTimestamp;
         this.pushTopic = pushTopic;
         this.serializedSharedSettings = serializedSharedSettings;
+        this.serializedJsonGroupType = serializedJsonGroupType;
     }
 
     private ContactGroupV2(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -303,6 +314,7 @@ public class ContactGroupV2 implements ObvDatabase {
         this.lastModificationTimestamp = res.getLong(LAST_MODIFICATION_TIMESTAMP);
         this.pushTopic = res.getString(PUSH_TOPIC);
         this.serializedSharedSettings = res.getString(SERIALIZED_SHARED_SETTINGS);
+        this.serializedJsonGroupType = res.getString(SERIALIZED_JSON_GROUP_TYPE);
     }
 
 
@@ -428,7 +440,7 @@ public class ContactGroupV2 implements ObvDatabase {
             }
         }
 
-        return new GroupV2.ServerBlob(administratorsChain, groupMemberIdentityAndPermissionsAndDetailsList, group.version, serializedGroupDetails, serverPhotoInfo);
+        return new GroupV2.ServerBlob(administratorsChain, groupMemberIdentityAndPermissionsAndDetailsList, group.version, serializedGroupDetails, serverPhotoInfo, group.serializedJsonGroupType);
     }
 
     public static String getPhotoUrl(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
@@ -849,6 +861,7 @@ public class ContactGroupV2 implements ObvDatabase {
         blobVersionSeed = blobKeys.blobVersionSeed;
         groupAdminServerAuthenticationPrivateKey = blobKeys.groupAdminServerAuthenticationPrivateKey;
         lastModificationTimestamp = System.currentTimeMillis();
+        serializedJsonGroupType = serverBlob.serializedGroupType;
 
         // create the new group details
         GroupV2.Identifier groupIdentifier = getGroupIdentifier();
@@ -1348,6 +1361,7 @@ public class ContactGroupV2 implements ObvDatabase {
                     LAST_MODIFICATION_TIMESTAMP + " INTEGER NOT NULL, " +
                     PUSH_TOPIC + " TEXT, " +
                     SERIALIZED_SHARED_SETTINGS + " TEXT, " +
+                    SERIALIZED_JSON_GROUP_TYPE + " TEXT, " +
                     " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + GROUP_UID + ", " + SERVER_URL + ", " + CATEGORY + ", " + OWNED_IDENTITY + "), " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + "(" + OwnedIdentity.OWNED_IDENTITY + ")," +
                     " FOREIGN KEY (" + GROUP_UID + ", " + SERVER_URL + ", " + CATEGORY + ", " + OWNED_IDENTITY + ", " + VERSION + ") REFERENCES " + ContactGroupV2Details.TABLE_NAME + "(" + ContactGroupV2Details.GROUP_UID + ", " + ContactGroupV2Details.SERVER_URL + ", " + ContactGroupV2Details.CATEGORY + ", " + ContactGroupV2Details.OWNED_IDENTITY + ", " + ContactGroupV2Details.VERSION + ")," +
@@ -1412,10 +1426,16 @@ public class ContactGroupV2 implements ObvDatabase {
             }
             oldVersion = 34;
         }
+        if (oldVersion < 35 && newVersion >= 35) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `contact_group_v2` DATABASE FROM VERSION " + oldVersion + " to 35");
+                statement.execute("ALTER TABLE contact_group_v2 ADD COLUMN `serialized_json_group_type` TEXT DEFAULT NULL");
+            }
+        }
     }
 
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
             statement.setBytes(1, groupUid.getBytes());
             statement.setString(2, serverUrl);
             statement.setInt(3, category);
@@ -1434,6 +1454,7 @@ public class ContactGroupV2 implements ObvDatabase {
             statement.setLong(14, lastModificationTimestamp);
             statement.setString(15, pushTopic);
             statement.setString(16, serializedSharedSettings);
+            statement.setString(17, serializedJsonGroupType);
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_INSERTED;
             identityManagerSession.session.addSessionCommitListener(this);
@@ -1486,7 +1507,8 @@ public class ContactGroupV2 implements ObvDatabase {
                 FROZEN + " = ?, " +
                 LAST_MODIFICATION_TIMESTAMP + " = ?, " +
                 PUSH_TOPIC + " = ?, " +
-                SERIALIZED_SHARED_SETTINGS + " = ? " +
+                SERIALIZED_SHARED_SETTINGS + " = ?, " +
+                SERIALIZED_JSON_GROUP_TYPE + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -1506,10 +1528,12 @@ public class ContactGroupV2 implements ObvDatabase {
             statement.setString(11, pushTopic);
             statement.setString(12, serializedSharedSettings);
 
-            statement.setBytes(13, groupUid.getBytes());
-            statement.setString(14, serverUrl);
-            statement.setInt(15, category);
-            statement.setBytes(16, ownedIdentity.getBytes());
+            statement.setString(13, serializedJsonGroupType);
+
+            statement.setBytes(14, groupUid.getBytes());
+            statement.setString(15, serverUrl);
+            statement.setInt(16, category);
+            statement.setBytes(17, ownedIdentity.getBytes());
             statement.executeUpdate();
         }
     }
@@ -1538,7 +1562,7 @@ public class ContactGroupV2 implements ObvDatabase {
     private static final long HOOK_BIT_PHOTO_UPDATED = 0x20;
     private static final long HOOK_BIT_SERVER_USER_DATA_CAN_BE_DELETED = 0x40;
     private static final long HOOK_BIT_NEW_PUSH_TOPIC = 0x80;
-
+    private static final long HOOK_BIT_CREATED_ON_OTHER_DEVICE = 0x100;
     @Override
     public void wasCommitted() {
         // nothing to do here
@@ -1546,7 +1570,8 @@ public class ContactGroupV2 implements ObvDatabase {
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_OWNED_IDENTITY_KEY, ownedIdentity);
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_GROUP_IDENTIFIER_KEY, getGroupIdentifier());
-            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_NEW_GROUP_KEY, (commitHookBits & HOOK_BIT_INSERTED_AS_NEW) != 0);
+            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_CREATED_BY_ME_KEY, (commitHookBits & HOOK_BIT_INSERTED_AS_NEW) != 0);
+            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_ON_OTHER_DEVICE_KEY, (commitHookBits & HOOK_BIT_CREATED_ON_OTHER_DEVICE) != 0);
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED, userInfo);
         }
         if ((commitHookBits & HOOK_BIT_DELETED) != 0) {
@@ -1636,6 +1661,7 @@ public class ContactGroupV2 implements ObvDatabase {
         pojo.last_modification_timestamp = lastModificationTimestamp;
         pojo.push_topic = pushTopic;
         pojo.serialized_shared_settings = serializedSharedSettings;
+        pojo.serialized_json_group_type = serializedJsonGroupType;
 
         pojo.members = ContactGroupV2Member.backupAll(identityManagerSession, ownedIdentity, getGroupIdentifier());
         pojo.pending_members = ContactGroupV2PendingMember.backupAll(identityManagerSession, ownedIdentity, getGroupIdentifier());
@@ -1687,7 +1713,8 @@ public class ContactGroupV2 implements ObvDatabase {
                 false,
                 pojo.last_modification_timestamp,
                 pojo.push_topic,
-                pojo.serialized_shared_settings
+                pojo.serialized_shared_settings,
+                pojo.serialized_json_group_type
         );
         groupV2.insert();
 
@@ -1722,6 +1749,7 @@ public class ContactGroupV2 implements ObvDatabase {
         public long last_modification_timestamp;
         public String push_topic;
         public String serialized_shared_settings;
+        public String serialized_json_group_type;
 
         public ContactGroupV2Member.Pojo_0[] members;
         public ContactGroupV2PendingMember.Pojo_0[] pending_members;

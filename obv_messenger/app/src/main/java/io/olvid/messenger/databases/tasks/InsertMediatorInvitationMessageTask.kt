@@ -29,29 +29,40 @@ class InsertMediatorInvitationMessageTask(
     private val displayName: String,
 ) : Runnable {
     override fun run() {
-        val db = AppDatabase.getInstance()
-        try {
-            val discussion = db.discussionDao().getByContact(
-                bytesOwnedIdentity, bytesContactIdentity
-            )
-           discussion?.let {
-                val message = Message.createMediatorInvitationMessage(
-                    db,
-                    type,
-                    discussion.id,
-                    bytesContactIdentity,
-                    displayName,
-                    System.currentTimeMillis()
-                )
-                message.id = db.messageDao().insert(message)
-                if (discussion.updateLastMessageTimestamp(message.timestamp)) {
-                    db.discussionDao()
-                        .updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp)
+        when (type) {
+            Message.TYPE_MEDIATOR_INVITATION_SENT,
+            Message.TYPE_MEDIATOR_INVITATION_ACCEPTED,
+            Message.TYPE_MEDIATOR_INVITATION_IGNORED -> {
+                val db = AppDatabase.getInstance()
+                try {
+                    val discussion = db.discussionDao().getByContact(
+                        bytesOwnedIdentity, bytesContactIdentity
+                    )
+                    discussion?.let {
+                        val message = Message.createMediatorInvitationMessage(
+                            db,
+                            type,
+                            discussion.id,
+                            bytesContactIdentity,
+                            displayName,
+                            System.currentTimeMillis()
+                        )
+                        message.id = db.messageDao().insert(message)
+
+                        // we do not update the discussion timestamp for type TYPE_MEDIATOR_INVITATION_SENT,
+                        // for other messages, we update only if timestamp was 0 (0 corresponds to discussions hidden from the main list)
+                        if (type != Message.TYPE_MEDIATOR_INVITATION_SENT
+                            && discussion.lastMessageTimestamp != 0L
+                            && discussion.updateLastMessageTimestamp(message.timestamp)
+                        ) {
+                            db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Logger.e("Unable to insert mediator invitation message.")
+                    e.printStackTrace()
                 }
             }
-        } catch (e: Exception) {
-            Logger.e("Unable to insert mediator invitation message.")
-            e.printStackTrace()
         }
     }
 }

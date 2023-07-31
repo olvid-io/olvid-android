@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Constants;
@@ -54,24 +53,28 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
+import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 import io.olvid.engine.identity.datatypes.KeycloakGroupBlob;
 
 public interface IdentityDelegate {
     boolean isOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
     boolean isActiveOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
-    Identity generateOwnedIdentity(Session session, String server, JsonIdentityDetails jsonIdentityDetails, UUID apiKey, ObvKeycloakState keycloakState, PRNGService prng) throws SQLException;
+    Identity generateOwnedIdentity(Session session, String server, JsonIdentityDetails jsonIdentityDetails, ObvKeycloakState keycloakState, String deviceDisplayName, PRNGService prng) throws SQLException;
     void deleteOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
     Identity[] getOwnedIdentities(Session session) throws SQLException;
     void updateLatestIdentityDetails(Session session, Identity ownedIdentity, JsonIdentityDetails jsonIdentityDetails) throws Exception;
     void updateOwnedIdentityPhoto(Session session, Identity ownedIdentity, String absolutePhotoUrl) throws Exception;
     void setOwnedDetailsDownloadedPhoto(Session session, Identity ownedIdentity, int version, byte[] decryptedPhoto) throws Exception;
     void setOwnedIdentityDetailsServerLabelAndKey(Session session, Identity ownedIdentity, int version, UID photoServerLabel, AuthEncKey photoServerKey) throws Exception;
+    void createOwnedIdentityServerUserData(Session session, Identity ownedIdentity, UID photoServerLabel) throws SQLException;
     int publishLatestIdentityDetails(Session session, Identity ownedIdentity) throws SQLException;
     void discardLatestIdentityDetails(Session session, Identity ownedIdentity) throws SQLException;
+    boolean setOwnedIdentityDetailsFromOtherDevice(Session session, Identity ownedIdentity, JsonIdentityDetailsWithVersionAndPhoto ownDetailsWithVersionAndPhoto) throws SQLException;
     JsonIdentityDetailsWithVersionAndPhoto[] getOwnedIdentityPublishedAndLatestDetails(Session session, Identity ownedIdentity) throws SQLException;
     String getSerializedPublishedDetailsOfOwnedIdentity(Session session, Identity ownedIdentity);
     JsonIdentityDetailsWithVersionAndPhoto getOwnedIdentityPublishedDetails(Session session, Identity ownedIdentity) throws SQLException;
@@ -89,31 +92,35 @@ public interface IdentityDelegate {
     String getOwnedIdentityKeycloakServerUrl(Session session, Identity ownedIdentity) throws SQLException;
     void saveKeycloakAuthState(Session session, Identity ownedIdentity, String serializedAuthState) throws SQLException;
     void saveKeycloakJwks(Session session, Identity ownedIdentity, String serializedJwks) throws SQLException;
+    void saveKeycloakApiKey(Session session, Identity ownedIdentity, String apiKey) throws SQLException;
     String getOwnedIdentityKeycloakUserId(Session session, Identity ownedIdentity) throws SQLException;
     void setOwnedIdentityKeycloakUserId(Session session, Identity ownedIdentity, String userId) throws SQLException;
     void bindOwnedIdentityToKeycloak(Session session, Identity ownedIdentity, String keycloakUserId, ObvKeycloakState keycloakState) throws Exception;
     int unbindOwnedIdentityFromKeycloak(Session session, Identity ownedIdentity) throws Exception; // return the version of the new details to publish
-    void updateApiKeyOfOwnedIdentity(Session session, Identity ownedIdentity, UUID newApiKey) throws SQLException;
     boolean updateKeycloakPushTopicsIfNeeded(Session session, Identity ownedIdentity, String serverUrl, List<String> pushTopics) throws SQLException;
     void setOwnedIdentityKeycloakSelfRevocationTestNonce(Session session, Identity ownedIdentity, String serverUrl, String nonce) throws SQLException;
     String getOwnedIdentityKeycloakSelfRevocationTestNonce(Session session, Identity ownedIdentity, String serverUrl) throws SQLException;
     void updateKeycloakGroups(Session session, Identity ownedIdentity, List<String> signedGroupBlobs, List<String> signedGroupDeletions, List<String> signedGroupKicks, long keycloakCurrentTimestamp) throws Exception;
     void reactivateOwnedIdentityIfNeeded(Session session, Identity ownedIdentity) throws SQLException;
     void deactivateOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
+    void markOwnedIdentityForDeletion(Session session, Identity ownedIdentity) throws SQLException;
 
 
     UID[] getDeviceUidsOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
     UID[] getOtherDeviceUidsOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
     UID getCurrentDeviceUidOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
-    Identity getOwnedIdentityForDeviceUid(Session session, UID currentDeviceUid) throws SQLException;
-    void addDeviceForOwnedIdentity(Session session, UID deviceUid, Identity ownedIdentity) throws SQLException;
-    boolean isRemoteDeviceUidOfOwnedIdentity(Session session, UID deviceUid, Identity ownedIdentity) throws SQLException;
+    Identity getOwnedIdentityForCurrentDeviceUid(Session session, UID currentDeviceUid) throws SQLException;
+    void addDeviceForOwnedIdentity(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, boolean channelCreationAlreadyInProgress) throws SQLException;
+    void updateOwnedDevice(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp) throws SQLException;
+    void removeDeviceForOwnedIdentity(Session session, Identity ownedIdentity, UID deviceUid) throws SQLException;
+    List<ObvOwnedDevice> getDevicesOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
+    String getCurrentDeviceDisplayName(Session session, Identity ownedIdentity) throws SQLException;
 
 
     void addContactIdentity(Session session, Identity contactIdentity, String serializedDetails, Identity ownedIdentity, TrustOrigin trustOrigin, boolean oneToOne) throws Exception;
     void addTrustOriginToContact(Session session, Identity contactIdentity, Identity ownedIdentity, TrustOrigin trustOrigin, boolean markContactAsOneToOne) throws SQLException;
     Identity[] getContactsOfOwnedIdentity(Session session, Identity ownedIdentity);
-    void trustPublishedContactDetails(Session session, Identity contactIdentity, Identity ownedIdentity) throws SQLException;
+    JsonIdentityDetailsWithVersionAndPhoto trustPublishedContactDetails(Session session, Identity contactIdentity, Identity ownedIdentity) throws SQLException;
     void setContactPublishedDetails(Session session, Identity contactIdentity, Identity ownedIdentity, JsonIdentityDetailsWithVersionAndPhoto jsonIdentityDetailsWithVersionAndPhoto, boolean allowDowngrade) throws Exception;
     void setContactDetailsDownloadedPhoto(Session session, Identity contactIdentity, Identity ownedIdentity, int version, byte[] photo) throws Exception;
     String getSerializedPublishedDetailsOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity);
@@ -138,7 +145,7 @@ public interface IdentityDelegate {
     boolean reBlockForcefullyUnblockedContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
 
     // return true if a device was indeed added, false if the device already existed, and throws an exception if adding the device failed
-    boolean addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid) throws SQLException;
+    boolean addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid, boolean channelCreationAlreadyInProgress) throws SQLException;
     void removeDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid) throws SQLException;
     void removeAllDevicesForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     UID[] getDeviceUidsOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
@@ -159,7 +166,7 @@ public interface IdentityDelegate {
     byte[] signBlock(Session session, Constants.SignatureContext signatureContext, byte[] block, Identity ownedIdentity, PRNGService prng) throws Exception;
     byte[] signGroupInvitationNonce(Session session, Constants.SignatureContext signatureContext, GroupV2.Identifier groupIdentifier, byte[] nonce, Identity contactIdentity, Identity ownedIdentity, PRNGService prng) throws Exception;
 
-    void createContactGroup(Session session, Identity ownedIdentity, GroupInformation groupInformation, Identity[] groupMembers, IdentityWithSerializedDetails[] pendingGroupMembers) throws Exception;
+    void createContactGroup(Session session, Identity ownedIdentity, GroupInformation groupInformation, Identity[] groupMembers, IdentityWithSerializedDetails[] pendingGroupMembers, boolean createdByMeOnOtherDevice) throws Exception;
     void leaveGroup(Session session, byte[] groupOwnerAndUid, Identity ownedIdentity) throws Exception;
     void addPendingMembersToGroup(Session session, byte[] groupUid, Identity ownedIdentity, Identity[] contactIdentities, GroupMembersChangedCallback groupMembersChangedCallback) throws Exception;
     void removeMembersAndPendingFromGroup(Session session, byte[] groupOwnerAndUid, Identity ownedIdentity, Identity[] contactIdentities, GroupMembersChangedCallback groupMembersChangedCallback) throws Exception;
@@ -176,9 +183,10 @@ public interface IdentityDelegate {
     GroupInformation getGroupInformation(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws Exception;
     JsonGroupDetailsWithVersionAndPhoto[] getGroupPublishedAndLatestOrTrustedDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
     String getGroupPhotoUrl(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
-    void trustPublishedGroupDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
+    JsonGroupDetailsWithVersionAndPhoto trustPublishedGroupDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
     void updateLatestGroupDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, JsonGroupDetails jsonGroupDetails) throws Exception;
     void setOwnedGroupDetailsServerLabelAndKey(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, int version, UID photoServerLabel, AuthEncKey photoServerKey) throws Exception;
+    void createGroupV1ServerUserData(Session session, Identity ownedIdentity, UID photoServerLabel, byte[] groupOwnerAndUid) throws SQLException;
     void updateOwnedGroupPhoto(Session session, Identity ownedIdentity,  byte[] groupOwnerAndUid, String absolutePhotoUrl, boolean partOfGroupCreation) throws Exception;
     void setContactGroupDownloadedPhoto(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid, int version, byte[] photo) throws Exception;
     int publishLatestGroupDetails(Session session, Identity ownedIdentity, byte[] groupOwnerAndUid) throws SQLException;
@@ -191,14 +199,15 @@ public interface IdentityDelegate {
 
     // region groups v2
 
-    void createNewGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, String absolutePhotoUrl, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, HashSet<GroupV2.IdentityAndPermissionsAndDetails> otherGroupMembers) throws Exception;
-    boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob) throws Exception;
+    void createNewGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, String absolutePhotoUrl, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, HashSet<GroupV2.IdentityAndPermissionsAndDetails> otherGroupMembers, String serializedGroupType) throws Exception;
+    boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob, boolean createdByMeOnOtherDevice) throws Exception;
     GroupV2.ServerBlob getGroupV2ServerBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     String getGroupV2PhotoUrl(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     void deleteGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     void freezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     void unfreezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     Integer getGroupV2Version(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    String getGroupV2JsonGroupType(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     boolean isGroupV2Frozen(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     GroupV2.BlobKeys getGroupV2BlobKeys(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     HashSet<GroupV2.IdentityAndPermissions> getGroupV2OtherMembersAndPermissions(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
@@ -209,7 +218,7 @@ public interface IdentityDelegate {
     void moveGroupV2PendingMemberToMembers(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity groupMemberIdentity) throws Exception;
     void setGroupV2DownloadedPhoto(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] photov) throws Exception;
     ObvGroupV2 getObvGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
-    void trustGroupV2PublishedDetails(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    int trustGroupV2PublishedDetails(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     GroupV2.ServerPhotoInfo getGroupV2PublishedServerPhotoInfo(Session session, Identity ownedIdentity, byte[] bytesGroupIdentifier);
     ObvGroupV2.ObvGroupV2DetailsAndPhotos getGroupV2DetailsAndPhotos(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier);
     void setUpdatedGroupV2PhotoUrl(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String absolutePhotoUrl) throws Exception;
@@ -229,12 +238,15 @@ public interface IdentityDelegate {
 
 
     void initiateBackup(final BackupDelegate backupDelegate, final String tag, final UID backupKeyUid, final int version);
-    ObvIdentity[] restoreOwnedIdentitiesFromBackup(String serializedJsonPojo, PRNGService prng);
-    void restoreContactsAndGroupsFromBackup(String serializedJsonPojo, Identity[] restoredOwnedIdentities, long backupTimestamp);
+    ObvIdentity[] restoreOwnedIdentitiesFromBackup(String serializedJsonPojo, String deviceDisplayName, PRNGService prng);
+    void restoreContactsAndGroupsFromBackup(String serializedJsonPojo, ObvIdentity[] restoredOwnedIdentities, long backupTimestamp);
 
     // userData
     UserData[] getAllUserData(Session session) throws Exception;
     UserData getUserData(Session session, Identity ownedIdentity, UID label) throws Exception;
     void deleteUserData(Session session, Identity ownedIdentity, UID label) throws Exception;
     void updateUserDataNextRefreshTimestamp(Session session, Identity ownedIdentity, UID label) throws Exception;
+
+    // device sync
+    void processSyncItem(Session session, Identity ownedIdentity, ObvSyncAtom obvSyncAtom) throws Exception;
 }

@@ -54,9 +54,12 @@ public class PushNotificationConfiguration implements ObvDatabase {
     static final String IDENTITY_MASKING_UID = "identity_masking_uid";
     private int multiDeviceConfiguration;
     static final String MULTI_DEVICE_CONFIGURATION = "multi_device_configuration";
+    private UID deviceUidToReplace;
+    static final String DEVICE_UID_TO_REPLACE = "device_uid_to_replace";
 
-    private static final int CONFIGURATION_KICK_OTHER_DEVICES_AT_NEXT_REGISTRATION_BIT = 0x1;
-    private static final int CONFIGURATION_USE_MULTI_DEVICE_BIT = 0x2;
+
+    private static final int CONFIGURATION_REACTIVATE_CURRENT_DEVICE_AT_NEXT_REGISTRATION_BIT = 0x1;
+//    private static final int CONFIGURATION_USE_MULTI_DEVICE_BIT = 0x2;
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
@@ -78,18 +81,17 @@ public class PushNotificationConfiguration implements ObvDatabase {
         return identityMaskingUid;
     }
 
-    public boolean shouldKickOtherDevices() {
-        return (multiDeviceConfiguration & CONFIGURATION_KICK_OTHER_DEVICES_AT_NEXT_REGISTRATION_BIT) != 0;
+    public boolean shouldReactivateCurrentDevice() {
+        return (multiDeviceConfiguration & CONFIGURATION_REACTIVATE_CURRENT_DEVICE_AT_NEXT_REGISTRATION_BIT) != 0;
     }
 
-    public boolean useMultiDevice() {
-        return (multiDeviceConfiguration & CONFIGURATION_USE_MULTI_DEVICE_BIT) != 0;
+    public UID getDeviceUidToReplace() {
+        return deviceUidToReplace;
     }
 
     public PushNotificationTypeAndParameters getPushNotificationTypeAndParameters() {
-        boolean kickOtherDevices = (multiDeviceConfiguration & CONFIGURATION_KICK_OTHER_DEVICES_AT_NEXT_REGISTRATION_BIT) != 0;
-        boolean useMultiDevice = (multiDeviceConfiguration & CONFIGURATION_USE_MULTI_DEVICE_BIT) != 0;
-        return new PushNotificationTypeAndParameters(pushNotificationType, token, identityMaskingUid, kickOtherDevices, useMultiDevice);
+        boolean reactivateCurrentDevice = (multiDeviceConfiguration & CONFIGURATION_REACTIVATE_CURRENT_DEVICE_AT_NEXT_REGISTRATION_BIT) != 0;
+        return new PushNotificationTypeAndParameters(pushNotificationType, token, identityMaskingUid, reactivateCurrentDevice, deviceUidToReplace);
     }
 
     // region constructors
@@ -100,15 +102,12 @@ public class PushNotificationConfiguration implements ObvDatabase {
         }
 
         int multiDeviceConfiguration = 0;
-        if (pushNotificationTypeAndParameters.kickOtherDevices) {
-            multiDeviceConfiguration |= CONFIGURATION_KICK_OTHER_DEVICES_AT_NEXT_REGISTRATION_BIT;
-        }
-        if (pushNotificationTypeAndParameters.useMultiDevice) {
-            multiDeviceConfiguration |= CONFIGURATION_USE_MULTI_DEVICE_BIT;
+        if (pushNotificationTypeAndParameters.reactivateCurrentDevice) {
+            multiDeviceConfiguration |= CONFIGURATION_REACTIVATE_CURRENT_DEVICE_AT_NEXT_REGISTRATION_BIT;
         }
 
         try {
-            PushNotificationConfiguration pushNotificationConfiguration = new PushNotificationConfiguration(fetchManagerSession, ownedIdentity, deviceUid, pushNotificationTypeAndParameters.pushNotificationType, pushNotificationTypeAndParameters.token, pushNotificationTypeAndParameters.identityMaskingUid, multiDeviceConfiguration);
+            PushNotificationConfiguration pushNotificationConfiguration = new PushNotificationConfiguration(fetchManagerSession, ownedIdentity, deviceUid, pushNotificationTypeAndParameters.pushNotificationType, pushNotificationTypeAndParameters.token, pushNotificationTypeAndParameters.identityMaskingUid, multiDeviceConfiguration, pushNotificationTypeAndParameters.deviceUidToReplace);
             pushNotificationConfiguration.insert();
             return pushNotificationConfiguration;
         } catch (SQLException e) {
@@ -117,7 +116,7 @@ public class PushNotificationConfiguration implements ObvDatabase {
         }
     }
 
-    private PushNotificationConfiguration(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID deviceUid, byte pushNotificationType, byte[] token, UID identityMaskingUid, int multiDeviceConfiguration) {
+    private PushNotificationConfiguration(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID deviceUid, byte pushNotificationType, byte[] token, UID identityMaskingUid, int multiDeviceConfiguration, UID deviceUidToReplace) {
         this.fetchManagerSession = fetchManagerSession;
         this.ownedIdentity = ownedIdentity;
         this.deviceUid = deviceUid;
@@ -125,6 +124,7 @@ public class PushNotificationConfiguration implements ObvDatabase {
         this.token = token;
         this.identityMaskingUid = identityMaskingUid;
         this.multiDeviceConfiguration = multiDeviceConfiguration;
+        this.deviceUidToReplace = deviceUidToReplace;
     }
 
     private PushNotificationConfiguration(FetchManagerSession fetchManagerSession, ResultSet res) throws SQLException {
@@ -138,8 +138,10 @@ public class PushNotificationConfiguration implements ObvDatabase {
         this.pushNotificationType = res.getByte(PUSH_NOTIFICATION_TYPE);
         this.token = res.getBytes(TOKEN);
         byte[] identityMaskingBytes = res.getBytes(IDENTITY_MASKING_UID);
-        this.identityMaskingUid = (identityMaskingBytes==null)?null:new UID(identityMaskingBytes);
+        this.identityMaskingUid = (identityMaskingBytes == null) ? null : new UID(identityMaskingBytes);
         this.multiDeviceConfiguration = res.getInt(MULTI_DEVICE_CONFIGURATION);
+        byte[] bytesDeviceUidToReplace = res.getBytes(DEVICE_UID_TO_REPLACE);
+        this.deviceUidToReplace = (bytesDeviceUidToReplace == null) ? null : new UID(bytesDeviceUidToReplace);
     }
 
     // endregion
@@ -154,7 +156,9 @@ public class PushNotificationConfiguration implements ObvDatabase {
                     PUSH_NOTIFICATION_TYPE + " INT NOT NULL, " +
                     TOKEN + " BLOB, " +
                     IDENTITY_MASKING_UID + " BLOB, " +
-                    MULTI_DEVICE_CONFIGURATION + " INT NOT NULL);");
+                    MULTI_DEVICE_CONFIGURATION + " INT NOT NULL," +
+                    DEVICE_UID_TO_REPLACE + " BLOB " +
+                    ");");
         }
     }
 
@@ -164,18 +168,27 @@ public class PushNotificationConfiguration implements ObvDatabase {
             try (Statement statement = session.createStatement()) {
                 statement.execute("DROP TABLE IF EXISTS registered_push_notification");
             }
+            oldVersion = 15;
+        }
+        if (oldVersion < 35 && newVersion >= 35) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `push_notification_configuration` TABLE FROM VERSION " + oldVersion + " TO 35");
+                statement.execute("ALTER TABLE push_notification_configuration ADD COLUMN device_uid_to_replace BLOB DEFAULT NULL");
+            }
+            oldVersion = 35;
         }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, deviceUid.getBytes());
             statement.setByte(3, pushNotificationType);
             statement.setBytes(4, token);
-            statement.setBytes(5, (identityMaskingUid==null)?null:identityMaskingUid.getBytes());
+            statement.setBytes(5, (identityMaskingUid == null) ? null : identityMaskingUid.getBytes());
             statement.setInt(6, multiDeviceConfiguration);
+            statement.setBytes(7, (deviceUidToReplace == null) ? null : deviceUidToReplace.getBytes());
             statement.executeUpdate();
             this.commitHookBits |= HOOK_BIT_INSERT;
             fetchManagerSession.session.addSessionCommitListener(this);
@@ -233,9 +246,10 @@ public class PushNotificationConfiguration implements ObvDatabase {
 
     public void clearKickOtherDevices() {
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
-                " SET " + MULTI_DEVICE_CONFIGURATION + " = ? " +
+                " SET " + MULTI_DEVICE_CONFIGURATION + " = ?, " +
+                DEVICE_UID_TO_REPLACE + " = NULL " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
-            int newMultiDeviceConfiguration = multiDeviceConfiguration & (~CONFIGURATION_KICK_OTHER_DEVICES_AT_NEXT_REGISTRATION_BIT);
+            int newMultiDeviceConfiguration = multiDeviceConfiguration & (~CONFIGURATION_REACTIVATE_CURRENT_DEVICE_AT_NEXT_REGISTRATION_BIT);
             statement.setInt(1, newMultiDeviceConfiguration);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.executeUpdate();

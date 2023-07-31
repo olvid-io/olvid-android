@@ -29,6 +29,7 @@ import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
@@ -162,6 +163,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
     public static final int INITIAL_MESSAGE_ID = 0;
     public static final int SERVER_PUT_PHOTO_MESSAGE_ID = 1;
     public static final int SEND_DETAILS_MESSAGE_ID = 2;
+    public static final int PROPAGATE_OWN_DETAILS_MESSAGE_ID = 3;
 
     @Override
     protected Class<?> getMessageClass(int protocolMessageId) {
@@ -172,6 +174,8 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
                 return ServerPutPhotoMessage.class;
             case SEND_DETAILS_MESSAGE_ID:
                 return SendDetailsMessage.class;
+            case PROPAGATE_OWN_DETAILS_MESSAGE_ID:
+                return PropagateOwnDetailsMessage.class;
             default:
                 return null;
         }
@@ -259,6 +263,36 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
     }
 
 
+    public static class PropagateOwnDetailsMessage extends ConcreteProtocolMessage {
+        private final String jsonIdentityDetailsWithVersionAndPhoto;
+
+        public PropagateOwnDetailsMessage(CoreProtocolMessage coreProtocolMessage, String jsonIdentityDetailsWithVersionAndPhoto) {
+            super(coreProtocolMessage);
+            this.jsonIdentityDetailsWithVersionAndPhoto = jsonIdentityDetailsWithVersionAndPhoto;
+        }
+
+        public PropagateOwnDetailsMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(new CoreProtocolMessage(receivedMessage));
+            if (receivedMessage.getInputs().length != 1) {
+                throw new Exception();
+            }
+            this.jsonIdentityDetailsWithVersionAndPhoto = receivedMessage.getInputs()[0].decodeString();
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return PROPAGATE_OWN_DETAILS_MESSAGE_ID;
+        }
+
+        @Override
+        public Encoded[] getInputs() {
+            return new Encoded[]{
+                    Encoded.of(jsonIdentityDetailsWithVersionAndPhoto),
+            };
+        }
+    }
+
+
     // endregion
 
 
@@ -272,7 +306,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
     protected Class<?>[] getPossibleStepClasses(int stateId) {
         switch (stateId) {
             case INITIAL_STATE_ID:
-                return new Class[]{StartPhotoUploadStep.class, ReceiveDetailsStep.class};
+                return new Class[]{StartPhotoUploadStep.class, ReceiveDetailsStep.class, ReceiveOwnDetailsStep.class};
             case UPLOADING_PHOTO_STATE_ID:
                 return new Class[]{SendDetailsStep.class};
             case DETAILS_SENT_STATE_ID:
@@ -331,10 +365,10 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
                 return new UploadingPhotoState(jsonPublishedDetails);
             } else {
                 // we can directly send the details
+                String jsonPublishedDetails = protocol.getJsonObjectMapper().writeValueAsString(publishedDetails);
 
                 Identity[] contactIdentities = protocolManagerSession.identityDelegate.getContactsOfOwnedIdentity(protocolManagerSession.session, ownedIdentity);
                 if (contactIdentities.length > 0) {
-                    String jsonPublishedDetails = protocol.getJsonObjectMapper().writeValueAsString(publishedDetails);
 
                     SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(contactIdentities, ownedIdentity);
                     for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
@@ -345,6 +379,18 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
                         } catch (Exception e) {
                             Logger.d("One contact with no channel during IdentityDetailsPublicationProtocol.StartPhotoUploadStep");
                         }
+                    }
+                }
+
+                {
+                    // send the details to other owned devices
+                    int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
+                    if (numberOfOtherDevices > 0) {
+                        try {
+                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                            ChannelMessageToSend messageToSend = new PropagateOwnDetailsMessage(coreProtocolMessage, jsonPublishedDetails).generateChannelProtocolMessageToSend();
+                            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                        } catch (NoAcceptableChannelException ignored) { }
                     }
                 }
 
@@ -367,19 +413,34 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            Identity[] contactIdentities = protocolManagerSession.identityDelegate.getContactsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
-            if (contactIdentities.length > 0) {
-                SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(contactIdentities, getOwnedIdentity());
-                for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
-                    try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(sendChannelInfo);
-                        ChannelMessageToSend messageToSend = new SendDetailsMessage(coreProtocolMessage, startState.jsonIdentityDetailsWithVersionAndPhoto).generateChannelProtocolMessageToSend();
-                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-                    } catch (Exception e) {
-                        Logger.d("One contact with no channel during IdentityDetailsPublicationProtocol.SendDetailsStep");
+            {
+                Identity[] contactIdentities = protocolManagerSession.identityDelegate.getContactsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
+                if (contactIdentities.length > 0) {
+                    SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(contactIdentities, getOwnedIdentity());
+                    for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
+                        try {
+                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(sendChannelInfo);
+                            ChannelMessageToSend messageToSend = new SendDetailsMessage(coreProtocolMessage, startState.jsonIdentityDetailsWithVersionAndPhoto).generateChannelProtocolMessageToSend();
+                            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                        } catch (Exception e) {
+                            Logger.d("One contact with no channel during IdentityDetailsPublicationProtocol.SendDetailsStep");
+                        }
                     }
                 }
             }
+
+            {
+                // send the details to other owned devices
+                int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
+                if (numberOfOtherDevices > 0) {
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateOwnDetailsMessage(coreProtocolMessage, startState.jsonIdentityDetailsWithVersionAndPhoto).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
+                }
+            }
+
             return new DetailsSentState();
         }
     }
@@ -408,8 +469,8 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
 
                 if (! (Arrays.equals(jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerLabel(), publishedDetails.getPhotoServerLabel()) &&
                         ((jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerKey() == null && publishedDetails.getPhotoServerKey() == null) ||
-                        (jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerKey() != null && publishedDetails.getPhotoServerKey() != null && new Encoded(jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerKey()).decodeSymmetricKey().equals(new Encoded(publishedDetails.getPhotoServerKey()).decodeSymmetricKey()))) &&
-                            publishedDetails.getPhotoUrl() != null)) {
+                                (jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerKey() != null && publishedDetails.getPhotoServerKey() != null && new Encoded(jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerKey()).decodeSymmetricKey().equals(new Encoded(publishedDetails.getPhotoServerKey()).decodeSymmetricKey()))) &&
+                        publishedDetails.getPhotoUrl() != null)) {
                     // we need to download the photo, so we start a child protocol
 
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
@@ -425,6 +486,45 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
 
             // update the contact published details
             protocolManagerSession.identityDelegate.setContactPublishedDetails(protocolManagerSession.session, contactIdentity, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto, false);
+
+            return new DetailsReceivedState();
+        }
+    }
+
+    public static class ReceiveOwnDetailsStep extends ProtocolStep {
+        private final InitialProtocolState startState;
+        private final PropagateOwnDetailsMessage receivedMessage;
+
+        public ReceiveOwnDetailsStep(InitialProtocolState startState, PropagateOwnDetailsMessage receivedMessage, IdentityDetailsPublicationProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            Identity ownedIdentity = getOwnedIdentity();
+            JsonIdentityDetailsWithVersionAndPhoto ownDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().readValue(receivedMessage.jsonIdentityDetailsWithVersionAndPhoto, JsonIdentityDetailsWithVersionAndPhoto.class);
+
+            // update the published details
+            boolean photoDownloadNeeded = protocolManagerSession.identityDelegate.setOwnedIdentityDetailsFromOtherDevice(protocolManagerSession.session, ownedIdentity, ownDetailsWithVersionAndPhoto);
+
+            if (photoDownloadNeeded) {
+                // even though another device set the photo, we create a ServerUserData to ensure this photo is retained on server
+                protocolManagerSession.identityDelegate.createOwnedIdentityServerUserData(protocolManagerSession.session, getOwnedIdentity(), new UID(ownDetailsWithVersionAndPhoto.getPhotoServerLabel()));
+
+                // we need to download a photo
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
+                        SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID,
+                        new UID(getPrng()),
+                        false
+                );
+                ChannelMessageToSend messageToSend = new DownloadIdentityPhotoChildProtocol.InitialMessage(coreProtocolMessage, getOwnedIdentity(), receivedMessage.jsonIdentityDetailsWithVersionAndPhoto).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            }
 
             return new DetailsReceivedState();
         }

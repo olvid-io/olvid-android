@@ -50,12 +50,12 @@ public class UpdateAllGroupMembersNames implements Runnable {
     public void run() {
         AppDatabase db = AppDatabase.getInstance();
         for (Group group : ((bytesOwnedIdentity == null) ? db.groupDao().getAll() : db.groupDao().getAllForContact(bytesOwnedIdentity, bytesContactIdentity))) {
-            group.groupMembersNames = StringUtils.joinGroupMemberNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
+            group.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
             db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
         }
 
         for (Group2 group : ((bytesOwnedIdentity == null) ? db.group2Dao().getAll() : db.group2Dao().getAllForContact(bytesOwnedIdentity, bytesContactIdentity))) {
-            group.groupMembersNames = StringUtils.joinGroupMemberNames(db.group2Dao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier));
+            group.groupMembersNames = StringUtils.joinContactDisplayNames(db.group2Dao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier));
             db.group2Dao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.groupMembersNames);
 
             if (group.name == null && group.customName == null) {

@@ -31,6 +31,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageMetadata;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
 public class UpdateLocationMessageTask implements Runnable {
@@ -81,15 +82,15 @@ public class UpdateLocationMessageTask implements Runnable {
         }
 
         // create jsonLocation depending on update message type
-        Message.JsonLocation jsonLocation;
+        JsonLocation jsonLocation;
         // update location message
         if (location != null) {
-            jsonLocation = Message.JsonLocation.updateSharingLocationMessage(originalMessage.getJsonLocation(), location);
+            jsonLocation = JsonLocation.updateSharingLocationMessage(originalMessage.getJsonLocation(), location);
             // update message body
             originalMessage.contentBody = jsonLocation.getLocationMessageBody();
         } else {
             // end sharing message
-            jsonLocation = Message.JsonLocation.endOfSharingLocationMessage(originalMessage.getJsonLocation().getCount());
+            jsonLocation = JsonLocation.endOfSharingLocationMessage(originalMessage.getJsonLocation().getCount());
         }
 
         // serialize new jsonLocation

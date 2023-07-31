@@ -82,6 +82,7 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -513,7 +514,7 @@ public class AndroidNotificationManager {
     @SuppressLint("MissingPermission")
     private static void displayMissedCallNotificationInternal(@NonNull Discussion discussion, boolean ownedIdentityIsHidden, String message) {
         // this kind of notification only makes sense for one to one discussions
-        if (!discussion.canPostMessages() || discussion.discussionType != Discussion.TYPE_CONTACT) {
+        if (!discussion.isNormalOrReadOnly() || discussion.discussionType != Discussion.TYPE_CONTACT) {
             return;
         }
 
@@ -854,7 +855,7 @@ public class AndroidNotificationManager {
                 return null;
             }
             discussionNotification = new JsonPojoDiscussionNotification();
-            if (discussion.canPostMessages() && discussion.discussionType != Discussion.TYPE_CONTACT) {
+            if (discussion.isNormalOrReadOnly() && discussion.discussionType != Discussion.TYPE_CONTACT) {
                 discussionNotification.discussionInitialBytes = discussion.bytesDiscussionIdentifier;
                 discussionNotification.isGroup = true;
             } else {
@@ -1021,7 +1022,7 @@ public class AndroidNotificationManager {
         builder.setDeleteIntent(dismissPendingIntent);
 
         // REPLY ACTION
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M && discussion.isNormal()) {
             RemoteInput remoteInput = new RemoteInput.Builder(NotificationActionService.KEY_TEXT_REPLY)
                     .setLabel(App.getContext().getString(R.string.hint_notification_reply))
                     .build();
@@ -1228,7 +1229,7 @@ public class AndroidNotificationManager {
             String messageContent = message.getStringContent(App.getContext());
             if (message.jsonExpiration != null) {
                 try {
-                    Message.JsonExpiration jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, Message.JsonExpiration.class);
+                    JsonExpiration jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, JsonExpiration.class);
                     if (jsonExpiration != null) {
                         if ((jsonExpiration.getReadOnce() != null && jsonExpiration.getReadOnce()) || jsonExpiration.getVisibilityDuration() != null) {
                             messageContent = App.getContext().getString(R.string.text_message_content_hidden);

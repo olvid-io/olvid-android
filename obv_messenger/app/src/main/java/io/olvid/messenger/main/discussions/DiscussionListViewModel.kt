@@ -205,13 +205,13 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                                 -CallLogItem.STATUS_BUSY -> {
                                     context.getString(string.text_busy_outgoing_call)
                                 }
-                                -CallLogItem.STATUS_REJECTED, CallLogItem.STATUS_REJECTED -> {
+                                -CallLogItem.STATUS_REJECTED, CallLogItem.STATUS_REJECTED, CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE -> {
                                     context.getString(string.text_rejected_call)
                                 }
                                 -CallLogItem.STATUS_MISSED, -CallLogItem.STATUS_FAILED, CallLogItem.STATUS_FAILED -> {
                                     context.getString(string.text_failed_call)
                                 }
-                                -CallLogItem.STATUS_SUCCESSFUL, CallLogItem.STATUS_SUCCESSFUL -> {
+                                -CallLogItem.STATUS_SUCCESSFUL, CallLogItem.STATUS_SUCCESSFUL, CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE -> {
                                     context.getString(string.text_successful_call)
                                 }
                                 CallLogItem.STATUS_BUSY -> {
@@ -221,7 +221,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                                     context.getString(string.text_missed_call)
                                 }
                                 else -> {
-                                    context.getString(string.text_missed_call)
+                                    context.getString(string.text_successful_call)
                                 }
                             }
                         )
@@ -270,6 +270,16 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                 Message.TYPE_LOST_GROUP_ADMIN -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_you_are_no_longer_admin))
+                    }
+                }
+                Message.TYPE_GAINED_GROUP_SEND_MESSAGE -> {
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                        append(context.getString(string.text_you_became_writer))
+                    }
+                }
+                Message.TYPE_LOST_GROUP_SEND_MESSAGE -> {
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                        append(context.getString(string.text_you_are_no_longer_writer))
                     }
                 }
                 Message.TYPE_SCREEN_SHOT_DETECTED -> {
@@ -345,7 +355,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                 }
             }
             // locked discussion is in italic
-            if (discussion.status == Discussion.STATUS_LOCKED) {
+            if (discussion.isLocked) {
                 addStyle(SpanStyle(fontStyle = FontStyle.Italic), 0, length)
             }
         } ifNull {

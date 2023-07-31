@@ -77,6 +77,7 @@ import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.databases.tasks.UpdateLocationMessageTask;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.main.MainActivity;
@@ -156,9 +157,9 @@ public class UnifiedForegroundService extends Service {
     public static void connectOrDisconnectWebSocket() {
         if (App.isVisible() || WebClientSubService.isRunning || SettingsActivity.usePermanentWebSocket()) {
             if (SettingsActivity.shareAppVersion()) {
-                AppSingleton.getEngine().connectWebsocket("android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME);
+                AppSingleton.getEngine().connectWebsocket(false, "android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME);
             } else {
-                AppSingleton.getEngine().connectWebsocket(null, null, 0, null);
+                AppSingleton.getEngine().connectWebsocket(false, null, null, 0, null);
             }
         } else {
             // only disconnect websocket after 3 seconds
@@ -1054,7 +1055,7 @@ public class UnifiedForegroundService extends Service {
                             continue;
                         }
 
-                        Message.JsonLocation jsonLocation = message.getJsonLocation();
+                        JsonLocation jsonLocation = message.getJsonLocation();
 
                         // check if sharing expired (and update message.locationType if needed)
                         if (message.isSharingExpired()) {
@@ -1136,6 +1137,9 @@ public class UnifiedForegroundService extends Service {
         }
 
         public static void stopSharingInDiscussion(long discussionId, boolean runSynchronously) {
+            if (subscriber == null) {
+                return;
+            }
             if (!subscriber.isSharingLocationInDiscussion(discussionId)) {
                 Logger.e("LocationSharingSubService: trying to stop sharing for a non sharing discussion");
                 // Try to stop sharing even if not marked as sharing in service

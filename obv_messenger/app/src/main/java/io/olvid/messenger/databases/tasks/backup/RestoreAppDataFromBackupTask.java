@@ -34,6 +34,8 @@ import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -64,13 +66,13 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                             ownedIdentity.unlockSalt = ownedIdentityPojo.unlock_salt;
                             db.ownedIdentityDao().updateUnlockPasswordAndSalt(ownedIdentity.bytesOwnedIdentity, ownedIdentity.unlockPassword, ownedIdentity.unlockSalt);
                         }
-                        if (ownedIdentityPojo.mute_notifications) {
+                        if (ownedIdentityPojo.mute_notifications != null && ownedIdentityPojo.mute_notifications) {
                             ownedIdentity.prefMuteNotifications = true;
                             ownedIdentity.prefMuteNotificationsTimestamp = ownedIdentityPojo.mute_notification_timestamp;
-                            ownedIdentity.prefMuteNotificationsExceptMentioned = ownedIdentityPojo.mute_notifications_except_mentioned;
+                            ownedIdentity.prefMuteNotificationsExceptMentioned = ownedIdentityPojo.mute_notifications_except_mentioned != null && ownedIdentityPojo.mute_notifications_except_mentioned;
                             db.ownedIdentityDao().updateMuteNotifications(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefMuteNotifications, ownedIdentity.prefMuteNotificationsTimestamp, ownedIdentity.prefMuteNotificationsExceptMentioned);
                         }
-                        if (ownedIdentityPojo.show_neutral_notification_when_hidden) {
+                        if (ownedIdentityPojo.show_neutral_notification_when_hidden != null && ownedIdentityPojo.show_neutral_notification_when_hidden) {
                             ownedIdentity.prefShowNeutralNotificationWhenHidden = true;
                             db.ownedIdentityDao().updateShowNeutralNotificationWhenHidden(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefShowNeutralNotificationWhenHidden);
                         }
@@ -152,12 +154,12 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                                                         db.discussionDao().updatePinned(discussion.id, discussion.pinned);
 
                                                         if (sharedSettingsRestored) {
-                                                            Message.JsonExpiration expiration = new Message.JsonExpiration();
+                                                            JsonExpiration expiration = new JsonExpiration();
                                                             expiration.setReadOnce(discussionCustomization.settingReadOnce);
                                                             expiration.setVisibilityDuration(discussionCustomization.settingVisibilityDuration);
                                                             expiration.setExistenceDuration(discussionCustomization.settingExistenceDuration);
                                                             if (!expiration.likeNull()) {
-                                                                DiscussionCustomization.JsonSharedSettings settings = new DiscussionCustomization.JsonSharedSettings();
+                                                                JsonSharedSettings settings = new JsonSharedSettings();
                                                                 //noinspection ConstantConditions
                                                                 settings.setVersion(discussionCustomization.sharedSettingsVersion);
                                                                 settings.setGroupUid(groupPojo.group_uid);
@@ -187,12 +189,12 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                                                         db.discussionDao().updatePinned(discussion.id, discussion.pinned);
 
                                                         if (sharedSettingsRestored) {
-                                                            Message.JsonExpiration expiration = new Message.JsonExpiration();
+                                                            JsonExpiration expiration = new JsonExpiration();
                                                             expiration.setReadOnce(customization.settingReadOnce);
                                                             expiration.setVisibilityDuration(customization.settingVisibilityDuration);
                                                             expiration.setExistenceDuration(customization.settingExistenceDuration);
                                                             if (!expiration.likeNull()) {
-                                                                DiscussionCustomization.JsonSharedSettings settings = new DiscussionCustomization.JsonSharedSettings();
+                                                                JsonSharedSettings settings = new JsonSharedSettings();
                                                                 //noinspection ConstantConditions
                                                                 settings.setVersion(customization.sharedSettingsVersion);
                                                                 settings.setGroupUid(groupPojo.group_uid);

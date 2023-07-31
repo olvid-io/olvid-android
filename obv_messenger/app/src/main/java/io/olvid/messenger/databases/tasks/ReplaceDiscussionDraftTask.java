@@ -30,6 +30,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 
 public class ReplaceDiscussionDraftTask implements Runnable {
     private final long discussionId;
@@ -59,7 +60,7 @@ public class ReplaceDiscussionDraftTask implements Runnable {
 
             // create new draft with the shared text and files
             Message newDraft = Message.createEmptyDraft(discussionId, discussion.bytesOwnedIdentity, discussion.senderThreadIdentifier);
-            newDraft.setJsonMessage(new Message.JsonMessage(draftText));
+            newDraft.setJsonMessage(new JsonMessage(draftText));
             newDraft.id = db.messageDao().insert(newDraft);
         });
         if (draftFiles != null) {

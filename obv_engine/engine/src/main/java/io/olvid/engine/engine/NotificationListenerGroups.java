@@ -67,7 +67,8 @@ public class NotificationListenerGroups implements NotificationListener {
                 try (EngineSession engineSession = engine.getSession()) {
                     byte[] groupOwnerAndUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_CREATED_GROUP_OWNER_AND_UID_KEY);
                     Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_CREATED_OWNED_IDENTITY_KEY);
-                    if (groupOwnerAndUid == null || ownedIdentity == null) {
+                    Boolean createdOnOtherDevice = (Boolean) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_CREATED_ON_OTHER_DEVICE_KEY);
+                    if (groupOwnerAndUid == null || ownedIdentity == null || createdOnOtherDevice == null) {
                         break;
                     }
 
@@ -122,6 +123,7 @@ public class NotificationListenerGroups implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_CREATED_GROUP_KEY, obvGroup);
                     engineInfo.put(EngineNotifications.GROUP_CREATED_HAS_MULTIPLE_DETAILS_KEY, group.hasMultipleDetails());
                     engineInfo.put(EngineNotifications.GROUP_CREATED_PHOTO_URL_KEY, photoUrl);
+                    engineInfo.put(EngineNotifications.GROUP_CREATED_ON_OTHER_DEVICE_KEY, createdOnOtherDevice);
                     engine.postEngineNotification(EngineNotifications.GROUP_CREATED, engineInfo);
                 } catch (Exception e) {
                     e.printStackTrace();

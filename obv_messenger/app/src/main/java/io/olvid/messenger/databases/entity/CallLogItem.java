@@ -61,6 +61,10 @@ public class CallLogItem {
     public static final int STATUS_FAILED = 3;
     public static final int STATUS_BUSY = 4;
     public static final int STATUS_REJECTED = 5;
+    public static final int STATUS_ANSWERED_ON_OTHER_DEVICE = 6;
+    public static final int STATUS_REJECTED_ON_OTHER_DEVICE = 7;
+
+
 
     @PrimaryKey(autoGenerate = true)
     public long id;

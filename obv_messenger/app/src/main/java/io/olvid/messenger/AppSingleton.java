@@ -62,8 +62,11 @@ import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.ObvPushNotificationType;
+import io.olvid.engine.engine.types.RegisterApiKeyResult;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
+import io.olvid.messenger.billing.BillingUtils;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.CustomSSLSocketFactory;
 import io.olvid.messenger.databases.AppDatabase;
@@ -71,7 +74,9 @@ import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.tasks.CheckLinkPreviewValidityTask;
+import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
 import io.olvid.messenger.discussion.ComposeMessageFragment;
@@ -91,6 +96,7 @@ public class AppSingleton {
     public static final String DISCUSSION_BACKGROUNDS_DIRECTORY = "discussion_backgrounds";
     public static final String CUSTOM_PHOTOS_DIRECTORY = "custom_photos";
 
+    public static final String DEFAULT_DEVICE_DISPLAY_NAME = Build.BRAND + " " + Build.MODEL;
 
     private static final AppSingleton instance = new AppSingleton();
 
@@ -119,7 +125,7 @@ public class AppSingleton {
         this.jsonObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         this.sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_app), Context.MODE_PRIVATE);
 
-        int lastBuildExecuted = sharedPreferences.getInt(LAST_BUILD_EXECUTED_PREFERENCE_KEY, 0);
+        int lastBuildExecuted = sharedPreferences.getInt(LAST_BUILD_EXECUTED_PREFERENCE_KEY, BuildConfig.VERSION_CODE);
         int lastAndroidSdkVersionExecuted = sharedPreferences.getInt(LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY, 0);
 
         if (lastBuildExecuted != 0 && lastBuildExecuted < 89) {
@@ -205,7 +211,7 @@ public class AppSingleton {
 
         // initialize Engine
         try {
-            this.engine = new Engine(App.getContext().getNoBackupFilesDir(), null, this.sslSocketFactory,
+            this.engine = new Engine(App.getContext().getNoBackupFilesDir(), new AppBackupAndSyncDelegate(), null, this.sslSocketFactory,
                     new Logger.LogOutputter() {
                         @Override
                         public void d(String s, String s1) {
@@ -344,6 +350,7 @@ public class AppSingleton {
                                     keycloakState.jwks,
                                     keycloakState.signatureKey,
                                     keycloakState.serializedAuthState,
+                                    keycloakState.ownApiKey,
                                     keycloakState.latestRevocationListTimestamp,
                                     keycloakState.latestGroupUpdateTimestamp,
                                     false
@@ -355,6 +362,12 @@ public class AppSingleton {
                 e.printStackTrace();
             }
         });
+    }
+
+    public static void setCreatedGroupEphemeralSettings(JsonExpiration jsonExpiration) {
+        if (instance.engineNotificationProcessorForGroupsV2 != null) {
+            instance.engineNotificationProcessorForGroupsV2.setCreatedGroupEphemeralSettings(jsonExpiration);
+        }
     }
 
     public static LiveData<Integer> getWebsocketConnectivityStateLiveData() {
@@ -538,6 +551,7 @@ public class AppSingleton {
                                             keycloakState.jwks,
                                             keycloakState.signatureKey,
                                             keycloakState.serializedAuthState,
+                                            keycloakState.ownApiKey,
                                             keycloakState.latestRevocationListTimestamp,
                                             keycloakState.latestGroupUpdateTimestamp,
                                             false
@@ -546,6 +560,9 @@ public class AppSingleton {
                             } catch (Exception ignored) {}
                         }
                     }
+                }
+                if (BuildConfig.USE_BILLING_LIB) {
+                    BillingUtils.newIdentityAvailableForSubscription(ownedIdentity.bytesOwnedIdentity);
                 }
             } else {
                 instance.deactivatedIdentities.add(new BytesKey(ownedIdentity.bytesOwnedIdentity));
@@ -560,7 +577,7 @@ public class AppSingleton {
     }
 
     public void generateIdentity(@NonNull final String server,
-                                 @NonNull final UUID apiKey,
+                                 @Nullable final UUID apiKey,
                                  @NonNull final JsonIdentityDetails identityDetails,
                                  @Nullable final String absolutePhotoUrl,
                                  @Nullable final String customDisplayName,
@@ -577,15 +594,15 @@ public class AppSingleton {
         App.runThread(() -> {
             ObvKeycloakState keycloakState = null;
             if (keycloakServer != null && serializedKeycloakState != null && jwks != null && clientId != null && signatureKey != null) {
-                keycloakState = new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, 0, 0);
+                keycloakState = new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, null,0, 0);
             }
-
-            ObvIdentity obvOwnedIdentity = engine.generateOwnedIdentity(server, identityDetails, apiKey, keycloakState);
+            ObvIdentity obvOwnedIdentity = engine.generateOwnedIdentity(server, identityDetails, keycloakState, DEFAULT_DEVICE_DISPLAY_NAME);
 
             if (obvOwnedIdentity != null) {
                 if (keycloakState != null) {
-                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, 0, 0, true);
+                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, null, 0, 0, true);
                 }
+
                 OwnedIdentity ownedIdentity;
                 try {
                     ownedIdentity = new OwnedIdentity(obvOwnedIdentity, OwnedIdentity.API_KEY_STATUS_UNKNOWN);
@@ -606,6 +623,21 @@ public class AppSingleton {
                     return;
                 }
 
+                if (apiKey != null) {
+                    App.runThread(() -> {
+                        RegisterApiKeyResult result;
+                        do {
+                            result = engine.registerOwnedIdentityApiKeyOnServer(obvOwnedIdentity.getBytesIdentity(), apiKey);
+                            try {
+                                // sleep 5s before retrying to register --> this leaves some time for the engine to create the first server session
+                                Thread.sleep(5_000);
+                            } catch (InterruptedException ignored) { }
+                        } while (result == RegisterApiKeyResult.FAILED);
+                    });
+                } else if (BuildConfig.USE_BILLING_LIB) {
+                    BillingUtils.newIdentityAvailableForSubscription(ownedIdentity.bytesOwnedIdentity);
+                }
+
                 if (absolutePhotoUrl != null) {
                     try {
                         engine.updateOwnedIdentityPhoto(obvOwnedIdentity.getBytesIdentity(), absolutePhotoUrl);
@@ -615,20 +647,19 @@ public class AppSingleton {
                     }
                 }
 
+                App.runThread(new OwnedDevicesSynchronisationWithEngineTask(ownedIdentity.bytesOwnedIdentity));
+
                 selectIdentity(ownedIdentity.bytesOwnedIdentity, (OwnedIdentity ignored) -> {
                     if (successCallback != null) {
                         successCallback.run(obvOwnedIdentity);
                     }
 
                     String token = AppSingleton.retrieveFirebaseToken();
-                    for (int i = 0; i < 5; i++) {
-                        try {
-                            engine.registerToPushNotification(obvOwnedIdentity.getBytesIdentity(), token, false, false);
-                            break;
-                        } catch (Exception e) {
-                            Logger.d("Error registering newly generated Identity to push notification.");
-                            e.printStackTrace();
-                        }
+                    try {
+                        engine.registerToPushNotification(obvOwnedIdentity.getBytesIdentity(), ObvPushNotificationType.createAndroid(token), false, null);
+                    } catch (Exception e) {
+                        Logger.d("Error registering newly generated Identity to push notification.");
+                        e.printStackTrace();
                     }
                 });
             } else {
@@ -638,6 +669,8 @@ public class AppSingleton {
             }
         });
     }
+
+    EngineNotificationListener backupRestoredListener;
 
     public void restoreBackup(final Context activityContext, final String backupSeed, final byte[] encryptedBackupContent, final Runnable successCallback, final Runnable failureCallback) {
         App.runThread(() -> {
@@ -650,7 +683,7 @@ public class AppSingleton {
                 return;
             }
 
-            ObvIdentity[] obvOwnedIdentities = engine.restoreOwnedIdentitiesFromBackup(backupSeed, encryptedBackupContent);
+            ObvIdentity[] obvOwnedIdentities = engine.restoreOwnedIdentitiesFromBackup(backupSeed, encryptedBackupContent, DEFAULT_DEVICE_DISPLAY_NAME);
             if (obvOwnedIdentities != null && obvOwnedIdentities.length != 0) {
                 try {
                     final String token = AppSingleton.retrieveFirebaseToken();
@@ -701,6 +734,7 @@ public class AppSingleton {
                                                 keycloakState.jwks,
                                                 keycloakState.signatureKey,
                                                 keycloakState.serializedAuthState,
+                                                null,
                                                 0,
                                                 0,
                                                 false
@@ -712,14 +746,11 @@ public class AppSingleton {
                             }
 
                             if (obvOwnedIdentity.isActive()) {
-                                for (int i = 0; i < 5; i++) {
-                                    try {
-                                        engine.registerToPushNotification(obvOwnedIdentity.getBytesIdentity(), token, true, false);
-                                        break;
-                                    } catch (Exception e) {
-                                        Logger.d("Error registering newly generated Identity to push notification.");
-                                        e.printStackTrace();
-                                    }
+                                try {
+                                    engine.registerToPushNotification(obvOwnedIdentity.getBytesIdentity(), ObvPushNotificationType.createAndroid(token), false, null);
+                                } catch (Exception e) {
+                                    Logger.d("Error registering newly generated Identity to push notification.");
+                                    e.printStackTrace();
                                 }
                             }
                         }
@@ -733,9 +764,12 @@ public class AppSingleton {
                     return;
                 }
 
+                for (ObvIdentity obvOwnedIdentity : obvOwnedIdentities) {
+                    App.runThread(new OwnedDevicesSynchronisationWithEngineTask(obvOwnedIdentity.getBytesIdentity()));
+                }
 
                 // once contacts and groups are restored in engine we can restore nicknames and settings
-                EngineNotificationListener backupRestoredListener = new EngineNotificationListener() {
+                backupRestoredListener = new EngineNotificationListener() {
                     private Long registrationNumber = null;
 
                     @Override
@@ -743,6 +777,7 @@ public class AppSingleton {
                         if (EngineNotifications.ENGINE_BACKUP_RESTORATION_FINISHED.equals(notificationName)) {
                             Logger.w("💾 Received backup restore finished notification --> restoring app data");
                             getEngine().removeNotificationListener(EngineNotifications.ENGINE_BACKUP_RESTORATION_FINISHED, this);
+                            backupRestoredListener = null;
 
                             String appDataBackup = engine.decryptAppDataBackup(backupSeed, encryptedBackupContent);
 
@@ -1147,23 +1182,24 @@ public class AppSingleton {
 
     // region Upgrade after new build
 
-    private void runBuildUpgrade(int lastBuildExecuted, int lastAndroidSdkVersionExecuted) {
+    private void runBuildUpgrade(int lastBuildExecuted, int ignoredLastAndroidSdkVersionExecuted) {
         try {
             if (lastBuildExecuted < 88) {
                 // trigger the download of all waiting userData in the engine
                 engine.downloadAllUserData();
             }
-            if (lastBuildExecuted < 99) {
-                // reset the apiKey to de hardcoded one
-                boolean success = true;
-                for (ObvIdentity ownedIdentity: engine.getOwnedIdentities()) {
-                    success &= engine.updateApiKeyForOwnedIdentity(ownedIdentity.getBytesIdentity(), UUID.fromString(BuildConfig.HARDCODED_API_KEY));
-                }
-                if (!success) {
-                    Logger.e("Error resetting API key to HARDCODED one");
-                    throw new Exception();
-                }
-            }
+            // removed: no longer required with new api key management
+//            if (lastBuildExecuted < 99) {
+//                // reset the apiKey to de hardcoded one
+//                boolean success = true;
+//                for (ObvIdentity ownedIdentity: engine.getOwnedIdentities()) {
+//                    success &= engine.registerOwnedIdentityApiKeyOnServer(ownedIdentity.getBytesIdentity(), UUID.fromString(BuildConfig.HARDCODED_API_KEY));
+//                }
+//                if (!success) {
+//                    Logger.e("Error resetting API key to HARDCODED one");
+//                    throw new Exception();
+//                }
+//            }
             if (lastBuildExecuted < 127) {
                 // recompute the number of images in all messages as the filtering method was changed
                 long migrationStartTime = System.currentTimeMillis();
@@ -1214,6 +1250,10 @@ public class AppSingleton {
             if (lastBuildExecuted != 0 && lastBuildExecuted < 204) {
                 App.openAppDialogIntroducingMarkdown();
             }
+            if (lastBuildExecuted < 206) {
+                AppSingleton.getEngine().setAllOwnedDeviceNames(DEFAULT_DEVICE_DISPLAY_NAME);
+            }
+
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
             saveLastExecutedVersions(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);
         } catch (Exception e) {

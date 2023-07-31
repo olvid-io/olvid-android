@@ -92,7 +92,6 @@
     <string name="explanation_empty_discussion_list">Cet écran affiche vos discussions en cours.</string>
     <string name="explanation_empty_group_list">Cet écran affiche la liste des groupes auxquels vous appartenez.</string>
     <string name="explanation_empty_invitation_list">Cet écran affiche la liste des invitations reçues ou envoyées.</string>
-    <string name="explanation_group_name">Choisissez un nom de groupe qui aide les membres à comprendre le but de ce groupe.</string>
     <string name="explanation_new_group_card">L\'administrateur du groupe a mis à jour la Group Card. L\'ancienne version et la nouvelle sont affichées ci-dessous.\n\nActualisez les informations du groupe en cliquant «\u00a0mettre à jour\u00a0».</string>
     <string name="explanation_new_group_v2_card">Un administrateur a mis à jour les détails du groupe. La nouvelle version est affichée ci-dessous.\n\nUtilisez cette version en appuyant sur «\u00a0mettre à jour\u00a0».</string>
     <string name="explanation_new_olvid_card">Votre contact a mis à jour son Olvid Card. L\'ancienne version et la nouvelle sont affichées ci-dessous.\n\nActualisez les informations de votre contact en cliquant "mettre à jour".</string>
@@ -195,6 +194,7 @@
     <string name="menu_action_share">Partager</string>
     <string name="menu_check_update">Vérifier les mises à jour sur Google Play</string>
     <string name="message_discussion_locked">Cette discussion est verrouillée</string>
+    <string name="message_discussion_readonly">Cette discussion est en lecture seule</string>
     <string name="message_discussion_no_channel">Vos messages seront automatiquement envoyés dès qu\'un canal sécurisé sera établi pour cette discussion. D\'ici là, ils resteront en attente.</string>
     <string name="message_error_first_or_last_name_needed">Veuillez saisir un prénom ou un nom.</string>
     <string name="message_error_trust_origin">Erreur lors de la récupération des sources de confiance</string>
@@ -436,9 +436,13 @@
     <string name="dialog_title_confirm_backup_key_generation">Génére une nouvelle clé de sauvegarde</string>
     <string name="dialog_message_confirm_backup_key_generation">Êtes-vous certain de vouloir générer une nouvelle clé de sauvegarde\u00a0?\n\nSi oui, assurez-vous d\'avoir à portée de main de quoi noter cette nouvelle clé car elle sera utilisée pour toutes les prochaines sauvegardes.</string>
     <string name="toast_message_backup_failed">Erreur de création du fichier de sauvegarde. Veuillez réessayer.</string>
-    <string name="dialog_title_identity_deactivated">ID Olvid désactivé</string>
-    <string name="dialog_message_identity_deactivated">Votre ID Olvid a été désactivée sur cet appareil.\n\nCeci vient probablement de la restauration d\'une sauvegarde sur un autre appareil. Votre ID Olvid ne peut être active que sur un appareil à la fois.\n\nSi vous souhaitez désactiver toutes vos autres installations d\'Olvid, appuyer sur «\u00a0réactiver Olvid sur cet appareil\u00a0» ci-dessous. Soyez conscient que cela ne vous permettra pas de recevoir vos messages sur deux appareils en même temps.\n\nAppuyez sur OK pour fermer ce dialogue et laisser cet appareil inactif\u00a0: vous ne pourrez ni envoyer, ni recevoir de messages sur cet appareil, mais vous pourrez consulter vos anciennes discussions.</string>
-    <string name="button_label_reactivate_identity">Réactiver Olvid sur cet appareil</string>
+    <string name="dialog_title_identity_deactivated">Profil désactivé sur cet appareil</string>
+    <string name="dialog_message_identity_deactivated">Votre profil a été désactivé sur cet appareil.\n\nOlvid n\'a pas réussi à récupérer la liste des appareils sur lesquels il est actuellement actif. Réactiver votre profil sur cet appareil pourrait le désactiver sur un autre.\n\nSi vous souhaitez poursuivre, appuyez sur «\u00a0réactiver mon profil sur cet appareil\u00a0» ci-dessous. Soyez conscient qu\'utiliser Olvid pour envoyer et recevoir des messages simultanément depuis deux appareils nécessite une licence.\n\nAppuyez sur «\u00a0annuler\u00a0» pour fermer ce dialogue et laisser cet appareil inactif\u00a0: vous ne pourrez ni envoyer, ni recevoir de messages sur cet appareil, mais vous pourrez consulter vos anciennes discussions.</string>
+    <string name="dialog_message_identity_deactivated_multi_device">Votre profil a été désactivé sur cet appareil.\n\nVous avez une licence pour utiliser Olvid simultanément sur plusieurs appareils, vous pouvez donc réactiver votre profil quand vous voulez. Pour information, la liste de vos appareils actuellement actifs est affichée ci-dessous.\n\nSi vous souhaitez poursuivre, appuyez sur «\u00a0réactiver mon profil sur cet appareil\u00a0» ci-dessous. Cet appareil se synchronisera alors avec vos autres appareils pour mettre à jour vos contacts et vos groupes.\n\nAppuyez sur «\u00a0annuler\u00a0» pour fermer ce dialogue et laisser cet appareil inactif\u00a0: vous ne pourrez ni envoyer, ni recevoir de messages sur cet appareil, mais vous pourrez consulter vos anciennes discussions.</string>
+    <string name="dialog_message_identity_deactivated_no_device">Votre profil a été désactivé sur cet appareil.\n\nIl semble que vous n\'avez aucun appareil actif pour le moment, vous pouvez donc réactiver votre profil quand vous voulez.\n\nSi vous souhaitez poursuivre, appuyez sur «\u00a0réactiver mon profil sur cet appareil\u00a0» ci-dessous.\n\nAppuyez sur «\u00a0annuler\u00a0» pour fermer ce dialogue et laisser cet appareil inactif\u00a0: vous ne pourrez ni envoyer, ni recevoir de messages sur cet appareil, mais vous pourrez consulter vos anciennes discussions.</string>
+    <string name="dialog_message_identity_deactivated_choose_device">Votre profil a été désactivé sur cet appareil.\n\nIl semble que vous n\'avez pas de licence pour utiliser Olvid simultanément sur plusieurs appareils. Réactiver cet appareil nécessite donc de désactiver un autre appareil.\n\nSi vous souhaitez poursuivre, sélectionnez l\'appareil que vous souhaitez désactiver dans la liste ci-dessous, puis appuyez sur «\u00a0réactiver mon profil sur cet appareil\u00a0».\n\nAppuyez sur «\u00a0annuler\u00a0» pour fermer ce dialogue et laisser cet appareil inactif\u00a0: vous ne pourrez ni envoyer, ni recevoir de messages sur cet appareil, mais vous pourrez consulter vos anciennes discussions.</string>
+    <string name="dialog_message_identity_deactivated_only_expiring">Votre profil a été désactivé sur cet appareil.\n\Il semble que tous vos autres appareils sont en cours de désactivation dans un futur proche, vous pouvez donc réactiver votre profil quand vous voulez. Pour information, la liste de vos appareils actuellement actifs est affichée ci-dessous.\n\nSi vous souhaitez poursuivre, appuyez sur «\u00a0réactiver mon profil sur cet appareil\u00a0» ci-dessous.\n\nAppuyez sur «\u00a0annuler\u00a0» pour fermer ce dialogue et laisser cet appareil inactif\u00a0: vous ne pourrez ni envoyer, ni recevoir de messages sur cet appareil, mais vous pourrez consulter vos anciennes discussions.</string>
+    <string name="button_label_reactivate_identity">Réactiver mon profil sur cet appareil</string>
     <string name="toast_message_error_retry">Une erreur s\'est produite. Veuillez réessayer.</string>
     <string name="dialog_title_identity_activated">ID Olvid réactivée</string>
     <string name="dialog_message_identity_activated">Votre ID Olvid a été réactivée sur cet appareil.\n\nDes canaux sécurisés sont en train d\'être recréés avec tous vos contacts.</string>
@@ -458,8 +462,10 @@
     <string name="toast_message_error_while_deleting_selected_backup">Erreur de suppression du fichier de sauvegarde. Veuillez réessayer</string>
     <string name="text_description_google_drive_backup">Compte Google Drive\u00a0: %1$s\nAppareil\u00a0: %2$s\nDate\u00a0: %3$s</string>
     <string name="text_description_webdav_backup">Compte WebDAV\u00a0: %1$s\nAppareil\u00a0: %2$s\nDate\u00a0: %3$s</string>
-    <string name="dialog_title_identity_reactivation_confirmation">Réactiver Olvid</string>
-    <string name="dialog_message_identity_reactivation_confirmation">Souhaitez-vous réellement réactiver Olvid sur cet appareil\u00a0?\n\nCela désactivera Olvid sur tous vos autres appareils. Soyez conscient que cela ne vous permettra pas de recevoir vos messages sur deux appareils en même temps.</string>
+    <string name="dialog_title_identity_reactivation_confirmation">Réactiver mon profil</string>
+    <string name="dialog_message_identity_reactivation_confirmation">Souhaitez-vous réellement réactiver votre profil Olvid sur cet appareil\u00a0?\n\nCela le désactivera sur votre autre appareil «\u00a0%1$s\u00a0». Cela ne vous permettra pas de recevoir vos messages sur ces deux appareils en même temps.</string>
+    <string name="dialog_message_identity_reactivation_confirmation_multi">Souhaitez-vous réellement réactiver votre profil Olvid sur cet appareil\u00a0?</string>
+    <string name="dialog_message_identity_reactivation_confirmation_unknown">Souhaitez-vous réellement réactiver votre profil Olvid sur cet appareil\u00a0?\n\nSi vous avez d\'autres appareils actifs, cela pourrait desactiver l\'un d\'eux.</string>
     <string name="pref_prevent_screen_capture_title">Interdire les captures d\'écran</string>
     <string name="pref_prevent_screen_capture_summary">Quand cette option est activée, les captures d\'écran sont interdites dans Olvid et dans la liste d\'applications récentes.</string>
     <string name="button_label_to_file">Export fichier</string>
@@ -656,7 +662,7 @@
     <string name="text_premium_features_free_trial">Période d\'essai gratuite des fonctionnalités premiums</string>
     <string name="button_label_start_free_trial">Démarrer l\'essai</string>
     <string name="label_free_trial_available">Essai gratuit disponible</string>
-    <string name="label_free_trial_explanation">Accédez aux fonctionnalités premiums gratuitement pendant un mois (disponible une seule fois)</string>
+    <string name="label_free_trial_explanation">Testez les appels sécurisés Olvid gratuitement pendant un mois (disponible une seule fois)</string>
     <string name="toast_message_failed_to_start_free_trial">Échec d\'activation de l\'essai gratuit</string>
     <string name="toast_message_free_trial_started">Essai gratuit démarré</string>
     <string name="toast_message_error_launching_in_app_purchase">Échec d\'initialisation de l\'achat in-app</string>
@@ -675,8 +681,10 @@
     <string name="label_failed_to_query_subscription">Impossible de vérifier les options d\'abonnement</string>
     <string name="dialog_title_subscription_required">Abonnement requis</string>
     <string name="button_label_check_subscription">Vérifier votre abonnement</string>
-    <string name="dialog_message_subscription_required_call">L\'émission d\'appels téléphoniques sécurisés avec Olvid nécessite un abonnement.\n\nVous pouvez vérifier le statut de votre abonnement et les options d\'abonnement disponibles depuis la page «\u00a0Mon ID\u00a0».</string>
-    <string name="dialog_message_subscription_required_web_client">La connexion au client web Olvid nécessite un abonnement.\n\nVous pouvez vérifier le statut de votre abonnement et les options d\'abonnement disponibles depuis la page «\u00a0Mon ID\u00a0».</string>
+    <string name="dialog_message_subscription_required_call">L\'émission d\'appels téléphoniques sécurisés avec Olvid nécessite un abonnement.\n\nVous pouvez vérifier le statut de votre abonnement et les options d\'abonnement disponibles depuis la page «\u00a0Mon Profil\u00a0».</string>
+    <string name="dialog_message_subscription_required_web_client">La connexion au client web Olvid nécessite un abonnement.\n\nVous pouvez vérifier le statut de votre abonnement et les options d\'abonnement disponibles depuis la page «\u00a0Mon Profil\u00a0».</string>
+    <string name="dialog_message_subscription_required_multi_device">L\'utilisation simultanée d\'un profil Olvid sur plusieurs appareils nécessite un abonnement.\n\nVous pouvez vérifier le statut de votre abonnement et les options d\'abonnement disponibles depuis la page «\u00a0Mon Profil\u00a0».</string>
+
     <string name="text_ended_on">Terminée depuis le\u00a0: %1$s</string>
     <string name="text_free_trial_ended">Période d\'essai gratuite terminée</string>
     <string name="text_free_trial_expired">Licence d\'essai gratuit expirée</string>
@@ -740,6 +748,7 @@
     <string name="pref_discussion_read_once_summary">Une fois cette option activée, les messages et pièces jointes ne seront affichés qu\'une seule fois et seront supprimés en sortant de la discussion.</string>
     <string name="pref_discussion_visibility_duration_title">Durée de visibilité des messages</string>
     <string name="pref_discussion_existence_duration_title">Durée d\'existence des messages</string>
+    <string name="pref_discussion_remote_delete_title">Qui peut «\u00a0supprimer partout\u00a0» les messages d\'autres utilisateurs\u00a0?</string>
     <string name="pref_text_duration_null">Illimitée</string>
     <string name="pref_text_duration_5s">5\u00a0secondes</string>
     <string name="pref_text_duration_10s">10\u00a0secondes</string>
@@ -928,6 +937,7 @@
     <string name="toast_message_error_exporting_db">Erreur d\'export des bases de données. Veuillez réessayer.</string>
     <string name="toast_message_success_exporting_db">Export des bases de données réussi</string>
     <string name="text_successful_call">Appel téléphonique</string>
+    <string name="text_successful_call_other_device">Appel téléphonique sur un autre appareil</string>
     <string name="pref_category_customization_title">Personnalisation</string>
     <string name="pref_sort_contacts_by_last_name_title">Trier les contacts par nom de famille</string>
     <string name="pref_sort_contacts_by_last_name_summary">Activez cette option pour trier votre liste de contacts par nom de famille. Sinon, le prénom est utilisé.</string>
@@ -960,7 +970,8 @@
     <string name="text_outgoing_call_with_contacts">Appel téléphonique avec %1$s</string>
     <string name="text_busy_outgoing_call_with_contacts">Appel quand %1$s était occupé</string>
     <string name="text_rejected_outgoing_call_with_contacts">Appel décliné par %1$s</string>
-    <string name="text_incoming_call_with_contacts">Appel téléphonique de %1$s</string>
+    <string name="text_incoming_call_with_contacts">Appel de %1$s</string>
+    <string name="text_successful_call_other_device_with_contacts">Appel de %1$s sur un autre appareil</string>
     <string name="menu_action_group_call">Appel de groupe</string>
     <string name="button_label_call">Appeler</string>
     <string name="dialog_title_start_call">Passer un appel</string>
@@ -1176,19 +1187,20 @@
     <string name="button_label_configure_lock_screen">Paramétrer l\'écran de verrouillage</string>
     <string name="menu_action_delete_profile">Supprimer ce profil</string>
     <string name="dialog_title_delete_profile">Supprimer votre profil\u00a0?</string>
-    <string name="dialog_title_delete_last_profile">Supprimer tous vos profils\u00a0?</string>
-    <string name="dialog_message_delete_profile">Supprimer un profil effacera toute information associée à ce profil de votre appareil. Cela inclut vos contacts, vos groupes et le contenu de toutes vos discussions pour ce profil. Vos autres profils ne seront pas affectés par cette opération.\nSi vous avez activé les sauvegardes Olvid, vos futures sauvegardes ne contiendront aucune trace de ce profil et vous ne serez pas en mesure de le restaurer.\n\nAppuyez sur «\u00a0poursuivre\u00a0» pour choisir comment supprimer ce profil.</string>
-    <string name="dialog_message_delete_last_profile">Supprimer un profil effacera toute information associée à ce profil de votre appareil. Cela inclut vos contacts, vos groupes et le contenu de toutes vos discussions pour ce profil.\n\nCe profil est votre seul profil visible et si vous avez des profils masqués, ceux-ci seront également supprimés.\nSi vous avez activé les sauvegardes Olvid, vos futures sauvegardes ne contiendront aucune trace de ce profil et vous ne serez pas en mesure de le restaurer.\n\nAppuyez sur «\u00a0poursuivre\u00a0» pour choisir comment supprimer ce profil.</string>
-    <string name="dialog_title_delete_profile_method">Choisissez comment supprimer ce profil</string>
-    <string name="dialog_message_notify_contacts_switch_label">Prévenir vos contacts</string>
+    <string name="dialog_message_delete_profile">Supprimer un profil effacera toute information associée à ce profil de votre appareil. Cela inclut vos contacts, vos groupes et le contenu de toutes vos discussions pour ce profil. Vos autres profils ne seront pas affectés par cette opération.\nSi vous avez activé les sauvegardes Olvid, vos futures sauvegardes ne contiendront aucune trace de ce profil et vous ne serez pas en mesure de le restaurer.\n\nAppuyez sur «\u00a0suivant\u00a0» pour choisir comment supprimer ce profil.</string>
+    <string name="dialog_message_delete_last_profile">Supprimer un profil effacera toute information associée à ce profil de votre appareil. Cela inclut vos contacts, vos groupes et le contenu de toutes vos discussions pour ce profil.\n\n<b>Ce profil est votre seul profil visible et si vous avez des profils masqués, ceux-ci seront également supprimés.</b>\n\nSi vous avez activé les sauvegardes Olvid, vos futures sauvegardes ne contiendront aucune trace de ce profil et vous ne serez pas en mesure de le restaurer.\n\nAppuyez sur «\u00a0suivant\u00a0» pour choisir comment supprimer ce profil.</string>
+    <string name="dialog_message_delete_profile_multi">Supprimer un profil effacera toute information associée à ce profil de votre appareil. Cela inclut vos contacts, vos groupes et le contenu de toutes vos discussions pour ce profil. Vos autres profils ne seront pas affectés par cette opération.\n\nAppuyez sur «\u00a0suivant\u00a0» pour choisir comment supprimer ce profil.</string>
+    <string name="dialog_message_delete_last_profile_multi">Supprimer un profil effacera toute information associée à ce profil de votre appareil. Cela inclut vos contacts, vos groupes et le contenu de toutes vos discussions pour ce profil.\n\n<b>Ce profil est votre seul profil visible et si vous avez des profils masqués, ceux-ci seront également supprimés.</b>\n\nAppuyez sur «\u00a0suivant\u00a0» pour choisir comment supprimer ce profil.</string>
+    <string name="switch_label_delete_profile_everywhere">Supprimer ce profil <b>partout</b></string>
     <string name="hint_type_delete_here_to_proceed">Écriver SUPPRIMER ici pour continuer</string>
-    <string name="explanation_delete_owned_identity">Choisissez de prévenir vos contacts (recommandé) pour que\u00a0:\n\u00a0- votre ID soit supprimée des appareils de vos contacts\n\u00a0- les groupes que vous gérez soient dissous\n\u00a0- vous quittiez les groupes rejoints\n\nSi vous ne prévenez pas, à moins d\'avoir transféré votre ID sur un autre appareil, vos contacts pourraient continuer à vous écrire sans réaliser que leurs messages ne peuvent vous être distribués.</string>
-    <string name="explanation_delete_inactive_owned_identity">Votre profil actuel semble être inactif, probablement parce que vous l\'avez transféré sur un autre appareil. Si c\'est le cas et que vous prévoyez de continuer à utiliser ce profil sur cet autre appareil, choisissez de ne pas prévenir vos contacts.\n\nSi vous ne voulez plus jamais utiliser ce profil, il faut réactiver votre ID Olvid sur cet appareil, attendre la création des canaux sécurisés avec vos contacts puis revenir ici supprimer ce profil.</string>
+    <string name="explanation_delete_owned_identity">Si vous choisissez de supprimer ce profil <b>partout</b>\u00a0:\n\u00a0-\u00a0il sera supprimé localement <b>et</b> sur les appareils de vos contacts\n\u00a0-\u00a0vous quitterez les groupes rejoints\n\u00a0-\u00a0les groupes que vous gérez seront dissous\n\nSi vous ne supprimez <b>pas</b> ce profil partout il sera supprimé uniquement localement de votre appareil. À moins d\'avoir prévu de restraurer une sauvegarde sur un autre appareil, vos contacts pourraient continuer à vous écrire sans réaliser que leurs messages ne peuvent vous être distribués.</string>
+    <string name="explanation_delete_inactive_owned_identity">Votre profil actuel semble être inactif, probablement parce que vous l\'avez transféré sur un autre appareil. Si vous prévoyez de continuer à utiliser ce profil sur cet autre appareil, vous pouvez le supprimer d\'ici sans risque.\n\nSi vous ne voulez plus jamais utiliser ce profil, il faut commencer par le réactiver sur cet appareil, attendre la création des canaux sécurisés avec vos contacts, puis supprimer ce profil en choisissant l\'option «\u00a0supprimer partout\u00a0».</string>
+    <string name="explanation_delete_owned_identity_multi">Votre profil est actuelleemnt activé sur plusieurs appareils.\n\nSi vous choisissez de supprimer ce profil <b>partout</b>\u00a0:\n\u00a0-\u00a0il sera supprimé de tous vos appareils <b>et</b> des appareils de vos contacts\n\u00a0-\u00a0vous quitterez les groupes rejoints\n\u00a0-\u00a0les groupes que vous gérez seront dissous\n\nSi vous ne supprimez <b>pas</b> ce profil partout il sera supprimé uniquement localement de votre appareil et vous pourrez continuer à l\'utiliser normalement sur vos autres appareils.</string>
     <string name="text_delete_capitalized">SUPPRIMER</string>
     <string name="toast_message_something_went_wrong">Quelque chose n\'a pas fonctionné, veuillez réessayer</string>
     <string name="toast_message_profile_deleted">Profil supprimé</string>
-    <string name="label_owned_identity_inactive">Votre ID Olvid est inactive</string>
-    <string name="explanation_owned_identity_inactive">Votre ID Olvid a été désactivée sur cet appareil.\n\nCeci vient probablement de la restauration d\'une sauvegarde sur un autre appareil. Votre ID Olvid ne peut être active que sur un appareil à la fois.\n\nSi vous souhaitez désactiver toutes vos autres installations d\'Olvid, appuyer sur «\u00a0réactiver Olvid sur cet appareil\u00a0» ci-dessous. Soyez conscient que cela ne vous permettra pas de recevoir vos messages sur deux appareils en même temps.</string>
+    <string name="label_owned_identity_inactive">Votre profil est inactif</string>
+    <string name="explanation_owned_identity_inactive">Votre profil a été désactivé sur cet appareil. C\'est probablement parce que vous l\'utilisez sur un autre appareil.\n\nAppuyez sur «\u00a0réactiver mon profil sur cet appareil\u00a0» pour voir quels appareils sont actuellement actifs et comment votre profil peut être réactivé sur celui-ci.</string>
     <string name="dialog_title_introducing_multi_profile">Découvrez le multi-profil\u00a0!</string>
     <string name="dialog_message_introducing_multi_profile">Olvid permet désormais de gérer plusieurs profils totalement indépendants au sein de la même application. Chaque profil utilise un nom et une photo de profil différente et possède son propre ensemble de contacts, de groupes et de discussions. Vous pouvez également avoir des profils masqués qui nécessitent un mot de passe pour être ouverts.\n\nVous voulez essayer\u00a0? Appuyez sur votre photo de profil en haut à gauche de l\'écran principal puis sur «\u00a0ajouter un profil\u00a0» pour commencer\u00a0!</string>
     <string name="menu_action_neutral_notifications_when_hidden">Notification neutre quand masqué</string>
@@ -1376,6 +1388,7 @@
     <string name="text_undelivered">Non reçu</string>
     <string name="label_metadata_kind_undelivered">Envoi non abouti</string>
     <string name="text_rejected_call">Appel décliné</string>
+    <string name="text_rejected_call_other_device">Appel décliné sur un autre appareil</string>
     <string name="pref_sending_foreground_service">Notification «\u00a0Envoi de message en cours\u00a0»</string>
     <string name="pref_sending_foreground_service_summary">Activer cette option démarrera un service d\'avant plan pendant l\'envoi de messages. Cela réduit les risques que le système tue Olvid pendant l\'envoi d\'une pièce jointe.</string>
     <string name="menu_action_select_all">Tout sélectionner</string>
@@ -1387,6 +1400,7 @@
     <string name="pref_discussion_pin_summary">Les discussions épinglées restent en permanence au sommet de votre liste de discussions</string>
     <string name="pref_screen_scale">Taille d\'affichage</string>
     <string name="content_description_open_discussion">Ouvrir la discussion</string>
+    <string name="label_read_only">Lecture</string>
     <string name="label_admin">Admin</string>
     <string name="label_pending_admin">Admin\nen attente</string>
     <string name="label_not_admin">Pas admin</string>
@@ -1454,6 +1468,7 @@
     <string name="label_stop_sharing_location">Souhaitez vous arrêter le partage de position\u00a0?</string>
     <string name="button_label_stop">Arrêter</string>
     <string name="text_message_sharing_location">Partage de position en cours</string>
+    <string name="text_message_sharing_location_on_other_device">Partage de position depuis un autre appareil</string>
     <string name="text_message_receiving_shared_location">Réception d\'un partage de position</string>
     <string name="text_message_sharing_location_finished">Partage de position terminé</string>
     <string name="dialog_title_grant_location_access">Autoriser l\'accès à la position</string>
@@ -1525,8 +1540,21 @@
     <string name="message_discussion_group_v2_updating">La liste des membres du groupe est en cours de synchronisation</string>
     <string name="message_discussion_group_v2_creating">Le groupe est en cours de création</string>
     <string name="button_label_new_group">Nouveau groupe</string>
+    <string name="label_group_type">Type de groupe</string>
+    <string name="label_group_simple_title">Simple</string>
+    <string name="label_group_simple_subtitle">Tous les membres sont administrateurs et peuvent inviter de nouveaux membres</string>
+    <string name="label_group_private_title">Privé</string>
+    <string name="label_group_private_subtitle">Vous seul pouvez ajouter de nouveaux membres à ce groupe</string>
+    <string name="label_group_read_only_title">Lecture seule</string>
+    <string name="label_group_read_only_subtitle">Seuls les administrateurs du groupe sont autorisés à poster des messages</string>
+    <string name="label_group_custom_title">Personnalisé</string>
+    <string name="label_group_custom_subtitle">Choisissez les paramètres de discussion qui vous conviennent (administrateurs, lecture seule etc.)</string>
+    <string name="label_group_custom_settings">Paramètres personnalisés</string>
+    <string name="label_group_choose_admins">Administrateurs</string>
     <string name="text_you_became_admin">Vous êtes maintenant un administrateur de ce groupe</string>
     <string name="text_you_are_no_longer_admin">Vous n\'êtes plus administrateur de ce groupe</string>
+    <string name="text_you_became_writer">Vous êtes maintenant autorisé à poster des messages</string>
+    <string name="text_you_are_no_longer_writer">Vous ne pouvez plus poster de messages ici</string>
     <string name="label_pending">En attente</string>
     <string name="pref_app_language_title">Langue de l\'application</string>
     <string name="pref_text_default_device_language">Langue par défaut de l\'appareil</string>
@@ -1593,6 +1621,9 @@
     <string name="text_setting_line">ligne</string>
     <string name="text_setting_full">complet</string>
     <string name="text_setting_none">aucun</string>
+    <string name="text_group_remote_delete_setting_nobody">Personne</string>
+    <string name="text_group_remote_delete_setting_everyone">Tout le monde</string>
+    <string name="text_group_remote_delete_setting_admins">Les administrateurs uniquement</string>
     <string name="activity_title_settings_update">Mise à jour des paramètres</string>
     <string name="xx_gbps">%1$sG/s</string>
     <string name="xx_mbps">%1$sM/s</string>
@@ -1620,16 +1651,48 @@
     <string name="label_no_address_found">Aucune adresse trouvée</string>
     <string name="label_zoom_in_for_address">Zoomez pour chercher l\'adresse</string>
     <string name="content_description_cancel_message_edit">Annuler l\'édition de message</string>
-    <string name="dialog_title_introducing_mentions">Découvrer les mentions\u00a0!</string>
+    <string name="dialog_title_introducing_mentions">Découvrez les mentions\u00a0!</string>
     <string name="dialog_message_introducing_mentions">Olvid vous permet maintenant de mentionner une personne dans une discussion\u00a0🫵\u00a0! Saisissez simplement @ suivi d\'une lettre de leur nom pour voir qui peut être mentionné.\nPar ailleurs, quand vous passez une discussion ou un profil en silencieux\u00a0💤, vous pouvez choisir de n\'être notifié que si l\'on vous mentionne explicitement dans un message.\n\nNotez que vos contacts devront avoir la dernière version d\'Olvid pour effectivement voir que vous les avez mentionnés.</string>
     <string name="pref_no_notify_certificate_change_for_previews_title">Désactiver les notifications de changement de certificat pour les aperçus de liens</string>
     <string name="pref_no_notify_certificate_change_for_previews_summary">Activez cette option pour désactiver la détection de changement de certificat lors du téléchargement d\'aperçus de liens. Certains sites peuvent présenter un certificat différent à chaque connexion, induisant des notifications fréquentes sans cette option.</string>
     <string name="pref_use_legacy_zxing_scanner_title">Utiliser ZXing pour scanner les codes QR</string>
     <string name="pref_use_legacy_zxing_scanner_summary">Par défaut, Olvid utilise ML Kit pour cela. Activez cette option si le scan de codes QR fonctionne mal dans Olvid.</string>
+    <string name="label_my_devices">Mes appareils</string>
+    <string name="text_device_xxxx">Appareil %1$s</string>
+    <string name="text_this_device">Cet appareil</string>
+    <string name="text_secure_channel_created">Canal sécurisé établi</string>
+    <string name="text_secure_channel_creation_in_progress">Canal sécurisé en cours de création</string>
+    <string name="menu_action_rename_device">Renommer cet appareil</string>
+    <string name="menu_action_remove_device">Supprimer cet appareil</string>
+    <string name="menu_action_refresh_device_list">Actualiser la liste d\'appareils</string>
+    <string name="menu_action_recreate_channel">Recréer le canal sécurisé</string>
+    <string name="explanation_message_sent_from_other_device">Ce message a été envoyé depuis un autre de vos appareils. Veuillez utiliser cet autre appareil pour consulter son statut d\'envoi détaillé.</string>
+    <string name="text_last_online">Dernière connexion\u00a0: %1$s</string>
+    <string name="text_deactivates_on">Sera désactivé le\u00a0: %1$s</string>
+    <string name="text_device_is_inactive">Appareil désactivé</string>
+    <string name="dialog_message_rename_current_device">Saisissez un nom pour identifier votre appareil actuel.\nAppuyez sur \"Par défaut\" pour utiliser son nom d\'appareil par défaut.</string>
+    <string name="dialog_message_rename_other_device">Saisissez un nom pour identifier cet appareil.</string>
+    <string name="hint_device_name">Nom de l\'appareil</string>
+    <string name="button_label_default">Par défaut</string>
+    <string name="dialog_title_rename_device">Renommer l\'appareil</string>
+    <string name="dialog_title_remove_device">Delete device</string>
+    <string name="dialog_message_remove_device">Si vous supprimez un appareil, votre profil Olvid sera désactivé sur cet appareil. Vous pourrez continuer à utiliser Olvid normalement sur vos autres appareils.</string>
+    <string name="button_label_remove">Supprimer</string>
+    <string name="menu_action_remove_expiration">Garder cet appareil actif</string>
+    <string name="dialog_title_set_unexpiring_device">Garder un appareil actif</string>
+    <string name="dialog_message_set_unexpiring_device">Vous n\'avez pas de licence vous autorisant à avoir plusieurs appareils actifs. Si vous souhaitez acheter une telle licence, fermez ce dialog et appuyez sur «\u00a0Voir les options d\'abonnements\u00a0».\n\nPour continuer et garder l\'appareil «\u00a0%1$s\u00a0» actif, l\'appareil «\u00a0%2$s\u00a0» devra être désactivé à la place. Voulez-vous poursuivre\u00a0?</string>
     <string name="dialog_title_remove_background_image">Retirer l\'image d\'arrière plan actuelle\u00a0?</string>
     <string name="dialog_title_introducing_markdown">Découvrez la mise en forme des messages\u00a0!</string>
     <string name="dialog_message_introducing_markdown">Olvid vous permet maintenant de mettre en forme vos messages en utilisant la syntaxe markdown\u00a0🎨\u00a0!\n\nÉcrivez en **<b>gras</b>**, en *<i>italique</i>*, ajoutez des #\u00a0<big>TITRES</big>, etc.\n\nRetrouvez l\'ensemble des balises\u00a0🦍 possibles à\u00a0:\nhttps://www.olvid.io/faq/mettre-en-forme-vos-messages/</string>
+    <string name="label_active_devices">Appareils actifs</string>
+    <string name="fetching_device_list">Récupération de la liste d\'appareils…</string>
+    <string name="toast_message_failed_to_reactivate_device">Erreur de réactivation de l\'appareil, veuillez réessayer.</string>
+    <string name="toast_message_license_rejected_by_server">La licence a été refusée par le serveur</string>
+    <string name="text_explanation_inactive_identity_activation_link">Votre profil est actuellement inactif. L\'activation d\'une licence n\'est possible que sur un profil actif.</string>
+    <string name="text_feature_multi_device">Utiliser plusieurs appareils</string>
     <string name="menu_action_location_message_change_integration">Changer de service de cartographie</string>
+    <string name="pref_read_only_title">Groupe en lecture seule</string>
+    <string name="pref_read_only_summary">Quand cette option est activée, seuls les administrateurs peuvent poster des messages dans ce groupe</string>
 
 
     <plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity">
@@ -1719,6 +1782,10 @@
     <plurals name="text_and_x_other" tools:ignore="MissingQuantity">
         <item quantity="one">Et %1$d autre</item>
         <item quantity="other">Et %1$d autres</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity">
+        <item quantity="one"> &amp; %1$d autre</item>
+        <item quantity="other"> &amp; %1$d autres</item>
     </plurals>
     <plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Le stratégie de rétention des messages que vous avez choisie conduirait à la suppression d\'un message.\nSouhaitez vous continuer\u00a0?</item>

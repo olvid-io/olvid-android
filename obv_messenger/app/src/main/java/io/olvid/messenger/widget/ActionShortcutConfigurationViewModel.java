@@ -66,7 +66,7 @@ public class ActionShortcutConfigurationViewModel extends ViewModel {
             if (bytesOwnedIdentity == null) {
                 return null;
             }
-            return AppDatabase.getInstance().discussionDao().getAllNotLockedWithGroupMembersNames(bytesOwnedIdentity);
+            return AppDatabase.getInstance().discussionDao().getAllWritableWithGroupMembersNames(bytesOwnedIdentity);
         });
 
         discussionLiveData = Transformations.switchMap(actionDiscussionIdLiveData, (Long discussionId) -> {

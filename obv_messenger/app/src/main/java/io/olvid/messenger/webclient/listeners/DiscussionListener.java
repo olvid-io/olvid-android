@@ -34,6 +34,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.webclient.WebClientManager;
 import io.olvid.messenger.webclient.datatypes.Constants;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass.Colissimo;
@@ -303,8 +304,8 @@ public class DiscussionListener {
                     // do not send message body if message is read once or have a limited visibility duration (inbound and outbound)
                     try {
                         if (discussionAndLastMessage.message.jsonExpiration != null) {
-                            io.olvid.messenger.databases.entity.Message.JsonExpiration jsonExpiration;
-                            jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(discussionAndLastMessage.message.jsonExpiration, io.olvid.messenger.databases.entity.Message.JsonExpiration.class);
+                            JsonExpiration jsonExpiration;
+                            jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(discussionAndLastMessage.message.jsonExpiration, JsonExpiration.class);
                             if ((jsonExpiration.getReadOnce() != null && jsonExpiration.getReadOnce()) || jsonExpiration.getVisibilityDuration() != null) {
                                 // hardcode message body and return builder without adding other info
                                 lastMessageBuilder.setContentBody(context.getString(R.string.text_message_content_hidden));

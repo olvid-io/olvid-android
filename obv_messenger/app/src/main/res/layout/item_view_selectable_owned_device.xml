@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:theme="@style/SubtleBlueRipple"
+    android:paddingVertical="2dp"
+    android:paddingHorizontal="16dp">
+
+    <RadioButton
+        android:id="@+id/device_selected_radio_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:checked="true"
+        android:theme="@style/AppTheme.BlueAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/device_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_device"
+        app:layout_constraintStart_toEndOf="@id/device_selected_radio_button"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/device_name_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/primary700"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@id/device_status_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/device_icon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_goneMarginEnd="16dp"
+        tools:text="Device Name" />
+
+
+    <TextView
+        android:id="@+id/device_status_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/grey"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@id/device_expiration_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/device_icon"
+        app:layout_constraintTop_toBottomOf="@id/device_name_text_view"
+        app:layout_goneMarginBottom="2dp"
+        tools:text="Last online: March 3, 2023 - 9:23" />
+
+    <TextView
+        android:id="@+id/device_expiration_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:drawablePadding="4dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:textColor="@color/grey"
+        android:textSize="12sp"
+        android:visibility="gone"
+        tools:drawableStartCompat="@drawable/ic_device_expiration"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/device_icon"
+        app:layout_constraintTop_toBottomOf="@id/device_status_text_view"
+        tools:text="Deactivates on: March 7, 2023 - 10:23"
+        tools:visibility="visible" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

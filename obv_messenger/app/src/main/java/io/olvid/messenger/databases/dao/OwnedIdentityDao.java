@@ -37,7 +37,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 @Dao
 public interface OwnedIdentityDao {
     @Insert
-    void insert(OwnedIdentity contact);
+    void insert(OwnedIdentity ownedIdentity);
 
     @Delete
     void delete(OwnedIdentity ownedIdentity);

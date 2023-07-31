@@ -8,7 +8,7 @@
         android:id="@+id/group_details_initial_view"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintEnd_toEndOf="parent"
@@ -78,7 +78,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/group_details_group_description_layout"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/group_type"
         android:visibility="visible"
         app:errorEnabled="false">
 
@@ -98,4 +98,16 @@
             android:textColor="@color/greyTint"
             android:importantForAutofill="no"/>
     </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/group_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:paddingTop="16dp"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintTop_toBottomOf="@+id/personal_note_group"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".activities.GroupDetailsActivity">
+    tools:context=".group.GroupDetailsActivity">
 
     <ScrollView
         android:id="@+id/group_details_scroll_view"

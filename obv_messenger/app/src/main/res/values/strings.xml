@@ -93,7 +93,6 @@
     <string name="explanation_empty_discussion_list">This screen displays your ongoing discussions.</string>
     <string name="explanation_empty_group_list">This screen displays the list of groups you belong to.</string>
     <string name="explanation_empty_invitation_list">This screen displays the list of invitations you have received or sent.</string>
-    <string name="explanation_group_name">Choose a group name to help group members identify the purpose of this group.</string>
     <string name="explanation_new_group_card">The group manager updated the Group Card. Both the old and new versions are shown below.\n\nPress \"update\" to update the group\'s information.</string>
     <string name="explanation_new_group_v2_card">One of the group administrators updated the group details. The new version is shown above.\n\nPress \"update\" to use this new version.</string>
     <string name="explanation_new_olvid_card">Your contact updated their Olvid Card. Both the old and new versions are shown below.\n\nPress \"update\" to update your contact\'s information with this new version.</string>
@@ -196,6 +195,7 @@
     <string name="menu_action_share">Share</string>
     <string name="menu_check_update">Check Google Play for update</string>
     <string name="message_discussion_locked">This discussion is locked</string>
+    <string name="message_discussion_readonly">This discussion is read-only</string>
     <string name="message_discussion_no_channel">Your messages will be automatically sent once a secure channel is established for this discussion. Until then, they will remain on hold.</string>
     <string name="message_error_first_or_last_name_needed">Please fill in a first or a last name</string>
     <string name="message_error_trust_origin">Error retrieving contact trust origin</string>
@@ -442,9 +442,13 @@
     <string name="dialog_title_confirm_backup_key_generation">Generate a new backup key</string>
     <string name="dialog_message_confirm_backup_key_generation">Are you sure you want to generate a new backup key?\n\nIf so, please make sure you are ready to write down this new key as it will be used for all future backups.</string>
     <string name="toast_message_backup_failed">Failed to create backup file. Please try again.</string>
-    <string name="dialog_title_identity_deactivated">Olvid ID deactivated</string>
-    <string name="dialog_message_identity_deactivated">Your Olvid ID has been deactivated on this device.\n\nThis is probably because you restored a backup on another device. Your Olvid ID can only be active on one device at a time.\n\nIf you wish to deactivate all your other installs of Olvid, press \"reactivate Olvid on this device\" below. Keep in mind that this will not allow you to receive messages on two devices simultaneously.\n\nPress OK to dismiss this dialog and keep this device inactive: you will not be able to send or receive messages on this device, but may still browse your old discussions.</string>
-    <string name="button_label_reactivate_identity">Reactivate Olvid on this device</string>
+    <string name="dialog_title_identity_deactivated">Profile deactivated on this device</string>
+    <string name="dialog_message_identity_deactivated">Your profile has been deactivated on this device.\n\nOlvid was not able to retrieve the list of devices on which it is currently active. Reactivating your profile on this device could deactivate it on another one.\n\nIf you wish to proceed, press \"reactivate my profile on this device\" below. Keep in mind that using Olvid to receive and send messages on two devices simultaneously requires a license.\n\nPress \"cancel\" to dismiss this dialog and keep this device inactive: you will not be able to send or receive messages on this device, but may still browse your old discussions.</string>
+    <string name="dialog_message_identity_deactivated_multi_device">Your profile has been deactivated on this device.\n\nIt appears you have a license to use Olvid on multiple devices simultaneously, so you may reactivate your profile whenever you want. For you information, below is the list of your current active devices.\n\nIf you wish to proceed, press \"reactivate my profile on this device\" below. Your device will then synchronize with your other active devices to update your contacts and groups.\n\nPress \"cancel\" to dismiss this dialog and keep this device inactive: you will not be able to send or receive messages on this device, but may still browse your old discussions.</string>
+    <string name="dialog_message_identity_deactivated_no_device">Your profile has been deactivated on this device.\n\nIt appears you do not have any active device at the moment, so you may reactivate your profile whenever you want.\n\nIf you wish to proceed, press \"reactivate my profile on this device\" below.\n\nPress \"cancel\" to dismiss this dialog and keep this device inactive: you will not be able to send or receive messages on this device, but may still browse your old discussions.</string>
+    <string name="dialog_message_identity_deactivated_choose_device">Your profile has been deactivated on this device.\n\nIt appears you do not have a license to use Olvid on multiple devices simultaneously. Reactivating this device requires to deactivate another of your devices.\n\nIf you wish to proceed, select the device you wish to deactivate from the list below, then press \"reactivate my profile on this device\".\n\nPress \"cancel\" to dismiss this dialog and keep this device inactive: you will not be able to send or receive messages on this device, but may still browse your old discussions.</string>
+    <string name="dialog_message_identity_deactivated_only_expiring">Your profile has been deactivated on this device.\n\nIt appears all your other devices are set to be deactivated in the near future, so you may reactivate your profile on this device whenever you want. For you information, below is the list of your current active devices.\n\nIf you wish to proceed, press \"reactivate my profile on this device\" below.\n\nPress \"cancel\" to dismiss this dialog and keep this device inactive: you will not be able to send or receive messages on this device, but may still browse your old discussions.</string>
+    <string name="button_label_reactivate_identity">Reactivate my profile on this device</string>
     <string name="toast_message_error_retry">An error occurred. Please try again.</string>
     <string name="dialog_title_identity_activated">Olvid ID reactivated</string>
     <string name="dialog_message_identity_activated">Your Olvid ID has been reactivated on this device.\n\nSecure channels are now being recreated with all your contacts.</string>
@@ -464,8 +468,10 @@
     <string name="toast_message_error_while_deleting_selected_backup">Failed to delete selected backup. Please try again</string>
     <string name="text_description_google_drive_backup">Google Drive account: %1$s\nDevice: %2$s\nDate: %3$s</string>
     <string name="text_description_webdav_backup">WebDAV account: %1$s\nDevice: %2$s\nDate: %3$s</string>
-    <string name="dialog_title_identity_reactivation_confirmation">Reactivate Olvid</string>
-    <string name="dialog_message_identity_reactivation_confirmation">Are you sure you wish to reactivate Olvid on this device?\n\nThis will deactivate Olvid on all your other devices. Keep in mind that this will not allow you to receive messages on two devices simultaneously.</string>
+    <string name="dialog_title_identity_reactivation_confirmation">Reactivate my profile</string>
+    <string name="dialog_message_identity_reactivation_confirmation">Are you sure you wish to reactivate your Olvid profile on this device?\n\nThis will deactivate it on your other device \"%1$s\". This will not allow you to receive messages on both devices simultaneously.</string>
+    <string name="dialog_message_identity_reactivation_confirmation_multi">Are you sure you wish to reactivate your Olvid profile on this device?</string>
+    <string name="dialog_message_identity_reactivation_confirmation_unknown">Are you sure you wish to reactivate your Olvid profile on this device?\n\nIf you have other active devices, this could deactivate another one of them.</string>
     <string name="pref_prevent_screen_capture_title">Prevent screenshots</string>
     <string name="pref_prevent_screen_capture_summary">When this is on, screenshots are disabled in Olvid and in the recent apps list.</string>
     <string name="button_label_to_file">Export to file</string>
@@ -663,7 +669,7 @@
     <string name="text_premium_features_free_trial">Premium features free trial</string>
     <string name="button_label_start_free_trial">Start free trial</string>
     <string name="label_free_trial_available">Free trial available</string>
-    <string name="label_free_trial_explanation">Get access to premium features for free for one month (only available once)</string>
+    <string name="label_free_trial_explanation">Try Olvid\'s secure calls for free for one month (only available once)</string>
     <string name="toast_message_failed_to_start_free_trial">Failed to start free trial</string>
     <string name="toast_message_free_trial_started">Free trial started</string>
     <string name="toast_message_error_launching_in_app_purchase">Error initiating in-app purchase</string>
@@ -682,8 +688,9 @@
     <string name="label_failed_to_query_subscription">Failed to query subscription plans</string>
     <string name="dialog_title_subscription_required">Subscription required</string>
     <string name="button_label_check_subscription">Check subscription status</string>
-    <string name="dialog_message_subscription_required_call">Initiating secure phone calls with Olvid requires a subscription.\n\nYou can check your current subscription status and see available subscription plans on the \"My ID\" page.</string>
-    <string name="dialog_message_subscription_required_web_client">Connecting to the Olvid web client requires a subscription.\n\nYou can check your current subscription status and see available subscription plans on the \"My ID\" page.</string>
+    <string name="dialog_message_subscription_required_call">Initiating secure phone calls with Olvid requires a subscription.\n\nYou can check your current subscription status and see available subscription plans on the \"My Profile\" page.</string>
+    <string name="dialog_message_subscription_required_web_client">Connecting to the Olvid web client requires a subscription.\n\nYou can check your current subscription status and see available subscription plans on the \"My Profile\" page.</string>
+    <string name="dialog_message_subscription_required_multi_device">Using your Olvid profile on multiple devices at the same time requires a subscription.\n\nYou can check your current subscription status and see available subscription plans on the \"My Profile\" page.</string>
     <string name="text_ended_on">Ended on: %1$s</string>
     <string name="text_free_trial_ended">Free trial ended</string>
     <string name="text_free_trial_expired">Expired free trial license</string>
@@ -747,6 +754,7 @@
     <string name="pref_discussion_read_once_summary">When activated, messages and attachments are displayed once, and are deleted when exiting the discussion.</string>
     <string name="pref_discussion_visibility_duration_title">Message visibility duration</string>
     <string name="pref_discussion_existence_duration_title">Message existence duration</string>
+    <string name="pref_discussion_remote_delete_title">Who can \"delete everywhere\" messages from other users?</string>
     <string name="pref_text_duration_null">Unlimited</string>
     <string name="pref_text_duration_5s">5\u00a0seconds</string>
     <string name="pref_text_duration_10s">10\u00a0seconds</string>
@@ -936,6 +944,7 @@
     <string name="toast_message_error_exporting_db">Error exporting app databases. Please try again.</string>
     <string name="toast_message_success_exporting_db">Database export successful</string>
     <string name="text_successful_call">Phone call</string>
+    <string name="text_successful_call_other_device">Phone call on another device</string>
     <string name="pref_category_customization_title">Customization</string>
     <string name="pref_sort_contacts_by_last_name_title">Sort contacts by last name</string>
     <string name="pref_sort_contacts_by_last_name_summary">When active, your contact list is sorted  by last name. Otherwise, the first name is used.</string>
@@ -969,6 +978,7 @@
     <string name="text_busy_outgoing_call_with_contacts">Phone call while %1$s was busy</string>
     <string name="text_rejected_outgoing_call_with_contacts">Phone call rejected by %1$s</string>
     <string name="text_incoming_call_with_contacts">Phone call from %1$s</string>
+    <string name="text_successful_call_other_device_with_contacts">Call from %1$s on another device</string>
     <string name="menu_action_group_call">Group call</string>
     <string name="button_label_call">Call</string>
     <string name="dialog_title_start_call">Start call</string>
@@ -1179,7 +1189,7 @@
     <string name="link_label_invitation_url">Add contact</string>
     <string name="link_label_configuration_url">Import configuration or license</string>
     <string name="dialog_title_chose_profile_keycloak_configuration">Choose the profile to be managed by your company\'s identity provider</string>
-    <string name="dialog_title_chose_profile_configuration">Choose the profile to which to apply this configuration/licence</string>
+    <string name="dialog_title_chose_profile_configuration">Choose the profile to which to apply this configuration/license</string>
     <string name="dialog_title_chose_profile_web_client">Choose the profile to connect to the Olvid web client</string>
     <string name="dialog_title_chose_profile_invitation">Choose the profile with which to invite this contact</string>
     <string name="toast_message_create_new_profile_then_reopen_this_link">Please create a new profile first, then open this link again</string>
@@ -1188,19 +1198,20 @@
     <string name="button_label_configure_lock_screen">Configure lock screen</string>
     <string name="menu_action_delete_profile">Delete this profile</string>
     <string name="dialog_title_delete_profile">Delete current profile?</string>
-    <string name="dialog_title_delete_last_profile">Delete all your profiles?</string>
-    <string name="dialog_message_delete_profile">Deleting a profile will delete any information related to this profile on your device. This includes, your contacts and groups and the content of all your discussions (messages and attachments) for this profile. Your other profiles will not be affected by this operation.\nIf you have enabled backups in Olvid, your future backups will not contain any trace of this profile and you will not be able to restore it.\n\nPress \"proceed\" to choose how this profile should be deleted.</string>
-    <string name="dialog_message_delete_last_profile">Deleting a profile will delete any information related to this profile on your device. This includes, your contacts and groups and the content of all your discussions (messages and attachments) for this profile.\n\nThis is your only visible profile and if you have any hidden profile, they will be deleted simultaneously.\nIf you have enabled backups in Olvid, your future backups will not contain any trace of this profile and you will not be able to restore it.\n\nPress \"proceed\" to choose how this profile should be deleted.</string>
-    <string name="dialog_title_delete_profile_method">Choose how to delete this profile</string>
-    <string name="dialog_message_notify_contacts_switch_label">Notify your contacts</string>
+    <string name="dialog_message_delete_profile">Deleting a profile will delete any information related to this profile on your device. This includes, your contacts and groups and the content of all your discussions (messages and attachments) for this profile. Your other profiles will not be affected by this operation.\nIf you have enabled backups in Olvid, your future backups will not contain any trace of this profile and you may not be able to restore it.\n\nPress \"next\" to choose how this profile should be deleted.</string>
+    <string name="dialog_message_delete_last_profile">Deleting a profile will delete any information related to this profile on your device. This includes, your contacts and groups and the content of all your discussions (messages and attachments) for this profile.\n\n<b>This is your only visible profile and if you have any hidden profile, they will be deleted simultaneously.</b>\n\nIf you have enabled backups in Olvid, your future backups will not contain any trace of this profile and you may not be able to restore it.\n\nPress \"next\" to choose how this profile should be deleted.</string>
+    <string name="dialog_message_delete_profile_multi">Deleting a profile will delete any information related to this profile on your device. This includes, your contacts and groups and the content of all your discussions (messages and attachments) for this profile. Your other profiles will not be affected by this operation.\n\nPress \"next\" to choose how this profile should be deleted.</string>
+    <string name="dialog_message_delete_last_profile_multi">Deleting a profile will delete any information related to this profile on your device. This includes, your contacts and groups and the content of all your discussions (messages and attachments) for this profile.\n\n<b>This is your only visible profile and if you have any hidden profile, they will be deleted simultaneously.</b>\n\nPress \"next\" to choose how this profile should be deleted.</string>
+    <string name="switch_label_delete_profile_everywhere">Delete profile <b>everywhere</b></string>
     <string name="hint_type_delete_here_to_proceed">Type DELETE here to proceed</string>
-    <string name="explanation_delete_owned_identity">Choose to notify your contacts (recommended) so that:\n\u00a0- your ID is deleted from your contacts\'s devices\n\u00a0- you leave groups you joined\n\u00a0- you disband groups you created\n\nIf you do not notify, unless you have transferred your profile to another device, your contacts may still try sending you messages and might not realize these messages cannot be delivered.</string>
-    <string name="explanation_delete_inactive_owned_identity">Your current profile appears to be inactive, meaning you probably transferred it to another device. If this is the case and plan to continue using this profile on your other device, choose not to notify your contacts.\n\nIf you do not want to use this profile ever again, you will need to reactivate your ID on this device first, wait for secure channels with your contacts to be recreated, and only then delete this profile.</string>
+    <string name="explanation_delete_owned_identity">If you choose to delete your profile <b>everywhere</b>:\n\u00a0-\u00a0it will be deleted locally <b>and</b> on your contacts\'s devices\n\u00a0-\u00a0you will leave groups you joined\n\u00a0-\u00a0groups you manage will be disbanded\n\nIf you <b>do not</b> delete your profile everywhere it will only be deleted locally on your device. Unless you plan to restore a backup on another device, your contacts may still try sending you messages and might not realize these messages cannot be delivered.</string>
+    <string name="explanation_delete_inactive_owned_identity">Your current profile appears to be inactive, meaning you probably transferred it to another device. If you plan to continue using this profile on your other device, you can safely delete it here.\n\nIf you do not want to use this profile ever again, you will need to reactivate it on this device first, wait for secure channels with your contacts to be recreated, and only then delete this profile choosing the \"delete everywhere\" option.</string>
+    <string name="explanation_delete_owned_identity_multi">Your profile is currently enable on multiple devices.\n\nIf you choose to delete your profile <b>everywhere</b>:\n\u00a0-\u00a0it will be deleted from all your devices <b>and</b> on your contacts\'s devices\n\u00a0-\u00a0you will leave groups you joined\n\u00a0-\u00a0groups you manage will be disbanded\n\nIf you <b>do not</b> delete your profile everywhere it will only be deleted locally and you can continue using it normally on your other devices.</string>
     <string name="text_delete_capitalized">DELETE</string>
     <string name="toast_message_something_went_wrong">Something went wrong, please try again</string>
     <string name="toast_message_profile_deleted">Profile deleted</string>
-    <string name="label_owned_identity_inactive">Your Olvid ID is inactive</string>
-    <string name="explanation_owned_identity_inactive">Your Olvid ID has been deactivated on this device.\n\nThis is probably because you restored a backup on another device. Your Olvid ID can only be active on one device at a time.\n\nIf you wish to deactivate all your other installs of Olvid, press \"reactivate Olvid on this device\" below. Keep in mind that this will not allow you to receive messages on two devices simultaneously.</string>
+    <string name="label_owned_identity_inactive">Your profile is inactive</string>
+    <string name="explanation_owned_identity_inactive">Your profile has been deactivated on this device. This is probably because you are using it on another device.\n\nPress \"reactivate my profile on this device\" to see which devices are currently active and how your profile can be reactivated on this device.</string>
     <string name="dialog_title_introducing_multi_profile">Introducing multi-profile!</string>
     <string name="dialog_message_introducing_multi_profile">Olvid now supports having multiple completely independent profiles inside one app. Each profile can use a different name and profile picture and has a separate set of contacts, groups, and discussions. You may also have hidden profiles that require an additional password to be accessed.\n\nWant to try this out? Tap on your profile picture at the top left of the main screen and simply press \"add new profile\" to get started!</string>
     <string name="menu_action_neutral_notifications_when_hidden">Neutral notification when hidden</string>
@@ -1391,6 +1402,7 @@
     <string name="text_undelivered">Undelivered</string>
     <string name="label_metadata_kind_undelivered">Unsuccessful sending</string>
     <string name="text_rejected_call">Rejected call</string>
+    <string name="text_rejected_call_other_device">Call rejected on another device</string>
     <string name="pref_sending_foreground_service">Enable the \"message being sent\" notification</string>
     <string name="pref_sending_foreground_service_summary">Activating this setting will enable a foreground service to run when a message is being sent. This may prevent the system from killing Olvid while an attachment is being uploaded.</string>
     <string name="menu_action_select_all">Select all</string>
@@ -1402,6 +1414,7 @@
     <string name="pref_discussion_pin_summary">Pinned discussions always remain at the top of your discussion list</string>
     <string name="pref_screen_scale">Display size</string>
     <string name="content_description_open_discussion">Open discussion</string>
+    <string name="label_read_only">Read Only</string>
     <string name="label_admin">Admin</string>
     <string name="label_pending_admin">Pending\nadmin</string>
     <string name="label_not_admin">Not admin</string>
@@ -1470,6 +1483,7 @@
     <string name="button_label_stop">Stop</string>
     <string name="label_live" translatable="false">live</string>
     <string name="text_message_sharing_location">Location sharing in progress</string>
+    <string name="text_message_sharing_location_on_other_device">Sharing location on another device</string>
     <string name="text_message_receiving_shared_location">Receiving shared location</string>
     <string name="text_message_sharing_location_finished">Location sharing ended</string>
     <string name="dialog_title_grant_location_access">Grant location access</string>
@@ -1541,8 +1555,21 @@
     <string name="message_discussion_group_v2_updating">Group members are currently being synchronized</string>
     <string name="message_discussion_group_v2_creating">Group is being created</string>
     <string name="button_label_new_group">New group</string>
+    <string name="label_group_type">Group Type</string>
+    <string name="label_group_simple_title">Simple</string>
+    <string name="label_group_simple_subtitle">All members are admin and can invite other members</string>
+    <string name="label_group_private_title">Private</string>
+    <string name="label_group_private_subtitle">Only you can invite members to this group</string>
+    <string name="label_group_read_only_title">Read only</string>
+    <string name="label_group_read_only_subtitle">Only the group admins can post messages</string>
+    <string name="label_group_custom_title">Custom</string>
+    <string name="label_group_custom_subtitle">Choose discussions parameters that suit you best (admins, read only etc.)</string>
+    <string name="label_group_custom_settings">Custom settings</string>
+    <string name="label_group_choose_admins">Group admins</string>
     <string name="text_you_became_admin">You are now a group administrator</string>
     <string name="text_you_are_no_longer_admin">You are no longer a group administrator</string>
+    <string name="text_you_became_writer">You are now allowed to post messages</string>
+    <string name="text_you_are_no_longer_writer">You can no longer post messages here</string>
     <string name="label_pending">Pending</string>
     <string name="pref_app_language_title">App language</string>
     <string name="pref_text_default_device_language">Default device language</string>
@@ -1600,6 +1627,12 @@
     <string name="text_setting_background">background (%1$ds)</string>
     <string name="text_setting_nobody">nobody</string>
     <string name="text_setting_everyone">everyone</string>
+    <string name="value_group_remote_delete_setting_nobody" translatable="false">nobody</string>
+    <string name="value_group_remote_delete_setting_everyone" translatable="false">everyone</string>
+    <string name="value_group_remote_delete_setting_admins" translatable="false">admins</string>
+    <string name="text_group_remote_delete_setting_nobody" translatable="false">Nobody</string>
+    <string name="text_group_remote_delete_setting_everyone" translatable="false">Everyone</string>
+    <string name="text_group_remote_delete_setting_admins" translatable="false">Admins only</string>
     <string name="text_setting_contacts">contacts</string>
     <string name="text_setting_lock_manually">lock manually</string>
     <string name="text_setting_xx_seconds">%1$ds</string>
@@ -1644,10 +1677,42 @@
     <string name="pref_no_notify_certificate_change_for_previews_summary">Enable this option to disable certificate change detection when fetching a link preview. Some sites may present a different certificate at each connection and you may get frequent notifications with this option off.</string>
     <string name="pref_use_legacy_zxing_scanner_title">Use legacy ZXing library for QR code scanning</string>
     <string name="pref_use_legacy_zxing_scanner_summary">By default, ML Kit is used for QR code scanning. Enable this option if you have issues scanning QR codes from within Olvid.</string>
+    <string name="label_my_devices">My devices</string>
+    <string name="text_device_xxxx">Device %1$s</string>
+    <string name="text_this_device">This device</string>
+    <string name="text_secure_channel_created">Secure channel established</string>
+    <string name="text_secure_channel_creation_in_progress">Secure channel creation in progress</string>
+    <string name="menu_action_rename_device">Rename device</string>
+    <string name="menu_action_remove_device">Remove device</string>
+    <string name="menu_action_refresh_device_list">Refresh device list</string>
+    <string name="menu_action_recreate_channel">Recreate secure channel</string>
+    <string name="explanation_message_sent_from_other_device">This message was sent from another devices. Please use that device to access the detailed message delivery status.</string>
+    <string name="text_last_online">Last online: %1$s</string>
+    <string name="text_deactivates_on">Deactivate on: %1$s</string>
+    <string name="text_device_is_inactive">Device deactivated</string>
+    <string name="dialog_message_rename_current_device">Please enter the name you want to use to identify your current device.\nPress \"default\" to use its default device name.</string>
+    <string name="dialog_message_rename_other_device">Please enter the name you want to use to identify that device.</string>
+    <string name="hint_device_name">Device Name</string>
+    <string name="button_label_default">Default</string>
+    <string name="dialog_title_rename_device">Rename device</string>
+    <string name="dialog_title_remove_device">Delete device</string>
+    <string name="dialog_message_remove_device">If you remove a device, your Olvid profile will be deactivated on that device. You can still use Olvid normally on your other devices.</string>
+    <string name="button_label_remove">Remove</string>
+    <string name="menu_action_remove_expiration">Keep this device active</string>
+    <string name="dialog_title_set_unexpiring_device">Keep a device active</string>
+    <string name="dialog_message_set_unexpiring_device">You currently do not have a license to have multiple active devices. If you wish to purchase such a license, close this dialog and press \"See subscription plans\" below.\n\nTo continue and keep device \"%1$s\" active, device \"%2$s\" will de deactivated instead. Do you wish to proceed?</string>
     <string name="dialog_title_remove_background_image">Remove current background image?</string>
     <string name="dialog_title_introducing_markdown">Introducing message formatting!</string>
     <string name="dialog_message_introducing_markdown">Olvid now allows formatting your messages using markdown syntax\u00a0🎨!\n\nWrite in **<b>bold</b>**, in *<i>italic</i>*, add #\u00a0<big>HEADINGS</big>, etc.\n\nFind the list of all supported tags\u00a0🦍 at:\nhttps://www.olvid.io/faq/format-your-messages/</string>
+    <string name="label_active_devices">Active devices</string>
+    <string name="fetching_device_list">Fetching device list…</string>
+    <string name="toast_message_failed_to_reactivate_device">Failed to reactivate current device, please try again.</string>
+    <string name="toast_message_license_rejected_by_server">License was rejected by the server</string>
+    <string name="text_explanation_inactive_identity_activation_link">Your profile is currently inactive. Activating a license can only be done on an active profile.</string>
+    <string name="text_feature_multi_device">Use multiple devices</string>
     <string name="menu_action_location_message_change_integration">Change map provider</string>
+    <string name="pref_read_only_title">Read only group</string>
+    <string name="pref_read_only_summary">When activated, only group admins can post messages in this group</string>
 
 
     <plurals name="dialog_message_delete_user_impossible_count">
@@ -1735,6 +1800,10 @@
     <plurals name="text_and_x_other">
         <item quantity="one">And %1$d other</item>
         <item quantity="other">And %1$d others</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d other</item>
+        <item quantity="other"> &amp; %1$d others</item>
     </plurals>
     <plurals name="dialog_message_confirm_retention_policy">
         <item quantity="one">Applying the retention policy you just selected would delete a single message.\nAre you sur you want to proceed?</item>

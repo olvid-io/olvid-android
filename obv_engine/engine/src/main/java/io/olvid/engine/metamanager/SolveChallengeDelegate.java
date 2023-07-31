@@ -20,12 +20,9 @@
 package io.olvid.engine.metamanager;
 
 
-import java.util.UUID;
-
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
 
 public interface SolveChallengeDelegate {
     byte[] solveChallenge(byte[] challenge, Identity identity, PRNGService prng) throws Exception;
-    UUID getApiKey(Identity identity);
 }

@@ -207,7 +207,7 @@
                 app:cardBackgroundColor="@color/almostWhite"
                 app:cardCornerRadius="8dp"
                 android:visibility="gone"
-                tools:visibility="gone"
+                tools:visibility="visible"
                 app:cardElevation="4dp">
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -264,12 +264,26 @@
                         android:layout_marginEnd="@dimen/plus_button_card_margins"
                         android:layout_marginTop="@dimen/plus_button_card_half_margins"
                         android:paddingVertical="16dp"
+                        android:stateListAnimator="@null"
                         android:text="@string/button_label_activate_license"
                         android:textColor="@color/alwaysWhite"
                         android:theme="@style/AppTheme.BlueAccent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/new_license_status_placeholder" />
+                    <ProgressBar
+                        android:id="@+id/activation_spinner"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_margin="6dp"
+                        app:layout_constraintStart_toStartOf="@id/activate_button"
+                        app:layout_constraintEnd_toEndOf="@id/activate_button"
+                        app:layout_constraintTop_toTopOf="@id/activate_button"
+                        app:layout_constraintBottom_toBottomOf="@id/activate_button"
+                        android:indeterminate="true"
+                        android:theme="@style/AppTheme.BlueAccent"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
 
                     <Button
                         android:id="@+id/cancel_button"
@@ -280,6 +294,7 @@
                         android:layout_marginEnd="@dimen/plus_button_card_margins"
                         android:layout_marginBottom="@dimen/plus_button_card_margins"
                         android:paddingVertical="16dp"
+                        android:stateListAnimator="@null"
                         android:text="@string/button_label_cancel"
                         android:textColor="@color/alwaysWhite"
                         android:theme="@style/AppTheme.GreyAccent"

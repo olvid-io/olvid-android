@@ -18,14 +18,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
     <Switch
-        android:id="@+id/notify_contacts_switch"
+        android:id="@+id/delete_profile_everywhere_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.BlueAccent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/notify_contacts_label"
         app:layout_constraintBottom_toBottomOf="@id/notify_contacts_label"
-        android:checked="true"
+        android:checked="false"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     <TextView
@@ -36,9 +36,9 @@
         android:ellipsize="end"
         android:textSize="16sp"
         android:textColor="@color/greyTint"
-        android:text="@string/dialog_message_notify_contacts_switch_label"
+        android:text="@string/switch_label_delete_profile_everywhere"
         android:layout_marginStart="4dp"
-        app:layout_constraintStart_toEndOf="@id/notify_contacts_switch"
+        app:layout_constraintStart_toEndOf="@id/delete_profile_everywhere_switch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
     </LinearLayout>

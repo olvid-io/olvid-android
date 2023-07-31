@@ -116,7 +116,7 @@ public class HandleReceiveReturnReceipt  implements Runnable {
                             if (messageRecipientInfo.markAttachmentDelivered(obvReturnReceipt.getAttachmentNumber())) {
                                 db.messageRecipientInfoDao().update(messageRecipientInfo);
                                 FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByIdAndAttachmentNumber(messageRecipientInfo.messageId, obvReturnReceipt.getAttachmentNumber());
-                                if (fyleMessageJoinWithStatus != null && fyleMessageJoinWithStatus.refreshOutboundStatus()) {
+                                if (fyleMessageJoinWithStatus != null && fyleMessageJoinWithStatus.refreshOutboundStatus(this.bytesOwnedIdentity)) {
                                     db.fyleMessageJoinWithStatusDao().updateReceptionStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.receptionStatus);
                                 }
                             }
@@ -126,7 +126,7 @@ public class HandleReceiveReturnReceipt  implements Runnable {
                             if (messageRecipientInfo.markAttachmentRead(obvReturnReceipt.getAttachmentNumber())) {
                                 db.messageRecipientInfoDao().update(messageRecipientInfo);
                                 FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByIdAndAttachmentNumber(messageRecipientInfo.messageId, obvReturnReceipt.getAttachmentNumber());
-                                if (fyleMessageJoinWithStatus != null && fyleMessageJoinWithStatus.refreshOutboundStatus()) {
+                                if (fyleMessageJoinWithStatus != null && fyleMessageJoinWithStatus.refreshOutboundStatus(this.bytesOwnedIdentity)) {
                                     db.fyleMessageJoinWithStatusDao().updateReceptionStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.receptionStatus);
                                 }
                             }

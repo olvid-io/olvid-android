@@ -59,8 +59,6 @@ public abstract class DownloadNotifications {
     public static final String NOTIFICATION_SERVER_SESSION_CREATED_PERMISSIONS_KEY = "permissions"; // List<ServerSession.Permission>
     public static final String NOTIFICATION_SERVER_SESSION_CREATED_API_KEY_EXPIRATION_TIMESTAMP_KEY = "api_key_expiration_timestamp"; // long -> 0 means no expiration
 
-    public static final String NOTIFICATION_API_KEY_REJECTED_BY_SERVER = "network_fetch_notification_api_key_rejected_by_server";
-    public static final String NOTIFICATION_API_KEY_REJECTED_BY_SERVER_IDENTITY_KEY = "identity";
 
     public static final String NOTIFICATION_SERVER_POLLED = "network_fetch_notification_server_polled";
     public static final String NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY = "owned_identity";
@@ -101,6 +99,8 @@ public abstract class DownloadNotifications {
 
     public static final String NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED = "network_fetch_notification_websocket_connection_state_changed";
     public static final String NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY = "state"; // int
+
+    public static final String NOTIFICATION_WEBSOCKET_DETECTED_SOME_NETWORK = "network_fetch_notification_websocket_detected_some_network";
 
     public enum TurnCredentialsFailedReason {
         PERMISSION_DENIED,
@@ -156,4 +156,7 @@ public abstract class DownloadNotifications {
 
     public static final String NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED = "network_fetch_notification_keycloak_update_required";
     public static final String NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED_OWNED_IDENTITY_KEY = "identity"; // Identity
+
+    public static final String NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE = "network_fetch_notification_push_register_failed_bad_device_uid_to_replace";
+    public static final String NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
 }

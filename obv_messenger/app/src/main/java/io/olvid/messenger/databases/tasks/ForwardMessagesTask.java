@@ -32,6 +32,9 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 public class ForwardMessagesTask implements Runnable {
@@ -39,7 +42,7 @@ public class ForwardMessagesTask implements Runnable {
    private final List<Long> discussionsIds;
 
    private final HashMap<Long, Discussion> discussionCache;
-   private final HashMap<Long, Message.JsonExpiration> discussionExpirationCache;
+   private final HashMap<Long, JsonExpiration> discussionExpirationCache;
 
    public ForwardMessagesTask(List<Long> messageIdsToForward, List<Long> discussionsIds) {
       this.messageIdsToForward = messageIdsToForward;
@@ -124,7 +127,7 @@ public class ForwardMessagesTask implements Runnable {
             }
 
 
-            final Message.JsonExpiration jsonExpiration;
+            final JsonExpiration jsonExpiration;
             if (discussionExpirationCache.containsKey(discussionId)) {
                jsonExpiration = discussionExpirationCache.get(discussionId);
             } else {
@@ -133,14 +136,14 @@ public class ForwardMessagesTask implements Runnable {
                discussionExpirationCache.put(discussionId, jsonExpiration);
             }
 
-            final Message.JsonMessage jsonMessage = new Message.JsonMessage(body);
+            final JsonMessage jsonMessage = new JsonMessage(body);
             if (message.isLocationMessage()) {
                // manually copy location data to forwarded message (to be sure it becomes a send location message and not a sharing location)
-               Message.JsonLocation jsonLocation = message.getJsonLocation();
+               JsonLocation jsonLocation = message.getJsonLocation();
                if (jsonLocation == null) {
                   continue;
                }
-               jsonLocation.setType(Message.JsonLocation.TYPE_SEND);
+               jsonLocation.setType(JsonLocation.TYPE_SEND);
                jsonMessage.setJsonLocation(jsonLocation);
             }
             if (jsonExpiration != null) {

@@ -44,6 +44,7 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
+import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
 import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
 import io.olvid.messenger.main.RefreshingFragment
@@ -99,9 +100,10 @@ class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
 
     override fun pinDiscussion(discussionId: Long, pinned: Boolean) {
         App.runThread {
-            AppDatabase.getInstance().discussionDao().updatePinned(
-                discussionId, pinned
-            )
+            AppDatabase.getInstance().discussionDao().updatePinned(discussionId, pinned)
+            AppDatabase.getInstance().discussionDao().getById(discussionId)?.let {
+                PropagatePinnedDiscussionsChangeTask(it.bytesOwnedIdentity).run()
+            }
         }
     }
 
@@ -144,7 +146,7 @@ class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
                 Handler(Looper.getMainLooper()).post {
                     val builder: AlertDialog.Builder = SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_unmute_notifications)
-                        .setPositiveButton(R.string.button_label_unmute_notifications) { dialog, which ->
+                        .setPositiveButton(R.string.button_label_unmute_notifications) { _, _ ->
                             App.runThread {
                                 AppDatabase.getInstance().discussionCustomizationDao()[discussionId]?.let {
                                     AppDatabase.getInstance().discussionCustomizationDao().update(it.apply {
@@ -177,7 +179,7 @@ class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
                         .group2Dao()[discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier]
                     group2?.ownPermissionRemoteDeleteAnything ?: false
                 } else {
-                    discussion.canPostMessages()
+                    discussion.isNormal
                 }
             val builder = if (canRemoteDelete) {
                 SecureDeleteEverywhereDialogBuilder(
@@ -218,7 +220,7 @@ class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
     }
 
     override fun renameDiscussion(discussion: Discussion) {
-        if (discussion.canPostMessages()) {
+        if (discussion.isNormalOrReadOnly) {
             when (discussion.discussionType) {
                 Discussion.TYPE_CONTACT -> {
                     App.runThread {

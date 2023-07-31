@@ -51,9 +51,9 @@ public interface NetworkFetchDelegate {
     void resendAllDownloadedAttachmentNotifications() throws Exception;
 
     void createPendingServerQuery(Session session, ServerQuery serverQuery) throws Exception;
-    void deleteExistingServerSessionAndCreateANewOne(Session session, Identity identity);
+    void deleteExistingServerSession(Session session, Identity identity, boolean createNewSession);
 
-    void connectWebsockets(String os, String osVersion, int appBuild, String appVersion);
+    void connectWebsockets(boolean aggressiveReconnectMode, String os, String osVersion, int appBuild, String appVersion);
     void disconnectWebsockets();
     void pingWebsocket (Identity ownedIdentity);
     byte[] getServerAuthenticationToken(Identity ownedIdentity);

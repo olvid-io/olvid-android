@@ -38,6 +38,7 @@ import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
+import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask;
 
 public class DiscussionSettingsHeadersFragment extends PreferenceFragmentCompat implements DiscussionSettingsViewModel.SettingsChangedListener {
     FragmentActivity activity;
@@ -73,7 +74,7 @@ public class DiscussionSettingsHeadersFragment extends PreferenceFragmentCompat 
             pinPreference.setOnPreferenceClickListener(preference -> {
                 Discussion discussion = discussionSettingsViewModel.getDiscussionLiveData().getValue();
                 if (discussion != null) {
-                    App.runThread(() -> AppDatabase.getInstance().discussionDao().updatePinned(discussion.id, !discussion.pinned));
+                    App.runThread(new PropagatePinnedDiscussionsChangeTask(discussion.bytesOwnedIdentity));
                     return true;
                 }
                 return false;

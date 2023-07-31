@@ -31,22 +31,24 @@ import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 
 public class ObvKeycloakState {
-    public final String keycloakServer;
-    public final String clientId;
-    public final String clientSecret;
-    public final JsonWebKeySet jwks;
-    public final JsonWebKey signatureKey;
-    public final String serializedAuthState;
+    public final String keycloakServer; // non-null
+    public final String clientId; // non-null
+    public final String clientSecret;  // may be null if keycloak is not configured with confidential access
+    public final JsonWebKeySet jwks; // non-null --> only set to null when sending to app and deserialization failed
+    public final JsonWebKey signatureKey; // non-null --> only set to null when sending to app and deserialization failed
+    public final String serializedAuthState; // device dependant --> do not share with other devices
+    public final String ownApiKey; // not included in the serialized version
     public final long latestRevocationListTimestamp; // not included in the serialized version
     public final long latestGroupUpdateTimestamp; // not included in the serialized version
 
-    public ObvKeycloakState(String keycloakServer, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, String serializedAuthState, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
+    public ObvKeycloakState(String keycloakServer, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, String serializedAuthState, String ownApiKey, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
         this.keycloakServer = keycloakServer;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.jwks = jwks;
         this.signatureKey = signatureKey;
         this.serializedAuthState = serializedAuthState;
+        this.ownApiKey = ownApiKey;
         this.latestRevocationListTimestamp = latestRevocationListTimestamp;
         this.latestGroupUpdateTimestamp = latestGroupUpdateTimestamp;
     }
@@ -134,6 +136,6 @@ public class ObvKeycloakState {
             serializedAuthState = null;
         }
 
-        return new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedAuthState, 0, 0);
+        return new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedAuthState, null, 0, 0);
     }
 }

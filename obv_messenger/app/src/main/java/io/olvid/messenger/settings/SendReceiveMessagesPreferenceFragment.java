@@ -36,7 +36,10 @@ import androidx.preference.SwitchPreference;
 
 import java.util.List;
 
+import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
@@ -49,6 +52,21 @@ public class SendReceiveMessagesPreferenceFragment extends PreferenceFragmentCom
         PreferenceScreen screen = getPreferenceScreen();
         if (screen == null) {
             return;
+        }
+
+        SwitchPreference sendReadReceiptPreference = screen.findPreference(SettingsActivity.PREF_KEY_READ_RECEIPT);
+        if (sendReadReceiptPreference != null) {
+            sendReadReceiptPreference.setOnPreferenceChangeListener((Preference preference, Object checked) -> {
+                if (checked instanceof Boolean) {
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts((Boolean) checked));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate default send read receipt setting change to other devices");
+                        e.printStackTrace();
+                    }
+                }
+                return true;
+            });
         }
 
         EditTextPreference defaultDiscussionRetentionCountPreference = screen.findPreference(SettingsActivity.PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT);

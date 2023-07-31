@@ -31,4 +31,5 @@ import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 public interface EncryptionForIdentityDelegate {
     EncryptedBytes wrap(AuthEncKey messageKey, Identity toIdentity, PRNGService prng);
     AuthEncKey unwrap(Session session, EncryptedBytes wrappedKey, Identity toIdentity) throws SQLException;
+    byte[] decrypt(Session session, EncryptedBytes ciphertext, Identity toIdentity) throws SQLException;
 }

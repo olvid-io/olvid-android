@@ -72,39 +72,40 @@ public class VerifyReceiptOperation extends Operation {
         try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
             try {
                 byte[] serverSessionToken = ServerSession.getToken(fetchManagerSession, ownedIdentity);
-                if (serverSessionToken != null) {
-                    VerifyReceiptServerMethod serverMethod = new VerifyReceiptServerMethod(
-                            ownedIdentity,
-                            serverSessionToken,
-                            storeToken
-                    );
-                    serverMethod.setSslSocketFactory(sslSocketFactory);
-
-                    byte returnStatus = serverMethod.execute(fetchManagerSession.identityDelegate.isActiveOwnedIdentity(fetchManagerSession.session, ownedIdentity));
-
-                    fetchManagerSession.session.startTransaction();
-                    switch (returnStatus) {
-                        case ServerMethod.OK: {
-                            HashMap<String, Object> userInfo = new HashMap<>();
-                            userInfo.put(DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS_OWNED_IDENTITY_KEY, ownedIdentity);
-                            userInfo.put(DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS_STORE_TOKEN_KEY, storeToken);
-                            fetchManagerSession.notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS, userInfo);
-
-                            fetchManagerSession.identityDelegate.updateApiKeyOfOwnedIdentity(fetchManagerSession.session, ownedIdentity, serverMethod.getApiKey());
-                            ServerSession.deleteForIdentity(fetchManagerSession, ownedIdentity);
-                            fetchManagerSession.createServerSessionDelegate.createServerSession(ownedIdentity);
-                            finished = true;
-                            return;
-                        }
-                        case ServerMethod.INVALID_SESSION: {
-                            ServerSession.deleteCurrentTokenIfEqualTo(fetchManagerSession, serverSessionToken, ownedIdentity);
-                            fetchManagerSession.session.commit();
-                            cancel(RFC_INVALID_SERVER_SESSION);
-                            break;
-                        }
-                    }
+                if (serverSessionToken == null) {
+                    cancel(RFC_INVALID_SERVER_SESSION);
+                    return;
                 }
 
+                VerifyReceiptServerMethod serverMethod = new VerifyReceiptServerMethod(
+                        ownedIdentity,
+                        serverSessionToken,
+                        storeToken
+                );
+                serverMethod.setSslSocketFactory(sslSocketFactory);
+
+                byte returnStatus = serverMethod.execute(fetchManagerSession.identityDelegate.isActiveOwnedIdentity(fetchManagerSession.session, ownedIdentity));
+
+                fetchManagerSession.session.startTransaction();
+                switch (returnStatus) {
+                    case ServerMethod.OK: {
+                        HashMap<String, Object> userInfo = new HashMap<>();
+                        userInfo.put(DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS_OWNED_IDENTITY_KEY, ownedIdentity);
+                        userInfo.put(DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS_STORE_TOKEN_KEY, storeToken);
+                        fetchManagerSession.notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_VERIFY_RECEIPT_SUCCESS, userInfo);
+
+                        ServerSession.deleteForIdentity(fetchManagerSession, ownedIdentity);
+                        fetchManagerSession.createServerSessionDelegate.createServerSession(ownedIdentity);
+                        finished = true;
+                        return;
+                    }
+                    case ServerMethod.INVALID_SESSION: {
+                        ServerSession.deleteCurrentTokenIfEqualTo(fetchManagerSession, serverSessionToken, ownedIdentity);
+                        fetchManagerSession.session.commit();
+                        cancel(RFC_INVALID_SERVER_SESSION);
+                        break;
+                    }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 fetchManagerSession.session.rollback();

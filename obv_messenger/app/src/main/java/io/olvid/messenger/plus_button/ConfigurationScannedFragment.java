@@ -33,6 +33,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -103,6 +104,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
     CardView newCardView;
     Button cancelButton;
     Button activateButton;
+    ProgressBar activationSpinner;
 
     CardView currentCardView;
 
@@ -182,6 +184,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
         newCardView = view.findViewById(R.id.new_license_card_view);
         cancelButton = view.findViewById(R.id.cancel_button);
         activateButton = view.findViewById(R.id.activate_button);
+        activationSpinner = view.findViewById(R.id.activation_spinner);
 
         currentCardView = view.findViewById(R.id.current_license_card_view);
         newLicenseStatusPlaceholder = view.findViewById(R.id.new_license_status_placeholder);
@@ -267,6 +270,13 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
             invalidCardView.setVisibility(View.VISIBLE);
             invalidMalformedLayout.setVisibility(View.VISIBLE);
             invalidMalformedExplanationTextView.setText(R.string.text_explanation_keycloak_license_activation_impossible);
+            return;
+        }
+
+        if (!ownedIdentity.active) {
+            invalidCardView.setVisibility(View.VISIBLE);
+            invalidMalformedLayout.setVisibility(View.VISIBLE);
+            invalidMalformedExplanationTextView.setText(R.string.text_explanation_inactive_identity_activation_link);
             return;
         }
 
@@ -492,8 +502,28 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
         if (id == R.id.ok_button || id == R.id.cancel_button || id == R.id.settings_cancel_button || id == R.id.back_button || id == R.id.keycloak_cancel_button) {
             activity.onBackPressed();
         } else if (id == R.id.activate_button) {
-            AppSingleton.getEngine().updateApiKeyForOwnedIdentity(viewModel.getCurrentIdentity().bytesOwnedIdentity, configurationApiKeyUuid);
-            activity.finish();
+            activateButton.setEnabled(false);
+            activationSpinner.setVisibility(View.VISIBLE);
+            App.runThread(() -> {
+                switch (AppSingleton.getEngine().registerOwnedIdentityApiKeyOnServer(viewModel.getCurrentIdentity().bytesOwnedIdentity, configurationApiKeyUuid)) {
+                    case SUCCESS:
+                        activity.finish();
+                        break;
+                    case INVALID_KEY:
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            activationSpinner.setVisibility(View.GONE);
+                            App.toast(R.string.toast_message_license_rejected_by_server, Toast.LENGTH_LONG);
+                        });
+                        break;
+                    case FAILED:
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            activateButton.setEnabled(true);
+                            activationSpinner.setVisibility(View.GONE);
+                            App.toast(R.string.toast_message_error_retry, Toast.LENGTH_LONG);
+                        });
+                        break;
+                }
+            });
         } else if (id == R.id.settings_update_button) {
             updateSettings();
             activity.finish();

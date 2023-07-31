@@ -313,6 +313,9 @@ public class GroupV2 {
             return true;
         }
 
+        public boolean isChainCreatedBy(Identity identity) {
+            return blocks.length > 0 && blocks[0].isSignatureValid(new Identity[]{identity});
+        }
 
         private AdministratorsChain(UID groupUid, Block[] blocks, boolean integrityWasChecked) {
             this.groupUid = groupUid;
@@ -465,19 +468,22 @@ public class GroupV2 {
         public static final String KEY_VERSION = "v";
         public static final String KEY_SERIALIZED_GROUP_DETAILS = "det";
         public static final String KEY_SERVER_PHOTO_INFO = "ph";
+        public static final String KEY_SERIALIZED_GROUP_TYPE = "t";
 
         public final AdministratorsChain administratorsChain;
         public final HashSet<IdentityAndPermissionsAndDetails> groupMemberIdentityAndPermissionsAndDetailsList;
         public final int version;
         public final String serializedGroupDetails;
         public final ServerPhotoInfo serverPhotoInfo; // null if the group does not have a photo
+        public final String serializedGroupType;
 
-        public ServerBlob(AdministratorsChain administratorsChain, HashSet<IdentityAndPermissionsAndDetails> groupMemberIdentityAndPermissionsAndDetailsList, int version, String serializedGroupDetails, ServerPhotoInfo serverPhotoInfo) {
+        public ServerBlob(AdministratorsChain administratorsChain, HashSet<IdentityAndPermissionsAndDetails> groupMemberIdentityAndPermissionsAndDetailsList, int version, String serializedGroupDetails, ServerPhotoInfo serverPhotoInfo, String serializedGroupType) {
             this.administratorsChain = administratorsChain;
             this.groupMemberIdentityAndPermissionsAndDetailsList = groupMemberIdentityAndPermissionsAndDetailsList;
             this.version = version;
             this.serializedGroupDetails = serializedGroupDetails;
             this.serverPhotoInfo = serverPhotoInfo;
+            this.serializedGroupType = serializedGroupType;
         }
 
         public Encoded encode() {
@@ -494,6 +500,9 @@ public class GroupV2 {
             map.put(new DictionaryKey(KEY_SERIALIZED_GROUP_DETAILS), Encoded.of(serializedGroupDetails));
             if (serverPhotoInfo != null) {
                 map.put(new DictionaryKey(KEY_SERVER_PHOTO_INFO), serverPhotoInfo.encode());
+            }
+            if (serializedGroupType != null) {
+                map.put(new DictionaryKey(KEY_SERIALIZED_GROUP_TYPE), Encoded.of(serializedGroupType));
             }
             return Encoded.of(map);
         }
@@ -532,7 +541,10 @@ public class GroupV2 {
             value = map.get(new DictionaryKey(KEY_SERVER_PHOTO_INFO));
             ServerPhotoInfo serverPhotoInfo = value == null ? null : ServerPhotoInfo.of(value);
 
-            return new ServerBlob(administratorsChain, groupMemberIdentityAndPermissionsAndDetailsList, version, serializedGroupDetails, serverPhotoInfo);
+            value = map.get(new DictionaryKey(KEY_SERIALIZED_GROUP_TYPE));
+            String serializedGroupType = value == null ? null : value.decodeString();
+
+            return new ServerBlob(administratorsChain, groupMemberIdentityAndPermissionsAndDetailsList, version, serializedGroupDetails, serverPhotoInfo, serializedGroupType);
         }
 
         public void consolidateWithLogEntries(GroupV2.Identifier groupIdentifier, List<byte[]> logEntries) {
@@ -551,8 +563,6 @@ public class GroupV2 {
             groupMemberIdentityAndPermissionsAndDetailsList.removeAll(leavers);
         }
     }
-
-
 
     public static class ServerPhotoInfo {
         public final Identity serverPhotoIdentity; // null for keycloak group photo info

@@ -81,7 +81,6 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
         this.serverUserDataCoordinator = serverUserDataCoordinator;
 
         serverQueriesOperationQueue = new NoDuplicateOperationQueue();
-        serverQueriesOperationQueue.execute(1, "Engine-ServerQueryCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -109,6 +108,8 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
                 e.printStackTrace();
             }
         }
+        // only start processing queries after the initial queueing is performed (otherwise a query could be queued while its already being executed)
+        serverQueriesOperationQueue.execute(1, "Engine-ServerQueryCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -210,8 +211,10 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
             rfc = Operation.RFC_NULL;
         }
         switch (rfc) {
+            case ServerQueryOperation.RFC_MALFORMED_URL:
             case ServerQueryOperation.RFC_USER_DATA_TOO_LARGE:
-            case ServerQueryOperation.RFC_BAD_ENCODED_SERVER_QUERY: {
+            case ServerQueryOperation.RFC_BAD_ENCODED_SERVER_QUERY:
+            case ServerQueryOperation.RFC_DEVICE_DOES_NOT_EXIST: {
                 // PendingServerQuery cannot be understood,
                 // or the data to send is too large
                 // ==> we can delete it from the database
@@ -227,20 +230,19 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
                 break;
             }
             case ServerQueryOperation.RFC_INVALID_SERVER_SESSION: {
-                if (serverQuery.getType().getId() == ServerQuery.Type.PUT_USER_DATA_QUERY_ID
-                        || serverQuery.getType().getId() == ServerQuery.Type.CREATE_GROUP_BLOB_QUERY_ID) {
-                    waitForServerSession(serverQuery.getOwnedIdentity(), serverQueryUid);
-                    createServerSessionDelegate.createServerSession(serverQuery.getOwnedIdentity());
-                }
+                waitForServerSession(serverQuery.getOwnedIdentity(), serverQueryUid);
+                createServerSessionDelegate.createServerSession(serverQuery.getOwnedIdentity());
                 break;
             }
             case ServerQueryOperation.RFC_IDENTITY_IS_INACTIVE: {
                 waitForIdentityReactivation(serverQuery.getOwnedIdentity(), serverQueryUid);
                 break;
             }
-            default:
+            case ServerQueryOperation.RFC_DEVICE_NOT_YET_REGISTERED:
+            default: {
                 // Requeue the operation in the future
                 scheduleNewServerQueryOperation(serverQueryUid);
+            }
         }
     }
 
@@ -289,7 +291,7 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
             }
 
             if (serverQuery.getType().getId() == ServerQuery.Type.PUT_USER_DATA_QUERY_ID) {
-                serverUserDataCoordinator.newUserDataUploaded(serverQuery.getOwnedIdentity(), serverQuery.getType().getServerLabel());
+                serverUserDataCoordinator.newUserDataUploaded(serverQuery.getOwnedIdentity(), serverQuery.getType().getServerLabelOrDeviceUid());
             }
         } catch (Exception e) {
             e.printStackTrace();

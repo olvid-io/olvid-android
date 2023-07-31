@@ -16,8 +16,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdk 33
-        versionCode 205
-        versionName "0.14.2"
+        versionCode 207
+        versionName "0.15.0"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr']
@@ -31,6 +31,7 @@ android {
             }
         }
         manifestPlaceholders.appAuthRedirectScheme = "olvid.openid"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         /////////////
         // Switch this settings to "false" to disable SSL handshake verification altogether.
@@ -76,7 +77,7 @@ android {
     productFlavors {
         prod {
             dimension "features"
-            buildConfigField "String", "HARDCODED_API_KEY", "\"00000000-0000-0000-0000-000000000000\""
+            buildConfigField "String", "HARDCODED_API_KEY", "null"
             buildConfigField "String", "CONTENT_PROVIDER_URI_PREFIX", "\"content://io.olvid.messenger.PROVIDER/\""
             buildConfigField "String", "SERVER_NAME", "\"https://server.olvid.io\""
             buildConfigField "String", "KEYCLOAK_REDIRECT_URL", "\"https://openid-redirect.olvid.io/\""
@@ -111,6 +112,7 @@ android {
 
 
 dependencies {
+    testImplementation "junit:junit:4.13.2"
     annotationProcessor 'androidx.room:room-compiler:2.5.2'
 
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
@@ -154,15 +156,15 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.exifinterface:exifinterface:1.3.6'
-    implementation 'androidx.fragment:fragment:1.6.0'
+    implementation 'androidx.fragment:fragment:1.6.1'
     implementation 'androidx.media2:media2-player:1.2.1'
     implementation 'androidx.media2:media2-session:1.2.1'
     implementation 'androidx.media2:media2-widget:1.2.1'
     implementation 'androidx.media:media:1.6.0'
     implementation 'androidx.navigation:navigation-fragment:2.6.0'
     implementation 'androidx.navigation:navigation-ui:2.6.0'
-    implementation 'androidx.preference:preference:1.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.recyclerview:recyclerview:1.3.1'
     implementation 'androidx.room:room-runtime:2.5.2'
     implementation 'androidx.sharetarget:sharetarget:1.2.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
@@ -191,10 +193,10 @@ dependencies {
     ///////////
 
     // Billing
-    fullImplementation 'com.android.billingclient:billing:4.1.0'
+    fullImplementation 'com.android.billingclient:billing:6.0.1'
 
     // Firebase
-    fullImplementation('com.google.firebase:firebase-messaging:23.1.2') {
+    fullImplementation('com.google.firebase:firebase-messaging:23.2.0') {
         exclude group: 'com.google.firebase', module: 'firebase-core'
         exclude group: 'com.google.firebase', module: 'firebase-analytics'
         exclude group: 'com.google.firebase', module: 'firebase-measurement-connector'

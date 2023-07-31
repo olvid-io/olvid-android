@@ -27,6 +27,7 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 
+import java.util.Arrays;
 import java.util.List;
 
 import io.olvid.messenger.App;
@@ -238,7 +239,7 @@ public class FyleMessageJoinWithStatus {
         }
     }
 
-    public boolean refreshOutboundStatus() {
+    public boolean refreshOutboundStatus(byte[] bytesOwnedIdentity) {
         // outbound status only makes sense for outbound messages, which have an engine number
         if (engineNumber == null) {
             return false;
@@ -248,9 +249,15 @@ public class FyleMessageJoinWithStatus {
         if (messageRecipientInfos.size() == 0) {
             return false;
         }
+        // when computing the message status, do not take the recipient info of my other owned devices into account, unless this is the only recipient info (discussion with myself)
+        boolean ignoreOwnRecipientInfo = messageRecipientInfos.size() > 1;
 
         int newStatus = 100000;
         for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
+            if (ignoreOwnRecipientInfo && Arrays.equals(messageRecipientInfo.bytesContactIdentity, bytesOwnedIdentity)) {
+                continue;
+            }
+
             if (MessageRecipientInfo.isAttachmentNumberPresent(engineNumber, messageRecipientInfo.undeliveredAttachmentNumbers)) {
                 newStatus = RECEPTION_STATUS_NONE;
                 break;

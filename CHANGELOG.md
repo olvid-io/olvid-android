@@ -1,3 +1,14 @@
+#  Build 207 (0.15.0)
+2023-07-31
+
+- Minor fixes for group types
+
+# ~~Build 206 (0.15.0)~~
+2023-07-28
+
+- introduction of group "types" allowing, for example, the creation of read-only discussions
+- preliminary support for multi-device (device re-synchronization not fully implemented yet)
+
 # Build 205 (0.14.2)
 2023-07-13
 
@@ -13,7 +24,6 @@
 - Update WebRTC
 - Some markdown fixes
 - Fix discussion background image rotation issue
-
 
 # ~~Build 203 (0.14.2)~~
 2023-06-05

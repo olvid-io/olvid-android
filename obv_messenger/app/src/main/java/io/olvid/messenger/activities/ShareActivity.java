@@ -154,7 +154,7 @@ public class ShareActivity extends LockScreenOrNotActivity {
                 if (ownedIdentity == null) {
                     return null;
                 } else {
-                    return AppDatabase.getInstance().discussionDao().getAllNotLockedWithGroupMembersNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity);
+                    return AppDatabase.getInstance().discussionDao().getAllWritableWithGroupMembersNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity);
                 }
             });
 

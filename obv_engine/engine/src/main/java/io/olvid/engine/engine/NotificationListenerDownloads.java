@@ -40,6 +40,7 @@ import io.olvid.engine.notification.NotificationManager;
 
 public class NotificationListenerDownloads implements NotificationListener {
     private final Engine engine;
+    private long latestNetworkRestart = System.currentTimeMillis();
 
     public NotificationListenerDownloads(Engine engine) {
         this.engine = engine;
@@ -72,8 +73,10 @@ public class NotificationListenerDownloads implements NotificationListener {
                 DownloadNotifications.NOTIFICATION_PING_LOST,
                 DownloadNotifications.NOTIFICATION_PING_RECEIVED,
                 DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED,
+                DownloadNotifications.NOTIFICATION_WEBSOCKET_DETECTED_SOME_NETWORK,
                 DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED,
                 DownloadNotifications.NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED,
+                DownloadNotifications.NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE,
         }) {
             notificationManager.addListener(notificationName, this);
         }
@@ -208,6 +211,9 @@ public class NotificationListenerDownloads implements NotificationListener {
                             break;
                         case WEB_CLIENT:
                             enginePermissions.add(EngineAPI.ApiKeyPermission.WEB_CLIENT);
+                            break;
+                        case MULTI_DEVICE:
+                            enginePermissions.add(EngineAPI.ApiKeyPermission.MULTI_DEVICE);
                             break;
                     }
                 }
@@ -344,6 +350,9 @@ public class NotificationListenerDownloads implements NotificationListener {
                             break;
                         case WEB_CLIENT:
                             enginePermissions.add(EngineAPI.ApiKeyPermission.WEB_CLIENT);
+                            break;
+                        case MULTI_DEVICE:
+                            enginePermissions.add(EngineAPI.ApiKeyPermission.MULTI_DEVICE);
                             break;
                     }
                 }
@@ -487,6 +496,16 @@ public class NotificationListenerDownloads implements NotificationListener {
                 engine.postEngineNotification(EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED, engineInfo);
                 break;
             }
+            case DownloadNotifications.NOTIFICATION_WEBSOCKET_DETECTED_SOME_NETWORK: {
+                // this notification is only sent if websocket are monitoring network state. In case network is detected --> reschedule all network tasks
+                if (latestNetworkRestart + 5_000 < System.currentTimeMillis()) {
+                    latestNetworkRestart = System.currentTimeMillis();
+                    Logger.i("Network detected (WebSocket connected), retrying all scheduled network jobs");
+                    engine.retryScheduledNetworkTasks();
+                }
+                engine.postEngineNotification(EngineNotifications.WEBSOCKET_DETECTED_SOME_NETWORK, new HashMap<>());
+                break;
+            }
             case DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED: {
                 String topic = (String) userInfo.get(DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED_TOPIC_KEY);
                 if (topic == null) {
@@ -508,6 +527,18 @@ public class NotificationListenerDownloads implements NotificationListener {
                 engineInfo.put(EngineNotifications.KEYCLOAK_UPDATE_REQUIRED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
 
                 engine.postEngineNotification(EngineNotifications.KEYCLOAK_UPDATE_REQUIRED, engineInfo);
+                break;
+            }
+            case DownloadNotifications.NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE: {
+                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE_OWNED_IDENTITY_KEY);
+                if (ownedIdentity == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+
+                engine.postEngineNotification(EngineNotifications.PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE, engineInfo);
                 break;
             }
             default:

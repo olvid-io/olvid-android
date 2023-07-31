@@ -28,8 +28,7 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 
 public interface PushNotificationDelegate {
-    void registerPushNotificationIfConfigurationChanged(Session session, Identity identity, UID deviceUid, PushNotificationTypeAndParameters pushNotificationTypeAndParameters) throws SQLException;
-    void unregisterPushNotification(Session session, Identity identity) throws SQLException;
+    void registerPushNotificationIfConfigurationChanged(Session session, Identity ownedIdentity, UID currentDeviceUid, PushNotificationTypeAndParameters pushNotificationTypeAndParameters) throws SQLException;
     void processAndroidPushNotification(String maskingUidString);
     void forceRegisterPushNotification(Identity ownedIdentity);
     Identity getOwnedIdentityFromMaskingUid(String maskingUidString);

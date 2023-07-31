@@ -19,11 +19,14 @@
 
 package io.olvid.engine.networkfetch.operations;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.List;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.crypto.Suite;
+import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
@@ -41,6 +44,8 @@ public class RegisterPushNotificationOperation extends Operation {
     public static final int RFC_NETWORK_ERROR = 1;
     public static final int RFC_INVALID_SERVER_SESSION = 2;
     public static final int RFC_ANOTHER_DEVICE_IS_ALREADY_REGISTERED = 3;
+    public static final int RFC_PUSH_NOTIFICATION_CONFIGURATION_NOT_FOUND = 4;
+    public static final int RFC_DEVICE_UID_TO_REPLACE_NOT_FOUND = 5;
 
 
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
@@ -84,7 +89,24 @@ public class RegisterPushNotificationOperation extends Operation {
                     return;
                 }
                 PushNotificationConfiguration pushNotificationConfiguration = PushNotificationConfiguration.get(fetchManagerSession, ownedIdentity);
+                if (pushNotificationConfiguration == null) {
+                    cancel(RFC_PUSH_NOTIFICATION_CONFIGURATION_NOT_FOUND);
+                    return;
+                }
                 this.deviceUid = pushNotificationConfiguration.getDeviceUid();
+
+                String deviceName = fetchManagerSession.identityDelegate.getCurrentDeviceDisplayName(fetchManagerSession.session, ownedIdentity);
+                byte[] encodedDeviceName = Encoded.of(new Encoded[]{
+                        Encoded.of(deviceName == null ? new byte[0] : deviceName.getBytes(StandardCharsets.UTF_8))
+                }).getBytes();
+
+                byte[] plaintext = new byte[((encodedDeviceName.length - 1) | 127) + 1];
+                System.arraycopy(encodedDeviceName, 0, plaintext, 0, encodedDeviceName.length);
+
+                EncryptedBytes encryptedDeviceNameForFirstRegistration = Suite.getPublicKeyEncryption(ownedIdentity.getEncryptionPublicKey()).encrypt(
+                        ownedIdentity.getEncryptionPublicKey(),
+                        plaintext,
+                        Suite.getDefaultPRNGService(0));
 
                 List<String> keycloakPushTopics = fetchManagerSession.identityDelegate.getKeycloakPushTopics(fetchManagerSession.session, ownedIdentity);
                 RegisterPushNotificationServerMethod serverMethod = new RegisterPushNotificationServerMethod(
@@ -92,7 +114,8 @@ public class RegisterPushNotificationOperation extends Operation {
                         serverSessionToken,
                         pushNotificationConfiguration.getDeviceUid(),
                         pushNotificationConfiguration.getPushNotificationTypeAndParameters(),
-                        keycloakPushTopics
+                        keycloakPushTopics,
+                        encryptedDeviceNameForFirstRegistration
                 );
                 serverMethod.setSslSocketFactory(sslSocketFactory);
 
@@ -102,7 +125,7 @@ public class RegisterPushNotificationOperation extends Operation {
                 switch (returnStatus) {
                     case ServerMethod.OK:
                         fetchManagerSession.identityDelegate.reactivateOwnedIdentityIfNeeded(fetchManagerSession.session, ownedIdentity);
-                        if (pushNotificationConfiguration.shouldKickOtherDevices()) {
+                        if (pushNotificationConfiguration.shouldReactivateCurrentDevice()) {
                             pushNotificationConfiguration.clearKickOtherDevices();
                         }
                         finished = true;
@@ -116,6 +139,14 @@ public class RegisterPushNotificationOperation extends Operation {
                         fetchManagerSession.identityDelegate.deactivateOwnedIdentity(fetchManagerSession.session, ownedIdentity);
                         fetchManagerSession.session.commit();
                         cancel(RFC_ANOTHER_DEVICE_IS_ALREADY_REGISTERED);
+                        return;
+                    case ServerMethod.DEVICE_IS_NOT_REGISTERED:
+                        // this only happens when configuration was set to reactivate curent device, but the provided deviceUidToReplace is invalid/inactive
+                        if (pushNotificationConfiguration.shouldReactivateCurrentDevice()) {
+                            pushNotificationConfiguration.clearKickOtherDevices();
+                            fetchManagerSession.session.commit();
+                        }
+                        cancel(RFC_DEVICE_UID_TO_REPLACE_NOT_FOUND);
                         return;
                     default:
                         cancel(RFC_NETWORK_ERROR);
@@ -151,14 +182,16 @@ class RegisterPushNotificationServerMethod extends ServerMethod {
     private final UID deviceUid;
     private final PushNotificationTypeAndParameters pushNotificationTypeAndParameters;
     private final String[] keycloakPushTopics;
+    private final EncryptedBytes encryptedDeviceNameForFirstRegistration;
 
-    RegisterPushNotificationServerMethod(Identity ownedIdentity, byte[] token, UID deviceUid, PushNotificationTypeAndParameters pushNotificationTypeAndParameters, List<String> keycloakPushTopics) {
+    RegisterPushNotificationServerMethod(Identity ownedIdentity, byte[] token, UID deviceUid, PushNotificationTypeAndParameters pushNotificationTypeAndParameters, List<String> keycloakPushTopics, EncryptedBytes encryptedDeviceNameForFirstRegistration) {
         this.server = ownedIdentity.getServer();
         this.ownedIdentity = ownedIdentity;
         this.token = token;
         this.deviceUid = deviceUid;
         this.pushNotificationTypeAndParameters = pushNotificationTypeAndParameters;
         this.keycloakPushTopics = keycloakPushTopics == null ? new String[0] : keycloakPushTopics.toArray(new String[0]);
+        this.encryptedDeviceNameForFirstRegistration = encryptedDeviceNameForFirstRegistration;
     }
 
     @Override
@@ -182,23 +215,40 @@ class RegisterPushNotificationServerMethod extends ServerMethod {
                 });
                 break;
             }
-            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_NONE:
+            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_ANDROID:
+            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_WINDOWS:
+            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX:
+            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON:
             default: {
                 extraInfo = Encoded.of(new Encoded[0]);
                 break;
             }
         }
 
-        return Encoded.of(new Encoded[]{
-                Encoded.of(ownedIdentity),
-                Encoded.of(token),
-                Encoded.of(deviceUid),
-                Encoded.of(new byte[]{pushNotificationTypeAndParameters.pushNotificationType}),
-                extraInfo,
-                Encoded.of(pushNotificationTypeAndParameters.kickOtherDevices),
-                Encoded.of(pushNotificationTypeAndParameters.useMultiDevice),
-                Encoded.of(keycloakPushTopics)
-        }).getBytes();
+        if (pushNotificationTypeAndParameters.deviceUidToReplace != null) {
+            return Encoded.of(new Encoded[]{
+                    Encoded.of(ownedIdentity),
+                    Encoded.of(token),
+                    Encoded.of(deviceUid),
+                    Encoded.of(new byte[]{pushNotificationTypeAndParameters.pushNotificationType}),
+                    extraInfo,
+                    Encoded.of(pushNotificationTypeAndParameters.reactivateCurrentDevice),
+                    Encoded.of(keycloakPushTopics),
+                    Encoded.of(encryptedDeviceNameForFirstRegistration),
+                    Encoded.of(pushNotificationTypeAndParameters.deviceUidToReplace),
+            }).getBytes();
+        } else {
+            return Encoded.of(new Encoded[]{
+                    Encoded.of(ownedIdentity),
+                    Encoded.of(token),
+                    Encoded.of(deviceUid),
+                    Encoded.of(new byte[]{pushNotificationTypeAndParameters.pushNotificationType}),
+                    extraInfo,
+                    Encoded.of(pushNotificationTypeAndParameters.reactivateCurrentDevice),
+                    Encoded.of(keycloakPushTopics),
+                    Encoded.of(encryptedDeviceNameForFirstRegistration),
+            }).getBytes();
+        }
     }
 
     @Override

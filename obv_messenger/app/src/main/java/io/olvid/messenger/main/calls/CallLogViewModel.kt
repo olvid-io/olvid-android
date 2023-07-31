@@ -89,12 +89,14 @@ class CallLogViewModel : ViewModel() {
 fun CallLogItem.getStatusImageResource(): Int {
     return if (callType == CallLogItem.TYPE_INCOMING) {
         when (callStatus) {
-            CallLogItem.STATUS_SUCCESSFUL -> R.drawable.ic_call_incoming
+            CallLogItem.STATUS_SUCCESSFUL,
+            CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE -> R.drawable.ic_call_incoming
             CallLogItem.STATUS_BUSY -> R.drawable.ic_phone_busy_in
-            CallLogItem.STATUS_REJECTED -> R.drawable.ic_phone_rejected_in
+            CallLogItem.STATUS_REJECTED,
+            CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE -> R.drawable.ic_phone_rejected_in
             CallLogItem.STATUS_MISSED,
             CallLogItem.STATUS_FAILED -> R.drawable.ic_call_missed
-            else -> 0
+            else -> R.drawable.ic_phone_grey
         }
     } else {
         when (callStatus) {
@@ -103,7 +105,7 @@ fun CallLogItem.getStatusImageResource(): Int {
             CallLogItem.STATUS_REJECTED -> R.drawable.ic_phone_rejected_out
             CallLogItem.STATUS_MISSED,
             CallLogItem.STATUS_FAILED -> R.drawable.ic_call_failed
-            else -> 0
+            else -> R.drawable.ic_phone_grey
         }
     }
 }

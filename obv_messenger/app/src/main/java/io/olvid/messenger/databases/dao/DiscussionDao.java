@@ -182,8 +182,7 @@ public abstract class DiscussionDao {
             " ON cust." + DiscussionCustomization.DISCUSSION_ID + " = disc.id " +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " != 0 " +
-            " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC"
-    )
+            " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC" )
     public abstract LiveData<List<DiscussionAndLastMessage>> getNonDeletedDiscussionAndLastMessages(byte[] bytesOwnedIdentity);
 
     @Transaction
@@ -227,8 +226,7 @@ public abstract class DiscussionDao {
             " ON cust." + DiscussionCustomization.DISCUSSION_ID + " = disc.id " +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND disc." + Discussion.STATUS + " != " + Discussion.STATUS_PRE_DISCUSSION +
-            " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC"
-    )
+            " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC" )
     public abstract LiveData<List<DiscussionAndLastMessage>> getAllDiscussionsAndLastMessagesForWebClient(byte[] bytesOwnedIdentity);
 
 
@@ -262,7 +260,7 @@ public abstract class DiscussionDao {
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupOwnerAndUid " +
-            " AND " + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL)
+            " AND " + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")")
     public abstract Discussion getByGroupOwnerAndUid(byte[] ownedIdentityBytes, byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
@@ -275,7 +273,7 @@ public abstract class DiscussionDao {
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupIdentifier " +
-            " AND " + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL)
+            " AND " + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")")
     public abstract Discussion getByGroupIdentifier(byte[] ownedIdentityBytes, byte[] bytesGroupIdentifier);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
@@ -287,13 +285,13 @@ public abstract class DiscussionDao {
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupOwnerAndUidOrIdentifier " +
-            " AND " + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL)
+            " AND " + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")")
     public abstract Discussion getByGroupOwnerAndUidOrIdentifier(byte[] ownedIdentityBytes, byte[] bytesGroupOwnerAndUidOrIdentifier);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupOwnerAndUidOrIdentifier " +
-            " AND " + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL)
+            " AND " + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")")
     public abstract LiveData<Discussion> getByGroupOwnerAndUidOrIdentifierLiveData(byte[] ownedIdentityBytes, byte[] bytesGroupOwnerAndUidOrIdentifier);
 
 
@@ -359,6 +357,7 @@ public abstract class DiscussionDao {
             " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group, " +
             " CASE disc." + Discussion.STATUS +
               " WHEN " + Discussion.STATUS_NORMAL + " THEN 0 " +
+              " WHEN " + Discussion.STATUS_READ_ONLY + " THEN 0 " +
               " WHEN " + Discussion.STATUS_PRE_DISCUSSION + " THEN 1 " +
               " ELSE 2 " +
             " END AS status " +
@@ -381,6 +380,7 @@ public abstract class DiscussionDao {
             " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group, " +
             " CASE disc." + Discussion.STATUS +
               " WHEN " + Discussion.STATUS_NORMAL + " THEN 0 " +
+              " WHEN " + Discussion.STATUS_READ_ONLY + " THEN 0 " +
               " WHEN " + Discussion.STATUS_PRE_DISCUSSION + " THEN 1 " +
               " ELSE 2 " +
             " END AS status " +
@@ -413,7 +413,7 @@ public abstract class DiscussionDao {
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND disc." + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL +
             " ORDER BY disc." + Discussion.PINNED + " DESC, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
-    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllNotLockedWithGroupMembersNames(byte[] ownedIdentityBytes);
+    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNames(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames " +
@@ -429,7 +429,7 @@ public abstract class DiscussionDao {
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND disc." + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL +
             " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC")
-    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllNotLockedWithGroupMembersNamesOrderedByActivity(byte[] ownedIdentityBytes);
+    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNamesOrderedByActivity(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames " +
@@ -455,7 +455,7 @@ public abstract class DiscussionDao {
             " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grpp." + Group2.BYTES_GROUP_IDENTIFIER +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = grpp." + Group2.BYTES_OWNED_IDENTITY +
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
-            " WHERE disc." + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL +
+            " WHERE disc." + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")" +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " ORDER BY disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getContactNotLockedGroupDiscussionsWithGroupMembersNames(byte[] bytesContactIdentity, byte[] bytesOwnedIdentity);
@@ -489,6 +489,12 @@ public abstract class DiscussionDao {
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE " + Discussion.STATUS + " = " + Discussion.STATUS_PRE_DISCUSSION)
     public abstract List<Discussion> getAllPreDiscussions();
+
+
+    @Query("SELECT * FROM " + Discussion.TABLE_NAME +
+            " WHERE " + Discussion.PINNED + " = 1 " +
+            " AND " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
+    public abstract List<Discussion> getAllPinned(byte[] bytesOwnedIdentity);
 
     public static class DiscussionAndLastMessage {
         @Embedded(prefix = "disc_")

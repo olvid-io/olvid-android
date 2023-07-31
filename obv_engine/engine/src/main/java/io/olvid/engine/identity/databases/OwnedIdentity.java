@@ -40,9 +40,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Constants;
@@ -83,12 +83,12 @@ public class OwnedIdentity implements ObvDatabase {
     static final String PUBLISHED_DETAILS_VERSION = "published_details_version";
     private int latestDetailsVersion;
     static final String LATEST_DETAILS_VERSION = "latest_details_version";
-    private UUID apiKey;
-    static final String API_KEY = "api_key";
     private boolean active;
     static final String ACTIVE = "active";
     private String keycloakServerUrl;
     static final String KEYCLOAK_SERVER_URL = "keycloak_server_url";
+    private boolean markedForDeletion;
+    static final String MARKED_FOR_DELETION = "marked_for_deletion";
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
@@ -96,10 +96,6 @@ public class OwnedIdentity implements ObvDatabase {
 
     public PrivateIdentity getPrivateIdentity() {
         return privateIdentity;
-    }
-
-    public UUID getApiKey() {
-        return apiKey;
     }
 
     public int getPublishedDetailsVersion() {
@@ -122,6 +118,10 @@ public class OwnedIdentity implements ObvDatabase {
         return keycloakServerUrl != null;
     }
 
+    public boolean isMarkedForDeletion() {
+        return markedForDeletion;
+    }
+
     // region computed properties
 
     public ContactIdentity[] getContactIdentities() {
@@ -138,12 +138,7 @@ public class OwnedIdentity implements ObvDatabase {
     }
 
     public UID[] getAllDeviceUids() throws SQLException {
-        OwnedDevice[] ownedDevices = OwnedDevice.getAllDevicesOfIdentity(identityManagerSession, ownedIdentity);
-        UID[] uids = new UID[ownedDevices.length];
-        for (int i=0; i<ownedDevices.length; i++) {
-            uids[i] = ownedDevices[i].getUid();
-        }
-        return uids;
+        return OwnedDevice.getAllDeviceUidsOfIdentity(identityManagerSession, ownedIdentity);
     }
 
     public UID getCurrentDeviceUid() throws SQLException {
@@ -171,13 +166,17 @@ public class OwnedIdentity implements ObvDatabase {
         if (keycloakServerUrl != null) {
             KeycloakServer keycloakServer = KeycloakServer.get(identityManagerSession, keycloakServerUrl, ownedIdentity);
             if (keycloakServer != null) {
+                JsonWebKeySet jwks;
+                JsonWebKey signatureKey;
                 try {
-                    JsonWebKeySet jwks = keycloakServer.getJwks();
-                    JsonWebKey signatureKey = keycloakServer.getSignatureKey();
-                    return new ObvKeycloakState(keycloakServer.getServerUrl(), keycloakServer.getClientId(), keycloakServer.getClientSecret(), jwks, signatureKey, keycloakServer.getSerializedAuthState(), keycloakServer.getLatestRevocationListTimestamp(), keycloakServer.getLatestGroupUpdateTimestamp());
+                    jwks = keycloakServer.getJwks();
+                    signatureKey = keycloakServer.getSignatureKey();
                 } catch (Exception e) {
-                    return new ObvKeycloakState(keycloakServer.getServerUrl(), keycloakServer.getClientId(), keycloakServer.getClientSecret(), null, null, keycloakServer.getSerializedAuthState(), keycloakServer.getLatestRevocationListTimestamp(), keycloakServer.getLatestGroupUpdateTimestamp());
+                    jwks = null;
+                    signatureKey = null;
                 }
+                return new ObvKeycloakState(keycloakServer.getServerUrl(), keycloakServer.getClientId(), keycloakServer.getClientSecret(), jwks, signatureKey, keycloakServer.getSerializedAuthState(), keycloakServer.getOwnApiKey(), keycloakServer.getLatestRevocationListTimestamp(), keycloakServer.getLatestGroupUpdateTimestamp());
+
             }
         }
         return null;
@@ -318,6 +317,56 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
+    public boolean setOwnedIdentityDetailsFromOtherDevice(JsonIdentityDetailsWithVersionAndPhoto ownDetailsWithVersionAndPhoto) throws SQLException {
+        int newDetailsVersion = ownDetailsWithVersionAndPhoto.getVersion();
+
+        // first, check the received details are newer than our own details:
+        OwnedIdentityDetails currentPublishedDetails = getPublishedDetails();
+        if (currentPublishedDetails == null) {
+            Logger.e("In setOwnedIdentityDetailsFromOtherDevice: unable to read current published details!");
+            throw new SQLException();
+        }
+
+        if (currentPublishedDetails.getVersion() >= newDetailsVersion) {
+            // if the current version is greater or equal, do nothing
+            return false;
+        }
+
+
+        // now, create the new OwnedIdentityDetails
+        OwnedIdentityDetails newPublishedDetails = OwnedIdentityDetails.create(identityManagerSession, ownedIdentity, ownDetailsWithVersionAndPhoto);
+        if (newPublishedDetails == null) {
+            Logger.e("In setOwnedIdentityDetailsFromOtherDevice: unable to create new details!");
+            throw new SQLException();
+        }
+
+        // copy the existing photoUrl if it is the same
+        if (Objects.equals(newPublishedDetails.getPhotoServerKey(), currentPublishedDetails.getPhotoServerKey())
+                && Objects.equals(newPublishedDetails.getPhotoServerLabel(), currentPublishedDetails.getPhotoServerLabel())) {
+            newPublishedDetails.setPhotoUrl(currentPublishedDetails.getPhotoUrl(), false);
+        }
+
+        // finally, set the newly created OwnedIdentityDetails as the published ones and cleanup
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+                PUBLISHED_DETAILS_VERSION + " = ?, " +
+                LATEST_DETAILS_VERSION + " = ? " +
+                " WHERE " + OWNED_IDENTITY + " = ?;")) {
+            statement.setInt(1, newDetailsVersion);
+            statement.setInt(2, newDetailsVersion);
+            statement.setBytes(3, ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.publishedDetailsVersion = newDetailsVersion;
+        }
+
+        OwnedIdentityDetails.cleanup(identityManagerSession, ownedIdentity, newDetailsVersion, newDetailsVersion);
+
+        hookDetails = newPublishedDetails.getJsonIdentityDetailsWithVersionAndPhoto();
+        commitHookBits |= HOOK_BIT_IDENTITY_DETAILS_PUBLISHED | HOOK_BIT_LATEST_IDENTITY_DETAILS_VERSION_CHANGED;
+        identityManagerSession.session.addSessionCommitListener(this);
+
+        return newPublishedDetails.getPhotoUrl() == null && newPublishedDetails.getPhotoServerKey() != null && newPublishedDetails.getPhotoServerLabel() != null;
+    }
+
 
     public void setDetailsDownloadedPhotoUrl(int version, byte[] photo) throws Exception {
         OwnedIdentityDetails ownedIdentityDetails = OwnedIdentityDetails.get(identityManagerSession, ownedIdentity, version);
@@ -401,17 +450,6 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
-    public void setApiKey(UUID apiKey) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
-                " SET " + API_KEY + " = ? " +
-                " WHERE " + OWNED_IDENTITY + " = ?;")) {
-            statement.setString(1, Logger.getUuidString(apiKey));
-            statement.setBytes(2, ownedIdentity.getBytes());
-            statement.executeUpdate();
-            this.apiKey = apiKey;
-        }
-    }
-
     public void setActive(boolean active) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + ACTIVE + " = ? " +
@@ -444,12 +482,25 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
+    public void markForDeletion() throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + MARKED_FOR_DELETION + " = ? " +
+                " WHERE " + OWNED_IDENTITY + " = ?;")) {
+            statement.setBoolean(1, true);
+            statement.setBytes(2, ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.markedForDeletion = true;
+            commitHookBits |= HOOK_BIT_IDENTITY_LIST_CHANGED;
+            identityManagerSession.session.addSessionCommitListener(this);
+        }
+    }
+
     // endregion
 
     // region constructors
 
-    public static OwnedIdentity create(IdentityManagerSession identityManagerSession, String server, Byte serverAuthenticationAlgoImplByte, Byte encryptionAlgoImplByte, JsonIdentityDetails identityDetails, UUID apiKey, PRNGService prng) {
-        if (identityDetails == null || identityDetails.isEmpty() || apiKey == null) {
+    public static OwnedIdentity create(IdentityManagerSession identityManagerSession, String server, Byte serverAuthenticationAlgoImplByte, Byte encryptionAlgoImplByte, JsonIdentityDetails identityDetails, String deviceDisplayName, PRNGService prng) {
+        if (identityDetails == null || identityDetails.isEmpty()) {
             return null;
         }
         KeyPair serverAuthKeyPair = Suite.generateServerAuthenticationKeyPair(serverAuthenticationAlgoImplByte, prng);
@@ -462,9 +513,9 @@ public class OwnedIdentity implements ObvDatabase {
             Identity identity = new Identity(server, (ServerAuthenticationPublicKey) serverAuthKeyPair.getPublicKey(), (EncryptionPublicKey) encryptionKeyPair.getPublicKey());
             PrivateIdentity privateIdentity = new PrivateIdentity(identity, (ServerAuthenticationPrivateKey) serverAuthKeyPair.getPrivateKey(), (EncryptionPrivateKey) encryptionKeyPair.getPrivateKey(), macKey);
             OwnedIdentityDetails ownedIdentityDetails = OwnedIdentityDetails.create(identityManagerSession, identity, identityManagerSession.jsonObjectMapper.writeValueAsString(identityDetails));
-            OwnedIdentity ownedIdentity = new OwnedIdentity(identityManagerSession, privateIdentity, ownedIdentityDetails.getVersion(), apiKey);
+            OwnedIdentity ownedIdentity = new OwnedIdentity(identityManagerSession, privateIdentity, ownedIdentityDetails.getVersion());
             ownedIdentity.insert();
-            OwnedDevice.createCurrentDevice(identityManagerSession, identity, prng);
+            OwnedDevice.createCurrentDevice(identityManagerSession, identity, deviceDisplayName, prng);
             return ownedIdentity;
         } catch (Exception e) {
             e.printStackTrace();
@@ -472,15 +523,15 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
-    private OwnedIdentity(IdentityManagerSession identityManagerSession, PrivateIdentity privateIdentity, int detailsVersion, UUID apiKey) {
+    private OwnedIdentity(IdentityManagerSession identityManagerSession, PrivateIdentity privateIdentity, int detailsVersion) {
         this.identityManagerSession = identityManagerSession;
         this.ownedIdentity = privateIdentity.getPublicIdentity();
         this.privateIdentity = privateIdentity;
         this.publishedDetailsVersion = detailsVersion;
         this.latestDetailsVersion = detailsVersion;
-        this.apiKey = apiKey;
         this.active = true;
         this.keycloakServerUrl = null;
+        this.markedForDeletion = false;
     }
 
     private OwnedIdentity(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -493,13 +544,9 @@ public class OwnedIdentity implements ObvDatabase {
         this.privateIdentity = PrivateIdentity.deserialize(res.getBytes(PRIVATE_IDENTITY));
         this.publishedDetailsVersion = res.getInt(PUBLISHED_DETAILS_VERSION);
         this.latestDetailsVersion = res.getInt(LATEST_DETAILS_VERSION);
-        try {
-            this.apiKey = UUID.fromString(res.getString(API_KEY));
-        } catch (Exception e) {
-            this.apiKey = null;
-        }
         this.active = res.getBoolean(ACTIVE);
         this.keycloakServerUrl = res.getString(KEYCLOAK_SERVER_URL);
+        this.markedForDeletion = res.getBoolean(MARKED_FOR_DELETION);
     }
 
 
@@ -514,9 +561,9 @@ public class OwnedIdentity implements ObvDatabase {
                     PRIVATE_IDENTITY + " BLOB NOT NULL, " +
                     PUBLISHED_DETAILS_VERSION + " INT NOT NULL, " +
                     LATEST_DETAILS_VERSION + " INT NOT NULL, " +
-                    API_KEY + " VARCHAR NOT NULL, " +
                     ACTIVE + " BIT NOT NULL, " +
                     KEYCLOAK_SERVER_URL + " TEXT, " +
+                    MARKED_FOR_DELETION + " BIT NOT NULL, " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ", " + PUBLISHED_DETAILS_VERSION + ") REFERENCES " + OwnedIdentityDetails.TABLE_NAME + "(" + OwnedIdentityDetails.OWNED_IDENTITY + ", " + OwnedIdentityDetails.VERSION + ")," +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ", " + LATEST_DETAILS_VERSION + ") REFERENCES " + OwnedIdentityDetails.TABLE_NAME + "(" + OwnedIdentityDetails.OWNED_IDENTITY + ", " + OwnedIdentityDetails.VERSION + ")," +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ", " + KEYCLOAK_SERVER_URL + ") REFERENCES " + KeycloakServer.TABLE_NAME + "(" + KeycloakServer.OWNED_IDENTITY + ", " + KeycloakServer.SERVER_URL + "));");
@@ -617,6 +664,16 @@ public class OwnedIdentity implements ObvDatabase {
             }
             oldVersion = 20;
         }
+        if (oldVersion < 35 && newVersion >= 35) {
+            PRNG prng = Suite.getDefaultPRNGService(Suite.LATEST_VERSION);
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `owned_identity` DATABASE FROM VERSION " + oldVersion + " TO 35");
+                // No need to save the api_key, it has already been saved on server side
+                statement.execute("ALTER TABLE owned_identity DROP COLUMN api_key");
+                statement.execute("ALTER TABLE owned_identity ADD COLUMN marked_for_deletion BIT NOT NULL DEFAULT 0");
+            }
+            oldVersion = 35;
+        }
     }
 
     @Override
@@ -626,9 +683,9 @@ public class OwnedIdentity implements ObvDatabase {
             statement.setBytes(2, privateIdentity.serialize());
             statement.setInt(3, publishedDetailsVersion);
             statement.setInt(4, latestDetailsVersion);
-            statement.setString(5, Logger.getUuidString(apiKey));
-            statement.setBoolean(6, active);
-            statement.setString(7, keycloakServerUrl);
+            statement.setBoolean(5, active);
+            statement.setString(6, keycloakServerUrl);
+            statement.setBoolean(7, markedForDeletion);
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_IDENTITY_LIST_CHANGED;
             identityManagerSession.session.addSessionCommitListener(this);
@@ -690,21 +747,10 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
+    // only returns owned identities that have not been marked for deletion
     public static OwnedIdentity[] getAll(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
-            try (ResultSet res = statement.executeQuery()) {
-                List<OwnedIdentity> list = new ArrayList<>();
-                while (res.next()) {
-                    list.add(new OwnedIdentity(identityManagerSession, res));
-                }
-                return list.toArray(new OwnedIdentity[0]);
-            }
-        }
-    }
-
-
-    public static OwnedIdentity[] getAllActive(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + ACTIVE + " = 1;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + MARKED_FOR_DELETION + " == 0;")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<OwnedIdentity> list = new ArrayList<>();
                 while (res.next()) {
@@ -804,7 +850,6 @@ public class OwnedIdentity implements ObvDatabase {
         if (latestDetailsVersion != publishedDetailsVersion) {
             pojo.latest_details = getLatestDetails().backup();
         }
-        pojo.api_key = Logger.getUuidString(apiKey);
         pojo.active = active;
         if (keycloakServerUrl != null) {
             pojo.keycloak = getKeycloakServer().backup();
@@ -815,7 +860,7 @@ public class OwnedIdentity implements ObvDatabase {
         return pojo;
     }
 
-    public static ObvIdentity restore(IdentityManagerSession identityManagerSession, Pojo_0 pojo, PRNGService prng) throws SQLException {
+    public static ObvIdentity restore(IdentityManagerSession identityManagerSession, Pojo_0 pojo, String deviceDisplayName, PRNGService prng) throws SQLException {
         Identity ownedIdentity = null;
         try {
             ownedIdentity = Identity.of(pojo.owned_identity);
@@ -836,13 +881,11 @@ public class OwnedIdentity implements ObvDatabase {
         if (pojo.latest_details != null && pojo.latest_details.version != pojo.published_details.version) {
             latest_details = OwnedIdentityDetails.restore(identityManagerSession, ownedIdentity, pojo.latest_details);
         }
-        OwnedIdentity ownedIdentityObject = new OwnedIdentity(identityManagerSession, privateIdentity, published_details.getVersion(), UUID.fromString(pojo.api_key));
+        OwnedIdentity ownedIdentityObject = new OwnedIdentity(identityManagerSession, privateIdentity, published_details.getVersion());
         if (latest_details != null) {
             ownedIdentityObject.latestDetailsVersion = latest_details.getVersion();
         }
-        // after a restore, the identity is marked inactive in the Engine (to delay all message sending/reception until the device is registered on server).
-        // It will be re-activated once a register push notification is successful
-        ownedIdentityObject.active = false;
+        ownedIdentityObject.active = pojo.active;
         ownedIdentityObject.insert();
 
         if (pojo.keycloak != null) {
@@ -852,7 +895,7 @@ public class OwnedIdentity implements ObvDatabase {
             }
         }
 
-        OwnedDevice currentOwnedDevice = OwnedDevice.createCurrentDevice(identityManagerSession, ownedIdentity, prng);
+        OwnedDevice currentOwnedDevice = OwnedDevice.createCurrentDevice(identityManagerSession, ownedIdentity, deviceDisplayName, prng);
         // when restoring a backup, directly set all currentDevices to the most up to data capabilities
         // rationale: all channels will be recreated and contact devices will be notified properly.
         currentOwnedDevice.setRawDeviceCapabilities(ObvCapability.capabilityListToStringArray(ObvCapability.currentCapabilities));
@@ -882,13 +925,13 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Pojo_0 {
         public byte[] owned_identity;
         public PrivateIdentityPojo_0 private_identity;
         public OwnedIdentityDetails.Pojo_0 published_details;
         public OwnedIdentityDetails.Pojo_0 latest_details;
-        public String api_key;
         public Boolean active;
         public KeycloakServer.Pojo_0 keycloak;
         public ContactIdentity.Pojo_0[] contact_identities;

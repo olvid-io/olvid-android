@@ -135,7 +135,7 @@ fun ContactListScreen(
                                                         SpanStyle(background = colorResource(id = color.accentOverlay)),
                                                         contactListViewModel.filterPatterns
                                                     ),
-                                                shouldAnimateChannel = contactOrKeycloakDetails.contact?.establishedChannelCount == 0 && contactOrKeycloakDetails.contact.active,
+                                                shouldAnimateChannel = contactOrKeycloakDetails.contact?.shouldShowChannelCreationSpinner() == true && contactOrKeycloakDetails.contact.active,
                                                 onClick = { onClick(contactOrKeycloakDetails) },
                                                 initialViewSetup = { initialView ->
                                                     when (contactOrKeycloakDetails.contactType) {

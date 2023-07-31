@@ -42,6 +42,7 @@ public class ServerSession implements ObvDatabase {
     public enum Permission {
         CALL,
         WEB_CLIENT,
+        MULTI_DEVICE,
     }
 
     public enum ApiKeyStatus {
@@ -134,6 +135,9 @@ public class ServerSession implements ObvDatabase {
         }
         if ((permissions & Constants.API_KEY_PERMISSION_WEB_CLIENT) != 0){
             out.add(Permission.WEB_CLIENT);
+        }
+        if ((permissions & Constants.API_KEY_PERMISSION_MULTI_DEVICE) != 0){
+            out.add(Permission.MULTI_DEVICE);
         }
         return out;
     }

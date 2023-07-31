@@ -36,6 +36,7 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -345,7 +346,7 @@ public class DiscussionSettingsViewModel extends ViewModel {
             discussionCustomization.settingVisibilityDuration = settingsVisibilityDuration;
             discussionCustomization.settingExistenceDuration = settingsExistenceDuration;
 
-            DiscussionCustomization.JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
+            JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
 
             // send the json to others
             Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, discussion.bytesOwnedIdentity, true, null);

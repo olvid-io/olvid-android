@@ -28,6 +28,7 @@ import java.util.Map;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
+import io.olvid.engine.engine.types.ObvPushNotificationType;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.openid.KeycloakManager;
@@ -50,11 +51,15 @@ public class ObvFirebaseMessagingService extends FirebaseMessagingService {
         String identityString = data.get("identity");
         String topic = data.get("topic");
         String keycloak = data.get("keycloak");
+        String ownedDevices = data.get("ownedDevices");
         if (identityString != null) {
             Logger.d("For identity mask: " + identityString);
             if (keycloak != null) {
                 Logger.d("Is keycloak notification");
                 KeycloakManager.forceSyncManagedIdentity(AppSingleton.getEngine().getOwnedIdentityFromMaskingUid(identityString));
+            } else if (ownedDevices != null) {
+                Logger.d("Is ownedDevices notification");
+                AppSingleton.getEngine().refreshOwnedDeviceList(AppSingleton.getEngine().getOwnedIdentityFromMaskingUid(identityString));
             } else {
                 AppSingleton.getEngine().processAndroidPushNotification(identityString);
             }
@@ -73,19 +78,16 @@ public class ObvFirebaseMessagingService extends FirebaseMessagingService {
             token = null;
         }
 
-        // we try to register up to 5 times (here, registering is only storing something in the engine database)
-        for (int i=0; i<5; i++) {
-            try {
-                Engine engine = AppSingleton.getEngine();
-                ObvIdentity[] ownedIdentities = engine.getOwnedIdentities();
-                for (ObvIdentity ownedIdentity : ownedIdentities) {
-                    engine.registerToPushNotification(ownedIdentity.getBytesIdentity(), token, false, false);
+        try {
+            Engine engine = AppSingleton.getEngine();
+            for (ObvIdentity ownedIdentity : engine.getOwnedIdentities()) {
+                if (ownedIdentity.isActive()) {
+                    engine.registerToPushNotification(ownedIdentity.getBytesIdentity(), ObvPushNotificationType.createAndroid(token), false, null);
                 }
-                break;
-            } catch (Exception e) {
-                Logger.e("An error occurred while updating the push notifications with a new firebase token");
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            Logger.e("An error occurred while updating the push notifications with a new firebase token");
+            e.printStackTrace();
         }
     }
 }

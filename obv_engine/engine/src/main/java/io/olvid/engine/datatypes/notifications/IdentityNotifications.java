@@ -47,7 +47,13 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_NEW_CONTACT_DEVICE = "identity_manager_notification_new_contact_device";
     public static final String NOTIFICATION_NEW_CONTACT_DEVICE_CONTACT_DEVICE_UID_KEY = "contact_device_uid";
     public static final String NOTIFICATION_NEW_CONTACT_DEVICE_CONTACT_IDENTITY_KEY = "contact_identity";
+    public static final String NOTIFICATION_NEW_CONTACT_DEVICE_CHANNEL_CREATION_ALREADY_IN_PROGRESS_KEY = "channel_creation_already_in_progress";
     public static final String NOTIFICATION_NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY = "owned_identity";
+
+    public static final String NOTIFICATION_NEW_OWNED_DEVICE = "identity_manager_notification_new_owned_device";
+    public static final String NOTIFICATION_NEW_OWNED_DEVICE_DEVICE_UID_KEY = "device_uid";
+    public static final String NOTIFICATION_NEW_OWNED_DEVICE_CHANNEL_CREATION_ALREADY_IN_PROGRESS_KEY = "channel_creation_already_in_progress";
+    public static final String NOTIFICATION_NEW_OWNED_DEVICE_OWNED_IDENTITY_KEY = "owned_identity";
 
     public static final String NOTIFICATION_GROUP_MEMBER_ADDED = "identity_manager_notification_group_member_added";
     public static final String NOTIFICATION_GROUP_MEMBER_ADDED_GROUP_UID_KEY = "group_uid";
@@ -78,8 +84,9 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_PENDING_GROUP_MEMBER_DECLINED_TOGGLED_DECLINED_KEY = "declined";
 
     public static final String NOTIFICATION_GROUP_CREATED = "identity_manager_notification_group_created";
-    public static final String NOTIFICATION_GROUP_CREATED_GROUP_OWNER_AND_UID_KEY = "group_uid";
-    public static final String NOTIFICATION_GROUP_CREATED_OWNED_IDENTITY_KEY = "owned_identity";
+    public static final String NOTIFICATION_GROUP_CREATED_GROUP_OWNER_AND_UID_KEY = "group_uid"; // byte[]
+    public static final String NOTIFICATION_GROUP_CREATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_GROUP_CREATED_ON_OTHER_DEVICE_KEY = "on_other_device"; // boolean
 
     public static final String NOTIFICATION_GROUP_DELETED = "identity_manager_notification_group_deleted";
     public static final String NOTIFICATION_GROUP_DELETED_GROUP_OWNER_AND_UID_KEY = "group_uid";
@@ -163,7 +170,8 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_GROUP_V2_CREATED = "identity_manager_notification_group_v2_created";
     public static final String NOTIFICATION_GROUP_V2_CREATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
     public static final String NOTIFICATION_GROUP_V2_CREATED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
-    public static final String NOTIFICATION_GROUP_V2_CREATED_NEW_GROUP_KEY = "new_group"; // boolean
+    public static final String NOTIFICATION_GROUP_V2_CREATED_CREATED_BY_ME_KEY = "created_by_me"; // boolean --> indicates whether the group was created by me (on this device or on another one)
+    public static final String NOTIFICATION_GROUP_V2_CREATED_ON_OTHER_DEVICE_KEY = "on_other_device"; // boolean --> if NEW_GROUP is true, this tells if the group was created on another owned device
 
     public static final String NOTIFICATION_GROUP_V2_DELETED = "identity_manager_notification_group_v2_deleted";
     public static final String NOTIFICATION_GROUP_V2_DELETED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
@@ -192,4 +200,7 @@ public abstract class IdentityNotifications {
 
     public static final String NOTIFICATION_NEW_KEYCLOAK_GROUP_V2_PUSH_TOPIC = "identity_manager_notification_new_keycloak_group_v2_push_topic";
     public static final String NOTIFICATION_NEW_KEYCLOAK_GROUP_V2_PUSH_TOPIC_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+
+    public static final String NOTIFICATION_OWNED_DEVICE_LIST_CHANGED = "identity_manager_notification_owned_device_list_changed";
+    public static final String NOTIFICATION_OWNED_DEVICE_LIST_CHANGED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
 }

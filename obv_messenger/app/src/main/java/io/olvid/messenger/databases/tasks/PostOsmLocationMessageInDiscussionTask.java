@@ -36,6 +36,9 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 
 public class PostOsmLocationMessageInDiscussionTask implements Runnable {
     private final AppDatabase db;
@@ -55,19 +58,19 @@ public class PostOsmLocationMessageInDiscussionTask implements Runnable {
     @Override
     public void run() {
         final Discussion discussion = db.discussionDao().getById(discussionId);
-        if (!discussion.canPostMessages()) {
+        if (!discussion.isNormal()) {
             Logger.w("A message was posted in a discussion where you cannot post!!!");
             return;
         }
 
-        Message.JsonExpiration discussionDefaultJsonExpiration = null;
+        JsonExpiration discussionDefaultJsonExpiration = null;
         DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
         if (discussionCustomization != null) {
             discussionDefaultJsonExpiration = discussionCustomization.getExpirationJson();
         }
 
-        final Message.JsonMessage jsonMessage = new Message.JsonMessage();
-        Message.JsonLocation jsonLocation = Message.JsonLocation.sendLocationMessage(location);
+        final JsonMessage jsonMessage = new JsonMessage();
+        JsonLocation jsonLocation = JsonLocation.sendLocationMessage(location);
         jsonLocation.setAddress(address);
         jsonMessage.setJsonLocation(jsonLocation);
         jsonMessage.setBody(jsonMessage.getJsonLocation().getLocationMessageBody());
@@ -82,6 +85,8 @@ public class PostOsmLocationMessageInDiscussionTask implements Runnable {
             try {
                 File photoDir = new File(App.getContext().getCacheDir(), App.CAMERA_PICTURE_FOLDER);
                 imageTmpFile = File.createTempFile("map_preview", ".png", photoDir);
+                //noinspection ResultOfMethodCallIgnored
+                photoDir.mkdirs();
                 FileOutputStream fileOutputStream = new FileOutputStream(imageTmpFile.getAbsolutePath());
                 snapshotBitmap.compress(Bitmap.CompressFormat.PNG, 100,fileOutputStream);
             }

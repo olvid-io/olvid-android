@@ -134,6 +134,22 @@ public class OwnedIdentityDetails implements ObvDatabase {
         }
     }
 
+    public static OwnedIdentityDetails create(IdentityManagerSession identityManagerSession, Identity ownedIdentity, JsonIdentityDetailsWithVersionAndPhoto jsonIdentityDetailsWithVersionAndPhoto) {
+        if (ownedIdentity == null || jsonIdentityDetailsWithVersionAndPhoto == null) {
+            return null;
+        }
+        try {
+            OwnedIdentityDetails ownedIdentityDetails = new OwnedIdentityDetails(identityManagerSession, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getVersion(), identityManagerSession.jsonObjectMapper.writeValueAsString(jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails()));
+            ownedIdentityDetails.photoServerKey = jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerKey() == null ? null : (AuthEncKey) new Encoded(jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerKey()).decodeSymmetricKey();
+            ownedIdentityDetails.photoServerLabel = jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerLabel() == null ? null : new UID(jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerLabel());
+            ownedIdentityDetails.insert();
+            return ownedIdentityDetails;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static OwnedIdentityDetails copy(IdentityManagerSession identityManagerSession, Identity ownedIdentity, int version) {
         if (ownedIdentity == null) {
             return null;
@@ -293,7 +309,7 @@ public class OwnedIdentityDetails implements ObvDatabase {
         }
     }
 
-    public static List<OwnedIdentityDetails> getAllWithMissinPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
+    public static List<OwnedIdentityDetails> getAllWithMissingPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
                 " WHERE " + PHOTO_URL + " IS NULL " +
                 " AND " + PHOTO_SERVER_KEY + " IS NOT NULL " +

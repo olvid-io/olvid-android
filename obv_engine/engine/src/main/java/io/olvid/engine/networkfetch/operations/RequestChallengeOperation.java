@@ -22,7 +22,6 @@ package io.olvid.engine.networkfetch.operations;
 
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.UUID;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -35,7 +34,6 @@ import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.datatypes.Constants;
-import io.olvid.engine.metamanager.SolveChallengeDelegate;
 import io.olvid.engine.networkfetch.databases.ServerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
@@ -44,14 +42,12 @@ class RequestChallengeOperation extends Operation {
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
     private final Identity ownedIdentity;
-    private final SolveChallengeDelegate solveChallengeDelegate;
 
-    public RequestChallengeOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, SolveChallengeDelegate solveChallengeDelegate) {
+    public RequestChallengeOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity) {
         super(ownedIdentity.computeUniqueUid(), null, null);
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
         this.ownedIdentity = ownedIdentity;
-        this.solveChallengeDelegate = solveChallengeDelegate;
     }
 
     public Identity getOwnedIdentity() {
@@ -83,11 +79,6 @@ class RequestChallengeOperation extends Operation {
                     finished = true;
                     return;
                 }
-                UUID apiKey = solveChallengeDelegate.getApiKey(ownedIdentity);
-                if (apiKey == null) {
-                    cancel(CreateServerSessionCompositeOperation.RFC_IDENTITY_NOT_FOUND);
-                    return;
-                }
 
                 PRNGService prng = Suite.getPRNGService(PRNG.PRNG_HMAC_SHA256);
                 byte[] nonce = prng.bytes(Constants.SERVER_SESSION_NONCE_LENGTH);
@@ -99,8 +90,7 @@ class RequestChallengeOperation extends Operation {
 
                 RequestChallengeServerMethod serverMethod = new RequestChallengeServerMethod(
                         ownedIdentity,
-                        nonce,
-                        apiKey
+                        nonce
                 );
                 serverMethod.setSslSocketFactory(sslSocketFactory);
 
@@ -144,15 +134,13 @@ class RequestChallengeServerMethod extends ServerMethod {
     private final String server;
     private final Identity identity;
     private final byte[] nonce;
-    private final UUID apiKey;
 
     private byte[] challenge = null;
 
-    public RequestChallengeServerMethod(Identity identity, byte[] nonce, UUID apiKey) {
+    public RequestChallengeServerMethod(Identity identity, byte[] nonce) {
         this.server = identity.getServer();
         this.identity = identity;
         this.nonce = nonce;
-        this.apiKey = apiKey;
     }
 
     public byte[] getChallenge() {
@@ -174,7 +162,6 @@ class RequestChallengeServerMethod extends ServerMethod {
         return Encoded.of(new Encoded[]{
                 Encoded.of(identity),
                 Encoded.of(nonce),
-                Encoded.of(apiKey)
         }).getBytes();
     }
 

@@ -40,6 +40,7 @@ import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
+import io.olvid.messenger.databases.entity.Group2
 import io.olvid.messenger.databases.tasks.GroupCloningTasks
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
@@ -211,8 +212,9 @@ class GroupListFragment : RefreshingFragment(), OnRefreshListener, EngineNotific
                 return
             }
             App.runThread {
-                if (group2.ownPermissionAdmin) {
+                if (group2.ownPermissionAdmin && group2.updateInProgress != Group2.UPDATE_SYNCING) {
                     // check you are not the only admin (among members only, as pending members could decline)
+                    // only check if group update is not in progress: sometimes you can get locked in update and there is no way to leave/disband the group
                     var otherAdmin = false
                     val group2Members = AppDatabase.getInstance().group2MemberDao()
                         .getGroupMembers(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier)

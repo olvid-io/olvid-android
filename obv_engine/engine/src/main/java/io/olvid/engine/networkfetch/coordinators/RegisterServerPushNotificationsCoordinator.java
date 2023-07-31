@@ -119,7 +119,10 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
                             storeAndroidIdentityMaskingUid(pushNotificationConfiguration.getOwnedIdentity(), pushNotificationConfiguration.getDeviceUid(), pushNotificationConfiguration.getIdentityMaskingUid());
                             registerServerPushNotification(pushNotificationConfiguration.getOwnedIdentity());
                             break;
-                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_NONE:
+                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_ANDROID:
+                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_WINDOWS:
+                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX:
+                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON:
                             registerServerPushNotification(pushNotificationConfiguration.getOwnedIdentity());
                             break;
                     }
@@ -163,7 +166,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
 
     @Override
     public void onCancelCallback(Operation operation) {
-        Identity identity = ((RegisterPushNotificationOperation) operation).getOwnedIdentity();
+        Identity ownedIdentity = ((RegisterPushNotificationOperation) operation).getOwnedIdentity();
         Integer rfc = operation.getReasonForCancel();
         Logger.i("RegisterPushNotificationOperation cancelled for reason " + rfc);
         if (rfc == null) {
@@ -171,15 +174,22 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         }
         switch (rfc) {
             case RegisterPushNotificationOperation.RFC_INVALID_SERVER_SESSION: {
-                waitForServerSession(identity);
-                createServerSessionDelegate.createServerSession(identity);
+                waitForServerSession(ownedIdentity);
+                createServerSessionDelegate.createServerSession(ownedIdentity);
                 break;
             }
-            case RegisterPushNotificationOperation.RFC_ANOTHER_DEVICE_IS_ALREADY_REGISTERED: {
+            case RegisterPushNotificationOperation.RFC_ANOTHER_DEVICE_IS_ALREADY_REGISTERED:
+            case RegisterPushNotificationOperation.RFC_PUSH_NOTIFICATION_CONFIGURATION_NOT_FOUND: {
+                break;
+            }
+            case RegisterPushNotificationOperation.RFC_DEVICE_UID_TO_REPLACE_NOT_FOUND: {
+                HashMap<String, Object> userInfo = new HashMap<>();
+                userInfo.put(DownloadNotifications.NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE_OWNED_IDENTITY_KEY, ownedIdentity);
+                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE, userInfo);
                 break;
             }
             default: {
-                scheduleNewRegisterPushNotificationOperationQueueing(identity);
+                scheduleNewRegisterPushNotificationOperationQueueing(ownedIdentity);
             }
         }
     }
@@ -202,7 +212,10 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
                 storeAndroidIdentityMaskingUid(identity, deviceUid, pushNotificationTypeAndParameters.identityMaskingUid);
                 registerServerPushNotification(identity);
                 break;
-            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_NONE:
+            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_ANDROID:
+            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_WINDOWS:
+            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX:
+            case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON:
                 registerServerPushNotification(identity);
                 break;
         }

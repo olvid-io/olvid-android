@@ -23,11 +23,11 @@ package io.olvid.messenger.fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -43,6 +43,7 @@ import java.util.List;
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.messenger.R;
 import io.olvid.messenger.billing.SubscriptionPurchaseFragment;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 
 public class SubscriptionStatusFragment extends Fragment {
@@ -118,8 +119,10 @@ public class SubscriptionStatusFragment extends Fragment {
 
         TextView apiKeyStatusTextView = view.findViewById(R.id.api_key_status_text_view);
         TextView apiKeyExpirationTextView = view.findViewById(R.id.api_key_expiration_text_view);
-        TextView premiumFeaturesTitleTextView = view.findViewById(R.id.premium_features_title_text_view);
         TextView permissionCallTextView = view.findViewById(R.id.permission_call_text_view);
+        ImageView permissionCallImageView = view.findViewById(R.id.permission_call_active_image_view);
+        TextView permissionMultiDeviceTextView = view.findViewById(R.id.permission_multi_device_text_view);
+        ImageView permissionMultiDeviceImageView = view.findViewById(R.id.permission_multi_device_active_image_view);
         subscribeButton = view.findViewById(R.id.subscribe_button);
         subscribeButton.setOnClickListener(this::subscribeButtonClicked);
         subscriptionPurchasePlaceholder = view.findViewById(R.id.subscription_purchase_placeholder);
@@ -161,7 +164,7 @@ public class SubscriptionStatusFragment extends Fragment {
                     apiKeyExpirationTextView.setVisibility(View.GONE);
                 } else {
                     apiKeyExpirationTextView.setVisibility(View.VISIBLE);
-                    apiKeyExpirationTextView.setText(getString(R.string.text_will_expire, DateUtils.formatDateTime(getContext(), apiKeyExpirationTimestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH)));
+                    apiKeyExpirationTextView.setText(getString(R.string.text_will_expire, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
                 }
                 break;
             case LICENSES_EXHAUSTED:
@@ -193,7 +196,7 @@ public class SubscriptionStatusFragment extends Fragment {
                     apiKeyExpirationTextView.setVisibility(View.GONE);
                 } else {
                     apiKeyExpirationTextView.setVisibility(View.VISIBLE);
-                    apiKeyExpirationTextView.setText(getString(R.string.text_expired_since, DateUtils.formatDateTime(getContext(), apiKeyExpirationTimestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH)));
+                    apiKeyExpirationTextView.setText(getString(R.string.text_expired_since, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
                 }
                 break;
             case OPEN_BETA_KEY:
@@ -203,7 +206,7 @@ public class SubscriptionStatusFragment extends Fragment {
                     apiKeyExpirationTextView.setText(R.string.text_premium_features_available);
                 } else {
                     apiKeyExpirationTextView.setVisibility(View.VISIBLE);
-                    apiKeyExpirationTextView.setText(getString(R.string.text_premium_features_available_for_free_until, DateUtils.formatDateTime(getContext(), apiKeyExpirationTimestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH)));
+                    apiKeyExpirationTextView.setText(getString(R.string.text_premium_features_available_for_free_until, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
                 }
                 if (!licenseQuery) {
                     if (showInAppPurchase) {
@@ -220,16 +223,16 @@ public class SubscriptionStatusFragment extends Fragment {
                     apiKeyExpirationTextView.setText(R.string.text_premium_features_available);
                 } else {
                     apiKeyExpirationTextView.setVisibility(View.VISIBLE);
-                    apiKeyExpirationTextView.setText(getString(R.string.text_premium_features_available_until, DateUtils.formatDateTime(getContext(), apiKeyExpirationTimestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH)));
+                    apiKeyExpirationTextView.setText(getString(R.string.text_premium_features_available_until, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
                 }
                 break;
             case AWAITING_PAYMENT_GRACE_PERIOD:
             case AWAITING_PAYMENT_ON_HOLD: { // this case should never occur in a license query
                 apiKeyStatusTextView.setText(R.string.text_awaiting_subscription_payment);
                 if (apiKeyStatus == EngineAPI.ApiKeyStatus.AWAITING_PAYMENT_ON_HOLD) {
-                    apiKeyExpirationTextView.setText(getString(R.string.text_subscription_on_hold_since, DateUtils.formatDateTime(getContext(), apiKeyExpirationTimestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH)));
+                    apiKeyExpirationTextView.setText(getString(R.string.text_subscription_on_hold_since, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
                 } else {
-                    apiKeyExpirationTextView.setText(getString(R.string.text_subscription_in_grace_period_until, DateUtils.formatDateTime(getContext(), apiKeyExpirationTimestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH)));
+                    apiKeyExpirationTextView.setText(getString(R.string.text_subscription_in_grace_period_until, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
                 }
                 subscribeButton.setVisibility(View.GONE);
                 fixPaymentGroup.setVisibility(View.VISIBLE);
@@ -260,9 +263,9 @@ public class SubscriptionStatusFragment extends Fragment {
                 } else {
                     apiKeyExpirationTextView.setVisibility(View.VISIBLE);
                     if (licenseQuery) {
-                        apiKeyExpirationTextView.setText(getString(R.string.text_expired_since, DateUtils.formatDateTime(getContext(), apiKeyExpirationTimestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH)));
+                        apiKeyExpirationTextView.setText(getString(R.string.text_expired_since, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
                     } else {
-                        apiKeyExpirationTextView.setText(getString(R.string.text_ended_on, DateUtils.formatDateTime(getContext(), apiKeyExpirationTimestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH)));
+                        apiKeyExpirationTextView.setText(getString(R.string.text_ended_on, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
                     }
                 }
                 break;
@@ -270,20 +273,30 @@ public class SubscriptionStatusFragment extends Fragment {
         }
 
         if (apiKeyPermissions.contains(EngineAPI.ApiKeyPermission.CALL)) {
-            premiumFeaturesTitleTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_activated_green, 0);
             permissionCallTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_phone_failed_out, 0, 0, 0);
             permissionCallTextView.setTextColor(ContextCompat.getColor(view.getContext(), R.color.almostBlack));
             permissionCallTextView.setText(R.string.text_feature_initiate_secure_calls);
+            permissionCallImageView.setImageResource(R.drawable.ic_activated_green);
         } else if (anotherIdentityHasCallsPermission) {
-            premiumFeaturesTitleTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_activated_green, 0);
             permissionCallTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_phone_failed_out, 0, 0, 0);
             permissionCallTextView.setTextColor(ContextCompat.getColor(view.getContext(), R.color.almostBlack));
             permissionCallTextView.setText(R.string.text_feature_initiate_secure_calls_from_another_profile);
+            permissionCallImageView.setImageResource(R.drawable.ic_activated_green);
         } else {
-            premiumFeaturesTitleTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_deactivated_grey, 0);
             permissionCallTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_phone_outgoing_grey, 0, 0, 0);
             permissionCallTextView.setTextColor(ContextCompat.getColor(view.getContext(), R.color.grey));
             permissionCallTextView.setText(R.string.text_feature_initiate_secure_calls);
+            permissionCallImageView.setImageResource(R.drawable.ic_deactivated_grey);
+        }
+
+        if (apiKeyPermissions.contains(EngineAPI.ApiKeyPermission.MULTI_DEVICE)) {
+            permissionMultiDeviceTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_multi_device, 0, 0, 0);
+            permissionMultiDeviceTextView.setTextColor(ContextCompat.getColor(view.getContext(), R.color.almostBlack));
+            permissionMultiDeviceImageView.setImageResource(R.drawable.ic_activated_green);
+        } else {
+            permissionMultiDeviceTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_device, 0, 0, 0);
+            permissionMultiDeviceTextView.setTextColor(ContextCompat.getColor(view.getContext(), R.color.grey));
+            permissionMultiDeviceImageView.setImageResource(R.drawable.ic_deactivated_grey);
         }
 
         if (viewModel.showSubscriptionPlans) {

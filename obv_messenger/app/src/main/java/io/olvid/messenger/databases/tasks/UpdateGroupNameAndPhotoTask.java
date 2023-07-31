@@ -46,6 +46,11 @@ public class UpdateGroupNameAndPhotoTask implements Runnable {
             group.name = newName;
             group.photoUrl = photoUrl;
             db.groupDao().updateNameAndPhoto(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.name, group.photoUrl);
+            if (group.newPublishedDetails == Group.PUBLISHED_DETAILS_NEW_SEEN
+                    || group.newPublishedDetails == Group.PUBLISHED_DETAILS_NEW_UNSEEN) {
+                group.newPublishedDetails = Group.PUBLISHED_DETAILS_NOTHING_NEW;
+                db.groupDao().updatePublishedDetailsStatus(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.newPublishedDetails);
+            }
 
             // rename the corresponding group discussion
             Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);

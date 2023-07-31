@@ -51,12 +51,15 @@ import io.olvid.engine.channel.ChannelManager;
 import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.datatypes.Constants;
+import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.EncryptedBytes;
+import io.olvid.engine.datatypes.OperationQueue;
 import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
+import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesMDCKeyPair;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaMDCKeyPair;
@@ -87,29 +90,38 @@ import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvBackupKeyVerificationOutput;
 import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.ObvDeviceList;
+import io.olvid.engine.engine.types.ObvDeviceManagementRequest;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
+import io.olvid.engine.engine.types.ObvPushNotificationType;
+import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
+import io.olvid.engine.engine.types.RegisterApiKeyResult;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvMutualScanUrl;
 import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.ObvPostMessageOutput;
 import io.olvid.engine.engine.types.ObvReturnReceipt;
+import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 import io.olvid.engine.engine.types.identities.ObvTrustOrigin;
 import io.olvid.engine.engine.types.identities.ObvGroup;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.identity.IdentityManager;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
+import io.olvid.engine.metamanager.EngineOwnedIdentityCleanupDelegate;
 import io.olvid.engine.metamanager.MetaManager;
 import io.olvid.engine.networkfetch.FetchManager;
 import io.olvid.engine.networkfetch.datatypes.DownloadAttachmentPriorityCategory;
+import io.olvid.engine.networkfetch.operations.StandaloneServerQueryOperation;
 import io.olvid.engine.networksend.SendManager;
 import io.olvid.engine.notification.NotificationManager;
 import io.olvid.engine.protocol.ProtocolManager;
 
-public class Engine implements UserInterfaceDialogListener, EngineSessionFactory, EngineAPI {
+public class Engine implements UserInterfaceDialogListener, EngineSessionFactory, EngineAPI, EngineOwnedIdentityCleanupDelegate {
     // region fields
 
     private long instanceCounter;
@@ -137,7 +149,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
     // endregion
 
-    public Engine(File baseDirectory, String dbKey, SSLSocketFactory sslSocketFactory, Logger.LogOutputter logOutputter, int logLevel) throws Exception {
+    public Engine(File baseDirectory, ObvBackupAndSyncDelegate appBackupAndSyncDelegate, String dbKey, SSLSocketFactory sslSocketFactory, Logger.LogOutputter logOutputter, int logLevel) throws Exception {
         instanceCounter = 0;
         listeners = new HashMap<>();
         listenersLock = new ReentrantLock();
@@ -212,6 +224,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         MetaManager metaManager = new MetaManager();
         this.createSessionDelegate = () -> Session.getSession(dbPath, dbKey);
         metaManager.registerImplementedDelegates(this.createSessionDelegate);
+        metaManager.registerImplementedDelegates(this);
 
         try (EngineSession engineSession = getSession()) {
             UserInterfaceDialog.createTable(engineSession.session);
@@ -226,7 +239,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         this.fetchManager = new FetchManager(metaManager, sslSocketFactory, baseDirectoryPath, prng, jsonObjectMapper);
         this.sendManager = new SendManager(metaManager, sslSocketFactory, baseDirectoryPath, prng);
         this.notificationManager = new NotificationManager(metaManager);
-        this.protocolManager = new ProtocolManager(metaManager, baseDirectoryPath, prng, jsonObjectMapper);
+        this.protocolManager = new ProtocolManager(metaManager, appBackupAndSyncDelegate, baseDirectoryPath, prng, jsonObjectMapper);
         this.backupManager = new BackupManager(metaManager, prng, jsonObjectMapper);
 
         registerToInternalNotifications();
@@ -529,6 +542,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 category = ObvDialog.Category.createGroupV2FrozenInvitation(dialogType.mediatorOrGroupOwnerIdentity.getBytes(), dialogType.obvGroupV2);
                 break;
             }
+            case DialogType.SYNC_ITEM_TO_APPLY_DIALOG_ID: {
+                category = ObvDialog.Category.createSyncItemToApply(dialogType.obvSyncAtom);
+                break;
+            }
             default:
                 Logger.w("Unknown DialogType " + dialogType.id);
                 return null;
@@ -536,6 +553,30 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         return new ObvDialog(channelDialogMessageToSend.getUuid(), channelDialogMessageToSend.getEncodedElements(), ownedIdentity.getBytes(), category);
     }
 
+    // endregion
+
+    // region EngineOwnedIdentityCleanupDelegate
+
+    @Override
+    public void deleteOwnedIdentityFromInboxOutboxProtocolsAndDialogs(Session session, Identity ownedIdentity, UID excludedProtocolInstanceUid) throws Exception {
+        protocolManager.deleteOwnedIdentity(session, ownedIdentity, excludedProtocolInstanceUid);
+        sendManager.deleteOwnedIdentity(session, ownedIdentity);
+        // do not delete the server session if called with a non-null excludedProtocolInstanceUid
+        //  --> this server session is used in the OwnedIdentityDeletionProtocol to run a server query
+        fetchManager.deleteOwnedIdentity(session, ownedIdentity, excludedProtocolInstanceUid != null);
+
+        for (UserInterfaceDialog userInterfaceDialog : UserInterfaceDialog.getAll(wrapSession(session))) {
+            ObvDialog obvDialog = userInterfaceDialog.getObvDialog();
+            if (Arrays.equals(obvDialog.getBytesOwnedIdentity(), ownedIdentity.getBytes())) {
+                userInterfaceDialog.delete();
+            }
+        }
+    }
+
+    @Override
+    public void deleteOwnedIdentityServerSession(Session session, Identity ownedIdentity) {
+        fetchManager.deleteExistingServerSession(session, ownedIdentity, false);
+    }
     // endregion
 
 
@@ -576,15 +617,16 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public ObvIdentity generateOwnedIdentity(String server, JsonIdentityDetails identityDetails, UUID apiKey, ObvKeycloakState keycloakState) {
+    public ObvIdentity generateOwnedIdentity(String server, JsonIdentityDetails identityDetails, ObvKeycloakState keycloakState, String deviceDisplayName) {
         try (EngineSession engineSession = getSession()) {
             if (server == null) {
                 server = "";
             }
-            Identity identity = identityManager.generateOwnedIdentity(engineSession.session, server, identityDetails, apiKey, keycloakState, prng);
+            Identity identity = identityManager.generateOwnedIdentity(engineSession.session, server, identityDetails, keycloakState, deviceDisplayName, prng);
             if (identity == null) {
                 return null;
             }
+
             ObvIdentity ownedIdentity = new ObvIdentity(identity, identityDetails, keycloakState != null, true);
             engineSession.session.commit();
             return ownedIdentity;
@@ -595,26 +637,47 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
 
     @Override
-    public UUID getApiKeyForOwnedIdentity(byte[] bytesOwnedIdentity) {
+    public RegisterApiKeyResult registerOwnedIdentityApiKeyOnServer(byte[] bytesOwnedIdentity, UUID apiKey) {
         try {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            return identityManager.getApiKey(ownedIdentity);
-        } catch (Exception e) {
-            return null;
-        }
-    }
+            byte[] serverSessionToken = fetchManager.getServerAuthenticationToken(ownedIdentity);
+            if (serverSessionToken == null) {
+                fetchManager.createServerSession(ownedIdentity);
+                return RegisterApiKeyResult.FAILED;
+            }
 
-    @Override
-    public boolean updateApiKeyForOwnedIdentity(byte[] bytesOwnedIdentity, UUID apiKey) {
-        try (EngineSession engineSession = getSession()) {
-            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            identityManager.updateApiKeyOfOwnedIdentity(engineSession.session, ownedIdentity, apiKey);
-            fetchManager.deleteExistingServerSessionAndCreateANewOne(engineSession.session, ownedIdentity);
-            engineSession.session.commit();
-            return true;
+            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, ServerQuery.Type.createRegisterApiKey(ownedIdentity, serverSessionToken, Logger.getUuidString(apiKey))));
+
+            OperationQueue queue = new OperationQueue();
+            queue.queue(standaloneServerQueryOperation);
+            queue.execute(1, "Engine-registerOwnedIdentityApiKeyOnServer");
+            queue.join();
+
+            if (standaloneServerQueryOperation.isFinished()) {
+                recreateServerSession(bytesOwnedIdentity);
+                return RegisterApiKeyResult.SUCCESS;
+            } else {
+                if (standaloneServerQueryOperation.getReasonForCancel() != null) {
+                    switch (standaloneServerQueryOperation.getReasonForCancel()) {
+                        case StandaloneServerQueryOperation.RFC_INVALID_API_KEY: {
+                            return RegisterApiKeyResult.INVALID_KEY;
+                        }
+                        case StandaloneServerQueryOperation.RFC_INVALID_SERVER_SESSION: {
+                            recreateServerSession(bytesOwnedIdentity);
+                            break;
+                        }
+                        case StandaloneServerQueryOperation.RFC_UNSUPPORTED_SERVER_QUERY_TYPE:
+                        case StandaloneServerQueryOperation.RFC_NETWORK_ERROR:
+                        default: {
+                            break;
+                        }
+                    }
+                }
+                return RegisterApiKeyResult.FAILED;
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return RegisterApiKeyResult.FAILED;
         }
     }
 
@@ -701,7 +764,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     public void recreateServerSession(byte[] bytesOwnedIdentity) {
         try (EngineSession engineSession = getSession()) {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            fetchManager.deleteExistingServerSessionAndCreateANewOne(engineSession.session, ownedIdentity);
+            fetchManager.deleteExistingServerSession(engineSession.session, ownedIdentity, true);
             engineSession.session.commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -715,19 +778,13 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             engineSession.session.startTransaction();
             channelManager.deleteAllChannelsForOwnedIdentity(engineSession.session, ownedIdentity);
             identityManager.deleteOwnedIdentity(engineSession.session, ownedIdentity);
-            protocolManager.deleteOwnedIdentity(engineSession.session, ownedIdentity);
-            sendManager.deleteOwnedIdentity(engineSession.session, ownedIdentity);
-            fetchManager.deleteOwnedIdentity(engineSession.session, ownedIdentity);
 
-            for (UserInterfaceDialog userInterfaceDialog: UserInterfaceDialog.getAll(engineSession)) {
-                ObvDialog obvDialog = userInterfaceDialog.getObvDialog();
-                if (Arrays.equals(obvDialog.getBytesOwnedIdentity(), bytesOwnedIdentity)) {
-                    userInterfaceDialog.delete();
-                }
-            }
+            deleteOwnedIdentityFromInboxOutboxProtocolsAndDialogs(engineSession.session, ownedIdentity, null);
+
             engineSession.session.commit();
         }
     }
+
 
     @Override
     public JsonIdentityDetailsWithVersionAndPhoto[] getOwnedIdentityPublishedAndLatestDetails(byte[] bytesOwnedIdentity) throws Exception {
@@ -765,6 +822,14 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
     }
 
+    @Override
+    public void saveKeycloakApiKey(byte[] bytesOwnedIdentity, String apiKey) throws Exception {
+        try (EngineSession engineSession = getSession()) {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            identityManager.saveKeycloakApiKey(engineSession.session, ownedIdentity, apiKey);
+            engineSession.session.commit();
+        }
+    }
 
     @Override
     public Collection<ObvIdentity> getOwnedIdentitiesWithKeycloakPushTopic(String pushTopic) throws Exception {
@@ -835,19 +900,41 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public void registerToPushNotification(byte[] bytesOwnedIdentity, String firebaseToken, boolean kickOtherDevices, boolean useMultidevice) throws Exception {
+    public void registerToPushNotification(byte[] bytesOwnedIdentity, ObvPushNotificationType pushNotificationType, boolean reactivateCurrentDevice, byte[] bytesDeviceUidToReplace) throws Exception {
         try (EngineSession engineSession = getSession()) {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             UID currentDeviceUid = identityManager.getCurrentDeviceUidOfOwnedIdentity(engineSession.session, ownedIdentity);
+            UID deviceUidToReplace = bytesDeviceUidToReplace == null ? null : new UID(bytesDeviceUidToReplace);
 
             PushNotificationTypeAndParameters pushNotificationTypeAndParameters;
-            if (firebaseToken == null) {
-                pushNotificationTypeAndParameters = PushNotificationTypeAndParameters.createWebsocketOnly(kickOtherDevices, useMultidevice);
-            } else {
-                // We pick a random identityMaskingUid in case we need to register (only useful when configuration changed)
-                UID identityMaskingUid = new UID(prng);
-                byte[] firebaseTokenBytes = firebaseToken.getBytes(StandardCharsets.UTF_8);
-                pushNotificationTypeAndParameters = PushNotificationTypeAndParameters.createFirebaseAndroid(firebaseTokenBytes, identityMaskingUid, kickOtherDevices, useMultidevice);
+            switch (pushNotificationType.platform) {
+                case ANDROID: {
+                    if (pushNotificationType.firebaseToken == null) {
+                        pushNotificationTypeAndParameters = PushNotificationTypeAndParameters.createWebsocketOnlyAndroid(reactivateCurrentDevice, deviceUidToReplace);
+                    } else {
+                        // We pick a random identityMaskingUid in case we need to register (only useful when configuration changed)
+                        UID identityMaskingUid = new UID(prng);
+                        byte[] firebaseTokenBytes = pushNotificationType.firebaseToken.getBytes(StandardCharsets.UTF_8);
+                        pushNotificationTypeAndParameters = PushNotificationTypeAndParameters.createFirebaseAndroid(firebaseTokenBytes, identityMaskingUid, reactivateCurrentDevice, deviceUidToReplace);
+                    }
+                    break;
+                }
+                case WINDOWS: {
+                    pushNotificationTypeAndParameters = PushNotificationTypeAndParameters.createWindows(reactivateCurrentDevice, deviceUidToReplace);
+                    break;
+                }
+                case LINUX: {
+                    pushNotificationTypeAndParameters = PushNotificationTypeAndParameters.createLinux(reactivateCurrentDevice, deviceUidToReplace);
+                    break;
+                }
+                case DAEMON: {
+                    pushNotificationTypeAndParameters = PushNotificationTypeAndParameters.createDaemon(reactivateCurrentDevice, deviceUidToReplace);
+                    break;
+                }
+                default: {
+                    Logger.e("Engine.registerToPushNotification: unknown pushNotificationType.platform");
+                    throw new Exception();
+                }
             }
             engineSession.session.startTransaction();
             fetchManager.registerPushNotificationIfConfigurationChanged(engineSession.session, ownedIdentity, currentDeviceUid, pushNotificationTypeAndParameters);
@@ -855,15 +942,6 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
     }
 
-
-    @Override
-    public void unregisterToPushNotification(byte[] bytesOwnedIdentity) throws Exception {
-        try (EngineSession engineSession = getSession()) {
-            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            fetchManager.unregisterPushNotification(engineSession.session, ownedIdentity);
-            engineSession.session.commit();
-        }
-    }
 
     @Override
     public void processAndroidPushNotification(String maskingUidString) {
@@ -877,6 +955,15 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             return ownedIdentity.getBytes();
         }
         return null;
+    }
+
+    @Override
+    public void processDeviceManagementRequest(byte[] bytesOwnedIdentity, ObvDeviceManagementRequest deviceManagementRequest) throws Exception {
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        try (EngineSession engineSession = getSession()) {
+            protocolManager.processDeviceManagementRequest(engineSession.session, ownedIdentity, deviceManagementRequest);
+            engineSession.session.commit();
+        }
     }
 
     @Override
@@ -948,6 +1035,115 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             return null;
         }
     }
+
+    @Override
+    public List<ObvOwnedDevice> getOwnedDevices(byte[] bytesOwnedIdentity) {
+        try (EngineSession engineSession = getSession()) {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            return identityManager.getDevicesOfOwnedIdentity(engineSession.session, ownedIdentity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public ObvDeviceList queryRegisteredOwnedDevicesFromServer(byte[] bytesOwnedIdentity) {
+        try (EngineSession engineSession = getSession()) {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+
+            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, ServerQuery.Type.createOwnedDeviceDiscoveryQuery(ownedIdentity)));
+
+            OperationQueue queue = new OperationQueue();
+            queue.queue(standaloneServerQueryOperation);
+            queue.execute(1, "Engine-queryRegisterOwnedDevicesFromServer");
+            queue.join();
+
+            if (standaloneServerQueryOperation.isFinished() && standaloneServerQueryOperation.getServerResponse() != null) {
+                // decrypt the received device list
+                byte[] decryptedPayload = identityManager.decrypt(engineSession.session, standaloneServerQueryOperation.getServerResponse().decodeEncryptedData(), ownedIdentity);
+
+                HashMap<DictionaryKey, Encoded> map = new Encoded(decryptedPayload).decodeDictionary();
+
+                // check for multi-device (is null if server could not determine if multi-device is available)
+                Encoded encodedMulti = map.get(new DictionaryKey("multi"));
+                Boolean multiDevice;
+                if (encodedMulti != null) {
+                    multiDevice = encodedMulti.decodeBoolean();
+                } else {
+                    multiDevice = null;
+                }
+
+                // now get the actual device list
+                HashMap<ObvBytesKey, ObvOwnedDevice.ServerDeviceInfo> deviceUidsAndServerInfo = new HashMap<>();
+
+                Encoded[] encodedDevices = map.get(new DictionaryKey("dev")).decodeList();
+                for (Encoded encodedDevice : encodedDevices) {
+                    HashMap<DictionaryKey, Encoded> deviceMap = encodedDevice.decodeDictionary();
+                    UID deviceUid = deviceMap.get(new DictionaryKey("uid")).decodeUid();
+
+                    Encoded encodedExpiration = deviceMap.get(new DictionaryKey("exp"));
+                    Long expirationTimestamp = encodedExpiration == null ? null : encodedExpiration.decodeLong();
+
+                    Encoded encodedRegistration = deviceMap.get(new DictionaryKey("reg"));
+                    Long lastRegistrationTimestamp = encodedRegistration == null ? null : encodedRegistration.decodeLong();
+
+                    Encoded encodedName = deviceMap.get(new DictionaryKey("name"));
+                    String deviceName = null;
+                    if (encodedName != null) {
+                        try {
+                            byte[] plaintext = identityManager.decrypt(engineSession.session, encodedName.decodeEncryptedData(), ownedIdentity);
+                            byte[] bytesDeviceName = new Encoded(plaintext).decodeListWithPadding()[0].decodeBytes();
+                            if (bytesDeviceName.length != 0) {
+                                deviceName = new String(bytesDeviceName, StandardCharsets.UTF_8);
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    deviceUidsAndServerInfo.put(new ObvBytesKey(deviceUid.getBytes()), new ObvOwnedDevice.ServerDeviceInfo(deviceName, expirationTimestamp, lastRegistrationTimestamp));
+                }
+
+                return new ObvDeviceList(multiDevice, deviceUidsAndServerInfo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void refreshOwnedDeviceList(byte[] bytesOwnedIdentity) {
+        try {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            protocolManager.startOwnedDeviceDiscoveryProtocol(ownedIdentity);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void recreateOwnedDeviceChannel(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid) {
+        try {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            UID deviceUid = new UID(bytesDeviceUid);
+            // simply start the channel creation protocol: this deletes any channel and aborts any ongoing instance
+            protocolManager.startChannelCreationWithOwnedDeviceProtocol(ownedIdentity, deviceUid);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+//    @Override
+//    public void resynchronizeAllOwnedDevices(byte[] bytesOwnedIdentity) {
+//        try (EngineSession engineSession = getSession()) {
+//            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+//            protocolManager.triggerOwnedDevicesSync(engineSession.session, ownedIdentity);
+//            engineSession.session.commit();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     // endregion
 
@@ -1058,7 +1254,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         try (EngineSession engineSession = getSession()) {
             Identity contactIdentity = Identity.of(bytesContactIdentity);
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            identityManager.trustPublishedContactDetails(engineSession.session, contactIdentity, ownedIdentity);
+            JsonIdentityDetailsWithVersionAndPhoto details = identityManager.trustPublishedContactDetails(engineSession.session, contactIdentity, ownedIdentity);
+            if (details != null) {
+                propagateEngineSyncAtomToOtherDevicesIfNeeded(engineSession.session, ownedIdentity, ObvSyncAtom.createTrustContactDetails(contactIdentity, jsonObjectMapper.writeValueAsString(details)));
+            }
             engineSession.session.commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -1184,7 +1383,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         try (EngineSession engineSession = getSession()) {
             engineSession.session.startTransaction();
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            identityManager.trustPublishedGroupDetails(engineSession.session, ownedIdentity, bytesGroupOwnerAndUid);
+            JsonGroupDetailsWithVersionAndPhoto details = identityManager.trustPublishedGroupDetails(engineSession.session, ownedIdentity, bytesGroupOwnerAndUid);
+            if (details != null) {
+                propagateEngineSyncAtomToOtherDevicesIfNeeded(engineSession.session, ownedIdentity, ObvSyncAtom.createTrustGroupV1Details(bytesGroupOwnerAndUid, jsonObjectMapper.writeValueAsString(details)));
+            }
             engineSession.session.commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -1255,8 +1457,30 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
         GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
         try (EngineSession engineSession = getSession()) {
-            identityManager.trustGroupV2PublishedDetails(engineSession.session, ownedIdentity, groupIdentifier);
+            int version = identityManager.trustGroupV2PublishedDetails(engineSession.session, ownedIdentity, groupIdentifier);
+            if (version != -1) {
+                propagateEngineSyncAtomToOtherDevicesIfNeeded(engineSession.session, ownedIdentity, ObvSyncAtom.createTrustGroupV2Details(groupIdentifier, version));
+            }
             engineSession.session.commit();
+        }
+    }
+
+    @Override
+    public String getGroupV2JsonType(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) {
+        if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
+            return null;
+        }
+
+        try {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+
+            try (EngineSession engineSession = getSession()) {
+                return identityManager.getGroupV2JsonGroupType(engineSession.session, ownedIdentity, groupIdentifier);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -1299,6 +1523,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
         GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+        if (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
+            // it is not possible to leave a keycloak group
+            return;
+        }
 
         protocolManager.initiateGroupV2Leave(ownedIdentity, groupIdentifier);
     }
@@ -1310,6 +1538,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
         GroupV2.Identifier groupIdentifier = GroupV2.Identifier.of(bytesGroupIdentifier);
+        if (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
+            // it is not possible to leave a keycloak group
+            return;
+        }
 
         protocolManager.initiateGroupV2Disband(ownedIdentity, groupIdentifier);
     }
@@ -1493,7 +1725,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
 
     @Override
-    public void startGroupV2CreationProtocol(String serializedGroupDetails, String absolutePhotoUrl, byte[] bytesOwnedIdentity, HashSet<GroupV2.Permission> ownPermissions, HashMap<ObvBytesKey, HashSet<GroupV2.Permission>> otherGroupMembers) throws Exception {
+    public void startGroupV2CreationProtocol(String serializedGroupDetails, String absolutePhotoUrl, byte[] bytesOwnedIdentity, HashSet<GroupV2.Permission> ownPermissions, HashMap<ObvBytesKey, HashSet<GroupV2.Permission>> otherGroupMembers, String serializedGroupType) throws Exception {
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
 
         HashSet<GroupV2.IdentityAndPermissions> otherGroupMembersSet = new HashSet<>();
@@ -1502,7 +1734,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             otherGroupMembersSet.add(new GroupV2.IdentityAndPermissions(remoteIdentity, entry.getValue()));
         }
 
-        protocolManager.startGroupV2CreationProtocol(ownedIdentity, serializedGroupDetails, absolutePhotoUrl, ownPermissions, otherGroupMembersSet);
+        protocolManager.startGroupV2CreationProtocol(ownedIdentity, serializedGroupDetails, absolutePhotoUrl, ownPermissions, otherGroupMembersSet, serializedGroupType);
     }
 
     @Override
@@ -1599,26 +1831,13 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public void deleteOwnedIdentityAndNotifyContacts(byte[] bytesOwnedIdentity) throws Exception {
+    public void deleteOwnedIdentityAndNotifyContacts(byte[] bytesOwnedIdentity, boolean deleteEverywhere) throws Exception {
         try (EngineSession engineSession = getSession()) {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            engineSession.session.startTransaction();
-
-            // before starting the protocol in charge of notifying the contacts, delete everything that will no longer be used
-            protocolManager.deleteOwnedIdentity(engineSession.session, ownedIdentity);
-            sendManager.deleteOwnedIdentity(engineSession.session, ownedIdentity);
-            fetchManager.deleteOwnedIdentity(engineSession.session, ownedIdentity);
-
-            for (UserInterfaceDialog userInterfaceDialog: UserInterfaceDialog.getAll(engineSession)) {
-                ObvDialog obvDialog = userInterfaceDialog.getObvDialog();
-                if (Arrays.equals(obvDialog.getBytesOwnedIdentity(), bytesOwnedIdentity)) {
-                    userInterfaceDialog.delete();
-                }
-            }
 
             // now delete contacts and leave/disband groups
             // the protocol will also delete all channels (once they are no longer used) and actually delete the owned identity
-            protocolManager.deleteOwnedIdentityAndNotifyContacts(engineSession.session, ownedIdentity);
+            protocolManager.startOwnedIdentityDeletionProtocol(engineSession.session, ownedIdentity, deleteEverywhere);
             engineSession.session.commit();
         }
     }
@@ -1789,9 +2008,15 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity contactIdentity = Identity.of(bytesContactIdentity);
             AuthEncKey returnReceiptKey = (AuthEncKey) new Encoded(returnReceiptKeyBytes).decodeSymmetricKey();
             // fetch contact deviceUids
-            UID[] contactDeviceUids = identityManager.getDeviceUidsOfContactIdentity(engineSession.session, ownedIdentity, contactIdentity);
-            if (contactDeviceUids.length != 0) {
-                sendManager.sendReturnReceipt(engineSession.session, ownedIdentity, contactIdentity, contactDeviceUids, status, returnReceiptNonce, returnReceiptKey, attachmentNumber);
+            final UID[] deviceUids;
+            // To improve: maybe find a way to send the return receipt only to the device that actually sent the message?
+            if (Arrays.equals(bytesOwnedIdentity, bytesContactIdentity)) {
+                deviceUids = identityManager.getOtherDeviceUidsOfOwnedIdentity(engineSession.session, ownedIdentity);
+            } else {
+                deviceUids = identityManager.getDeviceUidsOfContactIdentity(engineSession.session, ownedIdentity, contactIdentity);
+            }
+            if (deviceUids.length != 0) {
+                sendManager.sendReturnReceipt(engineSession.session, ownedIdentity, contactIdentity, deviceUids, status, returnReceiptNonce, returnReceiptKey, attachmentNumber);
             }
             engineSession.session.commit();
         } catch (Exception e) {
@@ -1965,8 +2190,8 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public void connectWebsocket(String os, String osVersion, int appBuild, String appVersion) {
-        fetchManager.connectWebsockets(os, osVersion, appBuild, appVersion);
+    public void connectWebsocket(boolean relyOnWebsocketForNetworkDetection, String os, String osVersion, int appBuild, String appVersion) {
+        fetchManager.connectWebsockets(relyOnWebsocketForNetworkDetection, os, osVersion, appBuild, appVersion);
     }
 
     @Override
@@ -2059,21 +2284,13 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public ObvIdentity[] restoreOwnedIdentitiesFromBackup(String backupSeed, byte[] backupContent) {
-        return backupManager.restoreOwnedIdentitiesFromBackup(backupSeed, backupContent);
+    public ObvIdentity[] restoreOwnedIdentitiesFromBackup(String backupSeed, byte[] backupContent, String deviceDisplayName) {
+        return backupManager.restoreOwnedIdentitiesFromBackup(backupSeed, backupContent, deviceDisplayName);
     }
 
     @Override
     public void restoreContactsAndGroupsFromBackup(String backupSeed, byte[] backupContent, ObvIdentity[] restoredOwnedIdentities) {
-        Identity[] restoredIdentities = new Identity[restoredOwnedIdentities.length];
-        for (int i=0; i<restoredOwnedIdentities.length; i++) {
-            try {
-                restoredIdentities[i] = Identity.of(restoredOwnedIdentities[i].getBytesIdentity());
-            } catch (DecodingException ignored) {
-                // nothing we can do here...
-            }
-        }
-        backupManager.restoreContactsAndGroupsFromBackup(backupSeed, backupContent, restoredIdentities);
+        backupManager.restoreContactsAndGroupsFromBackup(backupSeed, backupContent, restoredOwnedIdentities);
     }
 
     @Override
@@ -2188,6 +2405,55 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
     }
 
+
+    @Override
+    public void propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom obvSyncAtom) throws Exception {
+        // the App should never be sending a non-app sync item
+        if (!obvSyncAtom.isAppSyncItem()) {
+            throw new Exception();
+        }
+
+        try (EngineSession engineSession = getSession()) {
+            for (Identity ownedIdentity : identityManager.getOwnedIdentities(engineSession.session)) {
+                if (identityManager.getOtherDeviceUidsOfOwnedIdentity(engineSession.session, ownedIdentity).length > 0) {
+                    protocolManager.initiateSingleItemSync(engineSession.session, ownedIdentity, obvSyncAtom);
+                }
+            }
+            engineSession.session.commit();
+        }
+    }
+
+    @Override
+    public void propagateAppSyncAtomToOtherDevicesIfNeeded(byte[] bytesOwnedIdentity, ObvSyncAtom obvSyncAtom) throws Exception {
+        // the App should never be sending a non-app sync item
+        if (!obvSyncAtom.isAppSyncItem()) {
+            throw new Exception();
+        }
+
+        try (EngineSession engineSession = getSession()) {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+
+            if (identityManager.getOtherDeviceUidsOfOwnedIdentity(engineSession.session, ownedIdentity).length > 0) {
+                protocolManager.initiateSingleItemSync(engineSession.session, ownedIdentity, obvSyncAtom);
+                engineSession.session.commit();
+            }
+        }
+    }
+
+    private boolean propagateEngineSyncAtomToOtherDevicesIfNeeded(Session session, Identity ownedIdentity, ObvSyncAtom obvSyncAtom) throws Exception {
+        // the App should never be sending a non-app sync item
+        if (obvSyncAtom.isAppSyncItem()) {
+            throw new Exception();
+        }
+
+        if (identityManager.getOtherDeviceUidsOfOwnedIdentity(session, ownedIdentity).length > 0) {
+            protocolManager.initiateSingleItemSync(session, ownedIdentity, obvSyncAtom);
+            return true;
+        }
+        return false;
+    }
+
+
     // Run once after you upgrade from a version not handling Contact and ContactGroup UserData to a version able to do so
     // Also run after a backup restore
     @Override
@@ -2196,6 +2462,20 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             engineSession.session.startTransaction();
             identityManager.downloadAllUserData(engineSession.session);
             engineSession.session.commit();
+        }
+    }
+
+    // Run once after the first introduction of device names for multi-device
+    @Override
+    public void setAllOwnedDeviceNames(String deviceName) {
+        try (EngineSession engineSession = getSession()) {
+            for (Identity ownedIdentity : identityManager.getOwnedIdentities(engineSession.session)) {
+                UID currentDeviceUid = identityManager.getCurrentDeviceUidOfOwnedIdentity(engineSession.session, ownedIdentity);
+                protocolManager.processDeviceManagementRequest(engineSession.session, ownedIdentity, ObvDeviceManagementRequest.createSetNicknameRequest(currentDeviceUid.getBytes(), deviceName));
+            }
+            engineSession.session.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

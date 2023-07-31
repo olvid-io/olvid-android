@@ -53,7 +53,7 @@ public class CreateServerSessionCompositeOperation extends Operation implements 
         this.ownedIdentity = ownedIdentity;
 
         this.suboperations = new Operation[3];
-        suboperations[0] = new RequestChallengeOperation(fetchManagerSessionFactory, sslSocketFactory, ownedIdentity, solveChallengeDelegate);
+        suboperations[0] = new RequestChallengeOperation(fetchManagerSessionFactory, sslSocketFactory, ownedIdentity);
         suboperations[1] = new SolveChallengeOperation(fetchManagerSessionFactory, ownedIdentity, solveChallengeDelegate);
         suboperations[2] = new GetTokenOperation(fetchManagerSessionFactory, sslSocketFactory, ownedIdentity, this);
 

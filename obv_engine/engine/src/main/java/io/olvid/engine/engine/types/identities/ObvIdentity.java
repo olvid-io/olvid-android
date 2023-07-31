@@ -112,4 +112,8 @@ public class ObvIdentity implements Comparable<ObvIdentity> {
     public int compareTo(ObvIdentity o) {
         return identity.computeUniqueUid().compareTo(o.identity.computeUniqueUid());
     }
+
+    public Identity getIdentity() {
+        return identity;
+    }
 }

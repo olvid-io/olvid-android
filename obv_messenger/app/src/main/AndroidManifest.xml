@@ -74,6 +74,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:localeConfig="@xml/locales_config"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:manageSpaceActivity="io.olvid.messenger.activities.storage_manager.StorageManagerActivity">
 
         <meta-data android:name="android.content.APP_RESTRICTIONS"
@@ -196,11 +197,11 @@
             android:name=".activities.ContactDetailsActivity"
             android:label="@string/activity_title_contact_details" />
         <activity
-            android:name=".activities.GroupDetailsActivity"
+            android:name=".group.GroupDetailsActivity"
             android:label="@string/activity_title_group_details" />
-        <activity android:name=".activities.GroupV2DetailsActivity"
+        <activity android:name=".group.GroupV2DetailsActivity"
             android:label="@string/activity_title_group_details" />
-        <activity android:name=".activities.GroupCreationActivity"
+        <activity android:name=".group.GroupCreationActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".gallery.GalleryActivity"
             android:configChanges="orientation|screenSize|screenLayout"

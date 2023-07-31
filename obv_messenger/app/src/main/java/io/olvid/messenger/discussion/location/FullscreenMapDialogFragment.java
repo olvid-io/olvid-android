@@ -54,6 +54,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment {
@@ -147,7 +148,7 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
 
         // if showing a location or a finished sharing: zoom on location, center camera and add a pointer on it
         if (message != null && message.locationType != Message.LOCATION_TYPE_SHARE) {
-            Message.JsonLocation location = message.getJsonLocation();
+            JsonLocation location = message.getJsonLocation();
             if (message.locationType == Message.LOCATION_TYPE_SEND) {
                 mapView.addMarker(message.id, getPinMarkerIcon(), new LatLngWrapper(location), location.getPrecision());
             } else if (message.locationType == Message.LOCATION_TYPE_SHARE_FINISHED) {
@@ -173,7 +174,7 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
         openInThirdPartyAppFab.setImageDrawable(AppCompatResources.getDrawable(activity, R.drawable.ic_location_person_pin));
 
         for (Message message : messages) {
-            Message.JsonLocation location = message.getJsonLocation();
+            JsonLocation location = message.getJsonLocation();
             // update symbol if needed
             if (currentlyShownMessagesIdList.contains(message.id)) {
                 mapView.updateMarker(message.id, new LatLngWrapper(location), location.getPrecision());
@@ -213,7 +214,7 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
         if (sharingLocationMessageLiveData != null && sharingLocationMessageLiveData.getValue() != null) {
             FullscreenMapBottomSheetDialog.newInstance(discussionId, this).show(activity.getSupportFragmentManager(), "fullscreen-map-bottom-sheet");
         } else if (message != null) {
-            Message.JsonLocation jsonLocation = message.getJsonLocation();
+            JsonLocation jsonLocation = message.getJsonLocation();
             App.openLocationInMapApplication(activity, jsonLocation.getTruncatedLatitudeString(), jsonLocation.getTruncatedLongitudeString(), message.contentBody, null);
         }
     }

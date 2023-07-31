@@ -286,10 +286,16 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
     }
 
 
+    boolean wasNonNull = false;
+
     public void displayDetails(ContactDetailsViewModel.ContactAndInvitation contactAndInvitation) {
         if (contactAndInvitation == null) {
+            if (wasNonNull) {
+                finish();
+            }
             return;
         }
+        wasNonNull = true;
         Contact contact = contactAndInvitation.contact;
         Invitation invitation = contactAndInvitation.invitation;
 
@@ -338,32 +344,32 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
             personalNoteTextView.setVisibility(View.GONE);
         }
 
-        if (contact.establishedChannelCount > 0) {
-            introduceButton.setEnabled(true);
+        if (contact.shouldShowChannelCreationSpinner() && contact.active) {
+            noChannelCardView.setVisibility(View.VISIBLE);
+            final AnimatedVectorDrawableCompat animated = AnimatedVectorDrawableCompat.create(App.getContext(), R.drawable.dots);
+            if (animated != null) {
+                animated.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
+                    @Override
+                    public void onAnimationEnd(Drawable drawable) {
+                        new Handler(Looper.getMainLooper()).post(animated::start);
+                    }
+                });
+                noChannelSpinner.setImageDrawable(animated);
+                animated.start();
+            }
+        } else {
             noChannelCardView.setVisibility(View.GONE);
             noChannelSpinner.setImageDrawable(null);
+        }
+
+        if (contact.establishedChannelCount > 0) {
+            introduceButton.setEnabled(true);
             notOneToOneInviteButton.setEnabled(true);
         } else {
-            if (contact.active) {
-                introduceButton.setEnabled(false);
-                noChannelCardView.setVisibility(View.VISIBLE);
-                final AnimatedVectorDrawableCompat animated = AnimatedVectorDrawableCompat.create(App.getContext(), R.drawable.dots);
-                if (animated != null) {
-                    animated.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
-                        @Override
-                        public void onAnimationEnd(Drawable drawable) {
-                            new Handler(Looper.getMainLooper()).post(animated::start);
-                        }
-                    });
-                    noChannelSpinner.setImageDrawable(animated);
-                    animated.start();
-                }
-            } else {
-                introduceButton.setEnabled(false);
-                noChannelCardView.setVisibility(View.GONE);
-            }
+            introduceButton.setEnabled(false);
             notOneToOneInviteButton.setEnabled(false);
         }
+
 
         EnumSet<ObvContactActiveOrInactiveReason> reasons = AppSingleton.getEngine().getContactActiveOrInactiveReasons(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
         if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
@@ -617,12 +623,12 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
     public boolean hasEngineNotificationListenerRegistrationNumber() {
         return registrationNumber != null;
     }
-
     static class DisplayTrustOriginsTask implements Runnable {
         private final WeakReference<TextView> textViewWeakReference;
         private final WeakReference<Button> buttonWeakReference;
         private final Contact contact;
         private final Context context;
+
 
         DisplayTrustOriginsTask(TextView textView, Button exchangeDigitsButton, Contact contact) {
             this.textViewWeakReference = new WeakReference<>(textView);
@@ -666,7 +672,6 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 }
             }
         }
-
         private CharSequence trustOriginToCharSequence(final ObvTrustOrigin trustOrigin, final byte[] bytesOwnedIdentity) {
             switch (trustOrigin.getType()) {
                 case DIRECT:
@@ -735,6 +740,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                     return context.getString(R.string.trust_origin_unknown_type, StringUtils.getNiceDateString(context, trustOrigin.getTimestamp()));
             }
         }
+
     }
 
     private void handleIntent(Intent intent) {
@@ -882,7 +888,6 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
             }
         }
     }
-
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {

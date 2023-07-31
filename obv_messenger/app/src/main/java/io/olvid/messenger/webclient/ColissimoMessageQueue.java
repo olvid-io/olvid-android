@@ -50,6 +50,7 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonMessageReference;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.databases.tasks.PostMessageInDiscussionTask;
 import io.olvid.messenger.databases.tasks.UpdateMessageBodyTask;
@@ -386,7 +387,7 @@ public class ColissimoMessageQueue {
                     case REQUEST_ADD_REACTION_TO_MESSAGE:
                         String reaction = colissimo.getRequestAddReactionToMessage().getReaction();
                         long messageId = colissimo.getRequestAddReactionToMessage().getMessageId();
-                        App.runThread(new UpdateReactionsTask(messageId, "".equals(reaction) ? null : reaction, null, 0));
+                        App.runThread(new UpdateReactionsTask(messageId, "".equals(reaction) ? null : reaction, null, 0, true));
                         break;
                     case NOTIF_NEW_DISCUSSION:
                     case NOTIF_FILE_ALREADY_ATTACHED:
@@ -424,7 +425,7 @@ public class ColissimoMessageQueue {
     }
 
     private void saveDraft(long discussionId, long replyMessageId, @Nullable String content){
-        Message.JsonMessageReference jsonReply;
+        JsonMessageReference jsonReply;
         Message existingDraft = AppDatabase.getInstance().messageDao().getDiscussionDraftMessageSync(discussionId);
         try {
             if (existingDraft != null) {
@@ -432,7 +433,7 @@ public class ColissimoMessageQueue {
                 if (replyMessageId != 0) {
                     Message replyMessage = AppDatabase.getInstance().messageDao().get(replyMessageId);
                     if (replyMessage != null) {
-                        jsonReply = Message.JsonMessageReference.of(replyMessage);
+                        jsonReply = JsonMessageReference.of(replyMessage);
                         existingDraft.jsonReply = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonReply);
                         existingDraft.timestamp = System.currentTimeMillis();
                     }
@@ -455,7 +456,7 @@ public class ColissimoMessageQueue {
                 if (replyMessageId != 0) {
                     Message replyMessage = AppDatabase.getInstance().messageDao().get(replyMessageId);
                     if (replyMessage != null) {
-                        jsonReply = Message.JsonMessageReference.of(replyMessage);
+                        jsonReply = JsonMessageReference.of(replyMessage);
                         draftMessage.jsonReply = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonReply);
                         draftMessage.timestamp = System.currentTimeMillis();
                     }

@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
@@ -39,13 +40,15 @@ public class UpdateGroupV2CustomNameAndPhotoTask implements Runnable {
     private final String customName;
     private final String absoluteCustomPhotoUrl;
     private final String personalNote;
+    private final boolean propagated;
 
-    public UpdateGroupV2CustomNameAndPhotoTask(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String customName, String absoluteCustomPhotoUrl, String personalNote) {
+    public UpdateGroupV2CustomNameAndPhotoTask(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String customName, String absoluteCustomPhotoUrl, String personalNote, boolean propagated) {
         this.bytesGroupIdentifier = bytesGroupIdentifier;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customName = customName;
         this.absoluteCustomPhotoUrl = absoluteCustomPhotoUrl;
         this.personalNote = personalNote;
+        this.propagated = propagated;
     }
 
     @Override
@@ -59,6 +62,15 @@ public class UpdateGroupV2CustomNameAndPhotoTask implements Runnable {
                 changed = true;
                 group.customName = customName;
                 db.group2Dao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.customName);
+
+                if (!propagated) {
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createGroupV2NicknameChange(group.bytesGroupIdentifier, customName));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate group nickname change to other devices");
+                        e.printStackTrace();
+                    }
+                }
             }
 
             if (!Objects.equals(App.absolutePathFromRelative(group.customPhotoUrl), absoluteCustomPhotoUrl)) {
@@ -116,6 +128,15 @@ public class UpdateGroupV2CustomNameAndPhotoTask implements Runnable {
             if (!Objects.equals(group.personalNote, personalNote)) {
                 group.personalNote = personalNote;
                 db.group2Dao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.personalNote);
+
+                if (!propagated) {
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createGroupV2PersonalNoteChange(group.bytesGroupIdentifier, personalNote));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate group nickname change to other devices");
+                        e.printStackTrace();
+                    }
+                }
             }
 
             if (changed) {

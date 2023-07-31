@@ -85,6 +85,10 @@ public interface Group2MemberDao {
             " c." + Contact.SORT_DISPLAY_NAME + " AS sortDisplayName, " +
             " c." + Contact.IDENTITY_DETAILS + " AS identityDetails, " +
             " gm." + Group2Member.PERMISSION_ADMIN + " AS permissionAdmin, " +
+            " gm." + Group2Member.PERMISSION_SEND_MESSAGE + " AS permissionSendMessage, " +
+            " gm." + Group2Member.PERMISSION_REMOTE_DELETE_ANYTHING + " AS permissionRemoteDeleteAnything, " +
+            " gm." + Group2Member.PERMISSION_EDIT_OR_REMOTE_DELETE_OWN_MESSAGES + " AS permissionEditOrRemoteDeleteOwnMessages, " +
+            " gm." + Group2Member.PERMISSION_CHANGE_SETTINGS + " AS permissionChangeSettings, " +
             " 0 as pending " +
             " FROM " + Group2Member.TABLE_NAME + " AS gm " +
             " INNER JOIN " + Contact.TABLE_NAME + " AS c " +
@@ -97,6 +101,10 @@ public interface Group2MemberDao {
             " COALESCE(c." + Contact.SORT_DISPLAY_NAME + ", pm." + Group2PendingMember.SORT_DISPLAY_NAME + " ) AS sortDisplayName, " +
             " COALESCE(c." + Contact.IDENTITY_DETAILS + ", pm." + Group2PendingMember.IDENTITY_DETAILS + " ) AS identityDetails, " +
             " pm." + Group2PendingMember.PERMISSION_ADMIN + " AS permissionAdmin, " +
+            " pm." + Group2PendingMember.PERMISSION_SEND_MESSAGE + " AS permissionSendMessage, " +
+            " pm." + Group2Member.PERMISSION_REMOTE_DELETE_ANYTHING + " AS permissionRemoteDeleteAnything, " +
+            " pm." + Group2Member.PERMISSION_EDIT_OR_REMOTE_DELETE_OWN_MESSAGES + " AS permissionEditOrRemoteDeleteOwnMessages, " +
+            " pm." + Group2Member.PERMISSION_CHANGE_SETTINGS + " AS permissionChangeSettings, " +
             " 1 as pending " +
             " FROM " + Group2PendingMember.TABLE_NAME + " AS pm " +
             " LEFT JOIN " + Contact.TABLE_NAME + " AS c " +
@@ -137,6 +145,10 @@ public interface Group2MemberDao {
             " c." + Contact.SORT_DISPLAY_NAME + " AS sortDisplayName, " +
             " c." + Contact.IDENTITY_DETAILS + " AS identityDetails, " +
             " gm." + Group2Member.PERMISSION_ADMIN + " AS permissionAdmin, " +
+            " gm." + Group2Member.PERMISSION_SEND_MESSAGE + " AS permissionSendMessage, " +
+            " gm." + Group2Member.PERMISSION_REMOTE_DELETE_ANYTHING + " AS permissionRemoteDeleteAnything, " +
+            " gm." + Group2Member.PERMISSION_EDIT_OR_REMOTE_DELETE_OWN_MESSAGES + " AS permissionEditOrRemoteDeleteOwnMessages, " +
+            " gm." + Group2Member.PERMISSION_CHANGE_SETTINGS + " AS permissionChangeSettings, " +
             " 0 as pending " +
             " FROM " + Group2Member.TABLE_NAME + " AS gm " +
             " INNER JOIN " + Contact.TABLE_NAME + " AS c " +
@@ -149,6 +161,10 @@ public interface Group2MemberDao {
             " COALESCE(c." + Contact.SORT_DISPLAY_NAME + ", pm." + Group2PendingMember.SORT_DISPLAY_NAME + " ) AS sortDisplayName, " +
             " COALESCE(c." + Contact.IDENTITY_DETAILS + ", pm." + Group2PendingMember.IDENTITY_DETAILS + " ) AS identityDetails, " +
             " pm." + Group2PendingMember.PERMISSION_ADMIN + " AS permissionAdmin, " +
+            " pm." + Group2PendingMember.PERMISSION_SEND_MESSAGE + " AS permissionSendMessage, " +
+            " pm." + Group2Member.PERMISSION_REMOTE_DELETE_ANYTHING + " AS permissionRemoteDeleteAnything, " +
+            " pm." + Group2Member.PERMISSION_EDIT_OR_REMOTE_DELETE_OWN_MESSAGES + " AS permissionEditOrRemoteDeleteOwnMessages, " +
+            " pm." + Group2Member.PERMISSION_CHANGE_SETTINGS + " AS permissionChangeSettings, " +
             " 1 as pending " +
             " FROM " + Group2PendingMember.TABLE_NAME + " AS pm " +
             " LEFT JOIN " + Contact.TABLE_NAME + " AS c " +
@@ -201,6 +217,10 @@ public interface Group2MemberDao {
         public byte[] sortDisplayName;
         public String identityDetails;
         public boolean permissionAdmin;
+        public boolean permissionSendMessage;
+        public boolean permissionRemoteDeleteAnything;
+        public boolean permissionEditOrRemoteDeleteOwnMessages;
+        public boolean permissionChangeSettings;
         public boolean pending;
     }
 

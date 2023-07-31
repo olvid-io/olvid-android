@@ -33,6 +33,7 @@ import io.olvid.engine.protocol.databases.ProtocolInstance;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
 import io.olvid.engine.protocol.protocols.ChannelCreationWithContactDeviceProtocol;
+import io.olvid.engine.protocol.protocols.ChannelCreationWithOwnedDeviceProtocol;
 import io.olvid.engine.protocol.protocols.DeviceCapabilitiesDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.ContactMutualIntroductionProtocol;
 import io.olvid.engine.protocol.protocols.DeviceDiscoveryChildProtocol;
@@ -49,7 +50,10 @@ import io.olvid.engine.protocol.protocols.KeycloakBindingAndUnbindingProtocol;
 import io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol;
 import io.olvid.engine.protocol.protocols.ContactManagementProtocol;
 import io.olvid.engine.protocol.protocols.OneToOneContactInvitationProtocol;
-import io.olvid.engine.protocol.protocols.OwnedIdentityDeletionWithContactNotificationProtocol;
+import io.olvid.engine.protocol.protocols.OwnedDeviceDiscoveryProtocol;
+import io.olvid.engine.protocol.protocols.OwnedDeviceManagementProtocol;
+import io.olvid.engine.protocol.protocols.OwnedIdentityDeletionProtocol;
+import io.olvid.engine.protocol.protocols.SynchronizationProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithMutualScanProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithSasProtocol;
 
@@ -77,10 +81,15 @@ public abstract class ConcreteProtocol {
     public static final int ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID = 17;
     public static final int GROUPS_V2_PROTOCOL_ID = 18;
     public static final int DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID = 19;
-    public static final int OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID = 20;
+    public static final int OWNED_IDENTITY_DELETION_PROTOCOL_ID = 20;
+    public static final int OWNED_DEVICE_DISCOVERY_PROTOCOL_ID = 21;
+    public static final int CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID = 22;
+    public static final int KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID = 23;
+    public static final int OWNED_DEVICE_MANAGEMENT_PROTOCOL_ID = 24;
+    public static final int SYNCHRONIZATION_PROTOCOL_ID = 25;
 
     // internal protocols, Android only
-    public static final int KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID = 1000;
+    public static final int LEGACY_KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID = 1000;
 
 
     protected final ProtocolManagerSession protocolManagerSession;
@@ -191,16 +200,25 @@ public abstract class ConcreteProtocol {
                 return new KeycloakContactAdditionProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID:
                 return new DeviceCapabilitiesDiscoveryProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case LEGACY_KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID:
             case KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID:
                 return new KeycloakBindingAndUnbindingProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
-            case OWNED_IDENTITY_DELETION_WITH_CONTACT_NOTIFICATION_PROTOCOL_ID:
-                return new OwnedIdentityDeletionWithContactNotificationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID:
                 return new OneToOneContactInvitationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case GROUPS_V2_PROTOCOL_ID:
                 return new GroupsV2Protocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID:
                 return new DownloadGroupV2PhotoProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case OWNED_IDENTITY_DELETION_PROTOCOL_ID:
+                return new OwnedIdentityDeletionProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case OWNED_DEVICE_DISCOVERY_PROTOCOL_ID:
+                return new OwnedDeviceDiscoveryProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID:
+                return new ChannelCreationWithOwnedDeviceProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case OWNED_DEVICE_MANAGEMENT_PROTOCOL_ID:
+                return new OwnedDeviceManagementProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case SYNCHRONIZATION_PROTOCOL_ID:
+                return new SynchronizationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             default:
                 Logger.w("Unknown protocol id: " + protocolId);
                 return null;
@@ -259,6 +277,7 @@ public abstract class ConcreteProtocol {
             }
             return (ProtocolStep) constructor.newInstance(currentState, concreteProtocolMessage, this);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

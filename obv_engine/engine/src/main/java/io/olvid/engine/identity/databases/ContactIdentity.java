@@ -81,6 +81,8 @@ public class ContactIdentity implements ObvDatabase {
     static final String FORCEFULLY_TRUSTED_BY_USER = "forcefully_trusted_by_user";
     private boolean oneToOne;
     static final String ONE_TO_ONE = "one_to_one";
+    private long lastNoDeviceContactDeviceDiscovery;
+    static final String LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY = "last_no_device_contact_device_discovery";
 
     public Identity getContactIdentity() {
         return contactIdentity;
@@ -122,6 +124,9 @@ public class ContactIdentity implements ObvDatabase {
         return oneToOne;
     }
 
+    public long getLastNoDeviceContactDeviceDiscovery() {
+        return lastNoDeviceContactDeviceDiscovery;
+    }
     // region computed properties
 
     public UID[] getDeviceUids() throws SQLException {
@@ -445,9 +450,9 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
-    public void trustPublishedDetails() throws SQLException {
+    public JsonIdentityDetailsWithVersionAndPhoto trustPublishedDetails() throws SQLException {
         if (trustedDetailsVersion == publishedDetailsVersion) {
-            return;
+            return null;
         }
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + TRUSTED_DETAILS_VERSION + " = ? " +
@@ -462,6 +467,7 @@ public class ContactIdentity implements ObvDatabase {
         hookTrustedDetails = getTrustedDetails().getJsonIdentityDetailsWithVersionAndPhoto();
         commitHookBits |= HOOK_BIT_PUBLISHED_DETAILS_TRUSTED;
         identityManagerSession.session.addSessionCommitListener(this);
+        return hookTrustedDetails;
     }
 
     public void setDetailsDownloadedPhotoUrl(int version, byte[] photo) throws Exception {
@@ -539,6 +545,19 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
+    public void setLastNoDeviceContactDeviceDiscovery(long lastNoDeviceContactDeviceDiscovery) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY + " = ? " +
+                " WHERE " + CONTACT_IDENTITY + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            statement.setLong(1, lastNoDeviceContactDeviceDiscovery);
+            statement.setBytes(2, contactIdentity.getBytes());
+            statement.setBytes(3, ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.lastNoDeviceContactDeviceDiscovery = lastNoDeviceContactDeviceDiscovery;
+        }
+    }
+
     // endregion
 
     // region constructors
@@ -574,12 +593,16 @@ public class ContactIdentity implements ObvDatabase {
                 }
             }
 
-            ContactTrustOrigin contactTrustOrigin = ContactTrustOrigin.create(identityManagerSession, contactIdentity, ownedIdentity, trustOrigin);
-            if (contactTrustOrigin == null) {
-                Logger.e("Error create contactTrustOrigin in ContactIdentity.create()");
-                throw new SQLException();
+            if (trustOrigin != null) {
+                ContactTrustOrigin contactTrustOrigin = ContactTrustOrigin.create(identityManagerSession, contactIdentity, ownedIdentity, trustOrigin);
+                if (contactTrustOrigin == null) {
+                    Logger.e("Error create contactTrustOrigin in ContactIdentity.create()");
+                    throw new SQLException();
+                }
+                contactIdentityObject.setTrustLevel(contactTrustOrigin.getTrustLevel());
+            } else {
+                contactIdentityObject.setTrustLevel(new TrustLevel(0, 0));
             }
-            contactIdentityObject.setTrustLevel(contactTrustOrigin.getTrustLevel());
             return contactIdentityObject;
         } catch (SQLException e) {
             return null;
@@ -597,6 +620,7 @@ public class ContactIdentity implements ObvDatabase {
         this.revokedAsCompromised = false;
         this.forcefullyTrustedByUser = false;
         this.oneToOne = oneToOne;
+        this.lastNoDeviceContactDeviceDiscovery = 0;
     }
 
     private ContactIdentity(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -614,6 +638,7 @@ public class ContactIdentity implements ObvDatabase {
         this.revokedAsCompromised = res.getBoolean(REVOKED_AS_COMPROMISED);
         this.forcefullyTrustedByUser = res.getBoolean(FORCEFULLY_TRUSTED_BY_USER);
         this.oneToOne = res.getBoolean(ONE_TO_ONE);
+        this.lastNoDeviceContactDeviceDiscovery = res.getLong(LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY);
     }
 
     // endregion
@@ -633,6 +658,7 @@ public class ContactIdentity implements ObvDatabase {
                     REVOKED_AS_COMPROMISED + " BIT NOT NULL, " +
                     FORCEFULLY_TRUSTED_BY_USER + " BIT NOT NULL, " +
                     ONE_TO_ONE + " BIT NOT NULL, " +
+                    LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY + " INTEGER NOT NULL, " +
                     " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + CONTACT_IDENTITY + ", " + OWNED_IDENTITY + "), " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + "(" + OwnedIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE, " +
                     " FOREIGN KEY (" + CONTACT_IDENTITY + ", " + OWNED_IDENTITY + ", " + TRUSTED_DETAILS_VERSION + ") REFERENCES " + ContactIdentityDetails.TABLE_NAME + "(" + ContactIdentityDetails.CONTACT_IDENTITY + ", " + ContactIdentityDetails.OWNED_IDENTITY + ", " + ContactIdentityDetails.VERSION + "), " +
@@ -835,11 +861,18 @@ public class ContactIdentity implements ObvDatabase {
             }
             oldVersion = 28;
         }
+        if (oldVersion < 35 && newVersion >= 35) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `contact_identity` TABLE FROM VERSION " + oldVersion + " TO 35");
+                statement.execute("ALTER TABLE contact_identity ADD COLUMN last_no_device_contact_device_discovery INTEGER NOT NULL DEFAULT 0");
+            }
+            oldVersion = 35;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?);")) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, trustedDetailsVersion);
@@ -850,6 +883,7 @@ public class ContactIdentity implements ObvDatabase {
             statement.setBoolean(7, revokedAsCompromised);
             statement.setBoolean(8, forcefullyTrustedByUser);
             statement.setBoolean(9, oneToOne);
+            statement.setLong(10, lastNoDeviceContactDeviceDiscovery);
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_INSERTED;
             identityManagerSession.session.addSessionCommitListener(this);

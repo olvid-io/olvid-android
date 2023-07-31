@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.channel.datatypes.AuthEncKeyAndChannelInfo;
@@ -421,7 +422,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             return null;
         }
         try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
-                (necessarilyConfirmed ? (CONFIRMED + " = 1 AND "): "") +
+                (necessarilyConfirmed ? (CONFIRMED + " = 1 AND ") : "") +
                 CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
             statement.setBytes(1, currentDeviceUid.getBytes());
             statement.setBytes(2, remoteDeviceUid.getBytes());
@@ -469,31 +470,13 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         }
     }
 
-    public static int countConfirmedWithContact(ChannelManagerSession channelManagerSession, UID currentDeviceUid, Identity remoteIdentity) throws SQLException {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT count(*) FROM " + TABLE_NAME +
-                " WHERE " + CONFIRMED + " = 1" +
-                " AND " + CURRENT_DEVICE_UID + " = ? " +
-                " AND " + REMOTE_IDENTITY + " = ?;")) {
-            statement.setBytes(1, currentDeviceUid.getBytes());
-            statement.setBytes(2, remoteIdentity.getBytes());
-            try (ResultSet res = statement.executeQuery()) {
-                if (res.next()) {
-                    return res.getInt(1);
-                }
-                return 0;
-            }
-        }
-    }
-
-
-
     public static ObliviousChannel[] getMany(ChannelManagerSession channelManagerSession, UID currentDeviceUid, UID[] remoteDeviceUids, Identity remoteIdentity, boolean necessarilyConfirmed) {
         if ((currentDeviceUid == null) || (remoteDeviceUids == null) || (remoteDeviceUids.length == 0) || (remoteIdentity == null)) {
             return null;
         }
         String questionMarks = "(";
-        for (int i=0; i<remoteDeviceUids.length; i++) {
-            if (i==0) {
+        for (int i = 0; i < remoteDeviceUids.length; i++) {
+            if (i == 0) {
                 questionMarks += "?";
             } else {
                 //noinspection StringConcatenationInLoop
@@ -502,14 +485,14 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         }
         questionMarks += ")";
         try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
-                (necessarilyConfirmed ? (CONFIRMED + " = 1 AND "): "") +
+                (necessarilyConfirmed ? (CONFIRMED + " = 1 AND ") : "") +
                 CURRENT_DEVICE_UID + " = ? AND " +
                 REMOTE_IDENTITY + " = ? AND " +
                 REMOTE_DEVICE_UID + " IN " + questionMarks + ";")) {
             statement.setBytes(1, currentDeviceUid.getBytes());
             statement.setBytes(2, remoteIdentity.getBytes());
-            for (int i=0; i<remoteDeviceUids.length; i++) {
-                statement.setBytes(3+i, remoteDeviceUids[i].getBytes());
+            for (int i = 0; i < remoteDeviceUids.length; i++) {
+                statement.setBytes(3 + i, remoteDeviceUids[i].getBytes());
             }
             try (ResultSet res = statement.executeQuery()) {
                 List<ObliviousChannel> list = new ArrayList<>();
@@ -671,7 +654,14 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                     // Only protocol messages may be sent through unconfirmed channels
                     return new ObliviousChannel[0];
                 }
-                HashSet<UID> remoteDeviceUidSet = new HashSet<>(Arrays.asList(channelManagerSession.identityDelegate.getDeviceUidsOfContactIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity(), message.getSendChannelInfo().getToIdentity())));
+                HashSet<UID> remoteDeviceUidSet;
+                if (Objects.equals(message.getSendChannelInfo().getFromIdentity(), message.getSendChannelInfo().getToIdentity())) {
+                    // posting for owned identity
+                    remoteDeviceUidSet = new HashSet<>(Arrays.asList(channelManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity())));
+                } else {
+                    // posting for contact
+                    remoteDeviceUidSet = new HashSet<>(Arrays.asList(channelManagerSession.identityDelegate.getDeviceUidsOfContactIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity(), message.getSendChannelInfo().getToIdentity())));
+                }
                 remoteDeviceUidSet.retainAll(Arrays.asList(message.getSendChannelInfo().getRemoteDeviceUids()));
                 UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
 
@@ -690,7 +680,12 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 List<ObliviousChannel> acceptableChannels = new ArrayList<>();
                 UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
                 for (Identity toIdentity: message.getSendChannelInfo().getToIdentities()) {
-                    UID[] remoteDeviceUids = channelManagerSession.identityDelegate.getDeviceUidsOfContactIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity(), toIdentity);
+                    final UID[] remoteDeviceUids;
+                    if (Objects.equals(message.getSendChannelInfo().getFromIdentity(), toIdentity)) {
+                        remoteDeviceUids = channelManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
+                    } else {
+                        remoteDeviceUids = channelManagerSession.identityDelegate.getDeviceUidsOfContactIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity(), toIdentity);
+                    }
                     acceptableChannels.addAll(Arrays.asList(ObliviousChannel.getAcceptableObliviousChannels(channelManagerSession, currentDeviceUid, remoteDeviceUids, toIdentity, true)));
                 }
                 return acceptableChannels.toArray(new ObliviousChannel[0]);

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
 
 @Entity(
         tableName = RemoteDeleteAndEditRequest.TABLE_NAME,
@@ -119,10 +120,10 @@ public class RemoteDeleteAndEditRequest {
     public String getSanitizedSerializedMentions() {
         if (mentions != null) {
             try {
-                List<Message.JsonUserMention> jsonUserMentions = AppSingleton.getJsonObjectMapper().readValue(mentions, new TypeReference<List<Message.JsonUserMention>>() {
+                List<JsonUserMention> jsonUserMentions = AppSingleton.getJsonObjectMapper().readValue(mentions, new TypeReference<List<JsonUserMention>>() {
                 });
-                List<Message.JsonUserMention> sanitizedMentions = new ArrayList<>();
-                for (Message.JsonUserMention mention : jsonUserMentions) {
+                List<JsonUserMention> sanitizedMentions = new ArrayList<>();
+                for (JsonUserMention mention : jsonUserMentions) {
                     if (mention.getUserIdentifier() != null) {
                         sanitizedMentions.add(mention);
                     }

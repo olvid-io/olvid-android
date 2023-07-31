@@ -35,7 +35,7 @@ public class SelectableArrayAdapter<T> extends ArrayAdapter<T> {
     @Nullable private final Integer initiallySelectedEntry;
 
     public SelectableArrayAdapter(@NonNull Context context, @Nullable Integer initiallySelectedEntry, @NonNull T[] objects) {
-        super(context, R.layout.dialog_singlechoice, objects);
+        super(context, R.layout.dialog_item_singlechoice, objects);
         this.initiallySelectedEntry = initiallySelectedEntry;
     }
 

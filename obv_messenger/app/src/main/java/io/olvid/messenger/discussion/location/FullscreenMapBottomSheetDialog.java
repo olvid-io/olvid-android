@@ -50,6 +50,7 @@ import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 
 public class FullscreenMapBottomSheetDialog extends BottomSheetDialogFragment {
     private static final String DISCUSSION_ID = "discussionId";
@@ -193,7 +194,7 @@ public class FullscreenMapBottomSheetDialog extends BottomSheetDialogFragment {
                 displayNameTextView.setText(AppSingleton.getContactCustomDisplayName(message.senderIdentifier));
                 lastUpdateTextView.setText(getString(R.string.label_share_location_latest_update, StringUtils.getLongNiceDateString(App.getContext(), message.getJsonLocation().getTimestamp())));
                 openInThirdPartyAppImageView.setOnClickListener((view) -> {
-                    Message.JsonLocation jsonLocation = message.getJsonLocation();
+                    JsonLocation jsonLocation = message.getJsonLocation();
                     App.openLocationInMapApplication(getActivity(), jsonLocation.getTruncatedLatitudeString(), jsonLocation.getTruncatedLongitudeString(), message.contentBody, null);
                 });
             }

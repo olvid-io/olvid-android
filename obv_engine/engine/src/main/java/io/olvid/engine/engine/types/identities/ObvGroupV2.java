@@ -238,6 +238,7 @@ public class ObvGroupV2 {
         public final HashMap<ObvBytesKey, HashSet<GroupV2.Permission>> permissionChanges; // may contain your ownedIdentity
 
         public String updatedSerializedGroupDetails; // null if no change
+        public String updatedJsonGroupType; // null if no change
         public String updatedPhotoUrl; // null if no change, "" if photo removed
 
         public ObvGroupV2ChangeSet() {
@@ -245,11 +246,12 @@ public class ObvGroupV2 {
             addedMembersWithPermissions = new HashMap<>();
             permissionChanges = new HashMap<>();
             updatedSerializedGroupDetails = null;
+            updatedJsonGroupType = null;
             updatedPhotoUrl = null;
         }
 
         public boolean isEmpty() {
-            return removedMembers.isEmpty() && addedMembersWithPermissions.isEmpty() && permissionChanges.isEmpty() && updatedPhotoUrl == null && updatedSerializedGroupDetails == null;
+            return removedMembers.isEmpty() && addedMembersWithPermissions.isEmpty() && permissionChanges.isEmpty() && updatedPhotoUrl == null && updatedSerializedGroupDetails == null && updatedJsonGroupType == null;
         }
 
         public Encoded encode() {
@@ -286,6 +288,9 @@ public class ObvGroupV2 {
             if (updatedSerializedGroupDetails != null) {
                 dic.put(new DictionaryKey("gd"), Encoded.of(updatedSerializedGroupDetails));
             }
+            if (updatedJsonGroupType != null) {
+                dic.put(new DictionaryKey("gt"), Encoded.of(updatedJsonGroupType));
+            }
             if (updatedPhotoUrl != null) {
                 dic.put(new DictionaryKey("pu"), Encoded.of(updatedPhotoUrl));
             }
@@ -319,6 +324,10 @@ public class ObvGroupV2 {
             enc = dic.get(new DictionaryKey("gd"));
             if (enc != null) {
                 changeSet.updatedSerializedGroupDetails = enc.decodeString();
+            }
+            enc = dic.get(new DictionaryKey("gt"));
+            if (enc != null) {
+                changeSet.updatedJsonGroupType = enc.decodeString();
             }
             enc = dic.get(new DictionaryKey("pu"));
             if (enc != null) {

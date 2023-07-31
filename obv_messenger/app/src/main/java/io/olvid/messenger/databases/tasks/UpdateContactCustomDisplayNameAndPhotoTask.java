@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
@@ -40,14 +41,16 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
     private final String absoluteCustomPhotoUrl;
     private final Integer customNameHue;
     private final String personalNote;
+    private final boolean propagated;
 
-    public UpdateContactCustomDisplayNameAndPhotoTask(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String customDisplayName, String absoluteCustomPhotoUrl, Integer customNameHue, String personalNote) {
+    public UpdateContactCustomDisplayNameAndPhotoTask(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String customDisplayName, String absoluteCustomPhotoUrl, Integer customNameHue, String personalNote, boolean propagated) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.bytesContactIdentity = bytesContactIdentity;
         this.customDisplayName = customDisplayName;
         this.absoluteCustomPhotoUrl = absoluteCustomPhotoUrl;
         this.customNameHue = customNameHue;
         this.personalNote = personalNote;
+        this.propagated = propagated;
     }
 
     @Override
@@ -60,11 +63,29 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                 contact.customNameHue = customNameHue;
                 db.contactDao().updateCustomNameHue(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.customNameHue);
                 AppSingleton.updateCachedCustomHue(contact.bytesContactIdentity, contact.customNameHue);
+
+                if (!propagated) {
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createContactCustomHueChange(contact.bytesContactIdentity, customNameHue));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate contact custom hue change to other devices");
+                        e.printStackTrace();
+                    }
+                }
             }
 
             if (!Objects.equals(contact.personalNote, personalNote)) {
                 contact.personalNote = personalNote;
                 db.contactDao().updatePersonalNote(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.personalNote);
+
+                if (!propagated) {
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createContactPersonalNoteChange(contact.bytesContactIdentity, personalNote));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate contact personal note change to other devices");
+                        e.printStackTrace();
+                    }
+                }
             }
 
             if (!Objects.equals(contact.customDisplayName, customDisplayName)) {
@@ -72,6 +93,15 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                 contact.setCustomDisplayName(customDisplayName);
                 db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
                 AppSingleton.updateCachedCustomDisplayName(contact.bytesContactIdentity, contact.getCustomDisplayName());
+
+                if (!propagated) {
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createContactNicknameChange(contact.bytesContactIdentity, customDisplayName));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate contact nickname change to other devices");
+                        e.printStackTrace();
+                    }
+                }
 
                 new UpdateAllGroupMembersNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity).run();
             }

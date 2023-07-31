@@ -76,7 +76,7 @@ public class MuteNotificationDialog {
         this.muteWholeProfile = muteType == MuteType.PROFILE;
         this.muteExceptMentioned = muteExceptMentioned;
 
-        ArrayAdapter<String> timeoutOptionsAdapter = new ArrayAdapter<>(context, R.layout.dialog_singlechoice, timeoutOptionsLabels);
+        ArrayAdapter<String> timeoutOptionsAdapter = new ArrayAdapter<>(context, R.layout.dialog_item_singlechoice, timeoutOptionsLabels);
         builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
                 .setAdapter(timeoutOptionsAdapter, (dialog, which) -> {
                     Long duration = timeoutOptionsDurations[which];

@@ -176,6 +176,17 @@
         <item>157680000</item>
     </string-array>
 
+    <string-array name="discussion_remote_delete">
+        <item>@string/text_group_remote_delete_setting_admins</item>
+        <item>@string/text_group_remote_delete_setting_everyone</item>
+        <item>@string/text_group_remote_delete_setting_nobody</item>
+    </string-array>
+    <string-array name="discussion_remote_delete_values">
+        <item>@string/value_group_remote_delete_setting_admins</item>
+        <item>@string/value_group_remote_delete_setting_everyone</item>
+        <item>@string/value_group_remote_delete_setting_nobody</item>
+    </string-array>
+
     <string-array name="language_picker_webclient">
         <item>English</item>
         <item>Français</item>

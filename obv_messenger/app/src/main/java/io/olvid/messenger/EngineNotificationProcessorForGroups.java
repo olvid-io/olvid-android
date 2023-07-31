@@ -19,6 +19,7 @@
 
 package io.olvid.messenger;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.identities.ObvGroup;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.customClasses.BytesKey;
@@ -41,6 +43,7 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.tasks.UpdateGroupNameAndPhotoTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -79,7 +82,8 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                 final ObvGroup obvGroup = (ObvGroup) userInfo.get(EngineNotifications.GROUP_CREATED_GROUP_KEY);
                 final Boolean hasMultipleDetails = (Boolean) userInfo.get(EngineNotifications.GROUP_CREATED_HAS_MULTIPLE_DETAILS_KEY);
                 final String photoUrl = (String) userInfo.get(EngineNotifications.GROUP_CREATED_PHOTO_URL_KEY);
-                if (obvGroup == null || hasMultipleDetails == null) {
+                final Boolean createdOnOtherDevice = (Boolean) userInfo.get(EngineNotifications.GROUP_CREATED_ON_OTHER_DEVICE_KEY);
+                if (obvGroup == null || hasMultipleDetails == null || createdOnOtherDevice == null) {
                     break;
                 }
                 final byte[] bytesGroupUid = obvGroup.getBytesGroupOwnerAndUid();
@@ -100,7 +104,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                         // create the discussion if it does not exist
                         Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupUid);
                         if (discussion == null) {
-                            discussion = Discussion.createOrReuseGroupDiscussion(db, group);
+                            discussion = Discussion.createOrReuseGroupDiscussion(db, group, createdOnOtherDevice);
 
                             if (discussion == null) {
                                 throw new RuntimeException("Unable to create group discussion");
@@ -135,8 +139,25 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                             db.pendingGroupMemberDao().insert(pendingGroupMember);
                         }
 
-                        group.groupMembersNames = StringUtils.joinGroupMemberNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
+                        group.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
                         db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
+
+                        // if createdByMeOnOtherDevice, query my devices for the sharedSettings
+                        if (obvGroup.getBytesGroupOwnerIdentity() == null && createdOnOtherDevice && db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(bytesOwnedIdentity)) {
+                            try {
+                                AppSingleton.getEngine().post(
+                                        Message.getDiscussionQuerySharedSettingsPayloadAsBytes(discussion, null, null),
+                                        null,
+                                        new ObvOutboundAttachment[0],
+                                        Collections.singletonList(bytesOwnedIdentity),
+                                        bytesOwnedIdentity,
+                                        false,
+                                        false
+                                );
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
                     });
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -162,7 +183,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                     Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupUid);
                                     if (discussion == null) {
                                         // this case should never happen
-                                        discussion = Discussion.createOrReuseGroupDiscussion(db, group);
+                                        discussion = Discussion.createOrReuseGroupDiscussion(db, group, false);
 
                                         if (discussion == null) {
                                             throw new RuntimeException("Unable to create group discussion");
@@ -174,7 +195,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                         contactGroupJoin = new ContactGroupJoin(bytesGroupUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                         db.contactGroupJoinDao().insert(contactGroupJoin);
 
-                                        group.groupMembersNames = StringUtils.joinGroupMemberNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
+                                        group.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
                                         db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
 
                                         Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity);
@@ -198,7 +219,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                     if (group.bytesGroupOwnerIdentity == null) {
                                         DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
                                         if (discussionCustomization != null) {
-                                            DiscussionCustomization.JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
+                                            JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
                                             if (jsonSharedSettings != null) {
                                                 Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, bytesOwnedIdentity, true, null);
                                                 if (message != null) {
@@ -237,7 +258,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                 Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupUid);
                                 if (discussion == null) {
                                     // this case should never happen
-                                    discussion = Discussion.createOrReuseGroupDiscussion(db, group);
+                                    discussion = Discussion.createOrReuseGroupDiscussion(db, group, false);
 
                                     if (discussion == null) {
                                         throw new RuntimeException("Unable to create group discussion");
@@ -248,7 +269,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                 if (contactGroupJoin != null) {
                                     db.contactGroupJoinDao().delete(contactGroupJoin);
 
-                                    group.groupMembersNames = StringUtils.joinGroupMemberNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
+                                    group.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
                                     db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
 
                                     Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, contact.bytesContactIdentity);
@@ -298,7 +319,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                 }
                 Group group = db.groupDao().get(bytesOwnedIdentity, groupId);
                 if (group != null) {
-                    PendingGroupMember pendingGroupMember = db.pendingGroupMemberDao().get(obvIdentity.getBytesIdentity(), bytesOwnedIdentity, groupId);
+                    PendingGroupMember pendingGroupMember = db.pendingGroupMemberDao().get(bytesOwnedIdentity, groupId, obvIdentity.getBytesIdentity());
                     if (pendingGroupMember == null) {
                         pendingGroupMember = new PendingGroupMember(obvIdentity.getBytesIdentity(), obvIdentity.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()), bytesOwnedIdentity, groupId, false);
                         db.pendingGroupMemberDao().insert(pendingGroupMember);
@@ -319,7 +340,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                 }
                 Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupUid);
                 if (group != null) {
-                    PendingGroupMember pendingGroupMember = db.pendingGroupMemberDao().get(obvIdentity.getBytesIdentity(), bytesOwnedIdentity, bytesGroupUid);
+                    PendingGroupMember pendingGroupMember = db.pendingGroupMemberDao().get(bytesOwnedIdentity, bytesGroupUid, obvIdentity.getBytesIdentity());
                     if (pendingGroupMember != null) {
                         db.pendingGroupMemberDao().delete(pendingGroupMember);
                     }
@@ -335,7 +356,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                 if (bytesOwnedIdentity == null || bytesContactIdentity == null || bytesGroupUid == null || declined == null) {
                     break;
                 }
-                PendingGroupMember pendingGroupMember = db.pendingGroupMemberDao().get(bytesContactIdentity, bytesOwnedIdentity, bytesGroupUid);
+                PendingGroupMember pendingGroupMember = db.pendingGroupMemberDao().get(bytesOwnedIdentity, bytesGroupUid, bytesContactIdentity);
                 if (pendingGroupMember != null) {
                     pendingGroupMember.declined = declined;
                     db.pendingGroupMemberDao().update(pendingGroupMember);
@@ -396,7 +417,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                 byte[] bytesGroupOwnerAndUid = (byte[]) userInfo.get(EngineNotifications.NEW_GROUP_PUBLISHED_DETAILS_BYTES_GROUP_OWNER_AND_UID_KEY);
 
                 Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
-                if (group != null) {
+                if (group != null && group.bytesGroupOwnerIdentity != null) {
                     try {
                         group.newPublishedDetails = Contact.PUBLISHED_DETAILS_NEW_UNSEEN;
                         db.groupDao().updatePublishedDetailsStatus(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.newPublishedDetails);

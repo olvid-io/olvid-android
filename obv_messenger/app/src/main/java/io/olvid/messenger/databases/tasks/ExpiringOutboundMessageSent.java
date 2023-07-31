@@ -29,6 +29,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.services.MessageExpirationService;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -45,9 +46,9 @@ public class ExpiringOutboundMessageSent implements Runnable {
         if (message == null || message.jsonExpiration == null || message.expirationStartTimestamp != 0) {
             return;
         }
-        Message.JsonExpiration jsonExpiration;
+        JsonExpiration jsonExpiration;
         try {
-            jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, Message.JsonExpiration.class);
+            jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, JsonExpiration.class);
         } catch (Exception e) {
             e.printStackTrace();
             return;

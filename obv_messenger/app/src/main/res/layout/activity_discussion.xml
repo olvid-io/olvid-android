@@ -172,6 +172,7 @@
                 android:layout_width="0dp"
                 android:maxLines="1"
                 android:ellipsize="end"
+                android:textAppearance="@style/RobotoMedium"
                 android:textColor="@color/alwaysWhite"
                 android:textSize="@dimen/title_font_size"
                 tools:text="Discussion title"

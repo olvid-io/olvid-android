@@ -24,6 +24,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
@@ -41,7 +44,7 @@ public class ProtocolInstance implements ObvDatabase {
 
     private final ProtocolManagerSession protocolManagerSession;
 
-    // TODO: add an expiration timestamp, updated each time a new state is written
+    // To improve: add an expiration timestamp, updated each time a new state is written
     //  --> this timestamp should depend on the protocol type (infinite for group management)
 
     private UID uid;
@@ -101,8 +104,8 @@ public class ProtocolInstance implements ObvDatabase {
 
 
 
-    public static ProtocolInstance create(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, Identity ownedIdentity, int protocolId, ConcreteProtocolState initialState) {
-        if ((protocolInstanceUid == null) || (ownedIdentity == null) || (initialState == null)) {
+    public static ProtocolInstance create(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, Identity ownedIdentity, int protocolId, ConcreteProtocolState protocolState) {
+        if ((protocolInstanceUid == null) || (ownedIdentity == null) || (protocolState == null)) {
             return null;
         }
         try {
@@ -111,8 +114,8 @@ public class ProtocolInstance implements ObvDatabase {
                     protocolInstanceUid,
                     ownedIdentity,
                     protocolId,
-                    initialState.id,
-                    initialState.encode()
+                    protocolState.id,
+                    protocolState.encode()
             );
             protocolInstance.insert();
             return protocolInstance;
@@ -228,11 +231,53 @@ public class ProtocolInstance implements ObvDatabase {
         }
     }
 
+    public static List<ProtocolInstance> getAllForProtocolId(ProtocolManagerSession protocolManagerSession, int protocolId) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
+            statement.setInt(1, protocolId);
+            try (ResultSet res = statement.executeQuery()) {
+                List<ProtocolInstance> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new ProtocolInstance(protocolManagerSession, res));
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            return Collections.emptyList();
+        }
+    }
 
-    public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
-            statement.setBytes(1, ownedIdentity.getBytes());
-            statement.executeUpdate();
+    public static List<ProtocolInstance> getAllForOwnedIdentityProtocolId(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity, int protocolId) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + PROTOCOL_ID + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            statement.setInt(1, protocolId);
+            statement.setBytes(2, ownedIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                List<ProtocolInstance> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new ProtocolInstance(protocolManagerSession, res));
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity, UID excludedProtocolInstanceUid) throws SQLException {
+        if (excludedProtocolInstanceUid == null) {
+            try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+                statement.setBytes(1, ownedIdentity.getBytes());
+                statement.executeUpdate();
+            }
+        } else {
+            try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+                    " WHERE " + OWNED_IDENTITY + " = ?" +
+                    " AND " + UID_ + " != ?;")) {
+                statement.setBytes(1, ownedIdentity.getBytes());
+                statement.setBytes(2, excludedProtocolInstanceUid.getBytes());
+                statement.executeUpdate();
+            }
         }
     }
 

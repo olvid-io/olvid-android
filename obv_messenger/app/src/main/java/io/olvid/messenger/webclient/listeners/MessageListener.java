@@ -39,8 +39,9 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.webclient.WebClientManager;
 import io.olvid.messenger.webclient.datatypes.Constants;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass;
@@ -339,14 +340,14 @@ public class MessageListener {
                         Long existenceDuration = null;
 
                         if (message.messageType == Message.TYPE_DISCUSSION_SETTINGS_UPDATE) {
-                            DiscussionCustomization.JsonSharedSettings jsonSharedSettings = AppSingleton.getJsonObjectMapper().readValue(message.contentBody, DiscussionCustomization.JsonSharedSettings.class);
+                            JsonSharedSettings jsonSharedSettings = AppSingleton.getJsonObjectMapper().readValue(message.contentBody, JsonSharedSettings.class);
                             if (jsonSharedSettings != null && jsonSharedSettings.getJsonExpiration() != null) {
                                 visibilityDuration = jsonSharedSettings.getJsonExpiration().getVisibilityDuration();
                                 existenceDuration = jsonSharedSettings.getJsonExpiration().getExistenceDuration();
                                 readOnce = jsonSharedSettings.getJsonExpiration().getReadOnce() != null && jsonSharedSettings.getJsonExpiration().getReadOnce();
                             }
                         } else {
-                            Message.JsonExpiration jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, Message.JsonExpiration.class);
+                            JsonExpiration jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, JsonExpiration.class);
                             visibilityDuration = jsonExpiration.getVisibilityDuration();
                             existenceDuration = jsonExpiration.getExistenceDuration();
                             readOnce = jsonExpiration.getReadOnce() != null && jsonExpiration.getReadOnce();

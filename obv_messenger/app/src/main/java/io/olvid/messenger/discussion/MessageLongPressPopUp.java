@@ -165,7 +165,7 @@ public class MessageLongPressPopUp {
         if ((message.messageType != Message.TYPE_OUTBOUND_MESSAGE && message.messageType != Message.TYPE_INBOUND_MESSAGE)
                 || message.wipeStatus == Message.WIPE_STATUS_WIPED
                 || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
-                || !discussion.canPostMessages()) {
+                || !discussion.isNormal()) {
             // no reactions in this case
             reactionsPopUpLinearLayout.setVisibility(View.GONE);
         } else {
@@ -193,7 +193,7 @@ public class MessageLongPressPopUp {
         boolean twoLines = false;
 
         View replyView = popUpView.findViewById(R.id.swipe_menu_reply);
-        if (!discussion.canPostMessages() ||
+        if (!discussion.isNormal() ||
                 (message.messageType != Message.TYPE_INBOUND_MESSAGE
                         && message.messageType != Message.TYPE_OUTBOUND_MESSAGE)) {
             replyView.setVisibility(View.GONE);
@@ -271,12 +271,12 @@ public class MessageLongPressPopUp {
         } else {
             detailsView.setOnClickListener(v -> {
                 discussionDelegate.doNotMarkAsReadOnPause();
-                App.openMessageDetails(activity, messageId, message.hasAttachments(), message.isInbound());
+                App.openMessageDetails(activity, messageId, message.hasAttachments(), message.isInbound(), message.status == Message.STATUS_SENT_FROM_ANOTHER_DEVICE);
                 popupWindow.dismiss();
             });
         }
         View editView = popUpView.findViewById(R.id.swipe_menu_edit);
-        if (!discussion.canPostMessages()
+        if (!discussion.isNormal()
                 || message.messageType != Message.TYPE_OUTBOUND_MESSAGE
                 || message.wipeStatus == Message.WIPE_STATUS_WIPED
                 || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
@@ -303,8 +303,8 @@ public class MessageLongPressPopUp {
                         canRemoteDeleteOwn = false;
                     }
                 } else {
-                    canRemoteDelete = discussion.canPostMessages();
-                    canRemoteDeleteOwn = discussion.canPostMessages();
+                    canRemoteDelete = discussion.isNormal();
+                    canRemoteDeleteOwn = discussion.isNormal();
                 }
                 final AlertDialog.Builder builder;
                 if (((canRemoteDeleteOwn && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
@@ -529,6 +529,6 @@ public class MessageLongPressPopUp {
         if (vibrator != null) {
             vibrator.vibrate(20);
         }
-        App.runThread(new UpdateReactionsTask(messageId, emoji, null, System.currentTimeMillis()));
+        App.runThread(new UpdateReactionsTask(messageId, emoji, null, System.currentTimeMillis(), true));
     }
 }

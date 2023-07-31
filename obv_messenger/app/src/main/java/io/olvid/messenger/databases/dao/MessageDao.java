@@ -341,6 +341,13 @@ public interface MessageDao {
             " AND " + Message.DISCUSSION_ID + " = :discussionId")
     void markAllDiscussionMessagesRead(long discussionId);
 
+    @Query("UPDATE " + Message.TABLE_NAME +
+            " SET " + Message.STATUS + " = " + Message.STATUS_READ +
+            " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD +
+            " AND " + Message.DISCUSSION_ID + " = :discussionId" +
+            " AND " + Message.TIMESTAMP + " <= :timestamp ")
+    void markDiscussionMessagesReadUpTo(long discussionId, long timestamp);
+
     @Query("SELECT COUNT(*) > 0 FROM " +
             " ( SELECT 1 FROM " + Message.TABLE_NAME + " AS message " +
             " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
@@ -439,13 +446,15 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
             " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
-            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE)
+            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE +
+            " AND " + Message.STATUS + " != " + Message.STATUS_SENT_FROM_ANOTHER_DEVICE)
     List<Message> getOutboundSharingLocationMessages();
 
     @Query("SELECT COUNT(*) FROM " + Message.TABLE_NAME +
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
             " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
-            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE)
+            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE +
+            " AND " + Message.STATUS + " != " + Message.STATUS_SENT_FROM_ANOTHER_DEVICE)
     int countOutboundSharingLocationMessages();
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
@@ -458,7 +467,9 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
             " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
-            " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_INBOUND_MESSAGE +
+            " AND (" + Message.MESSAGE_TYPE + " = " + Message.TYPE_INBOUND_MESSAGE +
+            " OR (" + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE +
+            " AND " + Message.STATUS + " != " + Message.STATUS_SENT_FROM_ANOTHER_DEVICE + ")) " +
             " AND " + Message.DISCUSSION_ID + " = :discussionId")
     List<Message> getCurrentlySharingInboundLocationMessagesInDiscussion(long discussionId);
 
@@ -466,6 +477,7 @@ public interface MessageDao {
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
             " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
             " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE +
+            " AND " + Message.STATUS + " != " + Message.STATUS_SENT_FROM_ANOTHER_DEVICE +
             " AND " + Message.DISCUSSION_ID + " = :discussionId " +
             " ORDER BY " + Message.SORT_INDEX + " ASC ")
     List<Message> getCurrentlySharingOutboundLocationMessagesInDiscussion(long discussionId);
@@ -482,6 +494,12 @@ public interface MessageDao {
     @Query("SELECT id FROM " + Message.TABLE_NAME +
             " WHERE " + Message.LIMITED_VISIBILITY + " = 1")
     List<Long> getAllLimitedVisibilityMessageIds();
+
+    @Query("SELECT max(" + Message.TIMESTAMP + ") FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.MESSAGE_TYPE + " IN (" + Message.TYPE_INBOUND_MESSAGE + "," + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE + ") " +
+            " AND " + Message.STATUS + " = " + Message.STATUS_UNREAD +
+            " AND " + Message.DISCUSSION_ID + " = :discussionId ")
+    Long getServerTimestampOfLatestUnreadInboundMessageInDiscussion(long discussionId);
 
     class UnreadCountAndFirstMessage {
         @ColumnInfo(name = "unread_count")

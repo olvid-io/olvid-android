@@ -30,6 +30,9 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
 public class PostLocationMessageInDiscussionTask implements Runnable {
@@ -64,22 +67,22 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
     @Override
     public void run() {
         final Discussion discussion = db.discussionDao().getById(discussionId);
-        if (!discussion.canPostMessages()) {
+        if (!discussion.isNormal()) {
             Logger.w("A message was posted in a discussion where you cannot post!!!");
             return;
         }
 
-        Message.JsonExpiration discussionDefaultJsonExpiration = null;
+        JsonExpiration discussionDefaultJsonExpiration = null;
         DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
         if (discussionCustomization != null) {
             discussionDefaultJsonExpiration = discussionCustomization.getExpirationJson();
         }
 
-        final Message.JsonMessage jsonMessage = new Message.JsonMessage();
+        final JsonMessage jsonMessage = new JsonMessage();
         if (isSharingLocationMessage) {
-            jsonMessage.setJsonLocation(Message.JsonLocation.startSharingLocationMessage(shareExpirationInMs, shareIntervalInMs, location));
+            jsonMessage.setJsonLocation(JsonLocation.startSharingLocationMessage(shareExpirationInMs, shareIntervalInMs, location));
         } else {
-            jsonMessage.setJsonLocation(Message.JsonLocation.sendLocationMessage(location));
+            jsonMessage.setJsonLocation(JsonLocation.sendLocationMessage(location));
         }
         jsonMessage.setBody(jsonMessage.getJsonLocation().getLocationMessageBody());
 

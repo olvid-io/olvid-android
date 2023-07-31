@@ -113,58 +113,94 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/lightGrey"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightGrey"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
 
         <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/RobotoMedium"
-        android:textColor="@color/almostBlack"
-        android:text="@string/text_free_features"
-        android:textSize="16sp"
-        app:drawableEndCompat="@drawable/ic_activated_green"
-        android:gravity="center_vertical"
-        android:drawablePadding="8dp"
-        android:layout_marginBottom="4dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/RobotoMedium"
+            android:textColor="@color/almostBlack"
+            android:text="@string/text_free_features"
+            android:textSize="16sp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp"/>
 
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical"
+                android:layout_weight="1"
                 android:textColor="@color/almostBlack"
                 android:text="@string/text_feature_send_receive_messages"
                 app:drawableStartCompat="@drawable/ic_message"
-                app:drawableTint="@color/orange"
-                android:layout_marginBottom="4dp"/>
+                app:drawableTint="@color/orange"/>
 
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_activated_green"
+                android:importantForAccessibility="no" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical"
+                android:layout_weight="1"
                 android:textColor="@color/almostBlack"
                 android:text="@string/text_feature_create_groups"
                 app:drawableStartCompat="@drawable/ic_group"
-                app:drawableTint="@color/olvid_gradient_light"
-                android:layout_marginBottom="4dp"/>
+                app:drawableTint="@color/olvid_gradient_light" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_activated_green"
+                android:importantForAccessibility="no" />
+        </LinearLayout>
 
 
-        <TextView
-                android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:drawablePadding="8dp"
+                android:layout_weight="1"
                 android:gravity="center_vertical"
                 android:textColor="@color/almostBlack"
                 android:text="@string/text_feature_receive_secure_calls"
                 app:drawableStartCompat="@drawable/ic_phone_failed_in"/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_activated_green"
+                android:importantForAccessibility="no" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <View
@@ -176,23 +212,62 @@
 
     <TextView
         android:id="@+id/premium_features_title_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/RobotoMedium"
-            android:textColor="@color/almostBlack"
-            android:text="@string/text_premium_features"
-            android:textSize="16sp"
-            app:drawableEndCompat="@drawable/ic_deactivated_grey"
-            android:gravity="center_vertical"
-            android:drawablePadding="8dp"
-            android:layout_marginBottom="4dp"/>
-
-    <TextView
-        android:id="@+id/permission_call_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawablePadding="8dp"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/almostBlack"
+        android:text="@string/text_premium_features"
+        android:textSize="16sp"
         android:gravity="center_vertical"
-        android:text="@string/text_feature_initiate_secure_calls"
-        app:drawableStartCompat="@drawable/ic_phone_failed_out" />
+        android:drawablePadding="8dp"
+        android:layout_marginBottom="4dp"/>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="4dp">
+        <TextView
+            android:id="@+id/permission_call_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:text="@string/text_feature_initiate_secure_calls"
+            app:drawableStartCompat="@drawable/ic_phone_failed_out" />
+
+        <ImageView
+            android:id="@+id/permission_call_active_image_view"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_deactivated_grey"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/permission_multi_device_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:text="@string/text_feature_multi_device"
+            app:drawableStartCompat="@drawable/ic_multi_device" />
+
+        <ImageView
+            android:id="@+id/permission_multi_device_active_image_view"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_deactivated_grey"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
 </LinearLayout>

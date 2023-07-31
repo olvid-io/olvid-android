@@ -39,14 +39,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsParams;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -228,10 +227,14 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
 
 
     private void querySkuDetails(BillingClient billingClient) {
-        SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder()
-                .setSkusList(Collections.singletonList(MONTHLY_SUBSCRIPTION_SKUTYPE))
-                .setType(BillingClient.SkuType.SUBS);
-        billingClient.querySkuDetailsAsync(params.build(), this::skuDetailsReceived);
+        QueryProductDetailsParams queryProductDetailsParams = QueryProductDetailsParams.newBuilder()
+                .setProductList(Collections.singletonList(QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId(MONTHLY_SUBSCRIPTION_SKUTYPE)
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build()))
+                .build();
+
+        billingClient.queryProductDetailsAsync(queryProductDetailsParams, this::productDetailsReceived);
 
         timeoutSubscriptionTimerTask = new TimerTask() {
             @Override
@@ -254,8 +257,8 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
         }
     }
 
-    private void skuDetailsReceived(BillingResult billingResult, List<SkuDetails> skuDetailsList) {
-        Logger.d("SKU details received:\n" + skuDetailsList);
+    private void productDetailsReceived(BillingResult billingResult, List<ProductDetails> productDetailsList) {
+        Logger.d("💲 Product details received:\n" + productDetailsList);
 
         if (timeoutSubscriptionTimerTask != null) {
             timeoutSubscriptionTimerTask.cancel();
@@ -269,44 +272,54 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
             return;
         }
 
-        viewModel.subscriptionDetails = skuDetailsList;
+        viewModel.subscriptionDetails = productDetailsList;
         new Handler(Looper.getMainLooper()).post(() -> {
-            if (skuDetailsList.size() > 0) {
+            if (productDetailsList.size() > 0) {
                 View separator = getLayoutInflater().inflate(R.layout.view_subscriptions_separator, availablePlansLinearLayout, false);
                 availablePlansLinearLayout.addView(separator, 0);
             }
 
-            for (SkuDetails skuDetails: skuDetailsList) {
-                View subscriptionView = getLayoutInflater().inflate(R.layout.view_subscription_details, availablePlansLinearLayout, false);
-                Button subscriptionButton = subscriptionView.findViewById(R.id.subscription_button);
-                TextView subscriptionTitle = subscriptionView.findViewById(R.id.subscription_title_textview);
-                TextView subscriptionExplanation = subscriptionView.findViewById(R.id.subscription_explanation_textview);
-                subscriptionTitle.setText(skuDetails.getTitle());
-                subscriptionExplanation.setText(skuDetails.getDescription());
-                switch (skuDetails.getSubscriptionPeriod()) {
-                    case "P1M":
-                        subscriptionButton.setText(getString(R.string.button_label_price_per_month, skuDetails.getPrice()));
-                        break;
-                    case "P1Y":
-                        subscriptionButton.setText(getString(R.string.button_label_price_per_year, skuDetails.getPrice()));
-                        break;
+            for (ProductDetails productDetails: productDetailsList) {
+                if (productDetails.getSubscriptionOfferDetails() == null) {
+                    continue;
                 }
+                for (ProductDetails.SubscriptionOfferDetails offerDetails: productDetails.getSubscriptionOfferDetails()) {
+                    for (ProductDetails.PricingPhase pricingPhase : offerDetails.getPricingPhases().getPricingPhaseList()) {
+                        View subscriptionView = getLayoutInflater().inflate(R.layout.view_subscription_details, availablePlansLinearLayout, false);
+                        Button subscriptionButton = subscriptionView.findViewById(R.id.subscription_button);
+                        TextView subscriptionTitle = subscriptionView.findViewById(R.id.subscription_title_textview);
+                        TextView subscriptionExplanation = subscriptionView.findViewById(R.id.subscription_explanation_textview);
+                        subscriptionTitle.setText(productDetails.getTitle());
+                        subscriptionExplanation.setText(productDetails.getDescription());
+                        switch (pricingPhase.getBillingPeriod()) {
+                            case "P1M":
+                                subscriptionButton.setText(getString(R.string.button_label_price_per_month, pricingPhase.getFormattedPrice()));
+                                break;
+                            case "P1Y":
+                                subscriptionButton.setText(getString(R.string.button_label_price_per_year, pricingPhase.getFormattedPrice()));
+                                break;
+                        }
 
-                subscriptionButton.setOnClickListener((view) -> {
-                    BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
-                            .setSkuDetails(skuDetails)
-                            .build();
+                        subscriptionButton.setOnClickListener((view) -> {
+                            BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+                                    .setProductDetailsParamsList(Collections.singletonList(BillingFlowParams.ProductDetailsParams.newBuilder()
+                                                    .setProductDetails(productDetails)
+                                                    .setOfferToken(offerDetails.getOfferToken())
+                                                    .build()))
+                                    .build();
 
-                    BillingResult launchResult = billingClient.launchBillingFlow(activity, billingFlowParams);
-                    if (launchResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-                        Logger.e("Error showing purchase panel " + launchResult.getDebugMessage());
-                        App.toast(R.string.toast_message_error_launching_in_app_purchase, Toast.LENGTH_LONG);
-                        return;
+                            BillingResult launchResult = billingClient.launchBillingFlow(activity, billingFlowParams);
+                            if (launchResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                                Logger.e("💲 Error showing purchase panel " + launchResult.getDebugMessage());
+                                App.toast(R.string.toast_message_error_launching_in_app_purchase, Toast.LENGTH_LONG);
+                                return;
+                            }
+                            subscriptionButton.setEnabled(false);
+                            this.disabledSubscriptionButton = subscriptionButton;
+                        });
+                        availablePlansLinearLayout.addView(subscriptionView, 1);
                     }
-                    subscriptionButton.setEnabled(false);
-                    this.disabledSubscriptionButton = subscriptionButton;
-                });
-                availablePlansLinearLayout.addView(subscriptionView, 1);
+                }
             }
 
             refreshStatus();
@@ -331,12 +344,8 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
         App.toast(R.string.toast_message_in_app_purchase_successful, Toast.LENGTH_LONG);
         viewModel.showSubscriptionPlans = false;
 
-        // verify the token on our server
-        for (Purchase purchase: purchases) {
-            if (!purchase.isAcknowledged()) {
-                AppSingleton.getEngine().verifyReceipt(viewModel.bytesOwnedIdentity, purchase.getPurchaseToken());
-            }
-        }
+        // refresh the subscriptions --> this will automatically add the subscription to any new identity
+        BillingUtils.refreshSubscriptions();
     }
 
 
@@ -401,26 +410,6 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
                 }
                 break;
             }
-            case EngineNotifications.VERIFY_RECEIPT_SUCCESS: {
-                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.VERIFY_RECEIPT_SUCCESS_BYTES_OWNED_IDENTITY_KEY);
-                String storeToken = (String) userInfo.get(EngineNotifications.VERIFY_RECEIPT_SUCCESS_STORE_TOKEN_KEY);
-
-                if (Arrays.equals(bytesOwnedIdentity, viewModel.bytesOwnedIdentity) && storeToken != null) {
-                    Logger.d("Acknowledging a purchase");
-                    AcknowledgePurchaseParams acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
-                                    .setPurchaseToken(storeToken)
-                                    .build();
-
-                    if (billingClient != null) {
-                        billingClient.acknowledgePurchase(acknowledgePurchaseParams, (BillingResult acknowledgeBillingResult) -> {
-                            if (acknowledgeBillingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-                                Logger.w("Error acknowledging store purchase " + acknowledgeBillingResult.getDebugMessage());
-                            }
-                        });
-                    }
-                }
-                break;
-            }
         }
     }
 
@@ -459,7 +448,7 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
 
         public Boolean freeTrialResults = null;
         public boolean freeTrialFailed = false;
-        public List<SkuDetails> subscriptionDetails = null;
+        public List<ProductDetails> subscriptionDetails = null;
         public boolean subscriptionFailed = false;
 
         public void setBytesOwnedIdentity(byte[] bytesOwnedIdentity) {

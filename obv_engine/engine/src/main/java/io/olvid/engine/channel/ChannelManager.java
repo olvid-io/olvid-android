@@ -21,8 +21,11 @@ package io.olvid.engine.channel;
 
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import io.olvid.engine.Logger;
@@ -106,10 +109,19 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
                 // at the same time, try to detect contact devices without a channel
                 ObliviousChannel[] obliviousChannels = ObliviousChannel.getAll(channelManagerSession);
                 Map<Identity, Map<Identity, Set<UID>>> deviceUidsMap = identityDelegate.getAllDeviceUidsOfAllContactsOfAllOwnedIdentities(channelManagerSession.session);
+                for (Identity ownedIdentity : identityDelegate.getOwnedIdentities(channelManagerSession.session)) {
+                    UID[] ownedDeviceUids = identityDelegate.getDeviceUidsOfOwnedIdentity(channelManagerSession.session, ownedIdentity);
+                    if (!deviceUidsMap.containsKey(ownedIdentity)) {
+                        deviceUidsMap.put(ownedIdentity, new HashMap<>());
+                    }
+                    Map<Identity, Set<UID>> ownedIdentityMap = deviceUidsMap.get(ownedIdentity);
+                    ownedIdentityMap.put(ownedIdentity, new HashSet<>(Arrays.asList(ownedDeviceUids)));
+                }
+
                 for (ObliviousChannel obliviousChannel : obliviousChannels) {
                     Identity ownedIdentity = ownedIdentityFromDeviceUid.get(obliviousChannel.getCurrentDeviceUid());
                     if (ownedIdentity == null) {
-                        ownedIdentity = identityDelegate.getOwnedIdentityForDeviceUid(channelManagerSession.session, obliviousChannel.getCurrentDeviceUid());
+                        ownedIdentity = identityDelegate.getOwnedIdentityForCurrentDeviceUid(channelManagerSession.session, obliviousChannel.getCurrentDeviceUid());
                         if (ownedIdentity == null) {
                             continue;
                         }
@@ -130,17 +142,48 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
                     }
                 }
 
-                // now that we have removed all devices for which we have a channel, we walk through the deviceUidsMap to check for channel-less deviceUids
+                // now that we have removed (from the HashMap) all devices for which we have a channel, we walk through the deviceUidsMap to check for channel-less deviceUids
                 for (Identity ownedIdentity: deviceUidsMap.keySet()) {
+                    // first check if some channels with owned devices should be restarted
+                    boolean deviceDiscoveryNeeded = false;
+                    if (identityDelegate.isActiveOwnedIdentity(channelManagerSession.session, ownedIdentity)) {
+                        for (UID ownedDeviceUid : identityDelegate.getOtherDeviceUidsOfOwnedIdentity(channelManagerSession.session, ownedIdentity)) {
+                            try {
+                                boolean channelExists = checkIfObliviousChannelExists(channelManagerSession.session, ownedIdentity, ownedDeviceUid, ownedIdentity);
+                                boolean channelCreationInProgress = protocolDelegate.isChannelCreationInProgress(channelManagerSession.session, ownedIdentity, ownedIdentity, ownedDeviceUid);
+                                if (!channelExists && !channelCreationInProgress) {
+                                    // we found a device without a channel and no channel creation is in progress
+                                    //  --> we delete the device and start a device discovery protocol
+                                    Logger.i("Found an owned device with no channel and no channel creation. Restarting device discovery.");
+                                    identityDelegate.removeDeviceForOwnedIdentity(channelManagerSession.session, ownedIdentity, ownedDeviceUid);
+                                    deviceDiscoveryNeeded = true;
+                                }
+                            } catch (Exception e) {
+                                // nothing to do
+                            }
+                        }
+                        if (deviceDiscoveryNeeded) {
+                            try {
+                                protocolStarterDelegate.startOwnedDeviceDiscoveryProtocolWithinTransaction(channelManagerSession.session, ownedIdentity);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
                     Map<Identity, Set<UID>> ownedIdentityMap = deviceUidsMap.get(ownedIdentity);
                     if (ownedIdentityMap == null) {
                         continue;
                     }
                     for (Identity contactIdentity: ownedIdentityMap.keySet()) {
+                        if (contactIdentity.equals(ownedIdentity)) {
+                            continue;
+                        }
                         Set<UID> deviceUidSet = ownedIdentityMap.get(contactIdentity);
                         if (deviceUidSet == null) {
                             continue;
                         }
+                        deviceDiscoveryNeeded = false;
                         for (UID contactDeviceUid: deviceUidSet) {
                             // check if a ChannelCreationProtocolInstance exists for this device
                             try {
@@ -149,15 +192,23 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
                                     //  --> we delete the device and start a device discovery protocol
                                     Logger.i("Found a contact device with no channel and no channel creation. Restarting device discovery.");
                                     identityDelegate.removeDeviceForContactIdentity(channelManagerSession.session, ownedIdentity, contactIdentity, contactDeviceUid);
-                                    protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(channelManagerSession.session, ownedIdentity, contactIdentity);
+                                    deviceDiscoveryNeeded = true;
                                 }
                             } catch (Exception e) {
                                 // nothing to do
                             }
                         }
+                        if (deviceDiscoveryNeeded) {
+                            try {
+                                protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(channelManagerSession.session, ownedIdentity, contactIdentity);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 }
             }
+
             channelManagerSession.session.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -282,7 +333,12 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
 
     @Override
     public UID[] getConfirmedObliviousChannelDeviceUids(Session session, Identity ownedIdentity, Identity remoteIdentity) throws Exception {
-        UID[] remoteUids = identityDelegate.getDeviceUidsOfContactIdentity(session, ownedIdentity, remoteIdentity);
+        UID[] remoteUids;
+        if (Objects.equals(ownedIdentity, remoteIdentity)) { // channels with owned devices
+            remoteUids = identityDelegate.getOtherDeviceUidsOfOwnedIdentity(session, ownedIdentity);
+        } else {
+            remoteUids = identityDelegate.getDeviceUidsOfContactIdentity(session, ownedIdentity, remoteIdentity);
+        }
         if ((remoteUids == null) || (remoteUids.length == 0)) {
             return new UID[0];
         }
@@ -308,24 +364,31 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
     @Override
     public void deleteObliviousChannelIfItExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws Exception {
         UID currentDeviceUid = identityDelegate.getCurrentDeviceUidOfOwnedIdentity(session, ownedIdentity);
-        // delete the channel
         ObliviousChannel obliviousChannel = ObliviousChannel.get(wrapSession(session), currentDeviceUid, remoteDeviceUid, remoteIdentity, false);
         if (obliviousChannel != null) {
+            // delete the channel
             obliviousChannel.delete();
         }
-    }
-
-    public boolean checkIfObliviousChannelExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws Exception {
-        UID currentDeviceUid = identityDelegate.getCurrentDeviceUidOfOwnedIdentity(session, ownedIdentity);
-        // delete the channel
-        ObliviousChannel obliviousChannel = ObliviousChannel.get(wrapSession(session), currentDeviceUid, remoteDeviceUid, remoteIdentity, false);
-        return obliviousChannel != null;
     }
 
     @Override
     public void deleteAllChannelsForOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
         UID currentDeviceUid = identityDelegate.getCurrentDeviceUidOfOwnedIdentity(session, ownedIdentity);
         ObliviousChannel.deleteAll(wrapSession(session), currentDeviceUid);
+    }
+
+    public boolean checkIfObliviousChannelExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws SQLException {
+        UID currentDeviceUid = identityDelegate.getCurrentDeviceUidOfOwnedIdentity(session, ownedIdentity);
+        ObliviousChannel obliviousChannel = ObliviousChannel.get(wrapSession(session), currentDeviceUid, remoteDeviceUid, remoteIdentity, false);
+        return obliviousChannel != null;
+    }
+
+    @Override
+    public boolean checkIfObliviousChannelIsConfirmed(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws SQLException {
+        UID currentDeviceUid = identityDelegate.getCurrentDeviceUidOfOwnedIdentity(session, ownedIdentity);
+        ObliviousChannel obliviousChannel = ObliviousChannel.get(wrapSession(session), currentDeviceUid, remoteDeviceUid, remoteIdentity, true);
+        return obliviousChannel != null;
+
     }
 
     // endregion

@@ -19,7 +19,6 @@
 
 package io.olvid.engine.metamanager;
 
-import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
@@ -37,6 +36,6 @@ public interface BackupDelegate {
     void markBackupUploaded(UID backupKeyUid, int version);
     void discardBackup(UID backupKeyUid, int version);
     int validateBackupSeed(String seedString, byte[] backupContent);
-    ObvIdentity[] restoreOwnedIdentitiesFromBackup(String seedString, byte[] backupContent);
-    void restoreContactsAndGroupsFromBackup(String seedString, byte[] backupContent, Identity[] restoredOwnedIdentities);
+    ObvIdentity[] restoreOwnedIdentitiesFromBackup(String seedString, byte[] backupContent, String deviceDisplayName);
+    void restoreContactsAndGroupsFromBackup(String seedString, byte[] backupContent, ObvIdentity[] restoredOwnedIdentities);
 }

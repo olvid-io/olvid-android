@@ -59,8 +59,9 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                 try (EngineSession engineSession = engine.getSession()) {
                     Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_OWNED_IDENTITY_KEY);
                     GroupV2.Identifier groupIdentifier = (GroupV2.Identifier) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_GROUP_IDENTIFIER_KEY);
-                    Boolean newGroup = (Boolean) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_NEW_GROUP_KEY);
-                    if (ownedIdentity == null || groupIdentifier == null || newGroup == null) {
+                    Boolean createdByMe = (Boolean) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_CREATED_BY_ME_KEY);
+                    Boolean createdOnOtherDevice = (Boolean) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_ON_OTHER_DEVICE_KEY);
+                    if (ownedIdentity == null || groupIdentifier == null || createdByMe == null || createdOnOtherDevice == null) {
                         break;
                     }
 
@@ -71,8 +72,9 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
 
                     HashMap<String, Object> engineInfo = new HashMap<>();
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY, obvGroupV2);
-                    engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY, newGroup);
-                    engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY, newGroup);
+                    engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY, createdByMe);
+                    engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY, createdByMe);
+                    engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE, createdOnOtherDevice);
                     engine.postEngineNotification(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, engineInfo);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -97,6 +99,7 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY, obvGroupV2);
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY, false);
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY, updatedByMe);
+                    engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE, false);
                     engine.postEngineNotification(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, engineInfo);
                 } catch (Exception e) {
                     e.printStackTrace();

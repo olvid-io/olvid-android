@@ -79,7 +79,6 @@ public class FreeTrialOperation extends Operation {
                                 userInfo.put(DownloadNotifications.NOTIFICATION_FREE_TRIAL_RETRIEVE_SUCCESS_OWNED_IDENTITY_KEY, ownedIdentity);
                                 fetchManagerSession.notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_FREE_TRIAL_RETRIEVE_SUCCESS, userInfo);
 
-                                fetchManagerSession.identityDelegate.updateApiKeyOfOwnedIdentity(fetchManagerSession.session, ownedIdentity, serverMethod.getApiKey());
                                 ServerSession.deleteForIdentity(fetchManagerSession, ownedIdentity);
                                 fetchManagerSession.createServerSessionDelegate.createServerSession(ownedIdentity);
                             } else {

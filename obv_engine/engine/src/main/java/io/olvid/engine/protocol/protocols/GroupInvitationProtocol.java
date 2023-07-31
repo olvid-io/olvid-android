@@ -28,6 +28,7 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.GroupMembersChangedCallback;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.DialogType;
@@ -523,9 +524,11 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                     // Propagate the accept to other owned devices
                     int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                     if (numberOfOtherDevices > 0) {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                        ChannelMessageToSend messageToSend = new PropagateInvitationResponseMessage(coreProtocolMessage, true).generateChannelProtocolMessageToSend();
-                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                        try {
+                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                            ChannelMessageToSend messageToSend = new PropagateInvitationResponseMessage(coreProtocolMessage, true).generateChannelProtocolMessageToSend();
+                            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                        } catch (NoAcceptableChannelException ignored) { }
                     }
                 }
                 {
@@ -596,9 +599,11 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                 // Propagate the accept to other owned devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
-                    ChannelMessageToSend messageToSend = new PropagateInvitationResponseMessage(coreProtocolMessage, invitationAccepted).generateChannelProtocolMessageToSend();
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    try {
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        ChannelMessageToSend messageToSend = new PropagateInvitationResponseMessage(coreProtocolMessage, invitationAccepted).generateChannelProtocolMessageToSend();
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                    } catch (NoAcceptableChannelException ignored) { }
                 }
             }
 
@@ -640,7 +645,8 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                         getOwnedIdentity(),
                         startState.groupInformation,
                         new Identity[]{groupOwnerIdentity},
-                        pendingGroupMembers
+                        pendingGroupMembers,
+                        false
                 );
             }
 
@@ -701,7 +707,8 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                         getOwnedIdentity(),
                         startState.groupInformation,
                         new Identity[]{groupOwnerIdentity},
-                        pendingGroupMembers
+                        pendingGroupMembers,
+                        false
                 );
             }
 

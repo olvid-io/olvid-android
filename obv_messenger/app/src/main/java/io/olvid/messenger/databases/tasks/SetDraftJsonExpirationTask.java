@@ -26,13 +26,14 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 
 public class SetDraftJsonExpirationTask implements Runnable {
     private final Long discussionId;
-    private final Message.JsonExpiration jsonExpiration;
+    private final JsonExpiration jsonExpiration;
 
 
-    public SetDraftJsonExpirationTask(long discussionId, @NonNull Message.JsonExpiration jsonExpiration) {
+    public SetDraftJsonExpirationTask(long discussionId, @NonNull JsonExpiration jsonExpiration) {
         this.discussionId = discussionId;
         this.jsonExpiration = jsonExpiration;
     }

@@ -41,6 +41,8 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
 import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
 import io.olvid.messenger.services.UnifiedForegroundService;
@@ -85,6 +87,7 @@ public class Discussion {
     public static final int STATUS_NORMAL = 1;
     public static final int STATUS_LOCKED = 2;
     public static final int STATUS_PRE_DISCUSSION = 3;
+    public static final int STATUS_READ_ONLY = 4;
 
     @PrimaryKey(autoGenerate = true)
     public long id;
@@ -196,8 +199,8 @@ public class Discussion {
                     App.runThread(new InsertContactRevokedMessageTask(contact.bytesOwnedIdentity, contact.bytesContactIdentity));
                 }
             }
-        } else if (!discussion.canPostMessages()) {
-            if (discussion.status == STATUS_LOCKED) {
+        } else if (!discussion.isNormal()) {
+            if (discussion.isLocked()) {
                 Message contactReAdded = Message.createContactReAddedMessage(db, discussion.id, contact.bytesContactIdentity);
                 db.messageDao().insert(contactReAdded);
             }
@@ -213,7 +216,7 @@ public class Discussion {
             discussion.keycloakManaged = contact.keycloakManaged;
             discussion.active = contact.active;
             discussion.trustLevel = contact.trustLevel;
-            discussion.status = Discussion.STATUS_NORMAL;
+            discussion.status = STATUS_NORMAL;
             db.discussionDao().updateAll(discussion);
 
             ShortcutActivity.updateShortcut(discussion);
@@ -224,6 +227,24 @@ public class Discussion {
                 if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED)) {
                     App.runThread(new InsertContactRevokedMessageTask(contact.bytesOwnedIdentity, contact.bytesContactIdentity));
                 }
+            }
+        }
+
+        // if we have a channel with the contact, post a shared settings message
+        if (contact.establishedChannelCount > 0) {
+            try {
+                DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
+                if (discussionCustomization != null) {
+                    JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
+                    if (jsonSharedSettings != null) {
+                        Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, contact.bytesOwnedIdentity, true, null);
+                        if (message != null) {
+                            message.postSettingsMessage(true, null);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -245,8 +266,23 @@ public class Discussion {
         }
     }
 
+    private static void setEphemeralMessageSettings(Discussion discussion, @NonNull AppDatabase db, @NonNull byte[] contact, @NonNull JsonExpiration jsonExpiration) {
+        Long existenceDuration = jsonExpiration.getExistenceDuration();
+        Long visibilityDuration = jsonExpiration.getVisibilityDuration();
+        boolean readOnce = jsonExpiration.getReadOnce();
+        if (readOnce || visibilityDuration != null || existenceDuration != null) {
+            DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
+            discussionCustomization.settingExistenceDuration = existenceDuration;
+            discussionCustomization.settingVisibilityDuration = visibilityDuration;
+            discussionCustomization.settingReadOnce = readOnce;
+            discussionCustomization.sharedSettingsVersion = 0;
+            db.discussionCustomizationDao().insert(discussionCustomization);
+            db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact, false, 0L));
+        }
+    }
+
     @Ignore
-    public static Discussion createOrReuseGroupDiscussion(AppDatabase db, @NonNull Group group) {
+    public static Discussion createOrReuseGroupDiscussion(AppDatabase db, @NonNull Group group, boolean createdByMeOnOtherDevice) {
         if (!db.inTransaction()) {
             Logger.e("ERROR: running discussion createOrReuseGroupDiscussion outside a transaction");
             return null;
@@ -274,11 +310,11 @@ public class Discussion {
             );
             discussion.id = db.discussionDao().insert(discussion);
 
-            if (group.bytesGroupOwnerIdentity == null) {
+            if (group.bytesGroupOwnerIdentity == null && !createdByMeOnOtherDevice) {
                 setDefaultEphemeralMessageSettings(discussion, db, group.bytesOwnedIdentity);
             }
-        } else if (!discussion.canPostMessages()) {
-            if (discussion.status == STATUS_LOCKED) {
+        } else if (!discussion.isNormal()) {
+            if (discussion.isLocked()) {
                 Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
                 db.messageDao().insert(reJoinedGroup);
             }
@@ -299,7 +335,7 @@ public class Discussion {
     }
 
     @Ignore
-    public static Discussion createOrReuseGroupV2Discussion(AppDatabase db, @NonNull Group2 group2, boolean groupWasJustCreatedByMe) {
+    public static Discussion createOrReuseGroupV2Discussion(AppDatabase db, @NonNull Group2 group2, boolean groupWasJustCreatedByMe, boolean createdOnOtherDevice, JsonExpiration jsonExpirationSettings) {
         if (!db.inTransaction()) {
             Logger.e("ERROR: running discussion createOrReuseGroupV2Discussion outside a transaction");
             return null;
@@ -323,19 +359,23 @@ public class Discussion {
                     false,
                     true,
                     null,
-                    STATUS_NORMAL
+                    group2.ownPermissionSendMessage ? STATUS_NORMAL : STATUS_READ_ONLY
             );
             discussion.id = db.discussionDao().insert(discussion);
 
-            // if the is a group we just created, we should apply default ephemeral settings
+            // if the is a group we just created, we should apply ephemeral settings
             if (groupWasJustCreatedByMe) {
-                setDefaultEphemeralMessageSettings(discussion, db, group2.bytesOwnedIdentity);
+                if (jsonExpirationSettings != null) {
+                    setEphemeralMessageSettings(discussion, db, group2.bytesOwnedIdentity, jsonExpirationSettings);
+                } else if (!createdOnOtherDevice) {
+                    setDefaultEphemeralMessageSettings(discussion, db, group2.bytesOwnedIdentity);
+                }
             } else {
                 Message reJoinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
                 db.messageDao().insert(reJoinedGroup);
             }
-        } else if (!discussion.canPostMessages()) {
-            if (discussion.status == STATUS_LOCKED) {
+        } else if (!discussion.isNormal()) {
+            if (discussion.isLocked()) {
                 Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
                 db.messageDao().insert(reJoinedGroup);
             }
@@ -346,7 +386,7 @@ public class Discussion {
             discussion.keycloakManaged = group2.keycloakManaged;
             discussion.active = true;
             discussion.trustLevel = null;
-            discussion.status = STATUS_NORMAL;
+            discussion.status = group2.ownPermissionSendMessage ? STATUS_NORMAL : STATUS_READ_ONLY;
             db.discussionDao().updateAll(discussion);
 
             ShortcutActivity.updateShortcut(discussion);
@@ -360,15 +400,17 @@ public class Discussion {
         return status == STATUS_LOCKED;
     }
 
-    public boolean canPostMessages() {
-        return status == STATUS_NORMAL;
-    }
-
-    public boolean canBeLocked() {
+    public boolean isNormal() {
         return status == STATUS_NORMAL;
     }
 
     public boolean isPreDiscussion() { return status == STATUS_PRE_DISCUSSION; }
+
+    public boolean isReadOnly() { return status == STATUS_READ_ONLY; }
+
+    public boolean isNormalOrReadOnly() {
+        return status == STATUS_NORMAL || status == STATUS_READ_ONLY;
+    }
 
     public boolean updateLastMessageTimestamp(long lastMessageTimestamp) {
         if (lastMessageTimestamp > this.lastMessageTimestamp) {
@@ -379,11 +421,11 @@ public class Discussion {
     }
 
     public void lockWithMessage(AppDatabase db) {
-        if (! db.inTransaction()) {
+        if (!db.inTransaction()) {
             Logger.e("ERROR: running discussion lockWithMessage outside a transaction");
         }
 
-        if (!canBeLocked()) {
+        if (!isNormalOrReadOnly()) {
             Logger.w("Locking a discussion which cannot be locked");
             return;
         }
@@ -411,7 +453,8 @@ public class Discussion {
                     try {
                         UnifiedForegroundService.processUploadedMessageIdentifier(messageRecipientInfo.engineMessageIdentifier);
                         AppSingleton.getEngine().cancelMessageSending(bytesOwnedIdentity, messageRecipientInfo.engineMessageIdentifier);
-                    } catch (Exception ignored) { }
+                    } catch (Exception ignored) {
+                    }
                 }
                 message.status = Message.STATUS_UNDELIVERED;
                 db.messageDao().updateStatus(message.id, message.status);

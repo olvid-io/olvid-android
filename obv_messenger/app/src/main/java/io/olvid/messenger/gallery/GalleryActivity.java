@@ -78,6 +78,7 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 
 public class GalleryActivity extends LockableActivity {
@@ -335,7 +336,7 @@ public class GalleryActivity extends LockableActivity {
         if (message != null && !screenShotBlockedForEphemeral) {
             if (message.wipeStatus != Message.WIPE_STATUS_WIPE_ON_READ) {
                 try {
-                    Message.JsonExpiration expiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, Message.JsonExpiration.class);
+                    JsonExpiration expiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, JsonExpiration.class);
                     if (expiration.getVisibilityDuration() == null) {
                         return;
                     }

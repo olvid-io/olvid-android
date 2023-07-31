@@ -157,6 +157,7 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
          } catch (e: Exception) {
             setTheme(R.style.AppTheme_NoActionBar)
         }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         root = findViewById(R.id.root_coordinator)
@@ -254,9 +255,10 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
             } else {
                 ownedIdentityMutedImageView.visibility = View.GONE
             }
-            if (BuildConfig.USE_BILLING_LIB && !ownedIdentity.keycloakManaged) {
-                BillingUtils.verifyPurchases(ownedIdentity.bytesOwnedIdentity, baseContext)
-            }
+        }
+
+        if (BuildConfig.USE_BILLING_LIB) {
+            BillingUtils.initializeBillingClient(baseContext)
         }
 
         // observe unread messages

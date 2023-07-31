@@ -332,7 +332,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
                 }
                 personalNote = viewModel.getPersonalNote();
 
-                App.runThread(new UpdateGroupCustomNameAndPhotoTask(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, customName, absoluteCustomPhotoUrl, personalNote));
+                App.runThread(new UpdateGroupCustomNameAndPhotoTask(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, customName, absoluteCustomPhotoUrl, personalNote, false));
                 break;
             }
             case GROUP_V2: {
@@ -362,7 +362,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
                 }
                 personalNote = viewModel.getPersonalNote();
 
-                App.runThread(new UpdateGroupV2CustomNameAndPhotoTask(group.bytesOwnedIdentity, group.bytesGroupIdentifier, customName, absoluteCustomPhotoUrl, personalNote));
+                App.runThread(new UpdateGroupV2CustomNameAndPhotoTask(group.bytesOwnedIdentity, group.bytesGroupIdentifier, customName, absoluteCustomPhotoUrl, personalNote, false));
                 break;
             }
             case CONTACT: {
@@ -394,7 +394,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
 
                 customNameHue = viewModel.getCustomNameHue();
                 personalNote = viewModel.getPersonalNote();
-                App.runThread(new UpdateContactCustomDisplayNameAndPhotoTask(contact.bytesOwnedIdentity, contact.bytesContactIdentity, customName, absoluteCustomPhotoUrl, customNameHue, personalNote));
+                App.runThread(new UpdateContactCustomDisplayNameAndPhotoTask(contact.bytesOwnedIdentity, contact.bytesContactIdentity, customName, absoluteCustomPhotoUrl, customNameHue, personalNote, false));
                 break;
             }
             case LOCKED_DISCUSSION:

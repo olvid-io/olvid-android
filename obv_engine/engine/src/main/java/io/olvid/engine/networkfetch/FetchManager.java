@@ -23,6 +23,7 @@ package io.olvid.engine.networkfetch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -74,6 +75,7 @@ import io.olvid.engine.networkfetch.databases.PushNotificationConfiguration;
 import io.olvid.engine.networkfetch.databases.ServerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
+import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 
 public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDelegate, PushNotificationDelegate, ObvManager {
     private final String engineBaseDirectory;
@@ -123,6 +125,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         metaManager.requestDelegate(this, NotificationPostingDelegate.class);
         metaManager.requestDelegate(this, ChannelDelegate.class);
         metaManager.requestDelegate(this, IdentityDelegate.class);
+        metaManager.requestDelegate(this, ProtocolStarterDelegate.class);
         metaManager.registerImplementedDelegates(this);
     }
 
@@ -213,9 +216,13 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         this.identityDelegate = identityDelegate;
     }
 
+    public void setDelegate(ProtocolStarterDelegate protocolStarterDelegate) {
+        this.websocketCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
+    }
+
     // endregion
 
-    public void deleteOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+    public void deleteOwnedIdentity(Session session, Identity ownedIdentity, boolean doNotDeleteServerSession) throws SQLException {
         // Delete all InboxMessage (this deletes InboxAttachment)
         InboxMessage[] inboxMessages = InboxMessage.getAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         for (InboxMessage inboxMessage: inboxMessages) {
@@ -234,7 +241,9 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
             }
         }
         PushNotificationConfiguration.deleteForOwnedIdentity(wrapSession(session), ownedIdentity);
-        ServerSession.deleteForIdentity(wrapSession(session), ownedIdentity);
+        if (doNotDeleteServerSession) {
+            ServerSession.deleteForIdentity(wrapSession(session), ownedIdentity);
+        }
     }
 
     // region FetchManagerSessionFactory
@@ -494,16 +503,22 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     }
 
 
-    public void deleteExistingServerSessionAndCreateANewOne(Session session, Identity ownedIdentity) {
+    public void deleteExistingServerSession(Session session, Identity ownedIdentity, boolean createNewSession) {
         ServerSession.deleteForIdentity(wrapSession(session), ownedIdentity);
+        if (createNewSession) {
+            createServerSessionCoordinator.createServerSession(ownedIdentity);
+        }
+    }
+
+    public void createServerSession(Identity ownedIdentity) {
         createServerSessionCoordinator.createServerSession(ownedIdentity);
     }
 
-    public void connectWebsockets(String os, String osVersion, int appBuild, String appVersion) {
+    public void connectWebsockets(boolean relyOnWebsocketForNetworkDetection, String os, String osVersion, int appBuild, String appVersion) {
         if ("javax.net.ssl.HttpsURLConnection.DefaultHostnameVerifier".equals(HttpsURLConnection.getDefaultHostnameVerifier().getClass().getCanonicalName())) {
             Logger.w("WARNING: default HostnameVerifier not set. Websocket connection will most probably fail.\n\tYou may want to consider using OkHttp's HostnameVerifier as the default with:\n\t\tHttpsURLConnection.setDefaultHostnameVerifier(OkHostnameVerifier.INSTANCE);");
         }
-        websocketCoordinator.connectWebsockets(os, osVersion, appBuild, appVersion);
+        websocketCoordinator.connectWebsockets(relyOnWebsocketForNetworkDetection, os, osVersion, appBuild, appVersion);
     }
 
     public void disconnectWebsockets() {
@@ -590,44 +605,35 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     // region implement PushNotificationDelegate
 
     @Override
-    public void registerPushNotificationIfConfigurationChanged(Session session, Identity identity, UID deviceUid, PushNotificationTypeAndParameters newPushParameters) throws SQLException {
+    public void registerPushNotificationIfConfigurationChanged(Session session, Identity ownedIdentity, UID currentDeviceUid, PushNotificationTypeAndParameters newPushParameters) throws SQLException {
         FetchManagerSession fetchManagerSession = wrapSession(session);
-        PushNotificationConfiguration pushNotificationConfiguration = PushNotificationConfiguration.get(fetchManagerSession, identity);
+        PushNotificationConfiguration pushNotificationConfiguration = PushNotificationConfiguration.get(fetchManagerSession, ownedIdentity);
         if (pushNotificationConfiguration != null) {
-            if (pushNotificationConfiguration.getDeviceUid().equals(deviceUid)) {
+            if (pushNotificationConfiguration.getDeviceUid().equals(currentDeviceUid)) {
                 PushNotificationTypeAndParameters oldPushParameters = pushNotificationConfiguration.getPushNotificationTypeAndParameters();
-                if (oldPushParameters.equals(newPushParameters)) {
-                    // when parameters are equal, we only replace them in DB if it changed from a no-kick to a kick
-                    if (oldPushParameters.kickOtherDevices || !newPushParameters.kickOtherDevices) {
-                        return;
-                    } else {
-                        // we are simply going into kick mode, no other change, so no need to change the maskingUid
+                if (oldPushParameters.sameTypeAndToken(newPushParameters)) {
+                    // when parameters are equal, we only replace them in DB if it changed from a no-reactivate to a reactivate, or if the deviceUidToReplace has changed
+                    if ((!oldPushParameters.reactivateCurrentDevice && newPushParameters.reactivateCurrentDevice) || (oldPushParameters.reactivateCurrentDevice && newPushParameters.reactivateCurrentDevice && !Objects.equals(oldPushParameters.deviceUidToReplace, newPushParameters.deviceUidToReplace))) {
+                        // tokens are the same, no need to change identityMaskingUid
                         newPushParameters.identityMaskingUid = oldPushParameters.identityMaskingUid;
+                    } else {
+                        return;
                     }
                 } else {
                     // token has changed, or notification type has changed
-                    // we still need to preserve the kickOtherDevices parameter
-                    if (oldPushParameters.kickOtherDevices) {
-                        newPushParameters.kickOtherDevices = true;
+                    // we still need to preserve the reactivateCurrentDevice and deviceUidToReplace parameters
+                    if (oldPushParameters.reactivateCurrentDevice && !newPushParameters.reactivateCurrentDevice) {
+                        newPushParameters.reactivateCurrentDevice = true;
+                        newPushParameters.deviceUidToReplace = oldPushParameters.deviceUidToReplace;
                     }
                 }
             }
             pushNotificationConfiguration.delete();
         }
-        if (PushNotificationConfiguration.create(fetchManagerSession, identity, deviceUid, newPushParameters) == null) {
+        if (PushNotificationConfiguration.create(fetchManagerSession, ownedIdentity, currentDeviceUid, newPushParameters) == null) {
             throw new SQLException();
         }
     }
-
-    @Override
-    public void unregisterPushNotification(Session session, Identity identity)  throws SQLException {
-        FetchManagerSession fetchManagerSession = wrapSession(session);
-        PushNotificationConfiguration pushNotificationConfiguration = PushNotificationConfiguration.get(fetchManagerSession, identity);
-        if (pushNotificationConfiguration != null) {
-            pushNotificationConfiguration.delete();
-        }
-    }
-
 
     @Override
     public void processAndroidPushNotification(String maskingUidString) {

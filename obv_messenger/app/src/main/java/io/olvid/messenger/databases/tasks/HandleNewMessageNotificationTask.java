@@ -58,6 +58,24 @@ import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.ReactionRequest;
 import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
+import io.olvid.messenger.databases.entity.jsons.JsonDeleteDiscussion;
+import io.olvid.messenger.databases.entity.jsons.JsonDeleteMessages;
+import io.olvid.messenger.databases.entity.jsons.JsonDiscussionRead;
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
+import io.olvid.messenger.databases.entity.jsons.JsonLimitedVisibilityMessageOpened;
+import io.olvid.messenger.databases.entity.jsons.JsonLocation;
+import io.olvid.messenger.databases.entity.jsons.JsonMessage;
+import io.olvid.messenger.databases.entity.jsons.JsonMessageReference;
+import io.olvid.messenger.databases.entity.jsons.JsonOneToOneMessageIdentifier;
+import io.olvid.messenger.databases.entity.jsons.JsonPayload;
+import io.olvid.messenger.databases.entity.jsons.JsonQuerySharedSettings;
+import io.olvid.messenger.databases.entity.jsons.JsonReaction;
+import io.olvid.messenger.databases.entity.jsons.JsonReturnReceipt;
+import io.olvid.messenger.databases.entity.jsons.JsonScreenCaptureDetection;
+import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
+import io.olvid.messenger.databases.entity.jsons.JsonUpdateMessage;
+import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
+import io.olvid.messenger.databases.entity.jsons.JsonWebrtcMessage;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.services.AvailableSpaceHelper;
@@ -87,25 +105,27 @@ public class HandleNewMessageNotificationTask implements Runnable {
             return;
         }
         try {
-            Message.JsonPayload messagePayload;
+            JsonPayload messagePayload;
             try {
-                messagePayload = AppSingleton.getJsonObjectMapper().readValue(obvMessage.getMessagePayload(), Message.JsonPayload.class);
+                messagePayload = AppSingleton.getJsonObjectMapper().readValue(obvMessage.getMessagePayload(), JsonPayload.class);
             } catch (Exception e) {
                 Logger.e("Received a message that cannot be deserialized! Deleting it...");
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
-            Message.JsonReturnReceipt jsonReturnReceipt = messagePayload.getJsonReturnReceipt();
-            Message.JsonMessage jsonMessage = messagePayload.getJsonMessage();
-            Message.JsonWebrtcMessage jsonWebrtcMessage = messagePayload.getJsonWebrtcMessage();
+            JsonReturnReceipt jsonReturnReceipt = messagePayload.getJsonReturnReceipt();
+            JsonMessage jsonMessage = messagePayload.getJsonMessage();
+            JsonWebrtcMessage jsonWebrtcMessage = messagePayload.getJsonWebrtcMessage();
 
-            DiscussionCustomization.JsonSharedSettings jsonSharedSettings = messagePayload.getJsonSharedSettings();
-            Message.JsonQuerySharedSettings jsonQuerySharedSettings = messagePayload.getJsonQuerySharedSettings();
-            Message.JsonDeleteDiscussion jsonDeleteDiscussion = messagePayload.getJsonDeleteDiscussion();
-            Message.JsonDeleteMessages jsonDeleteMessages = messagePayload.getJsonDeleteMessages();
-            Message.JsonUpdateMessage jsonUpdateMessage = messagePayload.getJsonUpdateMessage();
-            Message.JsonReaction jsonReaction = messagePayload.getJsonReaction();
-            Message.JsonScreenCaptureDetection jsonScreenCaptureDetection = messagePayload.getJsonScreenCaptureDetection();
+            JsonSharedSettings jsonSharedSettings = messagePayload.getJsonSharedSettings();
+            JsonQuerySharedSettings jsonQuerySharedSettings = messagePayload.getJsonQuerySharedSettings();
+            JsonDeleteDiscussion jsonDeleteDiscussion = messagePayload.getJsonDeleteDiscussion();
+            JsonDeleteMessages jsonDeleteMessages = messagePayload.getJsonDeleteMessages();
+            JsonUpdateMessage jsonUpdateMessage = messagePayload.getJsonUpdateMessage();
+            JsonReaction jsonReaction = messagePayload.getJsonReaction();
+            JsonScreenCaptureDetection jsonScreenCaptureDetection = messagePayload.getJsonScreenCaptureDetection();
+            JsonDiscussionRead jsonDiscussionRead = messagePayload.getJsonDiscussionRead();
+            JsonLimitedVisibilityMessageOpened jsonLimitedVisibilityMessageOpened = messagePayload.getJsonLimitedVisibilityMessageOpened();
 
             if (jsonWebrtcMessage != null) {
                 App.handleWebrtcMessage(obvMessage.getBytesToIdentity(), obvMessage.getBytesFromIdentity(), jsonWebrtcMessage, obvMessage.getDownloadTimestamp(), obvMessage.getServerTimestamp());
@@ -113,53 +133,64 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 return;
             }
 
-            final byte[] bytesContactIdentity = obvMessage.getBytesFromIdentity();
-            final byte[] bytesOwnedIdentity = obvMessage.getBytesToIdentity();
-            final Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
-            if (contact == null) {
-                Logger.e("Received an message from un unknown contact!!!");
+
+            final MessageSender messageSender = MessageSender.of(db, obvMessage.getBytesToIdentity(), obvMessage.getBytesFromIdentity());
+            if (messageSender == null) {
+                Logger.e("Received a message from an unknown contact!!!");
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonQuerySharedSettings != null) {
-                handleQuerySharedSettingsMessage(jsonQuerySharedSettings, contact);
+                handleQuerySharedSettingsMessage(jsonQuerySharedSettings, messageSender);
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonSharedSettings != null) {
-                handleSharedSettingsMessage(jsonSharedSettings, contact, obvMessage.getServerTimestamp());
+                handleSharedSettingsMessage(jsonSharedSettings, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonDeleteDiscussion != null) {
-                handleDeleteDiscussion(jsonDeleteDiscussion, contact, obvMessage.getServerTimestamp());
+                handleDeleteDiscussion(jsonDeleteDiscussion, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonDeleteMessages != null) {
-                handleDeleteMessages(jsonDeleteMessages, contact, obvMessage.getServerTimestamp());
+                handleDeleteMessages(jsonDeleteMessages, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonUpdateMessage != null) {
-                handleUpdateMessage(jsonUpdateMessage, contact, obvMessage.getServerTimestamp());
+                handleUpdateMessage(jsonUpdateMessage, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonReaction != null) {
-                handleReactionMessage(jsonReaction, contact, obvMessage.getServerTimestamp());
+                handleReactionMessage(jsonReaction, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonScreenCaptureDetection != null) {
-                handleScreenCaptureDetectionMessage(jsonScreenCaptureDetection, contact, obvMessage.getServerTimestamp());
+                handleScreenCaptureDetectionMessage(jsonScreenCaptureDetection, messageSender, obvMessage.getServerTimestamp());
+                engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
+                return;
+            }
+
+            if (jsonDiscussionRead != null) {
+                handleDiscussionReadMessage(jsonDiscussionRead, messageSender);
+                engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
+                return;
+            }
+
+            if (jsonLimitedVisibilityMessageOpened != null) {
+                handleLimitedVisibilityOpenedMessage(jsonLimitedVisibilityMessageOpened, messageSender, obvMessage.getServerTimestamp(), obvMessage.getDownloadTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
@@ -176,26 +207,32 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 return;
             }
 
-            Discussion discussion = getDiscussion(jsonMessage.getGroupUid(), jsonMessage.getGroupOwner(), jsonMessage.getGroupV2Identifier(), contact, GroupV2.Permission.SEND_MESSAGE);
+            Discussion discussion = getDiscussion(jsonMessage.getGroupUid(), jsonMessage.getGroupOwner(), jsonMessage.getGroupV2Identifier(), jsonMessage.getOneToOneIdentifier(), messageSender, GroupV2.Permission.SEND_MESSAGE);
             if (discussion == null) {
                 // we don't have a discussion to post this message in: probably a message from a not-oneToOne contact --> discarding it
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
-            RemoteDeleteAndEditRequest remoteDeleteAndEditRequest = db.remoteDeleteAndEditRequestDao().getBySenderSequenceNumber(jsonMessage.getSenderSequenceNumber(), jsonMessage.getSenderThreadIdentifier(), contact.bytesContactIdentity, discussion.id);
-            List<ReactionRequest> reactionRequests = db.reactionRequestDao().getAllBySenderSequenceNumber(jsonMessage.getSenderSequenceNumber(), jsonMessage.getSenderThreadIdentifier(), contact.bytesContactIdentity, discussion.id);
-            Message.JsonExpiration jsonExpiration = jsonMessage.getJsonExpiration();
+            RemoteDeleteAndEditRequest remoteDeleteAndEditRequest = db.remoteDeleteAndEditRequestDao().getBySenderSequenceNumber(jsonMessage.getSenderSequenceNumber(), jsonMessage.getSenderThreadIdentifier(), messageSender.getSenderIdentity(), discussion.id);
+            List<ReactionRequest> reactionRequests = db.reactionRequestDao().getAllBySenderSequenceNumber(jsonMessage.getSenderSequenceNumber(), jsonMessage.getSenderThreadIdentifier(), messageSender.getSenderIdentity(), discussion.id);
+            JsonExpiration jsonExpiration = jsonMessage.getJsonExpiration();
+
+            if (jsonExpiration != null && jsonExpiration.readOnce != null && jsonExpiration.readOnce && messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                // never display read once messages received from another device
+                engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
+                return;
+            }
 
             boolean messageShouldBeRemoteDeleted = false;
             if (remoteDeleteAndEditRequest != null && remoteDeleteAndEditRequest.requestType == RemoteDeleteAndEditRequest.TYPE_DELETE) {
                 // check whether the remote delete request comes from the message sender or an authorized group member
-                if (discussion.discussionType != Discussion.TYPE_GROUP_V2) {
+                if (remoteDeleteAndEditRequest.remoteDeleter == messageSender.bytesOwnedIdentity || discussion.discussionType != Discussion.TYPE_GROUP_V2) {
                     messageShouldBeRemoteDeleted = true;
                 } else {
                     Group2Member group2Member = db.group2MemberDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier, remoteDeleteAndEditRequest.remoteDeleter);
                     if (group2Member != null) {
-                        messageShouldBeRemoteDeleted = group2Member.permissionRemoteDeleteAnything || (group2Member.permissionEditOrRemoteDeleteOwnMessages && Arrays.equals(remoteDeleteAndEditRequest.remoteDeleter, contact.bytesContactIdentity));
+                        messageShouldBeRemoteDeleted = group2Member.permissionRemoteDeleteAnything || (group2Member.permissionEditOrRemoteDeleteOwnMessages && Arrays.equals(remoteDeleteAndEditRequest.remoteDeleter, messageSender.getSenderIdentity()));
                     }
                 }
             }
@@ -205,22 +242,41 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 Pair<Long, Boolean> transactionResult = db.runInTransaction(() -> {
                     boolean sendExpireIntent = false;
 
-                    Message message = new Message(
-                            db,
-                            jsonMessage.getSenderSequenceNumber(),
-                            jsonMessage,
-                            jsonReturnReceipt,
-                            obvMessage.getServerTimestamp(),
-                            Message.STATUS_READ,
-                            Message.TYPE_INBOUND_MESSAGE,
-                            discussion.id,
-                            obvMessage.getIdentifier(),
-                            contact.bytesContactIdentity,
-                            jsonMessage.getSenderThreadIdentifier(),
-                            0,
-                            0
-                    );
-                    message.missedMessageCount = processSequenceNumber(db, discussion.id, contact.bytesContactIdentity, jsonMessage.getSenderThreadIdentifier(), jsonMessage.getSenderSequenceNumber());
+                    final Message message;
+                    if (messageSender.type == MessageSender.Type.CONTACT) {
+                        message = new Message(
+                                db,
+                                jsonMessage.getSenderSequenceNumber(),
+                                jsonMessage,
+                                jsonReturnReceipt,
+                                obvMessage.getServerTimestamp(),
+                                Message.STATUS_READ,
+                                Message.TYPE_INBOUND_MESSAGE,
+                                discussion.id,
+                                obvMessage.getIdentifier(),
+                                messageSender.getSenderIdentity(),
+                                jsonMessage.getSenderThreadIdentifier(),
+                                0,
+                                0
+                        );
+                    } else {
+                        message = new Message(
+                                db,
+                                jsonMessage.getSenderSequenceNumber(),
+                                jsonMessage,
+                                jsonReturnReceipt,
+                                obvMessage.getServerTimestamp(),
+                                Message.STATUS_SENT_FROM_ANOTHER_DEVICE,
+                                Message.TYPE_OUTBOUND_MESSAGE,
+                                discussion.id,
+                                obvMessage.getIdentifier(),
+                                messageSender.getSenderIdentity(),
+                                jsonMessage.getSenderThreadIdentifier(),
+                                0,
+                                0
+                        );
+                    }
+                    message.missedMessageCount = processSequenceNumber(db, discussion.id, messageSender.getSenderIdentity(), jsonMessage.getSenderThreadIdentifier(), jsonMessage.getSenderSequenceNumber());
                     message.contentBody = null;
                     message.jsonLocation = null;
                     message.locationType = Message.LOCATION_TYPE_NONE;
@@ -304,12 +360,26 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 Pair<Long, Boolean> transactionResult = db.runInTransaction(() -> {
                     boolean sendExpireIntent = false;
                     int messageType;
-                    if (jsonExpiration == null || (jsonExpiration.getVisibilityDuration() == null && (jsonExpiration.getReadOnce() == null || !jsonExpiration.getReadOnce()))) {
+                    int messageStatus;
+
+                    if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                        messageType = Message.TYPE_OUTBOUND_MESSAGE;
+                        messageStatus = Message.STATUS_SENT_FROM_ANOTHER_DEVICE;
+                        // read once messages have already been discarded
+                        // existence duration and visibility duration should be treated the same way --> we move visibility to existence
+                        if (jsonExpiration != null && jsonExpiration.getVisibilityDuration() != null) {
+                            if (jsonExpiration.getExistenceDuration() == null || jsonExpiration.getExistenceDuration() > jsonExpiration.getVisibilityDuration()) {
+                                jsonExpiration.setExistenceDuration(jsonExpiration.getVisibilityDuration());
+                            }
+                        }
+                    } else if (jsonExpiration == null || (jsonExpiration.getVisibilityDuration() == null && (jsonExpiration.getReadOnce() == null || !jsonExpiration.getReadOnce()))) {
                         messageType = Message.TYPE_INBOUND_MESSAGE;
+                        messageStatus = Message.STATUS_UNREAD;
                         jsonMessage.setJsonExpiration(null); // we clear the jsonExpiration part before creating the message. The existence duration is taken into account a few lines below
                     } else {
                         // the message has a visibility duration or is read once
                         messageType = Message.TYPE_INBOUND_EPHEMERAL_MESSAGE;
+                        messageStatus = Message.STATUS_UNREAD;
                     }
 
                     long messageServerTimestamp = obvMessage.getServerTimestamp();
@@ -323,18 +393,18 @@ public class HandleNewMessageNotificationTask implements Runnable {
                             jsonMessage,
                             jsonReturnReceipt,
                             messageServerTimestamp,
-                            Message.STATUS_UNREAD,
+                            messageStatus,
                             messageType,
                             discussion.id,
                             obvMessage.getIdentifier(),
-                            contact.bytesContactIdentity,
+                            messageSender.getSenderIdentity(),
                             jsonMessage.getSenderThreadIdentifier(),
                             finalAttachmentCount,
                             finalImageCount
                     );
-                    message.missedMessageCount = processSequenceNumber(db, discussion.id, contact.bytesContactIdentity, jsonMessage.getSenderThreadIdentifier(), jsonMessage.getSenderSequenceNumber());
+                    message.missedMessageCount = processSequenceNumber(db, discussion.id, messageSender.getSenderIdentity(), jsonMessage.getSenderThreadIdentifier(), jsonMessage.getSenderSequenceNumber());
                     message.forwarded = jsonMessage.isForwarded() != null && jsonMessage.isForwarded();
-                    message.mentioned = message.isIdentityMentioned(bytesOwnedIdentity) || message.isOwnMessageReply(bytesOwnedIdentity);
+                    message.mentioned = message.isIdentityMentioned(messageSender.bytesOwnedIdentity) || message.isOwnMessageReply(messageSender.bytesOwnedIdentity);
                     boolean edited = false;
 
                     if (remoteDeleteAndEditRequest != null && remoteDeleteAndEditRequest.requestType == RemoteDeleteAndEditRequest.TYPE_EDIT) {
@@ -344,7 +414,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                             edited = true;
                             message.contentBody = newBody;
                             message.jsonMentions = mentions;
-                            message.mentioned = message.isIdentityMentioned(bytesOwnedIdentity) || message.isOwnMessageReply(bytesOwnedIdentity);
+                            message.mentioned = message.isIdentityMentioned(messageSender.bytesOwnedIdentity) || message.isOwnMessageReply(messageSender.bytesOwnedIdentity);
                             message.edited = Message.EDITED_UNSEEN;
                         }
                     }
@@ -352,11 +422,15 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     // if start sharing location message check this contact is not already sharing their location in this discussion
                     // if already sharing force end of previous sharing message
                     if (message.locationType == Message.LOCATION_TYPE_SHARE) {
-                        List<Message> currentLocationSharingMessages = db.messageDao().getCurrentLocationSharingMessagesOfIdentityInDiscussion(message.senderIdentifier, message.discussionId);
-                        if (currentLocationSharingMessages != null && currentLocationSharingMessages.size() > 0) {
-                            for (Message m : currentLocationSharingMessages) {
-                                Logger.e("This identity was already sharing it location, marking sharing as finished for message: " + m.id);
-                                db.messageDao().updateLocationType(m.id, Message.LOCATION_TYPE_SHARE_FINISHED);
+                        if (Arrays.equals(message.senderIdentifier, messageSender.bytesOwnedIdentity)) {
+                            UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(message.discussionId, true);
+                        } else {
+                            List<Message> currentLocationSharingMessages = db.messageDao().getCurrentLocationSharingMessagesOfIdentityInDiscussion(message.senderIdentifier, message.discussionId);
+                            if (currentLocationSharingMessages != null && currentLocationSharingMessages.size() > 0) {
+                                for (Message m : currentLocationSharingMessages) {
+                                    Logger.e("This identity was already sharing it location, marking sharing as finished for message: " + m.id);
+                                    db.messageDao().updateLocationType(m.id, Message.LOCATION_TYPE_SHARE_FINISHED);
+                                }
                             }
                         }
                     }
@@ -391,7 +465,8 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     }
                     if (reactionRequests != null) {
                         for (ReactionRequest reactionRequest : reactionRequests) {
-                            new UpdateReactionsTask(message.id, reactionRequest.reaction, reactionRequest.reacter, reactionRequest.serverTimestamp).run();
+                            final byte[] reacterOrNull = Arrays.equals(reactionRequest.reacter, messageSender.bytesOwnedIdentity) ? null : reactionRequest.reacter;
+                            new UpdateReactionsTask(message.id, reactionRequest.reaction, reacterOrNull, reactionRequest.serverTimestamp, false).run();
                         }
                         db.reactionRequestDao().delete(reactionRequests.toArray(new ReactionRequest[0]));
                     }
@@ -445,7 +520,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                     FyleMessageJoinWithStatus fyleMessageJoinWithStatus = new FyleMessageJoinWithStatus(
                                             fyle.id,
                                             message.id,
-                                            bytesOwnedIdentity,
+                                            messageSender.bytesOwnedIdentity,
                                             fyle.filePath,
                                             attachmentMetadata.getFileName(),
                                             attachmentMetadata.getType(),
@@ -466,7 +541,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                     FyleMessageJoinWithStatus fyleMessageJoinWithStatus = new FyleMessageJoinWithStatus(
                                             fyle.id,
                                             message.id,
-                                            bytesOwnedIdentity,
+                                            messageSender.bytesOwnedIdentity,
                                             attachment.getUrl(),
                                             attachmentMetadata.getFileName(),
                                             attachmentMetadata.getType(),
@@ -490,7 +565,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                 FyleMessageJoinWithStatus fyleMessageJoinWithStatus = new FyleMessageJoinWithStatus(
                                         fyle.id,
                                         message.id,
-                                        bytesOwnedIdentity,
+                                        messageSender.bytesOwnedIdentity,
                                         attachment.getUrl(),
                                         attachmentMetadata.getFileName(),
                                         attachmentMetadata.getType(),
@@ -517,8 +592,10 @@ public class HandleNewMessageNotificationTask implements Runnable {
                         engine.markAttachmentForDeletion(attachment);
                     }
                 }
-                OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(contact.bytesOwnedIdentity);
-                AndroidNotificationManager.displayReceivedMessageNotification(discussion, message, contact, ownedIdentity);
+                if (messageSender.type == MessageSender.Type.CONTACT) {
+                    OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(messageSender.bytesOwnedIdentity);
+                    AndroidNotificationManager.displayReceivedMessageNotification(discussion, message, messageSender.contact, ownedIdentity);
+                }
 
                 engine.markMessageForDeletion(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
 
@@ -590,12 +667,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
     }
 
 
-    private void handleQuerySharedSettingsMessage(Message.JsonQuerySharedSettings jsonQuerySharedSettings, Contact contact) {
-        if (jsonQuerySharedSettings.getGroupV2Identifier() == null) {
-            return;
-        }
+    private void handleQuerySharedSettingsMessage(JsonQuerySharedSettings jsonQuerySharedSettings, @NonNull MessageSender messageSender) {
+        Discussion discussion = getDiscussion(jsonQuerySharedSettings.getGroupUid(), jsonQuerySharedSettings.getGroupOwner(), jsonQuerySharedSettings.getGroupV2Identifier(), jsonQuerySharedSettings.getOneToOneIdentifier(), messageSender, null);
 
-        Discussion discussion = getDiscussion(null, null, jsonQuerySharedSettings.getGroupV2Identifier(), contact, null);
         if (discussion == null) {
             return;
         }
@@ -606,7 +680,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             return;
         }
 
-        DiscussionCustomization.JsonSharedSettings sharedSettings = discussionCustomization.getSharedSettingsJson();
+        JsonSharedSettings sharedSettings = discussionCustomization.getSharedSettingsJson();
         if (sharedSettings == null) {
             // there are no ephemeral settings for this discussion --> no need to send anything
             return;
@@ -622,14 +696,14 @@ public class HandleNewMessageNotificationTask implements Runnable {
             return;
         }
 
-        Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, sharedSettings, contact.bytesOwnedIdentity, true, null);
+        Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, sharedSettings, messageSender.bytesOwnedIdentity, true, null);
         if (message != null) {
-            message.postSettingsMessage(true, contact.bytesContactIdentity);
+            message.postSettingsMessage(true, messageSender.getSenderIdentity());
         }
     }
 
-    private void handleSharedSettingsMessage(DiscussionCustomization.JsonSharedSettings jsonSharedSettings, Contact contact, long serverTimestamp) {
-        Discussion discussion = getDiscussion(jsonSharedSettings.getGroupUid(), jsonSharedSettings.getGroupOwner(), jsonSharedSettings.getGroupV2Identifier(), contact, GroupV2.Permission.CHANGE_SETTINGS);
+    private void handleSharedSettingsMessage(JsonSharedSettings jsonSharedSettings, @NonNull MessageSender messageSender, long serverTimestamp) {
+        Discussion discussion = getDiscussion(jsonSharedSettings.getGroupUid(), jsonSharedSettings.getGroupOwner(), jsonSharedSettings.getGroupV2Identifier(), jsonSharedSettings.getOneToOneIdentifier(), messageSender, GroupV2.Permission.CHANGE_SETTINGS);
 
         if (discussion == null) {
             return;
@@ -637,8 +711,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
         switch (discussion.discussionType) {
             case Discussion.TYPE_GROUP: {
-                Group group = db.groupDao().get(contact.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
-                if (!Arrays.equals(group.bytesGroupOwnerIdentity, contact.bytesContactIdentity)) {
+                Group group = db.groupDao().get(messageSender.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                if (!Arrays.equals(group.bytesGroupOwnerIdentity, messageSender.getSenderIdentity())
+                        && (group.bytesGroupOwnerIdentity != null || !Arrays.equals(messageSender.getSenderIdentity(), messageSender.bytesOwnedIdentity))) {
                     Logger.e("Received a group shared settings update by someone else than the group owner");
                     return;
                 }
@@ -658,6 +733,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
         boolean oldReadOnce = discussionCustomization.settingReadOnce;
         Long oldVisibilityDuration = discussionCustomization.settingVisibilityDuration;
         Long oldExistenceDuration = discussionCustomization.settingExistenceDuration;
+
+        boolean resendSettings = false;
+        boolean gcdWasComputed = false;
 
         // check the version of the discussion customization
         if (discussionCustomization.sharedSettingsVersion == null || discussionCustomization.sharedSettingsVersion < jsonSharedSettings.getVersion()) {
@@ -679,17 +757,24 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 return;
             } else {
                 // if sharedSettingsVersion is non null, getExpirationJson() never returns null)
-                Message.JsonExpiration gcdExpiration = jsonSharedSettings.getJsonExpiration().computeGcd(discussionCustomization.getExpirationJson());
+                JsonExpiration gcdExpiration = jsonSharedSettings.getJsonExpiration().computeGcd(discussionCustomization.getExpirationJson());
                 discussionCustomization.settingReadOnce = gcdExpiration.getReadOnce() != null && gcdExpiration.getReadOnce();
                 discussionCustomization.settingVisibilityDuration = gcdExpiration.getVisibilityDuration();
                 discussionCustomization.settingExistenceDuration = gcdExpiration.getExistenceDuration();
+                // also send GCDed settings to everyone, just in case, but only do this if the GCD actually changed something to the received settings
+                resendSettings = !jsonSharedSettings.getJsonExpiration().equals(gcdExpiration);
+                gcdWasComputed = true;
             }
         } else {
-            // we received an older version --> ignore it and, for one-to-one discussions, resend our current discussion settings, just in case
+            // we received an older version --> ignore it and, for one-to-one or group v2 (when I have the permission) discussions, resend our current discussion settings, just in case
+            resendSettings = true;
+        }
+
+        if (resendSettings) {
             if (discussion.discussionType == Discussion.TYPE_CONTACT) {
                 jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
                 if (jsonSharedSettings != null) {
-                    Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, contact.bytesOwnedIdentity, true, null);
+                    Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, messageSender.bytesOwnedIdentity, true, null);
                     if (message != null) {
                         message.postSettingsMessage(true, null);
                     }
@@ -699,22 +784,21 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 if (group2 != null && group2.ownPermissionChangeSettings) {
                     jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
                     if (jsonSharedSettings != null) {
-                        Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, contact.bytesOwnedIdentity, true, null);
+                        Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, messageSender.bytesOwnedIdentity, true, null);
                         if (message != null) {
-                            message.postSettingsMessage(true, contact.bytesContactIdentity);
+                            message.postSettingsMessage(true, gcdWasComputed ? null : messageSender.getSenderIdentity());
                         }
                     }
                 }
             }
-            return;
         }
 
         // if we arrive here, settings might have been updated
-        if (discussionCustomization.settingReadOnce ^ oldReadOnce
+        if (oldReadOnce ^ discussionCustomization.settingReadOnce
                 || !Objects.equals(oldVisibilityDuration, discussionCustomization.settingVisibilityDuration)
                 || !Objects.equals(oldExistenceDuration, discussionCustomization.settingExistenceDuration)) {
             // there was indeed a change save it and add a message in the discussion
-            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact.bytesContactIdentity, false, serverTimestamp);
+            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), messageSender.getSenderIdentity(), false, serverTimestamp);
             if (message != null) {
                 message.id = db.messageDao().insert(message);
                 db.discussionCustomizationDao().update(discussionCustomization);
@@ -722,8 +806,8 @@ public class HandleNewMessageNotificationTask implements Runnable {
         }
     }
 
-    private void handleDeleteDiscussion(Message.JsonDeleteDiscussion jsonDeleteDiscussion, Contact contact, long serverTimestamp) {
-        Discussion discussion = getDiscussion(jsonDeleteDiscussion.getGroupUid(), jsonDeleteDiscussion.getGroupOwner(), jsonDeleteDiscussion.getGroupV2Identifier(), contact, GroupV2.Permission.REMOTE_DELETE_ANYTHING);
+    private void handleDeleteDiscussion(JsonDeleteDiscussion jsonDeleteDiscussion, @NonNull MessageSender messageSender, long serverTimestamp) {
+        Discussion discussion = getDiscussion(jsonDeleteDiscussion.getGroupUid(), jsonDeleteDiscussion.getGroupOwner(), jsonDeleteDiscussion.getGroupV2Identifier(), jsonDeleteDiscussion.getOneToOneIdentifier(), messageSender, GroupV2.Permission.REMOTE_DELETE_ANYTHING);
 
         if (discussion == null) {
             return;
@@ -740,7 +824,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
         // reload the discussion
         discussion = db.discussionDao().getById(discussion.id);
         if (messagesToDelete > 0) {
-            Message message = Message.createDiscussionRemotelyDeletedMessage(db, discussion.id, contact.bytesContactIdentity, serverTimestamp);
+            Message message = Message.createDiscussionRemotelyDeletedMessage(db, discussion.id, messageSender.getSenderIdentity(), serverTimestamp);
             db.messageDao().insert(message);
             if (discussion.updateLastMessageTimestamp(serverTimestamp)) {
                 db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -748,32 +832,33 @@ public class HandleNewMessageNotificationTask implements Runnable {
         }
     }
 
-    private void handleDeleteMessages(Message.JsonDeleteMessages jsonDeleteMessages, Contact contact, long serverTimestamp) {
+    private void handleDeleteMessages(JsonDeleteMessages jsonDeleteMessages, @NonNull MessageSender messageSender, long serverTimestamp) {
         if (jsonDeleteMessages.getMessageReferences() == null || jsonDeleteMessages.getMessageReferences().size() == 0) {
             return;
         }
 
-        Discussion discussion = getDiscussion(jsonDeleteMessages.getGroupUid(), jsonDeleteMessages.getGroupOwner(), jsonDeleteMessages.getGroupV2Identifier(), contact, null);
-
+        Discussion discussion = getDiscussion(jsonDeleteMessages.getGroupUid(), jsonDeleteMessages.getGroupOwner(), jsonDeleteMessages.getGroupV2Identifier(), jsonDeleteMessages.getOneToOneIdentifier(), messageSender, null);
         if (discussion == null) {
             return;
         }
 
-        boolean remoteDeletePermission = getDiscussion(jsonDeleteMessages.getGroupUid(), jsonDeleteMessages.getGroupOwner(), jsonDeleteMessages.getGroupV2Identifier(), contact, GroupV2.Permission.REMOTE_DELETE_ANYTHING) != null;
-        boolean editAndDeleteOwnMessagesPermission = getDiscussion(jsonDeleteMessages.getGroupUid(), jsonDeleteMessages.getGroupOwner(), jsonDeleteMessages.getGroupV2Identifier(), contact, GroupV2.Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES) != null;
+        boolean remoteDeletePermission = getDiscussion(jsonDeleteMessages.getGroupUid(), jsonDeleteMessages.getGroupOwner(), jsonDeleteMessages.getGroupV2Identifier(), jsonDeleteMessages.getOneToOneIdentifier(), messageSender, GroupV2.Permission.REMOTE_DELETE_ANYTHING) != null;
+        boolean editAndDeleteOwnMessagesPermission = getDiscussion(jsonDeleteMessages.getGroupUid(), jsonDeleteMessages.getGroupOwner(), jsonDeleteMessages.getGroupV2Identifier(), jsonDeleteMessages.getOneToOneIdentifier(), messageSender, GroupV2.Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES) != null;
 
-        for (Message.JsonMessageReference messageReference : jsonDeleteMessages.getMessageReferences()) {
+        for (JsonMessageReference messageReference : jsonDeleteMessages.getMessageReferences()) {
             Message message = db.messageDao().getBySenderSequenceNumber(messageReference.getSenderSequenceNumber(), messageReference.getSenderThreadIdentifier(), messageReference.getSenderIdentifier(), discussion.id);
             if (message != null) {
                 // only delete if the user has the permission to delete other users' messages
-                if (remoteDeletePermission || (editAndDeleteOwnMessagesPermission && Arrays.equals(message.senderIdentifier, contact.bytesContactIdentity))) {
+                if (messageSender.type == MessageSender.Type.OWNED_IDENTITY
+                        || remoteDeletePermission
+                        || (editAndDeleteOwnMessagesPermission && Arrays.equals(message.senderIdentifier, messageSender.getSenderIdentity()))) {
                     // stop sharing location if needed
-                    if (message.isLocationMessage() && message.locationType == Message.LOCATION_TYPE_SHARE) {
+                    if (message.isCurrentSharingOutboundLocationMessage()) {
                         UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussion.id, true);
                     }
 
                     db.runInTransaction(() -> {
-                        message.remoteDelete(db, contact.bytesContactIdentity, serverTimestamp);
+                        message.remoteDelete(db, messageSender.getSenderIdentity(), serverTimestamp);
                         message.deleteAttachments(db);
                     });
                     AndroidNotificationManager.remoteDeleteMessageNotification(discussion, message.id);
@@ -782,7 +867,10 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 RemoteDeleteAndEditRequest remoteDeleteAndEditRequest = db.remoteDeleteAndEditRequestDao().getBySenderSequenceNumber(messageReference.getSenderSequenceNumber(), messageReference.getSenderThreadIdentifier(), messageReference.getSenderIdentifier(), discussion.id);
                 if (remoteDeleteAndEditRequest != null) {
                     // an edit/delete request already exists
-                    if (remoteDeleteAndEditRequest.requestType != RemoteDeleteAndEditRequest.TYPE_DELETE || remoteDeletePermission || (editAndDeleteOwnMessagesPermission && Arrays.equals(messageReference.getSenderIdentifier(), contact.bytesContactIdentity))) {
+                    if (remoteDeleteAndEditRequest.requestType != RemoteDeleteAndEditRequest.TYPE_DELETE
+                            || messageSender.type == MessageSender.Type.OWNED_IDENTITY
+                            || remoteDeletePermission
+                            || (editAndDeleteOwnMessagesPermission && Arrays.equals(messageReference.getSenderIdentifier(), messageSender.getSenderIdentity()))) {
                         // delete the edit, replace it with our new delete
                         db.remoteDeleteAndEditRequestDao().delete(remoteDeleteAndEditRequest);
                     } else {
@@ -791,19 +879,19 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     }
                 }
 
-                remoteDeleteAndEditRequest = new RemoteDeleteAndEditRequest(discussion.id, messageReference.getSenderIdentifier(), messageReference.getSenderThreadIdentifier(), messageReference.getSenderSequenceNumber(), serverTimestamp, RemoteDeleteAndEditRequest.TYPE_DELETE, null, null, contact.bytesContactIdentity);
+                remoteDeleteAndEditRequest = new RemoteDeleteAndEditRequest(discussion.id, messageReference.getSenderIdentifier(), messageReference.getSenderThreadIdentifier(), messageReference.getSenderSequenceNumber(), serverTimestamp, RemoteDeleteAndEditRequest.TYPE_DELETE, null, null, messageSender.getSenderIdentity());
                 db.remoteDeleteAndEditRequestDao().insert(remoteDeleteAndEditRequest);
             }
         }
     }
 
-    private void handleUpdateMessage(Message.JsonUpdateMessage jsonUpdateMessage, Contact contact, long serverTimestamp) {
+    private void handleUpdateMessage(JsonUpdateMessage jsonUpdateMessage, @NonNull MessageSender messageSender, long serverTimestamp) {
         if (jsonUpdateMessage.getMessageReference() == null
-                || !Arrays.equals(contact.bytesContactIdentity, jsonUpdateMessage.getMessageReference().getSenderIdentifier())) { // only the original author can edit a message
+                || !Arrays.equals(messageSender.getSenderIdentity(), jsonUpdateMessage.getMessageReference().getSenderIdentifier())) { // only the original author can edit a message
             return;
         }
 
-        Discussion discussion = getDiscussion(jsonUpdateMessage.getGroupUid(), jsonUpdateMessage.getGroupOwner(), jsonUpdateMessage.getGroupV2Identifier(), contact, GroupV2.Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES);
+        Discussion discussion = getDiscussion(jsonUpdateMessage.getGroupUid(), jsonUpdateMessage.getGroupOwner(), jsonUpdateMessage.getGroupV2Identifier(), jsonUpdateMessage.getOneToOneIdentifier(), messageSender, GroupV2.Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES);
 
         if (discussion == null) {
             return;
@@ -827,9 +915,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
             // normal updateMessage message
             if (jsonUpdateMessage.getJsonLocation() == null) {
-                List<Message.JsonUserMention> mentions = message.getMentions();
-                HashSet<Message.JsonUserMention> mentionSet = mentions == null ? null : new HashSet<>(mentions);
-                HashSet<Message.JsonUserMention> newMentionSet = jsonUpdateMessage.getJsonUserMentions() == null ? null : new HashSet<>(jsonUpdateMessage.getJsonUserMentions());
+                List<JsonUserMention> mentions = message.getMentions();
+                HashSet<JsonUserMention> mentionSet = mentions == null ? null : new HashSet<>(mentions);
+                HashSet<JsonUserMention> newMentionSet = jsonUpdateMessage.getJsonUserMentions() == null ? null : new HashSet<>(jsonUpdateMessage.getJsonUserMentions());
                 boolean mentionsDidNotChange = Objects.equals(mentionSet, newMentionSet);
                 if (Objects.equals(message.contentBody, newBody) && mentionsDidNotChange) {
                     // no update needed --> do nothing
@@ -850,14 +938,14 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 });
 
                 // never edit the content of an hidden message notification!
-                if (message.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
+                if (message.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE && messageSender.type == MessageSender.Type.CONTACT) {
                     boolean editMentionsMyself = false;
                     // check if I was mentioned in the update but not in the original message
                     if (!mentionsDidNotChange && newMentionSet != null) {
                         if (mentionSet != null) {
                             newMentionSet.removeAll(mentionSet);
                         }
-                        for (Message.JsonUserMention mention : newMentionSet) {
+                        for (JsonUserMention mention : newMentionSet) {
                             if (Arrays.equals(mention.getUserIdentifier(), discussion.bytesOwnedIdentity)) {
                                 editMentionsMyself = true;
                                 break;
@@ -865,7 +953,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                         }
                     }
 
-                    AndroidNotificationManager.editMessageNotification(discussion, message, contact, newBody, editMentionsMyself);
+                    AndroidNotificationManager.editMessageNotification(discussion, message, messageSender.contact, newBody, editMentionsMyself);
                 }
             } else { // update location message
                 // check message is a sharing location one
@@ -878,15 +966,15 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     return;
                 }
 
-                Message.JsonLocation jsonLocation = jsonUpdateMessage.getJsonLocation();
+                JsonLocation jsonLocation = jsonUpdateMessage.getJsonLocation();
                 // handle end of sharing messages
-                if (jsonLocation.getType() == Message.JsonLocation.TYPE_END_SHARING) {
+                if (jsonLocation.getType() == JsonLocation.TYPE_END_SHARING) {
                     db.messageDao().updateLocationType(message.id, Message.LOCATION_TYPE_SHARE_FINISHED);
                     db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_LOCATION_SHARING_END, serverTimestamp));
                 }
                 // handle simple location update messages
-                else if (jsonLocation.getType() == Message.JsonLocation.TYPE_SHARING) {
-                    Message.JsonLocation oldJsonLocation = message.getJsonLocation();
+                else if (jsonLocation.getType() == JsonLocation.TYPE_SHARING) {
+                    JsonLocation oldJsonLocation = message.getJsonLocation();
                     Long count;
                     if (oldJsonLocation == null) {
                         count = -1L;
@@ -936,12 +1024,12 @@ public class HandleNewMessageNotificationTask implements Runnable {
         }
     }
 
-    private void handleReactionMessage(@NonNull Message.JsonReaction jsonReaction, @NonNull Contact contact, long serverTimestamp) {
+    private void handleReactionMessage(@NonNull JsonReaction jsonReaction, @NonNull MessageSender messageSender, long serverTimestamp) {
         if (jsonReaction.getMessageReference() == null) {
             return;
         }
 
-        Discussion discussion = getDiscussion(jsonReaction.getGroupUid(), jsonReaction.getGroupOwner(), jsonReaction.getGroupV2Identifier(), contact, GroupV2.Permission.SEND_MESSAGE);
+        Discussion discussion = getDiscussion(jsonReaction.getGroupUid(), jsonReaction.getGroupOwner(), jsonReaction.getGroupV2Identifier(), jsonReaction.getOneToOneIdentifier(), messageSender, GroupV2.Permission.SEND_MESSAGE);
 
         if (discussion == null) {
             return;
@@ -955,17 +1043,18 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
         if (message != null) {
             if (message.wipeStatus == Message.WIPE_STATUS_WIPED
-                || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
+                    || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
                 return;
             }
 
-            if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE || message.mentioned) {
-                OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(contact.bytesOwnedIdentity);
-                AndroidNotificationManager.displayReactionNotification(ownedIdentity, discussion, message, jsonReaction.getReaction(), contact);
+            // only show a notification if a contact reacted to an outbound message or a message I am mentioned in
+            if (messageSender.type == MessageSender.Type.CONTACT && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE || message.mentioned)) {
+                OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(messageSender.bytesOwnedIdentity);
+                AndroidNotificationManager.displayReactionNotification(ownedIdentity, discussion, message, jsonReaction.getReaction(), messageSender.contact);
             }
-            new UpdateReactionsTask(message.id, jsonReaction.getReaction(), contact.bytesContactIdentity, serverTimestamp).run();
+            new UpdateReactionsTask(message.id, jsonReaction.getReaction(), messageSender.type == MessageSender.Type.CONTACT ? messageSender.getSenderIdentity() : null, serverTimestamp, false).run();
         } else {
-            ReactionRequest reactionRequest = db.reactionRequestDao().getBySenderSequenceNumberAndReacter(jsonReaction.getMessageReference().getSenderSequenceNumber(), jsonReaction.getMessageReference().getSenderThreadIdentifier(), jsonReaction.getMessageReference().getSenderIdentifier(), discussion.id, contact.bytesContactIdentity);
+            ReactionRequest reactionRequest = db.reactionRequestDao().getBySenderSequenceNumberAndReacter(jsonReaction.getMessageReference().getSenderSequenceNumber(), jsonReaction.getMessageReference().getSenderThreadIdentifier(), jsonReaction.getMessageReference().getSenderIdentifier(), discussion.id, messageSender.getSenderIdentity());
             if (reactionRequest != null) {
                 if (reactionRequest.serverTimestamp < serverTimestamp) {
                     // we got a newer reaction --> update it
@@ -974,13 +1063,13 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     db.reactionRequestDao().update(reactionRequest);
                 }
             } else {
-                // only create a reactionRequest if the reaction is non-null
+                // also create a reactionRequest if the reaction is null, in case we later receive an older reaction we want to cancel
                 reactionRequest = new ReactionRequest(
                         discussion.id,
                         jsonReaction.getMessageReference().getSenderIdentifier(),
                         jsonReaction.getMessageReference().getSenderThreadIdentifier(),
                         jsonReaction.getMessageReference().getSenderSequenceNumber(),
-                        contact.bytesContactIdentity,
+                        messageSender.getSenderIdentity(),
                         serverTimestamp,
                         jsonReaction.getReaction()
                 );
@@ -989,73 +1078,126 @@ public class HandleNewMessageNotificationTask implements Runnable {
         }
     }
 
-    private void handleScreenCaptureDetectionMessage(@NonNull Message.JsonScreenCaptureDetection jsonScreenCaptureDetection, @NonNull Contact contact, long serverTimestamp) {
-        Discussion discussion = getDiscussion(jsonScreenCaptureDetection.getGroupUid(), jsonScreenCaptureDetection.getGroupOwner(), jsonScreenCaptureDetection.getGroupV2Identifier(), contact, null);
+    private void handleScreenCaptureDetectionMessage(@NonNull JsonScreenCaptureDetection jsonScreenCaptureDetection, @NonNull MessageSender messageSender, long serverTimestamp) {
+        Discussion discussion = getDiscussion(jsonScreenCaptureDetection.getGroupUid(), jsonScreenCaptureDetection.getGroupOwner(), jsonScreenCaptureDetection.getGroupV2Identifier(), jsonScreenCaptureDetection.getOneToOneIdentifier(), messageSender, null);
 
         if (discussion == null) {
             return;
         }
 
-        Message message = Message.createScreenShotDetectedMessage(db, discussion.id, contact.bytesContactIdentity, serverTimestamp);
+        Message message = Message.createScreenShotDetectedMessage(db, discussion.id, messageSender.getSenderIdentity(), serverTimestamp);
         db.messageDao().insert(message);
         if (discussion.updateLastMessageTimestamp(message.timestamp)) {
             db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
         }
     }
 
+    private void handleDiscussionReadMessage(@NonNull JsonDiscussionRead jsonDiscussionRead, @NonNull MessageSender messageSender) {
+        if (messageSender.type != MessageSender.Type.OWNED_IDENTITY) {
+            return;
+        }
 
-    private Discussion getDiscussion(byte[] bytesGroupUid, byte[] bytesGroupOwner, byte[] bytesGroupIdentifier, Contact contact, @Nullable GroupV2.Permission requiredPermission) {
+        Discussion discussion = getDiscussion(jsonDiscussionRead.getGroupUid(), jsonDiscussionRead.getGroupOwner(), jsonDiscussionRead.getGroupV2Identifier(), jsonDiscussionRead.getOneToOneIdentifier(), messageSender, null);
+
+        if (discussion == null) {
+            return;
+        }
+
+        db.messageDao().markDiscussionMessagesReadUpTo(discussion.id, jsonDiscussionRead.getLastReadMessageServerTimestamp());
+        if (db.messageDao().getServerTimestampOfLatestUnreadInboundMessageInDiscussion(discussion.id) == null) {
+            AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussion.id);
+        }
+    }
+
+
+    private void handleLimitedVisibilityOpenedMessage(@NonNull JsonLimitedVisibilityMessageOpened jsonLimitedVisibilityMessageOpened, @NonNull MessageSender messageSender, long serverTimestamp, long downloadTimestamp) {
+        if (messageSender.type != MessageSender.Type.OWNED_IDENTITY || jsonLimitedVisibilityMessageOpened.messageReference == null) {
+            return;
+        }
+
+        Discussion discussion = getDiscussion(jsonLimitedVisibilityMessageOpened.getGroupUid(), jsonLimitedVisibilityMessageOpened.getGroupOwner(), jsonLimitedVisibilityMessageOpened.getGroupV2Identifier(), jsonLimitedVisibilityMessageOpened.getOneToOneIdentifier(), messageSender, null);
+
+        if (discussion == null) {
+            return;
+        }
+
+        JsonMessageReference messageReference = jsonLimitedVisibilityMessageOpened.messageReference;
+        Message message = db.messageDao().getBySenderSequenceNumber(messageReference.getSenderSequenceNumber(), messageReference.getSenderThreadIdentifier(), messageReference.getSenderIdentifier(), discussion.id);
+
+        if (message == null) {
+            return;
+        }
+
+        new InboundEphemeralMessageClicked(messageSender.bytesOwnedIdentity, message, downloadTimestamp - serverTimestamp).run();
+    }
+
+
+
+    private Discussion getDiscussion(byte[] bytesGroupUid, byte[] bytesGroupOwner, byte[] bytesGroupIdentifier, JsonOneToOneMessageIdentifier oneToOneMessageIdentifier, MessageSender messageSender, @Nullable GroupV2.Permission requiredPermission) {
+        // we keep this test for now to maintain backward compatibility, but oneToOneMessageIdentifier should always be non-null in this case
         if (bytesGroupUid == null && bytesGroupOwner == null && bytesGroupIdentifier == null) {
-            return db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+            if (oneToOneMessageIdentifier != null) {
+                byte[] bytesContactIdentity = oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity);
+                if (bytesContactIdentity == null) {
+                    return null;
+                }
+                return db.discussionDao().getByContact(messageSender.bytesOwnedIdentity, bytesContactIdentity);
+            } else {
+                return db.discussionDao().getByContact(messageSender.bytesOwnedIdentity, messageSender.getSenderIdentity());
+            }
         } else if (bytesGroupIdentifier != null) {
             // check the send is indeed a member or pending member with appropriate send message permission
             boolean requiredPermissionFulfilled = false;
-            Group2Member group2Member = db.group2MemberDao().get(contact.bytesOwnedIdentity, bytesGroupIdentifier, contact.bytesContactIdentity);
-            if (group2Member != null) {
-                if (requiredPermission != null) {
-                    switch (requiredPermission) {
-                        case GROUP_ADMIN:
-                            requiredPermissionFulfilled = group2Member.permissionAdmin;
-                            break;
-                        case REMOTE_DELETE_ANYTHING:
-                            requiredPermissionFulfilled = group2Member.permissionRemoteDeleteAnything;
-                            break;
-                        case EDIT_OR_REMOTE_DELETE_OWN_MESSAGES:
-                            requiredPermissionFulfilled = group2Member.permissionEditOrRemoteDeleteOwnMessages;
-                            break;
-                        case CHANGE_SETTINGS:
-                            requiredPermissionFulfilled = group2Member.permissionChangeSettings;
-                            break;
-                        case SEND_MESSAGE:
-                            requiredPermissionFulfilled = group2Member.permissionSendMessage;
-                            break;
-                    }
-                } else {
-                    requiredPermissionFulfilled = true;
-                }
+            if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                requiredPermissionFulfilled = true;
             } else {
-                Group2PendingMember group2PendingMember = db.group2PendingMemberDao().get(contact.bytesOwnedIdentity, bytesGroupIdentifier, contact.bytesContactIdentity);
-                if (group2PendingMember != null) {
+                Group2Member group2Member = db.group2MemberDao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier, messageSender.getSenderIdentity());
+                if (group2Member != null) {
                     if (requiredPermission != null) {
                         switch (requiredPermission) {
                             case GROUP_ADMIN:
-                                requiredPermissionFulfilled = group2PendingMember.permissionAdmin;
+                                requiredPermissionFulfilled = group2Member.permissionAdmin;
                                 break;
                             case REMOTE_DELETE_ANYTHING:
-                                requiredPermissionFulfilled = group2PendingMember.permissionRemoteDeleteAnything;
+                                requiredPermissionFulfilled = group2Member.permissionRemoteDeleteAnything;
                                 break;
                             case EDIT_OR_REMOTE_DELETE_OWN_MESSAGES:
-                                requiredPermissionFulfilled = group2PendingMember.permissionEditOrRemoteDeleteOwnMessages;
+                                requiredPermissionFulfilled = group2Member.permissionEditOrRemoteDeleteOwnMessages;
                                 break;
                             case CHANGE_SETTINGS:
-                                requiredPermissionFulfilled = group2PendingMember.permissionChangeSettings;
+                                requiredPermissionFulfilled = group2Member.permissionChangeSettings;
                                 break;
                             case SEND_MESSAGE:
-                                requiredPermissionFulfilled = group2PendingMember.permissionSendMessage;
+                                requiredPermissionFulfilled = group2Member.permissionSendMessage;
                                 break;
                         }
                     } else {
                         requiredPermissionFulfilled = true;
+                    }
+                } else {
+                    Group2PendingMember group2PendingMember = db.group2PendingMemberDao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier, messageSender.getSenderIdentity());
+                    if (group2PendingMember != null) {
+                        if (requiredPermission != null) {
+                            switch (requiredPermission) {
+                                case GROUP_ADMIN:
+                                    requiredPermissionFulfilled = group2PendingMember.permissionAdmin;
+                                    break;
+                                case REMOTE_DELETE_ANYTHING:
+                                    requiredPermissionFulfilled = group2PendingMember.permissionRemoteDeleteAnything;
+                                    break;
+                                case EDIT_OR_REMOTE_DELETE_OWN_MESSAGES:
+                                    requiredPermissionFulfilled = group2PendingMember.permissionEditOrRemoteDeleteOwnMessages;
+                                    break;
+                                case CHANGE_SETTINGS:
+                                    requiredPermissionFulfilled = group2PendingMember.permissionChangeSettings;
+                                    break;
+                                case SEND_MESSAGE:
+                                    requiredPermissionFulfilled = group2PendingMember.permissionSendMessage;
+                                    break;
+                            }
+                        } else {
+                            requiredPermissionFulfilled = true;
+                        }
                     }
                 }
             }
@@ -1065,7 +1207,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 return null;
             }
 
-            return db.discussionDao().getByGroupIdentifier(contact.bytesOwnedIdentity, bytesGroupIdentifier);
+            return db.discussionDao().getByGroupIdentifier(messageSender.bytesOwnedIdentity, bytesGroupIdentifier);
         } else {
             if (bytesGroupUid == null || bytesGroupOwner == null) {
                 Logger.i("Received a message with one of groupOwner or groupUid null, IGNORING IT!");
@@ -1075,14 +1217,57 @@ public class HandleNewMessageNotificationTask implements Runnable {
             System.arraycopy(bytesGroupOwner, 0, bytesGroupOwnerAndUid, 0, bytesGroupOwner.length);
             System.arraycopy(bytesGroupUid, 0, bytesGroupOwnerAndUid, bytesGroupOwner.length, bytesGroupUid.length);
 
-            // only post the message in the discussion if the sender is indeed in this discussion!
-            if ((db.contactGroupJoinDao().get(bytesGroupOwnerAndUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity) == null &&
-                    db.pendingGroupMemberDao().get(contact.bytesContactIdentity, contact.bytesOwnedIdentity, bytesGroupOwnerAndUid) == null)) {
-                Logger.i("Received a message for an unknown group, or from someone not in the group, IGNORING IT!");
-                return null;
+            if (messageSender.type == MessageSender.Type.CONTACT) {
+                // only post the message in the discussion if the sender is indeed in this discussion!
+                if ((db.contactGroupJoinDao().get(bytesGroupOwnerAndUid, messageSender.bytesOwnedIdentity, messageSender.getSenderIdentity()) == null &&
+                        db.pendingGroupMemberDao().get(messageSender.bytesOwnedIdentity, bytesGroupOwnerAndUid, messageSender.getSenderIdentity()) == null)) {
+                    Logger.i("Received a message for an unknown group, or from someone not in the group, IGNORING IT!");
+                    return null;
+                }
             }
+            return db.discussionDao().getByGroupOwnerAndUid(messageSender.bytesOwnedIdentity, bytesGroupOwnerAndUid);
+        }
+    }
 
-            return db.discussionDao().getByGroupOwnerAndUid(contact.bytesOwnedIdentity, bytesGroupOwnerAndUid);
+    private static class MessageSender {
+        private enum Type {
+            CONTACT,
+            OWNED_IDENTITY,
+        }
+
+        private final @NonNull Type type;
+
+        private final Contact contact;
+        private final @NonNull byte[] bytesOwnedIdentity;
+
+        private MessageSender(@NonNull Type type, Contact contact, @NonNull byte[] bytesOwnedIdentity) {
+            this.type = type;
+            this.contact = contact;
+            this.bytesOwnedIdentity = bytesOwnedIdentity;
+        }
+
+        @Nullable
+        static MessageSender of(AppDatabase db, byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) {
+            if (Arrays.equals(bytesOwnedIdentity, bytesContactIdentity)) {
+                return new MessageSender(Type.OWNED_IDENTITY, null, bytesOwnedIdentity);
+            } else {
+                Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                if (contact != null) {
+                    return new MessageSender(Type.CONTACT, contact, bytesOwnedIdentity);
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        public byte[] getSenderIdentity() {
+            switch (type) {
+                case CONTACT:
+                    return contact.bytesContactIdentity;
+                case OWNED_IDENTITY:
+                default:
+                    return bytesOwnedIdentity;
+            }
         }
     }
 }
