@@ -67,9 +67,9 @@ public class ContactGroup implements ObvDatabase {
     static final String GROUP_OWNER = "group_owner";
     private int publishedDetailsVersion;
     static final String PUBLISHED_DETAILS_VERSION = "published_details_version";
-    private int latestOrTrustedDetailsVersion;
+    public int latestOrTrustedDetailsVersion;
     static final String LATEST_OR_TRUSTED_DETAILS_VERSION = "latest_or_trusted_details_version";
-    private long groupMembersVersion;
+    public long groupMembersVersion;
     static final String GROUP_MEMBERS_VERSION = "group_members_version";
 
     public byte[] getGroupOwnerAndUid() {
@@ -538,7 +538,7 @@ public class ContactGroup implements ObvDatabase {
         }
     }
 
-    private ContactGroup(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity, Identity groupOwner, int version) {
+    public ContactGroup(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity, Identity groupOwner, int version) {
         this.identityManagerSession = identityManagerSession;
         this.groupOwnerAndUid = groupOwnerAndUid;
         this.ownedIdentity = ownedIdentity;

@@ -153,7 +153,7 @@ public class ContactIdentityDetails implements ObvDatabase {
     }
 
 
-    private ContactIdentityDetails(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, int version, String serializedJsonDetails, String photoUrl, UID photoServerLabel, AuthEncKey photoServerKey) {
+    public ContactIdentityDetails(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, int version, String serializedJsonDetails, String photoUrl, UID photoServerLabel, AuthEncKey photoServerKey) {
         this.identityManagerSession = identityManagerSession;
         this.contactIdentity = contactIdentity;
         this.ownedIdentity = ownedIdentity;

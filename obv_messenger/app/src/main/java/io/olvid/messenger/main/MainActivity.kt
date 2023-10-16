@@ -68,7 +68,7 @@ import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
 import io.olvid.messenger.activities.ContactDetailsActivity
 import io.olvid.messenger.activities.ObvLinkActivity
-import io.olvid.messenger.activities.OwnedIdentityDetailsActivity
+import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity
 import io.olvid.messenger.activities.storage_manager.StorageManagerActivity
 import io.olvid.messenger.billing.BillingUtils
 import io.olvid.messenger.customClasses.ConfigurationPojo
@@ -90,6 +90,7 @@ import io.olvid.messenger.main.discussions.DiscussionListFragment
 import io.olvid.messenger.main.groups.GroupListFragment
 import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.onboarding.OnboardingActivity
+import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.plus_button.PlusButtonActivity
 import io.olvid.messenger.services.UnifiedForegroundService
@@ -144,12 +145,9 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
                 AppDatabase.getInstance().ownedIdentityDao().countAll()
             }
             if (identityCount == 0) {
-                val onboardingIntent = Intent(applicationContext, OnboardingActivity::class.java)
-                onboardingIntent.putExtra(OnboardingActivity.FIRST_ID_INTENT_EXTRA, true)
+                val onboardingIntent = Intent(applicationContext, OnboardingFlowActivity::class.java)
                 startActivity(onboardingIntent)
                 finish()
-            } else {
-                runOnUiThread { Utils.showDialogs(this) }
             }
         }
         try {
@@ -177,12 +175,7 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
                 return true
             }
 
-            override fun onScroll(
-                e1: MotionEvent,
-                e2: MotionEvent,
-                distanceX: Float,
-                distanceY: Float
-            ): Boolean {
+            override fun onScroll(e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
                 if (scrolled) {
                     return false
                 }
@@ -238,9 +231,7 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
             if (ownedIdentity == null) {
                 App.runThread {
                     if (AppDatabase.getInstance().ownedIdentityDao().countAll() == 0) {
-                        val onboardingIntent =
-                            Intent(applicationContext, OnboardingActivity::class.java)
-                        onboardingIntent.putExtra(OnboardingActivity.FIRST_ID_INTENT_EXTRA, true)
+                        val onboardingIntent = Intent(applicationContext, OnboardingFlowActivity::class.java)
                         startActivity(onboardingIntent)
                         finish()
                     }
@@ -267,7 +258,7 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
                 return@switchMap null
             }
             AppDatabase.getInstance().messageDao()
-                .hasUnreadMessagesOrDiscussions(ownedIdentity.bytesOwnedIdentity)
+                .hasUnreadMessagesOrDiscussionsOrInvitations(ownedIdentity.bytesOwnedIdentity)
         }.observe(this) { unreadMessages: Boolean? ->
             if (unreadMessages != null && unreadMessages) {
                 tabsPagerAdapter!!.showNotificationDot(DISCUSSIONS_TAB)
@@ -549,18 +540,8 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
                                         }
 
                                         override fun onNewProfileCreationSelected() {
-                                            val onboardingIntent = Intent(
-                                                this@MainActivity,
-                                                OnboardingActivity::class.java
-                                            )
-                                            onboardingIntent.putExtra(
-                                                OnboardingActivity.FIRST_ID_INTENT_EXTRA,
-                                                false
-                                            )
-                                            onboardingIntent.putExtra(
-                                                PlusButtonActivity.LINK_URI_INTENT_EXTRA,
-                                                uri
-                                            )
+                                            val onboardingIntent = Intent(this@MainActivity, OnboardingActivity::class.java)
+                                                .putExtra(PlusButtonActivity.LINK_URI_INTENT_EXTRA, uri)
                                             startActivity(onboardingIntent)
                                         }
                                     })
@@ -599,18 +580,8 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
                                     }
 
                                     override fun onNewProfileCreationSelected() {
-                                        val onboardingIntent = Intent(
-                                            this@MainActivity,
-                                            OnboardingActivity::class.java
-                                        )
-                                        onboardingIntent.putExtra(
-                                            OnboardingActivity.FIRST_ID_INTENT_EXTRA,
-                                            false
-                                        )
-                                        onboardingIntent.putExtra(
-                                            OnboardingActivity.LINK_URI_INTENT_EXTRA,
-                                            uri
-                                        )
+                                        val onboardingIntent = Intent(this@MainActivity, OnboardingActivity::class.java)
+                                            .putExtra(OnboardingActivity.LINK_URI_INTENT_EXTRA, uri)
                                         startActivity(onboardingIntent)
                                     }
                                 })
@@ -631,27 +602,16 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
                                     override fun onOwnedIdentitySelected(bytesOwnedIdentity: ByteArray) {
                                         AppSingleton.getInstance()
                                             .selectIdentity(bytesOwnedIdentity) {
-                                                val plusIntent = Intent(
-                                                    this@MainActivity,
-                                                    PlusButtonActivity::class.java
-                                                )
-                                                plusIntent.putExtra(
-                                                    PlusButtonActivity.LINK_URI_INTENT_EXTRA,
-                                                    uri
-                                                )
+                                                val plusIntent = Intent(this@MainActivity, PlusButtonActivity::class.java)
+                                                    .putExtra(PlusButtonActivity.LINK_URI_INTENT_EXTRA, uri)
                                                 startActivity(plusIntent)
                                             }
                                     }
 
                                     override fun onNewProfileCreationSelected() {
-                                        val onboardingIntent = Intent(
-                                            this@MainActivity,
-                                            OnboardingActivity::class.java
-                                        )
-                                        onboardingIntent.putExtra(
-                                            OnboardingActivity.FIRST_ID_INTENT_EXTRA,
-                                            false
-                                        )
+                                        val onboardingIntent = Intent(this@MainActivity, OnboardingActivity::class.java)
+                                            .putExtra(OnboardingActivity.PROFILE_CREATION, true)
+
                                         startActivity(onboardingIntent)
                                         App.toast(
                                             R.string.toast_message_create_new_profile_then_reopen_this_link,
@@ -682,6 +642,7 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
         supportFragmentManager.removeFragmentOnAttachListener(this)
         tabsPagerAdapter = null
         contactListFragment = null
+        Utils.dialogShowing = false
     }
 
     inner class TabsPagerAdapter internal constructor(

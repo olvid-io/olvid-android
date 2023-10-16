@@ -216,6 +216,7 @@ public class UserInterfaceDialog implements ObvDatabase {
                 return list.toArray(new UserInterfaceDialog[0]);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             return new UserInterfaceDialog[0];
         }
     }

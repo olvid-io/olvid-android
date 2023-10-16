@@ -27,7 +27,6 @@ import androidx.core.util.Pair
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor
-import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.StringUtils
@@ -40,7 +39,7 @@ import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOA
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.openid.KeycloakManager.KeycloakCallback
 import io.olvid.messenger.settings.SettingsActivity
-import java.util.*
+import java.util.Arrays
 import java.util.regex.Pattern
 
 class ContactListViewModel : ViewModel() {

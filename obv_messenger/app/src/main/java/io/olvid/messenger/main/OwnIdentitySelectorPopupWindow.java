@@ -53,12 +53,12 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
+import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.OwnedIdentityDao;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.onboarding.OnboardingActivity;
+import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class OwnIdentitySelectorPopupWindow {
@@ -164,8 +164,8 @@ public class OwnIdentitySelectorPopupWindow {
         final TextView addProfileButton = popupView.findViewById(R.id.button_add_profile);
         addProfileButton.setOnClickListener(v -> {
             popupWindow.dismiss();
-            Intent onboardingIntent = new Intent(activity, OnboardingActivity.class);
-            onboardingIntent.putExtra(OnboardingActivity.FIRST_ID_INTENT_EXTRA, false);
+            Intent onboardingIntent = new Intent(activity, OnboardingFlowActivity.class);
+            onboardingIntent.putExtra(OnboardingFlowActivity.NEW_PROFILE_INTENT_EXTRA, true);
             activity.startActivity(onboardingIntent);
         });
         addProfileButton.setOnLongClickListener(v -> {

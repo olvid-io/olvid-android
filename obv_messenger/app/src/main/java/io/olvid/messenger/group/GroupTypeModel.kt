@@ -24,10 +24,9 @@ import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.group.GroupTypeModel.GroupType.CUSTOM
 import io.olvid.messenger.group.GroupTypeModel.GroupType.PRIVATE
-import io.olvid.messenger.group.GroupTypeModel.GroupType.SIMPLE
 import io.olvid.messenger.group.GroupTypeModel.GroupType.READ_ONLY
+import io.olvid.messenger.group.GroupTypeModel.GroupType.SIMPLE
 import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting.ADMINS
-import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting.EVERYONE
 
 open class GroupTypeModel(
     val type: GroupType,

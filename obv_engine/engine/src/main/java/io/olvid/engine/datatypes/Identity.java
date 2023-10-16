@@ -42,7 +42,7 @@ public class Identity implements Comparable<Identity> {
         this.identityBytes = null;
     }
 
-    public Identity(String server, ServerAuthenticationPublicKey serverAuthenticationPublicKey, EncryptionPublicKey encryptionPublicKey, byte[] identityBytes) {
+    private Identity(String server, ServerAuthenticationPublicKey serverAuthenticationPublicKey, EncryptionPublicKey encryptionPublicKey, byte[] identityBytes) {
         this.server = server;
         this.serverAuthenticationPublicKey = serverAuthenticationPublicKey;
         this.encryptionPublicKey = encryptionPublicKey;

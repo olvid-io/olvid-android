@@ -181,7 +181,7 @@ public class OwnedIdentityDetails implements ObvDatabase {
 
 
 
-    private OwnedIdentityDetails(IdentityManagerSession identityManagerSession, Identity ownedIdentity, int version, String serializedJsonDetails, String photoUrl, UID photoServerLabel, AuthEncKey photoServerKey) {
+    public OwnedIdentityDetails(IdentityManagerSession identityManagerSession, Identity ownedIdentity, int version, String serializedJsonDetails, String photoUrl, UID photoServerLabel, AuthEncKey photoServerKey) {
         this.identityManagerSession = identityManagerSession;
         this.ownedIdentity = ownedIdentity;
         this.version = version;

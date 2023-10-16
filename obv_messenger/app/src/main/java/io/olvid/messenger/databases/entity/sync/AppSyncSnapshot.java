@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.sync.ObvSyncDiff;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.messenger.databases.AppDatabase;
@@ -57,6 +58,26 @@ public class AppSyncSnapshot implements ObvSyncSnapshotNode {
         appSyncSnapshot.domain = DEFAULT_DOMAIN;
         return appSyncSnapshot;
     }
+
+    @JsonIgnore
+    public void restore(AppDatabase db) throws Exception {
+        if (!domain.contains(OWNED_IDENTITY) || !domain.contains(OWNED_IDENTITY_NODE)) {
+            Logger.e("Trying to restore an incomplete IdentityManagerSyncSnapshot. Domain: " + domain);
+            throw new Exception();
+        }
+        if (db.ownedIdentityDao().get(owned_identity) == null) {
+            Logger.e("Trying to restore a snapshot of an unknown owned identity");
+            throw new Exception();
+        }
+        db.runInTransaction(() -> {
+            if (domain.contains(SETTINGS) && settings != null) {
+                settings.restore(db, owned_identity);
+            }
+            owned_identity_node.restore(db, owned_identity);
+        });
+    }
+
+
 
     @JsonIgnore
     @Override

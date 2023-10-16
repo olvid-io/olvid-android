@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW X6 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="5.48889cm" height="5.48889cm" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 5489 5489"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil1 {fill:white;fill-rule:nonzero}
+    .fil0 {fill:url(#id0)}
+   ]]>
+  </style>
+  <linearGradient id="id0" gradientUnits="userSpaceOnUse" x1="2744.44" y1="0" x2="2744.44" y2="5488.88">
+   <stop offset="0" style="stop-color:#2F65F5"/>
+   <stop offset="1" style="stop-color:#0044C9"/>
+  </linearGradient>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <g id="_754885872">
+   <path class="fil0" d="M1441 0c-796,0 -1441,645 -1441,1441l0 2607c0,796 645,1441 1441,1441l2607 0c796,0 1441,-645 1441,-1441l0 -2607c0,-796 -645,-1441 -1441,-1441l-2607 0z"/>
+   <path class="fil1" d="M3686 3161c0,0 0,0 0,0 -1,3 -13,33 -18,44 -22,50 -47,97 -76,142 -234,379 -616,547 -928,623 0,0 -128,28 -185,37 -479,80 -792,3 -792,3 0,0 381,-120 543,-347 -77,-46 -147,-101 -208,-167 -89,-96 -159,-208 -209,-335 -50,-127 -75,-266 -75,-418 0,-151 25,-291 75,-420 50,-129 120,-241 209,-335 89,-95 196,-168 320,-222 124,-53 260,-80 408,-80 148,0 284,27 408,80 124,53 230,127 320,222 89,95 159,206 209,335 50,129 75,269 75,420 0,151 -25,291 -75,418zm830 -1150c-98,-227 -233,-424 -405,-591 -172,-167 -375,-298 -609,-395 -234,-96 -485,-144 -753,-144 -268,0 -519,48 -753,144 -234,96 -437,228 -609,395 -172,167 -307,364 -405,591 -98,227 -147,471 -147,732 0,261 49,506 147,733 98,227 233,424 405,591 172,167 375,298 609,395 234,96 485,144 753,144 268,0 519,-48 753,-144 234,-96 437,-228 609,-395 172,-167 307,-364 405,-591 98,-227 147,-471 147,-733 0,-261 -49,-506 -147,-732z"/>
+  </g>
+ </g>
+</svg>

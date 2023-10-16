@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import io.olvid.engine.Logger;
@@ -73,7 +74,7 @@ public class ContactGroupV2Member implements ObvDatabase {
 
    // region constructor
 
-   public static ContactGroupV2Member create(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity, List<String> permissionStrings, byte[] groupInvitationNonce) {
+   public static ContactGroupV2Member create(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity, Collection<String> permissionStrings, byte[] groupInvitationNonce) {
       if ((identityManagerSession == null) || (ownedIdentity == null) || (groupIdentifier == null) || (contactIdentity == null) || (permissionStrings == null) || (groupInvitationNonce == null)) {
          return null;
       }

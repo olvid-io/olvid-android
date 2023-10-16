@@ -106,7 +106,6 @@ fun CallLogItemView(
                 unreadMessages = false,
                 muted = false,
                 locked = false,
-                onClick = {  },
             )
 
             // content

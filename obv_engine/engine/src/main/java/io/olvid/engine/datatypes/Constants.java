@@ -23,7 +23,7 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 35;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 37;
     public static final int SERVER_API_VERSION = 15;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
@@ -69,6 +69,10 @@ public abstract class Constants {
     public static final long GET_USER_DATA_LOCAL_FILE_LIFESPAN = 86_400_000L * 7; // 7 days
     public static final long WELL_KNOWN_REFRESH_INTERVAL = 3_600_000L * 6; // 6 hours
 
+    // download message
+    public static final long RELIST_NEW_MESSAGE_COUNT_THRESHOLD = 20; // number of new messages in a single list operation that trigger a re-list
+    public static final long RELIST_DELAY = 30_000; // 30 seconds
+
     // backups
     public static final long AUTOBACKUP_MAX_INTERVAL = 86_400_000L; // 1 day
     public static final long AUTOBACKUP_START_DELAY = 60_000L * 2; // 2 minutes
@@ -91,6 +95,9 @@ public abstract class Constants {
     public static final byte[] ANDROID_STORE_ID = new byte[]{0x01};
 
     public static final int DEFAULT_NUMBER_OF_DIGITS_FOR_SAS = 4;
+    public static final String EPHEMERAL_IDENTITY_SERVER = "ephemeral_fake_server";
+    public static final String TRANSFER_WS_SERVER_URL = "wss://transfer.olvid.io";
+    public static final int TRANSFER_MAX_PAYLOAD_SIZE = 10000;
 
 
     public static final long BASE_RESCHEDULING_TIME = 250L;
@@ -104,7 +111,6 @@ public abstract class Constants {
     // prefixes for various types of signature
 
     public static final int SIGNATURE_PADDING_LENGTH = 16;
-
     public enum SignatureContext {
         SERVER_AUTHENTICATION,
         MUTUAL_SCAN,

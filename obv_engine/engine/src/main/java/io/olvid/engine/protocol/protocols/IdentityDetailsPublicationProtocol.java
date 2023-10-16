@@ -356,7 +356,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
                 // store the label and key in the details
                 protocolManagerSession.identityDelegate.setOwnedIdentityDetailsServerLabelAndKey(protocolManagerSession.session, ownedIdentity, publishedDetails.getVersion(), photoServerLabel, photoServerKey);
 
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(ownedIdentity, ServerQuery.Type.createPutUserDataQuery(ownedIdentity, photoServerLabel, publishedDetails.getPhotoUrl(), photoServerKey)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(ownedIdentity, new ServerQuery.PutUserDataQuery(ownedIdentity, photoServerLabel, publishedDetails.getPhotoUrl(), photoServerKey)));
                 ChannelMessageToSend messageToSend = new ServerPutPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 

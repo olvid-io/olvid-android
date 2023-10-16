@@ -297,6 +297,8 @@ public abstract class EngineNotifications {
 
     public static final String ENGINE_BACKUP_RESTORATION_FINISHED = "engine_notification_engine_backup_restoration_finished";
 
+    public static final String ENGINE_SNAPSHOT_RESTORATION_FINISHED = "engine_notification_engine_snapshot_restoration_finished";
+
     public static final String PING_LOST = "engine_notification_ping_lost";
 
     public static final String PING_RECEIVED = "engine_notification_ping_received";

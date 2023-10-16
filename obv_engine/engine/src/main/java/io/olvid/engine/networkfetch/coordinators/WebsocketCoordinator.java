@@ -159,7 +159,10 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         ownedIdentityServerSessionTokens = new HashMap<>();
         existingWebsockets = new HashMap<>();
 
+        okHttpClient = initializeOkHttpClientForWebSocket(sslSocketFactory);
+    }
 
+    public static OkHttpClient initializeOkHttpClientForWebSocket(SSLSocketFactory sslSocketFactory) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         if (sslSocketFactory != null) {
             try {
@@ -203,8 +206,9 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             });
         }
         builder.pingInterval(Constants.WEBSOCKET_PING_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
-        okHttpClient = builder.build();
+        return builder.build();
     }
+
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
         this.notificationListeningDelegate = notificationListeningDelegate;

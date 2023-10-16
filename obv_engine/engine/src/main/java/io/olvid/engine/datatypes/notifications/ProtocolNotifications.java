@@ -47,4 +47,6 @@ public abstract class ProtocolNotifications {
     public static final String NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_MEDIATOR_IDENTITY_KEY = "mediator_identity"; // Identity
     public static final String NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY = "contact_serialized_details"; // String
     public static final String NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY = "accepted"; // boolean
+
+    public static final String NOTIFICATION_SNAPSHOT_RESTORATION_FINISHED = "protocol_manager_notification_snapshot_restoration_finished";
 }

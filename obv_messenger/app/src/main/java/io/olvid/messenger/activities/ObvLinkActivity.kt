@@ -28,6 +28,7 @@ import io.olvid.messenger.R.string
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.onboarding.OnboardingActivity
+import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
 import java.util.regex.Pattern
 
 class ObvLinkActivity : AppCompatActivity() {
@@ -55,12 +56,16 @@ class ObvLinkActivity : AppCompatActivity() {
                             AppDatabase.getInstance().ownedIdentityDao().countAll() == 0
                         val linkIntent: Intent
                         if (firstIdentity) {
-                            linkIntent = Intent(App.getContext(), OnboardingActivity::class.java)
-                            linkIntent.putExtra(OnboardingActivity.FIRST_ID_INTENT_EXTRA, true)
-                            linkIntent.putExtra(
-                                OnboardingActivity.LINK_URI_INTENT_EXTRA,
-                                uri.toString()
-                            )
+                            val configurationLink = CONFIGURATION_PATTERN.matcher(uri.toString())
+                            if (configurationLink.find()) {
+                                // only forward to the old onboarding if it is a configuration link
+                                linkIntent = Intent(App.getContext(), OnboardingActivity::class.java)
+                                    .putExtra(OnboardingActivity.FIRST_ID_INTENT_EXTRA, true)
+                                    .putExtra(OnboardingActivity.LINK_URI_INTENT_EXTRA, uri.toString())
+                            } else {
+                                // otherwise simply start an onboarding
+                                linkIntent = Intent(App.getContext(), OnboardingFlowActivity::class.java)
+                            }
                         } else {
                             linkIntent = Intent(App.getContext(), MainActivity::class.java)
                             linkIntent.action = MainActivity.LINK_ACTION

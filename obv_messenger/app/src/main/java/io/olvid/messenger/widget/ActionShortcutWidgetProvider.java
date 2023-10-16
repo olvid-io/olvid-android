@@ -104,12 +104,7 @@ public class ActionShortcutWidgetProvider extends AppWidgetProvider {
                     Intent onClickIntent = new Intent(context, ActionShortcutSendMessageActivity.class);
                     onClickIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     onClickIntent.putExtra(ActionShortcutSendMessageActivity.APP_WIDGET_ID_INTENT_EXTRA, appWidgetId);
-                    final PendingIntent onClickPendingIntent;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        onClickPendingIntent = PendingIntent.getActivity(context, appWidgetId, onClickIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-                    } else {
-                        onClickPendingIntent = PendingIntent.getActivity(context, appWidgetId, onClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    }
+                    final PendingIntent onClickPendingIntent = PendingIntent.getActivity(context, appWidgetId, onClickIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
 
                     RemoteViews widgetViews = new RemoteViews(context.getPackageName(), R.layout.widget_action_shortcut);

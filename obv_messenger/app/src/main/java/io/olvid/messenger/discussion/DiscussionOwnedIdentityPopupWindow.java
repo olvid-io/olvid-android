@@ -53,7 +53,7 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
+import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.OwnedIdentityDao;

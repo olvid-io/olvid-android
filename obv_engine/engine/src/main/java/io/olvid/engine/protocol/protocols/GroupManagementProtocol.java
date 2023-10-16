@@ -838,7 +838,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                     // store the label and key in the details
                     protocolManagerSession.identityDelegate.setOwnedGroupDetailsServerLabelAndKey(protocolManagerSession.session, getOwnedIdentity(), groupInformation.getGroupOwnerAndUid(), publishedDetails.getVersion(), photoServerLabel, photoServerKey);
 
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createPutUserDataQuery(getOwnedIdentity(), photoServerLabel, publishedDetails.getPhotoUrl(), photoServerKey)));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.PutUserDataQuery(getOwnedIdentity(), photoServerLabel, publishedDetails.getPhotoUrl(), photoServerKey)));
                     ChannelMessageToSend messageToSend = new UploadGroupPhotoMessage(coreProtocolMessage, groupInformation).generateChannelServerQueryMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 } catch (Exception e) {
@@ -994,7 +994,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 // store the label and key in the details
                 protocolManagerSession.identityDelegate.setOwnedGroupDetailsServerLabelAndKey(protocolManagerSession.session, getOwnedIdentity(), groupInformation.getGroupOwnerAndUid(), publishedDetails.getVersion(), photoServerLabel, photoServerKey);
 
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createPutUserDataQuery(getOwnedIdentity(), photoServerLabel, publishedDetails.getPhotoUrl(), photoServerKey)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.PutUserDataQuery(getOwnedIdentity(), photoServerLabel, publishedDetails.getPhotoUrl(), photoServerKey)));
                 ChannelMessageToSend messageToSend = new UploadGroupPhotoMessage(coreProtocolMessage, groupInformationWithKeyAndLabel).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 

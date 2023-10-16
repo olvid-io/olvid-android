@@ -181,6 +181,9 @@ public interface EngineAPI {
     void deleteOwnedIdentityAndNotifyContacts(byte[] bytesOwnedIdentity, boolean deleteEverywhere) throws Exception;
     void queryGroupOwnerForLatestGroupMembers(byte[] bytesGroupOwnerAndUid, byte[] bytesOwnedIdentity) throws Exception;
     void addKeycloakContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String signedContactDetails) throws Exception;
+    void initiateOwnedIdentityTransferProtocolOnSourceDevice(byte[] bytesOwnedIdentity) throws Exception;
+    void initiateOwnedIdentityTransferProtocolOnTargetDevice(String deviceName) throws Exception;
+
 
     // Post/receive messages
     byte[] getReturnReceiptNonce();

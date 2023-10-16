@@ -264,13 +264,13 @@ public class DownloadGroupV2PhotoProtocol extends ConcreteProtocol {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
             if (receivedMessage.groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createGetKeycloakDataQuery(receivedMessage.groupIdentifier.serverUrl, receivedMessage.serverPhotoInfo.serverPhotoLabel)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetKeycloakDataQuery(receivedMessage.groupIdentifier.serverUrl, receivedMessage.serverPhotoInfo.serverPhotoLabel)));
                 ChannelMessageToSend messageToSend = new ServerGetPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
                 return new DownloadingPhotoState(receivedMessage.groupIdentifier, receivedMessage.serverPhotoInfo);
             } else {
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createGetUserDataQuery(receivedMessage.serverPhotoInfo.serverPhotoIdentity, receivedMessage.serverPhotoInfo.serverPhotoLabel)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetUserDataQuery(receivedMessage.serverPhotoInfo.serverPhotoIdentity, receivedMessage.serverPhotoInfo.serverPhotoLabel)));
                 ChannelMessageToSend messageToSend = new ServerGetPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 

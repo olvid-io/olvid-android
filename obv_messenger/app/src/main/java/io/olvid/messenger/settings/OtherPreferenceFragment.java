@@ -77,9 +77,11 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_BATTERY_OPTIMIZATION);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_ALARM_SCHEDULING);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS);
+                    editor.remove(SettingsActivity.USER_DIALOG_HIDE_FULL_SCREEN_NOTIFICATION);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION);
+                    editor.remove(SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION);
                     editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED);
                     editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED);
                     editor.remove(SettingsActivity.PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP);

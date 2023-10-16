@@ -46,6 +46,8 @@ public class PendingServerQuery implements ObvDatabase {
     private Encoded encodedQuery;
     static final String CREATION_TIMESTAMP = "creation_timestamp";
     private long creationTimestamp;
+    static final String WEBSOCKET = "websocket";
+    private boolean webSocket;
 
     public UID getUid() {
         return uid;
@@ -59,6 +61,9 @@ public class PendingServerQuery implements ObvDatabase {
         return creationTimestamp;
     }
 
+    public boolean isWebSocket() {
+        return webSocket;
+    }
 
     // region constructors
     
@@ -69,7 +74,7 @@ public class PendingServerQuery implements ObvDatabase {
         try {
             Encoded encodedQuery = serverQuery.encode();
             UID uid = new UID(prng);
-            PendingServerQuery pendingServerQuery = new PendingServerQuery(fetchManagerSession, uid, encodedQuery);
+            PendingServerQuery pendingServerQuery = new PendingServerQuery(fetchManagerSession, uid, encodedQuery, serverQuery.isWebSocket());
             pendingServerQuery.insert();
             return pendingServerQuery;
         } catch (SQLException e) {
@@ -78,12 +83,13 @@ public class PendingServerQuery implements ObvDatabase {
         }
     }
 
-    private PendingServerQuery(FetchManagerSession fetchManagerSession, UID uid, Encoded encodedQuery) {
+    private PendingServerQuery(FetchManagerSession fetchManagerSession, UID uid, Encoded encodedQuery, boolean webSocket) {
         this.fetchManagerSession = fetchManagerSession;
 
         this.uid = uid;
         this.encodedQuery = encodedQuery;
         this.creationTimestamp = System.currentTimeMillis();
+        this.webSocket = webSocket;
     }
 
     private PendingServerQuery(FetchManagerSession fetchManagerSession, ResultSet res) throws SQLException {
@@ -92,6 +98,7 @@ public class PendingServerQuery implements ObvDatabase {
         this.uid = new UID(res.getBytes(UID_));
         this.encodedQuery = new Encoded(res.getBytes(ENCODED_QUERY));
         this.creationTimestamp = res.getLong(CREATION_TIMESTAMP);
+        this.webSocket = res.getBoolean(WEBSOCKET);
     }
 
     // endregion
@@ -103,7 +110,8 @@ public class PendingServerQuery implements ObvDatabase {
             statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
                     UID_ + " BLOB PRIMARY KEY, " +
                     ENCODED_QUERY + " BLOB NOT NULL, " +
-                    CREATION_TIMESTAMP + " BIGINT NOT NULL " +
+                    CREATION_TIMESTAMP + " BIGINT NOT NULL, " +
+                    WEBSOCKET + " BIT NOT NULL " +
                     " );");
         }
     }
@@ -116,14 +124,22 @@ public class PendingServerQuery implements ObvDatabase {
             }
             oldVersion = 31;
         }
+        if (oldVersion < 37 && newVersion >= 37) {
+            Logger.d("MIGRATING `server_query` DATABASE FROM VERSION " + oldVersion + " TO 36");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE `server_query` ADD COLUMN `websocket` BIT NOT NULL DEFAULT 0");
+            }
+            oldVersion = 37;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, encodedQuery.getBytes());
             statement.setLong(3, creationTimestamp);
+            statement.setBoolean(4, webSocket);
             statement.executeUpdate();
             this.commitHookBits |= HOOK_BIT_INSERTED;
             fetchManagerSession.session.addSessionCommitListener(this);
@@ -179,7 +195,7 @@ public class PendingServerQuery implements ObvDatabase {
     // region hooks
 
     public interface PendingServerQueryListener {
-        void newPendingServerQuery(UID uid);
+        void newPendingServerQuery(PendingServerQuery pendingServerQuery);
     }
 
 
@@ -190,7 +206,7 @@ public class PendingServerQuery implements ObvDatabase {
     public void wasCommitted() {
         if ((commitHookBits & HOOK_BIT_INSERTED) != 0) {
             if (fetchManagerSession.pendingServerQueryListener != null) {
-                fetchManagerSession.pendingServerQueryListener.newPendingServerQuery(uid);
+                fetchManagerSession.pendingServerQueryListener.newPendingServerQuery(this);
             }
         }
         commitHookBits = 0;

@@ -116,8 +116,8 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                         if (sha256 == null) {
                             break;
                         }
-                        Fyle.acquireLock(sha256);
                         try {
+                            Fyle.acquireLock(sha256);
                             Fyle.SizeAndSha256 sizeAndSha256 = Fyle.computeSHA256FromFile(App.absolutePathFromRelative(downloadedAttachment.getUrl()));
                             if ((sizeAndSha256 == null) || !Arrays.equals(sha256, sizeAndSha256.sha256)) {
                                 // OMG, the metadata contained an erroneous sha256!!! Delete everything

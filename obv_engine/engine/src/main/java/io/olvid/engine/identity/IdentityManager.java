@@ -90,13 +90,13 @@ import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakRevocation;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.ObvCapability;
-import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
-import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
+import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.engine.identity.databases.ContactDevice;
 import io.olvid.engine.identity.databases.ContactGroup;
@@ -126,10 +126,10 @@ import io.olvid.engine.identity.datatypes.KeycloakGroupMemberKickedData;
 import io.olvid.engine.metamanager.BackupDelegate;
 import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
-import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.metamanager.EncryptionForIdentityDelegate;
-import io.olvid.engine.metamanager.NotificationPostingDelegate;
+import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.metamanager.MetaManager;
+import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.metamanager.ObvManager;
 import io.olvid.engine.metamanager.SolveChallengeDelegate;
 import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
@@ -137,6 +137,7 @@ import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate, EncryptionForIdentityDelegate, ObvBackupAndSyncDelegate, IdentityManagerSessionFactory, ObvManager {
     private final String engineBaseDirectory;
     private final ObjectMapper jsonObjectMapper;
+    private final PRNGService prng;
     private final SessionCommitListener backupNeededSessionCommitListener;
 
     private CreateSessionDelegate createSessionDelegate;
@@ -144,9 +145,10 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     private ProtocolStarterDelegate protocolStarterDelegate;
     private ChannelDelegate channelDelegate;
 
-    public IdentityManager(MetaManager metaManager, String engineBaseDirectory, ObjectMapper jsonObjectMapper) {
+    public IdentityManager(MetaManager metaManager, String engineBaseDirectory, ObjectMapper jsonObjectMapper, PRNGService prng) {
         this.engineBaseDirectory = engineBaseDirectory;
         this.jsonObjectMapper = jsonObjectMapper;
+        this.prng = prng;
         this.backupNeededSessionCommitListener = () -> {
             if (notificationPostingDelegate != null) {
                 notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_DATABASE_CONTENT_CHANGED, new HashMap<>());
@@ -412,18 +414,19 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (createSessionDelegate == null) {
             throw new SQLException("No CreateSessionDelegate was set in IdentityManager.");
         }
-        return new IdentityManagerSession(createSessionDelegate.getSession(), notificationPostingDelegate, this, engineBaseDirectory, jsonObjectMapper);
+        return new IdentityManagerSession(createSessionDelegate.getSession(), notificationPostingDelegate, this, engineBaseDirectory, jsonObjectMapper, prng);
     }
 
     private IdentityManagerSession wrapSession(Session session) {
-        return new IdentityManagerSession(session, notificationPostingDelegate, this, engineBaseDirectory, jsonObjectMapper);
+        return new IdentityManagerSession(session, notificationPostingDelegate, this, engineBaseDirectory, jsonObjectMapper, prng);
     }
 
     public ObjectMapper getJsonObjectMapper() {
         return jsonObjectMapper;
     }
 
-    public void downloadAllUserData(Session session) throws Exception {
+   @Override
+   public void downloadAllUserData(Session session) throws Exception {
         List<OwnedIdentityDetails> ownedIdentityDetailsList = OwnedIdentityDetails.getAllWithMissingPhotoUrl(wrapSession(session));
         for (OwnedIdentityDetails ownedIdentityDetails : ownedIdentityDetailsList) {
             protocolStarterDelegate.startDownloadIdentityPhotoProtocolWithinTransaction(session, ownedIdentityDetails.getOwnedIdentity(), ownedIdentityDetails.getOwnedIdentity(), ownedIdentityDetails.getJsonIdentityDetailsWithVersionAndPhoto());
@@ -3764,14 +3767,70 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     @Override
     public ObvSyncSnapshotNode getSyncSnapshot(Identity ownedIdentity) {
         try (IdentityManagerSession identityManagerSession = getSession()) {
-            // start a transaction to be sure the db is not modified while the snapshot is being computed!
-            identityManagerSession.session.startTransaction();
-            return IdentityManagerSyncSnapshot.of(identityManagerSession, ownedIdentity);
-        } catch (Exception e) {
+            try {
+                // start a transaction to be sure the db is not modified while the snapshot is being computed!
+                identityManagerSession.session.startTransaction();
+                return getSyncSnapshotWithinTransaction(identityManagerSession, ownedIdentity);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            } finally {
+                // always rollback as the snapshot creation should never modify the DB.
+                identityManagerSession.session.rollback();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
             return null;
         }
     }
+    
+    private ObvSyncSnapshotNode getSyncSnapshotWithinTransaction(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws Exception {
+        if (!identityManagerSession.session.isInTransaction()) {
+            Logger.e("ERROR: called IdentityManager.getSyncSnapshot outside a transaction!");
+            throw new Exception();
+        }
+        return IdentityManagerSyncSnapshot.of(identityManagerSession, ownedIdentity);
+    }
 
+
+    @Override
+    public RestoreFinishedCallback restoreOwnedIdentity(ObvIdentity ownedIdentity, ObvSyncSnapshotNode node) throws Exception {
+        // this method does not do anything for the IdentityManager: the ownedIdentity has already been restored before calling this
+        return null;
+    }
+
+    @Override
+    public RestoreFinishedCallback restoreSyncSnapshot(ObvSyncSnapshotNode node) throws Exception {
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            boolean transactionSuccessful = false;
+            try {
+                // start a transaction to be sure the db is not modified while the snapshot is being computed!
+                identityManagerSession.session.startTransaction();
+                RestoreFinishedCallback callback = restoreSyncSnapshotWithinTransaction(identityManagerSession, node);
+                transactionSuccessful = true;
+                return callback;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (transactionSuccessful) {
+                    identityManagerSession.session.commit();
+                } else {
+                    identityManagerSession.session.rollback();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private RestoreFinishedCallback restoreSyncSnapshotWithinTransaction(IdentityManagerSession identityManagerSession, ObvSyncSnapshotNode node) throws Exception {
+        if (!(node instanceof IdentityManagerSyncSnapshot)) {
+            throw new Exception();
+        }
+        ((IdentityManagerSyncSnapshot) node).restore(identityManagerSession, protocolStarterDelegate);
+        return null;
+    }
 
     @Override
     public byte[] serialize(ObvSyncSnapshotNode snapshotNode) throws Exception {
@@ -3784,6 +3843,53 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     @Override
     public ObvSyncSnapshotNode deserialize(byte[] serializedSnapshotNode) throws Exception {
         return jsonObjectMapper.readValue(serializedSnapshotNode, IdentityManagerSyncSnapshot.class);
+    }
+
+    @Override
+    public ObvBackupAndSyncDelegate getSyncDelegateWithinTransaction(Session session) {
+        return new ObvBackupAndSyncDelegate() {
+            private final IdentityManagerSession identityManagerSession = wrapSession(session);
+            @Override
+            public String getTag() {
+                return IdentityManager.this.getTag();
+            }
+
+            @Override
+            public ObvSyncSnapshotNode getSyncSnapshot(Identity ownedIdentity) {
+                try {
+                    return IdentityManager.this.getSyncSnapshotWithinTransaction(identityManagerSession, ownedIdentity);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            public RestoreFinishedCallback restoreOwnedIdentity(ObvIdentity ownedIdentity, ObvSyncSnapshotNode node) throws Exception {
+                return IdentityManager.this.restoreOwnedIdentity(ownedIdentity, node);
+            }
+
+            @Override
+            public RestoreFinishedCallback restoreSyncSnapshot(ObvSyncSnapshotNode node) throws Exception {
+                return IdentityManager.this.restoreSyncSnapshotWithinTransaction(identityManagerSession, node);
+            }
+
+            @Override
+            public byte[] serialize(ObvSyncSnapshotNode snapshotNode) throws Exception {
+                return IdentityManager.this.serialize(snapshotNode);
+            }
+
+            @Override
+            public ObvSyncSnapshotNode deserialize(byte[] serializedSnapshotNode) throws Exception {
+                return IdentityManager.this.deserialize(serializedSnapshotNode);
+            }
+        };
+    }
+
+    @Override
+    public ObvIdentity restoreTransferredOwnedIdentity(Session session, String deviceName, IdentityManagerSyncSnapshot node) throws Exception {
+        Identity ownedIdentity = Identity.of(node.owned_identity);
+        return node.owned_identity_node.restoreOwnedIdentity(wrapSession(session), deviceName, ownedIdentity);
     }
 
     // endregion

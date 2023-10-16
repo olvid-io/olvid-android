@@ -106,6 +106,7 @@ public class OwnedDeviceManagementProtocol extends ConcreteProtocol {
     }
 
     public static class ResponseProcessedState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public ResponseProcessedState(Encoded encodedState) throws Exception {
             super(RESPONSE_PROCESSED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -252,15 +253,15 @@ public class OwnedDeviceManagementProtocol extends ConcreteProtocol {
                             Suite.getDefaultPRNGService(0));
 
                     UID currentDeviceUid = protocolManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
-                    serverQueryType = ServerQuery.Type.createDeviceManagementSetNicknameQuery(getOwnedIdentity(), receivedMessage.deviceManagementRequest.getDeviceUid(), encryptedDeviceName, currentDeviceUid.equals(receivedMessage.deviceManagementRequest.getDeviceUid()));
+                    serverQueryType = new ServerQuery.DeviceManagementSetNicknameQuery(getOwnedIdentity(), receivedMessage.deviceManagementRequest.getDeviceUid(), encryptedDeviceName, currentDeviceUid.equals(receivedMessage.deviceManagementRequest.getDeviceUid()));
                     break;
                 }
                 case ObvDeviceManagementRequest.ACTION_DEACTIVATE_DEVICE: {
-                    serverQueryType = ServerQuery.Type.createDeviceManagementDeactivateDeviceQuery(getOwnedIdentity(), receivedMessage.deviceManagementRequest.getDeviceUid());
+                    serverQueryType = new ServerQuery.DeviceManagementDeactivateDeviceQuery(getOwnedIdentity(), receivedMessage.deviceManagementRequest.getDeviceUid());
                     break;
                 }
                 case ObvDeviceManagementRequest.ACTION_SET_UNEXPIRING_DEVICE: {
-                    serverQueryType = ServerQuery.Type.createDeviceManagementSetUnexpiringDeviceQuery(getOwnedIdentity(), receivedMessage.deviceManagementRequest.getDeviceUid());
+                    serverQueryType = new ServerQuery.DeviceManagementSetUnexpiringDeviceQuery(getOwnedIdentity(), receivedMessage.deviceManagementRequest.getDeviceUid());
                     break;
                 }
                 default: {
@@ -280,6 +281,7 @@ public class OwnedDeviceManagementProtocol extends ConcreteProtocol {
     public static class ProcessResponseStateStep extends ProtocolStep {
         @SuppressWarnings({"unused", "FieldCanBeLocal"})
         private final RequestSentState startState;
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final ServerQueryMessage receivedMessage;
 
         public ProcessResponseStateStep(RequestSentState startState, ServerQueryMessage receivedMessage, OwnedDeviceManagementProtocol protocol) throws Exception {

@@ -1865,7 +1865,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 String photoUrl = protocolManagerSession.identityDelegate.getGroupV2PhotoUrl(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier);
 
                 if (photoUrl != null) {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createPutUserDataQuery(getOwnedIdentity(), serverBlob.serverPhotoInfo.serverPhotoLabel, photoUrl, serverBlob.serverPhotoInfo.serverPhotoKey)));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.PutUserDataQuery(getOwnedIdentity(), serverBlob.serverPhotoInfo.serverPhotoLabel, photoUrl, serverBlob.serverPhotoInfo.serverPhotoKey)));
                     ChannelMessageToSend messageToSend = new UploadGroupPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -1875,7 +1875,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             {
                 // upload the encrypted blob
 
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createCreateGroupBlobQuery(groupIdentifier, Encoded.of(groupAdminServerAuthenticationKeyPair.getPublicKey()), encryptedBlob)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.CreateGroupBlobQuery(groupIdentifier, Encoded.of(groupAdminServerAuthenticationKeyPair.getPublicKey()), encryptedBlob)));
                 ChannelMessageToSend messageToSend = new UploadGroupBlobMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -2011,7 +2011,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                         // delete the group from the server
                         byte[] signature = Signature.sign(Constants.SignatureContext.GROUP_DELETE_ON_SERVER, blobKeys.groupAdminServerAuthenticationPrivateKey.getSignaturePrivateKey(), getPrng());
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createDeleteGroupBlobQuery(startState.groupIdentifier, signature)));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.DeleteGroupBlobQuery(startState.groupIdentifier, signature)));
                         ChannelMessageToSend messageToSend = new DeleteGroupBlobFromServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -2437,7 +2437,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             byte[] serverQueryNonce = getPrng().bytes(16);
             {
                 // run the server query to download the server blob
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createGetGroupBlobQuery(groupIdentifier, serverQueryNonce)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetGroupBlobQuery(groupIdentifier, serverQueryNonce)));
                 ChannelMessageToSend messageToSend = new DownloadGroupBlobMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -2802,7 +2802,10 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             {
                 // check the message is not a replay
                 if (GroupV2SignatureReceived.exists(protocolManagerSession, getOwnedIdentity(), receivedMessage.signature)) {
-                    Logger.w("Received a group join ping with a known signature");
+                    if (propagationNeeded) {
+                        // do not log signature replays for propagated messages, they are normal
+                        Logger.i("Received a group join ping with a known signature");
+                    }
                     return new FinalState();
                 }
             }
@@ -3099,7 +3102,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                             getOwnedIdentity(),
                             getPrng());
 
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createPutGroupLogQuery(groupIdentifier, leaveSignature)));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.PutGroupLogQuery(groupIdentifier, leaveSignature)));
                     ChannelMessageToSend messageToSend = new PutGroupLogOnServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -3278,7 +3281,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 byte[] serverQueryNonce = getPrng().bytes(16);
                 {
                     // run the server query to download the server blob
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createGetGroupBlobQuery(groupIdentifier, serverQueryNonce)));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetGroupBlobQuery(groupIdentifier, serverQueryNonce)));
                     ChannelMessageToSend messageToSend = new DownloadGroupBlobMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -3331,7 +3334,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 byte[] serverQueryNonce = getPrng().bytes(16);
                 {
                     // run the server query to re-download the server blob
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createGetGroupBlobQuery(groupIdentifier, serverQueryNonce)));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetGroupBlobQuery(groupIdentifier, serverQueryNonce)));
                     ChannelMessageToSend messageToSend = new DownloadGroupBlobMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -3401,7 +3404,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             {
                 byte[] signature = Signature.sign(Constants.SignatureContext.GROUP_LOCK_ON_SERVER, lockNonce, blobKeys.groupAdminServerAuthenticationPrivateKey.getSignaturePrivateKey(), getPrng());
 
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createBlobLockQuery(receivedMessage.groupIdentifier, lockNonce, signature)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.LockGroupBlobQuery(receivedMessage.groupIdentifier, lockNonce, signature)));
                 ChannelMessageToSend messageToSend = new RequestLockMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -3807,7 +3810,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                 byte[] signature = Signature.sign(Constants.SignatureContext.GROUP_UPDATE_ON_SERVER, dataToSign, blobKeys.groupAdminServerAuthenticationPrivateKey.getSignaturePrivateKey(), getPrng());
 
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createUpdateGroupBlobQuery(startState.groupIdentifier, startState.lockNonce, encryptedBlob, encodedPublicKey, signature)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.UpdateGroupBlobQuery(startState.groupIdentifier, startState.lockNonce, encryptedBlob, encodedPublicKey, signature)));
                 ChannelMessageToSend messageToSend = new UploadGroupBlobMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -3872,7 +3875,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 {
                     byte[] signature = Signature.sign(Constants.SignatureContext.GROUP_LOCK_ON_SERVER, lockNonce, blobKeys.groupAdminServerAuthenticationPrivateKey.getSignaturePrivateKey(), getPrng());
 
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createBlobLockQuery(startState.groupIdentifier, lockNonce, signature)));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.LockGroupBlobQuery(startState.groupIdentifier, lockNonce, signature)));
                     ChannelMessageToSend messageToSend = new RequestLockMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -3889,7 +3892,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             } else {
                 // upload the group photo if needed
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createPutUserDataQuery(getOwnedIdentity(), startState.updatedBlob.serverPhotoInfo.serverPhotoLabel, startState.absolutePhotoUrlToUpload, startState.updatedBlob.serverPhotoInfo.serverPhotoKey)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.PutUserDataQuery(getOwnedIdentity(), startState.updatedBlob.serverPhotoInfo.serverPhotoLabel, startState.absolutePhotoUrlToUpload, startState.updatedBlob.serverPhotoInfo.serverPhotoKey)));
                 ChannelMessageToSend messageToSend = new UploadGroupPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -4348,7 +4351,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         getOwnedIdentity(),
                         getPrng());
 
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createPutGroupLogQuery(groupIdentifier, leaveSignature)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.PutGroupLogQuery(groupIdentifier, leaveSignature)));
                 ChannelMessageToSend messageToSend = new PutGroupLogOnServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -4484,7 +4487,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             if (!propagated) {
                 // delete the group from the server
                 byte[] signature = Signature.sign(Constants.SignatureContext.GROUP_DELETE_ON_SERVER, blobKeys.groupAdminServerAuthenticationPrivateKey.getSignaturePrivateKey(), getPrng());
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createDeleteGroupBlobQuery(this.groupIdentifier, signature)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.DeleteGroupBlobQuery(this.groupIdentifier, signature)));
                 ChannelMessageToSend messageToSend = new DeleteGroupBlobFromServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 

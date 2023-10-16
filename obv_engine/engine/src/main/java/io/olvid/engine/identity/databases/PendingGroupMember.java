@@ -51,7 +51,7 @@ public class PendingGroupMember implements ObvDatabase {
     static final String CONTACT_IDENTITY = "contact_identity";
     private String contactSerializedDetails;
     static final String CONTACT_SERIALIZED_DETAILS = "contact_display_name";
-    private boolean declined;
+    public boolean declined;
     static final String DECLINED = "declined";
 
     public byte[] getGroupOwnerAndUid() {
@@ -66,6 +66,13 @@ public class PendingGroupMember implements ObvDatabase {
         return contactIdentity;
     }
 
+    public String getContactSerializedDetails() {
+        return contactSerializedDetails;
+    }
+
+    public boolean isDeclined() {
+        return declined;
+    }
 
     // region constructors
 
@@ -82,7 +89,7 @@ public class PendingGroupMember implements ObvDatabase {
         }
     }
 
-    private PendingGroupMember(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity, Identity contactIdentity, String contactSerializedDetails) {
+    public PendingGroupMember(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity, Identity contactIdentity, String contactSerializedDetails) {
         this.identityManagerSession = identityManagerSession;
         this.groupOwnerAndUid = groupOwnerAndUid;
         this.ownedIdentity = ownedIdentity;
@@ -237,7 +244,7 @@ public class PendingGroupMember implements ObvDatabase {
         }
     }
 
-    private static PendingGroupMember[] getAllInGroup(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity) {
+    public static PendingGroupMember[] getAllInGroup(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity) {
         if ((groupOwnerAndUid == null) || (ownedIdentity == null)) {
             return new PendingGroupMember[0];
         }

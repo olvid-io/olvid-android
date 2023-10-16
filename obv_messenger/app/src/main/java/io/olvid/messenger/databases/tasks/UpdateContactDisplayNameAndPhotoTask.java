@@ -73,10 +73,10 @@ public class UpdateContactDisplayNameAndPhotoTask implements Runnable {
                 db.discussionDao().updateTitleAndPhotoUrl(discussion.id, discussion.title, discussion.photoUrl);
 
                 ShortcutActivity.updateShortcut(discussion);
+
+                // delete all contact details updated messages from the discussion
+                db.messageDao().deleteAllDiscussionNewPublishedDetailsMessages(discussion.id);
             }
-            
-            // delete all contact details updated messages from the discussion
-            db.messageDao().deleteAllDiscussionNewPublishedDetailsMessages(discussion.id);
         }
     }
 }

@@ -36,6 +36,7 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
+import io.olvid.engine.protocol.protocol_engine.ConcreteProtocol;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocolState;
 
 
@@ -281,7 +282,12 @@ public class ProtocolInstance implements ObvDatabase {
         }
     }
 
-
+    public static void deleteAllTransfer(ProtocolManagerSession protocolManagerSession) throws SQLException {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
+            statement.setInt(1, ConcreteProtocol.OWNED_IDENTITY_TRANSFER_PROTOCOL_ID);
+            statement.executeUpdate();
+        }
+    }
 
     @Override
     public void wasCommitted() {

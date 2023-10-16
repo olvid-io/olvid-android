@@ -21,7 +21,6 @@ package io.olvid.messenger.onboarding;
 
 import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -53,11 +52,9 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
-import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsFragment;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsViewModel;
-import io.olvid.messenger.plus_button.PlusButtonActivity;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class IdentityCreationFragment extends Fragment {
@@ -94,6 +91,14 @@ public class IdentityCreationFragment extends Fragment {
                             Navigation.findNavController(rootView).popBackStack();
                         }
                     }
+                }
+            });
+        } else if (!viewModel.isFirstIdentity()) {
+            activity.getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    remove();
+                    activity.finish();
                 }
             });
         }
@@ -283,15 +288,7 @@ public class IdentityCreationFragment extends Fragment {
                             if (detailsViewModel.getPassword() != null && !SettingsActivity.isHiddenProfileClosePolicyDefined()) {
                                 App.openAppDialogConfigureHiddenProfileClosePolicy();
                             }
-                            if (viewModel.getInvitationLink() == null) {
-                                App.openCurrentOwnedIdentityDetails(activity);
-                            } else {
-                                Intent linkIntent = new Intent(App.getContext(), MainActivity.class);
-                                linkIntent.setAction(MainActivity.FORWARD_ACTION);
-                                linkIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, PlusButtonActivity.class.getName());
-                                linkIntent.putExtra(PlusButtonActivity.LINK_URI_INTENT_EXTRA, viewModel.getInvitationLink());
-                                startActivity(linkIntent);
-                            }
+                            App.openCurrentOwnedIdentityDetails(activity);
                             activity.finish();
                         }
 
@@ -315,15 +312,7 @@ public class IdentityCreationFragment extends Fragment {
             if (detailsViewModel.getPassword() != null && !SettingsActivity.isHiddenProfileClosePolicyDefined()) {
                 App.openAppDialogConfigureHiddenProfileClosePolicy();
             }
-            if (viewModel.getInvitationLink() == null) {
-                App.openCurrentOwnedIdentityDetails(activity);
-            } else {
-                Intent linkIntent = new Intent(App.getContext(), MainActivity.class);
-                linkIntent.setAction(MainActivity.FORWARD_ACTION);
-                linkIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, PlusButtonActivity.class.getName());
-                linkIntent.putExtra(PlusButtonActivity.LINK_URI_INTENT_EXTRA, viewModel.getInvitationLink());
-                startActivity(linkIntent);
-            }
+            App.openCurrentOwnedIdentityDetails(activity);
             activity.finish();
         }
     }

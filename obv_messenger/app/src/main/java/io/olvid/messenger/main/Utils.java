@@ -23,6 +23,7 @@ package io.olvid.messenger.main;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -57,7 +58,7 @@ import io.olvid.messenger.settings.SettingsActivity;
 
 public class Utils {
     public static boolean dialogsLoaded = false;
-    private static boolean dialogShowing = false;
+    static boolean dialogShowing = false;
     private static final Deque<String> dialogsToShow = new ArrayDeque<>();
 
     private static final String USER_DIALOG_ALLOW_NOTIFICATIONS = "allow_notifications";
@@ -65,6 +66,7 @@ public class Utils {
     private static final String USER_DIALOG_BACKGROUND_RESTRICTED = "background_restricted";
     private static final String USER_DIALOG_BATTERY_OPTIMIZATION = "battery_optimization";
     private static final String USER_DIALOG_ALARM_SCHEDULING = "alarm_scheduling";
+    private static final String USER_DIALOG_FULL_SCREEN_NOTIFICATION = "full_screen_notification";
 
     static void showDialogs(MainActivity activity) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
@@ -111,6 +113,15 @@ public class Utils {
                 boolean hideDialog = prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS, false);
                 if (!hideDialog) {
                     dialogsToShow.offerLast(USER_DIALOG_ALLOW_NOTIFICATIONS);
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                NotificationManager notifManager = activity.getSystemService(NotificationManager.class);
+                if (!notifManager.canUseFullScreenIntent()) {
+                    boolean hideDialog = prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_FULL_SCREEN_NOTIFICATION, false);
+                    if (!hideDialog) {
+                        dialogsToShow.offerLast(USER_DIALOG_FULL_SCREEN_NOTIFICATION);
+                    }
                 }
             }
         }
@@ -201,8 +212,10 @@ public class Utils {
                             .setNeutralButton(R.string.button_label_skip, null)
                             .setPositiveButton(R.string.button_label_battery_optimization_settings, (DialogInterface dialog, int which) -> {
                                 Intent intent = new Intent();
-                                intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+                                intent.setData(uri);
                                 activity.startActivity(intent);
                             })
                             .setOnDismissListener((DialogInterface dialog) -> {
@@ -272,6 +285,39 @@ public class Utils {
                         dialogShowing = false;
                         showDialogs(activity);
                     });
+                    builder.create().show();
+                }
+                break;
+            }
+            case USER_DIALOG_FULL_SCREEN_NOTIFICATION: {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_view_message_and_checkbox, null);
+                    TextView message = dialogView.findViewById(R.id.dialog_message);
+                    message.setText(R.string.dialog_message_full_screen_notification);
+                    CheckBox checkBox = dialogView.findViewById(R.id.checkbox);
+                    checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_FULL_SCREEN_NOTIFICATION, isChecked);
+                        editor.apply();
+                    });
+
+                    AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
+                    builder.setTitle(R.string.dialog_title_full_screen_notification)
+                            .setView(dialogView)
+                            .setNeutralButton(R.string.button_label_skip, null)
+                            .setPositiveButton(R.string.button_label_app_settings, (DialogInterface dialog, int which) -> {
+                                Intent intent = new Intent();
+                                intent.setAction(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+                                intent.setData(uri);
+                                activity.startActivity(intent);
+                            })
+                            .setOnDismissListener((DialogInterface dialog) -> {
+                                dialogShowing = false;
+                                showDialogs(activity);
+                            });
+
                     builder.create().show();
                 }
                 break;

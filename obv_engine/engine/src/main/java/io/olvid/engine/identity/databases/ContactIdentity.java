@@ -69,15 +69,15 @@ public class ContactIdentity implements ObvDatabase {
     static final String OWNED_IDENTITY = "owned_identity";
     private int trustedDetailsVersion;
     static final String TRUSTED_DETAILS_VERSION = "trusted_details_version";
-    private int publishedDetailsVersion;
+    public int publishedDetailsVersion;
     static final String PUBLISHED_DETAILS_VERSION = "published_details_version";
     private TrustLevel trustLevel;
     static final String TRUST_LEVEL = "trust_level";
     private boolean certifiedByOwnKeycloak;
     static final String CERTIFIED_BY_OWN_KEYCLOAK = "keycloak_managed";
-    private boolean revokedAsCompromised;
+    public boolean revokedAsCompromised;
     static final String REVOKED_AS_COMPROMISED = "revoked_as_compromised";
-    private boolean forcefullyTrustedByUser;
+    public boolean forcefullyTrustedByUser;
     static final String FORCEFULLY_TRUSTED_BY_USER = "forcefully_trusted_by_user";
     private boolean oneToOne;
     static final String ONE_TO_ONE = "one_to_one";
@@ -258,10 +258,9 @@ public class ContactIdentity implements ObvDatabase {
             }
             try {
                 // check if any detail actually changed
-                JsonIdentityDetailsWithVersionAndPhoto oldJson = publishedDetails.getJsonIdentityDetailsWithVersionAndPhoto();
-                if (oldJson.getIdentityDetails().fieldsAreTheSame(jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails())
-                        && Arrays.equals(oldJson.getPhotoServerLabel(), jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerLabel())
-                        && Arrays.equals(oldJson.getPhotoServerKey(), jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerKey())) {
+                if (publishedDetails.getJsonIdentityDetails().fieldsAreTheSame(newPublishedDetails.getJsonIdentityDetails())
+                        && Objects.equals(publishedDetails.getPhotoServerKey(), newPublishedDetails.getPhotoServerKey())
+                        && Objects.equals(publishedDetails.getPhotoServerLabel(), newPublishedDetails.getPhotoServerLabel())) {
                     // nothing user visible changed --> do not notify
                     notifyNewDetails = false;
                 }
@@ -609,7 +608,7 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
-    private ContactIdentity(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, int version, TrustLevel trustLevel, boolean oneToOne) {
+    public ContactIdentity(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, int version, TrustLevel trustLevel, boolean oneToOne) {
         this.identityManagerSession = identityManagerSession;
         this.contactIdentity = contactIdentity;
         this.ownedIdentity = ownedIdentity;

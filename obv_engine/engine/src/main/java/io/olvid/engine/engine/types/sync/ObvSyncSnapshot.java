@@ -28,11 +28,12 @@ import java.util.Objects;
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.encoder.Encoded;
+import io.olvid.engine.engine.types.identities.ObvIdentity;
 
 public class ObvSyncSnapshot {
     private final HashMap<String, ObvSyncSnapshotNode> snapshotMap;
 
-    public ObvSyncSnapshot(HashMap<String, ObvSyncSnapshotNode> snapshotMap) {
+    private ObvSyncSnapshot(HashMap<String, ObvSyncSnapshotNode> snapshotMap) {
         this.snapshotMap = snapshotMap;
     }
 
@@ -42,6 +43,57 @@ public class ObvSyncSnapshot {
             snapshotMap.put(delegate.getTag(), delegate.getSyncSnapshot(ownedIdentity));
         }
         return new ObvSyncSnapshot(snapshotMap);
+    }
+
+
+    public List<ObvBackupAndSyncDelegate.RestoreFinishedCallback> restoreOwnedIdentity(ObvIdentity obvOwnedIdentity, ObvBackupAndSyncDelegate... delegates) throws Exception {
+        List<ObvBackupAndSyncDelegate.RestoreFinishedCallback> callbacks = new ArrayList<>();
+        try {
+            for (ObvBackupAndSyncDelegate delegate : delegates) {
+                ObvSyncSnapshotNode node = snapshotMap.get(delegate.getTag());
+                if (node == null) {
+                    throw new Exception();
+                }
+                ObvBackupAndSyncDelegate.RestoreFinishedCallback callback = delegate.restoreOwnedIdentity(obvOwnedIdentity, node);
+                if (callback != null) {
+                    callbacks.add(callback);
+                }
+            }
+            return callbacks;
+        } catch (Exception e) {
+            // if an exception occurs, call the onRestoreFailure of all callbacks we already got (typically to rollback transactions)
+            for (ObvBackupAndSyncDelegate.RestoreFinishedCallback callback : callbacks) {
+                try {
+                    callback.onRestoreFailure();
+                } catch (Exception ignored) { }
+            }
+            throw e;
+        }
+    }
+
+    public List<ObvBackupAndSyncDelegate.RestoreFinishedCallback> restore(ObvBackupAndSyncDelegate... delegates) throws Exception {
+        List<ObvBackupAndSyncDelegate.RestoreFinishedCallback> callbacks = new ArrayList<>();
+        try {
+            for (ObvBackupAndSyncDelegate delegate : delegates) {
+                ObvSyncSnapshotNode node = snapshotMap.get(delegate.getTag());
+                if (node == null) {
+                    throw new Exception();
+                }
+                ObvBackupAndSyncDelegate.RestoreFinishedCallback callback = delegate.restoreSyncSnapshot(node);
+                if (callback != null) {
+                    callbacks.add(callback);
+                }
+            }
+            return callbacks;
+        } catch (Exception e) {
+            // if an exception occurs, call the onRestoreFailure of all callbacks we already got (typically to rollback transactions)
+            for (ObvBackupAndSyncDelegate.RestoreFinishedCallback callback : callbacks) {
+                try {
+                    callback.onRestoreFailure();
+                } catch (Exception ignored) { }
+            }
+            throw e;
+        }
     }
 
     public HashMap<DictionaryKey, Encoded> toEncodedDictionary(ObvBackupAndSyncDelegate... delegates) {
@@ -56,6 +108,7 @@ public class ObvSyncSnapshot {
             }
             return map;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -73,6 +126,7 @@ public class ObvSyncSnapshot {
             }
             return new ObvSyncSnapshot(snapshotMap);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -103,5 +157,9 @@ public class ObvSyncSnapshot {
         }
 
         return diffs;
+    }
+
+    public ObvSyncSnapshotNode getSnapshotNode(String tag) {
+        return snapshotMap.get(tag);
     }
 }

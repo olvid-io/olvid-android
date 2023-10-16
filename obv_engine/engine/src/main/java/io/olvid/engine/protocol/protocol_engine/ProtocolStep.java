@@ -20,6 +20,8 @@
 package io.olvid.engine.protocol.protocol_engine;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.Objects;
 
 import io.olvid.engine.Logger;
@@ -78,6 +80,9 @@ public abstract class ProtocolStep extends Operation {
     public Identity getOwnedIdentity() {
         return protocol.getOwnedIdentity();
     }
+    public ObjectMapper getJsonObjectMapper() {
+        return protocol.getJsonObjectMapper();
+    }
 
     public ProtocolManagerSession getProtocolManagerSession() {
         return protocol.getProtocolManagerSession();
@@ -97,7 +102,7 @@ public abstract class ProtocolStep extends Operation {
 
     public abstract ConcreteProtocolState executeStep() throws Exception;
 
-    protected CoreProtocolMessage buildCoreProtocolMessage(SendChannelInfo sendChannelInfo) {
+    public CoreProtocolMessage buildCoreProtocolMessage(SendChannelInfo sendChannelInfo) {
         return new CoreProtocolMessage(sendChannelInfo, getProtocolId(), getProtocolInstanceUid(), false);
     }
 

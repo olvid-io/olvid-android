@@ -197,14 +197,14 @@ public class ContactGroupMembersJoin implements ObvDatabase {
     }
 
 
-    public static Identity[] getContactIdentitiesInGroup(IdentityManagerSession identityManagerSession, byte[] groupUid, Identity ownedIdentity) {
+    public static Identity[] getContactIdentitiesInGroup(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity) {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
                 "SELECT contact." + ContactIdentity.CONTACT_IDENTITY + " FROM " + TABLE_NAME + " AS joiin " +
                         " INNER JOIN " + ContactIdentity.TABLE_NAME + " AS contact " +
                         " ON contact." + ContactIdentity.CONTACT_IDENTITY + " = joiin." + CONTACT_IDENTITY +
                         " AND contact." + ContactIdentity.OWNED_IDENTITY + " = joiin." + OWNED_IDENTITY +
                         " WHERE joiin." + GROUP_OWNER_AND_UID + " = ? AND joiin." + OWNED_IDENTITY + " = ?;")) {
-            statement.setBytes(1, groupUid);
+            statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 List<Identity> list = new ArrayList<>();

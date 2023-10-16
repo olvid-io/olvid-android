@@ -253,7 +253,7 @@ public class AppSingleton {
             if (bytesOwnedIdentity != null) {
                 return AppDatabase.getInstance().ownedIdentityDao().getLiveData(bytesOwnedIdentity);
             }
-            return null;
+            return new MutableLiveData<>(null);
         });
         availableIdentities = db.ownedIdentityDao().getAllNotHiddenLiveData();
         aNonHiddenIdentityHasCallsPermission = new MediatorLiveData<>();
@@ -293,6 +293,8 @@ public class AppSingleton {
                 if (ownedIdentities != null) {
                     if (ownedIdentities.size() != 0) {
                         selectIdentity(ownedIdentities.get(0).bytesOwnedIdentity, null);
+                    } else {
+                        selectIdentity(null, null);
                     }
                     availableIdentities.removeObserver(this);
                 }
@@ -765,6 +767,9 @@ public class AppSingleton {
                 }
 
                 for (ObvIdentity obvOwnedIdentity : obvOwnedIdentities) {
+                    // mark the owned identity as restored so we do not get untrusted device notification
+                    OwnedDevicesSynchronisationWithEngineTask.Companion.ownedIdentityWasTransferredOrRestored(obvOwnedIdentity.getBytesIdentity());
+                    // synchronize devices with engine
                     App.runThread(new OwnedDevicesSynchronisationWithEngineTask(obvOwnedIdentity.getBytesIdentity()));
                 }
 

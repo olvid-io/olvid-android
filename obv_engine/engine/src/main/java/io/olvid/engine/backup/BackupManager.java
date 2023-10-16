@@ -225,8 +225,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
             BackupSeed backupSeed = new BackupSeed(seedString);
             BackupSeed.DerivedKeys derivedKeys = backupSeed.deriveKeys();
 
-            if (derivedKeys.backupKeyUid.equals(backupKey.getUid()) &&
-                    derivedKeys.macKey.equals(backupKey.getMacKey()) &&
+            if (derivedKeys.macKey.equals(backupKey.getMacKey()) &&
                     derivedKeys.encryptionKeyPair.getPublicKey().equals(backupKey.getEncryptionPublicKey())) {
                 // we have the same keys, everything is fine
                 backupKey.addSuccessfulVerification();

@@ -30,6 +30,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -59,6 +60,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executor;
 
 import io.olvid.engine.Logger;
@@ -115,24 +118,16 @@ public class UnifiedForegroundService extends Service {
             // cancel any pending lock
             Intent lockIntent = new Intent(LockSubService.LOCK_APP_ACTION, null, context, UnifiedForegroundService.class);
             lockIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_LOCK);
-            PendingIntent pendingLockIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                pendingLockIntent = PendingIntent.getService(context, 0, lockIntent, PendingIntent.FLAG_MUTABLE);
-            } else {
-                pendingLockIntent = PendingIntent.getService(context, 0, lockIntent, 0);
-            }
+            PendingIntent pendingLockIntent = PendingIntent.getService(context, 0, lockIntent, PendingIntent.FLAG_MUTABLE);
             alarmManager.cancel(pendingLockIntent);
 
             // cancel any pending close hidden profile
             Intent closeHiddenProfileIntent = new Intent(LockSubService.CLOSE_HIDDEN_PROFILE_ACTION, null, context, UnifiedForegroundService.class);
             closeHiddenProfileIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_LOCK);
-            PendingIntent pendingCloseHiddenProfileIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                pendingCloseHiddenProfileIntent = PendingIntent.getService(context, 0, closeHiddenProfileIntent, PendingIntent.FLAG_MUTABLE);
-            } else {
-                pendingCloseHiddenProfileIntent = PendingIntent.getService(context, 0, closeHiddenProfileIntent, 0);
-            }
+            PendingIntent pendingCloseHiddenProfileIntent = PendingIntent.getService(context, 0, closeHiddenProfileIntent, PendingIntent.FLAG_MUTABLE);
             alarmManager.cancel(pendingCloseHiddenProfileIntent);
+
+            LockSubService.cancelScheduledLocksAndHiddenProfileCloses();
         }
 
         connectOrDisconnectWebSocket();
@@ -399,12 +394,7 @@ public class UnifiedForegroundService extends Service {
                 openIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, bytesOwnedIdentityAndDiscussionId.first);
             }
         }
-        PendingIntent openPendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            openPendingIntent = PendingIntent.getActivity(App.getContext(), 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            openPendingIntent = PendingIntent.getActivity(App.getContext(), 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+        PendingIntent openPendingIntent = PendingIntent.getActivity(App.getContext(), 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         builder.setContentIntent(openPendingIntent);
 
 
@@ -412,12 +402,7 @@ public class UnifiedForegroundService extends Service {
             Intent lockIntent = new Intent(this, UnifiedForegroundService.class);
             lockIntent.setAction(LockSubService.LOCK_APP_ACTION);
             lockIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_LOCK);
-            PendingIntent lockPendingIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                lockPendingIntent = PendingIntent.getService(App.getContext(), 0, lockIntent, PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                lockPendingIntent = PendingIntent.getService(App.getContext(), 0, lockIntent, 0);
-            }
+            PendingIntent lockPendingIntent = PendingIntent.getService(App.getContext(), 0, lockIntent, PendingIntent.FLAG_IMMUTABLE);
             builder.addAction(R.drawable.ic_lock, getString(R.string.notification_action_lock), lockPendingIntent);
         }
 
@@ -425,12 +410,7 @@ public class UnifiedForegroundService extends Service {
             Intent disconnectIntent = new Intent(this, UnifiedForegroundService.class);
             disconnectIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_WEB_CLIENT);
             disconnectIntent.setAction(WebClientSubService.ACTION_DISCONNECT);
-            PendingIntent disconnectPendingIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                disconnectPendingIntent = PendingIntent.getService(App.getContext(), 0, disconnectIntent, PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                disconnectPendingIntent = PendingIntent.getService(App.getContext(), 0, disconnectIntent, 0);
-            }
+            PendingIntent disconnectPendingIntent = PendingIntent.getService(App.getContext(), 0, disconnectIntent, PendingIntent.FLAG_IMMUTABLE);
             builder.addAction(R.drawable.ic_webclient_disconnected, App.getContext().getString(R.string.notification_action_disconnect), disconnectPendingIntent);
         }
 
@@ -438,12 +418,7 @@ public class UnifiedForegroundService extends Service {
             Intent dismissIntent = new Intent(this, UnifiedForegroundService.class);
             dismissIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_MESSAGE_SENDING);
             dismissIntent.setAction(MessageSendingSubService.DISMISS_ACTION);
-            PendingIntent dismissPendingIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                dismissPendingIntent = PendingIntent.getService(App.getContext(), 0, dismissIntent, PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                dismissPendingIntent = PendingIntent.getService(App.getContext(), 0, dismissIntent, 0);
-            }
+            PendingIntent dismissPendingIntent = PendingIntent.getService(App.getContext(), 0, dismissIntent, PendingIntent.FLAG_IMMUTABLE);
             builder.addAction(R.drawable.ic_close, App.getContext().getString(R.string.notification_action_dismiss), dismissPendingIntent);
         }
 
@@ -451,12 +426,7 @@ public class UnifiedForegroundService extends Service {
             Intent stopSharingIntent = new Intent(this, UnifiedForegroundService.class);
             stopSharingIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_LOCATION_SHARING);
             stopSharingIntent.setAction(LocationSharingSubService.STOP_SHARING_ACTION);
-            PendingIntent stopSharingPendingIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                stopSharingPendingIntent = PendingIntent.getService(App.getContext(), 0, stopSharingIntent, PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                stopSharingPendingIntent = PendingIntent.getService(App.getContext(), 0, stopSharingIntent, 0);
-            }
+            PendingIntent stopSharingPendingIntent = PendingIntent.getService(App.getContext(), 0, stopSharingIntent, PendingIntent.FLAG_IMMUTABLE);
             builder.addAction(R.drawable.ic_close, App.getContext().getString(R.string.notification_action_stop_sharing), stopSharingPendingIntent);
         }
 
@@ -464,7 +434,11 @@ public class UnifiedForegroundService extends Service {
             stopForeground(true);
         }
         try {
-            startForeground(SERVICE_ID, builder.build());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(SERVICE_ID, builder.build(), showMessageSendingNotification ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : showLocationSharingNotification ? ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION : ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING);
+            } else {
+                startForeground(SERVICE_ID, builder.build());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -735,6 +709,7 @@ public class UnifiedForegroundService extends Service {
         public static final String APP_UNLOCKED_BROADCAST_ACTION = "app_unlocked_broadcast_action";
 
         private static boolean locked = true;
+        private static Timer noExactAlarmTimer = null;
 
         public static boolean isApplicationLocked() {
             return locked && SettingsActivity.useApplicationLockScreen();
@@ -814,16 +789,28 @@ public class UnifiedForegroundService extends Service {
                 }
                 return;
             }
-            PendingIntent pendingLockIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                pendingLockIntent = PendingIntent.getService(context, 0, lockIntent, PendingIntent.FLAG_MUTABLE);
-            } else {
-                pendingLockIntent = PendingIntent.getService(context, 0, lockIntent, 0);
-            }
+            PendingIntent pendingLockIntent = PendingIntent.getService(context, 0, lockIntent, PendingIntent.FLAG_MUTABLE);
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (alarmManager != null) {
                 alarmManager.cancel(pendingLockIntent);
-                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000L * timeout, pendingLockIntent);
+                try {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setExact(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000L * timeout, pendingLockIntent);
+                    } else {
+                        Logger.e("Missing exact alarm permission");
+                        if (noExactAlarmTimer == null) {
+                            noExactAlarmTimer = new Timer("LockSubService timer");
+                        }
+                        noExactAlarmTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                App.getContext().startService(lockIntent);
+                            }
+                        }, 1000L * timeout);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -842,16 +829,35 @@ public class UnifiedForegroundService extends Service {
 
             Intent closeHiddenProfileIntent = new Intent(CLOSE_HIDDEN_PROFILE_ACTION, null, context, UnifiedForegroundService.class);
             closeHiddenProfileIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_LOCK);
-            PendingIntent pendingCloseHiddenProfileIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                pendingCloseHiddenProfileIntent = PendingIntent.getService(context, 0, closeHiddenProfileIntent, PendingIntent.FLAG_MUTABLE);
-            } else {
-                pendingCloseHiddenProfileIntent = PendingIntent.getService(context, 0, closeHiddenProfileIntent, 0);
-            }
+            PendingIntent pendingCloseHiddenProfileIntent = PendingIntent.getService(context, 0, closeHiddenProfileIntent, PendingIntent.FLAG_MUTABLE);
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (alarmManager != null) {
                 alarmManager.cancel(pendingCloseHiddenProfileIntent);
-                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000L * timeout, pendingCloseHiddenProfileIntent);
+                try {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setExact(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000L * timeout, pendingCloseHiddenProfileIntent);
+                    } else {
+                        Logger.e("Missing exact alarm permission");
+                        if (noExactAlarmTimer == null) {
+                            noExactAlarmTimer = new Timer("LockSubService timer");
+                        }
+                        noExactAlarmTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                App.getContext().startService(closeHiddenProfileIntent);
+                            }
+                        }, 1000L * timeout);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private static void cancelScheduledLocksAndHiddenProfileCloses() {
+            if (noExactAlarmTimer != null) {
+                noExactAlarmTimer.cancel();
+                noExactAlarmTimer = null;
             }
         }
 

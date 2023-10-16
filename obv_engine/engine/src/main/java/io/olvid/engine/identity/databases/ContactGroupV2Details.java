@@ -68,9 +68,9 @@ public class ContactGroupV2Details implements ObvDatabase {
     static final String SERIALIZED_JSON_DETAILS = "serialized_json_details";
     private String photoUrl;
     static final String PHOTO_URL = "photo_url";
-    private Identity photoServerIdentity;
+    private Identity photoServerIdentity;  // this is null for Keycloak groups with a photo
     static final String PHOTO_SERVER_IDENTITY = "photo_server_identity";
-    private UID photoServerLabel; // this is the only non-null field for Keycloak groups with a photo
+    private UID photoServerLabel;
     static final String PHOTO_SERVER_LABEL = "photo_server_label";
     private AuthEncKey photoServerKey;
     static final String PHOTO_SERVER_KEY = "photo_server_key";
@@ -112,6 +112,10 @@ public class ContactGroupV2Details implements ObvDatabase {
 
     public UID getPhotoServerLabel() {
         return photoServerLabel;
+    }
+
+    public AuthEncKey getPhotoServerKey() {
+        return photoServerKey;
     }
 
     // region Constructor
@@ -264,7 +268,7 @@ public class ContactGroupV2Details implements ObvDatabase {
         }
     }
 
-    private ContactGroupV2Details(IdentityManagerSession identityManagerSession, UID groupUid, String serverUrl, int category, Identity ownedIdentity, int version, String serializedJsonDetails, String photoUrl, Identity photoServerIdentity, UID photoServerLabel, AuthEncKey photoServerKey) {
+    public ContactGroupV2Details(IdentityManagerSession identityManagerSession, UID groupUid, String serverUrl, int category, Identity ownedIdentity, int version, String serializedJsonDetails, String photoUrl, Identity photoServerIdentity, UID photoServerLabel, AuthEncKey photoServerKey) {
         this.identityManagerSession = identityManagerSession;
         this.groupUid = groupUid;
         this.serverUrl = serverUrl;

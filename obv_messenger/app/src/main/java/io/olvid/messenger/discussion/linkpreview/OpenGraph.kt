@@ -22,12 +22,10 @@ package io.olvid.messenger.discussion.linkpreview
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import androidx.compose.ui.text.toLowerCase
 import io.olvid.engine.datatypes.DictionaryKey
 import io.olvid.engine.encoder.DecodingException
 import io.olvid.engine.encoder.Encoded
 import io.olvid.messenger.customClasses.StringUtils2
-import io.olvid.messenger.customClasses.ifNull
 import java.io.ByteArrayOutputStream
 import java.util.Locale
 
@@ -64,6 +62,7 @@ data class OpenGraph(
         }
 
         val DOMAINS_WITH_LONG_DESCRIPTION = listOf(
+            ".x.com",
             ".twitter.com",
             ".fxtwitter.com",
             ".vxtwitter.com",

@@ -573,8 +573,8 @@ public class Message {
         return createInfoMessage(db, TYPE_DISCUSSION_REMOTELY_DELETED, discussionId, remoteIdentity, serverTimestamp, false);
     }
 
-    public static Message createNewPublishedDetailsMessage(AppDatabase db, long discussionId, byte[] bytesContactIdentity) {
-        Message message = createInfoMessage(db, TYPE_NEW_PUBLISHED_DETAILS, discussionId, bytesContactIdentity, System.currentTimeMillis(), true);
+    public static Message createNewPublishedDetailsMessage(AppDatabase db, long discussionId, byte[] senderIdentity) {
+        Message message = createInfoMessage(db, TYPE_NEW_PUBLISHED_DETAILS, discussionId, senderIdentity, System.currentTimeMillis(), true);
         message.status = STATUS_UNREAD;
         return message;
     }
@@ -1735,9 +1735,12 @@ public class Message {
 
             if (db.fyleMessageJoinWithStatusDao().countMessageForFyle(fyleAndStatus.fyle.id) == 0) {
                 if (fyleAndStatus.fyle.sha256 != null) {
-                    Fyle.acquireLock(fyleAndStatus.fyle.sha256);
-                    fyleAndStatus.fyle.delete();
-                    Fyle.releaseLock(fyleAndStatus.fyle.sha256);
+                    try {
+                        Fyle.acquireLock(fyleAndStatus.fyle.sha256);
+                        fyleAndStatus.fyle.delete();
+                    } finally {
+                        Fyle.releaseLock(fyleAndStatus.fyle.sha256);
+                    }
                 } else {
                     fyleAndStatus.fyle.delete();
                 }

@@ -305,7 +305,7 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
     protected void onDestroy() {
         super.onDestroy();
         unbindService(webrtcServiceConnection);
-        webrtcCallService = null;
+        setWebrtcCallService(null);
         if (mediaSession != null) {
             mediaSession.release();
         }
@@ -810,11 +810,13 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
     private void setWebrtcCallService(WebrtcCallService webrtcCallService) {
         if (webrtcCallService != null) {
             this.webrtcCallService = webrtcCallService;
-            this.webrtcCallService.getState().observe(this, callStateObserver);
+            if (callStateObserver != null && callDurationObserver != null) {
+                this.webrtcCallService.getState().observeForever(callStateObserver);
+                this.webrtcCallService.getCallDuration().observeForever(callDurationObserver);
+            }
             this.webrtcCallService.getCallParticipantsLiveData().observe(this, callParticipantsAdapter);
             this.webrtcCallService.getCallParticipantsLiveData().observe(this, showDiscussionButtonObserver);
             this.webrtcCallService.getCallParticipantsLiveData().observe(this, motionLayoutObserver);
-            this.webrtcCallService.getCallDuration().observe(this, callDurationObserver);
             this.webrtcCallService.getMicrophoneMuted().observe(this, microphoneMutedObserver);
             this.webrtcCallService.getSelectedAudioOutput().observe(this, selectedAudioOutputObserver);
             this.webrtcCallService.getAvailableAudioOutputs().observe(this, audioOutputsObserver);
@@ -822,9 +824,11 @@ public class WebrtcCallActivity extends AppCompatActivity implements View.OnClic
         } else {
             if (this.webrtcCallService != null) {
                 // remove observers
-                this.webrtcCallService.getState().removeObservers(this);
+                if (callStateObserver != null && callDurationObserver != null) {
+                    this.webrtcCallService.getState().removeObserver(callStateObserver);
+                    this.webrtcCallService.getCallDuration().removeObserver(callDurationObserver);
+                }
                 this.webrtcCallService.getCallParticipantsLiveData().removeObservers(this);
-                this.webrtcCallService.getCallDuration().removeObservers(this);
                 this.webrtcCallService.getMicrophoneMuted().removeObservers(this);
                 this.webrtcCallService.getSelectedAudioOutput().removeObservers(this);
                 this.webrtcCallService.getAvailableAudioOutputs().removeObservers(this);

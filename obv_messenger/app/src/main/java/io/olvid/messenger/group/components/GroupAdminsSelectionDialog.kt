@@ -34,7 +34,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
-import androidx.compose.material.SwitchColors
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -52,7 +51,6 @@ import androidx.compose.ui.window.Dialog
 import io.olvid.messenger.R
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
-import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.main.contacts.ContactListItem
 

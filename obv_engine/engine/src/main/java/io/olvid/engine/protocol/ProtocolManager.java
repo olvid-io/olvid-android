@@ -27,9 +27,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.crypto.Suite;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.Session;
@@ -43,6 +46,12 @@ import io.olvid.engine.datatypes.containers.ProtocolReceivedDialogResponse;
 import io.olvid.engine.datatypes.containers.ProtocolReceivedMessage;
 import io.olvid.engine.datatypes.containers.ProtocolReceivedServerResponse;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
+import io.olvid.engine.datatypes.key.asymmetric.EncryptionPrivateKey;
+import io.olvid.engine.datatypes.key.asymmetric.EncryptionPublicKey;
+import io.olvid.engine.datatypes.key.asymmetric.KeyPair;
+import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPrivateKey;
+import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPublicKey;
+import io.olvid.engine.datatypes.key.symmetric.MACKey;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
@@ -101,6 +110,7 @@ import io.olvid.engine.protocol.protocols.OneToOneContactInvitationProtocol;
 import io.olvid.engine.protocol.protocols.OwnedDeviceDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.OwnedDeviceManagementProtocol;
 import io.olvid.engine.protocol.protocols.OwnedIdentityDeletionProtocol;
+import io.olvid.engine.protocol.protocols.OwnedIdentityTransferProtocol;
 import io.olvid.engine.protocol.protocols.SynchronizationProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithMutualScanProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithSasProtocol;
@@ -113,6 +123,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     private ObvBackupAndSyncDelegate identityBackupAndSyncDelegate;
     private EncryptionForIdentityDelegate encryptionForIdentityDelegate;
     private NotificationPostingDelegate notificationPostingDelegate;
+    private NotificationListeningDelegate notificationListeningDelegate;
     private EngineOwnedIdentityCleanupDelegate engineOwnedIdentityCleanupDelegate;
     private PushNotificationDelegate pushNotificationDelegate;
 
@@ -187,6 +198,9 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 //                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
 //                }
 //            }
+
+            // delete all unfinished transfer instances
+            ProtocolInstance.deleteAllTransfer(protocolManagerSession);
 
             protocolManagerSession.session.commit();
         } catch (Exception e) {
@@ -265,6 +279,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     public void setDelegate(NotificationListeningDelegate notificationListeningDelegate) {
+        this.notificationListeningDelegate = notificationListeningDelegate;
         notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE, newDeviceListener);
         notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_NEW_OWNED_DEVICE, newDeviceListener);
         notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED, contactDeletedListener);
@@ -441,7 +456,8 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void process(Session session, ProtocolReceivedMessage message) throws Exception {
-        if (!identityDelegate.isOwnedIdentity(session, message.getOwnedIdentity())) {
+        if (!identityDelegate.isOwnedIdentity(session, message.getOwnedIdentity())
+                && !Objects.equals(message.getOwnedIdentity().getServer(), Constants.EPHEMERAL_IDENTITY_SERVER)) {
             throw new Exception();
         }
         GenericReceivedProtocolMessage genericReceivedProtocolMessage = GenericReceivedProtocolMessage.of(message);
@@ -452,7 +468,8 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void process(Session session, ProtocolReceivedDialogResponse message) throws Exception {
-        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity())) {
+        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity())
+                && !Objects.equals(message.getToIdentity().getServer(), Constants.EPHEMERAL_IDENTITY_SERVER)) {
             throw new Exception();
         }
         GenericReceivedProtocolMessage genericReceivedProtocolMessage = GenericReceivedProtocolMessage.of(message);
@@ -463,7 +480,8 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void process(Session session, ProtocolReceivedServerResponse message) throws Exception {
-        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity())) {
+        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity())
+                && !Objects.equals(message.getToIdentity().getServer(), Constants.EPHEMERAL_IDENTITY_SERVER)) {
             throw new Exception();
         }
         GenericReceivedProtocolMessage genericReceivedProtocolMessage = GenericReceivedProtocolMessage.of(message);
@@ -487,11 +505,11 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         if (createSessionDelegate == null) {
             throw new SQLException("No CreateSessionDelegate was set in ChannelManager.");
         }
-        return new ProtocolManagerSession(createSessionDelegate.getSession(), channelDelegate, identityDelegate, encryptionForIdentityDelegate, protocolStepCoordinator, this, this, notificationPostingDelegate, engineOwnedIdentityCleanupDelegate, pushNotificationDelegate, engineBaseDirectory, identityBackupAndSyncDelegate, appBackupAndSyncDelegate);
+        return new ProtocolManagerSession(createSessionDelegate.getSession(), channelDelegate, identityDelegate, encryptionForIdentityDelegate, protocolStepCoordinator, this, this, notificationPostingDelegate, notificationListeningDelegate, engineOwnedIdentityCleanupDelegate, pushNotificationDelegate, engineBaseDirectory, identityBackupAndSyncDelegate, appBackupAndSyncDelegate);
     }
 
     private ProtocolManagerSession wrapSession(Session session) {
-        return new ProtocolManagerSession(session, channelDelegate, identityDelegate, encryptionForIdentityDelegate, protocolStepCoordinator, this, this, notificationPostingDelegate, engineOwnedIdentityCleanupDelegate, pushNotificationDelegate, engineBaseDirectory, identityBackupAndSyncDelegate, appBackupAndSyncDelegate);
+        return new ProtocolManagerSession(session, channelDelegate, identityDelegate, encryptionForIdentityDelegate, protocolStepCoordinator, this, this, notificationPostingDelegate, notificationListeningDelegate, engineOwnedIdentityCleanupDelegate, pushNotificationDelegate, engineBaseDirectory, identityBackupAndSyncDelegate, appBackupAndSyncDelegate);
     }
     // endregion
 
@@ -927,6 +945,14 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         channelDelegate.post(session, message, prng);
     }
 
+
+    @Override
+    public void processDeviceManagementRequest(Identity ownedIdentity, ObvDeviceManagementRequest deviceManagementRequest) throws Exception {
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            processDeviceManagementRequest(protocolManagerSession.session, ownedIdentity, deviceManagementRequest);
+            protocolManagerSession.session.commit();
+        }
+    }
 
     @Override
     public void processDeviceManagementRequest(Session session, Identity ownedIdentity, ObvDeviceManagementRequest deviceManagementRequest) throws Exception {
@@ -1427,6 +1453,52 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 //            e.printStackTrace();
 //        }
 //    }
+
+    @Override
+    public void initiateOwnedIdentityTransferProtocolOnSourceDevice(Identity ownedIdentity) throws Exception {
+        if (ownedIdentity == null) {
+            throw new Exception();
+        }
+
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = new UID(prng);
+
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.OWNED_IDENTITY_TRANSFER_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+
+            ChannelMessageToSend message = new OwnedIdentityTransferProtocol.InitiateTransferOnSourceDeviceMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
+    @Override
+    public void initiateOwnedIdentityTransferProtocolOnTargetDevice(String deviceName) throws Exception {
+        KeyPair serverAuthKeyPair = Suite.generateServerAuthenticationKeyPair(null, prng);
+        KeyPair encryptionKeyPair = Suite.generateEncryptionKeyPair(null, prng);
+        if (serverAuthKeyPair == null || encryptionKeyPair == null) {
+            throw new Exception();
+        }
+        MACKey macKey = Suite.getDefaultMAC(0).generateKey(prng);
+        Identity ephemeralIdentity = new Identity(Constants.EPHEMERAL_IDENTITY_SERVER, (ServerAuthenticationPublicKey) serverAuthKeyPair.getPublicKey(), (EncryptionPublicKey) encryptionKeyPair.getPublicKey());
+
+
+        try (ProtocolManagerSession protocolManagerSession = getSession()) {
+            UID protocolInstanceUid = new UID(prng);
+
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ephemeralIdentity),
+                    ConcreteProtocol.OWNED_IDENTITY_TRANSFER_PROTOCOL_ID,
+                    protocolInstanceUid,
+                    false);
+
+            ChannelMessageToSend message = new OwnedIdentityTransferProtocol.InitiateTransferOnTargetDeviceMessage(coreProtocolMessage, deviceName, (ServerAuthenticationPrivateKey) serverAuthKeyPair.getPrivateKey(), (EncryptionPrivateKey) encryptionKeyPair.getPrivateKey(), macKey).generateChannelProtocolMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
+            protocolManagerSession.session.commit();
+        }
+    }
+
 
     // endregion
 

@@ -1,4 +1,47 @@
-#  Build 207 (0.15.0)
+# Build 216 (1.0)
+2023-10-10
+
+- Fixes for compatibility with iOS and Windows versions
+
+# ~~Build 215 (1.0)~~
+2023-10-07
+
+- Final adjustments to the transfer protocol
+
+# ~~Build 214 (1.0)~~
+2023-09-30
+
+- Several improvements to the transfer protocol
+- Notifications when a new device is added or the current device is set to be deactivated
+
+# ~~Build 213 (1.0)~~
+2023-09-27
+
+- Fix keycloak issue in the transfer protocol
+
+# ~~Build 211 (1.0)~~
+2023-09-26
+
+- Android 14 compatibility
+- Transfer protocol: copy a profile to a new device without using a backup/restore
+
+# Build 210 (0.15.0.3)
+2023-09-05
+
+- Fix for a bug in engine backup manager
+- Update SQLite JDBC to 3.42.0.1
+
+# Build 209 (0.15.0.2)
+2023-08-11
+
+- Hotfix for a crash on weird Markdown input
+
+# Build 208 (0.15.0.1)
+2023-08-03
+
+- Hotfix for a billing library crash
+
+# Build 207 (0.15.0)
 2023-07-31
 
 - Minor fixes for group types

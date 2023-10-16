@@ -235,7 +235,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
 
         this.channelManager = new ChannelManager(metaManager);
-        this.identityManager = new IdentityManager(metaManager, baseDirectoryPath, jsonObjectMapper);
+        this.identityManager = new IdentityManager(metaManager, baseDirectoryPath, jsonObjectMapper, prng);
         this.fetchManager = new FetchManager(metaManager, sslSocketFactory, baseDirectoryPath, prng, jsonObjectMapper);
         this.sendManager = new SendManager(metaManager, sslSocketFactory, baseDirectoryPath, prng);
         this.notificationManager = new NotificationManager(metaManager);
@@ -243,11 +243,35 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         this.backupManager = new BackupManager(metaManager, prng, jsonObjectMapper);
 
         registerToInternalNotifications();
+        initializationComplete();
         metaManager.initializationComplete();
     }
 
     private static void upgradeTables(Session session, int oldVersion, int newVersion) throws SQLException {
         UserInterfaceDialog.upgradeTable(session, oldVersion, newVersion);
+    }
+
+    private void initializationComplete() {
+        try {
+            // clear all transfer protocol UserInterfaceDialog
+            try (EngineSession engineSession = getSession()) {
+                for (UserInterfaceDialog userInterfaceDialog : UserInterfaceDialog.getAll(engineSession)) {
+                    try {
+                        if (userInterfaceDialog.getObvDialog().getCategory().getId() == ObvDialog.Category.TRANSFER_DIALOG_CATEGORY) {
+                            userInterfaceDialog.delete();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        try {
+                            userInterfaceDialog.delete();
+                        } catch (Exception ignored) { }
+                    }
+                }
+                engineSession.session.commit();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void deleteRecursive(File fileOrDirectory) {
@@ -546,6 +570,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 category = ObvDialog.Category.createSyncItemToApply(dialogType.obvSyncAtom);
                 break;
             }
+            case DialogType.TRANSFER_DIALOG_ID: {
+                category = ObvDialog.Category.createTransferDialog(dialogType.obvTransferStep);
+                break;
+            }
             default:
                 Logger.w("Unknown DialogType " + dialogType.id);
                 return null;
@@ -646,7 +674,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 return RegisterApiKeyResult.FAILED;
             }
 
-            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, ServerQuery.Type.createRegisterApiKey(ownedIdentity, serverSessionToken, Logger.getUuidString(apiKey))));
+            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, new ServerQuery.RegisterApiKeyQuery(ownedIdentity, serverSessionToken, Logger.getUuidString(apiKey))));
 
             OperationQueue queue = new OperationQueue();
             queue.queue(standaloneServerQueryOperation);
@@ -1052,7 +1080,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         try (EngineSession engineSession = getSession()) {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
 
-            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, ServerQuery.Type.createOwnedDeviceDiscoveryQuery(ownedIdentity)));
+            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, new ServerQuery.OwnedDeviceDiscoveryQuery(ownedIdentity)));
 
             OperationQueue queue = new OperationQueue();
             queue.queue(standaloneServerQueryOperation);
@@ -1853,6 +1881,17 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
         Identity contactIdentity = Identity.of(bytesContactIdentity);
         protocolManager.addKeycloakContact(ownedIdentity, contactIdentity, signedContactDetails);
+    }
+
+    @Override
+    public void initiateOwnedIdentityTransferProtocolOnSourceDevice(byte[] bytesOwnedIdentity) throws Exception {
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        protocolManager.initiateOwnedIdentityTransferProtocolOnSourceDevice(ownedIdentity);
+    }
+
+    @Override
+    public void initiateOwnedIdentityTransferProtocolOnTargetDevice(String deviceName) throws Exception {
+        protocolManager.initiateOwnedIdentityTransferProtocolOnTargetDevice(deviceName);
     }
 
     // endregion

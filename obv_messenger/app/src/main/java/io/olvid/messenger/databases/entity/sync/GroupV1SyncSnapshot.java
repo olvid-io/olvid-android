@@ -55,11 +55,34 @@ public class GroupV1SyncSnapshot implements ObvSyncSnapshotNode {
         Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
         if (discussion != null) {
             DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-            groupV1SyncSnapshot.discussion_customization = DiscussionCustomizationSyncSnapshot.of(db, discussionCustomization);
+            if (discussionCustomization != null) {
+                groupV1SyncSnapshot.discussion_customization = DiscussionCustomizationSyncSnapshot.of(db, discussionCustomization);
+            }
         }
 
         groupV1SyncSnapshot.domain = DEFAULT_DOMAIN;
         return groupV1SyncSnapshot;
+    }
+
+    public void restore(AppDatabase db, byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid) {
+        Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+        if (group != null) {
+            Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
+            if (domain.contains(CUSTOM_NAME) && custom_name != null) {
+                db.groupDao().updateCustomName(bytesOwnedIdentity, bytesGroupOwnerAndUid, custom_name);
+                if (discussion != null) {
+                    db.discussionDao().updateTitleAndPhotoUrl(discussion.id, custom_name, discussion.photoUrl);
+                }
+            }
+            if (domain.contains(PERSONAL_NOTE) && personal_note != null) {
+                db.groupDao().updatePersonalNote(bytesOwnedIdentity, bytesGroupOwnerAndUid, personal_note);
+            }
+            if (domain.contains(DISCUSSION_CUSTOMIZATION) && discussion_customization != null) {
+                if (discussion != null) {
+                    discussion_customization.restore(db, discussion.id);
+                }
+            }
+        }
     }
 
     @Override
@@ -89,7 +112,7 @@ public class GroupV1SyncSnapshot implements ObvSyncSnapshotNode {
                 }
                 case DISCUSSION_CUSTOMIZATION: {
                     if ((discussion_customization == null && other.discussion_customization != null)
-                            || (discussion_customization != null && discussion_customization.areContentsTheSame(other.discussion_customization))) {
+                            || (discussion_customization != null && !discussion_customization.areContentsTheSame(other.discussion_customization))) {
                         return false;
                     }
                     break;
@@ -102,7 +125,7 @@ public class GroupV1SyncSnapshot implements ObvSyncSnapshotNode {
     @Override
     @JsonIgnore
     public List<ObvSyncDiff> computeDiff(ObvSyncSnapshotNode otherSnapshotNode) throws Exception {
-        // TODO
+        // TODO computeDiff
         return null;
     }
 }

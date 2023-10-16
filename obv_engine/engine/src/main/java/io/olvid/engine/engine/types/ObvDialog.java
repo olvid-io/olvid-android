@@ -137,6 +137,40 @@ public class ObvDialog {
             throw new Exception();
         }
     }
+
+    public void setAbortTransfer() throws Exception {
+        if (this.category.id == Category.TRANSFER_DIALOG_CATEGORY) {
+            encodedResponse = null;
+        } else {
+            throw new Exception();
+        }
+    }
+
+    public void setTransferSessionNumber(long sessionNumber) throws Exception {
+        if (this.category.id == Category.TRANSFER_DIALOG_CATEGORY && this.category.obvTransferStep.getStep() == ObvTransferStep.Step.TARGET_SESSION_NUMBER_INPUT)  {
+            encodedResponse = Encoded.of(sessionNumber);
+        } else {
+            throw new Exception();
+        }
+    }
+
+    public void setTransferSasAndDeviceUid(String sas, byte[] deviceUidToKeepActive) throws Exception {
+        if (this.category.id == Category.TRANSFER_DIALOG_CATEGORY && this.category.obvTransferStep.getStep() == ObvTransferStep.Step.SOURCE_SAS_INPUT)  {
+            if (deviceUidToKeepActive == null) {
+                encodedResponse = Encoded.of(new Encoded[]{
+                        Encoded.of(sas),
+                });
+            } else {
+                encodedResponse = Encoded.of(new Encoded[]{
+                        Encoded.of(sas),
+                        Encoded.of(deviceUidToKeepActive),
+                });
+            }
+        } else {
+            throw new Exception();
+        }
+    }
+
     // endregion
 
 
@@ -163,6 +197,8 @@ public class ObvDialog {
         public static final int GROUP_V2_INVITATION_DIALOG_CATEGORY = 15;
         public static final int GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY = 16;
         public static final int SYNC_ITEM_TO_APPLY_DIALOG_CATEGORY = 17;
+        public static final int TRANSFER_DIALOG_CATEGORY = 18;
+
 
         private final int id;
         private final byte[] bytesContactIdentity;
@@ -176,9 +212,10 @@ public class ObvDialog {
         public final Long serverTimestamp;
         private final ObvGroupV2 obvGroupV2;
         private final ObvSyncAtom obvSyncAtom;
+        public final ObvTransferStep obvTransferStep;
 
 
-        public Category(int id, byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] sasToDisplay, byte[] sasEntered, byte[] bytesMediatorOrGroupOwnerIdentity, String serializedGroupDetails, byte[] bytesGroupUid, ObvIdentity[] pendingGroupMemberIdentities, Long serverTimestamp, ObvGroupV2 obvGroupV2, ObvSyncAtom obvSyncAtom) {
+        public Category(int id, byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] sasToDisplay, byte[] sasEntered, byte[] bytesMediatorOrGroupOwnerIdentity, String serializedGroupDetails, byte[] bytesGroupUid, ObvIdentity[] pendingGroupMemberIdentities, Long serverTimestamp, ObvGroupV2 obvGroupV2, ObvSyncAtom obvSyncAtom, ObvTransferStep obvTransferStep) {
             this.id = id;
             this.bytesContactIdentity = bytesContactIdentity;
             this.contactDisplayNameOrSerializedDetails = contactDisplayNameOrSerializedDetails;
@@ -191,6 +228,7 @@ public class ObvDialog {
             this.serverTimestamp = serverTimestamp;
             this.obvGroupV2 = obvGroupV2;
             this.obvSyncAtom = obvSyncAtom;
+            this.obvTransferStep = obvTransferStep;
         }
 
         public int getId() {
@@ -241,6 +279,10 @@ public class ObvDialog {
             return obvSyncAtom;
         }
 
+        public ObvTransferStep getObvTransferStep() {
+            return obvTransferStep;
+        }
+
         private static Category of(Encoded encoded, ObjectMapper jsonObjectMapper) throws Exception {
             Encoded[] list = encoded.decodeList();
             if (list.length != 2) {
@@ -258,6 +300,7 @@ public class ObvDialog {
             Long serverTimestamp = null;
             ObvGroupV2 obvGroupV2 = null;
             ObvSyncAtom obvSyncAtom = null;
+            ObvTransferStep obvTransferStep = null;
 
             Encoded[] vars = list[1].decodeList();
             switch (id) {
@@ -358,6 +401,13 @@ public class ObvDialog {
                     obvSyncAtom = ObvSyncAtom.of(vars[0]);
                     break;
                 }
+                case TRANSFER_DIALOG_CATEGORY: {
+                    if (vars.length != 1) {
+                        throw new DecodingException();
+                    }
+                    obvTransferStep = ObvTransferStep.of(vars[0]);
+                    break;
+                }
                 default:
                     if (vars.length != 2) {
                         throw new DecodingException();
@@ -366,7 +416,7 @@ public class ObvDialog {
                     contactDisplayNameOrSerializedDetails = vars[1].decodeString();
                     break;
             }
-            return new Category(id, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, bytesMediatorOrGroupOwnerIdentity, serializedGroupDetails, bytesGroupUid, pendingGroupMemberIdentities, serverTimestamp, obvGroupV2, obvSyncAtom);
+            return new Category(id, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, bytesMediatorOrGroupOwnerIdentity, serializedGroupDetails, bytesGroupUid, pendingGroupMemberIdentities, serverTimestamp, obvGroupV2, obvSyncAtom, obvTransferStep);
         }
 
         private Encoded encode(ObjectMapper jsonObjectMapper) {
@@ -468,6 +518,11 @@ public class ObvDialog {
                             obvSyncAtom.encode(),
                     });
                     break;
+                case TRANSFER_DIALOG_CATEGORY:
+                    encodedVars = Encoded.of(new Encoded[]{
+                            obvTransferStep.encode(),
+                    });
+                    break;
             }
             return Encoded.of(new Encoded[]{
                     Encoded.of(id),
@@ -476,55 +531,59 @@ public class ObvDialog {
         }
 
         public static Category createInviteSent(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails) {
-            return new Category(INVITE_SENT_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, null, null, null);
+            return new Category(INVITE_SENT_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, null, null, null, null);
         }
 
         public static Category createAcceptInvite(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, long serverTimestamp) {
-            return new Category(ACCEPT_INVITE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, serverTimestamp, null, null);
+            return new Category(ACCEPT_INVITE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, serverTimestamp, null, null, null);
         }
 
         public static Category createSasExchange(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] sasToDisplay, long serverTimestamp) {
-            return new Category(SAS_EXCHANGE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, null, null, null, null, null, serverTimestamp, null, null);
+            return new Category(SAS_EXCHANGE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, null, null, null, null, null, serverTimestamp, null, null, null);
         }
 
         public static Category createSasConfirmed(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] sasToDisplay, byte[] sasEntered) {
-            return new Category(SAS_CONFIRMED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, null, null, null, null, null, null, null);
+            return new Category(SAS_CONFIRMED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, null, null, null, null, null, null, null, null);
         }
 
         public static Category createInviteAccepted(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails) {
-            return new Category(INVITE_ACCEPTED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, null, null, null);
+            return new Category(INVITE_ACCEPTED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, null, null, null, null, null, null, null, null);
         }
 
         public static Category createAcceptMediatorInvite(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] bytesMediatorIdentity, long serverTimestamp) {
-            return new Category(ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, serverTimestamp, null, null);
+            return new Category(ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, serverTimestamp, null, null, null);
         }
 
         public static Category createMediatorInviteAccepted(byte[] bytesContactIdentity, String contactDisplayNameOrSerializedDetails, byte[] bytesMediatorIdentity) {
-            return new Category(MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, null, null, null);
+            return new Category(MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY, bytesContactIdentity, contactDisplayNameOrSerializedDetails, null, null, bytesMediatorIdentity, null, null, null, null, null, null, null);
         }
 
         public static Category createAcceptGroupInvite(String serializedGroupDetails, byte[] groupId, byte[] bytesGroupOwnerIdentity, ObvIdentity[] pendingGroupMemberIdentities, long serverTimestamp) {
-            return new Category(ACCEPT_GROUP_INVITE_DIALOG_CATEGORY, null, null, null, null, bytesGroupOwnerIdentity, serializedGroupDetails, groupId, pendingGroupMemberIdentities, serverTimestamp, null, null);
+            return new Category(ACCEPT_GROUP_INVITE_DIALOG_CATEGORY, null, null, null, null, bytesGroupOwnerIdentity, serializedGroupDetails, groupId, pendingGroupMemberIdentities, serverTimestamp, null, null, null);
         }
 
         public static Category createOneToOneInvitationSent(byte[] bytesContactIdentity) {
-            return new Category(ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, null, null, null);
+            return new Category(ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, null, null, null, null);
         }
 
         public static Category createAcceptOneToOneInvitation(byte[] bytesContactIdentity, Long serverTimestamp) {
-            return new Category(ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, serverTimestamp, null, null);
+            return new Category(ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY, bytesContactIdentity, null, null, null, null, null, null, null, serverTimestamp, null, null, null);
         }
 
         public static Category createGroupV2Invitation(byte[] bytesInviterIdentity, ObvGroupV2 obvGroupV2) {
-            return new Category(GROUP_V2_INVITATION_DIALOG_CATEGORY, null, null, null, null, bytesInviterIdentity, null, null, null, null, obvGroupV2, null);
+            return new Category(GROUP_V2_INVITATION_DIALOG_CATEGORY, null, null, null, null, bytesInviterIdentity, null, null, null, null, obvGroupV2, null, null);
         }
 
         public static Category createGroupV2FrozenInvitation(byte[] bytesInviterIdentity, ObvGroupV2 obvGroupV2) {
-            return new Category(GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY, null, null, null, null, bytesInviterIdentity, null, null, null, null, obvGroupV2, null);
+            return new Category(GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY, null, null, null, null, bytesInviterIdentity, null, null, null, null, obvGroupV2, null, null);
         }
 
         public static Category createSyncItemToApply(ObvSyncAtom obvSyncAtom) {
-            return new Category(SYNC_ITEM_TO_APPLY_DIALOG_CATEGORY, null, null, null, null, null, null, null, null, null, null, obvSyncAtom);
+            return new Category(SYNC_ITEM_TO_APPLY_DIALOG_CATEGORY, null, null, null, null, null, null, null, null, null, null, obvSyncAtom, null);
+        }
+
+        public static Category createTransferDialog(ObvTransferStep obvTransferStep) {
+            return new Category(TRANSFER_DIALOG_CATEGORY, null, null, null, null, null, null, null, null, null, null, null, obvTransferStep);
         }
     }
 }

@@ -149,9 +149,6 @@ public class ForwardMessagesTask implements Runnable {
             if (jsonExpiration != null) {
                jsonMessage.setJsonExpiration(jsonExpiration);
             }
-            if (message.jsonMentions != null) {
-               jsonMessage.setJsonUserMentions(message.getMentions());
-            }
 
             db.runInTransaction(() -> {
                discussion.lastOutboundMessageSequenceNumber++;

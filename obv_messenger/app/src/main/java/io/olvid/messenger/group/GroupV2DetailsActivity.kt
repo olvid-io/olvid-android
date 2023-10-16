@@ -20,7 +20,6 @@ package io.olvid.messenger.group
 
 import android.animation.LayoutTransition
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint

@@ -116,7 +116,6 @@ fun ContactListItem(
                     )
                     .requiredSize(40.dp),
                 initialViewSetup = initialViewSetup,
-                onClick = onClick,
             )
 
             // content

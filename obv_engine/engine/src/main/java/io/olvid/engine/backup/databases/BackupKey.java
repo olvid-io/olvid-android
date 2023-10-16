@@ -29,6 +29,7 @@ import java.util.List;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.backup.datatypes.BackupManagerSession;
+import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
@@ -175,13 +176,59 @@ public class BackupKey implements ObvDatabase {
                     UPLOADED_BACKUP_VERSION + " INTEGER, " +
                     EXPORTED_BACKUP_VERSION + " INTEGER, " +
                     LATEST_BACKUP_VERSION + " INTEGER, " +
-                    "FOREIGN KEY (" + UID_ + "," + UPLOADED_BACKUP_VERSION + ") REFERENCES " + Backup.TABLE_NAME + " (" + Backup.BACKUP_KEY_UID + "," + Backup.VERSION + ") ON DELETE SET NULL, " +
-                    "FOREIGN KEY (" + UID_ + "," + EXPORTED_BACKUP_VERSION + ") REFERENCES " + Backup.TABLE_NAME + " (" + Backup.BACKUP_KEY_UID + "," + Backup.VERSION + ") ON DELETE SET NULL, " +
-                    "FOREIGN KEY (" + UID_ + "," + LATEST_BACKUP_VERSION + ") REFERENCES " + Backup.TABLE_NAME + " (" + Backup.BACKUP_KEY_UID + "," + Backup.VERSION + ") ON DELETE SET NULL);");
+                    "FOREIGN KEY (" + UID_ + "," + UPLOADED_BACKUP_VERSION + ") REFERENCES " + Backup.TABLE_NAME + " (" + Backup.BACKUP_KEY_UID + "," + Backup.VERSION + "), " +
+                    "FOREIGN KEY (" + UID_ + "," + EXPORTED_BACKUP_VERSION + ") REFERENCES " + Backup.TABLE_NAME + " (" + Backup.BACKUP_KEY_UID + "," + Backup.VERSION + "), " +
+                    "FOREIGN KEY (" + UID_ + "," + LATEST_BACKUP_VERSION + ") REFERENCES " + Backup.TABLE_NAME + " (" + Backup.BACKUP_KEY_UID + "," + Backup.VERSION + "));");
         }
     }
 
     public static void upgradeTable(Session session, int oldVersion, int newVersion) throws SQLException {
+        if (oldVersion < 36 && newVersion >= 36) {
+            Logger.d("MIGRATING `backup_key` DATABASE FROM VERSION " + oldVersion + " TO 36");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("CREATE TABLE backup_key_new (" +
+                        " uid BLOB PRIMARY KEY, " +
+                        " encryption_public_key BLOB NOT NULL, " +
+                        " mac_key BLOB NOT NULL, " +
+                        " key_generation_timestamp INTEGER NOT NULL, " +
+                        " last_successful_key_verification_timestamp INTEGER NOT NULL, " +
+                        " last_key_verification_prompt_timestamp INTEGER NOT NULL, " +
+                        " successful_verification_count INTEGER NOT NULL, " +
+                        " uploaded_backup_version INTEGER, " +
+                        " exported_backup_version INTEGER, " +
+                        " latest_backup_version INTEGER, " +
+                        "FOREIGN KEY (uid, uploaded_backup_version) REFERENCES backup (backup_key_uid, version), " +
+                        "FOREIGN KEY (uid, exported_backup_version) REFERENCES backup (backup_key_uid, version), " +
+                        "FOREIGN KEY (uid, latest_backup_version) REFERENCES backup (backup_key_uid, version));");
+
+                ResultSet res = statement.executeQuery("SELECT * FROM backup_key WHERE uid IS NULL");
+                if (res.next()) {
+                    // we have a null primary key --> copy it partially to new table
+                    try (PreparedStatement ps = session.prepareStatement("INSERT INTO backup_key_new VALUES (?,?,?,?,?, ?,?,?,?,?)")) {
+                        ps.setBytes(1, new UID(Suite.getDefaultPRNGService(Suite.LATEST_VERSION)).getBytes());
+                        ps.setBytes(2, res.getBytes("encryption_public_key"));
+                        ps.setBytes(3, res.getBytes("mac_key"));
+                        ps.setLong(4, res.getLong("key_generation_timestamp"));
+                        ps.setLong(5, res.getLong("last_successful_key_verification_timestamp"));
+                        ps.setLong(6, res.getLong("last_key_verification_prompt_timestamp"));
+                        ps.setInt(7, res.getInt("successful_verification_count"));
+                        ps.setNull(8, Types.INTEGER);
+                        ps.setNull(9, Types.INTEGER);
+                        ps.setNull(10, Types.INTEGER);
+                        ps.executeUpdate();
+                    }
+                    // delete all existing backups (the backup_key_uid no longer exists)
+                    statement.execute("DELETE FROM backup");
+                } else {
+                    // no null primary key, simply copy the content of the old table to the new one
+                    statement.execute("INSERT into backup_key_new (uid, encryption_public_key, mac_key, key_generation_timestamp, last_successful_key_verification_timestamp, last_key_verification_prompt_timestamp, successful_verification_count, uploaded_backup_version, exported_backup_version, latest_backup_version) SELECT uid, encryption_public_key, mac_key, key_generation_timestamp, last_successful_key_verification_timestamp, last_key_verification_prompt_timestamp, successful_verification_count, uploaded_backup_version, exported_backup_version, latest_backup_version FROM backup_key");
+                }
+                statement.execute("DROP TABLE backup_key");
+                statement.execute("ALTER TABLE backup_key_new RENAME TO backup_key");
+
+            }
+            oldVersion = 36;
+        }
     }
 
     // delete all BackupKey and all Backup

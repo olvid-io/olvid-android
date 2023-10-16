@@ -213,22 +213,12 @@ public class MediaPlayerService extends Service {
         if (paused) {
             Intent playIntent = new Intent(this, MediaPlayerService.class);
             playIntent.setAction(ACTION_PLAY);
-            PendingIntent playPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                playPendingIntent = PendingIntent.getService(App.getContext(), 564, playIntent, PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                playPendingIntent = PendingIntent.getService(App.getContext(), 564, playIntent, 0);
-            }
+            PendingIntent playPendingIntent = PendingIntent.getService(App.getContext(), 564, playIntent, PendingIntent.FLAG_IMMUTABLE);
             builder.addAction(R.drawable.ic_play, getString(R.string.notification_action_play), playPendingIntent);
         } else {
             Intent pauseIntent = new Intent(this, MediaPlayerService.class);
             pauseIntent.setAction(ACTION_PAUSE);
-            PendingIntent pausePendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                pausePendingIntent = PendingIntent.getService(App.getContext(), 565, pauseIntent, PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                pausePendingIntent = PendingIntent.getService(App.getContext(), 565, pauseIntent, 0);
-            }
+            PendingIntent pausePendingIntent = PendingIntent.getService(App.getContext(), 565, pauseIntent, PendingIntent.FLAG_IMMUTABLE);
             builder.addAction(R.drawable.ic_pause, getString(R.string.notification_action_pause), pausePendingIntent);
         }
 
@@ -239,22 +229,12 @@ public class MediaPlayerService extends Service {
             contentIntent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
             contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, loadedMedia.fyleMessageJoinWithStatus.bytesOwnedIdentity);
         }
-        PendingIntent contentPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), 566, contentIntent, PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), 566, contentIntent, 0);
-        }
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), 566, contentIntent, PendingIntent.FLAG_IMMUTABLE);
         builder.setContentIntent(contentPendingIntent);
 
         Intent stopIntent = new Intent(this, MediaPlayerService.class);
         stopIntent.setAction(ACTION_STOP);
-        PendingIntent stopPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            stopPendingIntent = PendingIntent.getService(App.getContext(), 567, stopIntent, PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            stopPendingIntent = PendingIntent.getService(App.getContext(), 567, stopIntent, 0);
-        }
+        PendingIntent stopPendingIntent = PendingIntent.getService(App.getContext(), 567, stopIntent, PendingIntent.FLAG_IMMUTABLE);
         builder.setDeleteIntent(stopPendingIntent);
 
         try {

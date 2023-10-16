@@ -72,6 +72,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ContactDetailsActivity;
+import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -104,6 +105,7 @@ public class AndroidNotificationManager {
     public static final String DISCUSSION_NOTIFICATION_CHANNELS_GROUP_ID = "discussions";
     public static final String DISCUSSION_NOTIFICATION_CHANNEL_ID_PREFIX = "discussion_";
 
+    public static final String DEVICE_NOTIFICATION_CHANNEL_ID = "device";
     public static final String KEYCLOAK_NOTIFICATION_CHANNEL_ID = "keycloak";
     public static final String LOCATION_SHARING_NOTIFICATION_CHANNEL_ID = "location_sharing";
 
@@ -447,12 +449,7 @@ public class AndroidNotificationManager {
 
         // CONTENT INTENT
         Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
-        PendingIntent contentPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         builder.setContentIntent(contentPendingIntent);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
@@ -560,12 +557,7 @@ public class AndroidNotificationManager {
         contentIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
         contentIntent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussion.id);
         contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, discussion.bytesOwnedIdentity);
-        PendingIntent contentPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         builder.setContentIntent(contentPendingIntent);
 
         // SEND MESSAGE ACTION
@@ -577,12 +569,7 @@ public class AndroidNotificationManager {
             Intent sendMessageIntent = new Intent(App.getContext(), NotificationActionService.class);
             sendMessageIntent.setAction(NotificationActionService.ACTION_MISSED_CALL_MESSAGE);
             sendMessageIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
-            PendingIntent sendMessagePendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                sendMessagePendingIntent = PendingIntent.getService(App.getContext(), getMissedCallNotificationId(discussion.id), sendMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
-            } else {
-                sendMessagePendingIntent = PendingIntent.getService(App.getContext(), getMissedCallNotificationId(discussion.id), sendMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
+            PendingIntent sendMessagePendingIntent = PendingIntent.getService(App.getContext(), getMissedCallNotificationId(discussion.id), sendMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
             NotificationCompat.Action sendMessageAction = new NotificationCompat.Action.Builder(R.drawable.ic_send, App.getContext().getString(R.string.notification_action_send_message), sendMessagePendingIntent)
                     .addRemoteInput(remoteInput)
                     .setAllowGeneratedReplies(SettingsActivity.isNotificationSuggestionAllowed())
@@ -599,12 +586,7 @@ public class AndroidNotificationManager {
         callBackIntent.putExtra(WebrtcCallActivity.CALL_BACK_EXTRA_BYTES_CONTACT_IDENTITY, discussion.bytesDiscussionIdentifier);
         callBackIntent.putExtra(WebrtcCallActivity.CALL_BACK_EXTRA_DISCUSSION_ID, discussion.id);
         callBackIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent callBackPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            callBackPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), callBackIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            callBackPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), callBackIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+        PendingIntent callBackPendingIntent = PendingIntent.getActivity(App.getContext(), getMissedCallNotificationId(discussion.id), callBackIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Action callBackAction = new NotificationCompat.Action.Builder(R.drawable.ic_answer_call, App.getContext().getString(R.string.notification_action_call_back), callBackPendingIntent)
                 .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_CALL)
@@ -1001,24 +983,14 @@ public class AndroidNotificationManager {
         contentIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
         contentIntent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussion.id);
         contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, discussion.bytesOwnedIdentity);
-        PendingIntent contentPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         builder.setContentIntent(contentPendingIntent);
 
         // DISMISS INTENT
         Intent dismissIntent = new Intent(App.getContext(), NotificationActionService.class);
         dismissIntent.setAction(NotificationActionService.ACTION_DISCUSSION_CLEAR);
         dismissIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
-        PendingIntent dismissPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            dismissPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            dismissPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
+        PendingIntent dismissPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         builder.setDeleteIntent(dismissPendingIntent);
 
         // REPLY ACTION
@@ -1030,12 +1002,7 @@ public class AndroidNotificationManager {
             Intent replyIntent = new Intent(App.getContext(), NotificationActionService.class);
             replyIntent.setAction(NotificationActionService.ACTION_DISCUSSION_REPLY);
             replyIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
-            PendingIntent replyPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                replyPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), replyIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
-            } else {
-                replyPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), replyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
+            PendingIntent replyPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), replyIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
             NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(R.drawable.ic_send, App.getContext().getString(R.string.notification_action_reply), replyPendingIntent)
                     .addRemoteInput(remoteInput)
                     .setAllowGeneratedReplies(SettingsActivity.isNotificationSuggestionAllowed())
@@ -1049,12 +1016,7 @@ public class AndroidNotificationManager {
         Intent markAsReadIntent = new Intent(App.getContext(), NotificationActionService.class);
         markAsReadIntent.setAction(NotificationActionService.ACTION_DISCUSSION_MARK_AS_READ);
         markAsReadIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
-        PendingIntent markAsReadPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            markAsReadPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), markAsReadIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            markAsReadPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), markAsReadIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+        PendingIntent markAsReadPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), markAsReadIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Action markAsReadAction = new NotificationCompat.Action.Builder(R.drawable.ic_ok, App.getContext().getString(R.string.notification_action_mark_as_read), markAsReadPendingIntent)
                 .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
@@ -1067,12 +1029,7 @@ public class AndroidNotificationManager {
         Intent muteIntent = new Intent(App.getContext(), MuteDiscussionDialogActivity.class);
         muteIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         muteIntent.putExtra(MuteDiscussionDialogActivity.DISCUSSION_ID_INTENT_EXTRA, discussion.id);
-        PendingIntent mutePendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            mutePendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), muteIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            mutePendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), muteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+        PendingIntent mutePendingIntent = PendingIntent.getActivity(App.getContext(), getMessageNotificationId(discussion.id), muteIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Action muteAction = new NotificationCompat.Action.Builder(R.drawable.ic_notification_muted, App.getContext().getString(R.string.notification_action_mute), mutePendingIntent)
                 .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MUTE)
@@ -1266,24 +1223,14 @@ public class AndroidNotificationManager {
             contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, discussion.bytesOwnedIdentity);
             contentIntent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussion.id);
             contentIntent.putExtra(DiscussionActivity.MESSAGE_ID_INTENT_EXTRA, message.id);
-            PendingIntent contentPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            }
+            PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             builder.setContentIntent(contentPendingIntent);
 
             // DISMISS INTENT
             Intent dismissIntent = new Intent(App.getContext(), NotificationActionService.class);
             dismissIntent.setAction(NotificationActionService.ACTION_MESSAGE_REACTION_CLEAR);
             dismissIntent.putExtra(NotificationActionService.EXTRA_MESSAGE_ID, message.id);
-            PendingIntent dismissPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            }
+            PendingIntent dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             builder.setDeleteIntent(dismissPendingIntent);
 
             if (ownedIdentity != null && ownedIdentity.isHidden()) {
@@ -1372,12 +1319,7 @@ public class AndroidNotificationManager {
                 }
                 intent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, invitation.bytesOwnedIdentity);
             }
-            PendingIntent pendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                pendingIntent = PendingIntent.getActivity(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                pendingIntent = PendingIntent.getActivity(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), intent, PendingIntent.FLAG_CANCEL_CURRENT);
-            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), MESSAGE_NOTIFICATION_CHANNEL_ID + getCurrentMessageChannelVersion());
             builder.setSmallIcon(R.drawable.ic_o)
@@ -1534,23 +1476,13 @@ public class AndroidNotificationManager {
                     Intent acceptIntent = new Intent(App.getContext(), NotificationActionService.class);
                     acceptIntent.setAction(NotificationActionService.ACTION_ACCEPT_INVITATION);
                     acceptIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, Logger.getUuidString(invitation.dialogUuid));
-                    PendingIntent acceptPendingIntent;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        acceptPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), acceptIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                    } else {
-                        acceptPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), acceptIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                    }
+                    PendingIntent acceptPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), acceptIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     builder.addAction(R.drawable.ic_ok, App.getContext().getString(R.string.notification_action_accept), acceptPendingIntent);
 
                     Intent rejectIntent = new Intent(App.getContext(), NotificationActionService.class);
                     rejectIntent.setAction(NotificationActionService.ACTION_REJECT_INVITATION);
                     rejectIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, Logger.getUuidString(invitation.dialogUuid));
-                    PendingIntent rejectPendingIntent;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                    } else {
-                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                    }
+                    PendingIntent rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     builder.addAction(R.drawable.ic_close, App.getContext().getString(R.string.notification_action_reject), rejectPendingIntent);
                     break;
                 }
@@ -1558,12 +1490,7 @@ public class AndroidNotificationManager {
                     Intent rejectIntent = new Intent(App.getContext(), NotificationActionService.class);
                     rejectIntent.setAction(NotificationActionService.ACTION_REJECT_INVITATION);
                     rejectIntent.putExtra(NotificationActionService.EXTRA_INVITATION_DIALOG_UUID, Logger.getUuidString(invitation.dialogUuid));
-                    PendingIntent rejectPendingIntent;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                    } else {
-                        rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                    }
+                    PendingIntent rejectPendingIntent = PendingIntent.getService(App.getContext(), getInvitationNotificationId(invitation.dialogUuid), rejectIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     builder.addAction(R.drawable.ic_close, App.getContext().getString(R.string.notification_action_reject), rejectPendingIntent);
                     break;
                 }
@@ -1615,12 +1542,7 @@ public class AndroidNotificationManager {
             int notificationId = getNeutralNotificationId();
 
             Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
-            PendingIntent contentPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            }
+            PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             builder.setContentIntent(contentPendingIntent);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
@@ -1645,12 +1567,7 @@ public class AndroidNotificationManager {
             int notificationId = getNeutralNotificationId();
 
             Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
-            PendingIntent contentPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            }
+            PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             builder.setContentIntent(contentPendingIntent);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
@@ -1710,12 +1627,7 @@ public class AndroidNotificationManager {
                     // on click open settings to enable location
                     Intent locationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                     locationSettingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    PendingIntent contentPendingIntent;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationSettingsIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                    } else {
-                        contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationSettingsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                    }
+                    PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationSettingsIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     builder.setContentIntent(contentPendingIntent);
                     break;
                 }
@@ -1728,12 +1640,7 @@ public class AndroidNotificationManager {
                     Intent locationPermissionIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                     locationPermissionIntent.setData(Uri.parse("package:" + App.getContext().getPackageName()));
                     locationPermissionIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    PendingIntent contentPendingIntent;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationPermissionIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                    } else {
-                        contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationPermissionIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                    }
+                    PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), 0, locationPermissionIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     builder.setContentIntent(contentPendingIntent);
                     break;
                 }
@@ -1816,12 +1723,7 @@ public class AndroidNotificationManager {
             // CONTENT INTENT
             Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
             contentIntent.putExtra(MainActivity.KEYCLOAK_AUTHENTICATION_NEEDED_EXTRA, bytesOwnedIdentity);
-            PendingIntent contentPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            }
+            PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), channelId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             builder.setContentIntent(contentPendingIntent);
 
             NotificationCompat.Action authenticateAction = new NotificationCompat.Action.Builder(R.drawable.ic_lock, App.getContext().getString(R.string.notification_action_authenticate), contentPendingIntent)
@@ -1877,12 +1779,7 @@ public class AndroidNotificationManager {
             if (lastTrustedCertificateId != null) {
                 contentIntent.putExtra(MainActivity.LAST_TRUSTED_CERTIFICATE_ID_EXTRA, lastTrustedCertificateId);
             }
-            PendingIntent contentPendingIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            }
+            PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             builder.setContentIntent(contentPendingIntent);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
@@ -1905,6 +1802,133 @@ public class AndroidNotificationManager {
     }
 
     // endregion
+
+    // region owned devices
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private static void createDeviceChannel() {
+        NotificationChannel deviceChannel = new NotificationChannel(
+                DEVICE_NOTIFICATION_CHANNEL_ID,
+                App.getContext().getString(R.string.notification_channel_device_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        deviceChannel.setDescription(App.getContext().getString(R.string.notification_channel_device_description));
+        deviceChannel.setShowBadge(false);
+        deviceChannel.enableVibration(true);
+        deviceChannel.setVibrationPattern(new long[]{0, 100});
+        deviceChannel.enableLights(true);
+        deviceChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+        notificationManager.createNotificationChannel(deviceChannel);
+    }
+
+    @SuppressLint("MissingPermission")
+    public static void displayDeviceExpirationNotification(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] deviceUid, @Nullable String deviceDisplayName, long expirationTimestamp) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            createDeviceChannel();
+        }
+        executor.execute(() -> {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), DEVICE_NOTIFICATION_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_device)
+                    .setColor(ContextCompat.getColor(App.getContext(), R.color.orange))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_ERROR)
+                    .setAutoCancel(true)
+                    .setOnlyAlertOnce(true)
+                    .setVibrate(new long[0]);
+            if (deviceDisplayName != null) {
+                builder.setContentTitle(App.getContext().getString(R.string.notification_title_device_expiration, deviceDisplayName))
+                        .setContentText(App.getContext().getString(R.string.notification_message_device_expiration, deviceDisplayName, StringUtils.getNiceDurationString(App.getContext(), (expirationTimestamp - System.currentTimeMillis()) / 1000)));
+            } else {
+                builder.setContentTitle(App.getContext().getString(R.string.notification_title_unnamed_device_expiration))
+                        .setContentText(App.getContext().getString(R.string.notification_message_unnamed_device_expiration, StringUtils.getNiceDurationString(App.getContext(), (expirationTimestamp - System.currentTimeMillis()) / 1000)));
+            }
+
+            int notificationId = getDeviceExpirationNotificationId(deviceUid);
+
+            Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
+            contentIntent.setAction(MainActivity.FORWARD_ACTION);
+            contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, bytesOwnedIdentity);
+            contentIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, OwnedIdentityDetailsActivity.class.getName());
+            builder.setContentIntent(PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.notify(notificationId, builder.build());
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                Vibrator v = (Vibrator) App.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                if (v != null) {
+                    v.vibrate(new long[]{0, 100}, -1);
+                }
+            }
+        });
+    }
+
+    @SuppressLint("MissingPermission")
+    public static void displayDeviceTrustNotification(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] deviceUid, @Nullable String deviceDisplayName) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            createDeviceChannel();
+        }
+        executor.execute(() -> {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), DEVICE_NOTIFICATION_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_device)
+                    .setColor(ContextCompat.getColor(App.getContext(), R.color.red))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_ERROR)
+                    .setOngoing(true)
+                    .setOnlyAlertOnce(true)
+                    .setContentText(App.getContext().getString(R.string.notification_message_device_trust))
+                    .setVibrate(new long[0]);
+
+            if (deviceDisplayName != null) {
+                builder.setContentTitle(App.getContext().getString(R.string.notification_title_device_trust, deviceDisplayName));
+            } else {
+                builder.setContentTitle(App.getContext().getString(R.string.notification_title_unnamed_device_trust));
+            }
+
+            int notificationId = getDeviceTrustNotificationId(deviceUid);
+
+            Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
+            contentIntent.setAction(MainActivity.FORWARD_ACTION);
+            contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, bytesOwnedIdentity);
+            contentIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, OwnedIdentityDetailsActivity.class.getName());
+            builder.setContentIntent(PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+
+            Intent trustDeviceIntent = new Intent(App.getContext(), NotificationActionService.class);
+            trustDeviceIntent.setAction(NotificationActionService.ACTION_DEVICE_TRUST);
+            trustDeviceIntent.putExtra(NotificationActionService.EXTRA_BYTES_OWNED_IDENTITY, bytesOwnedIdentity);
+            trustDeviceIntent.putExtra(NotificationActionService.EXTRA_DEVICE_UID, deviceUid);
+            PendingIntent trustPendingIntent = PendingIntent.getService(App.getContext(), notificationId, trustDeviceIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            builder.addAction(R.drawable.ic_ok, App.getContext().getString(R.string.notification_action_device_trust), trustPendingIntent);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.notify(notificationId, builder.build());
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                Vibrator v = (Vibrator) App.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                if (v != null) {
+                    v.vibrate(new long[]{0, 100}, -1);
+                }
+            }
+        });
+    }
+
+    public static void clearDeviceTrustNotification(byte[] deviceUid) {
+        executor.execute(() -> {
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.cancel(getDeviceTrustNotificationId(deviceUid));
+        });
+    }
+
+    public static void clearDeviceExpirationNotification(byte[] deviceUid) {
+        executor.execute(() -> {
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.cancel(getDeviceExpirationNotificationId(deviceUid));
+        });
+    }
+
+
+    // endregion
+
 
 
     private static int getMessageNotificationId(long discussionId) {
@@ -1936,7 +1960,14 @@ public class AndroidNotificationManager {
     }
 
     private static int getLocationErrorNotificationId(@NonNull LocationErrorType errorType) {
-        return  (int) (0xffffff & errorType.ordinal()) | 0x7000000;
+        return  (0xffffff & errorType.ordinal()) | 0x7000000;
+    }
+
+    private static int getDeviceTrustNotificationId(@NonNull byte[] deviceUid) {
+        return (0xfffffff & Arrays.hashCode(deviceUid) | 0x80000000) ;
+    }
+    private static int getDeviceExpirationNotificationId(@NonNull byte[] deviceUid) {
+        return (0xfffffff & Arrays.hashCode(deviceUid) | 0x90000000) ;
     }
 
     private static void vibrate(@Nullable DiscussionCustomization discussionCustomization) {

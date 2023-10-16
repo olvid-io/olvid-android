@@ -165,8 +165,6 @@ public class KeycloakSelectionFragment extends Fragment implements View.OnClickL
         autoViewGroup = view.findViewById(R.id.keycloak_auto_configuration);
         autoLogoImageView = view.findViewById(R.id.keycloak_auto_successful_image_view);
         autoExplanationTextView = view.findViewById(R.id.keycloak_explanation_text_view);
-        restoreBackupButton = view.findViewById(R.id.button_restore_backup);
-        restoreBackupButton.setOnClickListener(this);
 
         view.findViewById(R.id.keycloak_manual_configuration_switch).setOnClickListener(v -> autoViewGroup.animate().alpha(0).setDuration(200).setListener(new AnimatorListenerAdapter() {
             @Override
@@ -280,13 +278,11 @@ public class KeycloakSelectionFragment extends Fragment implements View.OnClickL
         });
 
         if (viewModel.isConfiguredFromMdm()) {
-            restoreBackupButton.setVisibility(View.VISIBLE);
             keycloakServerEditText.setEnabled(false);
             keycloakClientIdEditText.setEnabled(false);
             keycloakClientSecretEditText.setEnabled(false);
             backButton.setImageResource(R.drawable.ic_close_blue_or_white);
         } else {
-            restoreBackupButton.setVisibility(View.GONE);
             keycloakServerEditText.setEnabled(true);
             keycloakClientIdEditText.setEnabled(true);
             keycloakClientSecretEditText.setEnabled(true);
@@ -385,8 +381,6 @@ public class KeycloakSelectionFragment extends Fragment implements View.OnClickL
             validateKeycloakServer();
         } else if (v.getId() == R.id.button_authentication_browser) {
             KeycloakBrowserChooserDialog.openBrowserChoiceDialog(v);
-        } else if (v.getId() == R.id.button_restore_backup) {
-            Navigation.findNavController(v).navigate(KeycloakSelectionFragmentDirections.actionMdmRestore());
         } else if (v.getId() == R.id.button_authenticate) {
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             if (imm != null) {

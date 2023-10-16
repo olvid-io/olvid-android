@@ -39,29 +39,40 @@ public interface OwnedDeviceDao {
 
     @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.DISPLAY_NAME + " = :displayName " +
-            " WHERE "  + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
     void updateDisplayName(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, String displayName);
 
     @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.CHANNEL_CONFIRMED + " = :channelConfirmed " +
-            " WHERE "  + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
     void updateChannelConfirmed(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, boolean channelConfirmed);
 
+   @Query("UPDATE " + OwnedDevice.TABLE_NAME +
+            " SET " + OwnedDevice.TRUSTED + " = :trusted " +
+            " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+           " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
+    void updateTrusted(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, boolean trusted);
+
     @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.CURRENT_DEVICE + " = :currentDevice " +
-            " WHERE "  + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
     void updateCurrentDevice(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, boolean currentDevice);
 
     @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.LAST_REGISTRATION_TIMESTAMP + " = :lastRegistrationTimestamp, " +
             OwnedDevice.EXPIRATION_TIMESTAMP + " = :expirationTimestamp " +
-            " WHERE "  + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
     void updateTimestamps(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, Long lastRegistrationTimestamp, Long expirationTimestamp);
 
+
+    @Query("SELECT * FROM " + OwnedDevice.TABLE_NAME +
+            " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
+    OwnedDevice get(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid);
 
     @Query("SELECT * FROM " + OwnedDevice.TABLE_NAME +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
@@ -77,4 +88,5 @@ public interface OwnedDeviceDao {
             " AND " + OwnedDevice.CURRENT_DEVICE + " = 0 " +
             " AND " + OwnedDevice.CHANNEL_CONFIRMED + " = 1)")
     boolean doesOwnedIdentityHaveAnotherDeviceWithChannel(byte[] bytesOwnedIdentity);
+
 }

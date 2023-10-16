@@ -296,6 +296,9 @@ public class WebrtcCallService extends Service {
     private SoundPool soundPool;
     private int connectSound;
     private int disconnectSound;
+    private int reconnectingSound;
+    private Integer reconnectingStreamId = null;
+
     private PhoneCallStateListener phoneCallStateListener;
     private ScreenOffReceiver screenOffReceiver;
 
@@ -586,6 +589,7 @@ public class WebrtcCallService extends Service {
                         .build();
                 connectSound = soundPool.load(this, R.raw.connect, 1);
                 disconnectSound = soundPool.load(this, R.raw.disconnect, 1);
+                reconnectingSound = soundPool.load(this, R.raw.reconnecting, 1);
 
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                     readCallStatePermissionGranted();
@@ -687,6 +691,9 @@ public class WebrtcCallService extends Service {
             }
 
             if (isCaller()) {
+                // show notification
+                showOngoingForeground();
+
                 callerStartCallInternal();
             } else {
                 recipientAnswerCallInternal();
@@ -1122,7 +1129,6 @@ public class WebrtcCallService extends Service {
             } catch (Exception e) {
                 // do nothing
             }
-            showOngoingForeground();
 
             if (waitForAudioPermission) {
                 setState(State.WAITING_FOR_AUDIO_PERMISSION);
@@ -1134,6 +1140,8 @@ public class WebrtcCallService extends Service {
 
 
     private void recipientAnswerCallInternal() {
+        showOngoingForeground();
+
         // get audio focus
         requestAudioManagerFocus();
 
@@ -1301,7 +1309,8 @@ public class WebrtcCallService extends Service {
                     }
                 }
             }
-
+            // we call updateStateFromPeerStates here so we get a chance to stop playing the reconnecting sound
+            updateStateFromPeerStates();
 
             if (state == State.CALL_IN_PROGRESS) {
                 return;
@@ -1826,6 +1835,7 @@ public class WebrtcCallService extends Service {
 
     private void updateStateFromPeerStates() {
         boolean allPeersAreInFinalState = true;
+        boolean allReconnecting = true;
         for (CallParticipant callParticipant: callParticipants.values()) {
             switch (callParticipant.peerState) {
                 case INITIAL:
@@ -1834,6 +1844,8 @@ public class WebrtcCallService extends Service {
                 case BUSY:
                 case CONNECTING_TO_PEER:
                 case CONNECTED:
+                    allReconnecting = false;
+                    //noinspection fallthrough
                 case RECONNECTING: {
                     allPeersAreInFinalState = false;
                     break;
@@ -1842,10 +1854,23 @@ public class WebrtcCallService extends Service {
                 case HANGED_UP:
                 case KICKED:
                 case FAILED: {
+                    allReconnecting = false;
                     break;
                 }
             }
         }
+
+        if (callParticipants.size() == 1 && allReconnecting) {
+            if (reconnectingStreamId == null) {
+                reconnectingStreamId = soundPool.play(reconnectingSound, .5f, .5f, 0, -1, 1);
+            }
+        } else {
+            if (reconnectingStreamId != null) {
+                soundPool.stop(reconnectingStreamId);
+                reconnectingStreamId = null;
+            }
+        }
+
         if (allPeersAreInFinalState) {
             createLogEntry(CallLogItem.STATUS_MISSED); // this only create the log if it was not yet created
 
@@ -2049,20 +2074,10 @@ public class WebrtcCallService extends Service {
         Intent endCallIntent = new Intent(this, WebrtcCallService.class);
         endCallIntent.setAction(ACTION_HANG_UP);
         endCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(callIdentifier));
-        PendingIntent endCallPendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            endCallPendingIntent = PendingIntent.getService(this, 0, endCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            endCallPendingIntent = PendingIntent.getService(this, 0, endCallIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
+        PendingIntent endCallPendingIntent = PendingIntent.getService(this, 0, endCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Intent callActivityIntent = new Intent(this, WebrtcCallActivity.class);
-        PendingIntent callActivityPendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            callActivityPendingIntent = PendingIntent.getActivity(this, 0, callActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            callActivityPendingIntent = PendingIntent.getActivity(this, 0, callActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
+        PendingIntent callActivityPendingIntent = PendingIntent.getActivity(this, 0, callActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         InitialView initialView = new InitialView(App.getContext());
         String notificationName = null;
@@ -2154,31 +2169,16 @@ public class WebrtcCallService extends Service {
         Intent rejectCallIntent = new Intent(this, WebrtcCallService.class);
         rejectCallIntent.setAction(ACTION_REJECT_CALL);
         rejectCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(callIdentifier));
-        PendingIntent rejectCallPendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            rejectCallPendingIntent = PendingIntent.getService(this, 0, rejectCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            rejectCallPendingIntent = PendingIntent.getService(this, 0, rejectCallIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
+        PendingIntent rejectCallPendingIntent = PendingIntent.getService(this, 0, rejectCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Intent answerCallIntent = new Intent(this, WebrtcCallActivity.class);
         answerCallIntent.setAction(WebrtcCallActivity.ANSWER_CALL_ACTION);
         answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER, Logger.getUuidString(callIdentifier));
         answerCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent answerCallPendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            answerCallPendingIntent = PendingIntent.getActivity(this, 0, answerCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            answerCallPendingIntent = PendingIntent.getActivity(this, 0, answerCallIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
+        PendingIntent answerCallPendingIntent = PendingIntent.getActivity(this, 0, answerCallIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Intent fullScreenIntent = new Intent(this, WebrtcIncomingCallActivity.class);
-        PendingIntent fullScreenPendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            fullScreenPendingIntent = PendingIntent.getActivity(this, 0, fullScreenIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            fullScreenPendingIntent = PendingIntent.getActivity(this, 0, fullScreenIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        }
+        PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0, fullScreenIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         InitialView initialView = new InitialView(App.getContext());
         int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
@@ -2206,6 +2206,7 @@ public class WebrtcCallService extends Service {
             Notification.Builder publicBuilder = new Notification.Builder(this, AndroidNotificationManager.WEBRTC_CALL_SERVICE_NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_phone_animated)
                     .setContentTitle(getString(R.string.notification_public_title_incoming_webrtc_call));
+
 
             Notification.Builder builder = new Notification.Builder(this, AndroidNotificationManager.WEBRTC_CALL_SERVICE_NOTIFICATION_CHANNEL_ID)
                     .setPublicVersion(publicBuilder.build())

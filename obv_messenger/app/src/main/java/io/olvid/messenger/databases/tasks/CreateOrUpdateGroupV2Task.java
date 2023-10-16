@@ -26,6 +26,7 @@ import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -497,6 +498,12 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                             if (messageRecipientInfoAndMessage.message.refreshOutboundStatus()) {
                                 db.messageDao().updateStatus(messageRecipientInfoAndMessage.message.id, messageRecipientInfoAndMessage.message.status);
                             }
+                        }
+
+                        // if he is not a contact, also remove his name from cache
+                        if (Arrays.equals(group2PendingMember.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())
+                                && db.contactDao().get(group2PendingMember.bytesOwnedIdentity, group2PendingMember.bytesContactIdentity) == null) {
+                            AppSingleton.updateCacheContactDeleted(group2PendingMember.bytesContactIdentity);
                         }
                     }
                 }

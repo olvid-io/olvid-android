@@ -25,13 +25,13 @@ import io.olvid.engine.encoder.Encoded;
 public class ChannelServerResponseMessageToSend implements ChannelMessageToSend {
 
     private final SendChannelInfo sendChannelInfo;
-    private final Encoded encodedElements;
     private final Encoded encodedServerResponse;
+    private final Encoded encodedElements;
 
     public ChannelServerResponseMessageToSend(Identity toIdentity, Encoded encodedServerResponse, Encoded encodedElements) {
         this.sendChannelInfo = SendChannelInfo.createLocalChannelInfo(toIdentity);
-        this.encodedElements = encodedElements;
         this.encodedServerResponse = encodedServerResponse;
+        this.encodedElements = encodedElements;
     }
 
     @Override

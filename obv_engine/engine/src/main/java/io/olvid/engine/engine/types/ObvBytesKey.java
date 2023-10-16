@@ -65,7 +65,7 @@ public class ObvBytesKey implements Comparable<ObvBytesKey> {
     }
 
 
-    public static class Serializer extends JsonSerializer<ObvBytesKey> {
+    public static class KeySerializer extends JsonSerializer<ObvBytesKey> {
         @Override
         public void serialize(ObvBytesKey value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             gen.writeFieldName(serializers.getConfig().getBase64Variant().encode(value.bytes));
@@ -76,6 +76,13 @@ public class ObvBytesKey implements Comparable<ObvBytesKey> {
         @Override
         public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
             return new ObvBytesKey(ctxt.getConfig().getBase64Variant().decode(key));
+        }
+    }
+
+    public static class Serializer extends JsonSerializer<ObvBytesKey> {
+        @Override
+        public void serialize(ObvBytesKey value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeString(serializers.getConfig().getBase64Variant().encode(value.bytes));
         }
     }
 

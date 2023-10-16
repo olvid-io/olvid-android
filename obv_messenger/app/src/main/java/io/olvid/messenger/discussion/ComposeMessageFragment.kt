@@ -722,6 +722,15 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         // attachments recycler view
         val newMessageAttachmentRecyclerView =
             composeMessageCard.findViewById<EmptyRecyclerView>(R.id.attachments_recycler_view)
+
+        if (audioAttachmentServiceBinding == null) {
+            audioAttachmentServiceBinding = (activity as? DiscussionActivity)?.audioAttachmentServiceBinding
+            if (audioAttachmentServiceBinding == null) {
+                activity?.finish()
+                return
+            }
+        }
+
         newMessageAttachmentAdapter =
             DraftAttachmentAdapter(activity, audioAttachmentServiceBinding!!)
         newMessageAttachmentAdapter?.setAttachmentLongClickListener(this)
@@ -1159,7 +1168,8 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         composeMessageViewModel.photoOrVideoUri = null
         composeMessageViewModel.photoOrVideoFile = null
         if (context?.packageManager?.let { takePictureIntent.resolveActivity(it) } != null) {
-            val photoDir = File(context?.cacheDir, App.CAMERA_PICTURE_FOLDER)
+            val context = context ?: return
+            val photoDir = File(context.cacheDir, App.CAMERA_PICTURE_FOLDER)
             val photoFile = File(
                 photoDir, SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH).format(
                     Date()
@@ -1172,7 +1182,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 }
                 composeMessageViewModel.photoOrVideoFile = photoFile
                 val photoUri = FileProvider.getUriForFile(
-                    requireContext(),
+                    context,
                     BuildConfig.APPLICATION_ID + ".PICTURE_FILES_PROVIDER",
                     photoFile
                 )
@@ -1194,7 +1204,8 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         composeMessageViewModel.photoOrVideoUri = null
         composeMessageViewModel.photoOrVideoFile = null
         if (context?.packageManager?.let { takeVideoIntent.resolveActivity(it) } != null) {
-            val videoDir = File(context?.cacheDir, App.CAMERA_PICTURE_FOLDER)
+            val context = context ?: return
+            val videoDir = File(context.cacheDir, App.CAMERA_PICTURE_FOLDER)
             val videoFile = File(
                 videoDir, SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH).format(
                     Date()
@@ -1207,7 +1218,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 }
                 composeMessageViewModel.photoOrVideoFile = videoFile
                 val photoUri = FileProvider.getUriForFile(
-                    requireContext(),
+                    context,
                     BuildConfig.APPLICATION_ID + ".PICTURE_FILES_PROVIDER",
                     videoFile
                 )
@@ -1580,7 +1591,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
 
     private fun updateIconsToShow(widthPixels: Int) {
         previousWidth = widthPixels
-        val metrics = requireContext().resources.displayMetrics
+        val metrics = context?.resources?.displayMetrics ?: return
         val widthDp = widthPixels.toFloat() / metrics.density
         iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36f, metrics).toInt()
         fourDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, metrics).toInt()

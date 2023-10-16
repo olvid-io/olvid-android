@@ -30,11 +30,14 @@ import androidx.room.Update;
 import java.util.List;
 import java.util.UUID;
 
+import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
+import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 @Dao
@@ -348,7 +351,7 @@ public interface MessageDao {
             " AND " + Message.TIMESTAMP + " <= :timestamp ")
     void markDiscussionMessagesReadUpTo(long discussionId, long timestamp);
 
-    @Query("SELECT COUNT(*) > 0 FROM " +
+    @Query("SELECT EXISTS " +
             " ( SELECT 1 FROM " + Message.TABLE_NAME + " AS message " +
             " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
             " ON discussion.id = " + Message.DISCUSSION_ID +
@@ -359,8 +362,20 @@ public interface MessageDao {
             " SELECT 1 FROM " + Discussion.TABLE_NAME +
             " WHERE " + Discussion.UNREAD + " = 1 " +
             " AND " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " " +
+            " UNION " +
+            " SELECT 1 FROM " + Invitation.TABLE_NAME + " AS inv " +
+            " WHERE inv." + Invitation.CATEGORY_ID + " IN ( " +
+            ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY +  ") " +
+            " AND inv." + Invitation.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " )")
-    LiveData<Boolean> hasUnreadMessagesOrDiscussions(byte[] bytesOwnedIdentity);
+    LiveData<Boolean> hasUnreadMessagesOrDiscussionsOrInvitations(byte[] bytesOwnedIdentity);
 
     @Query("SELECT COUNT(*) as unread_count, id as message_id, min(" + Message.SORT_INDEX + ") as min_sort_index FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +

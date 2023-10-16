@@ -57,9 +57,12 @@ public class DeleteAttachmentFromAllMessagesTask implements Runnable {
         }
 
         if (fyle.sha256 != null) {
-            Fyle.acquireLock(fyle.sha256);
-            fyle.delete();
-            Fyle.releaseLock(fyle.sha256);
+            try {
+                Fyle.acquireLock(fyle.sha256);
+                fyle.delete();
+            } finally {
+                Fyle.releaseLock(fyle.sha256);
+            }
         } else {
             fyle.delete();
         }

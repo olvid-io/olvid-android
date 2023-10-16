@@ -30,6 +30,7 @@ import java.util.Objects;
 
 import io.olvid.engine.engine.types.sync.ObvSyncDiff;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
+import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -52,12 +53,22 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
     }
 
     @JsonIgnore
-    public String getAuto_join_groups() {
+    public void restore(AppDatabase db, byte[] ownedIdentity) {
+        if (domain.contains(AUTO_JOIN_GROUPS)) {
+            SettingsActivity.setAutoJoinGroups(SettingsActivity.getAutoJoinGroupsFromString(auto_join_groups));
+        }
+        if (domain.contains(SEND_READ_RECEIPT)) {
+            SettingsActivity.setDefaultSendReadReceipt(send_read_receipt != null && send_read_receipt);
+        }
+    }
+
+    @JsonIgnore
+    public String getAutoJoinGroups() {
         return auto_join_groups == null ? SettingsActivity.AutoJoinGroupsCategory.CONTACTS.getStringValue() : auto_join_groups;
     }
 
     @JsonIgnore
-    public boolean getSend_read_receipt() {
+    public boolean getSendReadReceipt() {
         return send_read_receipt != null && send_read_receipt;
     }
 
@@ -75,13 +86,13 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
         for (String item : domainIntersection) {
             switch (item) {
                 case AUTO_JOIN_GROUPS: {
-                    if (!Objects.equals(getAuto_join_groups(), other.getAuto_join_groups())) {
+                    if (!Objects.equals(getAutoJoinGroups(), other.getAutoJoinGroups())) {
                         return false;
                     }
                     break;
                 }
                 case SEND_READ_RECEIPT: {
-                    if (getSend_read_receipt() != other.getSend_read_receipt()) {
+                    if (getSendReadReceipt() != other.getSendReadReceipt()) {
                         return false;
                     }
                     break;
@@ -105,14 +116,14 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
         for (String item : domainIntersection) {
             switch (item) {
                 case AUTO_JOIN_GROUPS: {
-                    if (!Objects.equals(getAuto_join_groups(), other.getAuto_join_groups())) {
-                        diffs.add(ObvSyncDiff.createSettingAutoJoinGroups(getAuto_join_groups(), other.getAuto_join_groups()));
+                    if (!Objects.equals(getAutoJoinGroups(), other.getAutoJoinGroups())) {
+                        diffs.add(ObvSyncDiff.createSettingAutoJoinGroups(getAutoJoinGroups(), other.getAutoJoinGroups()));
                     }
                     break;
                 }
                 case SEND_READ_RECEIPT: {
-                    if (getSend_read_receipt() != other.getSend_read_receipt()) {
-                        diffs.add(ObvSyncDiff.createSettingSendReadReceipt(getSend_read_receipt(), other.getSend_read_receipt()));
+                    if (getSendReadReceipt() != other.getSendReadReceipt()) {
+                        diffs.add(ObvSyncDiff.createSettingSendReadReceipt(getSendReadReceipt(), other.getSendReadReceipt()));
                     }
                     break;
                 }

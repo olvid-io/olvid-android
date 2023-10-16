@@ -47,7 +47,7 @@ fun InitialView(
     admin: Boolean = false,
     muted: Boolean = false,
     locked: Boolean = false,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ) {
     BoxWithConstraints(
         modifier = modifier
@@ -57,7 +57,9 @@ fun InitialView(
             factory = { context ->
                 InitialView(context).apply {
                     initialViewSetup.invoke(this)
-                    setOnClickListener { onClick() }
+                    if (onClick != null) {
+                        setOnClickListener { onClick() }
+                    }
                 }
             }) { initialView ->
             initialViewSetup(initialView)
@@ -112,7 +114,6 @@ private fun InitialViewPreview() {
             unreadMessages = true,
             muted = true,
             initialViewSetup = { initialView -> initialView.setInitial(byteArrayOf(), "A") },
-            onClick = {},
         )
     }
 }

@@ -352,8 +352,8 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                     }
                 } else {
                     // Fyle is incomplete (still downloading), but we have the complete Fyle at hand!
-                    Fyle.acquireLock(sha256);
                     try {
+                        Fyle.acquireLock(sha256);
                         if (nullFyle != null) {
                             db.fyleDao().delete(nullFyle);
                         }
@@ -417,8 +417,8 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                     }
                 }
             } else {
-                Fyle.acquireLock(sha256);
                 try {
+                    Fyle.acquireLock(sha256);
                     if (nullFyle != null) {
                         fyle = nullFyle;
                         fyle.sha256 = sha256;

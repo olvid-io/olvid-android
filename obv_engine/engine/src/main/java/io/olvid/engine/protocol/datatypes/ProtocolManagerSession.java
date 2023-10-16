@@ -28,6 +28,7 @@ import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.EncryptionForIdentityDelegate;
 import io.olvid.engine.metamanager.EngineOwnedIdentityCleanupDelegate;
 import io.olvid.engine.metamanager.IdentityDelegate;
+import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.metamanager.ProtocolDelegate;
 import io.olvid.engine.metamanager.PushNotificationDelegate;
@@ -41,13 +42,14 @@ public class ProtocolManagerSession implements AutoCloseable {
     public final ProtocolStarterDelegate protocolStarterDelegate;
     public final ProtocolDelegate protocolDelegate;
     public final NotificationPostingDelegate notificationPostingDelegate;
+    public final NotificationListeningDelegate notificationListeningDelegate;
     public final EngineOwnedIdentityCleanupDelegate engineOwnedIdentityCleanupDelegate;
     public final PushNotificationDelegate pushNotificationDelegate;
     public final String engineBaseDirectory;
     public final ObvBackupAndSyncDelegate identityBackupAndSyncDelegate;
     public final ObvBackupAndSyncDelegate appBackupAndSyncDelegate;
 
-    public ProtocolManagerSession(Session session, ChannelDelegate channelDelegate, IdentityDelegate identityDelegate, EncryptionForIdentityDelegate encryptionForIdentityDelegate, ProtocolReceivedMessageProcessorDelegate protocolReceivedMessageProcessorDelegate, ProtocolStarterDelegate protocolStarterDelegate, ProtocolDelegate protocolDelegate, NotificationPostingDelegate notificationPostingDelegate, EngineOwnedIdentityCleanupDelegate engineOwnedIdentityCleanupDelegate, PushNotificationDelegate pushNotificationDelegate, String engineBaseDirectory, ObvBackupAndSyncDelegate identityBackupAndSyncDelegate, ObvBackupAndSyncDelegate appBackupAndSyncDelegate) {
+    public ProtocolManagerSession(Session session, ChannelDelegate channelDelegate, IdentityDelegate identityDelegate, EncryptionForIdentityDelegate encryptionForIdentityDelegate, ProtocolReceivedMessageProcessorDelegate protocolReceivedMessageProcessorDelegate, ProtocolStarterDelegate protocolStarterDelegate, ProtocolDelegate protocolDelegate, NotificationPostingDelegate notificationPostingDelegate, NotificationListeningDelegate notificationListeningDelegate, EngineOwnedIdentityCleanupDelegate engineOwnedIdentityCleanupDelegate, PushNotificationDelegate pushNotificationDelegate, String engineBaseDirectory, ObvBackupAndSyncDelegate identityBackupAndSyncDelegate, ObvBackupAndSyncDelegate appBackupAndSyncDelegate) {
         this.session = session;
         this.channelDelegate = channelDelegate;
         this.identityDelegate = identityDelegate;
@@ -56,6 +58,7 @@ public class ProtocolManagerSession implements AutoCloseable {
         this.protocolStarterDelegate = protocolStarterDelegate;
         this.protocolDelegate = protocolDelegate;
         this.notificationPostingDelegate = notificationPostingDelegate;
+        this.notificationListeningDelegate = notificationListeningDelegate;
         this.engineOwnedIdentityCleanupDelegate = engineOwnedIdentityCleanupDelegate;
         this.pushNotificationDelegate = pushNotificationDelegate;
         this.engineBaseDirectory = engineBaseDirectory;

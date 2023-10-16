@@ -53,6 +53,7 @@ public interface ProtocolStarterDelegate {
     void initiateGroupV2ReDownload(Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
     void initiateGroupV2BatchKeysResend(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception;
     void createOrUpdateKeycloakGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedKeycloakGroupBlob) throws Exception;
+    void processDeviceManagementRequest(Identity ownedIdentity, ObvDeviceManagementRequest deviceManagementRequest) throws Exception;
     void processDeviceManagementRequest(Session session, Identity ownedIdentity, ObvDeviceManagementRequest deviceManagementRequest) throws Exception;
 
     void startIdentityDetailsPublicationProtocol(Session session, Identity ownedIdentity, int version) throws Exception;
@@ -82,5 +83,8 @@ public interface ProtocolStarterDelegate {
     void initiateKeycloakGroupV2TargetedPing(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity) throws Exception;
 
     void initiateSingleItemSync(Session session, Identity ownedIdentity, ObvSyncAtom obvSyncAtom) throws Exception;
-//    void triggerOwnedDevicesSync(Session session, Identity ownedIdentity);
+
+    //    void triggerOwnedDevicesSync(Session session, Identity ownedIdentity);
+    void initiateOwnedIdentityTransferProtocolOnSourceDevice(Identity ownedIdentity) throws Exception;
+    void initiateOwnedIdentityTransferProtocolOnTargetDevice(String deviceName) throws Exception;
 }

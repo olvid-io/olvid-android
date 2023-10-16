@@ -523,7 +523,7 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
-    private OwnedIdentity(IdentityManagerSession identityManagerSession, PrivateIdentity privateIdentity, int detailsVersion) {
+    public OwnedIdentity(IdentityManagerSession identityManagerSession, PrivateIdentity privateIdentity, int detailsVersion) {
         this.identityManagerSession = identityManagerSession;
         this.ownedIdentity = privateIdentity.getPublicIdentity();
         this.privateIdentity = privateIdentity;

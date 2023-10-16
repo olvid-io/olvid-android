@@ -260,7 +260,7 @@ public class DeviceDiscoveryChildProtocol extends ConcreteProtocol {
         public ServerRequestSentState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createDeviceDiscoveryQuery(receivedMessage.remoteIdentity)));
+            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.DeviceDiscoveryQuery(receivedMessage.remoteIdentity)));
             ChannelMessageToSend messageToSend = new ServerQueryMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             return new ServerRequestSentState(receivedMessage.remoteIdentity);

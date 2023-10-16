@@ -507,8 +507,8 @@ public class HandleNewMessageNotificationTask implements Runnable {
                             throw new Exception("Link preview attachment with message body mismatch");
                         }
                         final byte[] sha256 = attachmentMetadata.getSha256();
-                        Fyle.acquireLock(sha256);
                         try {
+                            Fyle.acquireLock(sha256);
                             Fyle fyle = db.fyleDao().getBySha256(sha256);
                             if (fyle != null) {
                                 // we know this attachment

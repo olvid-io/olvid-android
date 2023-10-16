@@ -5,18 +5,18 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission
-        android:name="android.permission.BLUETOOTH"
-        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission
-        android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
-        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
     <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
@@ -24,6 +24,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -191,7 +192,7 @@
             android:label="@string/activity_title_settings"
             android:theme="@style/AppTheme.WhiteBackground" />
         <activity
-            android:name=".activities.OwnedIdentityDetailsActivity"
+            android:name=".owneddetails.OwnedIdentityDetailsActivity"
             android:label="@string/activity_title_my_details" />
         <activity
             android:name=".activities.ContactDetailsActivity"
@@ -249,13 +250,18 @@
              android:name="net.openid.appauth.RedirectUriReceiverActivity"
              android:exported="true"
              tools:node="replace">
-             <intent-filter android:autoVerify="true">
-                 <action android:name="android.intent.action.VIEW"/>
-                 <category android:name="android.intent.category.DEFAULT"/>
-                 <category android:name="android.intent.category.BROWSABLE"/>
-                 <data android:scheme="https" android:host="${KEYCLOAK_REDIRECT_HOST}" />
-                 <data android:scheme="olvid.openid" android:host="${KEYCLOAK_REDIRECT_HOST}"/>
-             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="${KEYCLOAK_REDIRECT_HOST}" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="olvid.openid" android:host="${KEYCLOAK_REDIRECT_HOST}"/>
+            </intent-filter>
          </activity>
         <activity
             android:name=".activities.MessageDetailsActivity"
@@ -271,6 +277,10 @@
             android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
             android:name=".onboarding.OnboardingActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar" />
+        <activity
+            android:name=".onboarding.flow.OnboardingFlowActivity"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar" />
         <activity
@@ -341,12 +351,12 @@
             android:name=".services.UnifiedForegroundService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="location"/>
+            android:foregroundServiceType="location|remoteMessaging|dataSync"/>
         <service
             android:name=".webrtc.WebrtcCallService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="phoneCall|microphone"/>
+            android:foregroundServiceType="microphone"/>
         <service android:name=".services.MediaPlayerService"
             android:enabled="true"
             android:exported="false"

@@ -729,7 +729,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             // perform the server query to check for revoked identity
             ///////
 
-            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createCheckKeycloakRevocationServerQuery(receivedMessage.keycloakServerUrl, receivedMessage.signedContactDetails)));
+            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.CheckKeycloakRevocationQuery(receivedMessage.keycloakServerUrl, receivedMessage.signedContactDetails)));
             ChannelMessageToSend messageToSend = new CheckForRevocationServerQueryMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 

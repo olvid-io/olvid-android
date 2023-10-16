@@ -80,7 +80,7 @@ public class ContactGroupV2 implements ObvDatabase {
     static final String SERIALIZED_OWN_PERMISSIONS = "serialized_own_permissions";
     private int version; // always 0 for a keycloak group
     static final String VERSION = "version";
-    private int trustedDetailsVersion; // always 0 for a keycloak group
+    public int trustedDetailsVersion; // always 0 for a keycloak group
     static final String TRUSTED_DETAILS_VERSION = "trusted_details_version";
 
     private byte[] verifiedAdministratorsChain; // null for a keycloak group
@@ -254,7 +254,7 @@ public class ContactGroupV2 implements ObvDatabase {
         }
     }
 
-    private ContactGroupV2(IdentityManagerSession identityManagerSession, UID groupUid, String serverUrl, int category, Identity ownedIdentity, byte[] serializedOwnPermission, int version, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, boolean frozen, long lastModificationTimestamp, String pushTopic, String serializedSharedSettings, String serializedJsonGroupType) {
+    public ContactGroupV2(IdentityManagerSession identityManagerSession, UID groupUid, String serverUrl, int category, Identity ownedIdentity, byte[] serializedOwnPermission, int version, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, boolean frozen, long lastModificationTimestamp, String pushTopic, String serializedSharedSettings, String serializedJsonGroupType) {
         this.identityManagerSession = identityManagerSession;
         this.groupUid = groupUid;
         this.serverUrl = serverUrl;

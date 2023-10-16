@@ -73,6 +73,10 @@ public class ContactGroupDetails implements ObvDatabase {
         return version;
     }
 
+    public String getSerializedJsonDetails() {
+        return serializedJsonDetails;
+    }
+
     public JsonGroupDetails getJsonGroupDetails() {
         try {
             return identityManagerSession.jsonObjectMapper.readValue(serializedJsonDetails, JsonGroupDetails.class);
@@ -252,7 +256,7 @@ public class ContactGroupDetails implements ObvDatabase {
     }
 
 
-    private ContactGroupDetails(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity, int version, String serializedJsonDetails, String photoUrl, UID photoServerLabel, AuthEncKey photoServerKey) {
+    public ContactGroupDetails(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity, int version, String serializedJsonDetails, String photoUrl, UID photoServerLabel, AuthEncKey photoServerKey) {
         this.identityManagerSession = identityManagerSession;
         this.groupOwnerAndUid = groupOwnerAndUid;
         this.ownedIdentity = ownedIdentity;

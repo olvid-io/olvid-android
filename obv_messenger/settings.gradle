@@ -1,3 +1,5 @@
+rootProject.name='Olvid for Android'
+
 include ':app', ':engine', ':libwebrtc', ':sardine-android'
 
 project(':engine').projectDir = new File("../obv_engine/engine")

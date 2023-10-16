@@ -53,6 +53,7 @@ import io.olvid.engine.protocol.protocols.OneToOneContactInvitationProtocol;
 import io.olvid.engine.protocol.protocols.OwnedDeviceDiscoveryProtocol;
 import io.olvid.engine.protocol.protocols.OwnedDeviceManagementProtocol;
 import io.olvid.engine.protocol.protocols.OwnedIdentityDeletionProtocol;
+import io.olvid.engine.protocol.protocols.OwnedIdentityTransferProtocol;
 import io.olvid.engine.protocol.protocols.SynchronizationProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithMutualScanProtocol;
 import io.olvid.engine.protocol.protocols.TrustEstablishmentWithSasProtocol;
@@ -87,6 +88,7 @@ public abstract class ConcreteProtocol {
     public static final int KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID = 23;
     public static final int OWNED_DEVICE_MANAGEMENT_PROTOCOL_ID = 24;
     public static final int SYNCHRONIZATION_PROTOCOL_ID = 25;
+    public static final int OWNED_IDENTITY_TRANSFER_PROTOCOL_ID = 26;
 
     // internal protocols, Android only
     public static final int LEGACY_KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID = 1000;
@@ -219,6 +221,8 @@ public abstract class ConcreteProtocol {
                 return new OwnedDeviceManagementProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             case SYNCHRONIZATION_PROTOCOL_ID:
                 return new SynchronizationProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
+            case OWNED_IDENTITY_TRANSFER_PROTOCOL_ID:
+                return new OwnedIdentityTransferProtocol(protocolManagerSession, protocolInstanceUid, stateId, encodedState, ownedIdentity, prng, jsonObjectMapper);
             default:
                 Logger.w("Unknown protocol id: " + protocolId);
                 return null;

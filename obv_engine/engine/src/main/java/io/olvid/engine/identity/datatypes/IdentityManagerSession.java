@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
 
+import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
@@ -33,13 +34,15 @@ public class IdentityManagerSession implements AutoCloseable {
     public final IdentityDelegate identityDelegate;
     public final String engineBaseDirectory;
     public final ObjectMapper jsonObjectMapper;
+    public final PRNGService prng;
 
-    public IdentityManagerSession(Session session, NotificationPostingDelegate notificationPostingDelegate, IdentityDelegate identityDelegate, String engineBaseDirectory, ObjectMapper jsonObjectMapper) {
+    public IdentityManagerSession(Session session, NotificationPostingDelegate notificationPostingDelegate, IdentityDelegate identityDelegate, String engineBaseDirectory, ObjectMapper jsonObjectMapper, PRNGService prng) {
         this.session = session;
         this.notificationPostingDelegate = notificationPostingDelegate;
         this.identityDelegate = identityDelegate;
         this.engineBaseDirectory = engineBaseDirectory;
         this.jsonObjectMapper = jsonObjectMapper;
+        this.prng = prng;
     }
 
     @Override

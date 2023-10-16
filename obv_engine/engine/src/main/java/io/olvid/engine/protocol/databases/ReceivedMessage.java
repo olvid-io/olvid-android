@@ -40,6 +40,7 @@ import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.protocol.datatypes.GenericReceivedProtocolMessage;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
+import io.olvid.engine.protocol.protocol_engine.ConcreteProtocol;
 
 
 public class ReceivedMessage implements ObvDatabase {
@@ -304,6 +305,13 @@ public class ReceivedMessage implements ObvDatabase {
                         " AND " + ProtocolInstance.TABLE_NAME + "." + ProtocolInstance.UID_ + " IS NULL);")
         ) {
             statement.setLong(1, System.currentTimeMillis());
+            statement.executeUpdate();
+        }
+    }
+
+    public static void deleteAllTransfer(ProtocolManagerSession protocolManagerSession) throws SQLException {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
+            statement.setInt(1, ConcreteProtocol.OWNED_IDENTITY_TRANSFER_PROTOCOL_ID);
             statement.executeUpdate();
         }
     }

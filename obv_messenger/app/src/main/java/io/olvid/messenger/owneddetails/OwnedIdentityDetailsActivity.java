@@ -17,12 +17,13 @@
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.olvid.messenger.activities;
+package io.olvid.messenger.owneddetails;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -70,6 +72,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.ListAdapter;
@@ -100,6 +103,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.LockableActivity;
+import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.MuteNotificationDialog;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -112,6 +116,8 @@ import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineT
 import io.olvid.messenger.fragments.FullScreenImageFragment;
 import io.olvid.messenger.fragments.SubscriptionStatusFragment;
 import io.olvid.messenger.main.MainActivity;
+import io.olvid.messenger.notifications.AndroidNotificationManager;
+import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.owneddetails.EditOwnedIdentityDetailsDialogFragment;
 import io.olvid.messenger.plus_button.PlusButtonActivity;
@@ -185,6 +191,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                 return Objects.equals(oldItem.displayName, newItem.displayName)
                         && (oldItem.channelConfirmed == newItem.channelConfirmed)
                         && (oldItem.currentDevice == newItem.currentDevice)
+                        && (oldItem.trusted == newItem.trusted)
                         && Objects.equals(oldItem.lastRegistrationTimestamp, newItem.lastRegistrationTimestamp)
                         && Objects.equals(oldItem.expirationTimestamp, newItem.expirationTimestamp);
             }
@@ -204,6 +211,9 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
         deviceListRecyclerView.setAdapter(deviceListAdapter);
         viewModel.ownedDevicesLiveData.observe(this, deviceListAdapter::submitList);
         viewModel.ownedIdentityActive.observe(this, active -> deviceListAdapter.notifyDataSetChanged());
+
+        Button addDeviceButton = findViewById(R.id.add_device_button);
+        addDeviceButton.setOnClickListener(this);
 
         View loadingSpinner = findViewById(R.id.loading_spinner);
         viewModel.showRefreshSpinner.observe(this, refreshing -> loadingSpinner.setVisibility(refreshing ? View.VISIBLE : View.GONE));
@@ -427,15 +437,18 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             if (hasOtherDevices) {
                 explanationTextView.setText(R.string.explanation_delete_owned_identity_multi);
                 deleteEverywhereSwitch.setChecked(false);
+                deleteProfileEverywhere = false;
             } else {
                 explanationTextView.setText(R.string.explanation_delete_owned_identity);
                 deleteEverywhereSwitch.setChecked(true);
+                deleteProfileEverywhere = true;
             }
             deleteEverywhereSwitch.setEnabled(true);
         } else {
             explanationTextView.setText(R.string.explanation_delete_inactive_owned_identity);
             deleteEverywhereSwitch.setChecked(false);
             deleteEverywhereSwitch.setEnabled(false);
+            deleteProfileEverywhere = false;
         }
 
         AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
@@ -676,6 +689,34 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             if (ownedIdentity != null) {
                 App.openAppDialogIdentityDeactivated(ownedIdentity);
             }
+        } else if (id == R.id.add_device_button) {
+            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+            if (!prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION, false)) {
+                View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_view_message_and_checkbox, null);
+                TextView message = dialogView.findViewById(R.id.dialog_message);
+                message.setText(Markdown.formatMarkdown(getString(R.string.dialog_message_add_device_explanation)));
+                CheckBox checkBox = dialogView.findViewById(R.id.checkbox);
+                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION, isChecked);
+                    editor.apply();
+                });
+
+                AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog);
+                builder.setTitle(R.string.dialog_title_add_device_explanation)
+                        .setView(dialogView)
+                        .setNegativeButton(R.string.button_label_cancel, null)
+                        .setPositiveButton(R.string.button_label_proceed, (DialogInterface dialog, int which) -> {
+                            Intent intent = new Intent(this, OnboardingFlowActivity.class);
+                            intent.putExtra(OnboardingFlowActivity.TRANSFER_SOURCE_INTENT_EXTRA, true);
+                            startActivity(intent);
+                        });
+                builder.create().show();
+            } else {
+                Intent intent = new Intent(this, OnboardingFlowActivity.class);
+                intent.putExtra(OnboardingFlowActivity.TRANSFER_SOURCE_INTENT_EXTRA, true);
+                startActivity(intent);
+            }
         } else if (view instanceof InitialView) {
             String photoUrl = ((InitialView) view).getPhotoUrl();
             if (photoUrl != null) {
@@ -716,6 +757,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
         final ViewGroup channelCreationGroup;
         final ImageView channelCreationDotsImageView;
         final ImageView dots;
+        final ImageView untrusted;
         OwnedDevice ownedDevice;
         public OwnedDeviceViewHolder(@NonNull View itemView, @NonNull OwnedIdentityDetailsActivityViewModel viewModel) {
             super(itemView);
@@ -727,6 +769,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             channelCreationDotsImageView = itemView.findViewById(R.id.establishing_channel_image_view);
             dots = itemView.findViewById(R.id.button_dots);
             dots.setOnClickListener(this::onClick);
+            untrusted = itemView.findViewById(R.id.untrusted);
         }
 
         public void bind(@NonNull OwnedDevice ownedDevice, boolean currentDeviceIsActive) {
@@ -753,6 +796,12 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                 expirationTextView.setVisibility(View.VISIBLE);
                 expirationTextView.setText(deviceStatusTextView.getContext().getString(R.string.text_deactivates_on, StringUtils.getPreciseAbsoluteDateString(deviceStatusTextView.getContext(), ownedDevice.expirationTimestamp, expirationTextView.getContext().getString(R.string.text_date_time_separator))));
                 expirationTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_device_expiration, 0, 0, 0);
+            }
+
+            if (ownedDevice.trusted || ownedDevice.currentDevice) {
+                untrusted.setVisibility(View.GONE);
+            } else {
+                untrusted.setVisibility(View.VISIBLE);
             }
 
             if (!currentDeviceIsActive || ownedDevice.channelConfirmed || ownedDevice.currentDevice) {
@@ -788,6 +837,11 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             if (ownedDevice != null) {
                 int order = 0;
                 PopupMenu popupMenu = new PopupMenu(view.getContext(), view);
+
+                if (!ownedDevice.currentDevice && !ownedDevice.trusted) {
+                    popupMenu.getMenu().add(Menu.NONE, 6, order++, R.string.menu_action_trust_device);
+                }
+
                 if (ownedDevice.currentDevice) {
                     popupMenu.getMenu().add(Menu.NONE, 3, order++, R.string.menu_action_rename_device);
                 } else {
@@ -797,6 +851,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                 if (ownedDevice.expirationTimestamp != null) {
                     popupMenu.getMenu().add(Menu.NONE, 5, order++, R.string.menu_action_remove_expiration);
                 }
+
 
                 if (ownedDevice.currentDevice) {
                     popupMenu.getMenu().add(Menu.NONE, 0, order++, R.string.menu_action_refresh_device_list);
@@ -944,6 +999,15 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                     }
                     break;
                 }
+                case 6: {
+                    // trust
+                    App.runThread(() -> {
+                        AndroidNotificationManager.clearDeviceTrustNotification(ownedDevice.bytesDeviceUid);
+                        AppDatabase.getInstance().ownedDeviceDao().updateTrusted(ownedDevice.bytesOwnedIdentity, ownedDevice.bytesDeviceUid, true);
+                    });
+                    break;
+                }
+
             }
             return true;
         }

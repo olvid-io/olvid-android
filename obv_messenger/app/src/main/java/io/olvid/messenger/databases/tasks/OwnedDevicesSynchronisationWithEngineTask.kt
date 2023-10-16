@@ -24,12 +24,22 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedDevice
+import io.olvid.messenger.notifications.AndroidNotificationManager
+import io.olvid.messenger.notifications.DeviceExpirationReminder
 import java.util.Objects
 
 
 class OwnedDevicesSynchronisationWithEngineTask(
     private val bytesOwnedIdentity: ByteArray
 ) : Runnable {
+    companion object {
+        private val transferredOrRestoredOwnedIdentities: HashSet<BytesKey> = HashSet()
+
+        public fun ownedIdentityWasTransferredOrRestored(bytesOwnedIdentity: ByteArray) {
+            transferredOrRestoredOwnedIdentities.add(BytesKey(bytesOwnedIdentity))
+        }
+    }
+
     override fun run() {
         val deviceDao = AppDatabase.getInstance().ownedDeviceDao();
 
@@ -40,14 +50,29 @@ class OwnedDevicesSynchronisationWithEngineTask(
             dbDeviceMap[BytesKey(it.bytesDeviceUid)] = it
         }
 
+        val shouldTrustNewDevices = transferredOrRestoredOwnedIdentities.contains(BytesKey(bytesOwnedIdentity))
+        var consumeAutoTrust = false
+
         obvOwnedDevices.forEach {
             val dbOwnedDevice = dbDeviceMap.remove(BytesKey(it.bytesDeviceUid))
             if (dbOwnedDevice == null) {
-                // db not found in app --> insert it
-                val newOwnedDevice = OwnedDevice(it.bytesOwnedIdentity, it.bytesDeviceUid, it.serverDeviceInfo.displayName, it.currentDevice, it.channelConfirmed, it.serverDeviceInfo.lastRegistrationTimestamp, it.serverDeviceInfo.expirationTimestamp)
+                // device not found in app --> insert it as untrusted
+                val newOwnedDevice = OwnedDevice(it.bytesOwnedIdentity, it.bytesDeviceUid, it.serverDeviceInfo.displayName, it.currentDevice, it.currentDevice || shouldTrustNewDevices, it.channelConfirmed, it.serverDeviceInfo.lastRegistrationTimestamp, it.serverDeviceInfo.expirationTimestamp)
                 deviceDao.insert(newOwnedDevice)
+                if (it.currentDevice.not()) {
+                    if (shouldTrustNewDevices) {
+                        consumeAutoTrust = true
+                    } else {
+                        AndroidNotificationManager.displayDeviceTrustNotification(newOwnedDevice.bytesOwnedIdentity, newOwnedDevice.bytesDeviceUid, newOwnedDevice.displayName)
+                    }
+                } else {
+                    newOwnedDevice.expirationTimestamp?.let {
+                        DeviceExpirationReminder.scheduleNotifications(newOwnedDevice)
+                    }
+                }
             } else {
                 // db found both in engine and in app --> see what has changed
+                val previousExpirationTimestamp = dbOwnedDevice.expirationTimestamp
                 if (!Objects.equals(it.serverDeviceInfo.displayName, dbOwnedDevice.displayName)) {
                     dbOwnedDevice.displayName = it.serverDeviceInfo.displayName
                     deviceDao.updateDisplayName(dbOwnedDevice.bytesOwnedIdentity, dbOwnedDevice.bytesDeviceUid, dbOwnedDevice.displayName)
@@ -66,12 +91,26 @@ class OwnedDevicesSynchronisationWithEngineTask(
                     dbOwnedDevice.expirationTimestamp = it.serverDeviceInfo.expirationTimestamp
                     deviceDao.updateTimestamps(dbOwnedDevice.bytesOwnedIdentity, dbOwnedDevice.bytesDeviceUid, dbOwnedDevice.lastRegistrationTimestamp, dbOwnedDevice.expirationTimestamp)
                 }
-            }
+                // notify all untrusted devices so at startup we have the notifications
+                if (dbOwnedDevice.currentDevice.not() && dbOwnedDevice.trusted.not()) {
+                    AndroidNotificationManager.displayDeviceTrustNotification(dbOwnedDevice.bytesOwnedIdentity, dbOwnedDevice.bytesDeviceUid, dbOwnedDevice.displayName)
+                }
+
+                // notify expiration
+                if (dbOwnedDevice.currentDevice && dbOwnedDevice.expirationTimestamp != previousExpirationTimestamp) {
+                    DeviceExpirationReminder.scheduleNotifications(dbOwnedDevice)
+                }
+             }
         }
 
         // remove any remaining device (it is no longer present in the engine)
         dbDeviceMap.values.forEach {
             deviceDao.delete(it)
+            AndroidNotificationManager.clearDeviceTrustNotification(it.bytesDeviceUid)
+        }
+
+        if (consumeAutoTrust) {
+            transferredOrRestoredOwnedIdentities.remove(BytesKey(bytesOwnedIdentity))
         }
     }
 }

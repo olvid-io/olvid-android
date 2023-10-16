@@ -25,6 +25,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import java.util.List;
 import java.util.Objects;
@@ -145,19 +146,19 @@ public class MessageExpirationService extends BroadcastReceiver {
             }
 
             Intent expireIntent = new Intent(EXPIRE_MESSAGES_ACTION, null, App.getContext(), MessageExpirationService.class);
-            PendingIntent pendingExpireIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                pendingExpireIntent = PendingIntent.getBroadcast(App.getContext(), 0, expireIntent, PendingIntent.FLAG_MUTABLE);
-            } else {
-                pendingExpireIntent = PendingIntent.getBroadcast(App.getContext(), 0, expireIntent, 0);
-            }
+            PendingIntent pendingExpireIntent = PendingIntent.getBroadcast(App.getContext(), 0, expireIntent, PendingIntent.FLAG_MUTABLE);
 
             AlarmManager alarmManager = (AlarmManager) App.getContext().getSystemService(Context.ALARM_SERVICE);
             if (alarmManager != null) {
                 alarmManager.cancel(pendingExpireIntent);
                 if (scheduledAlarmTimestamp != null) {
                     Logger.d("MessageExpirationService - Scheduling wipe at " + scheduledAlarmTimestamp);
-                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, scheduledAlarmTimestamp, pendingExpireIntent);
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, scheduledAlarmTimestamp, pendingExpireIntent);
+                    } else {
+                        Logger.e("Missing exact alarm permission - Using approximate alarm");
+                        alarmManager.set(AlarmManager.RTC_WAKEUP, scheduledAlarmTimestamp, pendingExpireIntent);
+                    }
                 }
             }
         } catch (Exception e) {

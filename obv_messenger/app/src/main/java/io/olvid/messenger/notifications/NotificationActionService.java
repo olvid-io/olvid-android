@@ -52,10 +52,13 @@ public class NotificationActionService extends IntentService {
     public static final String ACTION_DISCUSSION_MARK_AS_READ = "mark_as_read";
     public static final String ACTION_MISSED_CALL_MESSAGE = "discussion_missed_call_message";
     public static final String ACTION_MESSAGE_REACTION_CLEAR = "message_reaction_clear";
+    public static final String ACTION_DEVICE_TRUST = "device_trust";
 
     public static final String EXTRA_INVITATION_DIALOG_UUID = "dialog_uuid";
     public static final String EXTRA_DISCUSSION_ID = "discussion_id";
     public static final String EXTRA_MESSAGE_ID = "message_id";
+    public static final String EXTRA_BYTES_OWNED_IDENTITY = "bytes_owned_identity";
+    public static final String EXTRA_DEVICE_UID = "device_uid";
 
     public static final String KEY_TEXT_REPLY = "text_reply";
 
@@ -274,6 +277,14 @@ public class NotificationActionService extends IntentService {
                     }
                 }
                 break;
+            } case ACTION_DEVICE_TRUST: {
+                final byte[] deviceUid = intent.getByteArrayExtra(EXTRA_DEVICE_UID);
+                final byte[] bytesOwnedIdentity = intent.getByteArrayExtra(EXTRA_BYTES_OWNED_IDENTITY);
+                if (deviceUid != null && bytesOwnedIdentity != null) {
+                    final AppDatabase db = AppDatabase.getInstance();
+                    db.ownedDeviceDao().updateTrusted(bytesOwnedIdentity, deviceUid, true);
+                    AndroidNotificationManager.clearDeviceTrustNotification(deviceUid);
+                }
             }
         }
     }

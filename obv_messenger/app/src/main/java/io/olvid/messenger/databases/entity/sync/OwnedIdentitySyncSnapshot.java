@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.ObvGroupOwnerAndUidKey;
 import io.olvid.engine.engine.types.sync.ObvSyncAtom;
@@ -45,6 +46,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
@@ -55,9 +57,11 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
     public static final String PINNED = "pinned";
     static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(CUSTOM_NAME, CONTACTS, GROUPS, GROUPS2, PINNED));
 
+    // TODO: decide whether we should transfer/sync the hidden profile password?
+    // TODO: decide whether we should transfer/sync the mute notification settings
 
     public String custom_name;
-    @JsonSerialize(keyUsing = ObvBytesKey.Serializer.class)
+    @JsonSerialize(keyUsing = ObvBytesKey.KeySerializer.class)
     @JsonDeserialize(keyUsing = ObvBytesKey.KeyDeserializer.class)
     public HashMap<ObvBytesKey, ContactSyncSnapshot> contacts;
 
@@ -65,7 +69,7 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
     @JsonDeserialize(keyUsing = ObvGroupOwnerAndUidKey.Deserializer.class)
     public HashMap<ObvGroupOwnerAndUidKey, GroupV1SyncSnapshot> groups;
 
-    @JsonSerialize(keyUsing = ObvBytesKey.Serializer.class)
+    @JsonSerialize(keyUsing = ObvBytesKey.KeySerializer.class)
     @JsonDeserialize(keyUsing = ObvBytesKey.KeyDeserializer.class)
     public HashMap<ObvBytesKey, GroupV2SyncSnapshot> groups2;
 
@@ -76,7 +80,8 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
     public Boolean pinned_sorted;
     public HashSet<String> domain;
 
-    public boolean getPinned_sorted() {
+    @JsonIgnore
+    private boolean getPinned_sorted() {
         return pinned_sorted != null && pinned_sorted;
     }
 
@@ -101,6 +106,9 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
 
         ownedIdentitySyncSnapshot.pinned_discussions = new ArrayList<>();
         for (Discussion discussion : db.discussionDao().getAllPinned(ownedIdentity.bytesOwnedIdentity)) {
+            if (!discussion.isNormalOrReadOnly()) {
+                continue;
+            }
             ObvSyncAtom.DiscussionIdentifier discussionIdentifier;
             switch (discussion.discussionType) {
                 case Discussion.TYPE_CONTACT:
@@ -121,6 +129,83 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
 
         ownedIdentitySyncSnapshot.domain = DEFAULT_DOMAIN;
         return ownedIdentitySyncSnapshot;
+    }
+
+    @JsonIgnore
+    public void restore(AppDatabase db, byte[] bytesOwnedIdentity) {
+        if (domain.contains(CUSTOM_NAME) && custom_name != null) {
+            db.ownedIdentityDao().updateCustomDisplayName(bytesOwnedIdentity, custom_name);
+        }
+
+        // restore contacts
+        if (domain.contains(CONTACTS) && contacts != null) {
+            for (Map.Entry<ObvBytesKey, ContactSyncSnapshot> contactEntry : contacts.entrySet()) {
+                try {
+                    contactEntry.getValue().restore(db, bytesOwnedIdentity, contactEntry.getKey().getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // restore groups v1
+        if (domain.contains(GROUPS) && groups != null) {
+            for (Map.Entry<ObvGroupOwnerAndUidKey, GroupV1SyncSnapshot> groupEntry : groups.entrySet()) {
+                try {
+                    groupEntry.getValue().restore(db, bytesOwnedIdentity, groupEntry.getKey().getGroupOwnerAndUid());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // restore groups v2
+        if (domain.contains(GROUPS2) && groups2 != null) {
+            for (Map.Entry<ObvBytesKey, GroupV2SyncSnapshot> group2Entry : groups2.entrySet()) {
+                try {
+                    group2Entry.getValue().restore(db, bytesOwnedIdentity, group2Entry.getKey().getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // pinned
+        if (domain.contains(PINNED) && pinned_discussions != null) {
+            // pinned sorted is ignored on Android (for now)
+            for (ObvBytesKey discussionKey : pinned_discussions) {
+                try {
+                    ObvSyncAtom.DiscussionIdentifier discussionIdentifier = ObvSyncAtom.DiscussionIdentifier.of(new Encoded(discussionKey.getBytes()));
+                    Discussion discussion;
+                    switch (discussionIdentifier.type) {
+                        case ObvSyncAtom.DiscussionIdentifier.CONTACT: {
+                            discussion = db.discussionDao().getByContact(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier);
+                            break;
+                        }
+                        case ObvSyncAtom.DiscussionIdentifier.GROUP_V1: {
+                            discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier);
+                            break;
+                        }
+                        case ObvSyncAtom.DiscussionIdentifier.GROUP_V2: {
+                            discussion = db.discussionDao().getByGroupIdentifier(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier);
+                            break;
+                        }
+                        default: {
+                            discussion = null;
+                            break;
+                        }
+                    }
+                    if (discussion != null) {
+                        db.discussionDao().updatePinned(discussion.id, true);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // update all group member names at the end only
+        new UpdateAllGroupMembersNames(bytesOwnedIdentity).run();
     }
 
     @Override
@@ -196,7 +281,7 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
     @Override
     @JsonIgnore
     public List<ObvSyncDiff> computeDiff(ObvSyncSnapshotNode otherSnapshotNode) throws Exception {
-        // TODO
+        // TODO computeDiff
         return null;
     }
 }

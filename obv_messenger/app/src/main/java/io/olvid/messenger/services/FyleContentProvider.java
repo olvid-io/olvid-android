@@ -82,6 +82,7 @@ public class FyleContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        //noinspection RedundantEscapeInRegexReplacement
         uriPattern = Pattern.compile(BuildConfig.CONTENT_PROVIDER_URI_PREFIX.replaceAll("[.]","\\.") + "([0-9A-Fa-f]{64})" + "/" + "([0-9]+)" + "/" + "([0-9A-Fa-f]{32})");
         return true;
     }

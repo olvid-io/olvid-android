@@ -315,7 +315,7 @@ public class Contact {
             // delete the contact
             db.contactDao().delete(this);
 
-            if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), bytesOwnedIdentity)) {
+            if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), bytesOwnedIdentity) && (db.group2PendingMemberDao().countContactGroups(bytesOwnedIdentity, bytesContactIdentity) == 0)) {
                 // remove this contact from all caches
                 AppSingleton.updateCacheContactDeleted(bytesContactIdentity);
             }

@@ -728,8 +728,7 @@ class InitialView : View {
                                 keycloakDrawable.draw(keycloakCanvas)
                             }
                             canvas.drawBitmap(keycloakBitmap, (size - keycloakSize).toFloat(), 0f, null)
-                    }
-
+                        }
                     }
                     return
                 }

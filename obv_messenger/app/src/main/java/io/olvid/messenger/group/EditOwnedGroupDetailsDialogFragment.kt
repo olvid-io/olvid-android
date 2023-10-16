@@ -104,6 +104,7 @@ class EditOwnedGroupDetailsDialogFragment : DialogFragment() {
                         if (groupV2DetailsViewModel.groupTypeChanged()) {
                             groupV2DetailsViewModel.createGroupeTypeChangeSet(groupV2DetailsViewModel.getGroupTypeLiveData().value?.toJsonGroupType())
                             obvChangeSet = groupV2DetailsViewModel.getObvChangeSet()
+                            changed =true
                         } else {
                             obvChangeSet = ObvGroupV2ChangeSet()
                         }

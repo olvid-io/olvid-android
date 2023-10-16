@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.ExponentialBackoffRepeatingScheduler;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
@@ -197,7 +198,14 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
     @Override
     public void onFinishCallback(Operation operation) {
         Identity identity = ((DownloadMessagesAndListAttachmentsOperation) operation).getOwnedIdentity();
+        UID deviceUid = ((DownloadMessagesAndListAttachmentsOperation) operation).getDeviceUid();
+        int newMessagesCount = ((DownloadMessagesAndListAttachmentsOperation) operation).getNewMessagesCount();
         scheduler.clearFailedCount(identity);
+
+        if (newMessagesCount > Constants.RELIST_NEW_MESSAGE_COUNT_THRESHOLD) {
+            // if we listed more than 20 new messages, we might have missed some messages on the server --> trigger a new list in 30 seconds, once messages are processed and deleted from server
+            scheduler.schedule(identity, () -> queueNewDownloadMessagesAndListAttachmentsOperation(identity, deviceUid), "DownloadMessagesAndListAttachmentsOperation [relist]", Constants.RELIST_DELAY);
+        }
 
         HashMap<String, Object> userInfo = new HashMap<>();
         userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY, identity);

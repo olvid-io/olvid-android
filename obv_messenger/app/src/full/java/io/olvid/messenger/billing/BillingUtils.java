@@ -130,7 +130,7 @@ public class BillingUtils {
     // must always be called from the executor
     private static void connectAndRun(@Nullable Runnable runnable) {
         executor.execute(() -> {
-            if (billingUnavailable) {
+            if (billingUnavailable || billingClientInstance == null) {
                 return;
             }
             if (runnable != null) {
@@ -248,7 +248,7 @@ public class BillingUtils {
             if (!purchaseList.isEmpty()) {
                 new Handler(Looper.getMainLooper()).post(loadPreference);
             }
-        } else {
+        } else if (billingClientInstance != null) {
             refreshPurchases(() -> {
                 if (purchaseList != null && !purchaseList.isEmpty()) {
                     new Handler(Looper.getMainLooper()).post(loadPreference);

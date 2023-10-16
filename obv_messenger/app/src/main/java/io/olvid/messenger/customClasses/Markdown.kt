@@ -317,9 +317,16 @@ fun Editable.formatMarkdown(highlightColor: Int) {
 
     // remove delimiters if not highlighting
     if (highlightColor == 0) {
-        getSpans<MarkdownDelimiter>().onEach {
-            delete(getSpanStart(it), getSpanEnd(it))
-            removeSpan(it)
+        try {
+            getSpans<MarkdownDelimiter>().onEach {
+                if (getSpanStart(it) >= 0 && getSpanEnd(it) <= length) {
+                    delete(getSpanStart(it), getSpanEnd(it))
+                }
+                removeSpan(it)
+            }
+        } catch (e : Exception) {
+            e.printStackTrace()
+            clearSpans()
         }
     }
 }
@@ -515,6 +522,12 @@ private fun Editable.setMarkdownSpanFromNode(
     }
 }
 
+fun String.formatMarkdown(): SpannableStringBuilder {
+    return SpannableStringBuilder(this).apply {
+        formatMarkdown(0)
+    }
+}
+
 fun SpannableString.formatMarkdown(): SpannableStringBuilder {
     return SpannableStringBuilder(this).apply {
         formatMarkdown(0)
@@ -522,60 +535,65 @@ fun SpannableString.formatMarkdown(): SpannableStringBuilder {
 }
 
 fun AnnotatedString.formatMarkdown(): AnnotatedString {
-    val spanStyles = emptyList<AnnotatedString.Range<SpanStyle>>().toMutableList()
-    val spannableString = SpannableString(this).formatMarkdown().toSpannable().apply {
-        getSpans<StyleSpan>(0, length).forEach { span ->
-            when (span.style) {
-                Typeface.BOLD -> spanStyles.add(
-                    AnnotatedString.Range(
-                        item = SpanStyle(fontWeight = FontWeight.Bold),
-                        start = getSpanStart(span),
-                        end = getSpanEnd(span)
+    try {
+        val spanStyles = emptyList<AnnotatedString.Range<SpanStyle>>().toMutableList()
+        val spannableString = SpannableString(this).formatMarkdown().toSpannable().apply {
+            getSpans<StyleSpan>(0, length).forEach { span ->
+                when (span.style) {
+                    Typeface.BOLD -> spanStyles.add(
+                            AnnotatedString.Range(
+                                    item = SpanStyle(fontWeight = FontWeight.Bold),
+                                    start = getSpanStart(span),
+                                    end = getSpanEnd(span)
+                            )
                     )
-                )
 
-                Typeface.ITALIC -> spanStyles.add(
-                    AnnotatedString.Range(
-                        item = SpanStyle(fontStyle = FontStyle.Italic),
-                        start = getSpanStart(span),
-                        end = getSpanEnd(span)
+                    Typeface.ITALIC -> spanStyles.add(
+                            AnnotatedString.Range(
+                                    item = SpanStyle(fontStyle = FontStyle.Italic),
+                                    start = getSpanStart(span),
+                                    end = getSpanEnd(span)
+                            )
                     )
-                )
 
-                Typeface.BOLD_ITALIC -> spanStyles.add(
-                    AnnotatedString.Range(
-                        item = SpanStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontStyle = FontStyle.Italic
-                        ),
-                        start = getSpanStart(span),
-                        end = getSpanEnd(span)
+                    Typeface.BOLD_ITALIC -> spanStyles.add(
+                            AnnotatedString.Range(
+                                    item = SpanStyle(
+                                            fontWeight = FontWeight.Bold,
+                                            fontStyle = FontStyle.Italic
+                                    ),
+                                    start = getSpanStart(span),
+                                    end = getSpanEnd(span)
+                            )
                     )
-                )
 
-                else -> {}
+                    else -> {}
+                }
+            }
+            getSpans<StrikethroughSpan>(0, length).forEach { span ->
+                spanStyles.add(
+                        AnnotatedString.Range(
+                                item = SpanStyle(textDecoration = TextDecoration.LineThrough),
+                                start = getSpanStart(span),
+                                end = getSpanEnd(span)
+                        )
+                )
+            }
+            getSpans<UnderlineSpan>(0, length).forEach { span ->
+                spanStyles.add(
+                        AnnotatedString.Range(
+                                item = SpanStyle(textDecoration = TextDecoration.Underline),
+                                start = getSpanStart(span),
+                                end = getSpanEnd(span)
+                        )
+                )
             }
         }
-        getSpans<StrikethroughSpan>(0, length).forEach { span ->
-            spanStyles.add(
-                AnnotatedString.Range(
-                    item = SpanStyle(textDecoration = TextDecoration.LineThrough),
-                    start = getSpanStart(span),
-                    end = getSpanEnd(span)
-                )
-            )
-        }
-        getSpans<UnderlineSpan>(0, length).forEach { span ->
-            spanStyles.add(
-                AnnotatedString.Range(
-                    item = SpanStyle(textDecoration = TextDecoration.Underline),
-                    start = getSpanStart(span),
-                    end = getSpanEnd(span)
-                )
-            )
-        }
+        return AnnotatedString(text = spannableString.toString(), spanStyles = spanStyles)
+    } catch (e : Exception) {
+        e.printStackTrace()
+        return this
     }
-    return AnnotatedString(text = spannableString.toString(), spanStyles = spanStyles)
 }
 
 fun Node.listLevel(): Int {

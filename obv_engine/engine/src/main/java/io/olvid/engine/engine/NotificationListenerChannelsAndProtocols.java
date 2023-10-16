@@ -54,6 +54,7 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
                 ProtocolNotifications.NOTIFICATION_KEYCLOAK_SYNCHRONIZATION_REQUIRED,
                 ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_SENT,
                 ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE,
+                ProtocolNotifications.NOTIFICATION_SNAPSHOT_RESTORATION_FINISHED,
         }) {
             notificationManager.addListener(notificationName, this);
         }
@@ -214,6 +215,10 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
                 engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY, accepted);
 
                 engine.postEngineNotification(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE, engineInfo);
+                break;
+            }
+            case ProtocolNotifications.NOTIFICATION_SNAPSHOT_RESTORATION_FINISHED: {
+                engine.postEngineNotification(EngineNotifications.ENGINE_SNAPSHOT_RESTORATION_FINISHED, new HashMap<>());
                 break;
             }
             default:

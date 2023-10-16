@@ -19,6 +19,7 @@
 
 package io.olvid.engine.identity.databases.sync;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.sql.SQLException;
@@ -27,11 +28,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.engine.types.sync.ObvSyncDiff;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.engine.identity.databases.OwnedIdentity;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
+import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IdentityManagerSyncSnapshot implements ObvSyncSnapshotNode {
@@ -52,6 +55,21 @@ public class IdentityManagerSyncSnapshot implements ObvSyncSnapshotNode {
         }
         identityManagerSyncSnapshot.domain = DEFAULT_DOMAIN;
         return identityManagerSyncSnapshot;
+    }
+
+    @JsonIgnore
+    public void restore(IdentityManagerSession identityManagerSession, ProtocolStarterDelegate protocolStarterDelegate) throws Exception {
+        if (!domain.contains(OWNED_IDENTITY) || !domain.contains(OWNED_IDENTITY_NODE)) {
+            Logger.e("Trying to restore an incomplete IdentityManagerSyncSnapshot. Domain: " + domain);
+            throw new Exception();
+        }
+        Identity ownedIdentity = Identity.of(owned_identity);
+        if (!identityManagerSession.identityDelegate.isOwnedIdentity(identityManagerSession.session, ownedIdentity)) {
+            Logger.e("Trying to restore a snapshot of an unknown owned identity");
+            throw new Exception();
+        }
+
+        owned_identity_node.restore(identityManagerSession, protocolStarterDelegate, ownedIdentity);
     }
 
     @Override

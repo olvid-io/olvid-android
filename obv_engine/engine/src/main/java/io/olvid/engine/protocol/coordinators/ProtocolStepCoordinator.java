@@ -70,6 +70,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
         try (ProtocolManagerSession protocolManagerSession = protocolManagerSessionFactory.getSession()) {
             // To improve: also cleanup protocol instances: implement a clean abort in each protocol, and call it when the protocol is stalled
             ReceivedMessage.deleteExpiredMessagesWithNoProtocol(protocolManagerSession);
+            ReceivedMessage.deleteAllTransfer(protocolManagerSession);
 
             ReceivedMessage[] receivedMessages = ReceivedMessage.getAll(protocolManagerSession);
             if (receivedMessages.length > 0) {
@@ -78,6 +79,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
                     queueNewProtocolOperation(receivedMessage.getUid());
                 }
             }
+            protocolManagerSession.session.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }

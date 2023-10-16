@@ -364,7 +364,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
       public ConcreteProtocolState executeStep() throws Exception {
          ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-         boolean gainedOneToOneCapability = false;
+         boolean gainedOneToOneCapability;
          {
             // check whether the current device has different capabilities and update them
 

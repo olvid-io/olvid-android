@@ -54,9 +54,12 @@ public class DeleteAttachmentTask implements Runnable {
         List<Long> messageIds = db.fyleMessageJoinWithStatusDao().getMessageIdsForFyleSync(fyleAndStatus.fyle.id);
         if ((messageIds.size() == 0) || ((messageIds.size() == 1) && (messageIds.get(0) == fyleAndStatus.fyleMessageJoinWithStatus.messageId))) {
             if (fyleAndStatus.fyle.sha256 != null) {
-                Fyle.acquireLock(fyleAndStatus.fyle.sha256);
-                fyleAndStatus.fyle.delete();
-                Fyle.releaseLock(fyleAndStatus.fyle.sha256);
+                try {
+                    Fyle.acquireLock(fyleAndStatus.fyle.sha256);
+                    fyleAndStatus.fyle.delete();
+                } finally {
+                    Fyle.releaseLock(fyleAndStatus.fyle.sha256);
+                }
             } else {
                 fyleAndStatus.fyle.delete();
             }

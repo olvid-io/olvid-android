@@ -27,10 +27,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.databases.entity.Invitation
-import io.olvid.messenger.main.invitations.InvitationListItem
-import io.olvid.messenger.main.invitations.InvitationListViewModel
-import io.olvid.messenger.main.invitations.getAnnotatedDate
-import io.olvid.messenger.main.invitations.getAnnotatedTitle
 import io.olvid.messenger.notifications.AndroidNotificationManager
 
 class InvitationAdapter(private val invitationListViewModel: InvitationListViewModel) : ListAdapter<Invitation, InvitationViewHolder>(InvitationDiffCallback) {

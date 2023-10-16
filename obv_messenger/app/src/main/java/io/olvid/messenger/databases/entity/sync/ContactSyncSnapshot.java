@@ -55,14 +55,54 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
         contactSyncSnapshot.custom_hue = contact.customNameHue;
         contactSyncSnapshot.personal_note = contact.personalNote;
 
-        Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-        if (discussion != null) {
-            DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-            contactSyncSnapshot.discussion_customization = DiscussionCustomizationSyncSnapshot.of(db, discussionCustomization);
+        // only store discussion customizations for one-to-one contacts. Locked discussions do not need to be synchronized
+        if (contact.oneToOne) {
+            Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+            if (discussion != null) {
+                DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
+                if (discussionCustomization != null) {
+                    contactSyncSnapshot.discussion_customization = DiscussionCustomizationSyncSnapshot.of(db, discussionCustomization);
+                }
+            }
         }
 
         contactSyncSnapshot.domain = DEFAULT_DOMAIN;
         return contactSyncSnapshot;
+    }
+
+    public void restore(AppDatabase db, byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) {
+        Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+        if (contact != null) {
+            Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+            if (domain.contains(CUSTOM_NAME) && custom_name != null) {
+                contact.setCustomDisplayName(custom_name);
+                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
+                if (discussion != null) {
+                    db.discussionDao().updateTitleAndPhotoUrl(discussion.id, contact.getCustomDisplayName(), discussion.photoUrl);
+                }
+            }
+            if (domain.contains(CUSTOM_HUE) && custom_hue != null) {
+                db.contactDao().updateCustomNameHue(bytesOwnedIdentity, bytesContactIdentity, custom_hue);
+            }
+            if (domain.contains(PERSONAL_NOTE) && personal_note != null) {
+                db.contactDao().updatePersonalNote(bytesOwnedIdentity, bytesContactIdentity, personal_note);
+            }
+            if (discussion != null) {
+                if (domain.contains(DISCUSSION_CUSTOMIZATION) && discussion_customization != null) {
+                    discussion_customization.restore(db, discussion.id);
+                } else {
+                    // in case a default ephemeral setting was applied, reset it
+                    DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
+                    if (discussionCustomization != null) {
+                        discussionCustomization.sharedSettingsVersion = null;
+                        discussionCustomization.settingVisibilityDuration = null;
+                        discussionCustomization.settingExistenceDuration = null;
+                        discussionCustomization.settingReadOnce = false;
+                        db.discussionCustomizationDao().update(discussionCustomization);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -98,7 +138,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
                 }
                 case DISCUSSION_CUSTOMIZATION: {
                     if ((discussion_customization == null && other.discussion_customization != null)
-                            || (discussion_customization != null && discussion_customization.areContentsTheSame(other.discussion_customization))) {
+                            || (discussion_customization != null && !discussion_customization.areContentsTheSame(other.discussion_customization))) {
                         return false;
                     }
                     break;
@@ -111,7 +151,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
     @Override
     @JsonIgnore
     public List<ObvSyncDiff> computeDiff(ObvSyncSnapshotNode otherSnapshotNode) throws Exception {
-        // TODO
+        // TODO computeDiff
         return null;
     }
 }

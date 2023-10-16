@@ -91,7 +91,7 @@ import io.olvid.messenger.group.GroupDetailsActivity;
 import io.olvid.messenger.group.GroupV2DetailsActivity;
 import io.olvid.messenger.activities.LockScreenActivity;
 import io.olvid.messenger.activities.MessageDetailsActivity;
-import io.olvid.messenger.activities.OwnedIdentityDetailsActivity;
+import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.appdialogs.AppDialogShowActivity;
 import io.olvid.messenger.appdialogs.AppDialogTag;

@@ -276,7 +276,7 @@ public class DownloadIdentityPhotoChildProtocol extends ConcreteProtocol {
             }
             UID photoServerLabel = new UID(jsonIdentityDetailsWithVersionAndPhoto.getPhotoServerLabel());
 
-            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), ServerQuery.Type.createGetUserDataQuery(receivedMessage.contactIdentity, photoServerLabel)));
+            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetUserDataQuery(receivedMessage.contactIdentity, photoServerLabel)));
             ChannelMessageToSend messageToSend = new ServerGetPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             return new DownloadingPhotoState(receivedMessage.contactIdentity, receivedMessage.jsonIdentityDetailsWithVersionAndPhoto);

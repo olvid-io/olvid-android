@@ -111,7 +111,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         this.serverPushNotificationsCoordinator = new RegisterServerPushNotificationsCoordinator(this, sslSocketFactory, createServerSessionCoordinator, downloadMessagesAndListAttachmentsCoordinator);
         this.downloadMessagesAndListAttachmentsCoordinator.setRegisterServerPushNotificationDelegate(this.serverPushNotificationsCoordinator);
         this.serverUserDataCoordinator = new ServerUserDataCoordinator(this, sslSocketFactory, createServerSessionCoordinator, jsonObjectMapper, prng);
-        this.serverQueryCoordinator = new ServerQueryCoordinator(this, sslSocketFactory, prng, createServerSessionCoordinator, serverUserDataCoordinator);
+        this.serverQueryCoordinator = new ServerQueryCoordinator(this, sslSocketFactory, prng, createServerSessionCoordinator, serverUserDataCoordinator, jsonObjectMapper);
         this.freeTrialCoordinator = new FreeTrialCoordinator(this, sslSocketFactory);
         this.verifyReceiptCoordinator = new VerifyReceiptCoordinator(this, sslSocketFactory, createServerSessionCoordinator);
         this.wellKnownCoordinator = new WellKnownCoordinator(this, sslSocketFactory, jsonObjectMapper);

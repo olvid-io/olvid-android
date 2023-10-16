@@ -895,6 +895,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         handleIntent(getIntent());
     }
 
+    public AudioAttachmentServiceBinding getAudioAttachmentServiceBinding() {
+        return audioAttachmentServiceBinding;
+    }
+
     private void enterEditMode(@NonNull Message message) {
         if (message.jsonLocation != null) {
             // prevent editing location messages
@@ -4636,7 +4640,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             if (getLayoutPosition() > 0 && id == R.id.message_content_card) {
                                 Discussion discussion = discussionViewModel.getDiscussion().getValue();
                                 if (discussion != null) {
-                                    App.runThread(new InboundEphemeralMessageClicked(discussion.bytesOwnedIdentity, messages.get(getLayoutPosition() - 1).id));
+                                    long messageId =  messages.get(getLayoutPosition() - 1).id;
+                                    App.runThread(new InboundEphemeralMessageClicked(discussion.bytesOwnedIdentity, messageId));
                                 }
                             }
                         } else if (viewType == ViewType.SETTINGS_UPDATE) {

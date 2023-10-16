@@ -20,7 +20,6 @@
 package io.olvid.messenger.onboarding;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.RestrictionsManager;
 import android.os.Bundle;
@@ -30,25 +29,23 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.regex.Matcher;
 
-import io.olvid.engine.engine.types.identities.ObvUrlIdentity;
 import io.olvid.messenger.App;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ObvLinkActivity;
-import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.settings.SettingsActivity;
 
 
 public class OnboardingActivity extends AppCompatActivity {
     public static final String LINK_URI_INTENT_EXTRA = "link_uri";
     public static final String FIRST_ID_INTENT_EXTRA = "first_id";
+    public static final String PROFILE_CREATION = "profile_creation";
 
     public static final String ALREADY_CREATED_BUNDLE_EXTRA = "already_created";
 
@@ -78,12 +75,22 @@ public class OnboardingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_onboarding);
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 
+        if (navHostFragment == null) {
+            finish();
+            return;
+        }
+
+        // Remove the empty start fragment
+        // We had to add this fragment to avoid the scan fragment requesting camera permission even though it was poped from the back stack
+        navHostFragment.getNavController().popBackStack(R.id.empty, true);
+
+
         if (savedInstanceState != null && savedInstanceState.getBoolean(ALREADY_CREATED_BUNDLE_EXTRA, false)) {
             setIntent(null);
         }
 
         Intent intent = getIntent();
-        if (navHostFragment != null && intent != null) {
+        if (intent != null) {
             boolean firstIdentity = intent.getBooleanExtra(FIRST_ID_INTENT_EXTRA, false);
             viewModel.setFirstIdentity(firstIdentity);
 
@@ -103,7 +110,6 @@ public class OnboardingActivity extends AppCompatActivity {
                             if (matcher.find() && viewModel.parseScannedConfigurationUri(matcher.group(2)) && viewModel.getKeycloakServer() != null) {
                                 viewModel.setConfiguredFromMdm(true);
                                 viewModel.setDeepLinked(true);
-                                navHostFragment.getNavController().popBackStack(R.id.welcome_screen, true);
                                 navHostFragment.getNavController().navigate(R.id.keycloak_selection);
                                 return;
                             } else {
@@ -116,7 +122,6 @@ public class OnboardingActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-
             if (intent.hasExtra(LINK_URI_INTENT_EXTRA)) {
                 String uri = intent.getStringExtra(LINK_URI_INTENT_EXTRA);
                 if (uri != null) {
@@ -124,25 +129,18 @@ public class OnboardingActivity extends AppCompatActivity {
                     if (matcher.find()) {
                         if (viewModel.parseScannedConfigurationUri(matcher.group(2))) {
                             viewModel.setDeepLinked(true);
-                            if (firstIdentity) {
-                                if (viewModel.getKeycloakServer() != null) {
-                                    navHostFragment.getNavController().navigate(R.id.action_skip_to_keycloak_selection);
-                                } else {
-                                    navHostFragment.getNavController().navigate(R.id.action_skip_to_configuration_scanned);
-                                }
+                            if (viewModel.getKeycloakServer() != null) {
+                                navHostFragment.getNavController().navigate(R.id.keycloak_selection);
                             } else {
-                                navHostFragment.getNavController().popBackStack(R.id.welcome_screen, true);
-                                navHostFragment.getNavController().navigate(R.id.new_profile);
-                                if (viewModel.getKeycloakServer() != null) {
-                                    navHostFragment.getNavController().navigate(R.id.action_new_profile_skip_to_keycloak_selection);
-                                } else {
-                                    navHostFragment.getNavController().navigate(R.id.action_new_profile_skip_to_configuration_scanned);
-                                }
+                                navHostFragment.getNavController().navigate(R.id.identity_creation_options);
                             }
+                            return;
                         }
                         App.toast(R.string.toast_message_invalid_configuration_link, Toast.LENGTH_SHORT);
                         return;
-                    } else if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()) {
+                    }
+                    // we disable this for now, we'll see if we re-implement this in the OnboardingFlowActivity
+                    /* else if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()) {
                         ObvUrlIdentity obvUrlIdentity = ObvUrlIdentity.fromUrlRepresentation(uri);
                         if (obvUrlIdentity != null) {
                             AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
@@ -171,14 +169,18 @@ public class OnboardingActivity extends AppCompatActivity {
                             builder.create().show();
                             return;
                         }
-                    }
+                    }*/
                 }
                 App.toast(R.string.toast_message_invalid_link, Toast.LENGTH_SHORT);
-            } else if (!firstIdentity) {
-                navHostFragment.getNavController().popBackStack(R.id.welcome_screen, true);
-                navHostFragment.getNavController().navigate(R.id.new_profile);
+            }
+
+            if (intent.getBooleanExtra(PROFILE_CREATION, false)) {
+                navHostFragment.getNavController().navigate(R.id.identity_creation);
+                return;
             }
         }
+
+        navHostFragment.getNavController().navigate(R.id.scan_fragment);
     }
 
     @Override

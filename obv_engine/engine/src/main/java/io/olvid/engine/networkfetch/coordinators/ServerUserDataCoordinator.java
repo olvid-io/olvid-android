@@ -274,7 +274,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                                 ServerQuery serverQuery = new ServerQuery(
                                         Encoded.of(new Encoded[0]),
                                         ownedIdentity,
-                                        ServerQuery.Type.createPutUserDataQuery(ownedIdentity, label, photoUrl, key)
+                                        new ServerQuery.PutUserDataQuery(ownedIdentity, label, photoUrl, key)
                                 );
 
                                 PendingServerQuery.create(fetchManagerSession, serverQuery, prng);

@@ -19,8 +19,6 @@
 
 package io.olvid.messenger.onboarding;
 
-import android.content.ContentResolver;
-import android.net.Uri;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
@@ -32,8 +30,6 @@ import androidx.lifecycle.ViewModel;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,14 +39,10 @@ import java.util.UUID;
 
 import io.olvid.engine.datatypes.ObvBase64;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
-import io.olvid.engine.engine.types.ObvBackupKeyVerificationOutput;
-import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
-import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.ConfigurationKeycloakPojo;
 import io.olvid.messenger.customClasses.ConfigurationPojo;
-import io.olvid.messenger.services.BackupCloudProviderService;
 
 
 public class OnboardingViewModel extends ViewModel {
@@ -84,19 +76,6 @@ public class OnboardingViewModel extends ViewModel {
     private final MutableLiveData<VALIDATED_STATUS> keycloakValidatedStatus = new MutableLiveData<>();
 
     private final MutableLiveData<Boolean> forceDisabled = new MutableLiveData<>(false);
-
-    private String invitationLink = null;
-
-    private int backupType;
-    private final MutableLiveData<String> backupName = new MutableLiveData<>();
-    private final MutableLiveData<byte[]> backupContent = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> backupReady = new MutableLiveData<>(false);
-
-    private String backupSeed;
-    private final MutableLiveData<Boolean> backupKeyValid = new MutableLiveData<>(false);
-
-    public static final int BACKUP_TYPE_FILE = 1;
-    public static final int BACKUP_TYPE_CLOUD = 2;
 
     private boolean deepLinked;
     private boolean configuredFromMdm;
@@ -137,13 +116,6 @@ public class OnboardingViewModel extends ViewModel {
         this.configuredFromMdm = configuredFromMdm;
     }
 
-    public String getInvitationLink() {
-        return invitationLink;
-    }
-
-    public void setInvitationLink(String invitationLink) {
-        this.invitationLink = invitationLink;
-    }
 
     @SuppressWarnings("SameParameterValue")
     void setServer(String server) {
@@ -410,99 +382,6 @@ public class OnboardingViewModel extends ViewModel {
     LiveData<Boolean> getForceDisabled() {
         return forceDisabled;
     }
-
-    // endregion
-
-
-
-
-
-    // region Backup File
-
-    void clearSelectedBackup() {
-        backupName.setValue(null);
-        backupContent.setValue(null);
-        backupReady.postValue(false);
-    }
-
-    MutableLiveData<String> getBackupName() {
-        return backupName;
-    }
-
-    MutableLiveData<byte[]> getBackupContent() {
-        return backupContent;
-    }
-
-    MutableLiveData<Boolean> getBackupReady() {
-        return backupReady;
-    }
-
-    int getBackupType() {
-        return backupType;
-    }
-
-    void selectBackupFile(Uri backupFileUri, String fileName) throws Exception {
-        ContentResolver contentResolver = App.getContext().getContentResolver();
-        try (InputStream is = contentResolver.openInputStream(backupFileUri)) {
-            if (is == null) {
-                throw new Exception("Unable to read from provided Uri");
-            }
-            try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                byte[] buffer = new byte[4_096];
-                int c;
-                while ((c = is.read(buffer)) != -1) {
-                    baos.write(buffer, 0, c);
-                }
-                backupContent.postValue(baos.toByteArray());
-                backupName.postValue(fileName);
-                backupType = BACKUP_TYPE_FILE;
-                backupReady.postValue(true);
-            }
-        }
-    }
-
-    void setBackupCloud(byte[] backupContent, BackupCloudProviderService.CloudProviderConfiguration configuration, String device, String timestamp) {
-        this.backupContent.postValue(backupContent);
-        switch (configuration.provider) {
-            case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV:
-                backupName.postValue(App.getContext().getString(R.string.text_description_webdav_backup, configuration.account + " @ " + configuration.serverUrl, device, timestamp));
-                break;
-            case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_GOOGLE_DRIVE:
-                backupName.postValue(App.getContext().getString(R.string.text_description_google_drive_backup, configuration.account, device, timestamp));
-                break;
-        }
-        backupType = BACKUP_TYPE_CLOUD;
-        backupReady.postValue(true);
-    }
-
-    // endregion
-
-    // region Backup Key
-
-    void setBackupSeed(String backupSeed) {
-        this.backupSeed = backupSeed;
-        this.backupKeyValid.setValue(false);
-    }
-
-    public String getBackupSeed() {
-        return backupSeed;
-    }
-
-    public MutableLiveData<Boolean> getBackupKeyValid() {
-        return backupKeyValid;
-    }
-
-    int validateBackupSeed() {
-        if (backupSeed == null || backupContent.getValue() == null) {
-            this.backupKeyValid.setValue(false);
-            return -1;
-        } else {
-            ObvBackupKeyVerificationOutput verificationOutput = AppSingleton.getEngine().validateBackupSeed(backupSeed, backupContent.getValue());
-            backupKeyValid.setValue(verificationOutput.verificationStatus == ObvBackupKeyVerificationOutput.STATUS_SUCCESS);
-            return verificationOutput.verificationStatus;
-        }
-    }
-
 
     // endregion
 }

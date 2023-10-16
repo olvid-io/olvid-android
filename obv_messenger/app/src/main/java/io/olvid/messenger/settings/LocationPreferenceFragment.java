@@ -44,7 +44,7 @@ public class LocationPreferenceFragment extends PreferenceFragmentCompat {
         if (mapIntegrationPreference != null && osmLanguagePreference != null) {
             mapIntegrationPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
                 if (newValue instanceof String) {
-                    osmLanguagePreference.setVisible(SettingsActivity.PREF_VALUE_LOCATION_INTEGRATION_OSM.equals((String) newValue));
+                    osmLanguagePreference.setVisible(SettingsActivity.PREF_VALUE_LOCATION_INTEGRATION_OSM.equals(newValue));
                 }
                 return true;
             });

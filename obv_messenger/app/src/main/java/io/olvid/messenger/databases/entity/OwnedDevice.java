@@ -49,6 +49,7 @@ public class OwnedDevice {
     public static final String BYTES_DEVICE_UID = "bytes_device_uid";
     public static final String DISPLAY_NAME = "display_name";
     public static final String CURRENT_DEVICE = "current_device";
+    public static final String TRUSTED = "trusted";
     public static final String CHANNEL_CONFIRMED = "channel_confirmed";
     public static final String LAST_REGISTRATION_TIMESTAMP = "last_registration_timestamp";
     public static final String EXPIRATION_TIMESTAMP = "expiration_timestamp";
@@ -69,6 +70,9 @@ public class OwnedDevice {
     @ColumnInfo(name = CURRENT_DEVICE)
     public boolean currentDevice;
 
+    @ColumnInfo(name = TRUSTED)
+    public boolean trusted;
+
     @ColumnInfo(name = CHANNEL_CONFIRMED)
     public boolean channelConfirmed;
 
@@ -82,11 +86,12 @@ public class OwnedDevice {
 
 
     // Constructor required by Room
-    public OwnedDevice(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesDeviceUid, @Nullable String displayName, boolean currentDevice, boolean channelConfirmed, @Nullable Long lastRegistrationTimestamp, @Nullable Long expirationTimestamp) {
+    public OwnedDevice(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesDeviceUid, @Nullable String displayName, boolean currentDevice, boolean trusted, boolean channelConfirmed, @Nullable Long lastRegistrationTimestamp, @Nullable Long expirationTimestamp) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.bytesDeviceUid = bytesDeviceUid;
         this.displayName = displayName;
         this.currentDevice = currentDevice;
+        this.trusted = trusted;
         this.channelConfirmed = channelConfirmed;
         this.lastRegistrationTimestamp = lastRegistrationTimestamp;
         this.expirationTimestamp = expirationTimestamp;

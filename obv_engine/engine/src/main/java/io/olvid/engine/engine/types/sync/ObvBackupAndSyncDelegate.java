@@ -20,6 +20,7 @@
 package io.olvid.engine.engine.types.sync;
 
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.engine.types.identities.ObvIdentity;
 
 public interface ObvBackupAndSyncDelegate {
     //////
@@ -28,8 +29,16 @@ public interface ObvBackupAndSyncDelegate {
 
     //////
     // This method computes a snapshot of the data to sync
-    ObvSyncSnapshotNode getSyncSnapshot(Identity ownedIdentity);
+    ObvSyncSnapshotNode getSyncSnapshot(Identity ownedIdentity); // TODO: we probably need to add a context as we do not want to include the same elements for a backup or a sync
 
+    //////
+    // This method allows each delegate to crate an owned identity base on the ObvIdentity the engine has restored
+    RestoreFinishedCallback restoreOwnedIdentity(ObvIdentity ownedIdentity, ObvSyncSnapshotNode node) throws Exception;
+    //////
+    // This method restores a Snapshot, assuming the owned identity already exists in db.
+    // - it may return a callback that will only get called if the restore was successful for all delegates.
+    // - this callback can be used to commit a transaction on app side, only if the engine restore is successful, and roll it back otherwise
+    RestoreFinishedCallback restoreSyncSnapshot(ObvSyncSnapshotNode node) throws Exception;
 
     //////
     // Method used to deserialize a node that was serialized with ObvSyncSnapshotNode.serialize(ObjectMapper jsonObjectMapper)
@@ -38,4 +47,9 @@ public interface ObvBackupAndSyncDelegate {
     // Method used to deserialize a node that was serialized with ObvSyncSnapshotNode.serialize(ObjectMapper jsonObjectMapper)
     ObvSyncSnapshotNode deserialize(byte[] serializedSnapshotNode) throws Exception;
 
+
+    interface RestoreFinishedCallback {
+        void onRestoreSuccess();
+        void onRestoreFailure();
+    }
 }

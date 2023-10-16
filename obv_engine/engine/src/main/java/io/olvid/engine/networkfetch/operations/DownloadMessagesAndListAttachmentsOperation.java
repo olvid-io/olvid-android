@@ -52,9 +52,14 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
     private final SSLSocketFactory sslSocketFactory;
     private final Identity ownedIdentity;
     private final UID deviceUid;
+    private int newMessagesCount = -1;
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
+    }
+
+    public int getNewMessagesCount() {
+        return newMessagesCount;
     }
 
     public UID getDeviceUid() {
@@ -144,6 +149,7 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                             }
                         }
                         Logger.d("DownloadMessagesAndListAttachmentsOperation found " + messageAndAttachmentLengthsArray.length + " messages (" + count + " new) on the server.");
+                        this.newMessagesCount = count;
                         finished = true;
                         return;
                     }

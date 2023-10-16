@@ -19,6 +19,7 @@
 
 package io.olvid.engine.identity.databases.sync;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Arrays;
@@ -26,11 +27,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
+import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.sync.ObvSyncDiff;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
+import io.olvid.engine.identity.databases.ContactIdentityDetails;
 import io.olvid.engine.identity.databases.OwnedIdentityDetails;
+import io.olvid.engine.identity.databases.ServerUserData;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
 
 // This class is used for both owned identity and contacts
@@ -50,14 +57,85 @@ public class IdentityDetailsSyncSnapshot implements ObvSyncSnapshotNode {
     public HashSet<String> domain;
 
 
-    public static IdentityDetailsSyncSnapshot of(IdentityManagerSession identityManagerSession, OwnedIdentityDetails publishedDetails) {
+    public static IdentityDetailsSyncSnapshot of(IdentityManagerSession identityManagerSession, OwnedIdentityDetails ownedIdentityDetails) {
         IdentityDetailsSyncSnapshot identityDetailsSyncSnapshot = new IdentityDetailsSyncSnapshot();
-        identityDetailsSyncSnapshot.version = publishedDetails.getVersion();
-        identityDetailsSyncSnapshot.serialized_details = publishedDetails.getSerializedJsonDetails();
-        identityDetailsSyncSnapshot.photo_server_label = publishedDetails.getPhotoServerLabel().getBytes();
-        identityDetailsSyncSnapshot.photo_server_key = Encoded.of(publishedDetails.getPhotoServerKey()).getBytes();
+        identityDetailsSyncSnapshot.version = ownedIdentityDetails.getVersion();
+        identityDetailsSyncSnapshot.serialized_details = ownedIdentityDetails.getSerializedJsonDetails();
+        if (ownedIdentityDetails.getPhotoServerLabel() != null && ownedIdentityDetails.getPhotoServerKey() != null) {
+            identityDetailsSyncSnapshot.photo_server_label = ownedIdentityDetails.getPhotoServerLabel().getBytes();
+            identityDetailsSyncSnapshot.photo_server_key = Encoded.of(ownedIdentityDetails.getPhotoServerKey()).getBytes();
+        }
         identityDetailsSyncSnapshot.domain = DEFAULT_DOMAIN;
         return identityDetailsSyncSnapshot;
+    }
+
+    public static IdentityDetailsSyncSnapshot of(IdentityManagerSession identityManagerSession, ContactIdentityDetails contactIdentityDetails) {
+        IdentityDetailsSyncSnapshot identityDetailsSyncSnapshot = new IdentityDetailsSyncSnapshot();
+        identityDetailsSyncSnapshot.version = contactIdentityDetails.getVersion();
+        identityDetailsSyncSnapshot.serialized_details = contactIdentityDetails.getSerializedJsonDetails();
+        if (contactIdentityDetails.getPhotoServerLabel() != null && contactIdentityDetails.getPhotoServerKey() != null) {
+            identityDetailsSyncSnapshot.photo_server_label = contactIdentityDetails.getPhotoServerLabel().getBytes();
+            identityDetailsSyncSnapshot.photo_server_key = Encoded.of(contactIdentityDetails.getPhotoServerKey()).getBytes();
+        }
+        identityDetailsSyncSnapshot.domain = DEFAULT_DOMAIN;
+        return identityDetailsSyncSnapshot;
+    }
+
+    @JsonIgnore
+    public OwnedIdentityDetails restoreOwned(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws Exception {
+        if (!domain.contains(VERSION) || !domain.contains(SERIALIZED_DETAILS)) {
+            Logger.e("Trying to restore an incomplete IdentityDetailsSyncSnapshot. Domain: " + domain);
+            throw new Exception();
+        }
+
+        UID photoServerLabel;
+        AuthEncKey photoServerKey;
+        if (domain.contains(PHOTO_SERVER_LABEL) && domain.contains(PHOTO_SERVER_KEY) && photo_server_key != null && photo_server_label != null) {
+            try {
+                photoServerLabel = new UID(photo_server_label);
+                photoServerKey = (AuthEncKey) new Encoded(photo_server_key).decodeSymmetricKey();
+            } catch (Exception e) {
+                e.printStackTrace();
+                photoServerLabel = null;
+                photoServerKey = null;
+            }
+        } else {
+            photoServerLabel = null;
+            photoServerKey = null;
+        }
+        OwnedIdentityDetails ownedIdentityDetails = new OwnedIdentityDetails(identityManagerSession, ownedIdentity, version, serialized_details, null, photoServerLabel, photoServerKey);
+        ownedIdentityDetails.insert();
+        if (photoServerLabel != null && photoServerKey != null) {
+            ServerUserData.createForOwnedIdentityDetails(identityManagerSession, ownedIdentity, photoServerLabel);
+        }
+        return ownedIdentityDetails;
+    }
+
+    @JsonIgnore
+    public ContactIdentityDetails restoreContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws Exception {
+        if (!domain.contains(VERSION) || !domain.contains(SERIALIZED_DETAILS)) {
+            Logger.e("Trying to restore an incomplete IdentityDetailsSyncSnapshot. Domain: " + domain);
+            throw new Exception();
+        }
+
+        UID photoServerLabel;
+        AuthEncKey photoServerKey;
+        if (domain.contains(PHOTO_SERVER_LABEL) && domain.contains(PHOTO_SERVER_KEY) && photo_server_key != null && photo_server_label != null) {
+            try {
+                photoServerLabel = new UID(photo_server_label);
+                photoServerKey = (AuthEncKey) new Encoded(photo_server_key).decodeSymmetricKey();
+            } catch (Exception e) {
+                e.printStackTrace();
+                photoServerLabel = null;
+                photoServerKey = null;
+            }
+        } else {
+            photoServerLabel = null;
+            photoServerKey = null;
+        }
+        ContactIdentityDetails contactIdentityDetails = new ContactIdentityDetails(identityManagerSession,contactIdentity, ownedIdentity, version, serialized_details, null, photoServerLabel, photoServerKey);
+        contactIdentityDetails.insert();
+        return contactIdentityDetails;
     }
 
     @Override
@@ -110,7 +188,7 @@ public class IdentityDetailsSyncSnapshot implements ObvSyncSnapshotNode {
 
     @Override
     public List<ObvSyncDiff> computeDiff(ObvSyncSnapshotNode otherSnapshotNode) throws Exception {
-        // TODO
+        // TODO computeDiff
         return null;
     }
 }

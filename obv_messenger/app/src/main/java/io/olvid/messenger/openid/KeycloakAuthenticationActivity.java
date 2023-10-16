@@ -147,22 +147,11 @@ public class KeycloakAuthenticationActivity extends AppCompatActivity {
                             }
                             successIntent.putExtra(CODE_VERIFIER_INTENT_EXTRA, codeVerifier);
                             successIntent.putExtra(NONCE_INTENT_EXTRA, nonce);
-                            PendingIntent successPendingIntent;
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                                successPendingIntent = PendingIntent.getActivity(this, 3, successIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
-                            } else {
-                                successPendingIntent = PendingIntent.getActivity(this, 3, successIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                            }
+                            PendingIntent successPendingIntent = PendingIntent.getActivity(this, 3, successIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
 
                             Intent cancelledIntent = new Intent(this, KeycloakAuthenticationActivity.class);
                             cancelledIntent.setAction(AUTHORIZATION_CANCELLED_ACTION);
-                            PendingIntent cancelledPendingIntent;
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                                cancelledPendingIntent = PendingIntent.getActivity(this, 4, cancelledIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
-                            } else {
-                                cancelledPendingIntent = PendingIntent.getActivity(this, 4, cancelledIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                            }
-
+                            PendingIntent cancelledPendingIntent = PendingIntent.getActivity(this, 4, cancelledIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
 
 
                             authorizationService.performAuthorizationRequest(authorizationRequest, successPendingIntent, cancelledPendingIntent);

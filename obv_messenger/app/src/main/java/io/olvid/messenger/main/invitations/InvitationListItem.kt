@@ -145,7 +145,6 @@ fun InvitationListItem(
                         )
                         .requiredSize(56.dp),
                     initialViewSetup = initialViewSetup,
-                    onClick = {},
                 )
 
                 // content

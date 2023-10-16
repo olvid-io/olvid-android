@@ -193,9 +193,11 @@ public class MessageLongPressPopUp {
         boolean twoLines = false;
 
         View replyView = popUpView.findViewById(R.id.swipe_menu_reply);
-        if (!discussion.isNormal() ||
-                (message.messageType != Message.TYPE_INBOUND_MESSAGE
-                        && message.messageType != Message.TYPE_OUTBOUND_MESSAGE)) {
+        if (!discussion.isNormal()
+                || (message.messageType != Message.TYPE_INBOUND_MESSAGE
+                  && message.messageType != Message.TYPE_OUTBOUND_MESSAGE)
+                || message.wipeStatus == Message.WIPE_STATUS_WIPED
+                || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
             replyView.setVisibility(View.GONE);
         } else {
             twoLines = true;

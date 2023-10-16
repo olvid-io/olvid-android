@@ -48,14 +48,34 @@ public class StandaloneServerQueryOperation extends Operation {
         try {
             ServerQueryServerMethod serverMethod;
             switch (serverQuery.getType().getId()) {
-                case ServerQuery.Type.OWNED_DEVICE_DISCOVERY_QUERY_ID: {
+                case OWNED_DEVICE_DISCOVERY_QUERY_ID: {
                     serverMethod = new OwnedDeviceDiscoveryServerMethod(serverQuery.getOwnedIdentity());
                     break;
                 }
-                case ServerQuery.Type.REGISTER_API_KEY_QUERY_ID: {
-                    serverMethod = new RegisterApiKeyServerMethod(serverQuery.getOwnedIdentity(), serverQuery.getType().getNonce(), serverQuery.getType().getDataUrl());
+                case REGISTER_API_KEY_QUERY_ID: {
+                    ServerQuery.RegisterApiKeyQuery registerApiKeyQuery = (ServerQuery.RegisterApiKeyQuery) serverQuery.getType();
+                    serverMethod = new RegisterApiKeyServerMethod(serverQuery.getOwnedIdentity(), registerApiKeyQuery.serverSessionToken, registerApiKeyQuery.apiKeyString);
                     break;
                 }
+                case DEVICE_DISCOVERY_QUERY_ID:
+                case PUT_USER_DATA_QUERY_ID:
+                case GET_USER_DATA_QUERY_ID:
+                case CHECK_KEYCLOAK_REVOCATION_QUERY_ID:
+                case CREATE_GROUP_BLOB_QUERY_ID:
+                case GET_GROUP_BLOB_QUERY_ID:
+                case LOCK_GROUP_BLOB_QUERY_ID:
+                case UPDATE_GROUP_BLOB_QUERY_ID:
+                case PUT_GROUP_LOG_QUERY_ID:
+                case DELETE_GROUP_BLOB_QUERY_ID:
+                case GET_KEYCLOAK_DATA_QUERY_ID:
+                case DEVICE_MANAGEMENT_SET_NICKNAME_QUERY_ID:
+                case DEVICE_MANAGEMENT_DEACTIVATE_DEVICE_QUERY_ID:
+                case DEVICE_MANAGEMENT_SET_UNEXPIRING_DEVICE_QUERY_ID:
+                case TRANSFER_SOURCE_QUERY_ID:
+                case TRANSFER_TARGET_QUERY_ID:
+                case TRANSFER_RELAY_QUERY_ID:
+                case TRANSFER_WAIT_QUERY_ID:
+                case TRANSFER_CLOSE_QUERY_ID:
                 default: {
                     cancel(RFC_UNSUPPORTED_SERVER_QUERY_TYPE);
                     return;

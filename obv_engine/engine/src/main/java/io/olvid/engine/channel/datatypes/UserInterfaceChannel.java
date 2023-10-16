@@ -22,9 +22,11 @@ package io.olvid.engine.channel.datatypes;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelDialogMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -65,7 +67,8 @@ public class UserInterfaceChannel extends Channel {
         switch (message.getSendChannelInfo().getChannelType()) {
             case SendChannelInfo.USER_INTERFACE_TYPE:
                 // Check that the toIdentity is an OwnedIdentity
-                if (channelManagerSession.identityDelegate.isOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getToIdentity())) {
+                if (channelManagerSession.identityDelegate.isOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getToIdentity())
+                        || Objects.equals(message.getSendChannelInfo().getToIdentity().getServer(), Constants.EPHEMERAL_IDENTITY_SERVER)) {
                     return new UserInterfaceChannel[]{
                             new UserInterfaceChannel()
                     };

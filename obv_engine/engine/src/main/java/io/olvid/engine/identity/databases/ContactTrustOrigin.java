@@ -65,11 +65,11 @@ public class ContactTrustOrigin implements ObvDatabase {
     private byte[] serializedGroupIdentifier;
     static final String SERIALIZED_GROUP_IDENTIFIER = "serialized_group_identifier";
 
-    private static final int TRUST_TYPE_DIRECT = 1;
-    private static final int TRUST_TYPE_INTRODUCTION = 2;
-    private static final int TRUST_TYPE_GROUP = 3;
-    private static final int TRUST_TYPE_IDENTITY_SERVER = 4;
-    private static final int TRUST_TYPE_SERVER_GROUP_V2 = 5;
+    public static final int TRUST_TYPE_DIRECT = 1;
+    public static final int TRUST_TYPE_INTRODUCTION = 2;
+    public static final int TRUST_TYPE_GROUP = 3;
+    public static final int TRUST_TYPE_IDENTITY_SERVER = 4;
+    public static final int TRUST_TYPE_SERVER_GROUP_V2 = 5;
 
     // region computed properties
 
@@ -263,7 +263,7 @@ public class ContactTrustOrigin implements ObvDatabase {
         }
     }
 
-    private ContactTrustOrigin(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, long timestamp, int trustType, Identity mediatorOrGroupOwnerIdentity, Integer mediatorOrGroupOwnerTrustLevelMajor, String identityServer, byte[] serializedGroupIdentifier) {
+    public ContactTrustOrigin(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, long timestamp, int trustType, Identity mediatorOrGroupOwnerIdentity, Integer mediatorOrGroupOwnerTrustLevelMajor, String identityServer, byte[] serializedGroupIdentifier) {
         this.identityManagerSession = identityManagerSession;
         this.contactIdentity = contactIdentity;
         this.ownedIdentity = ownedIdentity;

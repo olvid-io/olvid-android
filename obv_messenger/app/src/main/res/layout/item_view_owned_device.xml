@@ -14,7 +14,19 @@
         android:layout_marginStart="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <ImageView
+        android:id="@+id/untrusted"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:translationX="6dp"
+        android:translationY="-2dp"
+        android:src="@drawable/ic_untrusted"
+        app:layout_constraintEnd_toEndOf="@+id/device_icon"
+        app:layout_constraintTop_toTopOf="@+id/device_icon"
+        android:visibility="gone"
+        tools:visibility="visible"/>
 
     <TextView
         android:id="@+id/device_name_text_view"

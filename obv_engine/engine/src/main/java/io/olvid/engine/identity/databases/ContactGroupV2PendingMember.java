@@ -21,12 +21,16 @@ package io.olvid.engine.identity.databases;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import net.iharder.Base64;
+
+import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import io.olvid.engine.Logger;
@@ -36,6 +40,7 @@ import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.encoder.DecodingException;
+import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
 
 public class ContactGroupV2PendingMember implements ObvDatabase {
@@ -79,7 +84,7 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
 
     // region constructor
 
-    public static ContactGroupV2PendingMember create(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity, String serializedContactDetails, List<String> permissionStrings, byte[] groupInvitationNonce) {
+    public static ContactGroupV2PendingMember create(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity, String serializedContactDetails, Collection<String> permissionStrings, byte[] groupInvitationNonce) {
         if ((identityManagerSession == null) || (ownedIdentity == null) || (groupIdentifier == null) || (contactIdentity == null) || (permissionStrings == null) || (serializedContactDetails == null) || (groupInvitationNonce == null)) {
             return null;
         }
@@ -380,7 +385,24 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
         }
         for (Pojo_0 pojo : pojos) {
             try {
-                create(identityManagerSession, ownedIdentity, groupIdentifier, Identity.of(pojo.contact_identity), pojo.serialized_details, Arrays.asList(pojo.permissions), pojo.invitation_nonce);
+                String sanitizedSerializedDetails = null;
+                try {
+                    // check whether the input is base64 or plain json (there was a bug on iOS where the details were base64 encoded)
+                    identityManagerSession.jsonObjectMapper.readValue(pojo.serialized_details, JsonIdentityDetails.class);
+                    sanitizedSerializedDetails = pojo.serialized_details;
+                } catch (Exception ignored) {
+                    try {
+                        String serializedDetailsString = new String(Base64.decode(pojo.serialized_details), StandardCharsets.UTF_8);
+                        identityManagerSession.jsonObjectMapper.readValue(serializedDetailsString, JsonIdentityDetails.class);
+                        sanitizedSerializedDetails = serializedDetailsString;
+                    } catch (Exception e) {
+                        Logger.i("Could not determine serialized details of GroupV2 pending member.");
+                    }
+                }
+
+                if (sanitizedSerializedDetails != null) {
+                    create(identityManagerSession, ownedIdentity, groupIdentifier, Identity.of(pojo.contact_identity), sanitizedSerializedDetails, Arrays.asList(pojo.permissions), pojo.invitation_nonce);
+                }
             } catch (DecodingException e) {
                 e.printStackTrace();
             }

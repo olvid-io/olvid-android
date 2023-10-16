@@ -145,7 +145,7 @@ public class BackupSeed {
     }
 
     public static class DerivedKeys {
-        public final UID backupKeyUid;
+        public final UID backupKeyUid; // should never be used during backup: a bug fixed in Sept. 2023 may have changed the original value of this in DB
         public final EncryptionEciesCurve25519KeyPair encryptionKeyPair;
         public final MACKey macKey;
 

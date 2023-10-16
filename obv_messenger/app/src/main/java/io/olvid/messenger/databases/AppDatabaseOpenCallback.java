@@ -219,15 +219,19 @@ public class AppDatabaseOpenCallback implements Runnable {
             for (Fyle strayFyle: strayFyles) {
                 if (strayFyle.sha256 != null) {
                     Logger.i("Cleaning stray Fyle with sha256 " + Logger.toHexString(strayFyle.sha256));
-                    Fyle.acquireLock(strayFyle.sha256);
-                    db.fyleDao().delete(strayFyle);
-                    if (strayFyle.filePath != null) {
-                        try {
-                            //noinspection ResultOfMethodCallIgnored
-                            new File(App.absolutePathFromRelative(strayFyle.filePath)).delete();
-                        } catch (Exception ignored) {}
+                    try {
+                        Fyle.acquireLock(strayFyle.sha256);
+                        db.fyleDao().delete(strayFyle);
+                        if (strayFyle.filePath != null) {
+                            try {
+                                //noinspection ResultOfMethodCallIgnored
+                                new File(App.absolutePathFromRelative(strayFyle.filePath)).delete();
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    } finally {
+                        Fyle.releaseLock(strayFyle.sha256);
                     }
-                    Fyle.releaseLock(strayFyle.sha256);
                 } else {
                     Logger.i("Cleaning stray Fyle with NULL sha256");
                     db.fyleDao().delete(strayFyle);

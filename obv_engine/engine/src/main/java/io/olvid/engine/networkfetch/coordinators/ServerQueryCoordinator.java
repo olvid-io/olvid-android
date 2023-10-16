@@ -19,6 +19,8 @@
 
 package io.olvid.engine.networkfetch.coordinators;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +57,7 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
     private final PRNGService prng;
     private final CreateServerSessionDelegate createServerSessionDelegate;
 
+    private final ServerQueryCoordinatorWebSocketModule webSocketModule;
     private final ExponentialBackoffRepeatingScheduler<UID> scheduler;
     private final NoDuplicateOperationQueue serverQueriesOperationQueue;
 
@@ -73,12 +76,14 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
 
     private ChannelDelegate channelDelegate;
 
-    public ServerQueryCoordinator(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, PRNGService prng, CreateServerSessionDelegate createServerSessionDelegate, ServerUserDataCoordinator serverUserDataCoordinator) {
+    public ServerQueryCoordinator(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, PRNGService prng, CreateServerSessionDelegate createServerSessionDelegate, ServerUserDataCoordinator serverUserDataCoordinator, ObjectMapper jsonObjectMapper) {
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
         this.prng = prng;
         this.createServerSessionDelegate = createServerSessionDelegate;
         this.serverUserDataCoordinator = serverUserDataCoordinator;
+
+        webSocketModule = new ServerQueryCoordinatorWebSocketModule(fetchManagerSessionFactory, sslSocketFactory, jsonObjectMapper, prng);
 
         serverQueriesOperationQueue = new NoDuplicateOperationQueue();
 
@@ -101,8 +106,14 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
             try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
                 PendingServerQuery[] pendingServerQueries = PendingServerQuery.getAll(fetchManagerSession);
                 for (PendingServerQuery pendingServerQuery: pendingServerQueries) {
-                    queueNewServerQueryOperation(pendingServerQuery.getUid());
+                    if (pendingServerQuery.isWebSocket()) {
+                        pendingServerQuery.delete();
+                    } else {
+                        queueNewServerQueryOperation(pendingServerQuery.getUid());
+                    }
                 }
+                // commit, in case a WebSocket query was deleted
+                fetchManagerSession.session.commit();
                 initialQueueingPerformed = true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -121,6 +132,7 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
 
     public void setChannelDelegate(ChannelDelegate channelDelegate) {
         this.channelDelegate = channelDelegate;
+        webSocketModule.setChannelDelegate(channelDelegate);
     }
 
     private void waitForServerSession(Identity identity, UID serverQueryUid) {
@@ -290,8 +302,8 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
                 fetchManagerSession.session.commit();
             }
 
-            if (serverQuery.getType().getId() == ServerQuery.Type.PUT_USER_DATA_QUERY_ID) {
-                serverUserDataCoordinator.newUserDataUploaded(serverQuery.getOwnedIdentity(), serverQuery.getType().getServerLabelOrDeviceUid());
+            if (serverQuery.getType() instanceof ServerQuery.PutUserDataQuery) {
+                serverUserDataCoordinator.newUserDataUploaded(serverQuery.getOwnedIdentity(), ((ServerQuery.PutUserDataQuery) serverQuery.getType()).serverLabel);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -302,7 +314,11 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
 
     // Notifications received from PendingServerQuery database
     @Override
-    public void newPendingServerQuery(UID uid) {
-        queueNewServerQueryOperation(uid);
+    public void newPendingServerQuery(PendingServerQuery pendingServerQuery) {
+        if (pendingServerQuery.isWebSocket()) {
+            webSocketModule.handleServerQuery(pendingServerQuery, false);
+        } else {
+            queueNewServerQueryOperation(pendingServerQuery.getUid());
+        }
     }
 }

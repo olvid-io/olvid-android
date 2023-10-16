@@ -330,9 +330,11 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static final String USER_DIALOG_HIDE_GOOGLE_APIS = "user_dialog_hide_google_apis";
     public static final String USER_DIALOG_HIDE_ALARM_SCHEDULING = "user_dialog_hide_alarm_scheduling";
     public static final String USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS = "user_dialog_hide_allow_notifications";
+    public static final String USER_DIALOG_HIDE_FULL_SCREEN_NOTIFICATION = "user_dialog_hide_full_screen_notification";
     public static final String USER_DIALOG_HIDE_OPEN_EXTERNAL_APP = "user_dialog_hide_open_external_app";
     public static final String USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION = "user_dialog_hide_forward_message_explanation";
     public static final String USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION = "user_dialog_hide_open_external_app_location";
+    public static final String USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION = "user_dialog_hide_add_device_explanation";
 
     static final String PREF_KEY_DEBUG_LOG_LEVEL = "pref_key_debug_log_level";
     static final boolean PREF_KEY_DEBUG_LOG_LEVEL_DEFAULT = false;

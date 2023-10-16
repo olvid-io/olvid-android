@@ -398,6 +398,10 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         new ApplySyncAtomTask(dialogUuid, dialog.getBytesOwnedIdentity(), dialog.getCategory().getObvSyncItem()).run();
                         break;
                     }
+                    case ObvDialog.Category.TRANSFER_DIALOG_CATEGORY: {
+                        // not handled here
+                        break;
+                    }
                 }
                 break;
             }

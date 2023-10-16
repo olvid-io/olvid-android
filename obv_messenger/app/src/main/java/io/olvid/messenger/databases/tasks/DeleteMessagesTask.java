@@ -264,9 +264,12 @@ public class DeleteMessagesTask implements Runnable {
             long count = db.fyleMessageJoinWithStatusDao().countMessageForFyle(fyle.id);
             if (count == 0) {
                 if (fyle.sha256 != null) {
-                    Fyle.acquireLock(fyle.sha256);
-                    fyle.delete();
-                    Fyle.releaseLock(fyle.sha256);
+                    try {
+                        Fyle.acquireLock(fyle.sha256);
+                        fyle.delete();
+                    } finally {
+                        Fyle.releaseLock(fyle.sha256);
+                    }
                 } else {
                     fyle.delete();
                 }
