@@ -1384,7 +1384,8 @@
     <string name="pref_discussion_pin_summary">Les discussions épinglées restent en permanence au sommet de votre liste de discussions</string>
     <string name="pref_screen_scale">Taille d\'affichage</string>
     <string name="content_description_open_discussion">Ouvrir la discussion</string>
-    <string name="label_read_only">Lecture</string>
+    <string name="label_read_only">Lecture\nseule</string>
+    <string name="label_read_only_short">Lecture</string>
     <string name="label_admin">Admin</string>
     <string name="label_pending_admin">Admin\nen attente</string>
     <string name="label_not_admin">Pas admin</string>
@@ -1577,6 +1578,7 @@
     <string name="text_setting_wc_require_unlock">\u2023 Déverrouillage avant chaque connexion au client web\u00a0:\u0020</string>
     <string name="text_setting_permanent_foreground_service">\u2023 Utiliser un service d\'avant-plan permanent\u00a0:\u0020</string>
     <string name="text_setting_share_app_version">\u2023 Partager les versions de l\'app et de l\'OS avec Olvid\u00a0:\u0020</string>
+    <string name="text_setting_map_integration">\u2023 Service de cartographie:\u0020</string>
     <string name="text_setting_notify_certificate_change">\u2023 Notifier quand un certificat serveur change\u00a0:\u0020</string>
     <string name="text_setting_sending_foreground_service">\u2023 Notifications «\u00a0Envoi de message en cours\u00a0»\u00a0:\u0020</string>
     <string name="text_setting_auto_join_groups">\u2023 Accepter automatiquement les invitations de groupe de la part de\u00a0:\u0020</string>
@@ -1737,6 +1739,24 @@
     <string name="onboarding_transfer_source_confirmation_other_device_remain_active">L\'appareil ci-dessous restera actif :</string>
     <string name="button_label_restore_this_backup">Restaurer cette sauvegarde</string>
     <string name="button_label_maybe_later">Plus tard</string>
+    <string name="dialog_permissions_change_title">Changement de type de groupe</string>
+    <string name="dialog_permissions_change_message">Modifier le type de ce groupe changera significativement les permissions des membres ci-dessous.</string>
+    <string name="dialog_permissions_change_admin">**Droit admin gagné :**</string>
+    <string name="dialog_permissions_change_not_admin">**Droit admin perdu :**</string>
+    <string name="dialog_permissions_change_can_send_messages">**Peut poster des messages :**</string>
+    <string name="dialog_permissions_change_cannot_send_messages">**Ne peut plus poster de messages :**</string>
+    <string name="label_write_only_webdav_explanation">Configuration WebDAV en écriture seule. Impossible de lister les sauvegardes.</string>
+    <string name="label_write_only_webdav">Serveur WebDAV en écriture seule</string>
+    <string name="dialog_title_mdm_backup_failure">Échec de sauvegarde automatique</string>
+    <string name="dialog_message_mdm_backup_failure">Les sauvegardes automatiques sont actuellement configurées par l\'administrateur de votre appareil. Une erreur est survenue lors de l\'envoi de votre dernière sauvegarde, ce qui pourrait signifier que cette configuration n\'est plus valide.\n\nSi ce problème persiste, veuillez contacter votre administrateur.</string>
+    <string name="dialog_title_backup_configured_by_mdm">Sauvegardes configurées par l\'administrateur de votre appareil</string>
+    <string name="dialog_message_backup_configured_by_mdm">Les sauvegardes automatiques sont actuellement configurées par l\'administrateur de votre appareil et ne peuvent pas être désactivées. Si vous pensez que c\'est une erreur, veuillez contacter votre administrateur.</string>
+    <string name="dialog_title_mdm_key_escrow_required">Votre clé de sauvegarde n\'est pas mise en séquestre</string>
+    <string name="dialog_message_mdm_key_escrow_required">L\'administrateur de votre appareil a configuré un séquestre de clé automatique pour votre clé de sauvegarde Olvid. Cependant, votre clé actuelle n\'est pas encore enregistrée.\n\nVeuillez appuyer sur « ouvrir les paramètres » puis générer une nouvelle clé de sauvegarde. Si vous n\'êtes pas certains de savoir quoi faire, veuillez contacter votre administrateur.</string>
+    <string name="pref_generate_new_backup_key_summary_key_escrow_status_ok">\nSéquestre de clé : OK</string>
+    <string name="pref_generate_new_backup_key_summary_key_escrow_status_bad">\nSéquestre de clé : ⚠️ Absent ⚠️</string>
+    <string name="label_key_escrow_successful">Séquestre de clé réussi</string>
+    <string name="label_key_escrow_failed">Échec du séquestre de clé</string>
 
 
     <plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity">

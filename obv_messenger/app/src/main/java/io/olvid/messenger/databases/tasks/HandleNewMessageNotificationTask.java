@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -39,6 +40,7 @@ import io.olvid.engine.engine.types.ObvAttachment;
 import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.StringUtils2;
 import io.olvid.messenger.databases.AppDatabase;
@@ -89,6 +91,12 @@ public class HandleNewMessageNotificationTask implements Runnable {
     @NonNull
     private final ObvMessage obvMessage;
     private final AppDatabase db;
+
+    // this HashMap is used to store groupV2 messages received before the group blob is downloaded. This is only useful in a multi-device setting
+    // Map from ownedIdentity to Map from groupIdentifier to a list of ObvMessage to be processed as a fifo
+    private static final HashMap<BytesKey, HashMap<BytesKey, List<ObvMessage>>> pendingGroupV2Messages = new HashMap<>();
+    public static final long GROUP_V2_MESSAGES_TTL = 2 * 86_400_000L; // 2 days
+
 
     public HandleNewMessageNotificationTask(@NonNull Engine engine, @NonNull ObvMessage obvMessage) {
         this.engine = engine;
@@ -148,48 +156,72 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonSharedSettings != null) {
+                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonSharedSettings.getGroupV2Identifier(), obvMessage)) {
+                    return;
+                }
                 handleSharedSettingsMessage(jsonSharedSettings, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonDeleteDiscussion != null) {
+                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonDeleteDiscussion.getGroupV2Identifier(), obvMessage)) {
+                    return;
+                }
                 handleDeleteDiscussion(jsonDeleteDiscussion, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonDeleteMessages != null) {
+                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonDeleteMessages.getGroupV2Identifier(), obvMessage)) {
+                    return;
+                }
                 handleDeleteMessages(jsonDeleteMessages, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonUpdateMessage != null) {
+                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonUpdateMessage.getGroupV2Identifier(), obvMessage)) {
+                    return;
+                }
                 handleUpdateMessage(jsonUpdateMessage, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonReaction != null) {
+                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonReaction.getGroupV2Identifier(), obvMessage)) {
+                    return;
+                }
                 handleReactionMessage(jsonReaction, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonScreenCaptureDetection != null) {
+                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonScreenCaptureDetection.getGroupV2Identifier(), obvMessage)) {
+                    return;
+                }
                 handleScreenCaptureDetectionMessage(jsonScreenCaptureDetection, messageSender, obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonDiscussionRead != null) {
+                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonDiscussionRead.getGroupV2Identifier(), obvMessage)) {
+                    return;
+                }
                 handleDiscussionReadMessage(jsonDiscussionRead, messageSender);
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
 
             if (jsonLimitedVisibilityMessageOpened != null) {
+                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonLimitedVisibilityMessageOpened.getGroupV2Identifier(), obvMessage)) {
+                    return;
+                }
                 handleLimitedVisibilityOpenedMessage(jsonLimitedVisibilityMessageOpened, messageSender, obvMessage.getServerTimestamp(), obvMessage.getDownloadTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
@@ -204,6 +236,10 @@ public class HandleNewMessageNotificationTask implements Runnable {
             if (jsonMessage.isEmpty() && obvMessage.getAttachments().length == 0) {
                 // we received an empty message with no other attachments, simply discard it.
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
+                return;
+            }
+
+            if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonMessage.getGroupV2Identifier(), obvMessage)) {
                 return;
             }
 
@@ -1228,6 +1264,61 @@ public class HandleNewMessageNotificationTask implements Runnable {
             return db.discussionDao().getByGroupOwnerAndUid(messageSender.bytesOwnedIdentity, bytesGroupOwnerAndUid);
         }
     }
+
+
+    // region group v2 messages on hold
+
+    private boolean putGroupV2MessageOnHoldIfAppropriate(@NonNull MessageSender messageSender, @Nullable byte[] bytesGroupIdentifier, @NonNull ObvMessage obvMessage) {
+        if (bytesGroupIdentifier == null) {
+            return false;
+        }
+        if (db.group2Dao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier) == null) {
+            if (obvMessage.getLocalDownloadTimestamp() < System.currentTimeMillis() - GROUP_V2_MESSAGES_TTL) {
+                // if message is too old, do not put it on hold and let it be discarded
+                return false;
+            }
+
+            synchronized (pendingGroupV2Messages) {
+                // put the message on hold
+                BytesKey ownedIdentityBytesKey = new BytesKey(messageSender.bytesOwnedIdentity);
+                HashMap<BytesKey, List<ObvMessage>> ownedIdentityMap = pendingGroupV2Messages.get(ownedIdentityBytesKey);
+                if (ownedIdentityMap == null) {
+                    ownedIdentityMap = new HashMap<>();
+                    pendingGroupV2Messages.put(ownedIdentityBytesKey, ownedIdentityMap);
+                }
+                BytesKey groupIdentifierBytesKey = new BytesKey(bytesGroupIdentifier);
+                List<ObvMessage> groupMessages = ownedIdentityMap.get(groupIdentifierBytesKey);
+                if (groupMessages == null) {
+                    groupMessages = new ArrayList<>();
+                    ownedIdentityMap.put(groupIdentifierBytesKey, groupMessages);
+                }
+                groupMessages.add(obvMessage);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    // this method is called right after a groupV2 is created
+    public static void processAllGroupV2MessagesOnHold(@NonNull Engine engine, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier) {
+        synchronized (pendingGroupV2Messages) {
+            BytesKey ownedIdentityBytesKey = new BytesKey(bytesOwnedIdentity);
+            HashMap<BytesKey, List<ObvMessage>> ownedIdentityMap = pendingGroupV2Messages.get(ownedIdentityBytesKey);
+            if (ownedIdentityMap != null) {
+                BytesKey groupIdentifierBytesKey = new BytesKey(bytesGroupIdentifier);
+                List<ObvMessage> groupMessages = ownedIdentityMap.remove(groupIdentifierBytesKey);
+                if (groupMessages != null) {
+                    for (ObvMessage obvMessage : groupMessages) {
+                        new HandleNewMessageNotificationTask(engine, obvMessage).run();
+                    }
+                }
+            }
+        }
+    }
+
+    // endregion
+
+
 
     private static class MessageSender {
         private enum Type {

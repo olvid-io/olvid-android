@@ -25,6 +25,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -37,6 +41,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.Preference;
@@ -48,7 +53,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.ObvBackupKeyInformation;
@@ -62,6 +69,7 @@ import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.fragments.dialog.CloudProviderSignInDialogFragment;
 import io.olvid.messenger.google_services.GoogleServicesUtils;
 import io.olvid.messenger.services.BackupCloudProviderService;
+import io.olvid.messenger.services.MDMConfigurationSingleton;
 
 public class BackupPreferenceFragment extends PreferenceFragmentCompat implements EngineNotificationListener {
     static final int REQUEST_CODE_SAVE_BACKUP = 10089;
@@ -99,6 +107,7 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
 
             generateBackupKeyPreference.setOnPreferenceClickListener(preference -> {
                 if (viewModel.getBackupKeyInformation() == null) {
+                    SettingsActivity.setMdmWebdavKeyEscrowPublicKey(null);
                     AppSingleton.getEngine().generateBackupKey();
                 } else {
                     View dialogView = getLayoutInflater().inflate(R.layout.dialog_view_verify_backup_key, null);
@@ -119,7 +128,10 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
                         AlertDialog confirmationDialog = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                                 .setTitle(R.string.dialog_title_confirm_backup_key_generation)
                                 .setMessage(R.string.dialog_message_confirm_backup_key_generation)
-                                .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(() -> AppSingleton.getEngine().generateBackupKey()))
+                                .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(() -> {
+                                    SettingsActivity.setMdmWebdavKeyEscrowPublicKey(null);
+                                    AppSingleton.getEngine().generateBackupKey();
+                                }))
                                 .setNegativeButton(R.string.button_label_cancel, null)
                                 .create();
                         alertDialog.dismiss();
@@ -237,6 +249,7 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
                             .setMessage(R.string.dialog_message_unable_to_load_backup_configuration)
                             .setPositiveButton(R.string.button_label_generate_new_backup_key, (dialog, which) -> {
                                 failedLoads = 0;
+                                SettingsActivity.setMdmWebdavKeyEscrowPublicKey(null);
                                 AppSingleton.getEngine().generateBackupKey();
                             })
                             .setNegativeButton(R.string.button_label_cancel, null);
@@ -245,27 +258,51 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
                 return;
             }
 
+            CharSequence mdmKeyEscrowStatusCharSequence;
+            if (MDMConfigurationSingleton.getWebdavKeyEscrowPublicKeyString() == null) {
+                mdmKeyEscrowStatusCharSequence = null;
+            } else if (Objects.equals(SettingsActivity.getMdmWebdavKeyEscrowPublicKey(), MDMConfigurationSingleton.getWebdavKeyEscrowPublicKeyString())) {
+                SpannableString spannableString = new SpannableString(getString(R.string.pref_generate_new_backup_key_summary_key_escrow_status_ok));
+                spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(activity, R.color.green)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                mdmKeyEscrowStatusCharSequence = spannableString;
+            } else {
+                SpannableString spannableString = new SpannableString(getString(R.string.pref_generate_new_backup_key_summary_key_escrow_status_bad));
+                spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(activity, R.color.red)), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                mdmKeyEscrowStatusCharSequence = spannableString;
+            }
+
             viewModel.setBackupKeyInformation(backupKeyInformation);
             reloadBackupConfigurationPreference.setVisible(false);
             failedLoads = 0;
             if (backupKeyInformation == null) {
                 generateBackupKeyPreference.setTitle(R.string.pref_generate_new_backup_key_title);
-                generateBackupKeyPreference.setSummary(R.string.pref_generate_new_backup_key_summary_no_key);
+                SpannableStringBuilder sb = new SpannableStringBuilder();
+                sb.append(getString(R.string.pref_generate_new_backup_key_summary_no_key));
+                if (mdmKeyEscrowStatusCharSequence != null) {
+                    sb.append(mdmKeyEscrowStatusCharSequence);
+                }
+                generateBackupKeyPreference.setSummary(sb);
                 manualBackupPreference.setEnabled(false);
                 manualBackupPreference.setSummary(R.string.pref_manual_backup_summary);
                 enableAutomaticBackupPreference.setEnabled(false);
                 enableAutomaticBackupPreference.setSummary(R.string.pref_enable_automatic_backup_summary);
             } else {
                 generateBackupKeyPreference.setTitle(R.string.pref_generate_new_backup_key_title_or_verify);
+                SpannableStringBuilder sb = new SpannableStringBuilder();
                 if (backupKeyInformation.lastSuccessfulKeyVerificationTimestamp == 0) {
-                    generateBackupKeyPreference.setSummary(getString(R.string.pref_generate_new_backup_key_summary_never_verified,
+                    sb.append(getString(R.string.pref_generate_new_backup_key_summary_never_verified,
                             StringUtils.getLongNiceDateString(getActivity(), backupKeyInformation.keyGenerationTimestamp)));
                 } else {
-                    generateBackupKeyPreference.setSummary(getString(R.string.pref_generate_new_backup_key_summary,
+                    sb.append(getString(R.string.pref_generate_new_backup_key_summary,
                             StringUtils.getLongNiceDateString(getActivity(), backupKeyInformation.keyGenerationTimestamp),
                             backupKeyInformation.successfulVerificationCount,
                             StringUtils.getLongNiceDateString(getActivity(), backupKeyInformation.lastSuccessfulKeyVerificationTimestamp)));
                 }
+                if (mdmKeyEscrowStatusCharSequence != null) {
+                    sb.append(mdmKeyEscrowStatusCharSequence);
+                }
+                generateBackupKeyPreference.setSummary(sb);
+
                 manualBackupPreference.setEnabled(true);
                 if (backupKeyInformation.lastBackupExport == 0) {
                     manualBackupPreference.setSummary(R.string.pref_manual_backup_summary);
@@ -283,6 +320,7 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
                                 summaryString += getString(R.string.pref_enable_automatic_backup_summary_google_drive_account, configuration.account);
                                 break;
                             case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV:
+                            case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV_WRITE_ONLY:
                                 summaryString += getString(R.string.pref_enable_automatic_backup_summary_webdav_account, configuration.account, configuration.serverUrl);
                                 break;
                         }
@@ -298,6 +336,15 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
 
     void automaticBackupClicked() {
         if (enableAutomaticBackupPreference != null) {
+            if (MDMConfigurationSingleton.getAutoBackupConfiguration() != null) {
+                AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_backup_configured_by_mdm)
+                        .setMessage(R.string.dialog_message_backup_configured_by_mdm)
+                        .setNegativeButton(R.string.button_label_ok, null);
+                builder.create().show();
+                return;
+            }
+
             if (enableAutomaticBackupPreference.isChecked()) {
                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_backup_choose_deactivate_or_change_account)
@@ -309,15 +356,15 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
                             GoogleServicesUtils.requestGoogleSignOut(activity);
                             deactivateAutomaticBackups();
                         })
-                        .setPositiveButton(R.string.button_label_switch_account, (DialogInterface dialog, int which) -> openSignInDialog());
+                        .setPositiveButton(R.string.button_label_switch_account, (DialogInterface dialog, int which) -> openSignInDialog(true));
                 builder.create().show();
             } else {
-                openSignInDialog();
+                openSignInDialog(false);
             }
         }
     }
 
-    private void openSignInDialog() {
+    private void openSignInDialog(boolean switchingAccount) {
         CloudProviderSignInDialogFragment cloudProviderSignInDialogFragment = CloudProviderSignInDialogFragment.newInstance();
         cloudProviderSignInDialogFragment.setSignInContext(CloudProviderSignInDialogFragment.SignInContext.ACTIVATE_AUTOMATIC_BACKUPS);
         cloudProviderSignInDialogFragment.setOnCloudProviderConfigurationCallback(new CloudProviderSignInDialogFragment.OnCloudProviderConfigurationCallback() {
@@ -334,8 +381,10 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
 
             @Override
             public void onCloudProviderConfigurationFailed() {
-                App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
-                activity.runOnUiThread(() -> deactivateAutomaticBackups());
+                if (!switchingAccount) {
+                    App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
+                    activity.runOnUiThread(() -> deactivateAutomaticBackups());
+                }
             }
         });
         cloudProviderSignInDialogFragment.show(getChildFragmentManager(), "CloudProviderSignInDialogFragment");
@@ -404,7 +453,35 @@ public class BackupPreferenceFragment extends PreferenceFragmentCompat implement
                     if (backupSeed != null) {
                         View dialogView = getLayoutInflater().inflate(R.layout.dialog_view_new_backup_key, null);
                         TextView backupSeedTextView = dialogView.findViewById(R.id.backup_seed_text_view);
+                        TextView keyEscrowTextView = dialogView.findViewById(R.id.key_escrow_status_text_view);
                         backupSeedTextView.setText(backupSeed);
+                        keyEscrowTextView.setVisibility(View.GONE);
+
+                        if (MDMConfigurationSingleton.getWebdavKeyEscrowPublicKey() != null) {
+                            BackupCloudProviderService.uploadBackupKeyEscrow(MDMConfigurationSingleton.getAutoBackupConfiguration(), MDMConfigurationSingleton.getWebdavKeyEscrowPublicKey(), backupSeed, new BackupCloudProviderService.OnKeyEscrowCallback() {
+                                @Override
+                                public void onKeyEscrowSuccess() {
+                                    SettingsActivity.setMdmWebdavKeyEscrowPublicKey(MDMConfigurationSingleton.getWebdavKeyEscrowPublicKeyString());
+                                    activity.runOnUiThread(() -> {
+                                        keyEscrowTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_ok_green, 0, 0, 0);
+                                        keyEscrowTextView.setText(R.string.label_key_escrow_successful);
+                                        keyEscrowTextView.setTextColor(ContextCompat.getColor(activity, R.color.green));
+                                        keyEscrowTextView.setVisibility(View.VISIBLE);
+                                        refreshBackupPreferences();
+                                    });
+                                }
+
+                                @Override
+                                public void onKeyEscrowFailure(int error) {
+                                    activity.runOnUiThread(() -> {
+                                        keyEscrowTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_error_outline, 0, 0, 0);
+                                        keyEscrowTextView.setText(R.string.label_key_escrow_failed);
+                                        keyEscrowTextView.setTextColor(ContextCompat.getColor(activity, R.color.red));
+                                        keyEscrowTextView.setVisibility(View.VISIBLE);
+                                    });
+                                }
+                            });
+                        }
 
                         final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                                 .setTitle(R.string.dialog_title_new_backup_key)

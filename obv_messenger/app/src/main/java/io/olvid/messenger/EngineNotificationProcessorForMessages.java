@@ -159,7 +159,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                             otherFyleMessageJoinWithStatus.size = fyleMessageJoinWithStatus.size;
                                             db.fyleMessageJoinWithStatusDao().update(otherFyleMessageJoinWithStatus);
                                             otherFyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
-                                            engine.markAttachmentForDeletion(downloadedAttachment.getBytesOwnedIdentity(), otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
+                                            engine.markAttachmentForDeletion(otherFyleMessageJoinWithStatus.bytesOwnedIdentity, otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
                                             break;
                                     }
                                 }

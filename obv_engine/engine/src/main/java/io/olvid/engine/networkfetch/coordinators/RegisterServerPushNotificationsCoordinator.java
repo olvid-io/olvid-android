@@ -55,8 +55,6 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
     private final ExponentialBackoffRepeatingScheduler<Identity> scheduler;
     private final NoDuplicateOperationQueue registerPushNotificationOperationQueue;
 
-    private final HashSet<Identity> awaitingServerSessionOperations;
-    private final Object awaitingServerSessionOperationsLock;
     private final ServerSessionCreatedNotificationListener serverSessionCreatedNotificationListener;
 
     private final HashMap<UID, IdentityAndUid> androidIdentityMaskingUids;
@@ -80,8 +78,6 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         registerPushNotificationOperationQueue.execute(1, "Engine-RegisterServerPushNotificationsCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
-        awaitingServerSessionOperations = new HashSet<>();
-        awaitingServerSessionOperationsLock = new Object();
 
         androidIdentityMaskingUids = new HashMap<>();
 
@@ -174,7 +170,6 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         }
         switch (rfc) {
             case RegisterPushNotificationOperation.RFC_INVALID_SERVER_SESSION: {
-                waitForServerSession(ownedIdentity);
                 createServerSessionDelegate.createServerSession(ownedIdentity);
                 break;
             }
@@ -191,12 +186,6 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
             default: {
                 scheduleNewRegisterPushNotificationOperationQueueing(ownedIdentity);
             }
-        }
-    }
-
-    private void waitForServerSession(Identity identity) {
-        synchronized (awaitingServerSessionOperationsLock) {
-            awaitingServerSessionOperations.add(identity);
         }
     }
 
@@ -270,13 +259,9 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
             if (!(identityObject instanceof Identity)) {
                 return;
             }
-            Identity identity = (Identity) identityObject;
-            synchronized (awaitingServerSessionOperationsLock) {
-                if (awaitingServerSessionOperations.contains(identity)) {
-                    awaitingServerSessionOperations.remove(identity);
-                    queueNewRegisterPushNotificationOperation(identity);
-                }
-            }
+
+            // alway do a register after a new client session, we no longer keep a list a awaiting identities
+            queueNewRegisterPushNotificationOperation((Identity) identityObject);
         }
     }
 }

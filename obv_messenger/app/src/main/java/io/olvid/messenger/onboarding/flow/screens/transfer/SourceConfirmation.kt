@@ -362,10 +362,6 @@ fun NavGraphBuilder.sourceConfirmation(
                         onFinalize.invoke()
                     }
                 },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.red),
-                    contentColor = colorResource(id = R.color.alwaysWhite)
-                ),
                 contentPadding = PaddingValues(vertical = 16.dp, horizontal = 24.dp)
             ) {
                 AnimatedVisibility(visible = clicked) {

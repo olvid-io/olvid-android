@@ -2109,6 +2109,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             return -1;
                         }
 
+                        if (newItem.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE && oldItem.expirationStartTimestamp != newItem.expirationStartTimestamp) {
+                            // expiration triggered (limited visibility inbound message was clicked on another device) --> rebind everything
+                            return -1;
+                        }
+
                         if (!Objects.equals(oldItem.linkPreviewFyleId, newItem.linkPreviewFyleId)) {
                             // preview link changed --> rebind
                             changesMask |= LINK_PREVIEW_MASK;
@@ -4374,6 +4379,35 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
 
             private void updateTimerTextView(long timestamp) {
+                // start the countdown in the INBOUND_EPHEMERAL "click message" if this message was opened on another device
+                if ((viewType == ViewType.INBOUND_EPHEMERAL || viewType == ViewType.INBOUND_EPHEMERAL_LOCATION || viewType == ViewType.INBOUND_EPHEMERAL_WITH_ATTACHMENT)
+                        && ephemeralTimerTextView != null && expirationTimestamp != null && wipeOnly) {
+                    if (ephemeralTimerTextView.getVisibility() != View.VISIBLE) {
+                        LayoutTransition lt = messageRootView.getLayoutTransition();
+                        messageRootView.setLayoutTransition(null);
+                        ephemeralTimerTextView.setVisibility(View.VISIBLE);
+                        messageRootView.setLayoutTransition(lt);
+                    }
+                    long remaining = (expirationTimestamp - timestamp) / 1000;
+                    ephemeralTimerTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_eye, 0, 0, 0);
+                    ephemeralTimerTextView.setTextColor(ContextCompat.getColor(DiscussionActivity.this, R.color.orange));
+                    if (remaining < 0) {
+                        remaining = 0;
+                    }
+                    if (remaining < 60) {
+                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_s, remaining));
+                    } else if (remaining < 3_600) {
+                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_m, remaining / 60));
+                    } else if (remaining < 86_400) {
+                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_h, remaining / 3_600));
+                    } else if (remaining < 31_536_000L) {
+                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_d, remaining / 86_400));
+                    } else {
+                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_y, remaining / 31_536_000));
+                    }
+                }
+
+                // still show the expiration timer outside the message if there is one
                 if (timerTextView == null) {
                     return;
                 }

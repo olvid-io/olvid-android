@@ -12,4 +12,28 @@
         android:description="@string/restriction_disable_new_version_notification_description"
         android:restrictionType="bool"
         android:defaultValue="false" />
+    <restriction
+        android:key="settings_configuration_uri"
+        android:title="@string/restriction_settings_configuration_uri_title"
+        android:description="@string/restriction_settings_configuration_uri_description"
+        android:restrictionType="string"
+        android:defaultValue="" />
+    <restriction
+        android:key="webdav_automatic_backup_uri"
+        android:title="@string/restriction_webdav_automatic_backup_uri_title"
+        android:description="@string/restriction_webdav_automatic_backup_uri_description"
+        android:restrictionType="string"
+        android:defaultValue="" />
+    <restriction
+        android:key="webdav_automatic_backup_write_only"
+        android:title="@string/restriction_webdav_automatic_backup_write_only_title"
+        android:description="@string/restriction_webdav_automatic_backup_write_only_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+    <restriction
+        android:key="webdav_key_escrow_public_key"
+        android:title="@string/restriction_webdav_key_escrow_public_key_title"
+        android:description="@string/restriction_webdav_key_escrow_public_key_description"
+        android:restrictionType="string"
+        android:defaultValue="" />
 </restrictions>

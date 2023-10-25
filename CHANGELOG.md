@@ -1,3 +1,11 @@
+# Build 217 (1.1)
+2023-10-24
+
+- Fixes for various protocols in some multi-device corner cases
+- Support for "write only" WebDAV automatic backup server (PUT permission is sufficient)
+- Possibility to push settings configuration links through an MDM
+- Possibility to push a WebDAV automatic backup configuration through an MDM and to enable Olvid backup key escrow on this WebDAV server
+
 # Build 216 (1.0)
 2023-10-10
 

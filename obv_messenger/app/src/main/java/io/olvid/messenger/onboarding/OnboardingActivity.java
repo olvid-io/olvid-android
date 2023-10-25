@@ -21,7 +21,6 @@ package io.olvid.messenger.onboarding;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.RestrictionsManager;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
@@ -39,6 +38,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ObvLinkActivity;
+import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.settings.SettingsActivity;
 
 
@@ -98,23 +98,18 @@ public class OnboardingActivity extends AppCompatActivity {
             // check for managed configuration from MDM
             //////////////////////////
             try {
-                RestrictionsManager restrictionsManager = (RestrictionsManager) getSystemService(Context.RESTRICTIONS_SERVICE);
-                Bundle restrictions =  restrictionsManager.getApplicationRestrictions();
-
-                if (restrictions != null && restrictions.containsKey("keycloak_configuration_uri")) {
-                    String mdmKeycloakConfigurationUri = restrictions.getString("keycloak_configuration_uri");
-                    if (mdmKeycloakConfigurationUri != null) {
-                        // this configuration is only used when creating the first profile
-                        if (firstIdentity) {
-                            Matcher matcher = ObvLinkActivity.CONFIGURATION_PATTERN.matcher(mdmKeycloakConfigurationUri);
-                            if (matcher.find() && viewModel.parseScannedConfigurationUri(matcher.group(2)) && viewModel.getKeycloakServer() != null) {
-                                viewModel.setConfiguredFromMdm(true);
-                                viewModel.setDeepLinked(true);
-                                navHostFragment.getNavController().navigate(R.id.keycloak_selection);
-                                return;
-                            } else {
-                                viewModel.setKeycloakServer(null);
-                            }
+                String mdmKeycloakConfigurationUri = MDMConfigurationSingleton.getKeycloakConfigurationUri();
+                if (mdmKeycloakConfigurationUri != null) {
+                    // this configuration is only used when creating the first profile
+                    if (firstIdentity) {
+                        Matcher matcher = ObvLinkActivity.CONFIGURATION_PATTERN.matcher(mdmKeycloakConfigurationUri);
+                        if (matcher.find() && viewModel.parseScannedConfigurationUri(matcher.group(2)) && viewModel.getKeycloakServer() != null) {
+                            viewModel.setConfiguredFromMdm(true);
+                            viewModel.setDeepLinked(true);
+                            navHostFragment.getNavController().navigate(R.id.keycloak_selection);
+                            return;
+                        } else {
+                            viewModel.setKeycloakServer(null);
                         }
                     }
                 }

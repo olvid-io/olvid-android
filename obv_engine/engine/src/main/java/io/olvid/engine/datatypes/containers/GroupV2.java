@@ -313,9 +313,10 @@ public class GroupV2 {
             return true;
         }
 
-        public boolean isChainCreatedBy(Identity identity) {
-            return blocks.length > 0 && blocks[0].isSignatureValid(new Identity[]{identity});
-        }
+        // no longer used, but could be useful one day!
+//        public boolean isChainCreatedBy(Identity identity) {
+//            return blocks.length > 0 && blocks[0].isSignatureValid(new Identity[]{identity});
+//        }
 
         private AdministratorsChain(UID groupUid, Block[] blocks, boolean integrityWasChecked) {
             this.groupUid = groupUid;

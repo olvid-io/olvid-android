@@ -143,6 +143,10 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     if (groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
                         thereAreNewMembersWithChangeSettingsPermissionChanged = true;
                     }
+                    // after the commit, process all pending messages for this group
+                    runAfterTransaction.add(() -> {
+                       HandleNewMessageNotificationTask.processAllGroupV2MessagesOnHold(AppSingleton.getEngine(), groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
+                    });
                 } else {
                     // if it exists, update any field that might have changed
                     group.name = groupName;

@@ -32,8 +32,10 @@ import io.olvid.engine.engine.types.ObvBytesKey
 import io.olvid.engine.engine.types.identities.ObvGroupV2.ObvGroupV2ChangeSet
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.R
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.BytesKey
+import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.Group2MemberDao.Group2MemberOrPending
 import io.olvid.messenger.databases.entity.Contact
@@ -136,7 +138,8 @@ class GroupV2DetailsViewModel : ViewModel() {
                 }
                 group2MemberOrPendings.orEmpty()
             }
-        editedGroupMembersLiveData = EditedGroupMembersLiveData(groupMembers, changeSetLiveData, editingGroupMembersLiveData)
+        editedGroupMembersLiveData =
+            EditedGroupMembersLiveData(groupMembers, changeSetLiveData, editingGroupMembersLiveData)
     }
 
     fun setGroup(bytesOwnedIdentity: ByteArray?, bytesGroupIdentifier: ByteArray?) {
@@ -171,7 +174,8 @@ class GroupV2DetailsViewModel : ViewModel() {
             return PrivateGroup
         }
 
-        val readOnly = members.filter { it.permissionAdmin.not() }.all { it.permissionSendMessage.not() }
+        val readOnly =
+            members.filter { it.permissionAdmin.not() }.all { it.permissionSendMessage.not() }
 
         val remoteDelete =
             members.filter { it.permissionRemoteDeleteAnything }.let { remoteDeleteMembers ->
@@ -207,6 +211,7 @@ class GroupV2DetailsViewModel : ViewModel() {
                     }
                 }
             }
+
             else -> if (isAdmin) Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet() else Permission.DEFAULT_MEMBER_PERMISSIONS.toHashSet()
         }.apply {
             if (groupType is CustomGroup) {// REMOTE_DELETE_ANYTHING
@@ -217,6 +222,7 @@ class GroupV2DetailsViewModel : ViewModel() {
                         } else {
                             remove(Permission.REMOTE_DELETE_ANYTHING)
                         }
+
                     NOBODY -> remove(Permission.REMOTE_DELETE_ANYTHING)
                     EVERYONE -> add(Permission.REMOTE_DELETE_ANYTHING)
                 }
@@ -286,10 +292,14 @@ class GroupV2DetailsViewModel : ViewModel() {
                     getGroupTypeLiveData().value?.let {
                         with(getPermissions(groupType = it, isAdmin = false)) {
                             memberOrPending.permissionAdmin = contains(Permission.GROUP_ADMIN)
-                            memberOrPending.permissionChangeSettings = contains(Permission.CHANGE_SETTINGS)
-                            memberOrPending.permissionRemoteDeleteAnything = contains(Permission.REMOTE_DELETE_ANYTHING)
-                            memberOrPending.permissionEditOrRemoteDeleteOwnMessages = contains(Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES)
-                            memberOrPending.permissionSendMessage = contains(Permission.SEND_MESSAGE)
+                            memberOrPending.permissionChangeSettings =
+                                contains(Permission.CHANGE_SETTINGS)
+                            memberOrPending.permissionRemoteDeleteAnything =
+                                contains(Permission.REMOTE_DELETE_ANYTHING)
+                            memberOrPending.permissionEditOrRemoteDeleteOwnMessages =
+                                contains(Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES)
+                            memberOrPending.permissionSendMessage =
+                                contains(Permission.SEND_MESSAGE)
                         }
                     }
 
@@ -325,7 +335,7 @@ class GroupV2DetailsViewModel : ViewModel() {
         return true
     }
 
-    fun createGroupeTypeChangeSet(jsonGroupType : JsonGroupType?) {
+    fun createGroupeTypeChangeSet(jsonGroupType: JsonGroupType?) {
         synchronized(changeSet) {
             changeSet.adminChanges.clear()
             changeSet.membersAdded.clear()
@@ -335,20 +345,21 @@ class GroupV2DetailsViewModel : ViewModel() {
         changeSetLiveData.postValue(changeSet)
     }
 
-    fun getObvChangeSet() : ObvGroupV2ChangeSet {
+    fun getObvChangeSet(): ObvGroupV2ChangeSet {
         val obvChangeSet = ObvGroupV2ChangeSet()
         var adminPermissions: HashSet<Permission>
         var memberPermissions: HashSet<Permission>
 
         synchronized(changeSet) {
-            val groupType = changeSet.jsonGroupType?.toGroupCreationModel() ?: initialGroupType ?: CustomGroup()
+            val groupType =
+                changeSet.jsonGroupType?.toGroupCreationModel() ?: initialGroupType ?: CustomGroup()
             adminPermissions = getPermissions(groupType = groupType, true)
             memberPermissions = getPermissions(groupType = groupType, false)
 
             // added members
             for (group2Member in changeSet.membersAdded.values) {
                 obvChangeSet.addedMembersWithPermissions[ObvBytesKey(group2Member.bytesContactIdentity)] =
-                        if (group2Member.permissionAdmin) adminPermissions else memberPermissions
+                    if (group2Member.permissionAdmin) adminPermissions else memberPermissions
             }
 
             // removed members
@@ -362,26 +373,41 @@ class GroupV2DetailsViewModel : ViewModel() {
                     continue
                 }
 
-                val admin : Boolean = when(groupType) {
+                val admin: Boolean = when (groupType) {
                     PrivateGroup -> false
                     SimpleGroup -> true
-                    else -> changeSet.adminChanges[groupMemberEntry.key] ?: groupMemberEntry.value.permissionAdmin
+                    else -> changeSet.adminChanges[groupMemberEntry.key]
+                        ?: groupMemberEntry.value.permissionAdmin
                 }
                 val expectedPermissions = if (admin) adminPermissions else memberPermissions
-                if (groupMemberEntry.value.permissionAdmin != expectedPermissions.contains(Permission.GROUP_ADMIN)
-                        || groupMemberEntry.value.permissionSendMessage != expectedPermissions.contains(Permission.SEND_MESSAGE)
-                        || groupMemberEntry.value.permissionRemoteDeleteAnything != expectedPermissions.contains(Permission.REMOTE_DELETE_ANYTHING)
-                        || groupMemberEntry.value.permissionChangeSettings != expectedPermissions.contains(Permission.CHANGE_SETTINGS)
-                        || groupMemberEntry.value.permissionEditOrRemoteDeleteOwnMessages != expectedPermissions.contains(Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES)) {
-                    obvChangeSet.permissionChanges[ObvBytesKey(groupMemberEntry.key.bytes)] = expectedPermissions
+                if (groupMemberEntry.value.permissionAdmin != expectedPermissions.contains(
+                        Permission.GROUP_ADMIN
+                    )
+                    || groupMemberEntry.value.permissionSendMessage != expectedPermissions.contains(
+                        Permission.SEND_MESSAGE
+                    )
+                    || groupMemberEntry.value.permissionRemoteDeleteAnything != expectedPermissions.contains(
+                        Permission.REMOTE_DELETE_ANYTHING
+                    )
+                    || groupMemberEntry.value.permissionChangeSettings != expectedPermissions.contains(
+                        Permission.CHANGE_SETTINGS
+                    )
+                    || groupMemberEntry.value.permissionEditOrRemoteDeleteOwnMessages != expectedPermissions.contains(
+                        Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES
+                    )
+                ) {
+                    obvChangeSet.permissionChanges[ObvBytesKey(groupMemberEntry.key.bytes)] =
+                        expectedPermissions
                 }
             }
 
             // groupType change
             if (groupType != initialGroupType) {
                 try {
-                    obvChangeSet.updatedJsonGroupType = AppSingleton.getJsonObjectMapper().writeValueAsString(groupType.toJsonGroupType())
-                } catch (_: Exception) { }
+                    obvChangeSet.updatedJsonGroupType = AppSingleton.getJsonObjectMapper()
+                        .writeValueAsString(groupType.toJsonGroupType())
+                } catch (_: Exception) {
+                }
             }
         }
 
@@ -390,6 +416,84 @@ class GroupV2DetailsViewModel : ViewModel() {
             obvChangeSet.permissionChanges[ObvBytesKey(bytesOwnedIdentity)] = adminPermissions
         }
         return obvChangeSet
+    }
+
+    fun getPermissionsChangeAlert(): String {
+        var adminPermissions: HashSet<Permission>
+        var memberPermissions: HashSet<Permission>
+        val gainedAdmin = ArrayList<String>()
+        val lostAdmin = ArrayList<String>()
+        val gainedSend = ArrayList<String>()
+        val lostSend = ArrayList<String>()
+
+        synchronized(changeSet) {
+            val type =
+                groupType.value ?: initialGroupType ?: CustomGroup()
+            adminPermissions = getPermissions(groupType = type, true)
+            memberPermissions = getPermissions(groupType = type, false)
+
+            // permission/admin changes
+            for (groupMemberEntry in dbGroupMembers.entries) {
+                if (changeSet.membersRemoved.contains(groupMemberEntry.key)) {
+                    continue
+                }
+
+                val admin: Boolean = when (type) {
+                    PrivateGroup -> false
+                    SimpleGroup -> true
+                    else -> changeSet.adminChanges[groupMemberEntry.key]
+                        ?: groupMemberEntry.value.permissionAdmin
+                }
+                val expectedPermissions = if (admin) adminPermissions else memberPermissions
+
+                if (groupMemberEntry.value.permissionAdmin != expectedPermissions.contains(Permission.GROUP_ADMIN)) {
+                    if (expectedPermissions.contains(Permission.GROUP_ADMIN)) {
+                        gainedAdmin.add(AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes))
+                    } else {
+                        lostAdmin.add(AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes))
+                    }
+                }
+
+                if (groupMemberEntry.value.permissionSendMessage != expectedPermissions.contains(Permission.SEND_MESSAGE)) {
+                    if (expectedPermissions.contains(Permission.SEND_MESSAGE)) {
+                        gainedSend.add(AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes))
+                    } else {
+                        lostSend.add(AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes))
+                    }
+                }
+            }
+            val context = App.getContext()
+            return buildString {
+                if (gainedAdmin.isEmpty().not() || lostAdmin.isEmpty().not() || gainedSend.isEmpty().not() || lostSend.isEmpty().not()) {
+                    appendLine(context.getString(R.string.dialog_permissions_change_message))
+                    appendLine()
+                    if (gainedAdmin.isEmpty().not()) {
+                        append(context.getString(R.string.dialog_permissions_change_admin))
+                        append(" ")
+                        appendLine(StringUtils.joinContactDisplayNames(gainedAdmin.toTypedArray(), 5))
+                        appendLine()
+                    }
+                    if (lostAdmin.isEmpty().not()) {
+                        append(context.getString(R.string.dialog_permissions_change_not_admin))
+                        append(" ")
+                        appendLine(StringUtils.joinContactDisplayNames(lostAdmin.toTypedArray(), 5))
+                        appendLine()
+                    }
+                    if (gainedSend.isEmpty().not()) {
+                        append(context.getString(R.string.dialog_permissions_change_can_send_messages))
+                        append(" ")
+                        appendLine(StringUtils.joinContactDisplayNames(gainedSend.toTypedArray(), 5))
+                        appendLine()
+                    }
+                    if (lostSend.isEmpty().not()) {
+                        append(context.getString(R.string.dialog_permissions_change_cannot_send_messages))
+                        append(" ")
+                        appendLine(StringUtils.joinContactDisplayNames(lostSend.toTypedArray(), 5))
+                        appendLine()
+                    }
+                }
+            }
+        }
     }
 
     fun publishGroupEdits() {
@@ -495,8 +599,10 @@ class GroupV2DetailsViewModel : ViewModel() {
             if (!editingMembers) {
                 value = groupMembers
             } else {
-                val readOnly = groupType.value?.let { it == ReadOnlyGroup || (it is CustomGroup && it.readOnlySetting)  } ?: false
-                
+                val readOnly =
+                    groupType.value?.let { it == ReadOnlyGroup || (it is CustomGroup && it.readOnlySetting) }
+                        ?: false
+
                 val editedMembers = HashMap<BytesKey, Group2MemberOrPending>()
                 for (group2MemberOrPending in groupMembers) {
                     val key = BytesKey(group2MemberOrPending.bytesContactIdentity)

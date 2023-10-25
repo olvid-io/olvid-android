@@ -179,14 +179,16 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         protected final GroupV2.Identifier groupIdentifier;
         protected final UUID dialogUuid;
         protected final GroupV2.InvitationCollectedData invitationCollectedData;
+        protected final byte[][] ownInvitationNoncesAcceptedOnOtherDevices;
         protected final byte[] lastKnownOwnInvitationNonce;
         protected final Identity[] lastKnownOtherGroupMemberIdentities;
 
-        protected CollectingSeedsAbstractState(int stateId, GroupV2.Identifier groupIdentifier, UUID dialogUuid, GroupV2.InvitationCollectedData invitationCollectedData, byte[] lastKnownOwnInvitationNonce, Identity[] lastKnownOtherGroupMemberIdentities) {
+        protected CollectingSeedsAbstractState(int stateId, GroupV2.Identifier groupIdentifier, UUID dialogUuid, GroupV2.InvitationCollectedData invitationCollectedData, byte[][] ownInvitationNoncesAcceptedOnOtherDevices, byte[] lastKnownOwnInvitationNonce, Identity[] lastKnownOtherGroupMemberIdentities) {
             super(stateId);
             this.groupIdentifier = groupIdentifier;
             this.invitationCollectedData = invitationCollectedData;
             this.dialogUuid = dialogUuid;
+            this.ownInvitationNoncesAcceptedOnOtherDevices = ownInvitationNoncesAcceptedOnOtherDevices;
             this.lastKnownOwnInvitationNonce = lastKnownOwnInvitationNonce;
             this.lastKnownOtherGroupMemberIdentities = lastKnownOtherGroupMemberIdentities;
         }
@@ -195,29 +197,44 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         public CollectingSeedsAbstractState(int stateId, Encoded encodedState) throws Exception {
             super(stateId);
             Encoded[] list = encodedState.decodeList();
-            if (list.length != 3 && list.length != 5) {
+            if (list.length < 3 || list.length > 6) {
                 throw new Exception();
             }
             this.groupIdentifier = GroupV2.Identifier.of(list[0]);
             this.dialogUuid = list[1].decodeUuid();
             this.invitationCollectedData = GroupV2.InvitationCollectedData.of(list[2]);
-            this.lastKnownOwnInvitationNonce = list.length == 5 ? list[3].decodeBytes() : null;
-            this.lastKnownOtherGroupMemberIdentities = list.length == 5 ? list[4].decodeIdentityArray() : null;
+            if ((list.length & 0x1) == 0) {
+                Encoded[] encodeds = list[3].decodeList();
+                this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[encodeds.length][];
+                for (int i=0; i<encodeds.length; i++) {
+                    this.ownInvitationNoncesAcceptedOnOtherDevices[i] = encodeds[i].decodeBytes();
+                }
+            } else {
+                this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[0][];
+            }
+            this.lastKnownOwnInvitationNonce = list.length >= 5 ? list[list.length - 2].decodeBytes() : null;
+            this.lastKnownOtherGroupMemberIdentities = list.length >= 5 ? list[list.length - 1].decodeIdentityArray() : null;
         }
 
         @Override
         public Encoded encode() {
+            Encoded[] encodedNonces = new Encoded[ownInvitationNoncesAcceptedOnOtherDevices.length];
+            for (int i = 0; i < encodedNonces.length; i++) {
+                encodedNonces[i] = Encoded.of(ownInvitationNoncesAcceptedOnOtherDevices[i]);
+            }
             if (lastKnownOwnInvitationNonce == null || lastKnownOtherGroupMemberIdentities == null) {
                 return Encoded.of(new Encoded[]{
                         groupIdentifier.encode(),
                         Encoded.of(dialogUuid),
                         invitationCollectedData.encode(),
+                        Encoded.of(encodedNonces),
                 });
             } else {
                 return Encoded.of(new Encoded[]{
                         groupIdentifier.encode(),
                         Encoded.of(dialogUuid),
                         invitationCollectedData.encode(),
+                        Encoded.of(encodedNonces),
                         Encoded.of(lastKnownOwnInvitationNonce),
                         Encoded.of(lastKnownOtherGroupMemberIdentities),
                 });
@@ -228,8 +245,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     public static class DownloadingGroupBlobState extends CollectingSeedsAbstractState {
         private final byte[] serverQueryNonce;
 
-        protected DownloadingGroupBlobState(GroupV2.Identifier groupIdentifier, UUID dialogUuid, GroupV2.InvitationCollectedData invitationCollectedData, byte[] lastKnownOwnInvitationNonce, Identity[] lastKnownOtherGroupMemberIdentities, byte[] serverQueryNonce) {
-            super(DOWNLOADING_GROUP_BLOB_STATE_ID, groupIdentifier, dialogUuid, invitationCollectedData, lastKnownOwnInvitationNonce, lastKnownOtherGroupMemberIdentities);
+        protected DownloadingGroupBlobState(GroupV2.Identifier groupIdentifier, UUID dialogUuid, GroupV2.InvitationCollectedData invitationCollectedData, byte[][] ownInvitationNoncesAcceptedOnOtherDevices, byte[] lastKnownOwnInvitationNonce, Identity[] lastKnownOtherGroupMemberIdentities, byte[] serverQueryNonce) {
+            super(DOWNLOADING_GROUP_BLOB_STATE_ID, groupIdentifier, dialogUuid, invitationCollectedData, ownInvitationNoncesAcceptedOnOtherDevices, lastKnownOwnInvitationNonce, lastKnownOtherGroupMemberIdentities);
             this.serverQueryNonce = serverQueryNonce;
         }
 
@@ -249,8 +266,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     }
 
     public static class INeedMoreSeedsState extends CollectingSeedsAbstractState {
-        protected INeedMoreSeedsState(GroupV2.Identifier groupIdentifier, UUID dialogUuid, GroupV2.InvitationCollectedData invitationCollectedData, byte[] lastKnownOwnInvitationNonce, Identity[] lastKnownOtherGroupMemberIdentities) {
-            super(I_NEED_MORE_SEEDS_STATE_ID, groupIdentifier, dialogUuid, invitationCollectedData, lastKnownOwnInvitationNonce, lastKnownOtherGroupMemberIdentities);
+        protected INeedMoreSeedsState(GroupV2.Identifier groupIdentifier, UUID dialogUuid, GroupV2.InvitationCollectedData invitationCollectedData, byte[][] ownInvitationNoncesAcceptedOnOtherDevices, byte[] lastKnownOwnInvitationNonce, Identity[] lastKnownOtherGroupMemberIdentities) {
+            super(I_NEED_MORE_SEEDS_STATE_ID, groupIdentifier, dialogUuid, invitationCollectedData, ownInvitationNoncesAcceptedOnOtherDevices, lastKnownOwnInvitationNonce, lastKnownOtherGroupMemberIdentities);
         }
 
         @SuppressWarnings("unused")
@@ -569,6 +586,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
     private static final int BLOB_KEYS_AFTER_CHANNEL_CREATION_MESSAGE_ID = 28;
     private static final int CREATE_OR_UPDATE_KEYCLOAK_GROUP_MESSAGE_ID = 29;
     private static final int INITIATE_TARGETED_PING_MESSAGE_ID = 30;
+    private static final int AUTO_ACCEPT_INVITATION_MESSAGE = 400;
 
     @Override
     protected Class<?> getMessageClass(int protocolMessageId) {
@@ -633,6 +651,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 return CreateOrUpdateKeycloakGroupMessage.class;
             case INITIATE_TARGETED_PING_MESSAGE_ID:
                 return InitiateTargetedPingMessage.class;
+            case AUTO_ACCEPT_INVITATION_MESSAGE:
+                return AutoAcceptInvitationMessage.class;
             default:
                 return null;
         }
@@ -1701,6 +1721,22 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         }
     }
 
+    public static class AutoAcceptInvitationMessage extends EmptyProtocolMessage {
+        public AutoAcceptInvitationMessage(CoreProtocolMessage coreProtocolMessage) {
+            super(coreProtocolMessage);
+        }
+
+        @SuppressWarnings("unused")
+        public AutoAcceptInvitationMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(receivedMessage);
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return AUTO_ACCEPT_INVITATION_MESSAGE;
+        }
+    }
+
 
     // endregion
 
@@ -2057,6 +2093,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         private final ConcreteProtocolState startState;
         private final GroupV2.InvitationCollectedData invitationCollectedData;
         private final UUID dialogUuid;
+        private final byte[][] ownInvitationNoncesAcceptedOnOtherDevices;
         private final byte[] lastKnownOwnInvitationNonce;
         private final Identity[] lastKnownOtherGroupMemberIdentities;
 
@@ -2075,6 +2112,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.startState = null;
             this.invitationCollectedData = new GroupV2.InvitationCollectedData();
             this.dialogUuid = UUID.randomUUID();
+            this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[0][];
             this.lastKnownOwnInvitationNonce = null;
             this.lastKnownOtherGroupMemberIdentities = null;
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2091,6 +2129,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.startState = null;
             this.invitationCollectedData = new GroupV2.InvitationCollectedData();
             this.dialogUuid = UUID.randomUUID();
+            this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[0][];
             this.lastKnownOwnInvitationNonce = null;
             this.lastKnownOtherGroupMemberIdentities = null;
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2108,6 +2147,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.startState = null;
             this.invitationCollectedData = new GroupV2.InvitationCollectedData();
             this.dialogUuid = UUID.randomUUID();
+            this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[0][];
             this.lastKnownOwnInvitationNonce = null;
             this.lastKnownOtherGroupMemberIdentities = null;
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2124,6 +2164,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.startState = null;
             this.invitationCollectedData = new GroupV2.InvitationCollectedData();
             this.dialogUuid = UUID.randomUUID();
+            this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[0][];
             this.lastKnownOwnInvitationNonce = null;
             this.lastKnownOtherGroupMemberIdentities = null;
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2141,6 +2182,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.startState = startState;
             this.invitationCollectedData = startState.invitationCollectedData;
             this.dialogUuid = startState.dialogUuid;
+            this.ownInvitationNoncesAcceptedOnOtherDevices = startState.ownInvitationNoncesAcceptedOnOtherDevices;
             this.lastKnownOwnInvitationNonce = startState.lastKnownOwnInvitationNonce;
             this.lastKnownOtherGroupMemberIdentities = startState.lastKnownOtherGroupMemberIdentities;
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2157,6 +2199,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.startState = startState;
             this.invitationCollectedData = startState.invitationCollectedData;
             this.dialogUuid = startState.dialogUuid;
+            this.ownInvitationNoncesAcceptedOnOtherDevices = startState.ownInvitationNoncesAcceptedOnOtherDevices;
             this.lastKnownOwnInvitationNonce = startState.lastKnownOwnInvitationNonce;
             this.lastKnownOtherGroupMemberIdentities = startState.lastKnownOtherGroupMemberIdentities;
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2174,6 +2217,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.startState = startState;
             this.invitationCollectedData = startState.invitationCollectedData;
             this.dialogUuid = startState.dialogUuid;
+            this.ownInvitationNoncesAcceptedOnOtherDevices = startState.ownInvitationNoncesAcceptedOnOtherDevices;
             this.lastKnownOwnInvitationNonce = startState.lastKnownOwnInvitationNonce;
             this.lastKnownOtherGroupMemberIdentities = startState.lastKnownOtherGroupMemberIdentities;
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2190,6 +2234,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.startState = startState;
             this.invitationCollectedData = startState.invitationCollectedData;
             this.dialogUuid = startState.dialogUuid;
+            this.ownInvitationNoncesAcceptedOnOtherDevices = startState.ownInvitationNoncesAcceptedOnOtherDevices;
             this.lastKnownOwnInvitationNonce = startState.lastKnownOwnInvitationNonce;
             this.lastKnownOtherGroupMemberIdentities = startState.lastKnownOtherGroupMemberIdentities;
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2219,6 +2264,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
                 identities.add(identityAndPermissionsAndDetails.identity);
             }
+            this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[0][];
             this.lastKnownOwnInvitationNonce = nonce;
             this.lastKnownOtherGroupMemberIdentities = identities.toArray(new Identity[0]);
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2247,6 +2293,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
                 identities.add(identityAndPermissionsAndDetails.identity);
             }
+            this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[0][];
             this.lastKnownOwnInvitationNonce = nonce;
             this.lastKnownOtherGroupMemberIdentities = identities.toArray(new Identity[0]);
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2276,6 +2323,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
                 identities.add(identityAndPermissionsAndDetails.identity);
             }
+            this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[0][];
             this.lastKnownOwnInvitationNonce = nonce;
             this.lastKnownOtherGroupMemberIdentities = identities.toArray(new Identity[0]);
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2304,6 +2352,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
                 identities.add(identityAndPermissionsAndDetails.identity);
             }
+            this.ownInvitationNoncesAcceptedOnOtherDevices = new byte[0][];
             this.lastKnownOwnInvitationNonce = nonce;
             this.lastKnownOtherGroupMemberIdentities = identities.toArray(new Identity[0]);
             this.groupIdentifier = receivedMessage.groupIdentifier;
@@ -2352,7 +2401,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             {
                 if (startState instanceof InvitationReceivedState) {
                     // if still in InvitationReceivedState, check the version and trigger a re-download if necessary
-                    if (((InvitationReceivedState) startState).serverBlob.version >= groupVersion) {
+                    if (((InvitationReceivedState) startState).serverBlob.version > groupVersion
+                            || (((InvitationReceivedState) startState).serverBlob.version == groupVersion && !Objects.equals(obliviousChannelContactIdentity, getOwnedIdentity()))) {
                         return startState;
                     }
 
@@ -2446,6 +2496,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     groupIdentifier,
                     dialogUuid,
                     invitationCollectedData,
+                    ownInvitationNoncesAcceptedOnOtherDevices,
                     lastKnownOwnInvitationNonce,
                     lastKnownOtherGroupMemberIdentities,
                     serverQueryNonce
@@ -2650,16 +2701,25 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                 }
 
                                 return new FinalState();
-                            } else if (serverBlob.administratorsChain.isChainCreatedBy(getOwnedIdentity()) && startState.invitationCollectedData.inviterIdentityAndBlobMainSeedCandidates.containsKey(getOwnedIdentity())) {
-                                // check who signed the first block of the administrator chain --> this is the group creator
-                                // also check that one of the seed was sent by me --> this means I am the group creator (on another device)
-                                // => in this case, create the group directly and start the photo download
+                            } else if (startState.invitationCollectedData.inviterIdentityAndBlobMainSeedCandidates.containsKey(getOwnedIdentity())) {
+                                // If owned identity is part of the inviterIdentityAndBlobMainSeedCandidates, this means the group was:
+                                // - either created by me on another device
+                                // - either created by someone else, but I joined it on another device
+                                // In both case the group can be safely created and joined
 
                                 // create the group in DB (we use the createJoinedGroupV2 method which is better suited here, even if another of my devices created the group)
                                 boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, blobKeys, serverBlob, true);
 
                                 // if success == false, this is not a retry-able failure, so we do nothing
                                 if (success) {
+                                    {
+                                        // remove the dialog if there is one
+                                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startState.dialogUuid));
+                                        ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
+                                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                                    }
+
+
                                     // getGroupV2PhotoUrl will always return null here, but we check anyways
                                     if (serverBlob.serverPhotoInfo != null && protocolManagerSession.identityDelegate.getGroupV2PhotoUrl(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier) == null) {
                                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
@@ -2695,7 +2755,21 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                                 return new FinalState();
                             } else {
-                                {
+                                // check if we already received an "accept" from another owned device
+                                boolean autoAccept = false;
+                                for (byte[] alreadyAcceptedNonce : startState.ownInvitationNoncesAcceptedOnOtherDevices) {
+                                    if (Arrays.equals(alreadyAcceptedNonce, ownIdentityAndPermissions.groupInvitationNonce)) {
+                                        autoAccept = true;
+                                        break;
+                                    }
+                                }
+
+                                if (autoAccept) {
+                                    // send an auto-accept message so the next protocol step is automatically executed --> no user dialog to show
+                                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()));
+                                    ChannelMessageToSend messageToSend = new AutoAcceptInvitationMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
+                                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                                } else {
                                     // create the accept invitation dialog (or unfreeze the previous invitation)
                                     HashSet<ObvGroupV2.ObvGroupV2PendingMember> groupV2PendingMembers = new HashSet<>();
                                     for (GroupV2.IdentityAndPermissionsAndDetails identityAndPermissionsAndDetails : serverBlob.groupMemberIdentityAndPermissionsAndDetailsList) {
@@ -2708,6 +2782,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                                 identityAndPermissionsAndDetails.serializedIdentityDetails
                                         ));
                                     }
+
 
                                     CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createGroupV2InvitationDialog(inviterIdentityAndBlobMainSeedCandidate.getKey(), new ObvGroupV2(
                                             getOwnedIdentity().getBytes(),
@@ -2748,7 +2823,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
             }
 
-            return new INeedMoreSeedsState(startState.groupIdentifier, startState.dialogUuid, startState.invitationCollectedData, startState.lastKnownOwnInvitationNonce, startState.lastKnownOtherGroupMemberIdentities);
+            return new INeedMoreSeedsState(startState.groupIdentifier, startState.dialogUuid, startState.invitationCollectedData, startState.ownInvitationNoncesAcceptedOnOtherDevices, startState.lastKnownOwnInvitationNonce, startState.lastKnownOtherGroupMemberIdentities);
         }
     }
 
@@ -2886,6 +2961,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         private final byte[] ownGroupInvitationNonce;
         private final byte[] propagatedOwnGroupInvitationNonce;
         private final List<Identity> groupMembersToNotify;
+        private final boolean autoAccept;
 
         @SuppressWarnings("unused")
         public ProcessInvitationDialogResponseStep(InvitationReceivedState startState, DialogAcceptGroupInvitationMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
@@ -2907,6 +2983,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 groupMembersToNotify.add(groupMember.identity);
             }
             this.ownGroupInvitationNonce = ownGroupInvitationNonce;
+            this.autoAccept = false;
         }
 
         @SuppressWarnings("unused")
@@ -2929,6 +3006,30 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 groupMembersToNotify.add(groupMember.identity);
             }
             this.ownGroupInvitationNonce = ownGroupInvitationNonce;
+            this.autoAccept = false;
+        }
+
+        @SuppressWarnings("unused")
+        public ProcessInvitationDialogResponseStep(InvitationReceivedState startState, AutoAcceptInvitationMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.startDialogUuid = startState.dialogUuid;
+            this.groupIdentifier = startState.groupIdentifier;
+            this.propagated = false;
+            this.invitationAccepted = true;
+            this.receivedDialogUuid = null;
+            this.propagatedOwnGroupInvitationNonce = null;
+            this.groupMembersToNotify = new ArrayList<>();
+            byte[] ownGroupInvitationNonce = null;
+            for (GroupV2.IdentityAndPermissionsAndDetails groupMember : startState.serverBlob.groupMemberIdentityAndPermissionsAndDetailsList) {
+                if (groupMember.identity.equals(getOwnedIdentity())) {
+                    ownGroupInvitationNonce = groupMember.groupInvitationNonce;
+                    continue;
+                }
+                groupMembersToNotify.add(groupMember.identity);
+            }
+            this.ownGroupInvitationNonce = ownGroupInvitationNonce;
+            this.autoAccept = true;
         }
 
         @SuppressWarnings("unused")
@@ -2943,6 +3044,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.propagatedOwnGroupInvitationNonce = null;
             this.ownGroupInvitationNonce = startState.lastKnownOwnInvitationNonce;
             this.groupMembersToNotify = startState.lastKnownOtherGroupMemberIdentities == null ? null : Arrays.asList(startState.lastKnownOtherGroupMemberIdentities);
+            this.autoAccept = false;
         }
 
         @SuppressWarnings("unused")
@@ -2957,6 +3059,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.propagatedOwnGroupInvitationNonce = receivedMessage.ownGroupInvitationNonce;
             this.ownGroupInvitationNonce = startState.lastKnownOwnInvitationNonce;
             this.groupMembersToNotify = startState.lastKnownOtherGroupMemberIdentities == null ? null : Arrays.asList(startState.lastKnownOtherGroupMemberIdentities);
+            this.autoAccept = false;
         }
 
         @SuppressWarnings("unused")
@@ -2971,6 +3074,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.propagatedOwnGroupInvitationNonce = null;
             this.ownGroupInvitationNonce = startState.lastKnownOwnInvitationNonce;
             this.groupMembersToNotify = startState.lastKnownOtherGroupMemberIdentities == null ? null : Arrays.asList(startState.lastKnownOtherGroupMemberIdentities);
+            this.autoAccept = false;
         }
 
         @SuppressWarnings("unused")
@@ -2985,6 +3089,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.propagatedOwnGroupInvitationNonce = receivedMessage.ownGroupInvitationNonce;
             this.ownGroupInvitationNonce = startState.lastKnownOwnInvitationNonce;
             this.groupMembersToNotify = startState.lastKnownOtherGroupMemberIdentities == null ? null : Arrays.asList(startState.lastKnownOtherGroupMemberIdentities);
+            this.autoAccept = false;
         }
 
 
@@ -2992,15 +3097,58 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            if (!propagated && !Objects.equals(this.startDialogUuid, this.receivedDialogUuid)) {
-                // bad dialogUuid, ignore the message
+            if (!propagated && !Objects.equals(this.startDialogUuid, this.receivedDialogUuid) && !autoAccept) {
+                // bad dialogUuid, and not an autoAccept, ignore the message
                 return startState;
             }
 
-            if (!(startState instanceof InvitationReceivedState) && invitationAccepted) {
-                // when not in InvitationReceivedState, only rejects are accepted
-                return startState;
+
+            // if we are still downloading/waiting for seeds, keep all accepted responses on the side to process once we have the blob
+            if (startState instanceof DownloadingGroupBlobState) {
+                if (invitationAccepted) {
+                    if (propagatedOwnGroupInvitationNonce == null) {
+                        return startState;
+                    }
+
+                    byte[][] nonces = new byte[((DownloadingGroupBlobState) startState).ownInvitationNoncesAcceptedOnOtherDevices.length + 1][];
+                    for (int i = 0; i < nonces.length - 1; i++) {
+                        nonces[i] = ((DownloadingGroupBlobState) startState).ownInvitationNoncesAcceptedOnOtherDevices[i];
+                    }
+                    nonces[nonces.length - 1] = propagatedOwnGroupInvitationNonce;
+
+                    return new DownloadingGroupBlobState(
+                            ((DownloadingGroupBlobState) startState).groupIdentifier,
+                            ((DownloadingGroupBlobState) startState).dialogUuid,
+                            ((DownloadingGroupBlobState) startState).invitationCollectedData,
+                            nonces,
+                            ((DownloadingGroupBlobState) startState).lastKnownOwnInvitationNonce,
+                            ((DownloadingGroupBlobState) startState).lastKnownOtherGroupMemberIdentities,
+                            ((DownloadingGroupBlobState) startState).serverQueryNonce
+                    );
+                }
+            } else if (startState instanceof INeedMoreSeedsState) {
+                if (invitationAccepted) {
+                    if (propagatedOwnGroupInvitationNonce == null) {
+                        return startState;
+                    }
+
+                    byte[][] nonces = new byte[((INeedMoreSeedsState) startState).ownInvitationNoncesAcceptedOnOtherDevices.length + 1][];
+                    for (int i = 0; i < nonces.length - 1; i++) {
+                        nonces[i] = ((INeedMoreSeedsState) startState).ownInvitationNoncesAcceptedOnOtherDevices[i];
+                    }
+                    nonces[nonces.length - 1] = propagatedOwnGroupInvitationNonce;
+
+                    return new INeedMoreSeedsState(
+                            ((INeedMoreSeedsState) startState).groupIdentifier,
+                            ((INeedMoreSeedsState) startState).dialogUuid,
+                            ((INeedMoreSeedsState) startState).invitationCollectedData,
+                            nonces,
+                            ((INeedMoreSeedsState) startState).lastKnownOwnInvitationNonce,
+                            ((INeedMoreSeedsState) startState).lastKnownOtherGroupMemberIdentities
+                    );
+                }
             }
+
 
             // if we are not part of the group, abort !
             if (this.ownGroupInvitationNonce == null) {
@@ -3018,7 +3166,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             }
 
 
-            if (!propagated) {
+            if (!propagated && !autoAccept) {
                 // propagate the dialog response to other devices
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
@@ -3293,6 +3441,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         groupIdentifier,
                         dialogUuid,
                         invitationCollectedData,
+                        new byte[0][],
                         null,
                         null,
                         serverQueryNonce
@@ -3343,6 +3492,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         groupIdentifier,
                         dialogUuid,
                         invitationCollectedData,
+                        new byte[0][],
                         ownInvitationNonce,
                         otherGroupMemberIdentities.toArray(new Identity[0]),
                         serverQueryNonce
@@ -4586,8 +4736,13 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            // get all shared groups with the contact
-            GroupV2.IdentifierVersionAndKeys[] identifierVersionAndKeys = protocolManagerSession.identityDelegate.getServerGroupsV2IdentifierVersionAndKeysForContact(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity);
+            // get all shared groups with the contact (or owned identity)
+            GroupV2.IdentifierVersionAndKeys[] identifierVersionAndKeys;
+            if (Objects.equals(receivedMessage.contactIdentity, getOwnedIdentity())) {
+                identifierVersionAndKeys = protocolManagerSession.identityDelegate.getAllServerGroupsV2IdentifierVersionAndKeys(protocolManagerSession.session, getOwnedIdentity());
+            } else {
+                identifierVersionAndKeys = protocolManagerSession.identityDelegate.getServerGroupsV2IdentifierVersionAndKeysForContact(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity);
+            }
 
             if (identifierVersionAndKeys.length > 0) {
                 CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, false));

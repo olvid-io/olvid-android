@@ -19,10 +19,6 @@
 
 package io.olvid.messenger;
 
-import android.content.Context;
-import android.content.RestrictionsManager;
-import android.os.Bundle;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +27,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.EngineNotificationListener;
@@ -59,6 +56,7 @@ import io.olvid.messenger.main.invitations.InvitationListViewModelKt;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.services.BackupCloudProviderService;
+import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class EngineNotificationProcessor implements EngineNotificationListener {
@@ -73,6 +71,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
         registrationNumber = null;
         for (String notificationName : new String[]{
                 EngineNotifications.BACKUP_FINISHED,
+                EngineNotifications.NEW_BACKUP_SEED_GENERATED,
                 EngineNotifications.APP_BACKUP_REQUESTED,
                 EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS,
                 EngineNotifications.WEBSOCKET_CONNECTION_STATE_CHANGED,
@@ -155,19 +154,9 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 boolean updated = (boolean) userInfo.get(EngineNotifications.WELL_KNOWN_DOWNLOAD_SUCCESS_UPDATED_KEY);
 
                 if (appInfo != null) {
-                    try {
-                        RestrictionsManager restrictionsManager = (RestrictionsManager) App.getContext().getSystemService(Context.RESTRICTIONS_SERVICE);
-                        Bundle restrictions =  restrictionsManager.getApplicationRestrictions();
-
-                        if (restrictions != null && restrictions.containsKey("disable_new_version_notification")) {
-                            boolean disableNewVersionNotification = restrictions.getBoolean("disable_new_version_notification");
-                            if (disableNewVersionNotification) {
-                                // if notifications are disable, do not even check if our version is up-to-date
-                                break;
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    if (MDMConfigurationSingleton.getDisableNewVersionNotification()) {
+                        // if notifications are disable, do not even check if our version is up-to-date
+                        break;
                     }
 
                     if (updated) {

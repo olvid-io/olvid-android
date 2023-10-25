@@ -21,7 +21,6 @@ package io.olvid.messenger.onboarding.flow
 
 import android.content.Context
 import android.content.Intent
-import android.content.RestrictionsManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -80,6 +79,7 @@ import io.olvid.messenger.onboarding.flow.screens.transfer.targetRestoreSuccessf
 import io.olvid.messenger.onboarding.flow.screens.transfer.targetSessionInput
 import io.olvid.messenger.onboarding.flow.screens.transfer.targetShowSas
 import io.olvid.messenger.onboarding.flow.screens.welcomeScreen
+import io.olvid.messenger.services.MDMConfigurationSingleton
 import io.olvid.messenger.settings.SettingsActivity
 import java.util.UUID
 
@@ -160,8 +160,7 @@ class OnboardingFlowActivity : AppCompatActivity() {
                         onNewProfile = {
                             // mdm forwards to legacy activity
                             try {
-                                if ((getSystemService(RESTRICTIONS_SERVICE) as RestrictionsManager).applicationRestrictions?.getString("keycloak_configuration_uri") != null
-                                ) {
+                                if (MDMConfigurationSingleton.getKeycloakConfigurationUri() != null) {
                                     startActivity(
                                         Intent(this@OnboardingFlowActivity, OnboardingActivity::class.java)
                                             .putExtra(OnboardingActivity.FIRST_ID_INTENT_EXTRA, true)

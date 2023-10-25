@@ -181,12 +181,17 @@ public class ManageCloudBackupsDialogFragment extends DialogFragment implements 
         if (cloudProviderConfiguration != null && cloudProviderConfiguration.provider != null) {
             switch (cloudProviderConfiguration.provider) {
                 case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV:
+                case BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV_WRITE_ONLY:
                     if (cloudProviderConfiguration.account != null && cloudProviderConfiguration.serverUrl != null && cloudProviderConfiguration.password != null) {
                         displayWebDAVAccount(cloudProviderConfiguration.account, cloudProviderConfiguration.serverUrl);
-
-                        emptyView.setText(R.string.label_no_backup_found);
-                        adapter.setBackupItems(null, true);
-                        BackupCloudProviderService.listBackups(cloudProviderConfiguration, this);
+                        if (Objects.equals(cloudProviderConfiguration.provider, BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV_WRITE_ONLY)) {
+                            emptyView.setText(R.string.label_write_only_webdav_explanation);
+                            adapter.setBackupItems(null, false);
+                        } else {
+                            emptyView.setText(R.string.label_no_backup_found);
+                            adapter.setBackupItems(null, true);
+                            BackupCloudProviderService.listBackups(cloudProviderConfiguration, this);
+                        }
                         return;
                     }
                     break;

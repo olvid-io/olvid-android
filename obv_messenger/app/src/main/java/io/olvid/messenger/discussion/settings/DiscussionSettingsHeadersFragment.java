@@ -74,7 +74,10 @@ public class DiscussionSettingsHeadersFragment extends PreferenceFragmentCompat 
             pinPreference.setOnPreferenceClickListener(preference -> {
                 Discussion discussion = discussionSettingsViewModel.getDiscussionLiveData().getValue();
                 if (discussion != null) {
-                    App.runThread(new PropagatePinnedDiscussionsChangeTask(discussion.bytesOwnedIdentity));
+                    App.runThread(() -> {
+                        AppDatabase.getInstance().discussionDao().updatePinned(discussion.id, !discussion.pinned);
+                        new PropagatePinnedDiscussionsChangeTask(discussion.bytesOwnedIdentity).run();
+                    });
                     return true;
                 }
                 return false;

@@ -351,6 +351,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                             for (ChannelCreationProtocolInstance channelCreationProtocolInstance: channelCreationProtocolInstances) {
                                 abortProtocol(protocolManagerSession.session, channelCreationProtocolInstance.getProtocolInstanceUid(), ownedIdentity);
                             }
+                            protocolManagerSession.session.commit();
                         }
                         // To improve: delete any other protocol related to this contact
                     } catch (Exception e) {

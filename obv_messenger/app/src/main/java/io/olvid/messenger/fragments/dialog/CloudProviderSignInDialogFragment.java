@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.fragments.dialog;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -30,7 +31,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,7 +57,7 @@ import io.olvid.messenger.services.BackupCloudProviderService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 
-public class CloudProviderSignInDialogFragment extends DialogFragment implements View.OnClickListener {
+public class CloudProviderSignInDialogFragment extends DialogFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private static final int REQUEST_CODE_AUTHORIZE_DRIVE = 1823;
 
     private FragmentActivity activity;
@@ -62,6 +65,8 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
 
     private TextView googleDriveButton;
     private TextView webdavButton;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    private Switch writeOnlyWebdavSwitch;
     private View webdavConfigGroup;
     private TextView okButton;
     private View webdavLoadingSpinner;
@@ -93,6 +98,7 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
 
         activity = requireActivity();
         viewModel = new ViewModelProvider(activity).get(CloudProviderSignInViewModel.class);
+        viewModel.failOnDismiss = true;
 
         if (onCloudProviderConfigurationCallback != null) {
             viewModel.onCloudProviderConfigurationCallback = onCloudProviderConfigurationCallback;
@@ -137,6 +143,9 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View dialogView = inflater.inflate(R.layout.dialog_fragment_cloud_provider_sign_in, container, false);
 
+        writeOnlyWebdavSwitch = dialogView.findViewById(R.id.write_only_switch);
+        writeOnlyWebdavSwitch.setOnCheckedChangeListener(this);
+
         TextView dialogMessage = dialogView.findViewById(R.id.dialog_message);
         switch (viewModel.signInContext) {
             case ACTIVATE_AUTOMATIC_BACKUPS:
@@ -153,6 +162,7 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
                 } else {
                     dialogMessage.setText(R.string.dialog_message_cloud_provider_sign_in_restore_no_google);
                 }
+                writeOnlyWebdavSwitch.setVisibility(View.GONE);
                 break;
             case MANAGE_BACKUPS:
                 dialogMessage.setText(R.string.dialog_message_cloud_provider_sign_in_manage);
@@ -206,11 +216,18 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
 
         if (viewModel.webdavConfiguration.serverUrl == null) {
             BackupCloudProviderService.CloudProviderConfiguration configuration = SettingsActivity.getAutomaticBackupConfiguration();
-            if (configuration != null && Objects.equals(configuration.provider, BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV)) {
+            if (configuration != null
+                    && (Objects.equals(configuration.provider, BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV)
+                    || Objects.equals(configuration.provider, BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV_WRITE_ONLY))) {
                 viewModel.webdavConfiguration = configuration;
                 viewModel.webdavDetailsOpened = true;
+                // write-only webdav is not allowed for backup restore
+                if (signInContext == SignInContext.RESTORE_BACKUP) {
+                    viewModel.webdavConfiguration.provider = BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV;
+                }
             }
         }
+        writeOnlyWebdavSwitch.setChecked(Objects.equals(viewModel.webdavConfiguration.provider, BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV_WRITE_ONLY));
         webdavServerUrlEditText.setText(viewModel.webdavConfiguration.serverUrl);
         webdavUsernameEditText.setText(viewModel.webdavConfiguration.account);
         webdavPasswordEditText.setText(viewModel.webdavConfiguration.password);
@@ -223,6 +240,8 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
+        // reset the webDav configuration so it is reloaded next time the dialog is opened
+        viewModel.webdavConfiguration = BackupCloudProviderService.CloudProviderConfiguration.buildWebDAV(null, null, null);
         if (viewModel != null && viewModel.onCloudProviderConfigurationCallback != null && viewModel.failOnDismiss) {
             viewModel.onCloudProviderConfigurationCallback.onCloudProviderConfigurationFailed();
         }
@@ -321,7 +340,7 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
                 viewModel.webdavValidationInProgress = true;
                 refreshLayout();
 
-                BackupCloudProviderService.validateConfiguration(viewModel.webdavConfiguration, viewModel.signInContext == SignInContext.ACTIVATE_AUTOMATIC_BACKUPS || viewModel.signInContext == SignInContext.AUTOMATIC_BACKUP_SIGN_IN_REQUIRED,new BackupCloudProviderService.OnValidateCallback() {
+                BackupCloudProviderService.validateConfiguration(viewModel.webdavConfiguration, viewModel.signInContext == SignInContext.ACTIVATE_AUTOMATIC_BACKUPS || viewModel.signInContext == SignInContext.AUTOMATIC_BACKUP_SIGN_IN_REQUIRED, new BackupCloudProviderService.OnValidateCallback() {
                     @Override
                     public void onValidateSuccess() {
                         if (viewModel != null) {
@@ -379,6 +398,14 @@ public class CloudProviderSignInDialogFragment extends DialogFragment implements
                     }
                 });
             }
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        int id = buttonView.getId();
+        if (id == R.id.write_only_switch) {
+            viewModel.webdavConfiguration.provider = isChecked ? BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV_WRITE_ONLY : BackupCloudProviderService.CloudProviderConfiguration.PROVIDER_WEBDAV;
         }
     }
 

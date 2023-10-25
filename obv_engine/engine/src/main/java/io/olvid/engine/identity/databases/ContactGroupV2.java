@@ -1093,7 +1093,7 @@ public class ContactGroupV2 implements ObvDatabase {
 
                 while (res.next()) {
                     byte[] groupUid = res.getBytes("uid");
-                    String serverUld = res.getString("url");
+                    String serverUrl = res.getString("url");
                     byte[] serializedContactPermissions = res.getBytes("perms");
                     int version = res.getInt(ContactGroupV2.VERSION);
 
@@ -1117,7 +1117,7 @@ public class ContactGroupV2 implements ObvDatabase {
 
 
                     list.add(new GroupV2.IdentifierVersionAndKeys(
-                            new GroupV2.Identifier(new UID(groupUid), serverUld, GroupV2.Identifier.CATEGORY_SERVER),
+                            new GroupV2.Identifier(new UID(groupUid), serverUrl, GroupV2.Identifier.CATEGORY_SERVER),
                             version,
                             blobKeys
                     ));
@@ -1126,6 +1126,48 @@ public class ContactGroupV2 implements ObvDatabase {
             }
         }
     }
+
+    public static GroupV2.IdentifierVersionAndKeys[] getAllServerGroupsV2IdentifierVersionAndKeys(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+                "SELECT * FROM " + ContactGroupV2.TABLE_NAME +
+                        " WHERE " + ContactGroupV2.CATEGORY + " = " + GroupV2.Identifier.CATEGORY_SERVER +
+                        " AND " + ContactGroupV2.OWNED_IDENTITY + " = ?;"
+        )) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                ArrayList<GroupV2.IdentifierVersionAndKeys> list = new ArrayList<>();
+
+                while (res.next()) {
+                    byte[] groupUid = res.getBytes(ContactGroupV2.GROUP_UID);
+                    String serverUrl = res.getString(ContactGroupV2.SERVER_URL);
+                    int version = res.getInt(ContactGroupV2.VERSION);
+                    byte[] bytesMainSeed = res.getBytes(ContactGroupV2.BLOB_MAIN_SEED);
+                    byte[] bytesVersionSeed = res.getBytes(ContactGroupV2.BLOB_VERSION_SEED);
+                    ServerAuthenticationPrivateKey serverAuthenticationPrivateKey = null;
+                    byte[] bytesGroupAdminKey = res.getBytes(ContactGroupV2.GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY); // this is non-null only when I am admin
+                    if (bytesGroupAdminKey != null) {
+                        try {
+                            serverAuthenticationPrivateKey = (ServerAuthenticationPrivateKey) new Encoded(bytesGroupAdminKey).decodePrivateKey();
+                        } catch (Exception ignored) { }
+                    }
+
+                    GroupV2.BlobKeys blobKeys = new GroupV2.BlobKeys(
+                            new Seed(bytesMainSeed),
+                            new Seed(bytesVersionSeed),
+                            serverAuthenticationPrivateKey);
+
+
+                    list.add(new GroupV2.IdentifierVersionAndKeys(
+                            new GroupV2.Identifier(new UID(groupUid), serverUrl, GroupV2.Identifier.CATEGORY_SERVER),
+                            version,
+                            blobKeys
+                    ));
+                }
+                return list.toArray(new GroupV2.IdentifierVersionAndKeys[0]);
+            }
+        }
+    }
+
 
     public static GroupV2.IdentifierAndAdminStatus[] getServerGroupsV2IdentifierAndMyAdminStatusForContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement(

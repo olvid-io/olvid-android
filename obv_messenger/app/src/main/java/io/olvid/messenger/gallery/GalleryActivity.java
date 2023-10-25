@@ -20,6 +20,10 @@
 package io.olvid.messenger.gallery;
 
 
+import static androidx.media3.common.C.AUDIO_CONTENT_TYPE_MOVIE;
+import static androidx.media3.common.C.USAGE_MEDIA;
+import static io.olvid.messenger.gallery.GalleryAdapter.VIEW_TYPE_VIDEO;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -59,6 +63,12 @@ import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.media3.common.AudioAttributes;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.PlayerView;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -81,6 +91,7 @@ import io.olvid.messenger.databases.entity.MessageExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 
+@UnstableApi
 public class GalleryActivity extends LockableActivity {
     public static final String BYTES_OWNED_IDENTITY_INTENT_EXTRA = "bytes_owned_identity";
     public static final String BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA = "sort_order";
@@ -125,8 +136,9 @@ public class GalleryActivity extends LockableActivity {
         DELETE_ONLY,
         NONE,
     }
-    @NonNull private MENU_TYPE currentMenuType = MENU_TYPE.NONE;
 
+    @NonNull
+    private MENU_TYPE currentMenuType = MENU_TYPE.NONE;
 
 
     private final ActivityResultLauncher<Pair<String, FyleMessageJoinWithStatusDao.FyleAndStatus>> saveAttachmentLauncher = registerForActivityResult(new GetAttachmentSaveUri(), this::saveCallback);
@@ -152,7 +164,7 @@ public class GalleryActivity extends LockableActivity {
 
         //noinspection unused // this useless line is here to prevent the linter from removing the id (causing a crash)
         View blackOverlay = findViewById(R.id.black_overlay);
-        
+
         galleryMotionLayout = findViewById(R.id.gallery_motion_layout);
         bottomBar = findViewById(R.id.bottom_bar);
         fileNameTextView = findViewById(R.id.file_name_text_view);
@@ -167,7 +179,20 @@ public class GalleryActivity extends LockableActivity {
         });
 
         viewPager = findViewById(R.id.gallery_pager);
-        galleryAdapter = new GalleryAdapter(getLayoutInflater(), new GalleryAdapter.GalleryAdapterCallbacks() {
+        ExoPlayer mplayer;
+        try {
+            mplayer = new ExoPlayer.Builder(this).build();
+            mplayer.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(USAGE_MEDIA)
+                            .setContentType(AUDIO_CONTENT_TYPE_MOVIE)
+                            .build(),
+                    true);
+        } catch (NoClassDefFoundError e) {
+            mplayer = null;
+        }
+        final ExoPlayer mediaPlayer = mplayer;
+
+        galleryAdapter = new GalleryAdapter(getLayoutInflater(), mediaPlayer, new GalleryAdapter.GalleryAdapterCallbacks() {
             @Override
             public void singleTapUp() {
                 toggleControlsAndUi();
@@ -197,34 +222,45 @@ public class GalleryActivity extends LockableActivity {
 
         onPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
             int currentPosition;
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
-
-                if (positionOffset > .5f && currentPosition != position + 1) {
-                    // currentPosition changed
-                    currentPosition = position + 1;
-                } else if (positionOffset < .5f && currentPosition != position) {
-                    // currentPosition changed
-                    currentPosition = position;
-                } else {
-                    return;
-                }
-
-                if (galleryAdapter != null) {
-                    galleryAdapter.pauseVideos();
-                }
-                if (viewModel != null) {
-                    viewModel.setCurrentPagerPosition(currentPosition);
-                }
-            }
+            PlayerView oldPlayerView = null;
 
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                GalleryAdapter.GalleryImageViewHolder newVideoViewHolder;
+                try {
+                    GalleryAdapter.GalleryImageViewHolder oldVideoViewHolder = ((GalleryAdapter.GalleryImageViewHolder) galleryAdapter.recyclerView.findViewHolderForAdapterPosition(currentPosition));
+                    if (oldVideoViewHolder != null && oldVideoViewHolder.playerView != null && oldVideoViewHolder.playerView.getPlayer() != null) {
+                        oldPlayerView = oldVideoViewHolder.playerView;
+                    }
+                    newVideoViewHolder = ((GalleryAdapter.GalleryImageViewHolder) galleryAdapter.recyclerView.findViewHolderForAdapterPosition(position));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    newVideoViewHolder = null;
+                }
 
                 currentPosition = position;
+
+                if (mediaPlayer != null) {
+                    mediaPlayer.stop();
+                    mediaPlayer.clearMediaItems();
+
+                    if (galleryAdapter.getItemViewType(position) == VIEW_TYPE_VIDEO) {
+                        if (newVideoViewHolder != null && newVideoViewHolder.playerView != null) {
+                            PlayerView.switchTargetView(mediaPlayer, oldPlayerView, newVideoViewHolder.playerView);
+                        }
+                        FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = galleryAdapter.getItemAt(position);
+                        String filePath = App.absolutePathFromRelative(fyleAndStatus.fyle.filePath);
+                        if (filePath == null) {
+                            filePath = fyleAndStatus.fyleMessageJoinWithStatus.getAbsoluteFilePath();
+                        }
+                        MediaItem mediaItem = new MediaItem.Builder().setUri(filePath).setMediaMetadata(new MediaMetadata.Builder().setTitle("").build()).build();
+                        mediaPlayer.setMediaItem(mediaItem);
+                        mediaPlayer.setPlayWhenReady(true);
+                        mediaPlayer.prepare();
+                    }
+                }
+
                 if (viewModel != null) {
                     viewModel.setCurrentPagerPosition(currentPosition);
                 }
@@ -296,9 +332,9 @@ public class GalleryActivity extends LockableActivity {
         }
 
         int DENSITY_INDEPENDENT_THRESHOLD = 200;
-        int SWIPE_THRESHOLD_VELOCITY = (int)(DENSITY_INDEPENDENT_THRESHOLD * getResources().getDisplayMetrics().density);
+        int SWIPE_THRESHOLD_VELOCITY = (int) (DENSITY_INDEPENDENT_THRESHOLD * getResources().getDisplayMetrics().density);
 
-        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener(){
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
                 if (isShowingVideo && controlsShown && e.getY() > topBar.getBottom()) {
@@ -318,8 +354,8 @@ public class GalleryActivity extends LockableActivity {
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                if (4*Math.abs(velocityX) < Math.abs(velocityY)
-                        && velocityY > SWIPE_THRESHOLD_VELOCITY
+                if (4 * Math.abs(velocityX) < Math.abs(velocityY)
+                        && (velocityY > SWIPE_THRESHOLD_VELOCITY || velocityY < -SWIPE_THRESHOLD_VELOCITY)
                         && viewPager.isUserInputEnabled()
                         && e1.getY() > 100 // no fling if starting from top of screen (like to show status bar)
                 ) {
@@ -391,6 +427,7 @@ public class GalleryActivity extends LockableActivity {
     }
 
     long lastMessageExpirationMessageId = -1;
+
     private void updateMessageExpiration(MessageExpiration messageExpiration) {
         if (messageExpiration != null) {
             if (lastMessageExpirationMessageId != messageExpiration.messageId) {
@@ -412,6 +449,7 @@ public class GalleryActivity extends LockableActivity {
 
 
     private long lastRemainingDisplayed = -1;
+
     private void updateExpirationTimer(boolean force) {
         if (timerTextView == null) {
             return;
@@ -504,7 +542,6 @@ public class GalleryActivity extends LockableActivity {
             }
         }
     }
-
 
 
     @Override
@@ -702,7 +739,6 @@ public class GalleryActivity extends LockableActivity {
             }
         }
     }
-
 
 
     private boolean controlsShown = false;

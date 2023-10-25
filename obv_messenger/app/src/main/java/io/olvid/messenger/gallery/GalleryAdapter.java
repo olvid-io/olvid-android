@@ -26,7 +26,6 @@ import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.ParcelFileDescriptor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,24 +33,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
-import androidx.media.AudioAttributesCompat;
-import androidx.media2.common.FileMediaItem;
-import androidx.media2.common.MediaItem;
-import androidx.media2.common.MediaMetadata;
-import androidx.media2.common.SessionPlayer;
-import androidx.media2.player.MediaPlayer;
-import androidx.media2.widget.VideoView;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.PlayerView;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import io.olvid.engine.Logger;
@@ -62,7 +51,7 @@ import io.olvid.messenger.customClasses.PreviewUtilsWithDrawables;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 
-public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryImageViewHolder> implements Observer<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> {
+@UnstableApi public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryImageViewHolder> implements Observer<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> {
     static final int STATUS_CHANGE_MASK = 1;
     static final int PROGRESS_CHANGE_MASK = 2;
 
@@ -70,29 +59,26 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
     static final int VIEW_TYPE_VIDEO = 2;
 
     private final LayoutInflater layoutInflater;
+    private final @Nullable ExoPlayer mediaPlayer;
+
     @NonNull
     private final GalleryAdapterCallbacks galleryAdapterCallbacks;
-    private final HashMap<GalleryViewModel.MessageAndFyleId, MediaPlayer> preparedMediaPlayers;
-    private final List<MediaPlayer> allMediaPlayers;
     List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses;
     GalleryViewModel.MessageAndFyleId messageAndFyleIdToGoTo;
     GalleryViewModel.MessageAndFyleId messageAndFyleIdToPlay;
 
-
-    public GalleryAdapter(LayoutInflater layoutInflater, @NonNull GalleryAdapterCallbacks galleryAdapterCallbacks) {
+    public GalleryAdapter(LayoutInflater layoutInflater, @Nullable ExoPlayer mediaPlayer, @NonNull GalleryAdapterCallbacks galleryAdapterCallbacks) {
         this.layoutInflater = layoutInflater;
+        this.mediaPlayer = mediaPlayer;
         this.galleryAdapterCallbacks = galleryAdapterCallbacks;
         this.setHasStableIds(true);
-        this.preparedMediaPlayers = new HashMap<>();
-        this.allMediaPlayers = new ArrayList<>();
     }
 
     public void cleanup() {
-        for (MediaPlayer mediaPlayer: allMediaPlayers) {
-            Logger.e("Closing media player");
-            mediaPlayer.close();
+        Logger.e("Closing media player");
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
         }
-        allMediaPlayers.clear();
     }
 
     @Override
@@ -127,7 +113,14 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
         // this is never called as we override the payloads version
     }
 
+    public RecyclerView recyclerView;
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.recyclerView = recyclerView;
+    }
 
+    private PlayerView lastPlayerView;
     @Override
     public void onBindViewHolder(@NonNull GalleryImageViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (fyleAndStatuses == null || fyleAndStatuses.size() <= position || position < 0) {
@@ -177,37 +170,27 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
                     });
                 }
             });
-        } else if (holder.mediaPlayer != null) {
+        } else if (holder.playerView != null) {
             try {
                 if (fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_FAILED) {
-                    holder.videoView.setVisibility(View.GONE);
+                    holder.playerView.setVisibility(View.GONE);
                     holder.attachmentFailedTextView.setVisibility(View.VISIBLE);
                     return;
                 }
 
-                holder.videoView.setVisibility(View.VISIBLE);
+                holder.playerView.setVisibility(View.VISIBLE);
                 holder.attachmentFailedTextView.setVisibility(View.GONE);
 
-                String filePath = App.absolutePathFromRelative(fyleAndStatus.fyle.filePath);
-                if (filePath == null) {
-                    filePath = fyleAndStatus.fyleMessageJoinWithStatus.getAbsoluteFilePath();
-                }
-                MediaItem mediaItem = new FileMediaItem.Builder(ParcelFileDescriptor.open(new File(filePath), ParcelFileDescriptor.MODE_READ_ONLY))
-                        .setMetadata(new MediaMetadata.Builder()
-                                .putString(MediaMetadata.METADATA_KEY_TITLE, "")
-                                .build())
-                        .build();
-                holder.mediaPlayer.setPlaylist(Collections.singletonList(mediaItem), null);
-                holder.prepareResult = holder.mediaPlayer.prepare();
-                holder.prepareResult.addListener(() -> {
-                    holder.prepareResult = null;
-                    GalleryViewModel.MessageAndFyleId messageAndFyleId = new GalleryViewModel.MessageAndFyleId(fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
-                    preparedMediaPlayers.put(messageAndFyleId, holder.mediaPlayer);
-                    if (messageAndFyleId.equals(messageAndFyleIdToPlay)) {
-                        holder.mediaPlayer.play();
-                        messageAndFyleIdToPlay = null;
+                GalleryViewModel.MessageAndFyleId messageAndFyleId = new GalleryViewModel.MessageAndFyleId(fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
+                if (messageAndFyleId.equals(messageAndFyleIdToPlay)) {
+                    if (mediaPlayer != null) {
+                        if (holder.playerView.getPlayer() == null) {
+                            holder.playerView.setPlayer(mediaPlayer);
+                        }
+                        mediaPlayer.play();
                     }
-                }, ContextCompat.getMainExecutor(holder.videoView.getContext()));
+                    messageAndFyleIdToPlay = null;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -307,18 +290,19 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
     public void goToFyle(@NonNull GalleryViewModel.MessageAndFyleId messageAndFyleId) {
         messageAndFyleIdToGoTo = messageAndFyleId;
         if (fyleAndStatuses != null) {
-            for (int i=0; i<fyleAndStatuses.size(); i++) {
+            for (int i = 0; i < fyleAndStatuses.size(); i++) {
                 FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = fyleAndStatuses.get(i);
                 if (fyleAndStatus.fyleMessageJoinWithStatus.messageId == messageAndFyleIdToGoTo.messageId
-                    && fyleAndStatus.fyleMessageJoinWithStatus.fyleId == messageAndFyleIdToGoTo.fyleId) {
+                        && fyleAndStatus.fyleMessageJoinWithStatus.fyleId == messageAndFyleIdToGoTo.fyleId) {
 
                     galleryAdapterCallbacks.setCurrentItem(i);
                     if (fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().startsWith("video/")) {
-                        MediaPlayer mediaPlayer = preparedMediaPlayers.get(messageAndFyleId);
                         if (mediaPlayer != null) {
-                            mediaPlayer.play();
-                        } else {
-                            messageAndFyleIdToPlay = messageAndFyleId;
+                            if (mediaPlayer.getPlaybackState() == Player.STATE_READY) {
+                                mediaPlayer.play();
+                            } else {
+                                messageAndFyleIdToPlay = messageAndFyleId;
+                            }
                         }
                     }
                     break;
@@ -339,58 +323,36 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
     @Override
     public void onViewRecycled(@NonNull GalleryImageViewHolder holder) {
         super.onViewRecycled(holder);
-        if (holder.mediaPlayer != null) {
-            preparedMediaPlayers.remove(new GalleryViewModel.MessageAndFyleId(holder.fyleAndStatus.fyleMessageJoinWithStatus.messageId, holder.fyleAndStatus.fyleMessageJoinWithStatus.fyleId));
-            holder.mediaPlayer.reset();
-        }
         if (holder.imageView != null) {
             holder.imageView.setImageDrawable(null);
         }
     }
 
-    public void pauseVideos() {
-        for (MediaPlayer mediaPlayer : preparedMediaPlayers.values()) {
-            mediaPlayer.pause();
-        }
-    }
-
-
     public class GalleryImageViewHolder extends RecyclerView.ViewHolder {
         final GalleryImageView imageView;
-        final VideoView videoView;
+        final PlayerView playerView;
         final TextView previewErrorTextView;
         final TextView attachmentFailedTextView;
-        final MediaPlayer mediaPlayer;
-        ListenableFuture<SessionPlayer.PlayerResult> prepareResult;
         FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus;
 
         public GalleryImageViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.image_view);
-            videoView = itemView.findViewById(R.id.video_view);
+            playerView = itemView.findViewById(R.id.player_view);
             previewErrorTextView = itemView.findViewById(R.id.preview_error_text_view);
             attachmentFailedTextView = itemView.findViewById(R.id.attachment_failed_text_view);
             if (imageView != null) {
                 imageView.setParentViewPagerUserInputController(galleryAdapterCallbacks::setViewPagerUserInputEnabled);
                 imageView.setSingleTapUpCallback(galleryAdapterCallbacks::singleTapUp);
             }
-            if (videoView != null) {
-                mediaPlayer = new MediaPlayer(itemView.getContext());
-                mediaPlayer.setAudioAttributes(new AudioAttributesCompat.Builder()
-                        .setUsage(AudioAttributesCompat.USAGE_MEDIA)
-                        .setContentType(AudioAttributesCompat.CONTENT_TYPE_MOVIE)
-                        .build());
-                videoView.setPlayer(mediaPlayer);
-                allMediaPlayers.add(mediaPlayer);
-            } else {
-                mediaPlayer = null;
-            }
         }
     }
 
     public interface GalleryAdapterCallbacks {
         void singleTapUp();
+
         void setCurrentItem(int position);
+
         void setViewPagerUserInputEnabled(boolean enabled);
     }
 }

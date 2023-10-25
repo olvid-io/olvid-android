@@ -62,9 +62,9 @@ public class ConfigurationSettingsPojo {
     public Integer lw; // lock_wipe_on_fail;
 
     public Long ad; // auto_download_size;
+    public Integer rr; // send_read_receipt;
     public Integer lpi; // link_preview_inbound;
     public Integer lpo; // link_preview_outbound;
-    public Integer rr; // send_read_receipt;
     public Integer ao; // auto_open_limited_visibility;
     public Integer rw; // retain_wiped_outbound;
 
@@ -276,6 +276,21 @@ public class ConfigurationSettingsPojo {
         if (ao != null) { sb.append(highlight(c, R.string.text_setting_auto_open_limited_visibility)).append(bool(c, ao != 0)).append("\n"); }
         if (rw != null) { sb.append(highlight(c, R.string.text_setting_retain_wiped_outbound)).append(bool(c, rw != 0)).append("\n"); }
 
+        if (mi != null) {
+            sb.append(highlight(c, R.string.text_setting_map_integration));
+            switch (mi) {
+                case 1:
+                    sb.append(c.getString(R.string.text_setting_google_maps));
+                    break;
+                case 2:
+                    sb.append(c.getString(R.string.text_setting_osm));
+                    break;
+                case 0:
+                default:
+                    sb.append(c.getString(R.string.text_setting_none));
+                    break;
+            }
+        }
         if (rj != null) { sb.append(highlight(c, R.string.text_setting_remove_jpeg_metadata)).append(bool(c, rj != 0)).append("\n"); }
 
         if (wk != null) { sb.append(highlight(c, R.string.text_setting_wc_keep_after_close)).append(bool(c, wk != 0)).append("\n"); }

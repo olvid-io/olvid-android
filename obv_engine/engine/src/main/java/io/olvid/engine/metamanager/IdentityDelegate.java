@@ -228,6 +228,7 @@ public interface IdentityDelegate {
     boolean getGroupV2AdminStatus(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
     List<ObvGroupV2> getObvGroupsV2ForOwnedIdentity(Session session, Identity ownedIdentity) throws Exception;
     GroupV2.IdentifierVersionAndKeys[] getServerGroupsV2IdentifierVersionAndKeysForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
+    GroupV2.IdentifierVersionAndKeys[] getAllServerGroupsV2IdentifierVersionAndKeys(Session session, Identity ownedIdentity) throws Exception;
     GroupV2.IdentifierAndAdminStatus[] getServerGroupsV2IdentifierAndMyAdminStatusForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception;
     void initiateGroupV2BatchKeysResend(UID currentDeviceUid, Identity contactIdentity, UID contactDeviceUid);
     void forcefullyRemoveMemberOrPendingFromNonAdminGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity contactIdentity) throws SQLException;

@@ -1058,7 +1058,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                     if (group2Member.permissionSendMessage) {
                         holder.adminLabel.setText(string.label_not_admin)
                     } else {
-                        holder.adminLabel.setText(string.label_read_only)
+                        holder.adminLabel.setText(string.label_read_only_short)
                     }
                 }
             } else {

@@ -234,6 +234,7 @@ class OnboardingFlowViewModel : ViewModel() {
         }
     }
 
+
     fun setBackupCloud(
         backupContent: ByteArray?,
         configuration: CloudProviderConfiguration,
@@ -250,7 +251,6 @@ class OnboardingFlowViewModel : ViewModel() {
                     timestamp
                 )
 
-
             CloudProviderConfiguration.PROVIDER_GOOGLE_DRIVE -> backupName =
                 App.getContext().getString(
                     R.string.text_description_google_drive_backup,
@@ -258,7 +258,6 @@ class OnboardingFlowViewModel : ViewModel() {
                     device,
                     timestamp
                 )
-
         }
         backupType = BACKUP_TYPE_CLOUD
         backupReady = true

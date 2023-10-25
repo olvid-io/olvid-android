@@ -76,26 +76,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Matcher;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.ObvBase64;
 import io.olvid.engine.engine.types.EngineAPI;
+import io.olvid.engine.engine.types.EngineNotificationListener;
+import io.olvid.engine.engine.types.EngineNotifications;
+import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvPushNotificationType;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.activities.ContactDetailsActivity;
-import io.olvid.messenger.group.GroupCreationActivity;
-import io.olvid.messenger.group.GroupDetailsActivity;
-import io.olvid.messenger.group.GroupV2DetailsActivity;
 import io.olvid.messenger.activities.LockScreenActivity;
 import io.olvid.messenger.activities.MessageDetailsActivity;
-import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
+import io.olvid.messenger.activities.ObvLinkActivity;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.appdialogs.AppDialogShowActivity;
 import io.olvid.messenger.appdialogs.AppDialogTag;
 import io.olvid.messenger.customClasses.BytesKey;
+import io.olvid.messenger.customClasses.ConfigurationPojo;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils2;
@@ -110,9 +114,15 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcMessage;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.gallery.GalleryActivity;
+import io.olvid.messenger.group.GroupCreationActivity;
+import io.olvid.messenger.group.GroupDetailsActivity;
+import io.olvid.messenger.group.GroupV2DetailsActivity;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
+import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.services.AvailableSpaceHelper;
+import io.olvid.messenger.services.BackupCloudProviderService;
+import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.services.MessageExpirationService;
 import io.olvid.messenger.services.NetworkStateMonitorReceiver;
 import io.olvid.messenger.services.PeriodicTasksScheduler;
@@ -831,8 +841,12 @@ public class App extends Application implements DefaultLifecycleObserver {
         showDialog(null, AppDialogShowActivity.DIALOG_AVAILABLE_SPACE_LOW, new HashMap<>());
     }
 
+    private static long backupRequireSignInCooldown = 0;
     public static void openAppDialogBackupRequiresSignIn() {
-        showDialog(null, AppDialogShowActivity.DIALOG_BACKUP_REQUIRES_SIGN_IN, new HashMap<>());
+        if (System.currentTimeMillis() > backupRequireSignInCooldown) {
+            backupRequireSignInCooldown = System.currentTimeMillis() + 3_600_000L; // add a 1 hour cooldown between dialogs
+            showDialog(null, AppDialogShowActivity.DIALOG_BACKUP_REQUIRES_SIGN_IN, new HashMap<>());
+        }
     }
 
     public static void openAppDialogConfigureHiddenProfileClosePolicy() {
@@ -1067,6 +1081,36 @@ public class App extends Application implements DefaultLifecycleObserver {
             ShortcutActivity.startPublishingShareTargets(getContext());
 
 
+            //////////////////////////
+            // check if there are settings pushed from an MDM
+            //////////////////////////
+            try {
+                String mdmSettingsConfigurationUri = MDMConfigurationSingleton.getSettingsConfigurationUri();
+                if (mdmSettingsConfigurationUri != null) {
+                    Matcher matcher = ObvLinkActivity.CONFIGURATION_PATTERN.matcher(mdmSettingsConfigurationUri);
+                    if (matcher.find()) {
+                        ConfigurationPojo configurationPojo = AppSingleton.getJsonObjectMapper().readValue(ObvBase64.decode(matcher.group(2)), ConfigurationPojo.class);
+                        if (configurationPojo.settings != null) {
+                            configurationPojo.settings.toBackupPojo().restore();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Logger.e("Error parsing MDM pushed settings configuration");
+                e.printStackTrace();
+            }
+
+            //////////////////////////
+            // check if there is a WebDAV automatic backups configuration pushed from an MDM
+            //////////////////////////
+            try {
+                configureMdmWebDavAutomaticBackups();
+            } catch (Exception e) {
+                Logger.e("Error configuring MDM pushed WebDav automatic backups");
+                e.printStackTrace();
+            }
+
+
             ///////////////////////
             // clean the CAMERA_PICTURE_FOLDER
             ///////////////////////
@@ -1113,5 +1157,108 @@ public class App extends Application implements DefaultLifecycleObserver {
                 } catch (Exception ignored) {}
             }
         }
+
+
+        private static EngineNotificationListener backupKeyListener = null;
+
+        private void configureMdmWebDavAutomaticBackups() throws Exception {
+            BackupCloudProviderService.CloudProviderConfiguration mdmAutoBackupConfiguration = MDMConfigurationSingleton.getAutoBackupConfiguration();
+            if (mdmAutoBackupConfiguration != null) {
+                BackupCloudProviderService.CloudProviderConfiguration currentAutoBackupConfiguration = SettingsActivity.getAutomaticBackupConfiguration();
+                if (!mdmAutoBackupConfiguration.equals(currentAutoBackupConfiguration) || !SettingsActivity.useAutomaticBackup()) {
+                    SettingsActivity.setAutomaticBackupConfiguration(mdmAutoBackupConfiguration);
+                    SettingsActivity.setMdmAutomaticBackup(true);
+                    if (!SettingsActivity.useAutomaticBackup()) {
+                        SettingsActivity.setUseAutomaticBackup(true);
+                        AppSingleton.getEngine().setAutoBackupEnabled(true, true);
+                    }
+                }
+
+                String keyEscrowPublicKeyString = MDMConfigurationSingleton.getWebdavKeyEscrowPublicKeyString();
+                if (!Objects.equals(keyEscrowPublicKeyString, SettingsActivity.getMdmWebdavKeyEscrowPublicKey())) {
+                    if (keyEscrowPublicKeyString == null) {
+                        // key escrow was deactivated --> clear the setting
+                        SettingsActivity.setMdmWebdavKeyEscrowPublicKey(null);
+                    } else {
+                        // key escrow is active, but backup key is not in escrow yet
+                        try {
+                            ObvBackupKeyInformation backupKeyInformation = AppSingleton.getEngine().getBackupKeyInformation();
+                            if (backupKeyInformation == null) {
+                                // no key generated yet --> generate one and attempt to put it in escrow
+                                backupKeyListener = new EngineNotificationListener() {
+                                    Long registrationNumber = null;
+                                    @Override
+                                    public void callback(String notificationName, HashMap<String, Object> userInfo) {
+                                        switch (notificationName) {
+                                            case EngineNotifications.BACKUP_SEED_GENERATION_FAILED: {
+                                                // do nothing, we will try again at next startup!
+                                                break;
+                                            }
+                                            case EngineNotifications.NEW_BACKUP_SEED_GENERATED: {
+                                                String backupKeyString = (String) userInfo.get(EngineNotifications.NEW_BACKUP_SEED_GENERATED_SEED_KEY);
+                                                BackupCloudProviderService.uploadBackupKeyEscrow(mdmAutoBackupConfiguration, MDMConfigurationSingleton.getWebdavKeyEscrowPublicKey(), backupKeyString, new BackupCloudProviderService.OnKeyEscrowCallback() {
+                                                    @Override
+                                                    public void onKeyEscrowSuccess() {
+                                                        // key was successfully put in escrow --> store it in settings
+                                                        SettingsActivity.setMdmWebdavKeyEscrowPublicKey(keyEscrowPublicKeyString);
+                                                    }
+
+                                                    @Override
+                                                    public void onKeyEscrowFailure(int error) {
+                                                        // we generated a key but could not put it in escrow --> fallback to notifying the user a new key generation is required
+                                                        showDialog(null, AppDialogShowActivity.DIALOG_KEY_ESCROW_REQUIRED, new HashMap<>());
+                                                    }
+                                                });
+                                                break;
+                                            }
+                                            default: {
+                                                return;
+                                            }
+                                        }
+
+                                        AppSingleton.getEngine().removeNotificationListener(EngineNotifications.BACKUP_SEED_GENERATION_FAILED, backupKeyListener);
+                                        AppSingleton.getEngine().removeNotificationListener(EngineNotifications.NEW_BACKUP_SEED_GENERATED, backupKeyListener);
+                                        backupKeyListener = null;
+                                    }
+
+                                    @Override
+                                    public void setEngineNotificationListenerRegistrationNumber(long registrationNumber) {
+                                        this.registrationNumber = registrationNumber;
+                                    }
+
+                                    @Override
+                                    public long getEngineNotificationListenerRegistrationNumber() {
+                                        return registrationNumber;
+                                    }
+
+                                    @Override
+                                    public boolean hasEngineNotificationListenerRegistrationNumber() {
+                                        return registrationNumber != null;
+                                    }
+                                };
+                                AppSingleton.getEngine().addNotificationListener(EngineNotifications.BACKUP_SEED_GENERATION_FAILED, backupKeyListener);
+                                AppSingleton.getEngine().addNotificationListener(EngineNotifications.NEW_BACKUP_SEED_GENERATED, backupKeyListener);
+
+                                AppSingleton.getEngine().generateBackupKey();
+                            } else {
+                                // backup key exists and is not in escrow --> prompt user to generate a new key
+                                showDialog(null, AppDialogShowActivity.DIALOG_KEY_ESCROW_REQUIRED, new HashMap<>());
+                            }
+                        } catch (Exception e) {
+                            // do nothing if there is an exception --> we were not able to check if a backup key exists
+                        }
+                    }
+                }
+            } else if (SettingsActivity.isMdmAutomaticBackup()) {
+                // backups used to be configured by MDM but no longer are --> disable automatic backups and clear the previous configuration
+                SettingsActivity.setAutomaticBackupConfiguration(null);
+                SettingsActivity.setUseAutomaticBackup(false);
+                SettingsActivity.setMdmAutomaticBackup(false);
+                SettingsActivity.setMdmWebdavKeyEscrowPublicKey(null);
+                AppSingleton.getEngine().setAutoBackupEnabled(false, false);
+            }
+        }
     }
+
+
 }

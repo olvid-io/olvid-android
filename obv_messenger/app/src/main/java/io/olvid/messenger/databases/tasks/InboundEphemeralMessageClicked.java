@@ -90,7 +90,10 @@ public class InboundEphemeralMessageClicked implements Runnable {
         }
 
         boolean expirationCreated = db.runInTransaction(() -> {
-            message.messageType = Message.TYPE_INBOUND_MESSAGE;
+            if (!clickedOnAnotherDevice) {
+                // reveal message only for clicked device
+                 message.messageType = Message.TYPE_INBOUND_MESSAGE;
+            }
 
             if (jsonExpiration.getReadOnce() != null && jsonExpiration.getReadOnce()) {
                 if (clickedOnAnotherDevice) {
@@ -120,6 +123,10 @@ public class InboundEphemeralMessageClicked implements Runnable {
             if (jsonExpiration.getVisibilityDuration() != null) {
                 long expirationTimestamp = System.currentTimeMillis() + jsonExpiration.getVisibilityDuration() * 1_000L - alreadyElapsedDelay;
                 MessageExpiration messageExpiration = new MessageExpiration(message.id, expirationTimestamp, true);
+                if (clickedOnAnotherDevice) {
+                    // start expiration timer on other devices inbound ephemeral message
+                    db.messageDao().updateExpirationStartTimestamp(message.id, expirationTimestamp);
+                }
                 db.messageExpirationDao().insert(messageExpiration);
                 return true;
             } else {

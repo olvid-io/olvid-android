@@ -57,9 +57,6 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
     public static final String PINNED = "pinned";
     static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(CUSTOM_NAME, CONTACTS, GROUPS, GROUPS2, PINNED));
 
-    // TODO: decide whether we should transfer/sync the hidden profile password?
-    // TODO: decide whether we should transfer/sync the mute notification settings
-
     public String custom_name;
     @JsonSerialize(keyUsing = ObvBytesKey.KeySerializer.class)
     @JsonDeserialize(keyUsing = ObvBytesKey.KeyDeserializer.class)

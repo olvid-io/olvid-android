@@ -3252,6 +3252,17 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return ContactGroupV2.getServerGroupsV2IdentifierVersionAndKeysForContact(wrapSession(session), ownedIdentity, contactIdentity);
     }
 
+
+    @Override
+    public GroupV2.IdentifierVersionAndKeys[] getAllServerGroupsV2IdentifierVersionAndKeys(Session session, Identity ownedIdentity) throws Exception {
+        if (ownedIdentity == null) {
+            throw new Exception();
+        }
+
+        return ContactGroupV2.getAllServerGroupsV2IdentifierVersionAndKeys(wrapSession(session), ownedIdentity);
+    }
+
+
     @Override
     public GroupV2.IdentifierAndAdminStatus[] getServerGroupsV2IdentifierAndMyAdminStatusForContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
         if (ownedIdentity == null || contactIdentity == null) {

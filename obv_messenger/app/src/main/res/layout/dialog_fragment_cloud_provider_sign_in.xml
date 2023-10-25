@@ -148,6 +148,18 @@
                         android:textColor="@color/primary700"
                         android:textSize="16sp" />
 
+                    <Switch
+                        android:id="@+id/write_only_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:switchPadding="16dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginBottom="8dp"
+                        android:textColor="@color/grey"
+                        android:text="@string/label_write_only_webdav"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

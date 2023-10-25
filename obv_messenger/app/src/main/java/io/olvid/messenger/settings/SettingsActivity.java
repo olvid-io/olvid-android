@@ -274,6 +274,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final boolean PREF_KEY_ENABLE_AUTOMATIC_BACKUP_DEFAULT = false;
     static final String PREF_KEY_AUTOMATIC_BACKUP_DEVICE_UNIQUE_ID = "pref_key_automatic_backup_device_unique_id";
     static final String PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION = "pref_key_automatic_backup_configuration";
+    static final String PREF_KEY_MDM_AUTOMATIC_BACKUP = "pref_key_mdm_automatic_backup";
+    static final String PREF_KEY_MDM_WEBDAV_KEY_ESCROW_PUBLIC_KEY = "pref_key_mdm_webdav_key_escrow_public_key";
 
     static final String PREF_KEY_MANAGE_CLOUD_BACKUPS = "pref_key_manage_cloud_backups";
 
@@ -1521,6 +1523,30 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     public static boolean useAutomaticBackup() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_ENABLE_AUTOMATIC_BACKUP, PREF_KEY_ENABLE_AUTOMATIC_BACKUP_DEFAULT);
+    }
+
+    public static void setMdmAutomaticBackup(boolean mdmAutomaticBackup) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        if (mdmAutomaticBackup) {
+            editor.putBoolean(PREF_KEY_MDM_AUTOMATIC_BACKUP, true);
+        } else {
+            editor.remove(PREF_KEY_MDM_AUTOMATIC_BACKUP);
+        }
+        editor.apply();
+    }
+
+    public static boolean isMdmAutomaticBackup() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_MDM_AUTOMATIC_BACKUP, false);
+    }
+
+    public static void setMdmWebdavKeyEscrowPublicKey(String publicKeyPem) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putString(PREF_KEY_MDM_WEBDAV_KEY_ESCROW_PUBLIC_KEY, publicKeyPem);
+        editor.apply();
+    }
+
+    public static String getMdmWebdavKeyEscrowPublicKey() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_MDM_WEBDAV_KEY_ESCROW_PUBLIC_KEY, null);
     }
 
     public static String getAutomaticBackupDeviceUniqueId() {

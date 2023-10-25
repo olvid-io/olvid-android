@@ -215,6 +215,14 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
     private val listCount = SparseIntArray()
     override fun visit(listItem: ListItem) {
         super.visit(listItem)
+        val columnIndex = listItem.sourceSpans.first().columnIndex
+        if (columnIndex != 0) {
+            val lineStart = lineOffsets[listItem.sourceSpans.first().lineIndex]
+            if (editable.substring(lineStart, lineStart + columnIndex).isNotBlank()) {
+                // this list item is inlined (it does not start the line), don't handle
+                return
+            }
+        }
         if (listItem.isOrderedList()) {
             val count = listCount.get(
                 listItem.parent.hashCode(),
@@ -508,10 +516,12 @@ private fun Editable.setMarkdownSpanFromNode(
                         )
                     }
                     val delimiterStart = sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex]
+                    val remainingString = substring(delimiterStart)
+                    val delimiterLength = remainingString.indexOf(" ") + 1
                     setSpan(
                         MarkdownDelimiter(color = highlightColor),
                         delimiterStart,
-                        (delimiterStart + markdownSpan.delimiter.length + substring(delimiterStart + markdownSpan.delimiter.length).indexOfFirstNonAsciiWhitespace()
+                        (delimiterStart + delimiterLength + remainingString.substring(delimiterLength).indexOfFirstNonAsciiWhitespace()
                             .coerceAtLeast(0))
                             .coerceAtMost(length),
                         SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE

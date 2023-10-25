@@ -227,7 +227,6 @@ public class GalleryViewModel extends ViewModel {
         }
 
         private void updateOwnedIdentity(byte[] bytesOwnedIdentity, String sortOrder, Boolean ascending) {
-            Logger.e("Ascending " + ascending);
             LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> newSource;
             if (bytesOwnedIdentity != null) {
                 if ("size".equals(sortOrder)) {

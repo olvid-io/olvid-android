@@ -1075,9 +1075,17 @@
     <string name="snackbar_message_verify_backup_key">Do you remember your backup key?</string>
     <string name="dialog_message_verify_backup_key_explanation">Having an up to date Olvid backup is essential, but you need your backup key to restore it!\n\nPress \"setup backups\" to verify your key. If you lost it, don\'t worry, you can generate a new one.</string>
     <string name="restriction_keycloak_configuration_uri_title" translatable="false">Keycloak configuration</string>
-    <string name="restriction_keycloak_configuration_uri_description" translatable="false">Configuration link provided by the Olvid keycloak plugin</string>
+    <string name="restriction_keycloak_configuration_uri_description" translatable="false">Configuration link provided in the keycloak Olvid Management Console.</string>
     <string name="restriction_disable_new_version_notification_title" translatable="false">Disable new version notification</string>
     <string name="restriction_disable_new_version_notification_description" translatable="false">Set to \"true\" to prevent users from receiving a notification when a new version of Olvid is available on the store. This is especially useful if the application can only be updated through the MDM.</string>
+    <string name="restriction_settings_configuration_uri_title" translatable="false">Settings configuration link</string>
+    <string name="restriction_settings_configuration_uri_description" translatable="false">Pre-defined application settings configuration link. May be generated at https://olvid.io/settings</string>
+    <string name="restriction_webdav_automatic_backup_uri_title" translatable="false">Automatic backup WebDAV uri</string>
+    <string name="restriction_webdav_automatic_backup_uri_description" translatable="false">Setting this will enable automatic backups to a WebDAV server. This uri should be of the form https://username:password@webdavserver/path/</string>
+    <string name="restriction_webdav_automatic_backup_write_only_title" translatable="false">Write-only WebDAV</string>
+    <string name="restriction_webdav_automatic_backup_write_only_description" translatable="false">Set this to \"true\" if the automatic backup WebDAV only supports writing (no listing, downloading or deleting).</string>
+    <string name="restriction_webdav_key_escrow_public_key_title" translatable="false">Encryption public key for backup key escrow on WebDAV</string>
+    <string name="restriction_webdav_key_escrow_public_key_description" translatable="false">Set this to an RSA public key in PEM format. The backup key generated in Olvid will then be kept in escrow on the WebDAV server.</string>
     <string name="dialog_title_open_external_app_warning">Open with external app</string>
     <string name="dialog_message_open_external_app_warning">You are about to open a file with an external application. The content of this file will be exposed outside of Olvid.\nDo you wish to proceed?</string>
     <string name="menu_action_unblock_discussion">Unblock discussion</string>
@@ -1399,6 +1407,7 @@
     <string name="pref_screen_scale">Display size</string>
     <string name="content_description_open_discussion">Open discussion</string>
     <string name="label_read_only">Read Only</string>
+    <string name="label_read_only_short">Read Only</string>
     <string name="label_admin">Admin</string>
     <string name="label_pending_admin">Pending\nadmin</string>
     <string name="label_not_admin">Not admin</string>
@@ -1596,6 +1605,7 @@
     <string name="text_setting_wc_require_unlock">\u2023 Require unlock before each WebClient connection:\u0020</string>
     <string name="text_setting_permanent_foreground_service">\u2023 Use a permanent foreground service:\u0020</string>
     <string name="text_setting_share_app_version">\u2023 Share app and OS version with Olvid:\u0020</string>
+    <string name="text_setting_map_integration">\u2023 Map provider integration:\u0020</string>
     <string name="text_setting_notify_certificate_change">\u2023 Notify when a server certifcate changes:\u0020</string>
     <string name="text_setting_sending_foreground_service">\u2023 Enable the \"message being sent\" notification:\u0020</string>
     <string name="text_setting_auto_join_groups">\u2023 Automatically accept group invitations from:\u0020</string>
@@ -1626,6 +1636,8 @@
     <string name="text_setting_line">line</string>
     <string name="text_setting_full">full</string>
     <string name="text_setting_none">none</string>
+    <string name="text_setting_osm" translatable="false">Open Street Maps</string>
+    <string name="text_setting_google_maps" translatable="false">Google Maps</string>
     <string name="activity_title_settings_update">Settings update</string>
     <string name="xx_gbps">%1$sG/s</string>
     <string name="xx_mbps">%1$sM/s</string>
@@ -1757,7 +1769,24 @@
     <string name="onboarding_transfer_source_confirmation_other_device_remain_active">The device below will remain active:</string>
     <string name="button_label_restore_this_backup">Restore this backup</string>
     <string name="button_label_maybe_later">Maybe later</string>
-
+    <string name="dialog_permissions_change_title">Groupe type modification</string>
+    <string name="dialog_permissions_change_message">Changing the group type will significantly change the permissions of the members below.</string>
+    <string name="dialog_permissions_change_admin">**Gain admin:**</string>
+    <string name="dialog_permissions_change_not_admin">**Lose admin:**</string>
+    <string name="dialog_permissions_change_can_send_messages">**Can send messages:**</string>
+    <string name="dialog_permissions_change_cannot_send_messages">**Can no longer send messages:**</string>
+    <string name="label_write_only_webdav_explanation">This is a write-only WebDAV. Listing is not possible.</string>
+    <string name="label_write_only_webdav">Write-only WebDAV server</string>
+    <string name="dialog_title_mdm_backup_failure">Automatic backup failure</string>
+    <string name="dialog_message_mdm_backup_failure">Automatic backups are currently configured by your device administrator. An error occured while uploading your latest backup, which could mean this configuration is no longer valid.\n\nIf this problem persists, please contact your administrator.</string>
+    <string name="dialog_title_backup_configured_by_mdm">Backups configured by your device administrator</string>
+    <string name="dialog_message_backup_configured_by_mdm">Automatic backups are currently configured by your device administrator and cannot be disabled. If you believe this is an error, please contact your administrator.</string>
+    <string name="dialog_title_mdm_key_escrow_required">Your backup key is not safely stored in escrow</string>
+    <string name="dialog_message_mdm_key_escrow_required">Your device administrator has configured automatic key escrow for your Olvid backup key. However your current key is not safely stored yet.\n\nPlease press \"open settings\" and generate a new backup key. If not sure about what to do, please contact your administrator.</string>
+    <string name="pref_generate_new_backup_key_summary_key_escrow_status_ok">\nKey escrow status: OK</string>
+    <string name="pref_generate_new_backup_key_summary_key_escrow_status_bad">\nKey escrow status: ⚠️ Missing ⚠️</string>
+    <string name="label_key_escrow_successful">Key escrow successful</string>
+    <string name="label_key_escrow_failed">Key escrow failed</string>
 
     <plurals name="dialog_message_delete_user_impossible_count">
         <item quantity="one">1 common group</item>
