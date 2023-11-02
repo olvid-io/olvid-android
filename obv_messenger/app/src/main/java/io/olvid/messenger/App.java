@@ -60,6 +60,7 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.media3.common.util.UnstableApi;
 import androidx.preference.PreferenceManager;
 
 import com.google.zxing.BarcodeFormat;
@@ -285,7 +286,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId) {
+    @UnstableApi public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
@@ -293,7 +294,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openDraftGalleryActivity(Context activityContext, long draftMessageId, long fyleId) {
+    @UnstableApi public static void openDraftGalleryActivity(Context activityContext, long draftMessageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, true);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, draftMessageId);
@@ -301,7 +302,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openMessageGalleryActivity(Context activityContext, long messageId, long fyleId) {
+    @UnstableApi public static void openMessageGalleryActivity(Context activityContext, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, false);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
@@ -309,7 +310,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, boolean ascending, long messageId, long fyleId) {
+    @UnstableApi public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, boolean ascending, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         if (sortOrder != null) {
@@ -327,7 +328,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openGroupCreationActivityForCloning(Context activityContext, String absolutePhotoUrl, String serializedGroupDetails, String serializedGroupType, List<Contact> preselectedGroupMembers) {
+    public static void openGroupCreationActivityForCloning(Context activityContext, String absolutePhotoUrl, String serializedGroupDetails, String serializedGroupType, List<Contact> preselectedGroupMembers, List<Contact> preselectedGroupAdminMembers) {
         Intent intent = new Intent(getContext(), GroupCreationActivity.class);
         if (absolutePhotoUrl != null) {
             intent.putExtra(GroupCreationActivity.ABSOLUTE_PHOTO_URL_INTENT_EXTRA, absolutePhotoUrl);
@@ -344,6 +345,13 @@ public class App extends Application implements DefaultLifecycleObserver {
                 parcelables.add(new BytesKey(contact.bytesContactIdentity));
             }
             intent.putParcelableArrayListExtra(GroupCreationActivity.PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA, parcelables);
+        }
+        if (preselectedGroupAdminMembers != null) {
+            ArrayList<Parcelable> parcelables = new ArrayList<>(preselectedGroupAdminMembers.size());
+            for (Contact contact : preselectedGroupAdminMembers) {
+                parcelables.add(new BytesKey(contact.bytesContactIdentity));
+            }
+            intent.putParcelableArrayListExtra(GroupCreationActivity.PRESELECTED_GROUP_ADMIN_MEMBERS_INTENT_EXTRA, parcelables);
         }
         activityContext.startActivity(intent);
     }
@@ -1161,7 +1169,7 @@ public class App extends Application implements DefaultLifecycleObserver {
 
         private static EngineNotificationListener backupKeyListener = null;
 
-        private void configureMdmWebDavAutomaticBackups() throws Exception {
+        static void configureMdmWebDavAutomaticBackups() throws Exception {
             BackupCloudProviderService.CloudProviderConfiguration mdmAutoBackupConfiguration = MDMConfigurationSingleton.getAutoBackupConfiguration();
             if (mdmAutoBackupConfiguration != null) {
                 BackupCloudProviderService.CloudProviderConfiguration currentAutoBackupConfiguration = SettingsActivity.getAutomaticBackupConfiguration();

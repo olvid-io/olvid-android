@@ -580,7 +580,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
                     FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
                     transaction.replace(R.id.new_license_status_placeholder, newSubscriptionStatusFragment);
                     transaction.commit();
-                    activateButton.setEnabled(true);
+                    activateButton.setEnabled(apiKeyStatus != EngineAPI.ApiKeyStatus.LICENSES_EXHAUSTED);
                 });
                 break;
             }

@@ -16,8 +16,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdk 34
-        versionCode 217
-        versionName "1.1"
+        versionCode 219
+        versionName "1.2"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr']
@@ -139,7 +139,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.6.2'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
-    implementation 'com.google.accompanist:accompanist-themeadapter-appcompat:0.31.1-alpha'
+    implementation 'com.google.accompanist:accompanist-themeadapter-appcompat:0.33.2-alpha'
+    implementation 'com.google.accompanist:accompanist-permissions:0.33.2-alpha'
     implementation 'io.coil-kt:coil-compose:2.3.0'
 
     // starting with zxing 3.4.0, API level 24 is required...
@@ -172,6 +173,7 @@ dependencies {
     implementation 'androidx.sharetarget:sharetarget:1.2.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.work:work-runtime:2.8.1'
+    implementation 'androidx.datastore:datastore-preferences:1.0.0'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
     implementation 'org.jsoup:jsoup:1.16.1'

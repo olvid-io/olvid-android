@@ -24,8 +24,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -54,11 +56,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import io.olvid.messenger.R
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
 import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
-import io.olvid.messenger.main.EmptyListCard
+import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -119,13 +122,22 @@ fun GroupListScreen(
                 } else {
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.TopCenter
                     ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            NewGroupButton(onNewGroupClick)
-                            EmptyListCard(stringRes = string.explanation_empty_group_list)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            MainScreenEmptyList(
+                                icon = R.drawable.tab_groups,
+                                title = R.string.explanation_empty_group_list,
+                                subtitle = R.string.explanation_empty_group_list_sub
+                            )
                         }
+                        NewGroupButton(onNewGroupClick)
                     }
                 }
             }

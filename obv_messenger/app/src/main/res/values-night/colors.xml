@@ -34,6 +34,7 @@
 
     <!-- New color -->
     <color name="dialogBackground">#303030</color>
+    <color name="itemBackground">#171717</color>
     <color name="dialogBackgroundOverlay">#99303030</color>
     <color name="inboundMessageBody">#c3d9e6</color>
 </resources>

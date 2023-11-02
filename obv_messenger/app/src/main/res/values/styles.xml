@@ -33,6 +33,12 @@
         <item name="android:statusBarColor">@color/olvid_gradient_light</item>
     </style>
 
+    <style name="AppTheme.NoActionBar.AlmostWhiteStatusBar">
+        <item name="android:windowBackground">@color/almostWhite</item>
+        <item name="android:statusBarColor">@color/almostWhite</item>
+        <item name="android:windowLightStatusBar">@bool/dayMode</item>
+    </style>
+
     <!-- Discussion/Storage activity -->
     <style name="AppTheme.NoActionBar.ActionModeOverlay">
         <item name="windowActionModeOverlay">true</item>

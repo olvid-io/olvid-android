@@ -319,7 +319,6 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                 appBackupPojo.settings.restore();
             }
             new Handler(Looper.getMainLooper()).post(SettingsActivity::setDefaultNightMode);
-            SettingsActivity.setLastBackupReminderTimestamp(System.currentTimeMillis());
 
             return true;
         } catch (Exception e) {

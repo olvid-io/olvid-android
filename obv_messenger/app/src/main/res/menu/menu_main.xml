@@ -17,4 +17,9 @@
         android:orderInCategory="200"
         android:title="@string/menu_action_storage_management"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_troubleshooting"
+        android:orderInCategory="210"
+        android:title="@string/menu_action_troubleshooting"
+        app:showAsAction="never"/>
 </menu>

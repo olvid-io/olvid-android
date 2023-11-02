@@ -72,19 +72,12 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                 SharedPreferences sharedPreferences = getPreferenceManager().getSharedPreferences();
                 if (sharedPreferences != null) {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.remove(SettingsActivity.USER_DIALOG_HIDE_GOOGLE_APIS);
-                    editor.remove(SettingsActivity.USER_DIALOG_HIDE_BACKGROUND_RESTRICTED);
-                    editor.remove(SettingsActivity.USER_DIALOG_HIDE_BATTERY_OPTIMIZATION);
-                    editor.remove(SettingsActivity.USER_DIALOG_HIDE_ALARM_SCHEDULING);
-                    editor.remove(SettingsActivity.USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS);
-                    editor.remove(SettingsActivity.USER_DIALOG_HIDE_FULL_SCREEN_NOTIFICATION);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION);
                     editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED);
                     editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED);
-                    editor.remove(SettingsActivity.PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP);
                     editor.apply();
                     App.toast(R.string.toast_message_dialogs_restored, Toast.LENGTH_SHORT);
                     Utils.dialogsLoaded = false;

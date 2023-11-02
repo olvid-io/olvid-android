@@ -123,6 +123,7 @@ public class GroupCloningTasks {
                 null,
                 absolutePhotoUrl,
                 clonableGroupContacts,
+                new ArrayList<>(),
                 nonGroupV2CapableContacts,
                 nonContactOrNonChanelSerializedDetails
         );
@@ -144,6 +145,7 @@ public class GroupCloningTasks {
         }
 
         List<Contact> clonableGroupContacts = new ArrayList<>();
+        List<Contact> clonableGroupAdminContacts = new ArrayList<>();
         List<String> nonContactOrNonChanelSerializedDetails = new ArrayList<>();
 
 
@@ -155,7 +157,11 @@ public class GroupCloningTasks {
             if (group2Member.contact == null || !group2Member.contact.capabilityGroupsV2 || group2Member.contact.establishedChannelCount == 0) {
                 nonContactOrNonChanelSerializedDetails.add(group2Member.identityDetails);
             } else {
-                clonableGroupContacts.add(group2Member.contact);
+                if (group2Member.permissionAdmin) {
+                    clonableGroupAdminContacts.add(group2Member.contact);
+                } else {
+                    clonableGroupContacts.add(group2Member.contact);
+                }
             }
         }
 
@@ -165,6 +171,7 @@ public class GroupCloningTasks {
                 serializedGroupType,
                 absolutePhotoUrl,
                 clonableGroupContacts,
+                clonableGroupAdminContacts,
                 new ArrayList<>(),
                 nonContactOrNonChanelSerializedDetails
         );
@@ -176,17 +183,19 @@ public class GroupCloningTasks {
         public final String serializedGroupDetails; // contains the actual group name (or custom name), never the members names
         public final String serializedGroupType;
         public final String absolutePhotoUrl;
-        public final List<Contact> clonableGroupContacts; // list of contacts in the group (or pending) with whom I have a channel and that have group v2 capability
+        public final List<Contact> clonableGroupContacts; // list of non admin contacts in the group (or pending) with whom I have a channel and that have group v2 capability
+        public final List<Contact> clonableGroupAdminContacts; // list of admins in the group (or pending) with whom I have a channel and that have group v2 capability
         public final List<Contact> nonGroupV2CapableContacts; // contacts without group v2 capability
         public final List<String> nonContactOrNonChanelSerializedDetails; // serializedIdentityDetails of group members without a channel or with whom I am not in contact
 
 
-        public ClonabilityOutput(String groupDisplayName, String serializedGroupDetails, String serializedGroupType, String absolutePhotoUrl, List<Contact> clonableGroupContacts, List<Contact> nonGroupV2CapableContacts, List<String> nonContactOrNonChanelSerializedDetails) {
+        public ClonabilityOutput(String groupDisplayName, String serializedGroupDetails, String serializedGroupType, String absolutePhotoUrl, List<Contact> clonableGroupContacts, List<Contact> clonableGroupAdminContacts, List<Contact> nonGroupV2CapableContacts, List<String> nonContactOrNonChanelSerializedDetails) {
             this.groupDisplayName = groupDisplayName;
             this.serializedGroupDetails = serializedGroupDetails;
             this.serializedGroupType = serializedGroupType;
             this.absolutePhotoUrl = absolutePhotoUrl;
             this.clonableGroupContacts = clonableGroupContacts;
+            this.clonableGroupAdminContacts = clonableGroupAdminContacts;
             this.nonGroupV2CapableContacts = nonGroupV2CapableContacts;
             this.nonContactOrNonChanelSerializedDetails = nonContactOrNonChanelSerializedDetails;
         }
@@ -228,11 +237,11 @@ public class GroupCloningTasks {
                     .setMessage(activity.getString(R.string.dialog_message_clone_group_warning_missing_members,
                             clonabilityOutput.groupDisplayName,
                             sb.toString()))
-                    .setPositiveButton(R.string.button_label_proceed, ((DialogInterface dialog, int which) -> App.openGroupCreationActivityForCloning(activity, clonabilityOutput.absolutePhotoUrl, clonabilityOutput.serializedGroupDetails, clonabilityOutput.serializedGroupType, clonabilityOutput.clonableGroupContacts)))
+                    .setPositiveButton(R.string.button_label_proceed, ((DialogInterface dialog, int which) -> App.openGroupCreationActivityForCloning(activity, clonabilityOutput.absolutePhotoUrl, clonabilityOutput.serializedGroupDetails, clonabilityOutput.serializedGroupType, clonabilityOutput.clonableGroupContacts, clonabilityOutput.clonableGroupAdminContacts)))
                     .setNegativeButton(R.string.button_label_cancel, null);
             confirmationBuilder.create().show();
         } else {
-            App.openGroupCreationActivityForCloning(activity, clonabilityOutput.absolutePhotoUrl, clonabilityOutput.serializedGroupDetails, clonabilityOutput.serializedGroupType, clonabilityOutput.clonableGroupContacts);
+            App.openGroupCreationActivityForCloning(activity, clonabilityOutput.absolutePhotoUrl, clonabilityOutput.serializedGroupDetails, clonabilityOutput.serializedGroupType, clonabilityOutput.clonableGroupContacts, clonabilityOutput.clonableGroupAdminContacts);
         }
     }
 }

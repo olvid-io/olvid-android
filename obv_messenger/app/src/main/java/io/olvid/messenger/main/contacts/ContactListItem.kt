@@ -140,6 +140,7 @@ fun ContactListItem(
                         text = body,
                         color = colorResource(id = R.color.greyTint),
                         fontSize = 12.sp,
+                        lineHeight = 15.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

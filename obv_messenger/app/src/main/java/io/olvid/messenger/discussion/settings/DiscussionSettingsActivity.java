@@ -164,9 +164,14 @@ public class DiscussionSettingsActivity extends LockableActivity implements Pref
             AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                     .setTitle(R.string.dialog_title_shared_ephemeral_settings_modified)
                     .setMessage(R.string.dialog_message_shared_ephemeral_settings_modified)
-                    .setNegativeButton(R.string.button_label_discard, (dialog, which) -> discussionSettingsViewModel.discardEphemeralSettings())
-                    .setPositiveButton(R.string.button_label_update, (dialog, which) -> discussionSettingsViewModel.saveEphemeralSettingsAndNotifyPeers())
-                    .setOnDismissListener(dialog -> super.onBackPressed());
+                    .setNegativeButton(R.string.button_label_discard, (dialog, which) -> {
+                        discussionSettingsViewModel.discardEphemeralSettings();
+                        super.onBackPressed();
+                    })
+                    .setPositiveButton(R.string.button_label_update, (dialog, which) -> {
+                        discussionSettingsViewModel.saveEphemeralSettingsAndNotifyPeers();
+                        super.onBackPressed();
+                    });
             builder.create().show();
         } else {
             super.onBackPressed();

@@ -33,6 +33,7 @@ import org.jose4j.jwt.consumer.JwtContext;
 import org.jose4j.lang.HashUtil;
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,6 +54,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.customClasses.BytesKey;
+import io.olvid.messenger.customClasses.ConfigurationKeycloakPojo;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
 import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
@@ -383,9 +385,8 @@ public class KeycloakManager {
 
                         @Override
                         public void failed(int rfc) {
-                            authenticationRequiredOwnedIdentities.add(identityBytesKey);
-                            AndroidNotificationManager.displayKeycloakAuthenticationRequiredNotification(identityBytesKey.bytes);
-                            App.openAppDialogKeycloakAuthenticationRequired(kms.bytesOwnedIdentity, kms.clientId, kms.clientSecret, kms.serverUrl);
+                            // in case of failure, we do nothing --> this is probably only a network error, and it will be tried again
+                            // we do not want to prompt the user to authenticate in case of permanent connection error with the keycloak
                         }
                     });
                 }

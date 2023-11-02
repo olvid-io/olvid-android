@@ -65,6 +65,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.fragments.FilteredContactListFragment
 import io.olvid.messenger.group.GroupTypeModel.CustomGroup
+import io.olvid.messenger.group.GroupTypeModel.PrivateGroup
 import io.olvid.messenger.group.GroupTypeModel.SimpleGroup
 import io.olvid.messenger.settings.SettingsActivity
 
@@ -122,9 +123,15 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                     )
                 )
             }
-            if (intent.hasExtra(PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA)) {
-                val preselectedContactBytesKeys = intent.getParcelableArrayListExtra<BytesKey>(PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA)
-                if (preselectedContactBytesKeys != null) {
+            val preselectedContactAdminBytesKeys = intent.getParcelableArrayListExtra<BytesKey>(
+                PRESELECTED_GROUP_ADMIN_MEMBERS_INTENT_EXTRA
+            ) ?: arrayListOf<BytesKey>()
+            val preselectedContactNonAdminBytesKeys =
+                intent.getParcelableArrayListExtra<BytesKey>(PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA)
+                    ?: arrayListOf<BytesKey>()
+            val preselectedContactBytesKeys = preselectedContactAdminBytesKeys + preselectedContactNonAdminBytesKeys
+            if (preselectedContactBytesKeys.isNotEmpty()) {
+                val admins : HashSet<Contact> = hashSetOf()
                     App.runThread {
                         val preselectedContacts: MutableList<Contact> = ArrayList()
                         for (bytesKey in preselectedContactBytesKeys) {
@@ -132,10 +139,14 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                                 .contactDao()[AppSingleton.getBytesCurrentIdentity(), bytesKey.bytes]
                             if (contact != null) {
                                 preselectedContacts.add(contact)
+                                if (preselectedContactAdminBytesKeys.contains(bytesKey)) {
+                                    admins.add(contact)
+                                }
                             }
                         }
                         if (preselectedContacts.isNotEmpty()) {
                             runOnUiThread {
+                                groupCreationViewModel.admins.value = admins
                                 groupCreationViewModel.selectedContacts = preselectedContacts
                                 contactsSelectionFragment?.setInitiallySelectedContacts(
                                     preselectedContacts
@@ -143,7 +154,6 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                             }
                         }
                     }
-                }
             }
         }
         setContentView(R.layout.activity_group_creation)
@@ -373,32 +383,46 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
             val groupDescription = groupDetailsViewModel.groupDescription?.trim()
 
             val jsonGroupDetails = JsonGroupDetails(groupName.trim(), groupDescription)
-            val groupType = groupV2DetailsViewModel.getGroupTypeLiveData().value
+            val groupType = groupV2DetailsViewModel.getGroupTypeLiveData().value ?: SimpleGroup
             val otherGroupMembers = HashMap<ObvBytesKey, HashSet<Permission>>()
             for (contact in selectedContacts) {
                 val permissions = groupV2DetailsViewModel.getPermissions(
-                    groupV2DetailsViewModel.getGroupTypeLiveData().value ?: SimpleGroup,
-                    groupCreationViewModel.admins.value?.find { it == contact } != null)
+                    groupType,
+                    if (groupType is PrivateGroup)
+                        false
+                    else
+                        groupCreationViewModel.admins.value?.find { it == contact } != null)
                 otherGroupMembers[ObvBytesKey(contact.bytesContactIdentity)] = permissions
             }
             try {
                 val serializedGroupDetails =
                     AppSingleton.getJsonObjectMapper().writeValueAsString(jsonGroupDetails)
-                val serializedGroupType = AppSingleton.getJsonObjectMapper().writeValueAsString((groupType ?: CustomGroup()).toJsonGroupType() )
+                val serializedGroupType = AppSingleton.getJsonObjectMapper()
+                    .writeValueAsString((groupType).toJsonGroupType())
                 // set tmp ephemeral settings for just created group
                 AppSingleton.setCreatedGroupEphemeralSettings(
-                    JsonExpiration().takeIf { groupV2DetailsViewModel.getGroupTypeLiveData().value is CustomGroup }?.apply {
-                        readOnce = groupCreationViewModel.settingsReadOnce
-                        existenceDuration =
-                            groupCreationViewModel.settingsExistenceDuration
-                        visibilityDuration =
-                            groupCreationViewModel.settingsVisibilityDuration
-                    }
+                    JsonExpiration().takeIf { groupV2DetailsViewModel.getGroupTypeLiveData().value is CustomGroup }
+                        ?.apply {
+                            readOnce = groupCreationViewModel.settingsReadOnce
+                            existenceDuration =
+                                groupCreationViewModel.settingsExistenceDuration
+                            visibilityDuration =
+                                groupCreationViewModel.settingsVisibilityDuration
+                        }
                 )
                 val ownPermissions = Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet().apply {
-                    if (groupType is CustomGroup && groupType.remoteDeleteSetting == GroupTypeModel.RemoteDeleteSetting.NOBODY) this.remove(Permission.REMOTE_DELETE_ANYTHING)
+                    if (groupType is CustomGroup && groupType.remoteDeleteSetting == GroupTypeModel.RemoteDeleteSetting.NOBODY) this.remove(
+                        Permission.REMOTE_DELETE_ANYTHING
+                    )
                 }
-                AppSingleton.getEngine().startGroupV2CreationProtocol(serializedGroupDetails, groupAbsolutePhotoUrl, bytesOwnedIdentity, ownPermissions, otherGroupMembers, serializedGroupType)
+                AppSingleton.getEngine().startGroupV2CreationProtocol(
+                    serializedGroupDetails,
+                    groupAbsolutePhotoUrl,
+                    bytesOwnedIdentity,
+                    ownPermissions,
+                    otherGroupMembers,
+                    serializedGroupType
+                )
                 AppSingleton.getEngine().addNotificationListener(
                     EngineNotifications.GROUP_V2_CREATED_OR_UPDATED,
                     object : EngineNotificationListener {
@@ -670,5 +694,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
             "serialized_group_type" // String with serialized JsonGroupType
         const val PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA =
             "preselected_group_members" // Array of BytesKey
+        const val PRESELECTED_GROUP_ADMIN_MEMBERS_INTENT_EXTRA =
+            "preselected_group_admin_members" // Array of BytesKey
     }
 }

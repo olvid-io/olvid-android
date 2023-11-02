@@ -24,21 +24,34 @@ import android.content.RestrictionsManager;
 import android.os.Bundle;
 import android.util.Base64;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.net.URI;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Objects;
+import java.util.regex.Matcher;
 
+import io.olvid.engine.datatypes.ObvBase64;
+import io.olvid.engine.engine.types.JsonIdentityDetails;
+import io.olvid.engine.engine.types.identities.ObvIdentity;
+import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.activities.ObvLinkActivity;
+import io.olvid.messenger.customClasses.ConfigurationPojo;
+import io.olvid.messenger.customClasses.StringUtils;
 
 public class MDMConfigurationSingleton {
-    public static final String KEYCLOAK_CONFIGURATION_URI = "keycloak_configuration_uri";
-    public static final String DISABLE_NEW_VERSION_NOTIFICATION = "disable_new_version_notification";
-    public static final String SETTINGS_CONFIGURATION_URI = "settings_configuration_uri";
-    public static final String WEBDAV_AUTOMATIC_BACKUP_URI = "webdav_automatic_backup_uri";
-    public static final String WEBDAV_AUTOMATIC_BACKUP_WRITE_ONLY = "webdav_automatic_backup_write_only";
-    public static final String WEBDAV_KEY_ESCROW_PUBLIC_KEY = "webdav_key_escrow_public_key";
+    private static final String KEYCLOAK_CONFIGURATION_URI = "keycloak_configuration_uri";
+    private static final String DISABLE_NEW_VERSION_NOTIFICATION = "disable_new_version_notification";
+    private static final String SETTINGS_CONFIGURATION_URI = "settings_configuration_uri";
+    private static final String WEBDAV_AUTOMATIC_BACKUP_URI = "webdav_automatic_backup_uri";
+    private static final String WEBDAV_AUTOMATIC_BACKUP_WRITE_ONLY = "webdav_automatic_backup_write_only";
+    private static final String WEBDAV_KEY_ESCROW_PUBLIC_KEY = "webdav_key_escrow_public_key";
 
     private static MDMConfigurationSingleton INSTANCE = null;
 
@@ -80,6 +93,11 @@ public class MDMConfigurationSingleton {
                 String webdavAutomaticBackupUri = restrictions.getString(WEBDAV_AUTOMATIC_BACKUP_URI);
                 if (webdavAutomaticBackupUri != null) {
                     boolean writeOnly = restrictions.containsKey(WEBDAV_AUTOMATIC_BACKUP_WRITE_ONLY) && restrictions.getBoolean(WEBDAV_AUTOMATIC_BACKUP_WRITE_ONLY, false);
+
+                    // if this identity is configured by keycloak, try to substitute variables
+                    if (keycloakConfigurationUri != null) {
+                        webdavAutomaticBackupUri = replaceWebDavUriVariablesFromKeycloakProfile(webdavAutomaticBackupUri, keycloakConfigurationUri);
+                    }
 
                     try {
                         URI mdmUri = new URI(webdavAutomaticBackupUri);
@@ -136,9 +154,20 @@ public class MDMConfigurationSingleton {
 
     public static MDMConfigurationSingleton getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new MDMConfigurationSingleton();
+            synchronized (MDMConfigurationSingleton.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new MDMConfigurationSingleton();
+                }
+            }
         }
         return INSTANCE;
+    }
+
+    // called after a profile creation, in case the WEBDAV_AUTOMATIC_BACKUP_URI contains substitution parameters
+    public static void reloadMDMConfiguration() {
+        if (INSTANCE != null) {
+            INSTANCE = null;
+        }
     }
 
     public static String getKeycloakConfigurationUri() {
@@ -162,5 +191,55 @@ public class MDMConfigurationSingleton {
     }
     public static PublicKey getWebdavKeyEscrowPublicKey() {
         return getInstance().webdavKeyEscrowPublicKey;
+    }
+
+
+    private String replaceWebDavUriVariablesFromKeycloakProfile(String uri, String keycloakConfigurationUri) {
+        try {
+            Matcher matcher = ObvLinkActivity.CONFIGURATION_PATTERN.matcher(keycloakConfigurationUri);
+            if (matcher.find()) {
+                ConfigurationPojo configurationPojo = AppSingleton.getJsonObjectMapper().readValue(ObvBase64.decode(matcher.group(2)), ConfigurationPojo.class);
+                if (configurationPojo.keycloak != null) {
+                    JsonIdentityDetails details = null;
+
+                    ObvIdentity[] ownedIdentities = AppSingleton.getEngine().getOwnedIdentities();
+                    for (ObvIdentity ownedIdentity : ownedIdentities) {
+                        if (ownedIdentity.isKeycloakManaged() && ownedIdentity.isActive()) {
+                            ObvKeycloakState keycloakState = AppSingleton.getEngine().getOwnedIdentityKeycloakState(ownedIdentity.getBytesIdentity());
+                            if (keycloakState != null && Objects.equals(keycloakState.keycloakServer, configurationPojo.keycloak.getServer())) {
+                                if (details == null) {
+                                    details = ownedIdentity.getIdentityDetails();
+                                } else {
+                                    throw new Exception("Multiple identities managed by Keycloak");
+                                }
+                            }
+                        }
+                    }
+
+                    if (details != null) {
+                        String first_name = unAccentAndClean(details.getFirstName());
+                        String last_name = unAccentAndClean(details.getLastName());
+                        String position = unAccentAndClean(details.getPosition());
+                        String company = unAccentAndClean(details.getCompany());
+
+                        return uri.replace("{{first_name}}", first_name).replace("{{last_name}}", last_name).replace("{{position}}", position).replace("{{company}}", company);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (uri.contains("{{first_name}}") || uri.contains("{{last_name}}") || uri.contains("{{position}}") || uri.contains("{{company}}")) {
+            return null;
+        }
+        return uri;
+    }
+
+    @NonNull
+    private String unAccentAndClean(@Nullable String s) {
+        if (s == null) {
+            return "";
+        }
+        return StringUtils.unAccent(s).toLowerCase().trim().replaceAll("[^a-z]", "_");
     }
 }

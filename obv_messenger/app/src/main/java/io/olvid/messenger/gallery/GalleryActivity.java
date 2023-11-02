@@ -360,7 +360,11 @@ public class GalleryActivity extends LockableActivity {
                         && e1.getY() > 100 // no fling if starting from top of screen (like to show status bar)
                 ) {
                     finish();
-                    overridePendingTransition(R.anim.none, R.anim.dismiss_from_fling_down);
+                    if (velocityY < 0) {
+                        overridePendingTransition(R.anim.none, R.anim.dismiss_from_fling_up);
+                    } else {
+                        overridePendingTransition(R.anim.none, R.anim.dismiss_from_fling_down);
+                    }
                     return true;
                 }
                 return false;

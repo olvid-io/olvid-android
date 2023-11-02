@@ -54,7 +54,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Discussion
-import io.olvid.messenger.main.EmptyListCard
+import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.main.invitations.getAnnotatedDate
@@ -197,8 +197,15 @@ fun DiscussionListScreen(
                 } else {
                     Box(modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())) {
-                        EmptyListCard(stringRes = string.explanation_empty_discussion_list)
+                        .verticalScroll(rememberScrollState()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        MainScreenEmptyList(
+                            icon = R.drawable.tab_discussions,
+                            iconPadding = 4.dp,
+                            title = R.string.explanation_empty_discussion_list,
+                            subtitle = R.string.explanation_empty_discussion_list_sub
+                        )
                     }
                 }
             }

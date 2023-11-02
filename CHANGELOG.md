@@ -1,3 +1,14 @@
+# Build 219 (1.2)
+2023-11-02
+
+- New troubleshooting activity
+- Improved group cloning: it now preserves group admins
+
+# ~~Build 218 (1.1.1)~~
+2023-10-28
+
+- Internal release
+
 # Build 217 (1.1)
 2023-10-24
 

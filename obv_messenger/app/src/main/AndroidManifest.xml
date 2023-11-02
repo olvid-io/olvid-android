@@ -284,6 +284,9 @@
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar" />
         <activity
+            android:name=".troubleshooting.TroubleshootingActivity"
+            android:theme="@style/AppTheme.NoActionBar.AlmostWhiteStatusBar" />
+        <activity
             android:name=".appdialogs.AppDialogShowActivity"
             android:configChanges="orientation|screenSize|screenLayout|uiMode"
             android:launchMode="singleTop"

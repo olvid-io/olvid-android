@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 
 fun Modifier.shimmer(show:Boolean): Modifier = composed {
-
     if (show) {
         var size by remember {
             mutableStateOf(IntSize.Zero)

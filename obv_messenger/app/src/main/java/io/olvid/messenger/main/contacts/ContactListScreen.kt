@@ -58,7 +58,8 @@ import io.olvid.messenger.R.color
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.main.EmptyListCard
+import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.*
@@ -136,6 +137,8 @@ fun ContactListScreen(
                                                         contactListViewModel.filterPatterns
                                                     ),
                                                 shouldAnimateChannel = contactOrKeycloakDetails.contact?.shouldShowChannelCreationSpinner() == true && contactOrKeycloakDetails.contact.active,
+                                                publishedDetails = contactOrKeycloakDetails.contact?.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_SEEN || contactOrKeycloakDetails.contact?.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_UNSEEN,
+                                                publishedDetailsNotification = contactOrKeycloakDetails.contact?.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_UNSEEN,
                                                 onClick = { onClick(contactOrKeycloakDetails) },
                                                 initialViewSetup = { initialView ->
                                                     when (contactOrKeycloakDetails.contactType) {
@@ -213,13 +216,21 @@ fun ContactListScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(rememberScrollState()),
+                        contentAlignment = Center
                     ) {
-                        EmptyListCard(
-                            stringRes = if (contactListViewModel.isFiltering())
-                                string.explanation_no_contact_match_filter
-                            else string.explanation_empty_contact_list
-                        )
+                        if (contactListViewModel.isFiltering())
+                            MainScreenEmptyList(
+                                icon = drawable.ic_contacts_filter,
+                                title = string.explanation_no_contact_match_filter,
+                                subtitle = null
+                            )
+                        else
+                            MainScreenEmptyList(
+                                icon = drawable.tab_contacts,
+                                title = string.explanation_empty_contact_list,
+                                subtitle = string.explanation_empty_contact_list_sub
+                            )
                     }
                 }
             }

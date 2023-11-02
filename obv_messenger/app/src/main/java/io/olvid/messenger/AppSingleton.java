@@ -83,6 +83,7 @@ import io.olvid.messenger.discussion.ComposeMessageFragment;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.services.BackupCloudProviderService;
+import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.services.PeriodicTasksScheduler;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -135,14 +136,6 @@ public class AppSingleton {
             SettingsActivity.setContactDisplayNameFormat(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY);
         }
 
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 124) {
-            // clear missing google service dialog hide preference
-            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.remove(SettingsActivity.USER_DIALOG_HIDE_GOOGLE_APIS);
-            editor.apply();
-        }
-
         if (lastBuildExecuted != 0 && lastBuildExecuted < 136) {
             // clear deprecated scaled_turn preference
             final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
@@ -163,6 +156,19 @@ public class AppSingleton {
         if (lastBuildExecuted != 0 && lastBuildExecuted < 205) {
             // we fixed the rename task, run it again to fix all user displaynames
             App.runThread(new ContactDisplayNameFormatChangedTask());
+        }
+
+        if (lastBuildExecuted != 0 && lastBuildExecuted < 219) {
+            // clear removed dialog hide preference
+            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.remove("user_dialog_hide_battery_optimization");
+            editor.remove("user_dialog_hide_background_restricted");
+            editor.remove("user_dialog_hide_alarm_scheduling");
+            editor.remove("user_dialog_hide_allow_notifications");
+            editor.remove("user_dialog_hide_full_screen_notification");
+            editor.remove("pref_key_last_backup_reminder_timestamp");
+            editor.apply();
         }
 
         // TODO: enable this once location is no longer in beta
@@ -647,6 +653,14 @@ public class AppSingleton {
                     } catch (Exception e) {
                         // error with the photo, too bad...
                     }
+                }
+
+                // in case we have an MDM configuration, reload it and reconfigure backups
+                MDMConfigurationSingleton.reloadMDMConfiguration();
+                try {
+                    App.AppStartupTasks.configureMdmWebDavAutomaticBackups();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
                 App.runThread(new OwnedDevicesSynchronisationWithEngineTask(ownedIdentity.bytesOwnedIdentity));

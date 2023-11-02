@@ -43,12 +43,6 @@ public class AlarmPermissionStateChangeReceiver extends BroadcastReceiver {
             Logger.w("Permission to set exact alarms was granted!");
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
-                // reset hidden dialog flag
-                final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.remove(SettingsActivity.USER_DIALOG_HIDE_ALARM_SCHEDULING);
-                editor.apply();
-
                 // restart unified foreground service (in case app was still running)
                 context.startService(new Intent(context, UnifiedForegroundService.class));
                 UnifiedForegroundService.onAppBackground(context);

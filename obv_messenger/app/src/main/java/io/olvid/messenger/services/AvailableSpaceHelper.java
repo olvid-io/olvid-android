@@ -32,7 +32,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class AvailableSpaceHelper {
-    private final static long AVAILABLE_SPACE_WARNING_THRESHOLD = 50_000_000L;
+    public final static long AVAILABLE_SPACE_WARNING_THRESHOLD = 50_000_000L;
     private final static long MIN_REFRESH_INTERVAL_MILLIS = 600_000L; // 10 minutes
     private final static long MIN_WARNING_INTERVAL_MILLIS = 7_200_000L; // 2 hours
 

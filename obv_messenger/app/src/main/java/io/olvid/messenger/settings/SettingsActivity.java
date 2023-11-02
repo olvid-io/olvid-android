@@ -78,6 +78,7 @@ import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.firebase.ObvFirebaseMessagingService;
 import io.olvid.messenger.google_services.GoogleServicesUtils;
+import io.olvid.messenger.main.Utils;
 import io.olvid.messenger.services.BackupCloudProviderService;
 
 public class SettingsActivity extends LockableActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
@@ -96,7 +97,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_LAST_AVAILABLE_SPACE_WARNING_TIMESTAMP = "pref_key_last_available_space_warning_timestamp";
     static final String PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED = "pref_key_first_call_audio_permission_requested";
     static final String PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED = "pref_key_first_call_bluetooth_permission_requested";
-    static final String PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP = "pref_key_last_backup_reminder_timestamp";
     static final String PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER = "pref_key_compose_message_icon_preferred_order";
 
     static final String PREF_KEY_PREFERRED_REACTIONS = "pref_key_preferred_reactions";
@@ -326,13 +326,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS = "pref_key_no_notify_certificate_change_for_previews";
     static final boolean PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS_DEFAULT = false;
-
-    public static final String USER_DIALOG_HIDE_BATTERY_OPTIMIZATION = "user_dialog_hide_battery_optimization";
-    public static final String USER_DIALOG_HIDE_BACKGROUND_RESTRICTED = "user_dialog_hide_background_restricted";
     public static final String USER_DIALOG_HIDE_GOOGLE_APIS = "user_dialog_hide_google_apis";
-    public static final String USER_DIALOG_HIDE_ALARM_SCHEDULING = "user_dialog_hide_alarm_scheduling";
-    public static final String USER_DIALOG_HIDE_ALLOW_NOTIFICATIONS = "user_dialog_hide_allow_notifications";
-    public static final String USER_DIALOG_HIDE_FULL_SCREEN_NOTIFICATION = "user_dialog_hide_full_screen_notification";
     public static final String USER_DIALOG_HIDE_OPEN_EXTERNAL_APP = "user_dialog_hide_open_external_app";
     public static final String USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION = "user_dialog_hide_forward_message_explanation";
     public static final String USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION = "user_dialog_hide_open_external_app_location";
@@ -533,14 +527,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
                 extraFeatures.add("beta");
             }
             int uptimeSeconds = (int) ((System.currentTimeMillis() - App.appStartTimestamp) / 1000);
-            final String uptime;
-            if (uptimeSeconds > 86400) {
-                uptime = getResources().getQuantityString(R.plurals.text_app_uptime_days, uptimeSeconds / 86400, uptimeSeconds / 86400, (uptimeSeconds % 86400) / 3600, (uptimeSeconds % 3600) / 60, uptimeSeconds % 60);
-            } else if (uptimeSeconds > 3600) {
-                uptime = getString(R.string.text_app_uptime_hours, uptimeSeconds / 3600, (uptimeSeconds % 3600) / 60, uptimeSeconds % 60);
-            } else {
-                uptime = getString(R.string.text_app_uptime, uptimeSeconds / 60, uptimeSeconds % 60);
-            }
+            final String uptime = Utils.getUptime(this);
             builder.setTitle(R.string.dialog_title_about_olvid)
                     .setPositiveButton(R.string.button_label_ok, null);
             StringBuilder sb = new StringBuilder();
@@ -813,17 +800,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.putBoolean(PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED, requested);
         editor.apply();
     }
-
-    public static long getLastBackupReminderTimestamp() {
-        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getLong(PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP, 0);
-    }
-
-    public static void setLastBackupReminderTimestamp(long timestamp) {
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
-        editor.putLong(PREF_KEY_LAST_BACKUP_REMINDER_TIMESTAMP, timestamp);
-        editor.apply();
-    }
-
 
     public static boolean useSystemEmojis() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_USE_SYSTEM_EMOJIS, PREF_KEY_USE_SYSTEM_EMOJIS_DEFAULT);

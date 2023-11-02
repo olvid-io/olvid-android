@@ -22,9 +22,9 @@
     <string name="pref_text_autodownload_size_100M">Smaller than 100MB</string>
     <string name="pref_text_autodownload_size_disabled">Never download automatically</string>
     <string name="pref_text_autodownload_size_unlimited">Always download automatically</string>
-    <string name="button_label_abort">Abort</string>
+     <string name="button_label_abort">Abort</string>
     <string name="button_label_accept">Accept</string>
-    <string name="button_label_app_settings">App Settings</string>
+    <string name="button_label_app_settings">App settings</string>
     <string name="button_label_cancel">Cancel</string>
     <string name="button_label_create_group">Create Group</string>
     <string name="button_label_discard">Discard</string>
@@ -51,7 +51,6 @@
     <string name="dialog_message_abort_invitation">You are about to discard an invitation. Proceed?</string>
     <string name="dialog_message_about_olvid">You are using Olvid for Android\nVersion %1$s (build %2$d)\n\nServer API: %3$d\nEngine DB schema: %4$d\nApplication DB schema: %5$d\nApp running for: %6$s</string>
     <string name="dialog_message_about_olvid_extra_features">You are using Olvid for Android\nVersion %1$s (build %2$d)\n\nServer API: %3$d\nEngine DB schema: %4$d\nApplication DB schema: %5$d\n\nExtra features: %6$s\nApp running for: %7$s</string>
-    <string name="dialog_message_background_restricted">It appears that the Olvid app has Background Restriction enabled. Olvid will not be able to function properly until you remove it from the Restricted Apps list.\n\nYou can access this settings from:\nApp\u00a0Settings\u00a0> Advanced\u00a0> Battery\u00a0> Background\u00a0restriction</string>
     <string name="dialog_message_contact_introduction">Do you want to introduce %1$s and %2$s to one another?</string>
     <string name="dialog_message_contact_introduction_multiple">Do you want to introduce %1$s to the %2$d following contacts?\n\n%3$s</string>
     <string name="dialog_message_delete_attachment">Do you really want to delete attachment %1$s from this message?\nThis action cannot be undone.</string>
@@ -66,7 +65,6 @@
     <string name="dialog_message_restart_channel_establishment">Do you really wish to restart the ongoing secure discussion channel establishment protocol?</string>
     <string name="dialog_title_abort_invitation">Abort Invitation?</string>
     <string name="dialog_title_about_olvid">About Olvid</string>
-    <string name="dialog_title_background_restricted">Olvid is Background Restricted</string>
     <string name="dialog_title_contact_introduction">Contact Introduction</string>
     <string name="dialog_title_delete_attachment">Delete Attachment</string>
     <string name="dialog_title_delete_discussion">Delete Discussion</string>
@@ -89,10 +87,12 @@
     <string name="dialog_title_share_with">Share with…</string>
     <string name="dialog_title_shortcut_to">Create shortcut to…</string>
     <string name="explanation_choose_display_name">Please enter a name which will be displayed to your contacts. These details will never be sent to Olvid\'s servers.</string>
-    <string name="explanation_empty_contact_list">This screen displays the list of contacts you trust.\n\nTo add new contacts, press the blue + at the bottom of this screen.</string>
-    <string name="explanation_empty_discussion_list">This screen displays your ongoing discussions.</string>
-    <string name="explanation_empty_group_list">This screen displays the list of groups you belong to.</string>
-    <string name="explanation_empty_invitation_list">This screen displays the list of invitations you have received or sent.</string>
+    <string name="explanation_empty_contact_list">No contacts for now</string>
+    <string name="explanation_empty_contact_list_sub">Press the blue + below to add your first contact.</string>
+    <string name="explanation_empty_discussion_list">No discussions for now</string>
+    <string name="explanation_empty_discussion_list_sub">Contact and group discussions will appear here.</string>
+    <string name="explanation_empty_group_list">No groups for now</string>
+    <string name="explanation_empty_group_list_sub">Press \"New group\" to create your first group.</string>
     <string name="explanation_new_group_card">The group manager updated the Group Card. Both the old and new versions are shown below.\n\nPress \"update\" to update the group\'s information.</string>
     <string name="explanation_new_group_v2_card">One of the group administrators updated the group details. The new version is shown above.\n\nPress \"update\" to use this new version.</string>
     <string name="explanation_new_olvid_card">Your contact updated their Olvid Card. Both the old and new versions are shown below.\n\nPress \"update\" to update your contact\'s information with this new version.</string>
@@ -297,9 +297,6 @@
     <string name="hint_search_contact_name">Search Contact Name…</string>
     <string name="menu_action_search">Search</string>
     <string name="toast_message_polling_failed">Failed to get messages</string>
-    <string name="dialog_title_google_apis_missing">Google Play Services Unavailable</string>
-    <string name="dialog_message_google_apis_missing">It seems the Google Play Services are not installed on your device. Olvid relies on these services to be notified of incoming messages. Without them, you will only receive new messages when Olvid is in the foreground.\n\nYou may instead enable a permanent WebSocket connection to Olvid\'s servers that can serve the same purpose (but may drain your battery).</string>
-    <string name="dialog_title_battery_optimization">Battery Optimization</string>
     <string name="dialog_message_battery_optimization">Battery optimization on Android works by delaying certain background events to run them in a batch. This may delay the reception of inbound Olvid messages.\n\nTo ensure that your messages are received promptly, you should allow Olvid to \"always run in background\". Press \"Settings\" below and then \"Allow\".</string>
     <string name="dialog_text_do_not_show_again">Do not show this message again</string>
     <string name="button_label_battery_optimization_settings">Settings</string>
@@ -510,7 +507,8 @@
     <string name="pref_call_ringtone_title">Ringtone</string>
     <string name="pref_call_vibration_pattern_title">Vibrator</string>
     <string name="pref_category_call_notifications_title">Incoming call notifications</string>
-    <string name="explanation_empty_call_log">This screen displays the list of calls you made or received.</string>
+    <string name="explanation_empty_call_log">No calls for now</string>
+    <string name="explanation_empty_call_log_sub">Calls you make or receive will appear here.</string>
     <string name="text_call_timestamp_and_duration">%1$s (lasted %2$02dmin\u00a0%3$02dsec)</string>
     <string name="text_call_duration">(lasted %1$02dmin\u00a0%2$02dsec)</string>
     <string name="text_call_duration_short">(lasted %1$02dsec)</string>
@@ -1042,8 +1040,6 @@
     <string name="pref_text_regional_turn_server_singapore">Singapore TURN servers</string>
     <string name="dialog_title_android_12_bluetooth_access">Request permission to access bluetooth devices</string>
     <string name="dialog_message_android_12_bluetooth_access">If you want to use a bluetooth headset for Olvid calls, you need to allow Olvid to \"find and connect to\" your nearby devices.</string>
-    <string name="dialog_title_alarm_scheduling_forbidden">Permission to set alarms</string>
-    <string name="dialog_message_alarm_scheduling_forbidden">Olvid relies on alarms to precisely schedule screen lock and ephemeral messages deletion.\nThe permission to set such alarms has been revoked, which may cause these security features to misbehave.\n\nWe strongly encourage you to allow settings alarms and reminders by pressing the \"app settings\" button below.</string>
     <string name="text_count_contacts">%1$d contacts</string>
     <string name="text_count_contacts_from_group">%1$d contacts in group %2$s</string>
     <string name="dialog_title_outdated_version">Update required</string>
@@ -1064,16 +1060,12 @@
     <string name="dialog_message_keycloak_signature_key_changed">Olvid detected a change in the cryptographic signature key of your identity provider. This should normally never happen.\n\nPlease contact your administrator and only press \"update key\" if he can confirm the key change was intentional. If unsure, press \"cancel\".</string>
     <string name="dialog_title_keycloak_identity_was_revoked">Identity provider removed</string>
     <string name="dialog_message_keycloak_identity_was_revoked">It seems that your account was removed from your company\'s identity provider. If you left your company, this is normal and you may continue using Olvid as a free user.\n\nIf you believe this is an error, please contact your administrator to re-register this identity provider with Olvid.</string>
-    <string name="button_label_show_me">Show me</string>
     <string name="button_label_backup_settings">Setup backups</string>
     <string name="snackbar_message_setup_backup">It\'s time to setup backups!</string>
-    <string name="dialog_title_setup_backup_explanation">Why should you setup backups 🤔?</string>
-    <string name="dialog_message_setup_backup_explanation">If you were to lose your device, or to uninstall Olvid by mistake, you would lose your Olvid ID, all your contacts, and all your groups 😱. Luckily for you, it is possible to setup secure backups 😅.\n\nPress \"setup backups\" to begin.</string>
+    <string name="dialog_message_setup_backup_explanation">If you were to lose your device, or to uninstall Olvid by mistake, you would lose your Olvid ID, all your contacts, and all your groups 😱. Luckily for you, it is possible to setup secure backups 😅.\n\nPress \"Setup backups\" to begin.</string>
     <string name="snackbar_message_remember_to_backup">It\'s backup time!</string>
-    <string name="dialog_message_remember_to_backup_explanation">In order not to lose any contact, we recommend you activate automatic backups to Google Drive. Don\'t worry, these backups are encrypted 🤓!\nOtherwise, you may also perform manual backups on a regular basis.\n\nPress \"setup backups\" to begin.</string>
-    <string name="dialog_message_remember_to_backup_explanation_no_google">It\'s been more than a week since your last backup. Now is probably a good time for a new one. Keep in mind that an old backup might not contain all your latest contacts.\n\nPress \"setup backups\" to begin.</string>
-    <string name="snackbar_message_verify_backup_key">Do you remember your backup key?</string>
-    <string name="dialog_message_verify_backup_key_explanation">Having an up to date Olvid backup is essential, but you need your backup key to restore it!\n\nPress \"setup backups\" to verify your key. If you lost it, don\'t worry, you can generate a new one.</string>
+    <string name="dialog_message_remember_to_backup_explanation">In order not to lose any contact, we recommend you activate automatic backups to Google Drive. Don\'t worry, these backups are encrypted 🤓!\nOtherwise, you may also perform manual backups on a regular basis.\n\nPress \"Setup backups\" to begin.</string>
+    <string name="dialog_message_remember_to_backup_explanation_no_google">It\'s been more than a week since your last backup. Now is probably a good time for a new one. Keep in mind that an old backup might not contain your latest contacts.\n\nPress \"Setup backups\" to begin.</string>
     <string name="restriction_keycloak_configuration_uri_title" translatable="false">Keycloak configuration</string>
     <string name="restriction_keycloak_configuration_uri_description" translatable="false">Configuration link provided in the keycloak Olvid Management Console.</string>
     <string name="restriction_disable_new_version_notification_title" translatable="false">Disable new version notification</string>
@@ -1240,8 +1232,8 @@
     <string name="label_ping_connectivity_none">Connectivity: NONE</string>
     <string name="label_ping_connectivity_connecting">Connectivity: CONNECTING…</string>
     <string name="label_ping_connectivity_connected">Connectivity: CONNECTED</string>
-    <string name="label_ping_delay">ping: %1$dms</string>
-    <string name="label_over_max_ping_delay">ping: >%1$ds</string>
+    <string name="label_ping_delay">Ping: %1$dms</string>
+    <string name="label_over_max_ping_delay">Ping: >%1$ds</string>
     <string name="menu_action_copy_message_text">Copy message text</string>
     <string name="menu_action_copy_text_and_attachments">Copy message and attachments</string>
     <string name="label_message_copied_from_olvid">Message copied from Olvid</string>
@@ -1295,6 +1287,7 @@
     <string name="label_other">Other</string>
     <string name="label_all">All</string>
     <string name="menu_action_storage_management">Storage management</string>
+    <string name="menu_action_troubleshooting">Troubleshooting</string>
     <string name="explanation_no_files">No attachment to display</string>
     <string name="menu_action_sort_order">Sort order</string>
     <string name="menu_action_sort_date">Sort by date (most recent first)</string>
@@ -1568,11 +1561,6 @@
     <string name="pref_text_default_device_language">Default device language</string>
     <string name="pref_text_english" translatable="false">English</string>
     <string name="pref_text_francais" translatable="false">Français</string>
-    <string name="dialog_title_notifications_disabled">Notifications disabled</string>
-    <string name="dialog_message_notifications_disabled">It appears that notifications are currently disabled for Olvid. Unless you enable them, you will not be notified when receiving a message from your contacts.\n\nWe recommend you tap \"open settings\" and toggle notifications back on.</string>
-    <string name="dialog_title_get_notified">Get notified!</string>
-    <string name="dialog_message_get_notified">To be notified when a contact sends you a message, you need to allow Olvid to send notifications.</string>
-    <string name="button_label_skip">Skip</string>
     <string name="pref_block_untrusted_certificate_title">Block connections using an untrusted certificate</string>
     <string name="pref_text_never">Never</string>
     <string name="pref_text_always">Always</string>
@@ -1706,8 +1694,6 @@
     <string name="menu_action_location_message_change_integration">Change map provider</string>
     <string name="pref_read_only_title">Read only group</string>
     <string name="pref_read_only_summary">When activated, only group admins can post messages in this group</string>
-    <string name="dialog_title_full_screen_notification">Incoming call notifications</string>
-    <string name="dialog_message_full_screen_notification">Incoming calls sometimes need to display a full screen \"answer call\" notification. Olvid currently does not have permission to open such full screen notifications. Press \"App Settings\" to open the relevant setting screen.</string>
     <string name="button_label_add_device">Add a device</string>
     <string name="onboarding_welcome_title">Welcome!</string>
     <string name="onboarding_welcome_among_us">Welcome to Olvid</string>
@@ -1787,6 +1773,47 @@
     <string name="pref_generate_new_backup_key_summary_key_escrow_status_bad">\nKey escrow status: ⚠️ Missing ⚠️</string>
     <string name="label_key_escrow_successful">Key escrow successful</string>
     <string name="label_key_escrow_failed">Key escrow failed</string>
+
+    <string name="troubleshooting_notifications_valid_title">Notifactions</string>
+    <string name="troubleshooting_notifications_valid_description">To be notified when a contact sends you a message, you need to allow Olvid to display notifications.</string>
+    <string name="troubleshooting_notifications_invalid_title">Notifications disabled</string>
+    <string name="troubleshooting_notifications_invalid_description">Notifications are currently disabled for Olvid. Unless you enable them, you will not be notified when receiving a message from your contacts.</string>
+    <string name="troubleshooting_camera_valid_title">Camera access</string>
+    <string name="troubleshooting_camera_valid_description">Granting Olvid access to the camera allows you to send pictures taken directly from within Olvid, or to scan the ID of other users.</string>
+    <string name="troubleshooting_camera_invalid_title">Camera access denied</string>
+    <string name="troubleshooting_audio_recording_valid_title">Audio recording</string>
+    <string name="troubleshooting_audio_recording_valid_description">Granting Olvid access to the microphone allows you to record voice messages and is required to start or receive secure calls.</string>
+    <string name="troubleshooting_audio_recording_invalid_title">Audio recording disabled</string>
+    <string name="troubleshooting_battery_optimization_valid_title">Battery optimization</string>
+    <string name="troubleshooting_battery_optimization_valid_description">Battery optimization on Android works by delaying certain background events to run them in a batch. This may delay the reception of inbound Olvid messages and calls.\n\nOlvid is currently allowed to \"always run in background\".</string>
+    <string name="troubleshooting_battery_optimization_invalid_description">Battery optimization on Android works by delaying certain background events to run them in a batch. This may delay the reception of inbound Olvid messages and calls.\n\nTo ensure that your messages are received promptly, you should allow Olvid to \"always run in background\".</string>
+    <string name="troubleshooting_background_restriction_valid_title">Background restriction</string>
+    <string name="troubleshooting_background_restriction_valid_description">Olvid needs to be allowed to run in background to function properly. Enabling background restriction would, for example, prevent Olvid from receiving messages in the background.</string>
+    <string name="troubleshooting_background_restriction_invalid_description">Olvid has \"background restriction\" enabled. Olvid will not be able to function properly until you remove it from the \"restricted apps\" list.\n\nYou can fix this by pressing \"App settings\" and heading to the battery usage section.</string>
+    <string name="troubleshooting_alarm_valid_title">Permission to set alarms</string>
+    <string name="troubleshooting_alarm_valid_description">Olvid relies on alarms to precisely schedule screen lock and ephemeral messages deletion. This permission is set correctly.</string>
+    <string name="troubleshooting_alarm_invalid_description">Olvid relies on alarms to precisely schedule screen lock and ephemeral messages deletion.\nThe permission to set such alarms has been revoked, which may cause these security features to misbehave.\n\nWe strongly encourage you to allow setting alarms and reminders by pressing \"App settings\".</string>
+    <string name="troubleshooting_incoming_call_valid_title">Incoming call notifications</string>
+    <string name="troubleshooting_incoming_call_valid_description">Incoming calls need to display a full screen \"answer call\" notification. This permission is set correctly.</string>
+    <string name="troubleshooting_incoming_call_invalid_description">Incoming calls need to display a full screen \"answer call\" notification. Olvid currently does not have permission to open such full screen notifications. Press \"App settings\" to allow full scrren notifications.</string>
+    <string name="troubleshooting_google_valid_title">Google Play Services unavailable</string>
+    <string name="troubleshooting_google_valid_description">Permanent WebSocket connection to Olvid\'s servers is properly configured.</string>
+    <string name="troubleshooting_google_invalid_description">Google Play Services are not available on your device. Olvid relies on these services to be notified of incoming messages. Without them, you will only receive new messages when Olvid is in the foreground.\n\nYou may instead enable a permanent WebSocket connection to Olvid\'s servers that can serve the same purpose (but may slightly drain your battery).</string>
+    <string name="button_label_enable_websocket">Enable the WebSocket</string>
+    <string name="troubleshooting_storage_valid_title">Device storage</string>
+    <string name="troubleshooting_storage_valid_description">%1$s storage space available on your device.</string>
+    <string name="troubleshooting_storage_invalid_title">Device storage almost full</string>
+    <string name="troubleshooting_storage_invalid_description">Only %1$s storage space left on your device.\n\nYour device is running low on available space. Expect to run into unexpected errors when receiving or sending files with Olvid.\n\nThis is probably the right time to free up some space on your device.</string>
+    <string name="troubleshooting_header">**App version**: %1$s (build %2$d)\n**Device model**: %3$s\n**Android API**: %4$s\n**App running for**: %5$s</string>
+    <string name="troubleshooting_faq_description">Need help with Olvid? Please read our FAQ:</string>
+    <string name="troubleshooting_faq_link">https://olvid.io/faq</string>
+    <string name="troubleshooting_request_permission">Request permission</string>
+    <string name="troubleshooting_backup_valid_description">Olvid backups are properly setup. Please make sure you know where your backup key is and check that you have access to up to date backup files.\n\nIt is a good idea to verify your backup key from time to time, just to be sure you\'ll know what to do if you lose your device 😅.</string>
+    <string name="snackbar_go_to_troubleshooting_message">Want to improve your Olvid experience?</string>
+    <string name="snackbar_go_to_troubleshooting_button">Let\'s go</string>
+    <string name="troubleshooting_ignored">Ignored</string>
+
+
 
     <plurals name="dialog_message_delete_user_impossible_count">
         <item quantity="one">1 common group</item>

@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
-import io.olvid.messenger.main.EmptyListCard
+import io.olvid.messenger.main.MainScreenEmptyList
 
 @Composable
 fun CallLogScreen(
@@ -99,7 +99,15 @@ fun CallLogScreen(
                         }
                     }
                 } else {
-                    EmptyListCard(stringRes =  R.string.explanation_empty_call_log)
+                    Box(modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center) {
+                        MainScreenEmptyList(
+                            icon = R.drawable.ic_phone_log,
+                            iconPadding = 6.dp,
+                            title = R.string.explanation_empty_call_log,
+                            subtitle = R.string.explanation_empty_call_log_sub
+                        )
+                    }
                 }
             }
             FloatingActionButton(modifier = Modifier
