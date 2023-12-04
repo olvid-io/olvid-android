@@ -97,7 +97,6 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.fragments.dialog.DiscussionSearchDialogFragment
-import io.olvid.messenger.fragments.dialog.OtherKnownUsersDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment.OnOwnedIdentitySelectedListener
 import io.olvid.messenger.main.calls.CallLogFragment
@@ -123,7 +122,7 @@ import io.olvid.messenger.troubleshooting.shouldShowTroubleshootingSnackbar
 import kotlinx.coroutines.launch
 import java.util.*
 
-class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListener {
+class MainActivity : LockableActivity(), OnClickListener {
     private var root: CoordinatorLayout? = null
     private val ownInitialView: InitialView by lazy { findViewById(R.id.owned_identity_initial_view) }
     private var pingConnectivityDot: View? = null
@@ -138,7 +137,7 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
     private var pingRed = 0
     private var pingGolden = 0
     private var pingGreen = 0
-    private var contactListFragment: ContactListFragment? = null
+    internal var contactListFragment: ContactListFragment? = null
     private lateinit var tabImageViews: Array<ImageView?>
 
     @JvmField
@@ -273,10 +272,10 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
         }
         mainActivityPageChangeListener = MainActivityPageChangeListener(tabImageViews)
         viewPager.adapter = tabsPagerAdapter
+        viewPager.isUserInputEnabled= false
         viewPager.registerOnPageChangeCallback(mainActivityPageChangeListener!!)
         viewPager.setPageTransformer(MarginPageTransformer(resources.getDimensionPixelSize(dimen.main_activity_page_margin)))
         viewPager.offscreenPageLimit = 3
-        supportFragmentManager.addFragmentOnAttachListener(this)
         val addContactButton = findViewById<ImageView>(id.tab_plus_button)
         addContactButton.setOnClickListener(this)
         val focusHugger = findViewById<View>(id.focus_hugger)
@@ -634,7 +633,6 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
 
     override fun onDestroy() {
         super.onDestroy()
-        supportFragmentManager.removeFragmentOnAttachListener(this)
         tabsPagerAdapter = null
         contactListFragment = null
         Utils.dialogShowing = false
@@ -650,8 +648,7 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 CONTACTS_TAB -> {
-                    contactListFragment = ContactListFragment()
-                    contactListFragment!!
+                    ContactListFragment()
                 }
 
                 GROUPS_TAB -> {
@@ -759,10 +756,6 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
         }
     }
 
-    override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
-        mainActivityPageChangeListener?.onPageSelected(viewPager.currentItem)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         when (viewPager.currentItem) {
             CONTACTS_TAB -> {
@@ -821,15 +814,6 @@ class MainActivity : LockableActivity(), OnClickListener, FragmentOnAttachListen
                 discussionSearchDialogFragment.show(
                     supportFragmentManager,
                     "discussion_search_dialog_fragment"
-                )
-                return true
-            }
-        } else if (itemId == R.id.action_other_known_users) {
-            if (viewPager.currentItem == CONTACTS_TAB) {
-                val otherKnownUsersDialogFragment = OtherKnownUsersDialogFragment.newInstance()
-                otherKnownUsersDialogFragment.show(
-                    supportFragmentManager,
-                    "other_known_users_dialog_fragment"
                 )
                 return true
             }

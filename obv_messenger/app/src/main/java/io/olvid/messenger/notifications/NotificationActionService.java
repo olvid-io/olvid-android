@@ -297,23 +297,25 @@ public class NotificationActionService extends IntentService {
         }
 
         DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussionId);
-        boolean sendReadReceipt;
+        final boolean sendReadReceipt;
         if (discussionCustomization != null && discussionCustomization.prefSendReadReceipt != null) {
             sendReadReceipt = discussionCustomization.prefSendReadReceipt;
         } else {
             sendReadReceipt = SettingsActivity.getDefaultSendReadReceipt();
         }
-        if (sendReadReceipt) {
-            final List<Message> messages = AppDatabase.getInstance().messageDao().getAllUnreadDiscussionMessagesSync(discussionId);
-            App.runThread(() -> {
-                for (Message message : messages) {
-                    if (message.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
+
+        final List<Message> messages = AppDatabase.getInstance().messageDao().getAllUnreadDiscussionMessagesSync(discussionId);
+        App.runThread(() -> {
+            for (Message message : messages) {
+                if (message.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
+                    if (sendReadReceipt) {
                         message.sendMessageReturnReceipt(discussion, Message.RETURN_RECEIPT_STATUS_READ);
                     }
                     new CreateReadMessageMetadata(message.id).run();
                 }
-            });
-        }
+            }
+        });
+
         if (AppDatabase.getInstance().ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(discussion.bytesOwnedIdentity)) {
             Long timestamp = AppDatabase.getInstance().messageDao().getServerTimestampOfLatestUnreadInboundMessageInDiscussion(discussionId);
             if (timestamp != null) {

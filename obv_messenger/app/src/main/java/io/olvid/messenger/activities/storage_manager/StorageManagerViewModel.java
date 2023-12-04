@@ -22,6 +22,7 @@ package io.olvid.messenger.activities.storage_manager;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -100,6 +101,15 @@ public class StorageManagerViewModel extends ViewModel {
         public SortOrder(SortKey sortKey, boolean ascending) {
             this.sortKey = sortKey;
             this.ascending = ascending;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (!(obj instanceof SortOrder)) {
+                return false;
+            }
+            SortOrder other = (SortOrder) obj;
+            return (other.sortKey == sortKey) && (other.ascending == ascending);
         }
     }
 

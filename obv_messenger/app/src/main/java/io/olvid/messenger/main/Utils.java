@@ -20,41 +20,14 @@
 package io.olvid.messenger.main;
 
 
-import android.Manifest;
-import android.app.ActivityManager;
-import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.Build;
-import android.os.PowerManager;
-import android.provider.Settings;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.CheckBox;
-import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.fragment.app.FragmentActivity;
-import androidx.preference.PreferenceManager;
-
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
-import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
-import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
-import io.olvid.messenger.google_services.GoogleServicesUtils;
-import io.olvid.messenger.services.UnifiedForegroundService;
-import io.olvid.messenger.settings.SettingsActivity;
 
 public class Utils {
     public static boolean dialogsLoaded = false;

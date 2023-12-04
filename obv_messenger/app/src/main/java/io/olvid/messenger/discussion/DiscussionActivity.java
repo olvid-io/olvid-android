@@ -2952,10 +2952,12 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     if ((message.isInbound() && message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ)
                             || message.messageType == Message.TYPE_INBOUND_MESSAGE && message.status == Message.STATUS_UNREAD) {
                         // only send the read receipt if the content of the message was actually displayed
-                        if (sendReadReceipt) {
-                            App.runThread(() -> message.sendMessageReturnReceipt(discussionViewModel.getDiscussion().getValue(), Message.RETURN_RECEIPT_STATUS_READ));
-                        }
-                        App.runThread(new CreateReadMessageMetadata(message.id));
+                        App.runThread(() -> {
+                            if (sendReadReceipt) {
+                                message.sendMessageReturnReceipt(discussionViewModel.getDiscussion().getValue(), Message.RETURN_RECEIPT_STATUS_READ);
+                            }
+                            new CreateReadMessageMetadata(message.id).run();
+                        });
                     }
                 }
 
@@ -3508,11 +3510,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                            constraintSet.applyTo(holder.messageLinkPreviewGroup);
                        }
                         holder.messageLinkPreviewGroup.setOnClickListener(v -> {
-                            try {
-                                startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                            } catch (Exception e) {
-                                App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
-                            }
+                                App.openLink(DiscussionActivity.this, uri);
                         });
                     } else {
                         holder.messageLinkPreviewGroup.setOnClickListener(null);
@@ -4518,6 +4516,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         Layout messageTextLayout = addressTextView.getLayout();
                         Layout timestampLayout = messageBottomTimestampTextView.getLayout();
                         if (messageTextLayout != null && timestampLayout != null && addressTextView.getVisibility() == View.VISIBLE) {
+                            // first check if the first character of the last message line matches LTR/RTL of layout
+                            int pos = messageContentTextView.getText().toString().lastIndexOf("\n") + 1;
+                            boolean forceSpacerRtl = pos < messageContentTextView.getText().length() && ((timestampSpacer.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) != messageTextLayout.isRtlCharAt(pos));
+
                             int lineCount = messageTextLayout.getLineCount();
 
                             float timestampWidth = timestampLayout.getLineMax(0) + statusWidth;
@@ -4527,7 +4529,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             if (messageTextLayout.getAlignment().equals(Layout.Alignment.ALIGN_CENTER)) {
                                 lastMessageLineWidth += (messageTotalWidth - lastMessageLineWidth) / 2;
                             }
-                            if (timestampWidth + lastMessageLineWidth < messageTotalWidth) {
+                            if (!forceSpacerRtl && (timestampWidth + lastMessageLineWidth < messageTotalWidth)) {
                                 // set VISIBLE, then GONE to force a redraw if it was already GONE
                                 timestampSpacer.setVisibility(View.VISIBLE);
                                 timestampSpacer.setVisibility(View.GONE);
@@ -4563,6 +4565,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             }
 
                             if (timestampLayout != null) {
+                                // first check if the first character of the last message line matches LTR/RTL of layout
+                                int pos = messageContentTextView.getText().toString().lastIndexOf("\n") + 1;
+                                boolean forceSpacerRtl = pos < messageContentTextView.getText().length() && ((timestampSpacer.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) != messageTextLayout.isRtlCharAt(pos));
+
                                 float timestampWidth = timestampLayout.getLineMax(0) + statusWidth;
                                 float lastMessageLineWidth = messageTextLayout.getLineMax(lineCount - 1);
                                 messageTextLayout.getLineBounds(lineCount - 1, rect);
@@ -4570,7 +4576,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                 if (messageTextLayout.getAlignment().equals(Layout.Alignment.ALIGN_CENTER)) {
                                     lastMessageLineWidth += (messageTotalWidth - lastMessageLineWidth) / 2;
                                 }
-                                if (timestampWidth + lastMessageLineWidth < messageTotalWidth) {
+                                if (!forceSpacerRtl && (timestampWidth + lastMessageLineWidth < messageTotalWidth)) {
                                     // set VISIBLE, then GONE to force a redraw if it was already GONE
                                     timestampSpacer.setVisibility(View.VISIBLE);
                                     timestampSpacer.setVisibility(View.GONE);

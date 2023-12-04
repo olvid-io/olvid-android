@@ -256,6 +256,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         return new FetchManagerSession(createSessionDelegate.getSession(),
                 downloadMessagesAndListAttachmentsCoordinator,
                 downloadMessageExtendedPayloadCoordinator,
+                deleteMessageAndAttachmentsCoordinator,
                 downloadAttachmentCoordinator,
                 deleteMessageAndAttachmentsCoordinator,
                 serverPushNotificationsCoordinator,
@@ -270,6 +271,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         return new FetchManagerSession(session,
                 downloadMessagesAndListAttachmentsCoordinator,
                 downloadMessageExtendedPayloadCoordinator,
+                deleteMessageAndAttachmentsCoordinator,
                 downloadAttachmentCoordinator,
                 deleteMessageAndAttachmentsCoordinator,
                 serverPushNotificationsCoordinator,
@@ -337,7 +339,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
             attachments[i].setKeyAndMetadata(attachmentKeyAndMetadata[i].getKey(),
                     attachmentKeyAndMetadata[i].getMetadata());
         }
-        inboxMessage.setPayloadAndFromIdentity(messagePayload, remoteIdentity, extendedPayloadKey);
+        inboxMessage.setPayloadAndFromIdentity(messagePayload, remoteIdentity, extendedPayloadKey, attachmentKeyAndMetadata.length > 0);
     }
 
 

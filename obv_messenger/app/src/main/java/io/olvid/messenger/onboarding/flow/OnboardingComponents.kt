@@ -28,8 +28,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -96,7 +96,8 @@ fun OnboardingScreen(
     onBack: (() -> Unit)? = null,
     onClose: () -> Unit,
     scrollable: Boolean = true,
-    content: @Composable (() -> Unit)? = null
+    footer: @Composable (() -> Unit)? = null,
+    content: @Composable (ColumnScope.() -> Unit)? = null
 ) {
     Box(
         modifier = Modifier
@@ -120,7 +121,7 @@ fun OnboardingScreen(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    it.invoke()
+                    it.invoke(this)
                 }
             }
 
@@ -229,8 +230,19 @@ fun OnboardingScreen(
                 Icon(
                     painter = painterResource(id = drawable.ic_close),
                     tint = colorResource(id = color.almostBlack),
-                    contentDescription = "back"
+                    contentDescription = "close"
                 )
+            }
+        }
+
+        footer?.let {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                it.invoke()
             }
         }
     }
@@ -471,25 +483,25 @@ private fun BoxedChar(
 //    }
 //}
 
-@Composable
-fun Indicator(isSelected: Boolean) {
-    val width = animateDpAsState(
-        targetValue = if (isSelected) 25.dp else 10.dp,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy), label = ""
-    )
-
-    Box(
-        modifier = Modifier
-            .height(10.dp)
-            .width(width.value)
-            .clip(CircleShape)
-            .background(
-                color = if (isSelected) MaterialTheme.colors.primary else Color(0XFFF8E2E7)
-            )
-    ) {
-
-    }
-}
+//@Composable
+//fun Indicator(isSelected: Boolean) {
+//    val width = animateDpAsState(
+//        targetValue = if (isSelected) 25.dp else 10.dp,
+//        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy), label = ""
+//    )
+//
+//    Box(
+//        modifier = Modifier
+//            .height(10.dp)
+//            .width(width.value)
+//            .clip(CircleShape)
+//            .background(
+//                color = if (isSelected) MaterialTheme.colors.primary else Color(0XFFF8E2E7)
+//            )
+//    ) {
+//
+//    }
+//}
 
 @Preview(showBackground = true)
 @Composable

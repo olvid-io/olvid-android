@@ -41,10 +41,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.ripple.rememberRipple
@@ -122,19 +125,34 @@ fun AppVersionHeader(betaEnabled: Boolean) {
 }
 
 @Composable
-fun FaqLinkHeader(openFaq: () -> Unit) {
-    Column {
-        Text(
-            modifier = Modifier
-                .widthIn(max = 400.dp)
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp),
-            text = stringResource(id = string.troubleshooting_faq_description),
-            color = colorResource(id = color.almostBlack),
-            fontSize = 16.sp,
-        )
+fun FaqLinkHeader(openFaq: () -> Unit, onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .widthIn(max = 400.dp)
+            .fillMaxWidth()
+            .padding(end = 16.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    modifier = Modifier.size(28.dp),
+                    painter = painterResource(id = drawable.ic_arrow_back),
+                    tint = colorResource(id = color.almostBlack),
+                    contentDescription = "back"
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                modifier = Modifier.weight(1f, true),
+                text = stringResource(id = string.troubleshooting_faq_description),
+                color = colorResource(id = color.almostBlack),
+                fontSize = 16.sp,
+            )
+        }
+
         ClickableText(
-            modifier = Modifier.align(CenterHorizontally)
+            modifier = Modifier
+                .align(CenterHorizontally)
                 .padding(8.dp),
             text = AnnotatedString(
                 text = stringResource(id = R.string.troubleshooting_faq_link),
@@ -151,6 +169,7 @@ fun FaqLinkHeader(openFaq: () -> Unit) {
         }
     }
 }
+
 
 
 @Composable
@@ -340,5 +359,13 @@ fun TroubleShootItemPreview() {
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun FaqLinkPreview() {
+    AppCompatTheme {
+        FaqLinkHeader({}, {})
     }
 }

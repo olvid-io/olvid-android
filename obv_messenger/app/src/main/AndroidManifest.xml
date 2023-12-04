@@ -12,11 +12,11 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
@@ -354,12 +354,15 @@
             android:name=".services.UnifiedForegroundService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="location|remoteMessaging|dataSync"/>
+            android:foregroundServiceType="location|remoteMessaging"/>
         <service
             android:name=".webrtc.WebrtcCallService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="microphone"/>
+            android:foregroundServiceType="microphone|specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="This service is started for VoIP both outgoing and incoming VoIP calls. For outgoing calls, the microphone permission is already granted and service can be started as microphone, for incoming calls we start a foreground service while the phone is ringing, following the reception of a push notification. As soon as the recipient picks up the call and grants audio permission, the foreground service is restarted as a microphone service."/>
+        </service>
         <service android:name=".services.MediaPlayerService"
             android:enabled="true"
             android:exported="false"

@@ -435,7 +435,7 @@ public class UnifiedForegroundService extends Service {
         }
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                startForeground(SERVICE_ID, builder.build(), showMessageSendingNotification ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : showLocationSharingNotification ? ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION : ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING);
+                startForeground(SERVICE_ID, builder.build(), showMessageSendingNotification ? ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING : showLocationSharingNotification ? ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION : ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING);
             } else {
                 startForeground(SERVICE_ID, builder.build());
             }

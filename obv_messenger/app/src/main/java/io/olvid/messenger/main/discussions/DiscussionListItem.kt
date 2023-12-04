@@ -162,7 +162,6 @@ fun DiscussionListItem(
                 unreadMessages = unreadCount > 0 || unread,
                 muted = muted,
                 locked = locked,
-                onClick = onClick,
             )
 
             // content
@@ -176,7 +175,6 @@ fun DiscussionListItem(
                     text = title,
                     color = colorResource(id = R.color.primary700),
                     fontSize = 16.sp,
-                    lineHeight = 20.sp,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -186,7 +184,6 @@ fun DiscussionListItem(
                     text = body,
                     color = colorResource(id = R.color.greyTint),
                     fontSize = 14.sp,
-                    lineHeight = 18.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -196,7 +193,6 @@ fun DiscussionListItem(
                     text = date,
                     color = colorResource(id = R.color.grey),
                     fontSize = 12.sp,
-                    lineHeight = 15.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -239,7 +235,6 @@ fun DiscussionListItem(
                                 .padding(horizontal = 7.dp, vertical = 2.dp),
                             text = "$unreadCount",
                             fontSize = 14.sp,
-                            lineHeight = 17.sp,
                             color = colorResource(id = R.color.alwaysWhite)
                         )
                     }
@@ -263,7 +258,6 @@ fun DiscussionListItem(
                             ),
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                             fontSize = 10.sp,
-                            lineHeight = 13.sp,
                             fontWeight = FontWeight.Medium,
                             color = colorResource(id = R.color.grey)
                         )

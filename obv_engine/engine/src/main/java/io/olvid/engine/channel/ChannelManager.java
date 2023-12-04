@@ -145,7 +145,6 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
                 // now that we have removed (from the HashMap) all devices for which we have a channel, we walk through the deviceUidsMap to check for channel-less deviceUids
                 for (Identity ownedIdentity: deviceUidsMap.keySet()) {
                     // first check if some channels with owned devices should be restarted
-                    boolean deviceDiscoveryNeeded = false;
                     if (identityDelegate.isActiveOwnedIdentity(channelManagerSession.session, ownedIdentity)) {
                         for (UID ownedDeviceUid : identityDelegate.getOtherDeviceUidsOfOwnedIdentity(channelManagerSession.session, ownedIdentity)) {
                             try {
@@ -154,22 +153,15 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
                                 if (!channelExists && !channelCreationInProgress) {
                                     // we found a device without a channel and no channel creation is in progress
                                     //  --> we delete the device and start a device discovery protocol
-                                    Logger.i("Found an owned device with no channel and no channel creation. Restarting device discovery.");
-                                    identityDelegate.removeDeviceForOwnedIdentity(channelManagerSession.session, ownedIdentity, ownedDeviceUid);
-                                    deviceDiscoveryNeeded = true;
+                                    Logger.i("Found an owned device with no channel and no channel creation. Restarting channel creation.");
+                                    protocolStarterDelegate.startChannelCreationProtocolWithOwnedDevice(channelManagerSession.session, ownedIdentity, ownedDeviceUid);
                                 }
                             } catch (Exception e) {
                                 // nothing to do
                             }
                         }
-                        if (deviceDiscoveryNeeded) {
-                            try {
-                                protocolStarterDelegate.startOwnedDeviceDiscoveryProtocolWithinTransaction(channelManagerSession.session, ownedIdentity);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
                     }
+
 
                     Map<Identity, Set<UID>> ownedIdentityMap = deviceUidsMap.get(ownedIdentity);
                     if (ownedIdentityMap == null) {
@@ -183,7 +175,7 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
                         if (deviceUidSet == null) {
                             continue;
                         }
-                        deviceDiscoveryNeeded = false;
+                        boolean deviceDiscoveryNeeded = false;
                         for (UID contactDeviceUid: deviceUidSet) {
                             // check if a ChannelCreationProtocolInstance exists for this device
                             try {

@@ -327,6 +327,7 @@ class OnboardingFlowActivity : AppCompatActivity() {
                         ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
                     )
                     activeDeviceSelection(
+                        activity = this@OnboardingFlowActivity,
                         onboardingFlowViewModel = onboardingFlowViewModel,
                         onProceed = {
                             navController.navigate(OnboardingRoutes.TRANSFER_SOURCE_CONFIRMATION)

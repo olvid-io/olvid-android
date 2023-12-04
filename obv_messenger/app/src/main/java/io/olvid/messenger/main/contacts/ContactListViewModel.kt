@@ -20,13 +20,16 @@ package io.olvid.messenger.main.contacts
 
 import android.os.Handler
 import android.os.Looper
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.core.util.Pair
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor
+import androidx.lifecycle.viewModelScope
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.StringUtils
@@ -35,34 +38,35 @@ import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDe
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
-import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_SEARCHING
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.openid.KeycloakManager.KeycloakCallback
 import io.olvid.messenger.settings.SettingsActivity
+import kotlinx.coroutines.launch
 import java.util.Arrays
 import java.util.regex.Pattern
 
 class ContactListViewModel : ViewModel() {
 
-    private var unfilteredContacts: List<Contact>? = null
-    private var unfilteredNotOneToOneContacts: List<Contact>? = null
-    internal val filteredContacts = MutableLiveData<List<ContactOrKeycloakDetails>?>()
-    private var _filter: String? = null
+    private var unfilteredContacts: List<Contact> = emptyList()
+    private var unfilteredNotOneToOneContacts: List<Contact> = emptyList()
+    internal val filteredContacts = MutableLiveData<List<ContactOrKeycloakDetails>>()
+    private var _filter by mutableStateOf<String?>(null)
     var filterPatterns: MutableList<Pattern>? = null
-    private val executor = NoExceptionSingleThreadExecutor("ContactListViewModelExecutor")
-    private var keycloakSearchInProgress = false
+    var keycloakSearchInProgress by mutableStateOf(false)
     private var keycloakSearchBytesOwnedIdentity: ByteArray? = null
     private var keycloakSearchResultsFilter: String? = null
     private var keycloakSearchResults: List<JsonKeycloakUserDetails>? = null
-    private var keycloakSearchAdditionalResults = false
+    private var keycloakSearchAdditionalResults = 0
+
+    var keycloakManaged = mutableStateOf(false)
 
     fun setUnfilteredContacts(unfilteredContacts: List<Contact>?) {
-        this.unfilteredContacts = unfilteredContacts
+        this.unfilteredContacts = unfilteredContacts.orEmpty()
         setFilter(_filter)
     }
 
     fun setUnfilteredNotOneToOneContacts(unfilteredNotOneToOneContacts: List<Contact>?) {
-        this.unfilteredNotOneToOneContacts = unfilteredNotOneToOneContacts
+        this.unfilteredNotOneToOneContacts = unfilteredNotOneToOneContacts.orEmpty()
         setFilter(_filter)
     }
 
@@ -81,8 +85,7 @@ class ContactListViewModel : ViewModel() {
                 }
             }
             val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
-            if (filterPatterns.isNullOrEmpty()
-                    .not() && ownedIdentity != null && ownedIdentity.keycloakManaged
+            if (filterPatterns != null && ownedIdentity != null && ownedIdentity.keycloakManaged
             ) {
                 if (filter != keycloakSearchResultsFilter || !Arrays.equals(
                         ownedIdentity.bytesOwnedIdentity,
@@ -99,18 +102,56 @@ class ContactListViewModel : ViewModel() {
                 }
             }
         }
-        executor.execute(
-            FilterContactListTask(
-                filterPatterns,
-                filteredContacts,
-                unfilteredContacts,
-                unfilteredNotOneToOneContacts,
-                keycloakSearchBytesOwnedIdentity,
-                keycloakSearchInProgress,
-                keycloakSearchResults,
-                keycloakSearchAdditionalResults
-            )
-        )
+        viewModelScope.launch {
+            if (filterPatterns == null) {
+                val list: MutableList<ContactOrKeycloakDetails> = ArrayList()
+                list.addAll(unfilteredContacts.map { ContactOrKeycloakDetails(it) })
+                list.addAll(unfilteredNotOneToOneContacts.map { ContactOrKeycloakDetails(it) })
+                filteredContacts.postValue(list)
+            } else {
+                val list: MutableList<ContactOrKeycloakDetails> = ArrayList()
+
+                for (contact in unfilteredContacts) {
+                    var matches = true
+                    for (pattern in filterPatterns!!) {
+                        val matcher = pattern.matcher(contact.fullSearchDisplayName)
+                        if (!matcher.find()) {
+                            matches = false
+                            break
+                        }
+                    }
+                    if (matches) {
+                        list.add(ContactOrKeycloakDetails(contact))
+                    }
+                }
+
+                for (contact in unfilteredNotOneToOneContacts) {
+                    var matches = true
+                    for (pattern in filterPatterns!!) {
+                        val matcher = pattern.matcher(contact.fullSearchDisplayName)
+                        if (!matcher.find()) {
+                            matches = false
+                            break
+                        }
+                    }
+                    if (matches) {
+                        list.add(ContactOrKeycloakDetails(contact))
+                    }
+                }
+                keycloakSearchResults?.let {
+                    for (keycloakUserDetails in it) {
+                        //  filters out our ownedIdentity
+                        if (keycloakUserDetails.identity != null && !(keycloakUserDetails.identity contentEquals keycloakSearchBytesOwnedIdentity)) {
+                            list.add(ContactOrKeycloakDetails(keycloakUserDetails))
+                        }
+                    }
+                    if (keycloakSearchAdditionalResults > 0) {
+                        list.add(ContactOrKeycloakDetails(keycloakSearchAdditionalResults))
+                    }
+                }
+                filteredContacts.postValue(list)
+            }
+        }
     }
 
     fun getFilter(): String? {
@@ -119,105 +160,6 @@ class ContactListViewModel : ViewModel() {
 
     fun isFiltering(): Boolean {
         return _filter?.trim()?.isNotEmpty() == true
-    }
-
-
-    private class FilterContactListTask(
-        filterPatterns: List<Pattern>?,
-        filteredContacts: MutableLiveData<List<ContactOrKeycloakDetails>?>,
-        unfilteredContacts: List<Contact>?,
-        unfilteredNotOneToOneContacts: List<Contact>?,
-        keycloakSearchBytesOwnedIdentity: ByteArray?,
-        keycloakSearchInProgress: Boolean,
-        keycloakSearchResults: List<JsonKeycloakUserDetails>?,
-        keycloakSearchAdditionalResults: Boolean
-    ) : Runnable {
-        private val filterPatterns: List<Pattern> by lazy { filterPatterns ?: arrayListOf() }
-        private val filteredContacts: MutableLiveData<List<ContactOrKeycloakDetails>?>
-        private val unfilteredContacts: List<Contact>?
-        private val unfilteredNotOneToOneContacts: List<Contact>?
-        private val keycloakSearchBytesOwnedIdentity: ByteArray?
-        private val keycloakSearchInProgress: Boolean
-        private val keycloakSearchResults: List<JsonKeycloakUserDetails>?
-        private val keycloakSearchAdditionalResults: Boolean
-
-        init {
-            this.filteredContacts = filteredContacts
-            this.unfilteredContacts = unfilteredContacts
-            this.unfilteredNotOneToOneContacts = unfilteredNotOneToOneContacts
-            this.keycloakSearchBytesOwnedIdentity = keycloakSearchBytesOwnedIdentity
-            this.keycloakSearchInProgress = keycloakSearchInProgress
-            this.keycloakSearchResults = keycloakSearchResults
-            this.keycloakSearchAdditionalResults = keycloakSearchAdditionalResults
-        }
-
-        override fun run() {
-            if (filterPatterns.isEmpty()) {
-                if (unfilteredContacts == null) {
-                    filteredContacts.postValue(null)
-                    return
-                }
-                val list: MutableList<ContactOrKeycloakDetails> = ArrayList()
-                for (contact in unfilteredContacts) {
-                    list.add(ContactOrKeycloakDetails(contact))
-                }
-                filteredContacts.postValue(list)
-            } else {
-                if (unfilteredContacts == null && unfilteredNotOneToOneContacts == null) {
-                    filteredContacts.postValue(null)
-                    return
-                }
-                val list: MutableList<ContactOrKeycloakDetails> = ArrayList()
-                unfilteredContacts?.let {
-                    for (contact in unfilteredContacts) {
-                        var matches = true
-                        for (pattern in filterPatterns) {
-                            val matcher = pattern.matcher(contact.fullSearchDisplayName)
-                            if (!matcher.find()) {
-                                matches = false
-                                break
-                            }
-                        }
-                        if (matches) {
-                            list.add(ContactOrKeycloakDetails(contact))
-                        }
-                    }
-                }
-                unfilteredNotOneToOneContacts?.let {
-                    for (contact in unfilteredNotOneToOneContacts) {
-                        var matches = true
-                        for (pattern in filterPatterns) {
-                            val matcher = pattern.matcher(contact.fullSearchDisplayName)
-                            if (!matcher.find()) {
-                                matches = false
-                                break
-                            }
-                        }
-                        if (matches) {
-                            list.add(ContactOrKeycloakDetails(contact))
-                        }
-                    }
-                }
-                if (keycloakSearchInProgress) {
-                    list.add(ContactOrKeycloakDetails(true))
-                } else {
-                    keycloakSearchResults?.let {
-                        for (keycloakUserDetails in keycloakSearchResults) {
-                            // check if the we know the contact by querying the cache (note that this also filters out our ownedIdentity)
-                            val trustLevel : Int? = AppSingleton.getContactTrustLevel(keycloakUserDetails.identity)
-                            if (trustLevel == null && keycloakUserDetails.identity != null  && !(keycloakUserDetails.identity contentEquals keycloakSearchBytesOwnedIdentity)) {
-                                // unknown contact --> add them to the list
-                                list.add(ContactOrKeycloakDetails(keycloakUserDetails))
-                            }
-                        }
-                        if (keycloakSearchAdditionalResults) {
-                            list.add(ContactOrKeycloakDetails(false))
-                        }
-                    }
-                }
-                filteredContacts.postValue(list)
-            }
-        }
     }
 
     private fun searchKeycloak(bytesOwnedIdentity: ByteArray, filter: String) {
@@ -246,13 +188,11 @@ class ContactListViewModel : ViewModel() {
                     keycloakSearchResultsFilter = filter
                     keycloakSearchResults = searchResult?.first
                     keycloakSearchAdditionalResults = if (searchResult?.second == null) {
-                        false
+                        0
+                    } else if (searchResult.first == null) {
+                        searchResult.second!!
                     } else {
-                        if (searchResult.first == null) {
-                            searchResult.second!! > 0
-                        } else {
-                            searchResult.second!! > searchResult.first!!.size
-                        }
+                        searchResult.second!! - searchResult.first!!.size
                     }
 
                     // re-filter to add keycloak search results
@@ -271,7 +211,7 @@ class ContactListViewModel : ViewModel() {
                     keycloakSearchBytesOwnedIdentity = bytesOwnedIdentity
                     keycloakSearchResultsFilter = filter
                     keycloakSearchResults = null
-                    keycloakSearchAdditionalResults = false
+                    keycloakSearchAdditionalResults = 0
 
                     // re-filter anyway to force refresh and remove the "searching" spinner
                     setFilter(filter)
@@ -280,30 +220,34 @@ class ContactListViewModel : ViewModel() {
     }
 
     enum class ContactType {
-        CONTACT, KEYCLOAK, KEYCLOAK_SEARCHING, KEYCLOAK_MORE_RESULTS
+        CONTACT, KEYCLOAK, KEYCLOAK_MORE_RESULTS
     }
 
     class ContactOrKeycloakDetails {
         val contactType: ContactType
         val contact: Contact?
         val keycloakUserDetails: JsonKeycloakUserDetails?
+        val additionalSearchResults: Int?
 
         constructor(contact: Contact) {
             contactType = CONTACT
             this.contact = contact
             keycloakUserDetails = null
+            additionalSearchResults = null
         }
 
         constructor(keycloakUserDetails: JsonKeycloakUserDetails) {
             contactType = KEYCLOAK
             contact = null
             this.keycloakUserDetails = keycloakUserDetails
+            additionalSearchResults = null
         }
 
-        constructor(searching: Boolean) {
-            contactType = if (searching) KEYCLOAK_SEARCHING else KEYCLOAK_MORE_RESULTS
+        constructor(additionalSearchResults: Int) {
+            contactType = KEYCLOAK_MORE_RESULTS
             contact = null
             keycloakUserDetails = null
+            this.additionalSearchResults = additionalSearchResults
         }
     }
 
@@ -333,6 +277,7 @@ fun ContactOrKeycloakDetails.getAnnotatedName(): AnnotatedString {
                     append(contact.getCustomDisplayName())
                 }
             }
+
             KEYCLOAK -> {
                 val keycloakUserDetails = keycloakUserDetails ?: return toAnnotatedString()
                 val identityDetails = keycloakUserDetails.getIdentityDetails(null)
@@ -343,7 +288,8 @@ fun ContactOrKeycloakDetails.getAnnotatedName(): AnnotatedString {
                     )
                 )
             }
-            KEYCLOAK_SEARCHING, KEYCLOAK_MORE_RESULTS -> {}
+
+            KEYCLOAK_MORE_RESULTS -> {}
         }
     }
 }
@@ -369,6 +315,7 @@ fun ContactOrKeycloakDetails.getAnnotatedDescription(): AnnotatedString? {
                     }
                 }
             }
+
             KEYCLOAK -> {
                 keycloakUserDetails?.getIdentityDetails(null)
                     ?.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat())
@@ -376,7 +323,8 @@ fun ContactOrKeycloakDetails.getAnnotatedDescription(): AnnotatedString? {
                         append(it)
                     }
             }
-            KEYCLOAK_SEARCHING, KEYCLOAK_MORE_RESULTS -> {}
+
+            KEYCLOAK_MORE_RESULTS -> {}
         }
     }.takeIf { it.isNotEmpty() }
 }

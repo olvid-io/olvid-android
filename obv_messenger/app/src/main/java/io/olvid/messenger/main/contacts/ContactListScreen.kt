@@ -17,34 +17,53 @@
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package io.olvid.messenger.main.contacts
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Badge
+import androidx.compose.material.BadgedBox
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -54,6 +73,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.R
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
@@ -62,21 +83,46 @@ import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
-import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.*
+import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
+import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
+import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
 import io.olvid.messenger.settings.SettingsActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
+data class ContactFilterTab(val label: String, val filter: (ContactOrKeycloakDetails) -> Boolean)
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ContactListScreen(
     contactListViewModel: ContactListViewModel,
     refreshing: Boolean,
     onRefresh: () -> Unit,
     onClick: (contact: ContactOrKeycloakDetails) -> Unit,
+    onInvite: (contact: Contact) -> Unit,
+    onScrollStart: (() -> Unit)? = null,
     contactMenu: ContactMenu,
 ) {
 
     val contacts by contactListViewModel.filteredContacts.observeAsState()
     val refreshState = rememberPullRefreshState(refreshing, onRefresh)
+    val tabs = arrayListOf(
+        ContactFilterTab(
+            label = stringResource(id = R.string.contact_list_tab_contact),
+            filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == true }
+        ),
+        ContactFilterTab(
+            label = stringResource(id = R.string.contact_list_tab_others),
+            filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == false }
+        )
+    )
+    if (contactListViewModel.keycloakManaged.value) {
+        tabs.add(ContactFilterTab(
+            label = stringResource(id = R.string.contact_list_tab_directory),
+            filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contactType != CONTACT }
+        ))
+    }
+
 
     AppCompatTheme {
         Box(
@@ -84,168 +130,319 @@ fun ContactListScreen(
                 .fillMaxSize()
                 .pullRefresh(refreshState)
         ) {
-            val lazyListState = rememberLazyListState()
-            contacts?.let { list ->
-                if (list.isEmpty().not()) {
-                    LazyColumn(
+            Column(modifier = Modifier.fillMaxSize()) {
+                val pagerState =
+                    rememberPagerState { if (contactListViewModel.keycloakManaged.value) 3 else 2 }
+                LaunchedEffect(pagerState) {
+                    snapshotFlow { pagerState.currentPage }.collect { page ->
+                        if (contactListViewModel.getFilter() == null && page == 2) {
+                            contactListViewModel.setFilter("")
+                        }
+                    }
+                }
+                val coroutineScope = rememberCoroutineScope()
+                Header(pagerState, tabs, coroutineScope, contactListViewModel, contacts)
+                HorizontalPager(
+                    state = pagerState,
+                    beyondBoundsPageCount = if (contactListViewModel.keycloakManaged.value) 2 else 1
+                ) { page ->
+                    Box(
                         modifier = Modifier.fillMaxSize(),
-                        state = lazyListState,
-                        contentPadding = PaddingValues(bottom = 80.dp),
+                        contentAlignment = Center
                     ) {
-                        itemsIndexed(items = list) { index, contactOrKeycloakDetails ->
-                            Column {
-                                // Additional results headers
-                                if (contactOrKeycloakDetails.contactType == CONTACT && contactOrKeycloakDetails.contact?.oneToOne != true && list.getOrNull(
-                                        index - 1
-                                    )?.contact?.oneToOne != false
-                                ) {
-                                    AdditionalResultsHeader(
-                                        drawable.ic_not_one_to_one,
-                                        string.label_users_below_not_in_contacts
-                                    )
-                                }
-
-                                if (contactOrKeycloakDetails.contactType == KEYCLOAK && list.getOrNull(
-                                        index - 1
-                                    )?.contactType != KEYCLOAK
-                                ) {
-                                    AdditionalResultsHeader(
-                                        drawable.ic_keycloak_directory,
-                                        string.label_users_below_from_keycloak
-                                    )
-                                }
-
-                                when (contactOrKeycloakDetails.contactType) {
-                                    KEYCLOAK_SEARCHING -> {
-                                        KeycloakSearching()
-                                    }
-                                    KEYCLOAK_MORE_RESULTS -> {
-                                        KeycloakMissingCount()
-                                    }
-                                    else -> {
-                                        // contacts
-                                        Box {
-                                            ContactListItem(
-                                                title = contactOrKeycloakDetails.getAnnotatedName()
-                                                    .highlight(
-                                                        SpanStyle(background = colorResource(id = color.accentOverlay)),
-                                                        contactListViewModel.filterPatterns
-                                                    ),
-                                                body = contactOrKeycloakDetails.getAnnotatedDescription()
-                                                    ?.highlight(
-                                                        SpanStyle(background = colorResource(id = color.accentOverlay)),
-                                                        contactListViewModel.filterPatterns
-                                                    ),
-                                                shouldAnimateChannel = contactOrKeycloakDetails.contact?.shouldShowChannelCreationSpinner() == true && contactOrKeycloakDetails.contact.active,
-                                                publishedDetails = contactOrKeycloakDetails.contact?.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_SEEN || contactOrKeycloakDetails.contact?.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_UNSEEN,
-                                                publishedDetailsNotification = contactOrKeycloakDetails.contact?.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_UNSEEN,
-                                                onClick = { onClick(contactOrKeycloakDetails) },
-                                                initialViewSetup = { initialView ->
-                                                    when (contactOrKeycloakDetails.contactType) {
-                                                        CONTACT -> contactOrKeycloakDetails.contact?.let {
-                                                            initialView.setContact(
-                                                                it
-                                                            )
-                                                        }
-                                                        KEYCLOAK -> contactOrKeycloakDetails.keycloakUserDetails?.let { keycloakUserDetails ->
-                                                            val identityDetails =
-                                                                keycloakUserDetails.getIdentityDetails(
-                                                                    null
-                                                                )
-                                                            val name =
-                                                                identityDetails.formatFirstAndLastName(
-                                                                    SettingsActivity.getContactDisplayNameFormat(),
-                                                                    SettingsActivity.getUppercaseLastName()
-                                                                )
-                                                            initialView.setInitial(
-                                                                keycloakUserDetails.identity,
-                                                                StringUtils.getInitial(name)
-                                                            )
-                                                            initialView.setKeycloakCertified(true)
-                                                        }
-                                                        else -> {}
-                                                    }
-                                                },
-                                                onRenameContact = if (contactOrKeycloakDetails.contactType != KEYCLOAK) {
-                                                    {
-                                                        contactOrKeycloakDetails.contact?.let {
-                                                            contactMenu.rename(
-                                                                contactOrKeycloakDetails.contact
-                                                            )
-                                                        }
-                                                    }
-                                                } else null,
-                                                onCallContact = if (contactOrKeycloakDetails.contactType != KEYCLOAK) {
-                                                    {
-                                                        contactOrKeycloakDetails.contact?.let {
-                                                            contactMenu.call(
-                                                                contactOrKeycloakDetails.contact
-                                                            )
-                                                        }
-                                                    }
-                                                } else null,
-                                                onDeleteContact = if (contactOrKeycloakDetails.contactType != KEYCLOAK) {
-                                                    {
-                                                        contactOrKeycloakDetails.contact?.let {
-                                                            contactMenu.delete(
-                                                                contactOrKeycloakDetails.contact
-                                                            )
-                                                        }
-                                                    }
-                                                } else null,
-                                            )
-                                            if (index < list.size - 1) {
-                                                Spacer(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(start = 68.dp, end = 12.dp)
-                                                        .requiredHeight(1.dp)
-                                                        .align(Alignment.BottomStart)
-                                                        .background(
-                                                            color = colorResource(id = color.lightGrey)
-                                                        )
-                                                )
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            contacts?.filter { tabs[page].filter(it) }?.let { list ->
+                                if (list.isEmpty().not()) {
+                                    val lazyListState = rememberLazyListState()
+                                    onScrollStart?.let {
+                                        LaunchedEffect(key1 = lazyListState.isScrollInProgress) {
+                                            if (lazyListState.isScrollInProgress) {
+                                                // when we start scolling, dismiss soft keyboard
+                                                onScrollStart()
                                             }
                                         }
+                                    }
+
+                                    LazyColumn(
+                                        modifier = Modifier.fillMaxSize(),
+                                        state = lazyListState,
+                                        contentPadding = PaddingValues(bottom = 80.dp),
+                                    ) {
+                                        items(items = list) { contactOrKeycloakDetails ->
+
+                                            when (contactOrKeycloakDetails.contactType) {
+
+                                                KEYCLOAK_MORE_RESULTS -> {
+                                                    KeycloakMissingCount(contactOrKeycloakDetails.additionalSearchResults)
+                                                }
+
+                                                else -> {
+                                                    Contact(
+                                                        contactOrKeycloakDetails = contactOrKeycloakDetails,
+                                                        contactListViewModel = contactListViewModel,
+                                                        contactMenu = contactMenu,
+                                                        onClick = onClick,
+                                                        endContent =
+                                                            when {
+                                                                contactOrKeycloakDetails.contactType == CONTACT
+                                                                        && contactOrKeycloakDetails.contact?.oneToOne == false
+                                                                        && contactOrKeycloakDetails.contact.shouldShowChannelCreationSpinner().not() -> {
+                                                                    {
+                                                                        TextButton(onClick = {
+                                                                            onInvite.invoke(contactOrKeycloakDetails.contact)
+                                                                        }) {
+                                                                            Text(text = stringResource(id = R.string.button_label_invite))
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                contactOrKeycloakDetails.contactType == KEYCLOAK && AppSingleton.getContactTrustLevel(contactOrKeycloakDetails.keycloakUserDetails?.identity) == null -> {
+                                                                    {
+                                                                        TextButton(onClick = {
+                                                                            onClick.invoke(contactOrKeycloakDetails)
+                                                                        }) {
+                                                                            Text(text = stringResource(id = R.string.button_label_add))
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                else -> {
+                                                                    null
+                                                                }
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .verticalScroll(rememberScrollState()),
+                                        contentAlignment = Center
+                                    ) {
+                                        if (contactListViewModel.isFiltering())
+                                            MainScreenEmptyList(
+                                                icon = drawable.ic_contacts_filter,
+                                                title = string.explanation_no_contact_match_filter,
+                                                subtitle = null
+                                            )
+                                        else
+                                            MainScreenEmptyList(
+                                                icon = drawable.tab_contacts,
+                                                title = when (page) {
+                                                    0 -> string.explanation_empty_contact_list
+                                                    1 -> R.string.explanation_empty_other_contact_list
+                                                    else -> R.string.explanation_empty_directory
+                                                },
+                                                subtitle = when (page) {
+                                                    0 -> string.explanation_empty_contact_list_sub
+                                                    1 -> R.string.explanation_empty_other_contact_list_sub
+                                                    else -> null
+                                                }
+                                            )
                                     }
                                 }
                             }
                         }
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
-                        contentAlignment = Center
-                    ) {
-                        if (contactListViewModel.isFiltering())
-                            MainScreenEmptyList(
-                                icon = drawable.ic_contacts_filter,
-                                title = string.explanation_no_contact_match_filter,
-                                subtitle = null
-                            )
-                        else
-                            MainScreenEmptyList(
-                                icon = drawable.tab_contacts,
-                                title = string.explanation_empty_contact_list,
-                                subtitle = string.explanation_empty_contact_list_sub
-                            )
+
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = contactListViewModel.keycloakSearchInProgress && page == 2,
+                            enter = EnterTransition.None,
+                            exit =  fadeOut(),
+                        ) {
+                            KeycloakSearching()
+                        }
                     }
                 }
             }
-
             RefreshingIndicator(refreshing = refreshing, refreshState = refreshState)
         }
+
     }
+}
+
+@Composable
+private fun Header(
+    pagerState: PagerState,
+    tabs: ArrayList<ContactFilterTab>,
+    coroutineScope: CoroutineScope,
+    contactListViewModel: ContactListViewModel,
+    contacts: List<ContactOrKeycloakDetails>?,
+) {
+    TabRow(
+        selectedTabIndex = pagerState.currentPage,
+        backgroundColor = colorResource(id = R.color.almostWhite),
+        contentColor = colorResource(id = R.color.almostBlack),
+    ) {
+        tabs.forEachIndexed { index, tab ->
+            CustomTab(
+                selected = pagerState.currentPage == index,
+                horizontalTextPadding = 4.dp,
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
+                },
+                text = {
+                    if (contactListViewModel.getFilter().isNullOrEmpty()) {
+                        Text(text = tab.label, softWrap = false, overflow = TextOverflow.Ellipsis)
+                    } else if ( index == 2 && contactListViewModel.keycloakSearchInProgress) {
+                        BadgedBox(badge = {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(16.dp),
+                                color = colorResource(id = color.olvid_gradient_light),
+                                strokeWidth = 2.dp
+                            )
+                        }) {
+                            Text(text = tab.label, softWrap = false, overflow = TextOverflow.Ellipsis)
+                        }
+                    } else {
+                        BadgedBox(badge = {
+                            Badge(
+                                modifier = Modifier.padding(4.dp),
+                                backgroundColor = colorResource(id = color.olvid_gradient_light),
+                            ) {
+                                Text(
+                                    color = colorResource(id = R.color.almostWhite),
+                                    text = contacts?.filter { tab.filter(it) }?.let { list ->
+                                        if (list.isNotEmpty() && list.last().contactType == KEYCLOAK_MORE_RESULTS) {
+                                            (list.size - 1).toString() + "+"
+                                        } else {
+                                            list.size.toString()
+                                        }
+                                    }
+                                        ?: ""
+                                )
+                            }
+                        }) {
+                            Text(text = tab.label, softWrap = false, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun Contact(
+    contactOrKeycloakDetails: ContactOrKeycloakDetails,
+    contactListViewModel: ContactListViewModel,
+    contactMenu: ContactMenu,
+    onClick: (contact: ContactOrKeycloakDetails) -> Unit,
+    endContent: (@Composable () -> Unit)? = null
+) {
+    ContactListItem(
+        title = contactOrKeycloakDetails.getAnnotatedName()
+            .highlight(
+                SpanStyle(
+                    background = colorResource(
+                        id = color.accentOverlay
+                    )
+                ),
+                contactListViewModel.filterPatterns
+            ),
+        body = contactOrKeycloakDetails.getAnnotatedDescription()
+            ?.highlight(
+                SpanStyle(
+                    background = colorResource(
+                        id = color.accentOverlay
+                    )
+                ),
+                contactListViewModel.filterPatterns
+            ),
+        shouldAnimateChannel = contactOrKeycloakDetails.contact?.shouldShowChannelCreationSpinner() == true && contactOrKeycloakDetails.contact.active,
+        publishedDetails = contactOrKeycloakDetails.contact?.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_SEEN || contactOrKeycloakDetails.contact?.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_UNSEEN,
+        publishedDetailsNotification = contactOrKeycloakDetails.contact?.newPublishedDetails == Contact.PUBLISHED_DETAILS_NEW_UNSEEN,
+        onClick = {
+            onClick(
+                contactOrKeycloakDetails
+            )
+        },
+        endContent = endContent,
+        initialViewSetup = { initialView ->
+            when (contactOrKeycloakDetails.contactType) {
+                CONTACT -> contactOrKeycloakDetails.contact?.let {
+                    initialView.setContact(
+                        it
+                    )
+                }
+
+                KEYCLOAK -> contactOrKeycloakDetails.keycloakUserDetails?.let { keycloakUserDetails ->
+                    val identityDetails =
+                        keycloakUserDetails.getIdentityDetails(
+                            null
+                        )
+                    val name =
+                        identityDetails.formatFirstAndLastName(
+                            SettingsActivity.getContactDisplayNameFormat(),
+                            SettingsActivity.getUppercaseLastName()
+                        )
+                    initialView.setInitial(
+                        keycloakUserDetails.identity,
+                        StringUtils.getInitial(
+                            name
+                        )
+                    )
+                    initialView.setKeycloakCertified(
+                        true
+                    )
+                }
+
+                else -> {}
+            }
+        },
+        onRenameContact = if (contactOrKeycloakDetails.contactType != KEYCLOAK) {
+            {
+                contactOrKeycloakDetails.contact?.let {
+                    contactMenu.rename(
+                        contactOrKeycloakDetails.contact
+                    )
+                }
+            }
+        } else null,
+        onCallContact = if (contactOrKeycloakDetails.contactType != KEYCLOAK) {
+            {
+                contactOrKeycloakDetails.contact?.let {
+                    contactMenu.call(
+                        contactOrKeycloakDetails.contact
+                    )
+                }
+            }
+        } else null,
+        onDeleteContact = if (contactOrKeycloakDetails.contactType != KEYCLOAK) {
+            {
+                contactOrKeycloakDetails.contact?.let {
+                    contactMenu.delete(
+                        contactOrKeycloakDetails.contact
+                    )
+                }
+            }
+        } else null,
+    )
 }
 
 @Composable
 private fun KeycloakSearching() {
     Column(
         modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp, bottom = 64.dp)
             .fillMaxWidth()
-            .padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally
+            .background(
+                color = colorResource(id = R.color.dialogBackground),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .border(1.dp, colorResource(id = R.color.greyTint), RoundedCornerShape(8.dp))
+            .padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CircularProgressIndicator(color = colorResource(id = color.olvid_gradient_light))
         Text(
@@ -266,7 +463,7 @@ private fun KeycloakSearchingPreview() {
 }
 
 @Composable
-private fun KeycloakMissingCount() {
+private fun KeycloakMissingCount(missingResults: Int?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -284,7 +481,8 @@ private fun KeycloakMissingCount() {
             modifier = Modifier
                 .padding(4.dp)
                 .align(Center),
-            text = stringResource(id = string.text_keycloak_missing_some_search_result),
+            text = missingResults?.let {pluralStringResource(id = R.plurals.text_keycloak_missing_search_result, missingResults, missingResults) }
+                ?: stringResource(id = string.text_keycloak_missing_some_search_result),
             color = colorResource(id = color.grey),
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
@@ -297,31 +495,6 @@ private fun KeycloakMissingCount() {
 @Composable
 private fun KeycloakMissingCountPreview() {
     AppCompatTheme {
-        KeycloakMissingCount()
-    }
-}
-
-@Composable
-private fun AdditionalResultsHeader(@DrawableRes drawableRes: Int, @StringRes stringRes: Int) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .requiredHeight(56.dp)
-            .padding(top = 16.dp, start = 20.dp, end = 8.dp),
-        verticalAlignment = CenterVertically,
-    ) {
-        Image(
-            modifier = Modifier.requiredSize(32.dp),
-            painter = painterResource(id = drawableRes),
-            contentDescription = ""
-        )
-        Spacer(modifier = Modifier.requiredWidth(20.dp))
-        Text(
-            text = stringResource(id = stringRes).uppercase(),
-            color = colorResource(id = color.primary700),
-            fontSize = 12.sp,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+        KeycloakMissingCount(5)
     }
 }

@@ -144,6 +144,8 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
         if (peliasServer != null) {
             this.peliasServer = peliasServer;
         }
+
+        checkPermissionsAndUpdateDialog();
     }
 
     @SuppressLint("MissingPermission")
@@ -372,7 +374,9 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
         }
 
         // if we can reach here this means user allowed and enabled location (so force centering)
-        mapView.centerOnCurrentLocation(true);
+        if (mapView != null) {
+            mapView.centerOnCurrentLocation(true);
+        }
     }
 
     private void setCenterPointerVisibility(boolean visible) {

@@ -37,7 +37,6 @@ import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
-import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 @Dao

@@ -73,6 +73,7 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
         super.onCreate(savedInstanceState);
         activity = (AppCompatActivity) requireActivity();
         viewModel = new ViewModelProvider(activity).get(SubscriptionPurchaseViewModel.class);
+
         Engine engine = AppSingleton.getEngine();
         engine.addNotificationListener(EngineNotifications.FREE_TRIAL_QUERY_SUCCESS, this);
         engine.addNotificationListener(EngineNotifications.FREE_TRIAL_QUERY_FAILED, this);
@@ -88,6 +89,7 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
         engine.removeNotificationListener(EngineNotifications.FREE_TRIAL_QUERY_FAILED, this);
         engine.removeNotificationListener(EngineNotifications.FREE_TRIAL_RETRIEVE_SUCCESS, this);
         engine.removeNotificationListener(EngineNotifications.FREE_TRIAL_RETRIEVE_FAILED, this);
+
         if (timeoutFreeTrialTimerTask != null) {
             timeoutFreeTrialTimerTask.cancel();
         }

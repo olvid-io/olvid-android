@@ -45,13 +45,15 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
     private final SSLSocketFactory sslSocketFactory;
     private final Identity ownedIdentity;
     private final UID messageUid;
+    private final boolean markAsListed;
 
-    public DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, UID messageUid, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
-        super(InboxMessage.computeUniqueUid(ownedIdentity, messageUid), onFinishCallback, onCancelCallback);
+    public DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, UID messageUid, boolean markAsListed, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
+        super(InboxMessage.computeUniqueUid(ownedIdentity, messageUid, markAsListed), onFinishCallback, onCancelCallback);
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
         this.ownedIdentity = ownedIdentity;
         this.messageUid = messageUid;
+        this.markAsListed = markAsListed;
     }
 
     public UID getMessageUid() {
@@ -62,6 +64,10 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
         return ownedIdentity;
     }
 
+    public boolean getMarkAsListed() {
+        return markAsListed;
+    }
+
     @Override
     public void doCancel() {
         // Nothing special to do on cancel
@@ -70,26 +76,31 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
     @Override
     public void doExecute() {
         boolean finished = false;
-        PendingDeleteFromServer pendingDeleteFromServer;
         try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
             try {
-                pendingDeleteFromServer = PendingDeleteFromServer.get(fetchManagerSession, ownedIdentity, messageUid);
-                if (pendingDeleteFromServer == null) {
-                    finished = true;
-                    return;
-                }
-
                 // message may be null in case of re-list of an already deleted message
                 InboxMessage message = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUid);
+                PendingDeleteFromServer pendingDeleteFromServer = null;
 
-                UID toDeviceUid = fetchManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(fetchManagerSession.session, ownedIdentity);
+                if (markAsListed) {
+                    if (message == null || message.isMarkedAsListedOnServer()) {
+                        finished = true;
+                        return;
+                    }
+                } else {
+                    if (message != null && !message.canBeDeleted()) {
+                        cancel(RFC_MESSAGE_AND_ATTACHMENTS_CANNOT_BE_DELETED);
+                        return;
+                    }
 
-                if (message != null && !message.canBeDeleted()) {
-                    cancel(RFC_MESSAGE_AND_ATTACHMENTS_CANNOT_BE_DELETED);
-                    return;
+                    pendingDeleteFromServer = PendingDeleteFromServer.get(fetchManagerSession, ownedIdentity, messageUid);
+                    if (pendingDeleteFromServer == null) {
+                        finished = true;
+                        return;
+                    }
                 }
 
-                byte[] serverSessionToken = ServerSession.getToken(fetchManagerSession, pendingDeleteFromServer.getOwnedIdentity());
+                byte[] serverSessionToken = ServerSession.getToken(fetchManagerSession, ownedIdentity);
                 if (serverSessionToken == null) {
                     cancel(RFC_INVALID_SERVER_SESSION);
                     return;
@@ -98,11 +109,14 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                     return;
                 }
 
+                UID currentDeviceUid = fetchManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(fetchManagerSession.session, ownedIdentity);
+
                 DeleteMessageAndAttachmentServerMethod serverMethod = new DeleteMessageAndAttachmentServerMethod(
-                        pendingDeleteFromServer.getOwnedIdentity(),
+                        ownedIdentity,
                         serverSessionToken,
                         messageUid,
-                        toDeviceUid
+                        currentDeviceUid,
+                        markAsListed
                 );
                 serverMethod.setSslSocketFactory(sslSocketFactory);
 
@@ -111,9 +125,13 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                 fetchManagerSession.session.startTransaction();
                 switch (returnStatus) {
                     case ServerMethod.OK:
-                        pendingDeleteFromServer.delete();
-                        if (message != null) {
-                            message.delete();
+                        if (markAsListed) {
+                            message.markAsListedOnServer();
+                        } else {
+                            pendingDeleteFromServer.delete();
+                            if (message != null) {
+                                message.delete();
+                            }
                         }
                         finished = true;
                         return;
@@ -153,14 +171,16 @@ class DeleteMessageAndAttachmentServerMethod extends ServerMethod {
     private final Identity identity;
     private final byte[] token;
     private final UID messageUid;
-    private final UID deviceUid;
+    private final UID currentDeviceUid;
+    private final boolean markAsListed;
 
-    DeleteMessageAndAttachmentServerMethod(Identity identity, byte[] token, UID messageUid, UID deviceUid) {
+    DeleteMessageAndAttachmentServerMethod(Identity identity, byte[] token, UID messageUid, UID currentDeviceUid, boolean markAsListed) {
         this.server = identity.getServer();
         this.identity = identity;
         this.token = token;
         this.messageUid = messageUid;
-        this.deviceUid = deviceUid;
+        this.currentDeviceUid = currentDeviceUid;
+        this.markAsListed = markAsListed;
     }
 
     @Override
@@ -179,7 +199,8 @@ class DeleteMessageAndAttachmentServerMethod extends ServerMethod {
                 Encoded.of(identity),
                 Encoded.of(token),
                 Encoded.of(messageUid),
-                Encoded.of(deviceUid)
+                Encoded.of(currentDeviceUid),
+                Encoded.of(markAsListed),
         }).getBytes();
     }
 

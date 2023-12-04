@@ -30,7 +30,6 @@ import androidx.lifecycle.ViewModel;
 import java.util.List;
 import java.util.Objects;
 
-import io.olvid.engine.Logger;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Message;

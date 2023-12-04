@@ -258,7 +258,7 @@
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
         android:paddingBottom="1dp"
-        android:textAlignment="textEnd"
+        android:textAlignment="viewEnd"
         android:textSize="12sp"
         android:textColor="#CC7D7D7D"
         app:layout_constraintBottom_toBottomOf="parent"

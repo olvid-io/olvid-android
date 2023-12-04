@@ -190,14 +190,19 @@ class TroubleshootingActivity : ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    FaqLinkHeader {
-                        startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("https://olvid.io/faq/")
+                    FaqLinkHeader (
+                        openFaq = {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://olvid.io/faq/")
+                                )
                             )
-                        )
-                    }
+                        },
+                        onBack = {
+                            onBackPressed()
+                        }
+                    )
 
                     troubleshootingItems.value.forEach { troubleshootingItem ->
                         when(troubleshootingItem) {

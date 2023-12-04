@@ -31,6 +31,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.storage.StorageManager;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.view.Gravity;
@@ -58,6 +59,7 @@ import io.olvid.engine.engine.types.ObvDeviceList;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
@@ -139,6 +141,7 @@ public class AppDialogShowActivity extends LockableActivity {
     public static final String DIALOG_INTRODUCING_GROUPS_V2 = "introducing_groups_v2";
     public static final String DIALOG_INTRODUCING_MENTIONS = "introducing_mentions";
     public static final String DIALOG_INTRODUCING_MARKDOWN = "introducing_markdown";
+    public static final String DIALOG_INTRODUCING_MULTI_DEVICE = "introducing_multi_device";
 
     AppDialogShowViewModel appDialogShowViewModel;
 
@@ -617,6 +620,25 @@ public class AppDialogShowActivity extends LockableActivity {
                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_introducing_markdown)
                         .setMessage(message)
+                        .setPositiveButton(R.string.button_label_ok, null)
+                        .setOnDismissListener(dialog -> continueWithNextDialog());
+                AlertDialog dialog = builder.create();
+                dialog.setOnShowListener((DialogInterface dialogInterface) -> {
+                    View messageView = dialog.findViewById(android.R.id.message);
+                    if (messageView instanceof TextView) {
+                        ((TextView) messageView).setMovementMethod(LinkMovementMethod.getInstance());
+                    }
+                });
+                dialog.show();
+                break;
+            }
+            case DIALOG_INTRODUCING_MULTI_DEVICE: {
+                SpannableString message = new SpannableString(getText(R.string.dialog_message_introducing_multi_device));
+                LinkifyCompat.addLinks(message, Linkify.WEB_URLS);
+                SpannableStringBuilder formattedMessage = Markdown.formatMarkdown(message);
+                AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_introducing_multi_device)
+                        .setMessage(formattedMessage)
                         .setPositiveButton(R.string.button_label_ok, null)
                         .setOnDismissListener(dialog -> continueWithNextDialog());
                 AlertDialog dialog = builder.create();

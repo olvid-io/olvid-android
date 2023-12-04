@@ -42,7 +42,6 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
-import io.olvid.messenger.customClasses.StringUtils2;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -537,11 +536,6 @@ public class HandleNewMessageNotificationTask implements Runnable {
                         if (attachmentMetadata == null || attachmentMetadata.getFileName() == null) {
                             throw new Exception();
                         }
-                        if (isLinkAttachmentButMessageBodyDoesNotMatchLink(attachmentMetadata, message)) {
-                            // do not download attachment when body does not contain link from link-preview
-                            // throw so that the attachment is deleted from engine
-                            throw new Exception("Link preview attachment with message body mismatch");
-                        }
                         final byte[] sha256 = attachmentMetadata.getSha256();
                         try {
                             Fyle.acquireLock(sha256);
@@ -656,11 +650,6 @@ public class HandleNewMessageNotificationTask implements Runnable {
             e.printStackTrace();
         }
     }
-
-    private boolean isLinkAttachmentButMessageBodyDoesNotMatchLink(Fyle.JsonMetadata attachmentMetadata, Message message) {
-        return Objects.equals(attachmentMetadata.getType(), OpenGraph.MIME_TYPE) && !StringUtils2.Companion.stringFirstLinkCheck(message.contentBody, attachmentMetadata.getFileName());
-    }
-
 
     // this must be run inside the transaction where the message is created.
     // It updates the latest discussion sequence number and updates the missing message count in the following sequenceNumber message (if this is not the latest)
@@ -960,9 +949,6 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     return;
                 }
 
-                // delete preview if link removed from body
-                new CheckLinkPreviewValidityTask(message, newBody).run();
-
                 String finalNewMentions = newMentions;
                 db.runInTransaction(() -> {
                     message.jsonMentions = finalNewMentions;
@@ -1170,6 +1156,22 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
 
     private Discussion getDiscussion(byte[] bytesGroupUid, byte[] bytesGroupOwner, byte[] bytesGroupIdentifier, JsonOneToOneMessageIdentifier oneToOneMessageIdentifier, MessageSender messageSender, @Nullable GroupV2.Permission requiredPermission) {
+        // handle the special case of messages from another device differently: the message shoud also be accepted for locked/pre discussions
+        if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+            if (bytesGroupIdentifier != null) {
+                return db.discussionDao().getByGroupIdentifierWithAnyStatus(messageSender.bytesOwnedIdentity, bytesGroupIdentifier);
+            } else if (bytesGroupUid != null && bytesGroupOwner != null) {
+                byte[] bytesGroupOwnerAndUid = new byte[bytesGroupUid.length + bytesGroupOwner.length];
+                System.arraycopy(bytesGroupOwner, 0, bytesGroupOwnerAndUid, 0, bytesGroupOwner.length);
+                System.arraycopy(bytesGroupUid, 0, bytesGroupOwnerAndUid, bytesGroupOwner.length, bytesGroupUid.length);
+                return db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(messageSender.bytesOwnedIdentity, bytesGroupOwnerAndUid);
+            } else if (oneToOneMessageIdentifier != null) {
+                return db.discussionDao().getByContactWithAnyStatus(messageSender.bytesOwnedIdentity, oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity));
+            } else {
+                return null;
+            }
+        }
+
         // we keep this test for now to maintain backward compatibility, but oneToOneMessageIdentifier should always be non-null in this case
         if (bytesGroupUid == null && bytesGroupOwner == null && bytesGroupIdentifier == null) {
             if (oneToOneMessageIdentifier != null) {
@@ -1184,56 +1186,52 @@ public class HandleNewMessageNotificationTask implements Runnable {
         } else if (bytesGroupIdentifier != null) {
             // check the send is indeed a member or pending member with appropriate send message permission
             boolean requiredPermissionFulfilled = false;
-            if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
-                requiredPermissionFulfilled = true;
+            Group2Member group2Member = db.group2MemberDao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier, messageSender.getSenderIdentity());
+            if (group2Member != null) {
+                if (requiredPermission != null) {
+                    switch (requiredPermission) {
+                        case GROUP_ADMIN:
+                            requiredPermissionFulfilled = group2Member.permissionAdmin;
+                            break;
+                        case REMOTE_DELETE_ANYTHING:
+                            requiredPermissionFulfilled = group2Member.permissionRemoteDeleteAnything;
+                            break;
+                        case EDIT_OR_REMOTE_DELETE_OWN_MESSAGES:
+                            requiredPermissionFulfilled = group2Member.permissionEditOrRemoteDeleteOwnMessages;
+                            break;
+                        case CHANGE_SETTINGS:
+                            requiredPermissionFulfilled = group2Member.permissionChangeSettings;
+                            break;
+                        case SEND_MESSAGE:
+                            requiredPermissionFulfilled = group2Member.permissionSendMessage;
+                            break;
+                    }
+                } else {
+                    requiredPermissionFulfilled = true;
+                }
             } else {
-                Group2Member group2Member = db.group2MemberDao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier, messageSender.getSenderIdentity());
-                if (group2Member != null) {
+                Group2PendingMember group2PendingMember = db.group2PendingMemberDao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier, messageSender.getSenderIdentity());
+                if (group2PendingMember != null) {
                     if (requiredPermission != null) {
                         switch (requiredPermission) {
                             case GROUP_ADMIN:
-                                requiredPermissionFulfilled = group2Member.permissionAdmin;
+                                requiredPermissionFulfilled = group2PendingMember.permissionAdmin;
                                 break;
                             case REMOTE_DELETE_ANYTHING:
-                                requiredPermissionFulfilled = group2Member.permissionRemoteDeleteAnything;
+                                requiredPermissionFulfilled = group2PendingMember.permissionRemoteDeleteAnything;
                                 break;
                             case EDIT_OR_REMOTE_DELETE_OWN_MESSAGES:
-                                requiredPermissionFulfilled = group2Member.permissionEditOrRemoteDeleteOwnMessages;
+                                requiredPermissionFulfilled = group2PendingMember.permissionEditOrRemoteDeleteOwnMessages;
                                 break;
                             case CHANGE_SETTINGS:
-                                requiredPermissionFulfilled = group2Member.permissionChangeSettings;
+                                requiredPermissionFulfilled = group2PendingMember.permissionChangeSettings;
                                 break;
                             case SEND_MESSAGE:
-                                requiredPermissionFulfilled = group2Member.permissionSendMessage;
+                                requiredPermissionFulfilled = group2PendingMember.permissionSendMessage;
                                 break;
                         }
                     } else {
                         requiredPermissionFulfilled = true;
-                    }
-                } else {
-                    Group2PendingMember group2PendingMember = db.group2PendingMemberDao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier, messageSender.getSenderIdentity());
-                    if (group2PendingMember != null) {
-                        if (requiredPermission != null) {
-                            switch (requiredPermission) {
-                                case GROUP_ADMIN:
-                                    requiredPermissionFulfilled = group2PendingMember.permissionAdmin;
-                                    break;
-                                case REMOTE_DELETE_ANYTHING:
-                                    requiredPermissionFulfilled = group2PendingMember.permissionRemoteDeleteAnything;
-                                    break;
-                                case EDIT_OR_REMOTE_DELETE_OWN_MESSAGES:
-                                    requiredPermissionFulfilled = group2PendingMember.permissionEditOrRemoteDeleteOwnMessages;
-                                    break;
-                                case CHANGE_SETTINGS:
-                                    requiredPermissionFulfilled = group2PendingMember.permissionChangeSettings;
-                                    break;
-                                case SEND_MESSAGE:
-                                    requiredPermissionFulfilled = group2PendingMember.permissionSendMessage;
-                                    break;
-                            }
-                        } else {
-                            requiredPermissionFulfilled = true;
-                        }
                     }
                 }
             }
@@ -1253,14 +1251,13 @@ public class HandleNewMessageNotificationTask implements Runnable {
             System.arraycopy(bytesGroupOwner, 0, bytesGroupOwnerAndUid, 0, bytesGroupOwner.length);
             System.arraycopy(bytesGroupUid, 0, bytesGroupOwnerAndUid, bytesGroupOwner.length, bytesGroupUid.length);
 
-            if (messageSender.type == MessageSender.Type.CONTACT) {
-                // only post the message in the discussion if the sender is indeed in this discussion!
-                if ((db.contactGroupJoinDao().get(bytesGroupOwnerAndUid, messageSender.bytesOwnedIdentity, messageSender.getSenderIdentity()) == null &&
-                        db.pendingGroupMemberDao().get(messageSender.bytesOwnedIdentity, bytesGroupOwnerAndUid, messageSender.getSenderIdentity()) == null)) {
-                    Logger.i("Received a message for an unknown group, or from someone not in the group, IGNORING IT!");
-                    return null;
-                }
+            // only post the message in the discussion if the sender is indeed in this discussion!
+            if ((db.contactGroupJoinDao().get(bytesGroupOwnerAndUid, messageSender.bytesOwnedIdentity, messageSender.getSenderIdentity()) == null &&
+                    db.pendingGroupMemberDao().get(messageSender.bytesOwnedIdentity, bytesGroupOwnerAndUid, messageSender.getSenderIdentity()) == null)) {
+                Logger.i("Received a message for an unknown group, or from someone not in the group, IGNORING IT!");
+                return null;
             }
+
             return db.discussionDao().getByGroupOwnerAndUid(messageSender.bytesOwnedIdentity, bytesGroupOwnerAndUid);
         }
     }

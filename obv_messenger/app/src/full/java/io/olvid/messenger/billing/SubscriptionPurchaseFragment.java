@@ -67,6 +67,7 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
     private AppCompatActivity activity;
 
     public static final long QUERY_TIMEOUT = 10_000;
+    public static final String MONTHLY_SUBSCRIPTION_SKUTYPE = "premium_2020_monthly";
 
     BillingClient billingClient;
     LinearLayout availablePlansLinearLayout;
@@ -78,8 +79,6 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
     Button freeTrialButton = null;
     Button disabledSubscriptionButton = null;
 
-    public static final String MONTHLY_SUBSCRIPTION_SKUTYPE = "premium_2020_monthly";
-
     public static SubscriptionPurchaseFragment newInstance() {
         return new SubscriptionPurchaseFragment();
     }
@@ -89,12 +88,12 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
         super.onCreate(savedInstanceState);
         activity = (AppCompatActivity) requireActivity();
         viewModel = new ViewModelProvider(activity).get(SubscriptionPurchaseViewModel.class);
+
         Engine engine = AppSingleton.getEngine();
         engine.addNotificationListener(EngineNotifications.FREE_TRIAL_QUERY_SUCCESS, this);
         engine.addNotificationListener(EngineNotifications.FREE_TRIAL_QUERY_FAILED, this);
         engine.addNotificationListener(EngineNotifications.FREE_TRIAL_RETRIEVE_SUCCESS, this);
         engine.addNotificationListener(EngineNotifications.FREE_TRIAL_RETRIEVE_FAILED, this);
-        engine.addNotificationListener(EngineNotifications.VERIFY_RECEIPT_SUCCESS, this);
     }
 
     @Override
@@ -105,7 +104,7 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
         engine.removeNotificationListener(EngineNotifications.FREE_TRIAL_QUERY_FAILED, this);
         engine.removeNotificationListener(EngineNotifications.FREE_TRIAL_RETRIEVE_SUCCESS, this);
         engine.removeNotificationListener(EngineNotifications.FREE_TRIAL_RETRIEVE_FAILED, this);
-        engine.removeNotificationListener(EngineNotifications.VERIFY_RECEIPT_SUCCESS, this);
+
         if (timeoutFreeTrialTimerTask != null) {
             timeoutFreeTrialTimerTask.cancel();
         }
@@ -289,6 +288,7 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
                         Button subscriptionButton = subscriptionView.findViewById(R.id.subscription_button);
                         TextView subscriptionTitle = subscriptionView.findViewById(R.id.subscription_title_textview);
                         TextView subscriptionExplanation = subscriptionView.findViewById(R.id.subscription_explanation_textview);
+
                         subscriptionTitle.setText(productDetails.getTitle());
                         subscriptionExplanation.setText(productDetails.getDescription());
                         switch (pricingPhase.getBillingPeriod()) {

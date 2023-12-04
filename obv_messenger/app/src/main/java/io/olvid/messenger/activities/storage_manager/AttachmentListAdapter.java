@@ -44,7 +44,6 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -93,6 +92,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
     private final int selectedColor;
     private final int selectableBackgroundResourceId;
     List<FyleMessageJoinWithStatusDao.FyleAndOrigin> fyleAndOrigins;
+    RecyclerView recyclerView = null;
 
     private static final int TYPE_IMAGE = 0;
     private static final int TYPE_VIDEO = 1;
@@ -127,6 +127,11 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                 previousSelectedCount = selectedCount;
             }
         });
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -271,6 +276,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         return fyleAndOrigins.size();
     }
 
+    StorageManagerViewModel.SortOrder latestSortOrder = null;
     @Override
     public void onChanged(List<FyleMessageJoinWithStatusDao.FyleAndOrigin> fyleAndOrigins) {
         final DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
@@ -307,6 +313,13 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         });
         this.fyleAndOrigins = fyleAndOrigins;
         result.dispatchUpdatesTo(this);
+
+        if (latestSortOrder != null && !Objects.equals(latestSortOrder, viewModel.getCurrentSortOrder())) {
+            if (recyclerView != null) {
+                recyclerView.scrollToPosition(0);
+            }
+        }
+        latestSortOrder = viewModel.getCurrentSortOrder();
     }
 
 
@@ -421,18 +434,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                         openGraph.setUrl(fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fileName);
                         Uri uri = openGraph.getSafeUri();
                         if (uri != null) {
-                            final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
-                                    .setTitle(R.string.dialog_title_confirm_open_link)
-                                    .setMessage(uri.toString())
-                                    .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
-                                        try {
-                                            activity.startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                                        } catch (Exception e) {
-                                            App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
-                                        }
-                                    })
-                                    .setNegativeButton(R.string.button_label_cancel, null);
-                            builder.create().show();
+                            App.openLink(activity, uri);
                         }
                     } else {
                         App.openFyleInExternalViewer(activity, fyleAndOrigin.fyleAndStatus, null);

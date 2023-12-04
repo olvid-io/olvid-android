@@ -20,11 +20,13 @@
 package io.olvid.messenger.billing;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,29 +37,42 @@ import androidx.preference.PreferenceScreen;
 import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.SimpleEngineNotificationListener;
+import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 
 public class BillingUtils {
+
+    public static final String MONTHLY_SUBSCRIPTION_SKUTYPE = "premium_2020_monthly";
+
     private static BillingClient billingClientInstance = null;
     private static SimpleEngineNotificationListener engineNotificationListener = null;
     private static final Queue<Runnable> tasksAwaitingBillingClientConnection = new ArrayDeque<>();
     private static final NoExceptionSingleThreadExecutor executor = new NoExceptionSingleThreadExecutor("BillingUtils");
+    private static final Set<PurchasesUpdatedListener> externalPurchaseListeners = new HashSet();
 
     private static boolean billingUnavailable = false;
     private static List<Purchase> purchaseList = null;
@@ -68,6 +83,11 @@ public class BillingUtils {
                 billingClientInstance = BillingClient.newBuilder(context)
                         .setListener((@NonNull BillingResult billingResult, @Nullable List<Purchase> list) -> {
                             Logger.i("💲 onPurchase: new subscription?");
+                            synchronized (externalPurchaseListeners) {
+                                for (PurchasesUpdatedListener purchasesUpdatedListener : externalPurchaseListeners) {
+                                    purchasesUpdatedListener.onPurchasesUpdated(billingResult, list);
+                                }
+                            }
                             refreshPurchases(null);
                         })
                         .enablePendingPurchases()
@@ -254,6 +274,88 @@ public class BillingUtils {
                     new Handler(Looper.getMainLooper()).post(loadPreference);
                 }
             });
+        }
+    }
+
+    public static void getSubscriptionProducts(@NonNull SubscriptionProductsCallback subscriptionProductsCallback) {
+        executor.execute(() -> {
+            if (billingUnavailable || billingClientInstance == null) {
+                subscriptionProductsCallback.callback(null);
+                return;
+            }
+            connectAndRun(() -> {
+                QueryProductDetailsParams queryProductDetailsParams = QueryProductDetailsParams.newBuilder()
+                        .setProductList(Collections.singletonList(QueryProductDetailsParams.Product.newBuilder()
+                                .setProductId(MONTHLY_SUBSCRIPTION_SKUTYPE)
+                                .setProductType(BillingClient.ProductType.SUBS)
+                                .build()))
+                        .build();
+
+                billingClientInstance.queryProductDetailsAsync(queryProductDetailsParams, (@NonNull BillingResult billingResult, @NonNull List<ProductDetails> productDetailsList) -> {
+                    if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                        subscriptionProductsCallback.callback(null);
+                    } else {
+                        List<SubscriptionOfferDetails> subscriptionOfferDetails = new ArrayList<>();
+                        for (ProductDetails productDetails: productDetailsList) {
+                            if (productDetails.getSubscriptionOfferDetails() == null) {
+                                continue;
+                            }
+                            for (ProductDetails.SubscriptionOfferDetails offerDetails : productDetails.getSubscriptionOfferDetails()) {
+                                for (ProductDetails.PricingPhase pricingPhase : offerDetails.getPricingPhases().getPricingPhaseList()) {
+                                    subscriptionOfferDetails.add(new SubscriptionOfferDetails(
+                                            productDetails.getTitle(),
+                                            productDetails.getDescription(),
+                                            productDetails,
+                                            offerDetails.getOfferToken(),
+                                            pricingPhase.getBillingPeriod(),
+                                            pricingPhase.getFormattedPrice()
+                                    ));
+                                }
+                            }
+                        }
+                        subscriptionProductsCallback.callback(subscriptionOfferDetails);
+                    }
+                });
+            });
+        });
+    }
+
+    interface SubscriptionProductsCallback {
+        void callback(List<SubscriptionOfferDetails> subscriptionOfferDetails);
+    }
+
+
+    public static void launchSubscriptionPurchase(@NonNull Activity activity, @NonNull ProductDetails productDetails, @NonNull String offerToken) {
+        executor.execute(() -> {
+            if (billingClientInstance != null) {
+
+                BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+                        .setProductDetailsParamsList(Collections.singletonList(BillingFlowParams.ProductDetailsParams.newBuilder()
+                                .setProductDetails(productDetails)
+                                .setOfferToken(offerToken)
+                                .build()))
+                        .build();
+
+                BillingResult launchResult = billingClientInstance.launchBillingFlow(activity, billingFlowParams);
+                if (launchResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    return;
+                }
+                Logger.e("💲 Error showing purchase panel " + launchResult.getDebugMessage());
+            }
+
+            App.toast(R.string.toast_message_error_launching_in_app_purchase, Toast.LENGTH_LONG);
+        });
+    }
+
+    public static void addPurchasesUpdatedListener(PurchasesUpdatedListener listener) {
+        synchronized (externalPurchaseListeners) {
+            externalPurchaseListeners.add(listener);
+        }
+    }
+
+    public static void removePurchasesUpdatedListener(PurchasesUpdatedListener listener) {
+        synchronized (externalPurchaseListeners) {
+            externalPurchaseListeners.remove(listener);
         }
     }
 }

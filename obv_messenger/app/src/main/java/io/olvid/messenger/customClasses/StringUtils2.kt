@@ -27,10 +27,6 @@ import androidx.core.util.PatternsCompat
 
 class StringUtils2 {
     companion object {
-        fun stringFirstLinkCheck(body: String?, link: String): Boolean {
-            return getLink(body)?.first == link
-        }
-
         fun getLink(s: String?): Pair<String, String?>? {
             s?.let { _s ->
                 val source = SpannableString(_s)
@@ -75,5 +71,14 @@ fun SpannableString.linkify(): SpannableString {
             this,
             Linkify.WEB_URLS or Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS
         )
+        getSpans(0, length, URLSpan::class.java).onEach { urlSpan ->
+            setSpan(
+                SecureUrlSpan(urlSpan.url),
+                getSpanStart(urlSpan),
+                getSpanEnd(urlSpan),
+                getSpanFlags(urlSpan)
+            )
+            removeSpan(urlSpan)
+        }
     }
 }

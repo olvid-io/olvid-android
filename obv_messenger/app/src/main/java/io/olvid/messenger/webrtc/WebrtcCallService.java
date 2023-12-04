@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Icon;
@@ -2139,7 +2140,11 @@ public class WebrtcCallService extends Service {
                     .setCategory(Notification.CATEGORY_CALL)
                     .setContentIntent(callActivityPendingIntent);
             try {
-                startForeground(SERVICE_ID, builder.build());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    startForeground(SERVICE_ID, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE);
+                } else {
+                    startForeground(SERVICE_ID, builder.build());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -2218,7 +2223,11 @@ public class WebrtcCallService extends Service {
                     .setFullScreenIntent(fullScreenPendingIntent, true);
 
             try {
-                startForeground(SERVICE_ID, builder.build());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    startForeground(SERVICE_ID, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+                } else {
+                    startForeground(SERVICE_ID, builder.build());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
 

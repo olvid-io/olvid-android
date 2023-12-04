@@ -19,19 +19,25 @@
 
 package io.olvid.messenger.onboarding.flow.screens.transfer
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
@@ -44,22 +50,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import io.olvid.engine.engine.types.EngineNotificationListener
+import io.olvid.engine.engine.types.EngineNotifications
 import io.olvid.engine.engine.types.ObvDeviceList
+import io.olvid.engine.engine.types.SimpleEngineNotificationListener
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.billing.SubscriptionOfferDialog
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.onboarding.flow.Device
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes
@@ -67,6 +82,7 @@ import io.olvid.messenger.onboarding.flow.OnboardingScreen
 import io.olvid.messenger.onboarding.flow.OnboardingStep
 
 fun NavGraphBuilder.activeDeviceSelection(
+    activity: Activity,
     onboardingFlowViewModel: OnboardingFlowViewModel,
     onProceed: () -> Unit,
     onClose: () -> Unit,
@@ -80,50 +96,102 @@ fun NavGraphBuilder.activeDeviceSelection(
     ) {
         val dbDevices = AppDatabase.getInstance().ownedDeviceDao()
             .getAllSorted(AppSingleton.getBytesCurrentIdentity()).observeAsState()
+        var loading by remember { mutableStateOf(true) }
         var deviceList: ObvDeviceList? by remember { mutableStateOf(null) }
+        val context = LocalContext.current
+        val googleServicesAvailable = remember { GoogleServicesUtils.googleServicesAvailable(context) }
+        var showPurchaseFragment by remember { mutableStateOf(false) }
+        var purchaseEngineListener: EngineNotificationListener? by remember { mutableStateOf(null) }
 
-        LaunchedEffect(Unit) {
+        fun clearDeviceList() {
+            loading = true
             onboardingFlowViewModel.updateTransferSelectedDevice(null)
+            deviceList = null
+        }
+
+        fun refreshDeviceList() {
             deviceList = AppSingleton.getEngine()
                 .queryRegisteredOwnedDevicesFromServer(AppSingleton.getBytesCurrentIdentity())
             deviceList?.let {
                 onboardingFlowViewModel.updateTransferMultiDevice(it.multiDevice)
             }
+            loading = false
+        }
+
+
+        LaunchedEffect(Unit) {
+            refreshDeviceList()
         }
 
         OnboardingScreen(
-            scrollable = false,
+            scrollable = true,
             step = OnboardingStep(
-                title = if (onboardingFlowViewModel.transferMultiDevice) stringResource(id = R.string.onboarding_transfer_devices_multi_title) else stringResource(
+                title = if (loading) stringResource(id = R.string.onboarding_transfer_devices_loading_title) else if (onboardingFlowViewModel.transferMultiDevice) stringResource(id = R.string.onboarding_transfer_devices_multi_title) else stringResource(
                     id = R.string.onboarding_transfer_devices_title
                 ),
-                subtitle = if (onboardingFlowViewModel.transferMultiDevice) stringResource(
+                subtitle = if (loading) "" else if (onboardingFlowViewModel.transferMultiDevice) stringResource(
                     id = R.string.onboarding_transfer_devices_multi_subtitle,
                     onboardingFlowViewModel.deviceName
                 ) else stringResource(
                     id = R.string.onboarding_transfer_devices_subtitle
                 ),
             ),
-            onClose = onClose
+            onClose = onClose,
+            footer = {
+                AnimatedVisibility(
+                    visible = !loading && googleServicesAvailable && onboardingFlowViewModel.transferMultiDevice.not(),
+                    enter = fadeIn(),
+                    exit =  fadeOut(),
+                ) {
+                    ClickableText(
+                        modifier = Modifier.padding(16.dp),
+                        text = buildAnnotatedString {
+                            append(stringResource(id = R.string.onboarding_transfer_multidevice_purchase_question))
+                            append(" ")
+                            withStyle(SpanStyle(color = colorResource(id = R.color.blueOrWhite))) {
+                                append(stringResource(id = R.string.onboarding_transfer_multidevice_purchase_hyperlink))
+                            }
+                        },
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight(400),
+                            color = Color(0xFF8B8D97),
+                            textAlign = TextAlign.Center
+                        )
+                    ) {
+                        showPurchaseFragment = true
+                    }
+                }
+            }
         ) {
-            val devices = arrayListOf<Device>()
-            deviceList?.deviceUidsAndServerInfo?.let { deviceUidsAndServerInfo ->
-                devices.addAll(deviceUidsAndServerInfo.map {
-                    Device(
-                        name = it.value.displayName,
-                        uid = it.key.bytes,
-                        lastRegistrationTimestamp = it.value.lastRegistrationTimestamp,
-                        expirationTimestamp = it.value.expirationTimestamp
-                    )
-                })
-            }
+            if (loading) {
+                Spacer(modifier = Modifier.height(16.dp))
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(128.dp)
+                        .align(Alignment.CenterHorizontally),
+                    color = colorResource(id = R.color.olvid_gradient_light),
+                    strokeWidth = 8.dp,
+                    strokeCap = StrokeCap.Round,
+                )
+            } else {
+                val devices = arrayListOf<Device>()
+                    deviceList?.deviceUidsAndServerInfo?.let { deviceUidsAndServerInfo ->
+                        devices.addAll(deviceUidsAndServerInfo.map {
+                            Device(
+                                name = it.value.displayName,
+                                uid = it.key.bytes,
+                                lastRegistrationTimestamp = it.value.lastRegistrationTimestamp,
+                                expirationTimestamp = it.value.expirationTimestamp
+                            )
+                        })
 
-            if (onboardingFlowViewModel.transferMultiDevice.not()) {
-                devices.add(Device(onboardingFlowViewModel.deviceName, null))
-            }
+                        if (onboardingFlowViewModel.transferMultiDevice.not()) {
+                            devices.add(Device(onboardingFlowViewModel.deviceName, null))
+                        }
+                    }
 
-            LazyColumn {
-                items(items = devices) { device ->
+                devices.forEach { device ->
                     Row(
                         modifier = Modifier
                             .widthIn(max = 400.dp)
@@ -135,7 +203,9 @@ fun NavGraphBuilder.activeDeviceSelection(
                     ) {
                         if (onboardingFlowViewModel.transferMultiDevice.not()) {
                             RadioButton(
-                                selected = onboardingFlowViewModel.transferSelectedDevice != null && onboardingFlowViewModel.transferSelectedDevice?.uid.contentEquals(device.uid),
+                                selected = onboardingFlowViewModel.transferSelectedDevice != null && onboardingFlowViewModel.transferSelectedDevice?.uid.contentEquals(
+                                    device.uid
+                                ),
                                 onClick = null,
                                 colors = RadioButtonDefaults.colors(selectedColor = colorResource(id = R.color.olvid_gradient_contrasted))
                             )
@@ -179,7 +249,10 @@ fun NavGraphBuilder.activeDeviceSelection(
                             }
                             device.expirationTimestamp?.let {
                                 Row {
-                                    Image(painter = painterResource(id = R.drawable.ic_device_expiration), contentDescription = "")
+                                    Image(
+                                        painter = painterResource(id = R.drawable.ic_device_expiration),
+                                        contentDescription = ""
+                                    )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = stringResource(
@@ -199,25 +272,47 @@ fun NavGraphBuilder.activeDeviceSelection(
                         }
                     }
                 }
+
+                Button(
+                    modifier = Modifier.padding(top = 16.dp),
+                    elevation = null,
+                    onClick = {
+                        onProceed.invoke()
+                    },
+                    enabled = onboardingFlowViewModel.transferMultiDevice || onboardingFlowViewModel.transferSelectedDevice != null,
+                    contentPadding = PaddingValues(vertical = 16.dp, horizontal = 24.dp)
+                ) {
+                    Text(
+                        text = if (onboardingFlowViewModel.transferMultiDevice)
+                            stringResource(
+                                id = R.string.button_label_add_device_xxx,
+                                onboardingFlowViewModel.deviceName
+                            )
+                        else
+                            stringResource(id = R.string.button_label_proceed),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(modifier = Modifier.height(32.dp))
             }
-            Button(
-                modifier = Modifier.padding(top = 16.dp),
-                elevation = null,
-                onClick = {
-                    onProceed.invoke()
-                },
-                enabled = onboardingFlowViewModel.transferMultiDevice || onboardingFlowViewModel.transferSelectedDevice != null,
-                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 24.dp)
-            ) {
-                Text(
-                    text = if (onboardingFlowViewModel.transferMultiDevice)
-                        stringResource(id = R.string.button_label_add_device_xxx, onboardingFlowViewModel.deviceName)
-                    else
-                        stringResource(id = R.string.button_label_proceed),
-                    textAlign = TextAlign.Center
-                )
+            if (showPurchaseFragment) {
+                SubscriptionOfferDialog(
+                    activity = activity,
+                    onDismissCallback = { showPurchaseFragment = false },
+                    onPurchaseCallback = {
+                        clearDeviceList()
+
+                        // wait for the purchase acknowledged notification
+                        purchaseEngineListener = object: SimpleEngineNotificationListener(EngineNotifications.VERIFY_RECEIPT_SUCCESS) {
+                            override fun callback(userInfo: HashMap<String, Any>?) {
+                                AppSingleton.getEngine().removeNotificationListener(EngineNotifications.VERIFY_RECEIPT_SUCCESS, purchaseEngineListener)
+                                purchaseEngineListener = null
+                                refreshDeviceList()
+                            }
+                        }
+                        AppSingleton.getEngine().addNotificationListener(EngineNotifications.VERIFY_RECEIPT_SUCCESS, purchaseEngineListener)
+                    })
             }
         }
     }
 }
-

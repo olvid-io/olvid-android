@@ -124,7 +124,7 @@ fun ComponentActivity.getBackgroundState() =
 
 fun getStorageState() =
     (AvailableSpaceHelper.getAvailableSpace()
-        ?: 0) > AvailableSpaceHelper.AVAILABLE_SPACE_WARNING_THRESHOLD
+        ?: Long.MAX_VALUE) > AvailableSpaceHelper.AVAILABLE_SPACE_WARNING_THRESHOLD
 
 fun Context.getPermanentSocketState() =
     if (!BuildConfig.USE_FIREBASE_LIB || !GoogleServicesUtils.googleServicesAvailable(this)) {

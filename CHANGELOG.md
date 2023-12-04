@@ -1,3 +1,13 @@
+# Build 220 (1.3)
+2023-12-04
+
+- Split contact tabs for easier access to "other users"
+- Make message listing on server "ordered" for better multi-device synchronisation
+- Fixes for Android 14 foreground service permissions
+- Update WebRTC
+- Confirmation before opening a link
+- Allow to purchase multi-device licence during identity import
+
 # Build 219 (1.2)
 2023-11-02
 

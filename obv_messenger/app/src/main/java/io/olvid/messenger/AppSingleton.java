@@ -75,7 +75,6 @@ import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
-import io.olvid.messenger.databases.tasks.CheckLinkPreviewValidityTask;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
@@ -1259,7 +1258,6 @@ public class AppSingleton {
                     if (message.recomputeAttachmentCount(db)) {
                         db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.wipedAttachmentCount, message.imageResolutions);
                     }
-                    new CheckLinkPreviewValidityTask(message, message.contentBody).run();
                 }
                 Logger.i("Build 193 link-preview migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
             }
@@ -1271,6 +1269,9 @@ public class AppSingleton {
             }
             if (lastBuildExecuted < 206) {
                 AppSingleton.getEngine().setAllOwnedDeviceNames(DEFAULT_DEVICE_DISPLAY_NAME);
+            }
+            if (lastBuildExecuted != 0 && lastBuildExecuted < 220) {
+                App.openAppDialogIntroducingMultiDeviceAndDesktop();
             }
 
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());

@@ -18,11 +18,14 @@
  */
 package io.olvid.messenger.main.contacts
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.widget.SearchView
@@ -42,19 +45,19 @@ import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.databases.tasks.PromptToDeleteContactTask
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
+import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.main.RefreshingFragment
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
-import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_SEARCHING
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.openid.KeycloakManager.KeycloakCallback
-import io.olvid.messenger.settings.SettingsActivity
 
 class ContactListFragment : RefreshingFragment(), ContactMenu {
 
     private val contactListViewModel: ContactListViewModel by activityViewModels()
+    private var searchView: SearchView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,6 +69,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                 if (ownedIdentity == null) {
                     return@switchMap null
                 }
+                contactListViewModel.keycloakManaged.value = ownedIdentity.keycloakManaged
                 AppDatabase.getInstance().contactDao()
                     .getAllOneToOneForOwnedIdentity(ownedIdentity.bytesOwnedIdentity)
             }
@@ -96,6 +100,8 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                     refreshing = refreshing,
                     onRefresh = ::onRefresh,
                     onClick = ::contactClicked,
+                    onInvite = ::inviteClicked,
+                    onScrollStart = ::dismissKeyboard,
                     contactMenu = this@ContactListFragment
                 )
             }
@@ -104,6 +110,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
 
     private fun contactClicked(contactOrKeycloakDetails: ContactOrKeycloakDetails?) {
         if (contactOrKeycloakDetails != null) {
+            val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value ?: return
             when (contactOrKeycloakDetails.contactType) {
                 CONTACT -> if (contactOrKeycloakDetails.contact != null) {
                     App.openContactDetailsActivity(
@@ -113,48 +120,80 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                     )
                 }
 
-                KEYCLOAK -> if (contactOrKeycloakDetails.keycloakUserDetails != null && contactOrKeycloakDetails.keycloakUserDetails.identity != null) {
-                    val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value ?: return
-                    val identityDetails =
-                        contactOrKeycloakDetails.keycloakUserDetails.getIdentityDetails(null)
-                    val name = identityDetails.formatFirstAndLastName(
-                        SettingsActivity.getContactDisplayNameFormat(),
-                        SettingsActivity.getUppercaseLastName()
-                    )
-                    val builder: Builder = SecureAlertDialogBuilder(
-                        requireActivity(), R.style.CustomAlertDialog
-                    )
-                    builder.setTitle(R.string.dialog_title_add_keycloak_user)
-                        .setMessage(getString(R.string.dialog_message_add_keycloak_user, name))
-                        .setNegativeButton(R.string.button_label_cancel, null)
-                        .setPositiveButton(R.string.button_label_add_contact) { _, _ ->
-                            KeycloakManager.getInstance().addContact(
-                                ownedIdentity.bytesOwnedIdentity,
-                                contactOrKeycloakDetails.keycloakUserDetails.id,
-                                contactOrKeycloakDetails.keycloakUserDetails.identity,
-                                object : KeycloakCallback<Void?> {
-                                    override fun success(result: Void?) {
-                                        App.toast(
-                                            getString(
-                                                R.string.toast_message_contact_added,
-                                                name
-                                            ), Toast.LENGTH_SHORT, Gravity.BOTTOM
-                                        )
-                                    }
+                KEYCLOAK -> if (contactOrKeycloakDetails.keycloakUserDetails != null && AppSingleton.getContactTrustLevel(
+                        contactOrKeycloakDetails.keycloakUserDetails.identity
+                    ) == null
+                ) {
+                    try {
+                        val name = contactOrKeycloakDetails.getAnnotatedName()
+                        val builder: Builder = SecureAlertDialogBuilder(
+                            requireActivity(), R.style.CustomAlertDialog
+                        )
+                        builder.setTitle(R.string.dialog_title_add_keycloak_user)
+                            .setMessage(
+                                getString(
+                                    R.string.dialog_message_add_keycloak_user,
+                                    contactOrKeycloakDetails.getAnnotatedName()
+                                )
+                            )
+                            .setNegativeButton(R.string.button_label_cancel, null)
+                            .setPositiveButton(R.string.button_label_add_contact) { _, _ ->
+                                KeycloakManager.getInstance().addContact(
+                                    ownedIdentity.bytesOwnedIdentity,
+                                    contactOrKeycloakDetails.keycloakUserDetails.id,
+                                    contactOrKeycloakDetails.keycloakUserDetails.identity,
+                                    object : KeycloakCallback<Void?> {
+                                        override fun success(result: Void?) {
+                                            App.toast(
+                                                getString(
+                                                    R.string.toast_message_contact_added,
+                                                    name
+                                                ), Toast.LENGTH_SHORT, Gravity.BOTTOM
+                                            )
+                                        }
 
-                                    override fun failed(rfc: Int) {
-                                        App.toast(
-                                            R.string.toast_message_error_retry,
-                                            Toast.LENGTH_SHORT
-                                        )
-                                    }
-                                })
-                        }
-                    builder.create().show()
+                                        override fun failed(rfc: Int) {
+                                            App.toast(
+                                                R.string.toast_message_error_retry,
+                                                Toast.LENGTH_SHORT
+                                            )
+                                        }
+                                    })
+                            }
+                        builder.create().show()
+                    } catch (ex: Exception) {
+                    }
+                } else {
+                    App.openContactDetailsActivity(
+                        context,
+                        ownedIdentity.bytesOwnedIdentity,
+                        contactOrKeycloakDetails.keycloakUserDetails?.identity
+                    )
                 }
 
-                KEYCLOAK_SEARCHING, KEYCLOAK_MORE_RESULTS -> {}
+                KEYCLOAK_MORE_RESULTS -> {}
             }
+        }
+    }
+
+    private fun inviteClicked(contact: Contact) {
+        val builder: Builder = SecureAlertDialogBuilder(requireActivity(), R.style.CustomAlertDialog)
+            .setTitle(R.string.dialog_title_invite_contact)
+            .setMessage(getString(R.string.dialog_message_invite_contact, contact.getCustomDisplayName()))
+            .setNegativeButton(R.string.button_label_cancel, null)
+            .setPositiveButton(R.string.button_label_invite) { _, _ ->
+                try {
+                    AppSingleton.getEngine().startOneToOneInvitationProtocol(contact.bytesOwnedIdentity, contact.bytesContactIdentity)
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
+            }
+        builder.create().show()
+    }
+
+    private fun dismissKeyboard() {
+        searchView?.let {
+            (requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(it.windowToken, 0)
         }
     }
 
@@ -189,7 +228,20 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
         }
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        contactListViewModel.setFilter(null)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is MainActivity) {
+            context.contactListFragment = this
+        }
+    }
+
     fun bindToSearchView(searchView: SearchView?) {
+        this.searchView = searchView
         if (searchView != null) {
             searchView.setOnQueryTextListener(object : OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
@@ -205,7 +257,6 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                 contactListViewModel.setFilter(null)
                 false
             })
-            contactListViewModel.setFilter(null)
         }
     }
 }

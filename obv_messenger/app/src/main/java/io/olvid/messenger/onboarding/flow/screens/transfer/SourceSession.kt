@@ -52,6 +52,7 @@ import io.olvid.messenger.onboarding.flow.OnboardingRoutes
 import io.olvid.messenger.onboarding.flow.OnboardingScreen
 import io.olvid.messenger.onboarding.flow.OnboardingStep
 
+@OptIn(ExperimentalComposeUiApi::class)
 fun NavGraphBuilder.sourceSession(
     onboardingFlowViewModel: OnboardingFlowViewModel,
     onSasValidated: () -> Unit,

@@ -24,14 +24,10 @@ import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
-
-import androidx.preference.PreferenceManager;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
-import io.olvid.messenger.settings.SettingsActivity;
 
 public class AlarmPermissionStateChangeReceiver extends BroadcastReceiver {
     @Override

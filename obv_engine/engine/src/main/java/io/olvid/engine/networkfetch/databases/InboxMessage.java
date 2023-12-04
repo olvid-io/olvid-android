@@ -56,6 +56,8 @@ public class InboxMessage implements ObvDatabase {
     private static long lastExpungeTimestamp = System.currentTimeMillis();
     private static final HashMap<IdentityAndUid, Long> deletedMessageUids = new HashMap<>();
 
+    private boolean messageCanBeMarkedAsListedOnServer = false; // not saved in DB, only used by commit hooks
+
     private Identity ownedIdentity;
     static final String OWNED_IDENTITY = "owned_identity";
     private UID uid;
@@ -82,6 +84,9 @@ public class InboxMessage implements ObvDatabase {
     static final String EXTENDED_PAYLOAD_KEY = "extended_payload_key";
     private byte[] extendedPayload;
     static final String EXTENDED_PAYLOAD = "extended_payload";
+    private boolean markedAsListedOnServer;
+    static final String MARKED_AS_LISTED_ON_SERVER = "marked_as_listed_on_server";
+
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
@@ -123,6 +128,9 @@ public class InboxMessage implements ObvDatabase {
         return extendedPayload;
     }
 
+    public boolean isMarkedAsListedOnServer() {
+        return markedAsListedOnServer;
+    }
 
     public InboxAttachment[] getAttachments() {
         return InboxAttachment.getAll(fetchManagerSession, ownedIdentity, uid);
@@ -143,19 +151,20 @@ public class InboxMessage implements ObvDatabase {
         return new DecryptedApplicationMessage(uid, payload, fromIdentity, ownedIdentity, serverTimestamp, downloadTimestamp, localDownloadTimestamp);
     }
 
-    public static UID computeUniqueUid(Identity ownedIdentity, UID messageUid) {
+    public static UID computeUniqueUid(Identity ownedIdentity, UID messageUid, boolean markAsListed) {
         Hash sha256 = Suite.getHash(Hash.SHA256);
-        byte[] input = new byte[ownedIdentity.getBytes().length + UID.UID_LENGTH];
+        byte[] input = new byte[ownedIdentity.getBytes().length + UID.UID_LENGTH + 1];
         System.arraycopy(ownedIdentity.getBytes(), 0, input, 0, ownedIdentity.getBytes().length);
         System.arraycopy(messageUid.getBytes(), 0, input, ownedIdentity.getBytes().length, UID.UID_LENGTH);
+        input[ownedIdentity.getBytes().length + UID.UID_LENGTH] = markAsListed ? (byte) 0x01 : (byte) 0x00;
         return new UID(sha256.digest(input));
     }
 
     public boolean canBeDeleted() {
-        if (! markedForDeletion) {
+        if (!markedForDeletion) {
             return false;
         }
-        for (InboxAttachment inboxAttachment: getAttachments()) {
+        for (InboxAttachment inboxAttachment : getAttachments()) {
             if (!inboxAttachment.isMarkedForDeletion()) {
                 return false;
             }
@@ -174,25 +183,40 @@ public class InboxMessage implements ObvDatabase {
             statement.setBytes(2, uid.getBytes());
             statement.executeUpdate();
             this.markedForDeletion = true;
-        } catch (SQLException ignored) {}
+        } catch (SQLException ignored) {
+        }
     }
 
-    public void setPayloadAndFromIdentity(byte[] payload, Identity fromIdentity, AuthEncKey extendedPayloadKey) {
+    public void markAsListedOnServer() {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + MARKED_AS_LISTED_ON_SERVER + " = 1 " +
+                " WHERE " + OWNED_IDENTITY + " = ? " +
+                " AND " + UID_ + " = ?;")) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            statement.setBytes(2, uid.getBytes());
+            statement.executeUpdate();
+            this.markedAsListedOnServer = true;
+        } catch (SQLException ignored) {
+        }
+    }
+
+    public void setPayloadAndFromIdentity(byte[] payload, Identity fromIdentity, AuthEncKey extendedPayloadKey, boolean messageCanBeMarkedAsListedOnServer) {
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + PAYLOAD + " = ?, " +
                 FROM_IDENTITY + " = ?, " +
                 EXTENDED_PAYLOAD_KEY + " = ? " +
                 "WHERE " + OWNED_IDENTITY + " = ? " +
-                " AND "  + UID_ + " = ?;")) {
+                " AND " + UID_ + " = ?;")) {
             statement.setBytes(1, payload);
             statement.setBytes(2, fromIdentity.getBytes());
-            statement.setBytes(3, (extendedPayloadKey == null) ? null: Encoded.of(extendedPayloadKey).getBytes());
+            statement.setBytes(3, (extendedPayloadKey == null) ? null : Encoded.of(extendedPayloadKey).getBytes());
             statement.setBytes(4, ownedIdentity.getBytes());
             statement.setBytes(5, uid.getBytes());
             statement.executeUpdate();
             this.payload = payload;
             this.fromIdentity = fromIdentity;
             this.extendedPayloadKey = extendedPayloadKey;
+            this.messageCanBeMarkedAsListedOnServer = messageCanBeMarkedAsListedOnServer;
             commitHookBits |= HOOK_BIT_PAYLOAD_AND_FROM_IDENTITY_SET;
             fetchManagerSession.session.addSessionCommitListener(this);
         } catch (SQLException e) {
@@ -221,7 +245,7 @@ public class InboxMessage implements ObvDatabase {
                 EXTENDED_PAYLOAD_KEY + " = NULL, " +
                 EXTENDED_PAYLOAD + " = NULL " +
                 "WHERE " + OWNED_IDENTITY + " = ? " +
-                " AND "  + UID_ + " = ?;")) {
+                " AND " + UID_ + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, messageUid.getBytes());
             statement.executeUpdate();
@@ -242,7 +266,8 @@ public class InboxMessage implements ObvDatabase {
             // we listed again a message that was deleted, just to be sure, create a pendingDelete
             try {
                 PendingDeleteFromServer.create(fetchManagerSession, ownedIdentity, messageUid);
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
             return null;
         }
         try {
@@ -255,12 +280,13 @@ public class InboxMessage implements ObvDatabase {
         }
     }
 
-    private InboxMessage(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID messageUid, EncryptedBytes encryptedContent, EncryptedBytes wrappedKey, long serverTimestamp, long downloadTimestamp,  long localDownloadTimestamp, boolean hasExtendedContent) {
+    private InboxMessage(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID messageUid, EncryptedBytes encryptedContent, EncryptedBytes wrappedKey, long serverTimestamp, long downloadTimestamp, long localDownloadTimestamp, boolean hasExtendedContent) {
         this.fetchManagerSession = fetchManagerSession;
-        this.uid =  messageUid;
+        this.uid = messageUid;
         this.ownedIdentity = ownedIdentity;
         this.encryptedContent = encryptedContent;
         this.wrappedKey = wrappedKey;
+        this.markedForDeletion = false;
         this.serverTimestamp = serverTimestamp;
         this.payload = null;
         this.fromIdentity = null;
@@ -269,6 +295,7 @@ public class InboxMessage implements ObvDatabase {
         this.hasExtendedPayload = hasExtendedContent;
         this.extendedPayloadKey = null;
         this.extendedPayload = null;
+        this.markedAsListedOnServer = false;
     }
 
     private InboxMessage(FetchManagerSession fetchManagerSession, ResultSet res) throws SQLException {
@@ -280,9 +307,9 @@ public class InboxMessage implements ObvDatabase {
         }
         this.uid = new UID(res.getBytes(UID_));
         byte[] bytes = res.getBytes(WRAPPED_KEY);
-        this.wrappedKey = (bytes == null)?null:new EncryptedBytes(bytes);
+        this.wrappedKey = (bytes == null) ? null : new EncryptedBytes(bytes);
         bytes = res.getBytes(ENCRYPTED_CONTENT);
-        this.encryptedContent = (bytes == null)?null:new EncryptedBytes(bytes);
+        this.encryptedContent = (bytes == null) ? null : new EncryptedBytes(bytes);
         this.markedForDeletion = res.getBoolean(MARKED_FOR_DELETION);
         this.serverTimestamp = res.getLong(SERVER_TIMESTAMP);
         this.payload = res.getBytes(PAYLOAD);
@@ -305,6 +332,7 @@ public class InboxMessage implements ObvDatabase {
             this.extendedPayloadKey = null;
         }
         this.extendedPayload = res.getBytes(EXTENDED_PAYLOAD);
+        this.markedAsListedOnServer = res.getBoolean(MARKED_AS_LISTED_ON_SERVER);
     }
 
     // endregion
@@ -428,6 +456,28 @@ public class InboxMessage implements ObvDatabase {
         }
     }
 
+    // get all messages that have been decrypted, have attachments and are not yet makredAsListedOnServer
+    public static InboxMessage[] getMessageThatCanBeMarkedAsListedOnServer(FetchManagerSession fetchManagerSession) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+                "SELECT m.* FROM " + TABLE_NAME + " AS m " +
+                        " INNER JOIN " + InboxAttachment.TABLE_NAME + " AS a " +
+                        " ON a." + InboxAttachment.MESSAGE_UID + " = m." + UID_ +
+                        " AND a." + InboxAttachment.OWNED_IDENTITY + " = m." + OWNED_IDENTITY +
+                        " WHERE m." + PAYLOAD + " IS NOT NULL" +
+                        " AND m." + MARKED_AS_LISTED_ON_SERVER + " = 0 " +
+                        " GROUP BY m." + UID_ + ";")) {
+            try (ResultSet res = statement.executeQuery()) {
+                List<InboxMessage> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new InboxMessage(fetchManagerSession, res));
+                }
+                return list.toArray(new InboxMessage[0]);
+            }
+        } catch (SQLException e) {
+            return new InboxMessage[0];
+        }
+    }
+
 
     // endregion
     // region database
@@ -447,9 +497,11 @@ public class InboxMessage implements ObvDatabase {
                             FROM_IDENTITY + " BLOB, " +
                             DOWNLOAD_TIMESTAMP + " BIGINT NOT NULL, " +
                             LOCAL_DOWNLOAD_TIMESTAMP + " BIGINT NOT NULL, " +
+
                             HAS_EXTENDED_PAYLOAD + " BIT NOT NULL, " +
                             EXTENDED_PAYLOAD_KEY + " BLOB, " +
                             EXTENDED_PAYLOAD + " BLOB, " +
+                            MARKED_AS_LISTED_ON_SERVER + " BIT NOT NULL, " +
                             " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + OWNED_IDENTITY + ", " + UID_ + "));"
             );
         }
@@ -468,15 +520,15 @@ public class InboxMessage implements ObvDatabase {
             try (Statement statement = session.createStatement()) {
                 statement.execute("DROP TABLE IF EXISTS `inbox_message`;");
                 statement.execute("CREATE TABLE IF NOT EXISTS inbox_message (" +
-                                "uid BLOB PRIMARY KEY, " +
-                                "to_identity BLOB NOT NULL, " +
-                                "wrapped_key BLOB NOT NULL, " +
-                                "encrypted_content BLOB NOT NULL, " +
-                                "marked_for_deletion BIT NOT NULL, " +
+                        "uid BLOB PRIMARY KEY, " +
+                        "to_identity BLOB NOT NULL, " +
+                        "wrapped_key BLOB NOT NULL, " +
+                        "encrypted_content BLOB NOT NULL, " +
+                        "marked_for_deletion BIT NOT NULL, " +
 
-                                "server_timestamp BIGINT NOT NULL, " +
-                                "payload BLOB, " +
-                                "from_identity BLOB);"
+                        "server_timestamp BIGINT NOT NULL, " +
+                        "payload BLOB, " +
+                        "from_identity BLOB);"
                 );
             }
             oldVersion = 4;
@@ -486,16 +538,16 @@ public class InboxMessage implements ObvDatabase {
             try (Statement statement = session.createStatement()) {
                 statement.execute("ALTER TABLE inbox_message RENAME TO old_inbox_message");
                 statement.execute("CREATE TABLE IF NOT EXISTS inbox_message (" +
-                                " owned_identity BLOB NOT NULL, " +
-                                " uid BLOB NOT NULL, " +
-                                " wrapped_key BLOB NOT NULL, " +
-                                " encrypted_content BLOB NOT NULL, " +
-                                " marked_for_deletion BIT NOT NULL, " +
+                        " owned_identity BLOB NOT NULL, " +
+                        " uid BLOB NOT NULL, " +
+                        " wrapped_key BLOB NOT NULL, " +
+                        " encrypted_content BLOB NOT NULL, " +
+                        " marked_for_deletion BIT NOT NULL, " +
 
-                                " server_timestamp BIGINT NOT NULL, " +
-                                " payload BLOB, " +
-                                " from_identity BLOB, " +
-                                " CONSTRAINT PK_inbox_message PRIMARY KEY(owned_identity, uid));");
+                        " server_timestamp BIGINT NOT NULL, " +
+                        " payload BLOB, " +
+                        " from_identity BLOB, " +
+                        " CONSTRAINT PK_inbox_message PRIMARY KEY(owned_identity, uid));");
                 statement.execute("INSERT INTO inbox_message SELECT to_identity, uid, wrapped_key, encrypted_content, marked_for_deletion, server_timestamp, payload, from_identity FROM old_inbox_message");
                 statement.execute("DROP TABLE old_inbox_message");
             }
@@ -538,12 +590,19 @@ public class InboxMessage implements ObvDatabase {
             }
             oldVersion = 22;
         }
+        if (oldVersion < 38 && newVersion >= 38) {
+            Logger.d("MIGRATING `inbox_message` DATABASE FROM VERSION " + oldVersion + " TO 38");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE inbox_message ADD COLUMN `marked_as_listed_on_server` BIT NOT NULL DEFAULT 0");
+            }
+            oldVersion = 38;
+        }
     }
 
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, uid.getBytes());
             statement.setBytes(3, wrappedKey.getBytes());
@@ -552,13 +611,14 @@ public class InboxMessage implements ObvDatabase {
 
             statement.setLong(6, serverTimestamp);
             statement.setBytes(7, payload);
-            statement.setBytes(8, (fromIdentity==null)?null:fromIdentity.getBytes());
+            statement.setBytes(8, (fromIdentity == null) ? null : fromIdentity.getBytes());
             statement.setLong(9, downloadTimestamp);
             statement.setLong(10, localDownloadTimestamp);
 
             statement.setBoolean(11, hasExtendedPayload);
-            statement.setBytes(12, (extendedPayloadKey==null)?null:Encoded.of(extendedPayloadKey).getBytes());
+            statement.setBytes(12, (extendedPayloadKey == null) ? null : Encoded.of(extendedPayloadKey).getBytes());
             statement.setBytes(13, extendedPayload);
+            statement.setBoolean(14, markedAsListedOnServer);
 
             statement.executeUpdate();
             this.commitHookBits |= HOOK_BIT_INSERT;
@@ -583,7 +643,8 @@ public class InboxMessage implements ObvDatabase {
                 for (IdentityAndUid key : toDelete) {
                     deletedMessageUids.remove(key);
                 }
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
         }
 
         deletedMessageUids.put(new IdentityAndUid(ownedIdentity, uid), System.currentTimeMillis());
@@ -599,7 +660,7 @@ public class InboxMessage implements ObvDatabase {
         }
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
-                " AND "  + UID_ + " = ?;")) {
+                " AND " + UID_ + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, uid.getBytes());
             statement.executeUpdate();
@@ -611,6 +672,7 @@ public class InboxMessage implements ObvDatabase {
 
     public interface InboxMessageListener {
         void messageWasDownloaded(NetworkReceivedMessage networkReceivedMessage);
+
         void messageDecrypted(Identity ownedIdentity, UID uid);
     }
 
@@ -618,6 +680,11 @@ public class InboxMessage implements ObvDatabase {
         void messageHasExtendedPayloadToDownload(Identity ownedIdentity, UID uid);
         void messageExtendedPayloadDownloaded(Identity ownedIdentity, UID uid, byte[] extendedPayload);
     }
+
+    public interface MarkAsListedOnServerListener {
+        void messageCanBeMarkedAsListedOnServer(Identity ownedIdentity, UID messageUid);
+    }
+
 
     private long commitHookBits = 0;
     private static final long HOOK_BIT_INSERT = 0x1;
@@ -637,6 +704,9 @@ public class InboxMessage implements ObvDatabase {
                 if (extendedPayloadKey != null && fetchManagerSession.extendedPayloadListener != null) {
                     fetchManagerSession.extendedPayloadListener.messageHasExtendedPayloadToDownload(ownedIdentity, uid);
                 }
+            }
+            if (messageCanBeMarkedAsListedOnServer && fetchManagerSession.markAsListedOnServerListener != null) {
+                fetchManagerSession.markAsListedOnServerListener.messageCanBeMarkedAsListedOnServer(ownedIdentity, uid);
             }
         }
         if ((commitHookBits & HOOK_BIT_EXTENDED_PAYLOAD_SET) != 0) {

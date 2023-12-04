@@ -100,7 +100,7 @@ class OwnedDevicesSynchronisationWithEngineTask(
                 if (dbOwnedDevice.currentDevice && dbOwnedDevice.expirationTimestamp != previousExpirationTimestamp) {
                     DeviceExpirationReminder.scheduleNotifications(dbOwnedDevice)
                 }
-             }
+            }
         }
 
         // remove any remaining device (it is no longer present in the engine)

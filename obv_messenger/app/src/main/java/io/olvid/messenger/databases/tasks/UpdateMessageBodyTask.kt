@@ -49,7 +49,6 @@ class UpdateMessageBodyTask(val messageId: Long, val body: String, val mentions:
             App.toast(R.string.toast_message_unable_to_update_message, Toast.LENGTH_SHORT)
             return
         }
-        CheckLinkPreviewValidityTask(message, newBody).run()
         db.messageDao().updateBody(message.id, body)
         db.messageDao().updateMentions(message.id, message.jsonMentions)
         db.messageMetadataDao().insert(

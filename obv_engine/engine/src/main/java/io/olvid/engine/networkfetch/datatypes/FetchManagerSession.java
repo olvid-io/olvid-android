@@ -36,6 +36,7 @@ public class FetchManagerSession implements AutoCloseable {
     public final Session session;
     public final InboxMessage.InboxMessageListener inboxMessageListener;
     public final InboxMessage.ExtendedPayloadListener extendedPayloadListener;
+    public final InboxMessage.MarkAsListedOnServerListener markAsListedOnServerListener;
     public final InboxAttachment.InboxAttachmentListener inboxAttachmentListener;
     public final PendingDeleteFromServer.PendingDeleteFromServerListener pendingDeleteFromServerListener;
     public final PushNotificationConfiguration.NewPushNotificationConfigurationListener newPushNotificationConfigurationListener;
@@ -48,6 +49,7 @@ public class FetchManagerSession implements AutoCloseable {
     public FetchManagerSession(Session session,
                                InboxMessage.InboxMessageListener inboxMessageListener,
                                InboxMessage.ExtendedPayloadListener extendedPayloadListener,
+                               InboxMessage.MarkAsListedOnServerListener markAsListedOnServerListener,
                                InboxAttachment.InboxAttachmentListener inboxAttachmentListener,
                                PendingDeleteFromServer.PendingDeleteFromServerListener pendingDeleteFromServerListener,
                                PushNotificationConfiguration.NewPushNotificationConfigurationListener newPushNotificationConfigurationListener,
@@ -59,6 +61,7 @@ public class FetchManagerSession implements AutoCloseable {
         this.session = session;
         this.inboxMessageListener = inboxMessageListener;
         this.extendedPayloadListener = extendedPayloadListener;
+        this.markAsListedOnServerListener = markAsListedOnServerListener;
         this.inboxAttachmentListener = inboxAttachmentListener;
         this.pendingDeleteFromServerListener = pendingDeleteFromServerListener;
         this.newPushNotificationConfigurationListener = newPushNotificationConfigurationListener;

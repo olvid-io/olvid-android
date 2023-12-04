@@ -60,7 +60,6 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.media3.common.util.UnstableApi;
 import androidx.preference.PreferenceManager;
 
 import com.google.zxing.BarcodeFormat;
@@ -286,7 +285,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    @UnstableApi public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId) {
+    public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
@@ -294,7 +293,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    @UnstableApi public static void openDraftGalleryActivity(Context activityContext, long draftMessageId, long fyleId) {
+    public static void openDraftGalleryActivity(Context activityContext, long draftMessageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, true);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, draftMessageId);
@@ -302,7 +301,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    @UnstableApi public static void openMessageGalleryActivity(Context activityContext, long messageId, long fyleId) {
+    public static void openMessageGalleryActivity(Context activityContext, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, false);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
@@ -310,7 +309,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    @UnstableApi public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, boolean ascending, long messageId, long fyleId) {
+    public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, boolean ascending, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         if (sortOrder != null) {
@@ -621,7 +620,23 @@ public class App extends Application implements DefaultLifecycleObserver {
         }
     }
 
-
+    public static void openLink(Context context, Uri uri) {
+        if (context == null || uri == null) {
+            return;
+        }
+        final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                .setTitle(R.string.dialog_title_confirm_open_link)
+                .setMessage(uri.toString())
+                .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
+                    try {
+                        context.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                    } catch (Exception e) {
+                        App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
+                    }
+                })
+                .setNegativeButton(R.string.button_label_cancel, null);
+        builder.create().show();
+    }
 
     public static String absolutePathFromRelative(String relativePath) {
         if (relativePath == null) {
@@ -877,6 +892,9 @@ public class App extends Application implements DefaultLifecycleObserver {
         showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_MARKDOWN, new HashMap<>());
     }
 
+    public static void openAppDialogIntroducingMultiDeviceAndDesktop() {
+        showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_MULTI_DEVICE, new HashMap<>());
+    }
 
     private static void showDialog(@Nullable byte[] bytesDialogOwnedIdentity, String dialogTag, HashMap<String, Object> dialogParameters) {
         dialogsToShowLock.lock();

@@ -294,7 +294,6 @@
     <string name="toast_message_polling_failed">Échec de téléchargement des messages</string>
     <string name="dialog_message_battery_optimization">L\'économie d\'énergie sur Android fonctionne en retardant certains événements d\'arrière-plan pour les exécuter par lots. Cela peut retarder la réception de messages Olvid entrants.\n\nPour être certain de recevoir vos messages au plus vite, vous pouvez autoriser Olvid à «\u00a0toujours fonctionner en arrière-plan\u00a0». Appuyez sur «\u00a0Paramètres\u00a0» puis «\u00a0Autoriser\u00a0».</string>
     <string name="dialog_text_do_not_show_again">Ne plus afficher ce message</string>
-    <string name="button_label_battery_optimization_settings">Paramètres</string>
     <string name="text_user_removed_from_contacts">Utilisateur supprimé de vos contacts</string>
     <string name="text_user_added_to_contacts">Utilisateur ajouté à vos contacts</string>
     <string name="toast_message_user_deleted">Utilisateur supprimé</string>
@@ -621,6 +620,7 @@
     <string name="text_explanation_scan_share_id">Partager votre ID permet à un autre utilisateur de vous inviter.</string>
     <string name="dialog_title_subscription_updated">Abonnement mis à jour</string>
     <string name="button_label_add_contact">Ajouter un contact</string>
+    <string name="button_label_add">Ajouter</string>
     <string name="text_explanation_warning_contact_already_known">%1$s fait déjà partie de vos contacts. L\'ajouter à nouveau permettra de re-valider son identité.</string>
     <string name="toast_message_failed_to_invite_contact">Échec d\'invitation du contact, veuillez réessayer</string>
     <string name="text_explanation_warning_cannot_invite_yourself">Vous ne pouvez pas ajouter votre propre ID à vos contacts\u00a0!</string>
@@ -659,6 +659,8 @@
     <string name="toast_message_in_app_purchase_successful">Achat in-app réussi</string>
     <string name="button_label_price_per_month">%1$s par mois</string>
     <string name="button_label_price_per_year">%1$s par an</string>
+    <string name="button_label_price_per_month_expanded">%1$s\npar mois</string>
+    <string name="button_label_price_per_year_expanded">%1$s\npar an</string>
     <string name="text_awaiting_subscription_payment">Paiement de l\'abonnement refusé</string>
     <string name="text_subscription_in_grace_period_until">En période de grâce jusqu\'au\u00a0: %1$s</string>
     <string name="text_subscription_on_hold_since">Abonnement en suspens depuis le\u00a0: %1$s</string>
@@ -1292,9 +1294,6 @@
     <string name="pref_text_auto_join_groups_contacts">De la part de vos contacts</string>
     <string name="pref_text_auto_join_groups_nobody">De la part de personne</string>
     <string name="debug_label_capability_one_to_one_contacts">Carnet de contacts à 2 niveaux\u00a0: %1$s</string>
-    <string name="menu_action_other_known_users">Autres utilisateurs</string>
-    <string name="dialog_title_other_known_users">Autres utilisateurs</string>
-    <string name="dialog_message_other_known_users">Ces utilisateurs d\'Olvid que vous avez rencontrés (typiquement dans un groupe) ne font pas partie de vos contacts. Vous pouvez les y ajouter en les invitant à une discussion privée.</string>
     <string name="button_label_invite">Inviter</string>
     <string name="explanation_contact_not_one_to_one">Pour démarrer une discussion privée avec %1$s et l\'ajouter à vos contacts, appuyez sur «\u00a0Inviter\u00a0».</string>
     <string name="label_contact_not_one_to_one">Cet utilisateur n\'est pas encore un contact</string>
@@ -1309,7 +1308,6 @@
     <string name="notification_public_title_one_to_one_invitation">Invitation à une discussion privée</string>
     <string name="pref_show_trust_levels_title">Afficher un indicateur de «\u00a0source de confiance\u00a0» des contacts</string>
     <string name="pref_show_trust_levels_summary">Une fois activé, un point de couleur sur leur portrait permet de distinguer les contacts dont vous avez vous-même vérifié l\'identité de ceux qui vous ont été présentés</string>
-    <string name="label_no_other_user_found">Aucun autre utilisateur trouvé</string>
     <string name="hint_user_name">Nom de l\'utilisateur</string>
     <string name="notification_title_sending_message">Envoi de message Olvid en cours</string>
     <string name="dialog_message_widget_open_hidden_profile_warning">Attention\u00a0: l\'utilisation d\'un profil masqué dans un widget pourrait dévoiler l\'existence de ce profil.</string>
@@ -1357,8 +1355,6 @@
     <string name="toast_message_webdav_read_only_access">Écriture impossible sur votre fournisseur cloud. Veuillez vérifier votre configuration serveur</string>
     <string name="label_pick_a_time">Choisir une heure…</string>
     <string name="label_pick_a_date">Choisir une date…</string>
-    <string name="label_users_below_not_in_contacts">Les utilisateurs ci-dessous ne sont pas dans vos contacts</string>
-    <string name="label_users_below_from_keycloak">Les utilisateurs ci-dessous ont été trouvés dans l\'annuaire de votre société</string>
     <string name="label_searching_company_directory">Recherche dans l\'annuaire de votre société…</string>
     <string name="text_keycloak_missing_some_search_result">… plus de résultats disponibles\nVeuillez affiner votre recherche</string>
     <string name="notification_action_dismiss">Fermer</string>
@@ -1397,12 +1393,11 @@
     <string name="notification_channel_discussion_group_name">Discussions</string>
     <string name="notification_channel_discussion_group_description">Notifications personnalisées pour certaines discussions d\'Olvid.</string>
     <string name="button_label_edit_group_members">Modifier ce groupe</string>
-    <string name="button_label_add_members">Ajouter des members</string>
+    <string name="button_label_add_members">Ajouter des membres</string>
     <string name="label_group_update_in_progress_title">Synchronisation du groupe en cours</string>
     <string name="label_group_update_in_progress_title_for_creation">Création du groupe en cours</string>
     <string name="explanation_group_update_in_progress">Le groupe est en cours de synchronisation. Cet écran sera mis à jour une fois l\'opération terminée.</string>
-    <string name="toast_message_not_yet_in_your_contacts">%1$s ne fait pas encore partie de vos contacts. Il y sera ajouté dès qu\'il aura rejoint le groupe.</string>
-    <string name="toast_message_unable_to_update_group">Impossible de mettre à jour le groupe. Vos modifications ont été perdues. Veuillez réessayer.</string>
+    <string name="toast_message_unable_to_update_group">Erreur de mise à jour. Vos modifications ont été perdues. Veuillez réessayer.</string>
     <string name="dialog_title_unable_to_leave_group">Impossible de quitter le groupe</string>
     <string name="dialog_message_unable_to_leave_group">Vous en êtes actuellement le seul administrateur et ne pouvez pas quitter ce groupe. Si ce groupe n\'est plus utile, vous avez la possibilité de le dissoudre.</string>
     <string name="dialog_message_unable_to_leave_group_pending_admin">Aucun autre administrateur n\'a accépté de rejoindre ce groupe pour le moment, faisant de vous le seul administrateur. En tant que tel, vous ne pouvez pas quitter le groupe. Si ce groupe n\'est plus utile, vous avez la possibilité de le dissoudre.</string>
@@ -1782,7 +1777,20 @@
     <string name="snackbar_go_to_troubleshooting_message">Améliorez votre expérience Olvid ?</string>
     <string name="snackbar_go_to_troubleshooting_button">Allons-y</string>
     <string name="troubleshooting_ignored">Ignoré</string>
-
+    <string name="onboarding_transfer_multidevice_purchase_question">Voulez-vous que tous vos appareils restent actifs ?</string>
+    <string name="onboarding_transfer_multidevice_purchase_hyperlink">Par ici</string>
+    <string name="button_label_subscribe_now">S\'abonner maintenant</string>
+    <string name="onboarding_transfer_devices_loading_title">Récupération de la liste d\'appareils…</string>
+    <string name="dialog_title_introducing_multi_device">Découvrez Olvid Desktop et le mutli-apareils !</string>
+    <string name="dialog_message_introducing_multi_device">Olvid est maintenant disponible pour **votre ordinateur** (Windows et macOS). Vous pouvez télécharger la dernière version sur :\nhttps://olvid.io/download/\n\nAvec le support du **multi-appareil**, commencez une conversation sur votre téléphone pour la poursuivre sur votre ordinateur. Partager des fichiers entre vos appareils et avec vos contacts n\'a jamais été aussi simple !</string>
+    <string name="contact_list_tab_contact">Contacts</string>
+    <string name="contact_list_tab_directory">Annuaire</string>
+    <string name="contact_list_tab_others">Autres</string>
+    <string name="dialog_title_invite_contact">Invitation à une discussion privée</string>
+    <string name="dialog_message_invite_contact">Souhaitez-vous inviter %1$s à une discussion privée ?</string>
+    <string name="explanation_empty_other_contact_list">Personne ici pour le moment</string>
+    <string name="explanation_empty_other_contact_list_sub">Les membres de groupes qui ne sont pas encore des contacts apparîtront ici.</string>
+    <string name="explanation_empty_directory">Annuaire vide</string>
 
 
     <plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity">

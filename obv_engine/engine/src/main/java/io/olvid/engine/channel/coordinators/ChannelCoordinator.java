@@ -116,6 +116,7 @@ public class ChannelCoordinator {
                         channelManagerSession.networkFetchDelegate.deleteMessageAndAttachments(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid());
                         break;
                     }
+
                     channelManagerSession.networkFetchDelegate.setAttachmentKeyAndMetadataAndMessagePayload(
                             channelManagerSession.session,
                             channelReceivedApplicationMessage.getOwnedIdentity(),

@@ -112,11 +112,13 @@ public class InboundEphemeralMessageClicked implements Runnable {
                 } else {
                     sendReadReceipt = SettingsActivity.getDefaultSendReadReceipt();
                 }
-                if (sendReadReceipt) {
-                    Discussion discussion = db.discussionDao().getById(message.discussionId);
-                    App.runThread(() -> message.sendMessageReturnReceipt(discussion, Message.RETURN_RECEIPT_STATUS_READ));
-                }
-                App.runThread(new CreateReadMessageMetadata(message.id));
+                App.runThread(() -> {
+                    if (sendReadReceipt) {
+                        Discussion discussion = db.discussionDao().getById(message.discussionId);
+                        message.sendMessageReturnReceipt(discussion, Message.RETURN_RECEIPT_STATUS_READ);
+                    }
+                    new CreateReadMessageMetadata(message.id).run();
+                });
             }
             db.messageDao().update(message);
 

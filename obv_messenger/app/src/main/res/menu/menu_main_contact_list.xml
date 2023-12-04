@@ -9,9 +9,4 @@
         android:title="@string/menu_action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
-    <item
-        android:id="@+id/action_other_known_users"
-        android:orderInCategory="300"
-        android:title="@string/menu_action_other_known_users"
-        app:showAsAction="never"/>
 </menu>

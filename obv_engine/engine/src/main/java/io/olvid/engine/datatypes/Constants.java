@@ -23,8 +23,8 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 37;
-    public static final int SERVER_API_VERSION = 15;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 38;
+    public static final int SERVER_API_VERSION = 16;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
     // files / folders
@@ -70,7 +70,6 @@ public abstract class Constants {
     public static final long WELL_KNOWN_REFRESH_INTERVAL = 3_600_000L * 6; // 6 hours
 
     // download message
-    public static final long RELIST_NEW_MESSAGE_COUNT_THRESHOLD = 20; // number of new messages in a single list operation that trigger a re-list
     public static final long RELIST_DELAY = 30_000; // 30 seconds
 
     // backups

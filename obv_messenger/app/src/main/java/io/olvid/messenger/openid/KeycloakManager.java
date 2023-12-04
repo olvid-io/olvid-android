@@ -33,7 +33,6 @@ import org.jose4j.jwt.consumer.JwtContext;
 import org.jose4j.lang.HashUtil;
 import org.json.JSONException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,7 +53,6 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.customClasses.BytesKey;
-import io.olvid.messenger.customClasses.ConfigurationKeycloakPojo;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
 import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
@@ -760,6 +758,11 @@ public class KeycloakManager {
                     }
                 }
 
+                // we successfully called an authenticated API point --> clear any authentication required notification
+                AndroidNotificationManager.clearKeycloakAuthenticationRequiredNotification(identityBytesKey.bytes);
+                authenticationRequiredOwnedIdentities.remove(identityBytesKey);
+
+                // call the wrapped callback
                 callback.success(result);
             });
         }

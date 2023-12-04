@@ -651,6 +651,10 @@ public class MessageDetailsActivity extends LockableActivity {
             if (messageTextLayout != null) {
                 int lineCount = messageTextLayout.getLineCount();
                 if (timestampLayout != null) {
+                    // first check if the first character of the last message line matches LTR/RTL of layout
+                    int pos = messageContentTextView.getText().toString().lastIndexOf("\n") + 1;
+                    boolean forceSpacerRtl = pos < messageContentTextView.getText().length() && ((timestampSpacer.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) != messageTextLayout.isRtlCharAt(pos));
+
                     float timestampWidth = timestampLayout.getLineMax(0) + statusWidth;
                     float lastMessageLineWidth = messageTextLayout.getLineMax(lineCount - 1);
                     messageTextLayout.getLineBounds(lineCount - 1, rect);
@@ -658,7 +662,7 @@ public class MessageDetailsActivity extends LockableActivity {
                     if (messageTextLayout.getAlignment().equals(Layout.Alignment.ALIGN_CENTER)) {
                         lastMessageLineWidth += (messageTotalWidth-lastMessageLineWidth)/2;
                     }
-                    if (timestampWidth + lastMessageLineWidth < messageTotalWidth) {
+                    if (!forceSpacerRtl && (timestampWidth + lastMessageLineWidth < messageTotalWidth)) {
                         timestampSpacer.setVisibility(View.GONE);
                     } else {
                         timestampSpacer.setVisibility(View.VISIBLE);

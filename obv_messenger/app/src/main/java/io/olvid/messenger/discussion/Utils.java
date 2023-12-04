@@ -27,11 +27,9 @@ import android.os.Looper;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -181,8 +179,6 @@ public class Utils {
                                 App.runThread(() -> {
                                     if (AppDatabase.getInstance().contactDao().get(bytesOwnedIdentity, mention.getUserIdentifier()) != null) {
                                         new Handler(Looper.getMainLooper()).post(() -> App.openContactDetailsActivity(context, bytesOwnedIdentity, mention.getUserIdentifier()));
-                                    } else {
-                                        App.toast(context.getString(R.string.toast_message_not_yet_in_your_contacts, name), Toast.LENGTH_SHORT, Gravity.BOTTOM);
                                     }
                                 });
                             }

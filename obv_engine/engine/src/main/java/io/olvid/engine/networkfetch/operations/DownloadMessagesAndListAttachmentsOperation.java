@@ -52,14 +52,14 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
     private final SSLSocketFactory sslSocketFactory;
     private final Identity ownedIdentity;
     private final UID deviceUid;
-    private int newMessagesCount = -1;
+    private boolean listingTruncated = false;
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
     }
 
-    public int getNewMessagesCount() {
-        return newMessagesCount;
+    public boolean getListingTruncated() {
+        return listingTruncated;
     }
 
     public UID getDeviceUid() {
@@ -105,7 +105,8 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                 long localDownloadTimestamp = System.currentTimeMillis();
 
                 switch (returnStatus) {
-                    case ServerMethod.OK: {
+                    case ServerMethod.OK:
+                    case ServerMethod.LISTING_TRUNCATED: {
                         long downloadTimestamp = serverMethod.getDownloadTimestamp();
                         DownloadMessagesAndListAttachmentsServerMethod.MessageAndAttachmentLengths[] messageAndAttachmentLengthsArray = serverMethod.getMessageAndAttachmentLengthsArray();
                         int count = 0;
@@ -149,7 +150,7 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                             }
                         }
                         Logger.d("DownloadMessagesAndListAttachmentsOperation found " + messageAndAttachmentLengthsArray.length + " messages (" + count + " new) on the server.");
-                        this.newMessagesCount = count;
+                        this.listingTruncated = (returnStatus == ServerMethod.LISTING_TRUNCATED);
                         finished = true;
                         return;
                     }
@@ -242,7 +243,8 @@ class DownloadMessagesAndListAttachmentsServerMethod extends ServerMethod {
 
     @Override
     protected void parseReceivedData(Encoded[] receivedData) {
-        if (returnStatus == ServerMethod.OK) {
+        if (returnStatus == ServerMethod.OK
+                || returnStatus == ServerMethod.LISTING_TRUNCATED) {
             try {
                 downloadTimestamp = receivedData[0].decodeLong();
                 List<MessageAndAttachmentLengths> list = new ArrayList<>();

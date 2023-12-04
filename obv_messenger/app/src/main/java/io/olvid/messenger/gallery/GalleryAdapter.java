@@ -84,10 +84,12 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
     @Override
     public int getItemViewType(int position) {
         if (fyleAndStatuses != null) {
-            FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = fyleAndStatuses.get(position);
-            if (fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().startsWith("video/")) {
-                return VIEW_TYPE_VIDEO;
-            }
+            try {
+                FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = fyleAndStatuses.get(position);
+                if (fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().startsWith("video/")) {
+                    return VIEW_TYPE_VIDEO;
+                }
+            } catch (Exception ignored) { }
         }
         return VIEW_TYPE_IMAGE;
     }

@@ -299,7 +299,6 @@
     <string name="toast_message_polling_failed">Failed to get messages</string>
     <string name="dialog_message_battery_optimization">Battery optimization on Android works by delaying certain background events to run them in a batch. This may delay the reception of inbound Olvid messages.\n\nTo ensure that your messages are received promptly, you should allow Olvid to \"always run in background\". Press \"Settings\" below and then \"Allow\".</string>
     <string name="dialog_text_do_not_show_again">Do not show this message again</string>
-    <string name="button_label_battery_optimization_settings">Settings</string>
     <string name="text_user_removed_from_contacts">User removed from your contacts</string>
     <string name="text_user_added_to_contacts">User added to your contacts</string>
     <string name="toast_message_user_deleted">User deleted</string>
@@ -628,6 +627,7 @@
     <string name="text_explanation_scan_share_id">Sharing your ID allows another Olvid user to invite you.</string>
     <string name="dialog_title_subscription_updated">Subscription updated</string>
     <string name="button_label_add_contact">Add contact</string>
+    <string name="button_label_add">Add</string>
     <string name="text_explanation_warning_contact_already_known">%1$s is already part of your contacts. Adding them again will allow you to re-verify their identity.</string>
     <string name="toast_message_failed_to_invite_contact">Failed to invite contact, please try again</string>
     <string name="text_explanation_warning_cannot_invite_yourself">You cannot add your own Olvid ID to your contacts!</string>
@@ -666,6 +666,8 @@
     <string name="toast_message_in_app_purchase_successful">In-app purchase successful</string>
     <string name="button_label_price_per_month">%1$s per month</string>
     <string name="button_label_price_per_year">%1$s per year</string>
+    <string name="button_label_price_per_month_expanded">%1$s\nper month</string>
+    <string name="button_label_price_per_year_expanded">%1$s\nper year</string>
     <string name="text_awaiting_subscription_payment">Subscription payment declined</string>
     <string name="text_subscription_in_grace_period_until">In grace period until: %1$s</string>
     <string name="text_subscription_on_hold_since">Subscription on hold since: %1$s</string>
@@ -1133,7 +1135,7 @@
     <string name="dialog_title_unhide_profile">Un-hide profile?</string>
     <string name="dialog_message_unhide_profile">You are about to un-hide a hidden Olvid profile. This profile will become visible to anyone opening your Olvid application.\nAre you sure you want to proceed?</string>
     <string name="dialog_title_hide_profile">Hide profile?</string>
-    <string name="dialog_message_hide_profile">You are about to hide an Olvid profile. If you forget the password you chose for this profile, you will permanently lose access to it.\nAre you sure you want to proceed?</string>
+    <string name="dialog_message_hide_profile">You are about to hide an Olvid profile. If you forget the password you choose for this profile, you will permanently lose access to it.\nAre you sure you want to proceed?</string>
     <string name="menu_action_mute_profile_notifications">Mute notifications</string>
     <string name="dialog_message_mute_all_profile_switch_label">Mute the whole profile instead of this discussion</string>
     <string name="dialog_message_mute_except_mentioned">Notify me when my name is mentioned</string>
@@ -1148,12 +1150,12 @@
     <string name="pref_hidden_profile_close_policy_summary_background">When Olvid enters background: %1$s</string>
     <string name="pref_hidden_profile_close_policy_summary_manual_switching">When manually switching profile</string>
     <string name="pref_hidden_profile_close_policy_summary_screen_lock">When Olvid lock screen activates (requires a lock screen)</string>
-    <string name="pref_hidden_profile_close_policy_dialog_title">Chose when to close an open hidden profile</string>
+    <string name="pref_hidden_profile_close_policy_dialog_title">Choose when to close an open hidden profile</string>
     <string name="dialog_title_hidden_profile_lock_screen_not_active">Olvid lock screen not configured</string>
-    <string name="dialog_message_hidden_profile_lock_screen_not_active">You chose to close any open hidden profile when the Olvid lock screen activate. However you have not configured any lock screen.\n\nIn the current setting, hidden profiles will only be closed when manually switching to another profile.</string>
+    <string name="dialog_message_hidden_profile_lock_screen_not_active">You chose to close any open hidden profile when the Olvid lock screen activates. However you have not yet configured a lock screen.\n\nIn the current setting, hidden profiles will only be closed when manually switching to another profile.</string>
     <string name="dialog_title_profile_close_policy_background_delay_dialog_title">Close hidden profile when Olvid enters background…</string>
     <string name="dialog_title_hidden_profile_but_no_policy">No hidden profile closing policy defined</string>
-    <string name="dialog_message_hidden_profile_but_no_policy">You have created a hidden profile but have not yet define when this profile should be closed.\nPress OK to chose between the different policies offered by Olvid.\n\nIn the current setting, hidden profiles will only be closed when manually switching to another profile.</string>
+    <string name="dialog_message_hidden_profile_but_no_policy">You have created a hidden profile but have not yet define when this profile should be closed.\nPress OK to choose between the different policies offered by Olvid.\n\nIn the current setting, hidden profiles will only be closed when manually switching to another profile.</string>
     <string name="pref_hidden_profile_close_policy_dialog_entry_manual_switching">When manually switching profile</string>
     <string name="pref_hidden_profile_close_policy_dialog_entry_screen_lock">When Olvid lock screen activates</string>
     <string name="pref_hidden_profile_close_policy_dialog_entry_background">When olvid enters background…</string>
@@ -1312,9 +1314,6 @@
     <string name="pref_text_auto_join_groups_contacts">From your contacts</string>
     <string name="pref_text_auto_join_groups_nobody">From nobody</string>
     <string name="debug_label_capability_one_to_one_contacts">2-level address book: %1$s</string>
-    <string name="menu_action_other_known_users">Other users</string>
-    <string name="dialog_title_other_known_users">Other users</string>
-    <string name="dialog_message_other_known_users">These Olvid users you have encountered (typically in a group) are not part of your contacts. You may add them by inviting them to a private discussion.</string>
     <string name="button_label_invite">Invite</string>
     <string name="explanation_contact_not_one_to_one">To have a private discussion with %1$s and add them to your contacts, press \"Invite\".</string>
     <string name="label_contact_not_one_to_one">This user is not yet a contact</string>
@@ -1329,7 +1328,6 @@
     <string name="notification_public_title_one_to_one_invitation">Invitation to a private discussion</string>
     <string name="pref_show_trust_levels_title">Show a \"trust origin\" indicator for contacts</string>
     <string name="pref_show_trust_levels_summary">When activated, a colored dot on their portrait indicates whether you personally verified a contact\'s identity or they were presented to you</string>
-    <string name="label_no_other_user_found">No other user found</string>
     <string name="hint_user_name">User name</string>
     <string name="notification_title_sending_message">Olvid message being sent</string>
     <string name="dialog_message_widget_open_hidden_profile_warning">Warning: using a shortcut widget with a hidden profile may disclose the existence of this profile.</string>
@@ -1379,8 +1377,6 @@
     <string name="toast_message_webdav_read_only_access">No write access to selected cloud provider. Please check your server configuration</string>
     <string name="label_pick_a_time">Pick a time…</string>
     <string name="label_pick_a_date">Pick a date…</string>
-    <string name="label_users_below_not_in_contacts">Users below are not part of your contacts</string>
-    <string name="label_users_below_from_keycloak">Users below were found in your company\'s directory</string>
     <string name="label_searching_company_directory">Searching company directory…</string>
     <string name="text_keycloak_missing_some_search_result">… additional search results available\nPlease refine your search</string>
     <string name="notification_action_dismiss">Dismiss</string>
@@ -1423,7 +1419,6 @@
     <string name="label_group_update_in_progress_title">Group synchronization in progress</string>
     <string name="label_group_update_in_progress_title_for_creation">Group creation in progress</string>
     <string name="explanation_group_update_in_progress">The group is currently being synchronized. This screen will refresh once the update is complete.</string>
-    <string name="toast_message_not_yet_in_your_contacts">%1$s is not yet part of your contacts. They will be added once they join the group.</string>
     <string name="toast_message_unable_to_update_group">Unable to update group. Your changes have been lost. Please try again.</string>
     <string name="dialog_title_unable_to_leave_group">Unable to leave group</string>
     <string name="dialog_message_unable_to_leave_group">You are currently the only administrator and cannot leave this group. If this group is no longer useful, you may want to disband it instead.</string>
@@ -1812,7 +1807,20 @@
     <string name="snackbar_go_to_troubleshooting_message">Want to improve your Olvid experience?</string>
     <string name="snackbar_go_to_troubleshooting_button">Let\'s go</string>
     <string name="troubleshooting_ignored">Ignored</string>
-
+    <string name="onboarding_transfer_multidevice_purchase_question">Do you want all your devices to remain active?</string>
+    <string name="onboarding_transfer_multidevice_purchase_hyperlink">This way</string>
+    <string name="button_label_subscribe_now">Subscribe now</string>
+    <string name="onboarding_transfer_devices_loading_title">Retreiving device list…</string>
+    <string name="dialog_title_introducing_multi_device">Introducing Olvid Desktop and mutli-device!</string>
+    <string name="dialog_message_introducing_multi_device">Olvid is now available for **your computer** (Windows and macOS). You can download the latest version from:\nhttps://olvid.io/download/\n\nWith the **multi-device** support, start a conversation on your phone and continue it on your computer. Sharing files between your devices and with your contacts has never been easier!</string>
+    <string name="contact_list_tab_contact">Contacts</string>
+    <string name="contact_list_tab_directory">Directory</string>
+    <string name="contact_list_tab_others">Others</string>
+    <string name="dialog_title_invite_contact">Private discussion invitation</string>
+    <string name="dialog_message_invite_contact">Do you want to invite %1$s to a private discussion?</string>
+    <string name="explanation_empty_other_contact_list">No one here for now</string>
+    <string name="explanation_empty_other_contact_list_sub">Group members that are not yet contacts will appear here.</string>
+    <string name="explanation_empty_directory">Empty directory</string>
 
 
     <plurals name="dialog_message_delete_user_impossible_count">

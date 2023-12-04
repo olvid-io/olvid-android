@@ -305,7 +305,7 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
     }
 
     private void onLocationUpdate(Location location) {
-        if (location == null) {
+        if (location == null || !isAdded()) {
             return;
         }
 

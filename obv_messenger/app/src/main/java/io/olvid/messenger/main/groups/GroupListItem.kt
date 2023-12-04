@@ -106,7 +106,6 @@ fun GroupListItem(
                     group.group2?.let { initialView.setGroup2(it) }
                 },
                 admin = group.group2?.ownPermissionAdmin == true || group.group != null && group.group.bytesGroupOwnerIdentity == null,
-                onClick = onClick,
             )
 
             // content
@@ -130,7 +129,6 @@ fun GroupListItem(
                     text = body,
                     color = colorResource(id = R.color.greyTint),
                     fontSize = 12.sp,
-                    lineHeight = 15.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

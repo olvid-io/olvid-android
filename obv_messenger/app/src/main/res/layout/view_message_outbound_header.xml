@@ -202,7 +202,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginStart="4dp"
         android:paddingBottom="1dp"
-        android:textAlignment="textEnd"
+        android:textAlignment="viewEnd"
         android:textSize="12sp"
         android:textColor="#CC7D7D7D"
         app:layout_constraintBottom_toBottomOf="@id/message_content_expander"

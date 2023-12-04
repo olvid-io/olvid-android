@@ -56,6 +56,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
@@ -91,7 +92,7 @@ import io.olvid.messenger.databases.entity.MessageExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 
-@UnstableApi
+@OptIn(markerClass = UnstableApi.class)
 public class GalleryActivity extends LockableActivity {
     public static final String BYTES_OWNED_IDENTITY_INTENT_EXTRA = "bytes_owned_identity";
     public static final String BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA = "sort_order";

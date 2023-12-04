@@ -126,6 +126,12 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                     PendingDeleteFromServer.create(fetchManagerSession, inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
                 }
             }
+
+            // check all decrypted messages, with attachments, that are not yet marked as listed on the server
+            InboxMessage[] messagesToMarkAsListedOnServer = InboxMessage.getMessageThatCanBeMarkedAsListedOnServer(fetchManagerSession);
+            for (InboxMessage inboxMessage : messagesToMarkAsListedOnServer) {
+                fetchManagerSession.markAsListedOnServerListener.messageCanBeMarkedAsListedOnServer(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -199,10 +205,10 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
     public void onFinishCallback(Operation operation) {
         Identity identity = ((DownloadMessagesAndListAttachmentsOperation) operation).getOwnedIdentity();
         UID deviceUid = ((DownloadMessagesAndListAttachmentsOperation) operation).getDeviceUid();
-        int newMessagesCount = ((DownloadMessagesAndListAttachmentsOperation) operation).getNewMessagesCount();
+        boolean listingTruncated = ((DownloadMessagesAndListAttachmentsOperation) operation).getListingTruncated();
         scheduler.clearFailedCount(identity);
 
-        if (newMessagesCount > Constants.RELIST_NEW_MESSAGE_COUNT_THRESHOLD) {
+        if (listingTruncated) {
             // if we listed more than 20 new messages, we might have missed some messages on the server --> trigger a new list in 30 seconds, once messages are processed and deleted from server
             scheduler.schedule(identity, () -> queueNewDownloadMessagesAndListAttachmentsOperation(identity, deviceUid), "DownloadMessagesAndListAttachmentsOperation [relist]", Constants.RELIST_DELAY);
         }

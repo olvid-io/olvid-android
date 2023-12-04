@@ -694,15 +694,8 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                     composeMessageLinkPreviewGroup?.visibility = View.VISIBLE
                     val uri = openGraph.getSafeUri()
                     if (uri != null) {
-                        composeMessageLinkPreviewGroup?.setOnClickListener { v: View? ->
-                            try {
-                                startActivity(Intent(Intent.ACTION_VIEW, uri))
-                            } catch (e: Exception) {
-                                App.toast(
-                                    string.toast_message_unable_to_open_url,
-                                    Toast.LENGTH_SHORT
-                                )
-                            }
+                        composeMessageLinkPreviewGroup?.setOnClickListener {
+                            App.openLink(activity, uri)
                         }
                     } else {
                         composeMessageLinkPreviewGroup?.setOnClickListener(null)

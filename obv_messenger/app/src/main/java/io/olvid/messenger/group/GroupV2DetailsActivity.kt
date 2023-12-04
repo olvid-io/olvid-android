@@ -34,7 +34,6 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.text.util.Linkify
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -1209,13 +1208,6 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                                     contact!!.bytesContactIdentity
                                 )
                             }
-                        } else {
-                            App.toast(
-                                getString(
-                                    string.toast_message_not_yet_in_your_contacts,
-                                    contactNameTextView.text
-                                ), Toast.LENGTH_SHORT, Gravity.BOTTOM
-                            )
                         }
                     }
                 }

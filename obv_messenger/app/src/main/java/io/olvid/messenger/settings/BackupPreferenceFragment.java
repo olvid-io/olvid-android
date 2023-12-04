@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.ObvBackupKeyInformation;
