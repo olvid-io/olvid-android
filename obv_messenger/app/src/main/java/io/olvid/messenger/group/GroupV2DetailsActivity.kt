@@ -840,6 +840,54 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                     .setPositiveButton(string.button_label_ok, null)
                 builder.create().show()
             }
+        } else if (itemId == R.id.action_invite_all_members) {
+            val group = groupDetailsViewModel.group.value ?: return true
+            if (group.updateInProgress == Group2.UPDATE_NONE) {
+                groupDetailsViewModel.groupMembers.value?.mapNotNull { group2MemberOrPending ->
+                    group2MemberOrPending.contact?.let { contact ->
+                        if ((contact.establishedChannelCount > 0 || contact.keycloakManaged) && contact.oneToOne.not()) {
+                            contact
+                        } else {
+                            null
+                        }
+                    }
+                } ?. let { contacts ->
+                    if (contacts.isEmpty()) {
+                        App.toast(R.string.toast_message_no_member_can_be_invited, Toast.LENGTH_SHORT)
+                    } else {
+                        val builder = SecureAlertDialogBuilder(this, style.CustomAlertDialog)
+                            .setTitle(string.dialog_title_invite_all_group_members)
+                            .setMessage(resources.getQuantityString(R.plurals.dialog_message_invite_all_group_members, contacts.size, contacts.size))
+                            .setPositiveButton(R.string.button_label_proceed) { _, _ ->
+                                contacts.forEach { contact ->
+                                    if (contact.establishedChannelCount > 0) {
+                                        AppSingleton.getEngine().startOneToOneInvitationProtocol(
+                                            contact.bytesOwnedIdentity,
+                                            contact.bytesContactIdentity
+                                        )
+                                    }
+                                    if (contact.keycloakManaged) {
+                                        try {
+                                            val jsonIdentityDetails = contact.getIdentityDetails()
+                                            if (jsonIdentityDetails != null && jsonIdentityDetails.signedUserDetails != null) {
+                                                AppSingleton.getEngine().addKeycloakContact(
+                                                    contact.bytesOwnedIdentity,
+                                                    contact.bytesContactIdentity,
+                                                    jsonIdentityDetails.signedUserDetails
+                                                )
+                                            }
+                                        } catch (e : Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    }
+                                }
+                            }
+                            .setNegativeButton(R.string.button_label_cancel, null)
+                        builder.create().show()
+                    }
+                }
+            }
+            return true
         }
         return false
     }

@@ -591,6 +591,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             super(coreProtocolMessage, contactIdentityA, contactIdentityB);
         }
 
+        @SuppressWarnings("unused")
         public PropagatedInitialMessage(ReceivedMessage receivedMessage) throws Exception {
             super(receivedMessage);
         }

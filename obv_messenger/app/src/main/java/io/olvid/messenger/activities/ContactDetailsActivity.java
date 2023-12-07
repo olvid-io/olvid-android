@@ -365,6 +365,9 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
         if (contact.establishedChannelCount > 0) {
             introduceButton.setEnabled(true);
             notOneToOneInviteButton.setEnabled(true);
+        } else if (contact.keycloakManaged) {
+            introduceButton.setEnabled(false);
+            notOneToOneInviteButton.setEnabled(true);
         } else {
             introduceButton.setEnabled(false);
             notOneToOneInviteButton.setEnabled(false);
@@ -800,7 +803,18 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
             } else {
                 // this is an invite initiation
                 try {
-                    AppSingleton.getEngine().startOneToOneInvitationProtocol(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                    // if the contact has channels, invite them to one-to-one discussion
+                    if (contact.establishedChannelCount > 0) {
+                        AppSingleton.getEngine().startOneToOneInvitationProtocol(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                    }
+
+                    // if the contact is keycloak managed, also start a keycloak invitation protocol
+                    if (contact.keycloakManaged) {
+                        JsonIdentityDetails jsonIdentityDetails = contact.getIdentityDetails();
+                        if (jsonIdentityDetails != null && jsonIdentityDetails.getSignedUserDetails() != null) {
+                            AppSingleton.getEngine().addKeycloakContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity, jsonIdentityDetails.getSignedUserDetails());
+                        }
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

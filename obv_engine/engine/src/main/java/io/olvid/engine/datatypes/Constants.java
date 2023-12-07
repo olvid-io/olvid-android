@@ -70,7 +70,7 @@ public abstract class Constants {
     public static final long WELL_KNOWN_REFRESH_INTERVAL = 3_600_000L * 6; // 6 hours
 
     // download message
-    public static final long RELIST_DELAY = 30_000; // 30 seconds
+    public static final long RELIST_DELAY = 10_000; // 10 seconds
 
     // backups
     public static final long AUTOBACKUP_MAX_INTERVAL = 86_400_000L; // 1 day

@@ -15,8 +15,12 @@
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_clone_group"
-        android:orderInCategory="130"
+        android:orderInCategory="120"
         android:title="@string/menu_action_clone_group"/>
+    <item
+        android:id="@+id/action_invite_all_members"
+        android:orderInCategory="125"
+        android:title="@string/menu_action_invite_all_members"/>
     <item
         android:id="@+id/action_sync_group"
         android:orderInCategory="130"

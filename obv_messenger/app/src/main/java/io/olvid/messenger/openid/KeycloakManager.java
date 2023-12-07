@@ -362,32 +362,28 @@ public class KeycloakManager {
             KeycloakManagerState kms = ownedIdentityStates.get(identityBytesKey);
             if (kms != null) {
                 String nonce = AppSingleton.getEngine().getOwnedIdentityKeycloakSelfRevocationTestNonce(kms.bytesOwnedIdentity, kms.serverUrl);
-                if (nonce == null) {
-                    authenticationRequiredOwnedIdentities.add(identityBytesKey);
-                    AndroidNotificationManager.displayKeycloakAuthenticationRequiredNotification(identityBytesKey.bytes);
-                    App.openAppDialogKeycloakAuthenticationRequired(kms.bytesOwnedIdentity, kms.clientId, kms.clientSecret, kms.serverUrl);
-                } else {
-                    KeycloakTasks.selfRevocationTest(kms.serverUrl, nonce, new KeycloakCallback<Boolean>() {
-                        @Override
-                        public void success(Boolean result) {
-                            if (result != null && result) {
-                                // the server returned true --> the identity is no longer managed
-                                AppSingleton.getEngine().unbindOwnedIdentityFromKeycloak(kms.bytesOwnedIdentity);
-                                App.openAppDialogKeycloakIdentityRevoked(kms.bytesOwnedIdentity);
-                            } else {
-                                authenticationRequiredOwnedIdentities.add(identityBytesKey);
-                                AndroidNotificationManager.displayKeycloakAuthenticationRequiredNotification(identityBytesKey.bytes);
-                                App.openAppDialogKeycloakAuthenticationRequired(kms.bytesOwnedIdentity, kms.clientId, kms.clientSecret, kms.serverUrl);
-                            }
+                KeycloakTasks.selfRevocationTest(kms.serverUrl, nonce == null ? "" : nonce, new KeycloakCallback<Boolean>() {
+                    @Override
+                    public void success(Boolean result) {
+                        // only unbind if nonce is non-null
+                        if (nonce != null && result != null && result) {
+                            // the server returned true --> the identity is no longer managed
+                            AppSingleton.getEngine().unbindOwnedIdentityFromKeycloak(kms.bytesOwnedIdentity);
+                            App.openAppDialogKeycloakIdentityRevoked(kms.bytesOwnedIdentity);
+                        } else {
+                            // require an authentication: either nonce still exists, or nonce is null
+                            authenticationRequiredOwnedIdentities.add(identityBytesKey);
+                            AndroidNotificationManager.displayKeycloakAuthenticationRequiredNotification(identityBytesKey.bytes);
+                            App.openAppDialogKeycloakAuthenticationRequired(kms.bytesOwnedIdentity, kms.clientId, kms.clientSecret, kms.serverUrl);
                         }
+                    }
 
-                        @Override
-                        public void failed(int rfc) {
-                            // in case of failure, we do nothing --> this is probably only a network error, and it will be tried again
-                            // we do not want to prompt the user to authenticate in case of permanent connection error with the keycloak
-                        }
-                    });
-                }
+                    @Override
+                    public void failed(int rfc) {
+                        // in case of failure, we do nothing --> this is probably only a network error, and it will be tried again
+                        // we do not want to prompt the user to authenticate in case of permanent connection error with the keycloak
+                    }
+                });
             }
         });
     }

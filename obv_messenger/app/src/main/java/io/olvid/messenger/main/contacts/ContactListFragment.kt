@@ -183,7 +183,26 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
             .setNegativeButton(R.string.button_label_cancel, null)
             .setPositiveButton(R.string.button_label_invite) { _, _ ->
                 try {
-                    AppSingleton.getEngine().startOneToOneInvitationProtocol(contact.bytesOwnedIdentity, contact.bytesContactIdentity)
+                    if (contact.establishedChannelCount > 0) {
+                        AppSingleton.getEngine().startOneToOneInvitationProtocol(
+                            contact.bytesOwnedIdentity,
+                            contact.bytesContactIdentity
+                        )
+                    }
+                    if (contact.keycloakManaged) {
+                        try {
+                            val jsonIdentityDetails = contact.getIdentityDetails()
+                            if (jsonIdentityDetails != null && jsonIdentityDetails.signedUserDetails != null) {
+                                AppSingleton.getEngine().addKeycloakContact(
+                                    contact.bytesOwnedIdentity,
+                                    contact.bytesContactIdentity,
+                                    jsonIdentityDetails.signedUserDetails
+                                )
+                            }
+                        } catch (e : Exception) {
+                            e.printStackTrace()
+                        }
+                    }
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
                 }

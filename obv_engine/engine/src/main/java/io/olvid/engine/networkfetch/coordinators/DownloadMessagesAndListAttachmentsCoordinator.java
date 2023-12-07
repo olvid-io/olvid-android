@@ -128,7 +128,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
             }
 
             // check all decrypted messages, with attachments, that are not yet marked as listed on the server
-            InboxMessage[] messagesToMarkAsListedOnServer = InboxMessage.getMessageThatCanBeMarkedAsListedOnServer(fetchManagerSession);
+            InboxMessage[] messagesToMarkAsListedOnServer = InboxMessage.getMessagesThatCanBeMarkedAsListedOnServer(fetchManagerSession);
             for (InboxMessage inboxMessage : messagesToMarkAsListedOnServer) {
                 fetchManagerSession.markAsListedOnServerListener.messageCanBeMarkedAsListedOnServer(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
             }
@@ -209,7 +209,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
         scheduler.clearFailedCount(identity);
 
         if (listingTruncated) {
-            // if we listed more than 20 new messages, we might have missed some messages on the server --> trigger a new list in 30 seconds, once messages are processed and deleted from server
+            // if listing was truncated --> trigger a new list in 10 seconds, once messages are processed and deleted from server
             scheduler.schedule(identity, () -> queueNewDownloadMessagesAndListAttachmentsOperation(identity, deviceUid), "DownloadMessagesAndListAttachmentsOperation [relist]", Constants.RELIST_DELAY);
         }
 

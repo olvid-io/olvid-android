@@ -457,7 +457,7 @@ public class InboxMessage implements ObvDatabase {
     }
 
     // get all messages that have been decrypted, have attachments and are not yet makredAsListedOnServer
-    public static InboxMessage[] getMessageThatCanBeMarkedAsListedOnServer(FetchManagerSession fetchManagerSession) {
+    public static InboxMessage[] getMessagesThatCanBeMarkedAsListedOnServer(FetchManagerSession fetchManagerSession) {
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
                 "SELECT m.* FROM " + TABLE_NAME + " AS m " +
                         " INNER JOIN " + InboxAttachment.TABLE_NAME + " AS a " +

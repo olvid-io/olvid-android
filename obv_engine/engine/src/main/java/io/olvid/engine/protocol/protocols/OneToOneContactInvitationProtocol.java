@@ -650,10 +650,12 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
 
             UUID dialogUuid = UUID.randomUUID();
             {
-                // create a dialog to allow Alice to abort the protocol
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createOneToOneInvitationSentDialog(receivedMessage.contactIdentity), dialogUuid));
-                ChannelMessageToSend messageToSend = new DialogInvitationSentMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                // create a dialog to allow Alice to abort the protocol (only if Bob is not one to one)
+                if (!protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity)) {
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createOneToOneInvitationSentDialog(receivedMessage.contactIdentity), dialogUuid));
+                    ChannelMessageToSend messageToSend = new DialogInvitationSentMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                }
             }
 
             {
@@ -1030,10 +1032,12 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
 
             UUID dialogUuid = UUID.randomUUID();
             {
-                // create a dialog to allow Alice to abort the protocol
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createOneToOneInvitationSentDialog(receivedMessage.contactIdentity), dialogUuid));
-                ChannelMessageToSend messageToSend = new DialogInvitationSentMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                // create a dialog to allow Alice to abort the protocol (only if Bob is not one to one)
+                if (!protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity)) {
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createOneToOneInvitationSentDialog(receivedMessage.contactIdentity), dialogUuid));
+                    ChannelMessageToSend messageToSend = new DialogInvitationSentMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                }
             }
 
             {

@@ -1791,8 +1791,15 @@
     <string name="explanation_empty_other_contact_list">Personne ici pour le moment</string>
     <string name="explanation_empty_other_contact_list_sub">Les membres de groupes qui ne sont pas encore des contacts apparîtront ici.</string>
     <string name="explanation_empty_directory">Annuaire vide</string>
+    <string name="menu_action_invite_all_members">Inviter tous les membres</string>
+    <string name="dialog_title_invite_all_group_members">Inviter tous les membres ?</string>
+    <string name="toast_message_no_member_can_be_invited">Aucun membre du group à inviter</string>
 
 
+    <plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Vous êtes sur le point d\'inviter chaque membre de ce groupe avec lequel vous avez un canal (actuellement 1 membre) à une discussion privée.\nSouhaitez-vous poursuivre ?</item>
+        <item quantity="other">Vous êtes sur le point d\'inviter chaque membre de ce groupe avec lequel vous avez un canal (actuellement %1$d membres) à une discussion privée.\nSouhaitez-vous poursuivre ?</item>
+    </plurals>
     <plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d groupe commun</item>
         <item quantity="other">%1$d groupes communs</item>

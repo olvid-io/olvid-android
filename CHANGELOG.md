@@ -1,3 +1,29 @@
+# Build 225 (1.3.1)
+2023-12-07
+
+- Minor fixes
+
+# ~~Build 224 (1.3.1)~~
+2023-12-06
+
+- Fix for keycloak contact addition when keycloak is unreachable
+
+# ~~Build 223 (1.3.1)~~
+2023-12-05
+
+- Various fixes for keycloak/one-to-one interactions
+
+# ~~Build 222 (1.3.1)~~
+2023-12-05
+
+- Fix for invite all group members
+
+
+# ~~Build 221 (1.3.1)~~
+2023-12-04
+
+- Make it possible to invite all group members to private discussions
+
 # Build 220 (1.3)
 2023-12-04
 

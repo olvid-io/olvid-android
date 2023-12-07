@@ -317,6 +317,12 @@ public class ServerQueryOperation extends Operation {
                                     // do nothing for these
                                     break;
                             }
+                        } else if (serverQuery.getType().getId() == ServerQuery.TypeId.CHECK_KEYCLOAK_REVOCATION_QUERY_ID && returnStatus == ServerMethod.SERVER_CONNECTION_ERROR) {
+                            // if not able to connect to keycloak, assume the user is not revoked. This is required in setups where one of the user's devices does not have access to keycloak
+                            // TODO: once we implement visibility rules in keycloak, this must be removed and replaced by synchronisation messages between owned devices in the protocol
+                            serverResponse = Encoded.of(true);
+                            finished = true;
+                            return;
                         }
                         cancel(RFC_NETWORK_ERROR);
                 }
