@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,6 +20,7 @@
 package io.olvid.messenger.discussion.settings;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -58,11 +59,6 @@ public class DiscussionSettingsViewModel extends ViewModel {
     private String messageVibrationPattern;
     private String messageLedColor;
 
-    // ephemeral settings
-    private boolean ephemeralSettingsModified;
-    private boolean settingsReadOnce;
-    private Long settingsVisibilityDuration;
-    private Long settingsExistenceDuration;
 
     public DiscussionSettingsViewModel() {
         discussionSettingsDataStore = new DiscussionSettingsDataStore(this);
@@ -114,11 +110,6 @@ public class DiscussionSettingsViewModel extends ViewModel {
         messageRingtone = null;
         messageVibrationPattern = null;
         messageLedColor = null;
-
-        ephemeralSettingsModified = false;
-        settingsReadOnce = false;
-        settingsVisibilityDuration = null;
-        settingsExistenceDuration = null;
     }
 
     void addSettingsChangedListener(@NonNull SettingsChangedListener settingsChangedListener) {
@@ -282,27 +273,7 @@ public class DiscussionSettingsViewModel extends ViewModel {
 
     // region Ephemeral settings
 
-    void updateEphemeralSettingsFromCustomization(DiscussionCustomization discussionCustomization) {
-        if (!ephemeralSettingsModified) {
-            if (discussionCustomization != null) {
-                this.settingsReadOnce = discussionCustomization.settingReadOnce;
-                this.settingsVisibilityDuration = discussionCustomization.settingVisibilityDuration;
-                this.settingsExistenceDuration = discussionCustomization.settingExistenceDuration;
-            } else {
-                this.settingsReadOnce = false;
-                this.settingsVisibilityDuration = null;
-                this.settingsExistenceDuration = null;
-            }
-        }
-    }
-
-    void discardEphemeralSettings() {
-        ephemeralSettingsModified = false;
-        updateEphemeralSettingsFromCustomization(discussionCustomization.getValue());
-    }
-
-
-    void saveEphemeralSettingsAndNotifyPeers() {
+    void saveEphemeralSettingsAndNotifyPeers(boolean readOnce, Long visibilityDuration, Long existenceDuration) {
         Discussion discussion = discussionLiveData.getValue();
         if (discussion == null) {
             return;
@@ -342,16 +313,15 @@ public class DiscussionSettingsViewModel extends ViewModel {
 
             // update our own discussion
             discussionCustomization.sharedSettingsVersion = version;
-            discussionCustomization.settingReadOnce = settingsReadOnce;
-            discussionCustomization.settingVisibilityDuration = settingsVisibilityDuration;
-            discussionCustomization.settingExistenceDuration = settingsExistenceDuration;
+            discussionCustomization.settingReadOnce = readOnce;
+            discussionCustomization.settingVisibilityDuration = visibilityDuration;
+            discussionCustomization.settingExistenceDuration = existenceDuration;
 
             JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
 
             // send the json to others
             Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, discussion.bytesOwnedIdentity, true, null);
             if (message != null) {
-                ephemeralSettingsModified = false;
                 db.discussionCustomizationDao().update(discussionCustomization); // only update the discussion if we could successfully build the message
                 message.id = db.messageDao().insert(message);
                 message.postSettingsMessage(false, null);
@@ -359,47 +329,10 @@ public class DiscussionSettingsViewModel extends ViewModel {
         });
     }
 
-    public boolean isEphemeralSettingsModified() {
-        return ephemeralSettingsModified;
-    }
-
-    public void setSettingsReadOnce(boolean settingsReadOnce) {
-        if (settingsReadOnce ^ this.settingsReadOnce) {
-            this.ephemeralSettingsModified = true;
-            this.settingsReadOnce = settingsReadOnce;
-        }
-    }
-
-    public void setSettingsVisibilityDuration(Long settingsVisibilityDuration) {
-        if (!Objects.equals(settingsVisibilityDuration, this.settingsVisibilityDuration)) {
-            this.ephemeralSettingsModified = true;
-            this.settingsVisibilityDuration = settingsVisibilityDuration;
-        }
-    }
-
-    public void setSettingsExistenceDuration(Long settingsExistenceDuration) {
-        if (!Objects.equals(settingsExistenceDuration, this.settingsExistenceDuration)) {
-            this.ephemeralSettingsModified = true;
-            this.settingsExistenceDuration = settingsExistenceDuration;
-        }
-    }
-
-    public boolean getSettingsReadOnce() {
-        return settingsReadOnce;
-    }
-
-    public Long getSettingsVisibilityDuration() {
-        return settingsVisibilityDuration;
-    }
-
-    public Long getSettingsExistenceDuration() {
-        return settingsExistenceDuration;
-    }
-
     // endregion
 
     public interface SettingsChangedListener{
-        void onSettingsChanged(DiscussionCustomization discussionCustomization);
+        void onSettingsChanged(@Nullable DiscussionCustomization discussionCustomization);
         void onLockedOrGroupAdminChanged(boolean locked, boolean nonAdminGroup);
     }
 }

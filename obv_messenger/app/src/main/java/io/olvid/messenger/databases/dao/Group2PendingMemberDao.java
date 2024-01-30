@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -40,11 +40,21 @@ public interface Group2PendingMemberDao {
     @Update
     void update(Group2PendingMember pendingMember);
 
+    @Query("UPDATE " + Group2PendingMember.TABLE_NAME +
+            " SET " + Group2PendingMember.FIRST_NAME + " = :firstName " +
+            " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+            " AND " + Group2PendingMember.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
+    void updateFirstName(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, byte[] bytesContactIdentity, String firstName);
+
     @Query("SELECT * FROM " + Group2PendingMember.TABLE_NAME +
             " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
             " AND " + Group2PendingMember.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity ")
     Group2PendingMember get(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, byte[] bytesContactIdentity);
+
+    @Query("SELECT * FROM " + Group2PendingMember.TABLE_NAME)
+    List<Group2PendingMember> getAll();
 
     @Query("SELECT * FROM " + Group2PendingMember.TABLE_NAME +
             " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +

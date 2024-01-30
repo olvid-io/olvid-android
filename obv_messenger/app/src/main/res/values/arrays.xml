@@ -384,11 +384,13 @@
         <item>@string/location_map_language_default</item>
         <item>@string/location_map_language_english</item>
         <item>@string/location_map_language_french</item>
+        <item>@string/location_map_language_international</item>
     </string-array>
     <string-array name="location_osm_language_values">
         <item>default</item>
         <item>en</item>
         <item>fr</item>
+        <item>intl</item>
     </string-array>
     <string-array name="app_language_choice">
         <item>@string/pref_text_default_device_language</item>

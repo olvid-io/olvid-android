@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -130,7 +130,7 @@ fun DiscussionListScreen(
                                         locked = discussion.isLocked && invitation == null,
                                         mentioned = discussionAndLastMessage.unreadMention,
                                         pinned = discussion.pinned,
-                                        attachmentCount = message?.totalAttachmentCount ?: 0,
+                                        attachmentCount = if (message?.isLocationMessage == true) 0 else message?.totalAttachmentCount ?: 0,
                                         onClick = { onClick(discussion) },
                                         isPreDiscussion = discussion.isPreDiscussion,
                                         onMarkAllDiscussionMessagesRead = {

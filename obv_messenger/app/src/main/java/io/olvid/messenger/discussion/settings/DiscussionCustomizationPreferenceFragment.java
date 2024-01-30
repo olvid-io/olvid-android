@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -106,7 +106,7 @@ public class DiscussionCustomizationPreferenceFragment extends PreferenceFragmen
     }
 
     @Override
-    public void onSettingsChanged(DiscussionCustomization discussionCustomization) {
+    public void onSettingsChanged(@Nullable DiscussionCustomization discussionCustomization) {
         if (colorPickerPreference != null) {
             if (discussionCustomization != null) {
                 DiscussionCustomization.ColorJson colorJson = discussionCustomization.getColorJson();

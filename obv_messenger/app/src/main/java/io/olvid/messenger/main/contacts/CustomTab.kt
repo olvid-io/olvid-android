@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -36,16 +36,6 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-
-@Composable
-private fun TabBaselineLayout(
-    text: @Composable (() -> Unit)
-) {
-    Box(
-        Modifier.layoutId("text").padding(horizontal = 4.dp)
-    ) { text() }
-}
-
 
 @Composable
 fun CustomTab(

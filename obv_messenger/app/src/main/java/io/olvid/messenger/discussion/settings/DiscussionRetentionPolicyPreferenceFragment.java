@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -209,7 +209,7 @@ public class DiscussionRetentionPolicyPreferenceFragment extends PreferenceFragm
     }
 
     @Override
-    public void onSettingsChanged(DiscussionCustomization discussionCustomization) {
+    public void onSettingsChanged(@Nullable DiscussionCustomization discussionCustomization) {
         if (discussionRetentionCountPreference != null) {
             discussionRetentionCountPreference.setText(discussionSettingsDataStore.getString(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_RETENTION_COUNT, ""));
         }

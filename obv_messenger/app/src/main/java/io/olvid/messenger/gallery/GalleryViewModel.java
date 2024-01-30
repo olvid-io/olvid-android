@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -81,7 +81,8 @@ public class GalleryViewModel extends ViewModel {
         });
     }
 
-    public void setDiscussionId(long discussionId) {
+    public void setDiscussionId(long discussionId, @Nullable Boolean ascending) {
+        this.ownedIdentitySortOrderAscending.postValue(ascending);
         this.discussionId.postValue(discussionId);
         galleryType = GalleryType.DISCUSSION;
     }
@@ -157,6 +158,7 @@ public class GalleryViewModel extends ViewModel {
 
     public static class TripleLiveData extends MediatorLiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> {
         private final AppDatabase db;
+        private Long discussionId;
         private byte[] bytesOwnedIdentity = null;
         private String sortOrder = null;
         private Boolean ascending = null;
@@ -174,9 +176,18 @@ public class GalleryViewModel extends ViewModel {
 
 
         public void onDiscussionChanged(Long discussionId) {
+            this.discussionId = discussionId;
+            updateDiscussion(discussionId, ascending);
+        }
+
+        private void updateDiscussion(Long discussionId, Boolean ascending) {
             LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> newSource;
             if (discussionId != null) {
-                newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForDiscussion(discussionId);
+                if (ascending == null || ascending) {
+                    newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForDiscussion(discussionId);
+                } else {
+                    newSource = db.fyleMessageJoinWithStatusDao().getImageAndVideoFylesAndStatusesForDiscussionDescending(discussionId);
+                }
             } else {
                 newSource = null;
             }
@@ -223,6 +234,7 @@ public class GalleryViewModel extends ViewModel {
         public void onAscendingChanged(Boolean ascending) {
             this.ascending = ascending;
             updateOwnedIdentity(bytesOwnedIdentity, sortOrder, ascending);
+            updateDiscussion(discussionId, ascending);
         }
 
         private void updateOwnedIdentity(byte[] bytesOwnedIdentity, String sortOrder, Boolean ascending) {

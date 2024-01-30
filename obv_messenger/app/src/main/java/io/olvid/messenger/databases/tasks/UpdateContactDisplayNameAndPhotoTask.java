@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -49,7 +49,7 @@ public class UpdateContactDisplayNameAndPhotoTask implements Runnable {
         if (contact != null) {
             try {
                 contact.setIdentityDetailsAndDisplayName(identityDetails.getIdentityDetails());
-                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
+                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.firstName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
 
                 new UpdateAllGroupMembersNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity).run();
             } catch (Exception e) {
@@ -61,7 +61,7 @@ public class UpdateContactDisplayNameAndPhotoTask implements Runnable {
             db.contactDao().updatePublishedDetailsStatus(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.newPublishedDetails);
 
             if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                AppSingleton.updateCachedCustomDisplayName(contact.bytesContactIdentity, contact.getCustomDisplayName());
+                AppSingleton.updateCachedCustomDisplayName(contact.bytesContactIdentity, contact.getCustomDisplayName(), contact.getFirstNameOrCustom());
                 AppSingleton.updateCachedPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
             }
 

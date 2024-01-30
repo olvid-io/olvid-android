@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -30,14 +30,11 @@ import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.switchMap
-import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.R.layout
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
-import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.fragments.FilteredContactListFragment
 import io.olvid.messenger.settings.SettingsActivity
 
@@ -102,7 +99,6 @@ class GroupV2MemberAdditionDialogFragment : DialogFragment() {
             inflater.inflate(layout.dialog_fragment_add_group_v2_members, container, false)
         val dialogContactNameFilter =
             dialogView.findViewById<EditText>(R.id.dialog_discussion_filter)
-        val v2Warning = dialogView.findViewById<View>(R.id.group_v2_warning_message)
         val cancelButton = dialogView.findViewById<Button>(R.id.button_cancel)
         cancelButton.setOnClickListener { dismiss() }
         val okButton = dialogView.findViewById<Button>(R.id.button_ok)
@@ -133,14 +129,6 @@ class GroupV2MemberAdditionDialogFragment : DialogFragment() {
             filteredContactListFragment
         )
         transaction.commit()
-        AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity ->
-            AppDatabase.getInstance().contactDao()
-                .nonGroupV2ContactExists(ownedIdentity.bytesOwnedIdentity)
-        }
-            .observe(this) { nonGroupV2Exists: Boolean? ->
-                v2Warning.visibility =
-                    if (nonGroupV2Exists != null && nonGroupV2Exists) View.VISIBLE else View.GONE
-            }
         return dialogView
     }
 

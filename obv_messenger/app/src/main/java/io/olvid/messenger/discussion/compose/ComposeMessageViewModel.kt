@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -16,9 +16,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
-package io.olvid.messenger.discussion
+package io.olvid.messenger.discussion.compose
 
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -54,6 +57,7 @@ class ComposeMessageViewModel(
     // region take picture from discussion
     var photoOrVideoUri: Uri? = null
     var photoOrVideoFile: File? = null
+    var openEphemeralSettings by mutableStateOf(false)
 
     init {
         this.discussionIdLiveData = discussionIdLiveData

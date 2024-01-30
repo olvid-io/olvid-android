@@ -31,6 +31,15 @@
         android:order="20" />
 
     <SwitchPreference
+        android:key="pref_key_sometimes_show_first_name_only"
+        android:defaultValue="true"
+        android:title="@string/pref_sometimes_show_first_name_only_title"
+        android:summary="@string/pref_sometimes_show_first_name_only_summary"
+        android:icon="@drawable/ic_pref_first_name"
+        android:order="25"
+        />
+
+    <SwitchPreference
         android:key="pref_key_sort_contacts_by_last_name"
         android:defaultValue="false"
         android:title="@string/pref_sort_contacts_by_last_name_title"

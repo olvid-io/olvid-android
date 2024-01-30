@@ -1,6 +1,5 @@
 .DS_Store
 *~
-Backup*.cdr
 /obv_messenger/app/release/
 /obv_messenger/app/devFull/
 avd/
@@ -13,7 +12,6 @@ avd/
 /.idea/caches
 .idea/misc.xml
 .idea/deploymentTargetDropDown.xml
-.DS_Store
 build
 /captures
 .externalNativeBuild

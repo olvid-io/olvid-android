@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -58,6 +58,7 @@ public class Group2PendingMember {
     public static final String BYTES_CONTACT_IDENTITY = "bytes_contact_identity";
 
     public static final String DISPLAY_NAME = "display_name";
+    public static final String FIRST_NAME = "first_name";
     public static final String SORT_DISPLAY_NAME = "sort_display_name";
     public static final String FULL_SEARCH_DISPLAY_NAME = "full_search_display_name";
     public static final String IDENTITY_DETAILS = "identity_details";
@@ -84,6 +85,10 @@ public class Group2PendingMember {
     @ColumnInfo(name = DISPLAY_NAME)
     @NonNull
     public String displayName;
+
+    @ColumnInfo(name = FIRST_NAME)
+    @Nullable
+    public String firstName;
 
     @SuppressWarnings("NotNullFieldNotInitialized")
     @ColumnInfo(name = SORT_DISPLAY_NAME)
@@ -116,11 +121,12 @@ public class Group2PendingMember {
 
 
     // Constructor required by Room
-    public Group2PendingMember(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, @NonNull byte[] bytesContactIdentity, @NonNull String displayName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, boolean permissionAdmin, boolean permissionRemoteDeleteAnything, boolean permissionEditOrRemoteDeleteOwnMessages, boolean permissionChangeSettings, boolean permissionSendMessage) {
+    public Group2PendingMember(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, @NonNull byte[] bytesContactIdentity, @NonNull String displayName, @Nullable String firstName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, boolean permissionAdmin, boolean permissionRemoteDeleteAnything, boolean permissionEditOrRemoteDeleteOwnMessages, boolean permissionChangeSettings, boolean permissionSendMessage) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.bytesGroupIdentifier = bytesGroupIdentifier;
         this.bytesContactIdentity = bytesContactIdentity;
         this.displayName = displayName;
+        this.firstName = firstName;
         this.sortDisplayName = sortDisplayName;
         this.fullSearchDisplayName = fullSearchDisplayName;
         this.identityDetails = identityDetails;
@@ -155,11 +161,21 @@ public class Group2PendingMember {
             this.sortDisplayName = new byte[0];
             this.fullSearchDisplayName = "";
             this.identityDetails = null;
+            this.firstName = null;
         } else {
             this.displayName = jsonIdentityDetails.formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName());
             this.sortDisplayName = ContactDisplayNameFormatChangedTask.computeSortDisplayName(jsonIdentityDetails, null, SettingsActivity.getSortContactsByLastName());
             this.fullSearchDisplayName = StringUtils.unAccent(jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
             this.identityDetails = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonIdentityDetails);
+            this.firstName = jsonIdentityDetails.getFirstName();
         }
+    }
+
+    @NonNull
+    public String getFirstName() {
+        if (firstName != null) {
+            return firstName;
+        }
+        return displayName;
     }
 }

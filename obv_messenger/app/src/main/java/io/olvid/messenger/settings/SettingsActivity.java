@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -168,6 +168,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_CONTACT_DISPLAY_NAME_FORMAT = "pref_key_contact_display_name_format";
     static final String PREF_KEY_CONTACT_DISPLAY_NAME_FORMAT_DEFAULT = "%f %l";
+
+    static final String PREF_KEY_SOMETIMES_SHOW_FIRST_NAME_ONLY = "pref_key_sometimes_show_first_name_only";
+    static final boolean PREF_KEY_SOMETIMES_SHOW_FIRST_NAME_ONLY_DEFAULT = true;
 
     static final String PREF_KEY_UPPERCASE_LAST_NAME = "pref_key_uppercase_last_name";
     static final boolean PREF_KEY_UPPERCASE_LAST_NAME_DEFAULT = false;
@@ -346,6 +349,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     private static final String PREF_KEY_USE_SPEAKER_OUTPUT_FOR_MEDIA_PLAYER = "pref_key_use_speaker_output_for_media_player";
     private static final boolean PREF_KEY_USE_SPEAKER_OUTPUT_FOR_MEDIA_PLAYER_DEFAULT = true;
+    private static final String PREF_KEY_PLAYBACK_SPEED_FOR_MEDIA_PLAYER = "pref_key_playback_speed_for_media_player";
+    private static final float PREF_KEY_PLAYBACK_SPEED_FOR_MEDIA_PLAYER_DEFAULT = 1f;
 
     // SEND & RECEIVE MESSAGES
     static final String PREF_KEY_AUTODOWNLOAD_SIZE = "pref_key_autodownload_size";
@@ -363,6 +368,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES = "pref_key_retain_wiped_outbound_messages";
     static final boolean PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES_DEFAULT = false;
 
+    static final String PREF_KEY_RETAIN_REMOTE_DELETED_MESSAGES = "pref_key_retain_remote_deleted_messages";
+    static final boolean PREF_KEY_RETAIN_REMOTE_DELETED_MESSAGES_DEFAULT = true;
     static final String PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT = "pref_key_default_discussion_retention_count"; // number of messages to keep
     static final String PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT_DEFAULT = ""; // keep everything by default
 
@@ -414,10 +421,11 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     // LOCATION
     static final String PREF_KEY_LOCATION_INTEGRATION = "pref_key_location_integration";
     public enum LocationIntegrationEnum {
-        NONE, // used if user do not chose integration
+        NONE, // used if user did not yet chose an integration
         OSM,
         MAPS,
-        BASIC;
+        BASIC,
+        CUSTOM_OSM;
 
         public String getString() {
             switch (this) {
@@ -427,6 +435,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
                     return PREF_VALUE_LOCATION_INTEGRATION_MAPS;
                 case BASIC:
                     return PREF_VALUE_LOCATION_INTEGRATION_BASIC;
+                case CUSTOM_OSM:
+                    return PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM;
                 case NONE:
                 default:
                     return null;
@@ -436,6 +446,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static final String PREF_VALUE_LOCATION_INTEGRATION_OSM = "osm";
     public static final String PREF_VALUE_LOCATION_INTEGRATION_MAPS = "maps";
     public static final String PREF_VALUE_LOCATION_INTEGRATION_BASIC = "basic";
+    public static final String PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM = "custom_osm";
+
+    static final String PREF_KEY_LOCATION_CUSTOM_OSM_SERVER = "pref_key_location_custom_osm_server";
 
     static final String PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION = "pref_key_location_share_duration";
     static final long PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION_DEFAULT = 3_600_000L;
@@ -448,6 +461,14 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_LOCATION_OSM_LANGUAGE = "pref_key_location_osm_language";
     static final String PREF_KEY_LOCATION_OSM_LANGUAGE_DEFAULT = "default";
+    static final String PREF_KEY_LOCATION_OSM_LANGUAGE_INTERNATIONAL = "intl";
+
+    static final String PREF_KEY_LOCATION_DISABLE_ADDRESS_LOOKUP = "pref_key_location_disable_address_lookup";
+    static final boolean PREF_KEY_LOCATION_DISABLE_ADDRESS_LOOKUP_DEFAULT = false;
+
+    static final String PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER = "pref_key_location_use_custom_address_server";
+    static final boolean PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER_DEFAULT = false;
+    static final String PREF_KEY_LOCATION_CUSTOM_ADDRESS_SERVER = "pref_key_location_custom_address_server";
 
     // ACTIVITY VARIABLES
 
@@ -842,6 +863,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
+    public static boolean getAllowContactFirstName() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_SOMETIMES_SHOW_FIRST_NAME_ONLY, PREF_KEY_SOMETIMES_SHOW_FIRST_NAME_ONLY_DEFAULT);
+    }
+
     public static boolean getUppercaseLastName() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_UPPERCASE_LAST_NAME, PREF_KEY_UPPERCASE_LAST_NAME_DEFAULT);
     }
@@ -981,6 +1006,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         editor.putBoolean(PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES, retain);
         editor.apply();
+    }
+
+    public static boolean getRetainRemoteDeletedMessages() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_RETAIN_REMOTE_DELETED_MESSAGES, PREF_KEY_RETAIN_REMOTE_DELETED_MESSAGES_DEFAULT);
     }
 
     public static Long getDefaultDiscussionRetentionCount() {
@@ -1863,6 +1892,16 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_USE_SPEAKER_OUTPUT_FOR_MEDIA_PLAYER, PREF_KEY_USE_SPEAKER_OUTPUT_FOR_MEDIA_PLAYER_DEFAULT);
     }
 
+    public static void setPlaybackSpeedForMediaPlayer(float playbackSpeed) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putFloat(PREF_KEY_PLAYBACK_SPEED_FOR_MEDIA_PLAYER, playbackSpeed);
+        editor.apply();
+    }
+
+    public static float getPlaybackSpeedForMediaPlayer() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getFloat(PREF_KEY_PLAYBACK_SPEED_FOR_MEDIA_PLAYER, PREF_KEY_PLAYBACK_SPEED_FOR_MEDIA_PLAYER_DEFAULT);
+    }
+
     public static List<Integer> getComposeMessageIconPreferredOrder() {
         String preferredOrderString = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER, null);
         try {
@@ -1939,6 +1978,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             case PREF_VALUE_LOCATION_INTEGRATION_BASIC: {
                 return LocationIntegrationEnum.BASIC;
             }
+            case PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM: {
+                return LocationIntegrationEnum.CUSTOM_OSM;
+            }
             default: {
                 return LocationIntegrationEnum.NONE;
             }
@@ -1946,15 +1988,27 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     }
 
     // return language set by user ot system default language
+    @Nullable
     public static String getLocationOpenStreetMapLanguage() {
-        String language = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_OSM_LANGUAGE, PREF_KEY_LOCATION_OSM_LANGUAGE_DEFAULT);
-        if (language.equals(PREF_KEY_LOCATION_OSM_LANGUAGE_DEFAULT)) {
+        if (getLocationIntegration() != LocationIntegrationEnum.OSM) {
+            // do not use the custom language for non-osm integrations
             return Locale.getDefault().getLanguage();
         }
-        return language;
+        String language = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_OSM_LANGUAGE, PREF_KEY_LOCATION_OSM_LANGUAGE_DEFAULT);
+        switch (language) {
+            case PREF_KEY_LOCATION_OSM_LANGUAGE_DEFAULT: {
+                return Locale.getDefault().getLanguage();
+            }
+            case PREF_KEY_LOCATION_OSM_LANGUAGE_INTERNATIONAL: {
+                return null;
+            }
+            default: {
+                return language;
+            }
+        }
     }
 
-    public static void setLocationIntegration(String integrationString) {
+    public static void setLocationIntegration(@Nullable String integrationString, @Nullable String customOsmServerUrl) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         if (integrationString == null) {
             editor.remove(PREF_KEY_LOCATION_INTEGRATION);
@@ -1966,6 +2020,13 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
                     editor.putString(PREF_KEY_LOCATION_INTEGRATION, integrationString);
                     break;
                 }
+                case PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM: {
+                    if (customOsmServerUrl != null) {
+                        editor.putString(PREF_KEY_LOCATION_INTEGRATION, integrationString);
+                        editor.putString(PREF_KEY_LOCATION_CUSTOM_OSM_SERVER, customOsmServerUrl);
+                    }
+                    break;
+                }
                 default: {
                     editor.remove(PREF_KEY_LOCATION_INTEGRATION);
                     break;
@@ -1973,6 +2034,11 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
             }
         }
         editor.apply();
+    }
+
+    @Nullable
+    public static String getLocationCustomOsmServerUrl() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_CUSTOM_OSM_SERVER, null);
     }
 
     public static String getLocationOpenStreetMapRawLanguage() {
@@ -2070,8 +2136,40 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         return longStringArray[0];
     }
 
+    public static boolean getLocationDisableAddressLookup() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_LOCATION_DISABLE_ADDRESS_LOOKUP, PREF_KEY_LOCATION_DISABLE_ADDRESS_LOOKUP_DEFAULT);
+    }
+
+    public static void setLocationDisableAddressLookup(boolean disabled) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putBoolean(PREF_KEY_LOCATION_DISABLE_ADDRESS_LOOKUP, disabled);
+        editor.apply();
+    }
+
+    public static String getLocationCustomAddressServer() {
+        if (PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER, PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER_DEFAULT)) {
+            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_CUSTOM_ADDRESS_SERVER, null);
+        }
+        return null;
+    }
+
+    public static String getLocationCustomAddressServerEvenIfDisabled() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_LOCATION_CUSTOM_ADDRESS_SERVER, null);
+    }
+
+    // set to null to disable the use of custom server, but do not wipe the previously entered server
+    public static void setLocationCustomAddressServer(@Nullable String serverUrl) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        if (serverUrl == null) {
+            editor.putBoolean(PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER, false);
+        } else {
+            editor.putBoolean(PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER, true);
+            editor.putString(PREF_KEY_LOCATION_CUSTOM_ADDRESS_SERVER, serverUrl);
+        }
+        editor.apply();
+    }
+
     public static boolean hideLocationErrorsNotifications() {
-        return PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                .getBoolean(PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS, PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS_DEFAULT);
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS, PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS_DEFAULT);
     }
 }

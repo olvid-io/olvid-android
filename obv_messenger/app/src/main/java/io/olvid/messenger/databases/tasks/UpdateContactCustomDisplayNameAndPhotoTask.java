@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.tasks;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -91,8 +92,10 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
             if (!Objects.equals(contact.customDisplayName, customDisplayName)) {
                 changed = true;
                 contact.setCustomDisplayName(customDisplayName);
-                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
-                AppSingleton.updateCachedCustomDisplayName(contact.bytesContactIdentity, contact.getCustomDisplayName());
+                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.firstName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
+                if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), contact.bytesOwnedIdentity)) {
+                    AppSingleton.updateCachedCustomDisplayName(contact.bytesContactIdentity, contact.getCustomDisplayName(), contact.getFirstNameOrCustom());
+                }
 
                 if (!propagated) {
                     try {

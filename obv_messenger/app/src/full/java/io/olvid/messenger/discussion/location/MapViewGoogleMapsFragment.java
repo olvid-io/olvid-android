@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -106,7 +106,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
                     .setTitle(R.string.dialog_title_google_maps_services_unavailable)
                     .setMessage(R.string.dialog_message_google_maps_services_unavailable)
                     .setPositiveButton(R.string.button_label_choose_provider,
-                            (dialog, which) -> new LocationIntegrationSelectorDialog(activity, (SettingsActivity.LocationIntegrationEnum integration) -> SettingsActivity.setLocationIntegration(integration.getString())).show())
+                            (dialog, which) -> new LocationIntegrationSelectorDialog(activity, false, (SettingsActivity.LocationIntegrationEnum integration, String customOsmServerUrl) -> SettingsActivity.setLocationIntegration(integration.getString(), customOsmServerUrl)).show())
                     .show();
             if (getParentFragment() != null && getParentFragment() instanceof DialogFragment) {
                 ((DialogFragment) getParentFragment()).dismiss();

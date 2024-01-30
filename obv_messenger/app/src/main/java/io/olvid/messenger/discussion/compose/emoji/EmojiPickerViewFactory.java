@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -17,7 +17,7 @@
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.olvid.messenger.discussion;
+package io.olvid.messenger.discussion.compose.emoji;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -54,7 +54,7 @@ import io.olvid.messenger.customClasses.EmojiList;
 public class EmojiPickerViewFactory {
     private static int lastScrollPosition = 0;
 
-    static View createEmojiPickerView(Context context, @Nullable View windowTokenView, @NonNull EmojiClickListener emojiClickListener, @Nullable EmojiKeyboardListener emojiKeyboardListener, int maxRows, boolean isReactionPopup, @Nullable String highlightedEmoji) {
+    public static View createEmojiPickerView(Context context, @Nullable View windowTokenView, @NonNull EmojiClickListener emojiClickListener, @Nullable EmojiKeyboardListener emojiKeyboardListener, int maxRows, boolean isReactionPopup, @Nullable String highlightedEmoji) {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -447,14 +447,4 @@ public class EmojiPickerViewFactory {
         popupWindow.showAtLocation(windowTokenView == null ? anchorView : windowTokenView, Gravity.NO_GRAVITY, pos[0] + xOffset, pos[1] - (2 + (emojiVariants.length - 1) / rowSize) * fortyDp);
     }
 
-    interface EmojiClickListener {
-        void onClick(String emoji);
-        void onLongClick(String emoji);
-        void onHighlightedClick(View emojiView, String emoji);
-    }
-
-    interface EmojiKeyboardListener {
-        void onBackspace();
-        void onRestoreKeyboard();
-    }
 }

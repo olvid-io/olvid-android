@@ -180,6 +180,25 @@
         tools:text="fileName"
         tools:ignore="SpUsage" />
 
+    <TextView
+        android:id="@+id/playback_speed_selection_text_view"
+        android:layout_width="36dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="2dp"
+        android:background="@drawable/background_light_grey_badge"
+        android:gravity="center"
+        android:paddingVertical="1dp"
+        android:textColor="@color/grey"
+        android:textStyle="bold"
+        android:textSize="12dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/speaker_output_image_view"
+        app:layout_constraintEnd_toStartOf="@id/speaker_output_image_view"
+        app:layout_constraintTop_toTopOf="@id/speaker_output_image_view"
+        tools:text="1.5\u00d7"
+        tools:visibility="visible"
+        tools:ignore="SpUsage" />
+
     <ImageView
         android:id="@+id/speaker_output_image_view"
         android:layout_width="0dp"

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -285,11 +285,12 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId) {
+    public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId, boolean ascending) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
+        intent.putExtra(GalleryActivity.ASCENDING_INTENT_EXTRA, ascending);
         activityContext.startActivity(intent);
     }
 
@@ -314,10 +315,16 @@ public class App extends Application implements DefaultLifecycleObserver {
         intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         if (sortOrder != null) {
             intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA, sortOrder);
-            intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_ASCENDING_INTENT_EXTRA, ascending);
+            intent.putExtra(GalleryActivity.ASCENDING_INTENT_EXTRA, ascending);
         }
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
+        activityContext.startActivity(intent);
+    }
+
+    public static void openDiscussionMediaGalleryActivity(Context activityContext, long discussionId) {
+        Intent intent = new Intent(getContext(), io.olvid.messenger.discussion.gallery.DiscussionMediaGalleryActivity.class);
+        intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
         activityContext.startActivity(intent);
     }
 
@@ -568,14 +575,14 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     public static void openFyleInExternalViewer(Activity activity, FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Runnable onOpenCallback) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(fyleAndStatus.getContentUri(), fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
+        intent.setDataAndType(fyleAndStatus.getContentUriForExternalSharing(), fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         if (getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).size() == 0) {
             // if the mime type is not openable, try to fallback to the default mime type from extension
             String extension = StringUtils2.Companion.getExtensionFromFilename(fyleAndStatus.fyleMessageJoinWithStatus.fileName);
             String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             if (type != null) {
-                intent.setDataAndType(fyleAndStatus.getContentUri(), type);
+                intent.setDataAndType(fyleAndStatus.getContentUriForExternalSharing(), type);
             }
             if (type == null || getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).size() == 0) {
                 App.toast(R.string.toast_message_unable_to_open_file, Toast.LENGTH_SHORT);

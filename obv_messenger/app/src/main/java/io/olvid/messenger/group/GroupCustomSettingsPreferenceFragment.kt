@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -29,7 +29,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceChangeListener
-import androidx.preference.Preference.SummaryProvider
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
@@ -37,8 +36,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.ComposeViewPreference
 import io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.discussion.compose.EphemeralSettingsGroup
+import io.olvid.messenger.discussion.compose.EphemeralViewModel
 import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity
 import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting
 import io.olvid.messenger.group.components.GroupAdminsSelectionDialog
@@ -48,12 +50,11 @@ class GroupCustomSettingsPreferenceFragment(private val isGroupCreation: Boolean
     PreferenceFragmentCompat() {
     private val groupCreationViewModel: GroupCreationViewModel by activityViewModels()
     private val groupV2DetailsViewModel: GroupV2DetailsViewModel by activityViewModels()
+    private val ephemeralViewModel: EphemeralViewModel by activityViewModels()
     private var admins: Preference? = null
     private var readOnlyPreference: SwitchPreference? = null
     private var remoteDeletePreference: ListPreference? = null
-    private var readOncePreference: SwitchPreference? = null
-    private var visibilityDurationPreference: ListPreference? = null
-    private var existenceDurationPreference: ListPreference? = null
+    private var ephemeralPreference: ComposeViewPreference? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (isGroupCreation) {
@@ -90,9 +91,6 @@ class GroupCustomSettingsPreferenceFragment(private val isGroupCreation: Boolean
         readOnlyPreference = preferenceScreen.findPreference("pref_key_discussion_read_only") as? SwitchPreference
         remoteDeletePreference = preferenceScreen.findPreference("pref_key_discussion_remote_delete") as? ListPreference
 
-        readOncePreference = preferenceScreen.findPreference(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_READ_ONCE) as? SwitchPreference
-        visibilityDurationPreference = preferenceScreen.findPreference(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_VISIBILITY_DURATION) as? ListPreference
-        existenceDurationPreference =  preferenceScreen.findPreference(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_EXISTENCE_DURATION) as? ListPreference
 
         if (!isGroupCreation) {
             admins?.let {
@@ -102,6 +100,13 @@ class GroupCustomSettingsPreferenceFragment(private val isGroupCreation: Boolean
                 DiscussionSettingsActivity.PREF_KEY_DISCUSSION_CATEGORY_SHARED_EPHEMERAL_SETTINGS
             )?.let {
                 preferenceScreen.removePreference(it)
+            }
+        } else {
+            ephemeralPreference = preferenceScreen.findPreference(DiscussionSettingsActivity.PREF_KEY_COMPOSE_EPHEMERAL_SETTINGS) as? ComposeViewPreference
+            ephemeralPreference?.setContent {
+                EphemeralSettingsGroup(
+                    ephemeralViewModel = ephemeralViewModel, expanded = null, locked = false
+                )
             }
         }
 
@@ -125,12 +130,6 @@ class GroupCustomSettingsPreferenceFragment(private val isGroupCreation: Boolean
 
 
         if (isGroupCreation) {
-            readOncePreference?.isChecked = groupCreationViewModel.settingsReadOnce
-            visibilityDurationPreference?.value =
-                "${groupCreationViewModel.settingsVisibilityDuration ?: "null"}"
-            existenceDurationPreference?.value =
-                "${groupCreationViewModel.settingsExistenceDuration ?: "null"}"
-
             groupCreationViewModel.selectedContactCount.observe(this) {count : Int ->
                 admins?.isEnabled = count != 0
             }
@@ -153,84 +152,6 @@ class GroupCustomSettingsPreferenceFragment(private val isGroupCreation: Boolean
                     groupCreationViewModel.chooseAdmins.value = true
                     true
                 }
-
-            readOncePreference?.onPreferenceChangeListener =
-                OnPreferenceChangeListener { _, newValue ->
-                    groupCreationViewModel.settingsReadOnce = newValue as Boolean
-                    true
-                }
-
-            visibilityDurationPreference?.apply {
-                onPreferenceChangeListener =
-                    OnPreferenceChangeListener { _, newValue ->
-                        groupCreationViewModel.settingsVisibilityDuration = try {
-                            (newValue?.takeIf { it != "null" } as? String)?.toLong()
-                        } catch (ex: Exception) {
-                            null
-                        }
-                        true
-                    }
-                summaryProvider = SummaryProvider<ListPreference> {
-                    groupCreationViewModel.settingsVisibilityDuration?.let { visibilityDuration ->
-                        listView.post { value = visibilityDuration.toString() }
-                        if (entry == null) {
-                            val values: MutableList<CharSequence> =
-                                visibilityDurationPreference?.entryValues.orEmpty().toMutableList()
-                            val entries: MutableList<CharSequence?> =
-                                visibilityDurationPreference?.entries.orEmpty().toMutableList()
-                            values.add(visibilityDuration.toString())
-                            entries.add(
-                                StringUtils.getNiceDurationString(
-                                    requireContext(),
-                                    visibilityDuration
-                                )
-                            )
-                            visibilityDurationPreference?.entryValues = values.toTypedArray()
-                            visibilityDurationPreference?.entries = entries.toTypedArray()
-                        }
-                        getString(R.string.pref_discussion_visibility_duration_summary, entry)
-                    } ?: kotlin.run {
-                        visibilityDurationPreference?.value = "null"
-                        getString(R.string.pref_discussion_visibility_duration_summary_null)
-                    }
-                }
-            }
-
-            existenceDurationPreference?.apply {
-                onPreferenceChangeListener = OnPreferenceChangeListener { _, newValue ->
-                    groupCreationViewModel.settingsExistenceDuration = try {
-                        (newValue?.takeIf { it != "null" } as? String)?.toLong()
-                    } catch (ex: Exception) {
-                        null
-                    }
-                    true
-                }
-                summaryProvider = SummaryProvider<ListPreference> {
-                    groupCreationViewModel.settingsExistenceDuration?.let { existenceDuration ->
-                        listView.post { value = existenceDuration.toString() }
-                        if (entry == null) {
-                            val values: MutableList<CharSequence> =
-                                existenceDurationPreference?.entryValues.orEmpty().toMutableList()
-                            val entries: MutableList<CharSequence?> =
-                                existenceDurationPreference?.entries.orEmpty().toMutableList()
-                            values.add(existenceDuration.toString())
-                            entries.add(
-                                StringUtils.getNiceDurationString(
-                                    requireContext(),
-                                    existenceDuration
-                                )
-                            )
-                            entryValues = values.toTypedArray()
-                            existenceDurationPreference?.entries = entries.toTypedArray()
-                        }
-                        getString(R.string.pref_discussion_existence_duration_summary, entry)
-
-                    } ?: kotlin.run {
-                        existenceDurationPreference?.value = "null"
-                        getString(R.string.pref_discussion_existence_duration_summary_null)
-                    }
-                }
-            }
         }
     }
 }

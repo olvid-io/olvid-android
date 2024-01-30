@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -38,6 +38,7 @@ import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.settings.SettingsActivity
 import java.util.Arrays
 
 class DiscussionListViewModel : ViewModel() {
@@ -344,6 +345,15 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                     }
                 }
                 else -> {
+                    if (discussion.discussionType == Discussion.TYPE_GROUP || discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                        (if (SettingsActivity.getAllowContactFirstName())
+                            AppSingleton.getContactFirstName(message.senderIdentifier)
+                        else
+                            AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                        )?.let {
+                            append(context.getString(string.text_inbound_group_message_prefix, it))
+                        }
+                    }
                     val body = message.getStringContent(context)
                     if (message.wipeStatus == Message.WIPE_STATUS_WIPED || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED || message.isLocationMessage) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -69,13 +69,13 @@ public class ShareSelectedMessageTask implements Runnable {
                 if (multiple) {
                     ArrayList<Uri> uris = new ArrayList<>(fyleAndStatuses.size());
                     for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {
-                        uris.add(fyleAndStatus.getContentUri());
+                        uris.add(fyleAndStatus.getContentUriForExternalSharing());
                         mimeType = mimeGcd(mimeType, fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
                     }
                     intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
                 } else {
                     FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = fyleAndStatuses.get(0);
-                    intent.putExtra(Intent.EXTRA_STREAM, fyleAndStatus.getContentUri());
+                    intent.putExtra(Intent.EXTRA_STREAM, fyleAndStatus.getContentUriForExternalSharing());
                     mimeType = fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType();
                 }
             }

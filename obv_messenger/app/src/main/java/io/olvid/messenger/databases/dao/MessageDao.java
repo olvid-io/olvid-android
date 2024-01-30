@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -514,6 +514,14 @@ public interface MessageDao {
             " AND " + Message.STATUS + " = " + Message.STATUS_UNREAD +
             " AND " + Message.DISCUSSION_ID + " = :discussionId ")
     Long getServerTimestampOfLatestUnreadInboundMessageInDiscussion(long discussionId);
+
+    @Query("SELECT COUNT(*) FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.WIPE_STATUS + " = " + Message.WIPE_STATUS_REMOTE_DELETED)
+    int countRemoteDeletedMessages();
+
+    @Query("DELETE FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.WIPE_STATUS + " = " + Message.WIPE_STATUS_REMOTE_DELETED)
+    void deleteAllRemoteDeletedMessages();
 
     class UnreadCountAndFirstMessage {
         @ColumnInfo(name = "unread_count")

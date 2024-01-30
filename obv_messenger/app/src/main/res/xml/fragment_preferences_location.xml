@@ -1,7 +1,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ListPreference
+    <io.olvid.messenger.customClasses.NoClickListPreference
         android:entries="@array/location_integration"
         android:entryValues="@array/location_integration_values"
         android:key="pref_key_location_integration"
@@ -43,6 +43,21 @@
         android:icon="@drawable/ic_pref_interval"
         android:order="30"
         />
+
+    <SwitchPreference
+        android:key="pref_key_location_disable_address_lookup"
+        android:defaultValue="false"
+        android:title="@string/pref_location_disable_address_lookup_title"
+        android:summary="@string/pref_location_disable_address_lookup_summary"
+        android:icon="@drawable/ic_pref_address"
+        android:order="40" />
+
+    <io.olvid.messenger.customClasses.NoClickSwitchPreference
+        android:key="pref_key_location_use_custom_address_server"
+        android:defaultValue="false"
+        android:title="@string/pref_location_custom_address_server"
+        android:icon="@drawable/ic_pref_address_add"
+        android:order="45" />
 
     <SwitchPreference
         android:key="pref_key_location_hide_error_notifications"

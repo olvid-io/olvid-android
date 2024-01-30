@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -28,6 +28,7 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
+import io.olvid.messenger.settings.SettingsActivity;
 
 public class UpdateAllGroupMembersNames implements Runnable {
     @Nullable
@@ -54,12 +55,22 @@ public class UpdateAllGroupMembersNames implements Runnable {
     public void run() {
         AppDatabase db = AppDatabase.getInstance();
         for (Group group : ((bytesOwnedIdentity == null) ? db.groupDao().getAll() : (bytesContactIdentity == null) ? db.groupDao().getAllForOwnedIdentity(bytesOwnedIdentity) : db.groupDao().getAllForContact(bytesOwnedIdentity, bytesContactIdentity))) {
-            group.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
+            group.groupMembersNames = StringUtils.joinContactDisplayNames(
+                    SettingsActivity.getAllowContactFirstName() ?
+                            db.groupDao().getGroupMembersFirstNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
+                            :
+                            db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
+            );
             db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
         }
 
         for (Group2 group : ((bytesOwnedIdentity == null) ? db.group2Dao().getAll() : (bytesContactIdentity == null) ? db.group2Dao().getAllForOwnedIdentity(bytesOwnedIdentity) : db.group2Dao().getAllForContact(bytesOwnedIdentity, bytesContactIdentity))) {
-            group.groupMembersNames = StringUtils.joinContactDisplayNames(db.group2Dao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier));
+            group.groupMembersNames = StringUtils.joinContactDisplayNames(
+                    SettingsActivity.getAllowContactFirstName() ?
+                            db.group2Dao().getGroupMembersFirstNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier)
+                            :
+                            db.group2Dao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier)
+            );
             db.group2Dao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.groupMembersNames);
 
             if (group.name == null && group.customName == null) {

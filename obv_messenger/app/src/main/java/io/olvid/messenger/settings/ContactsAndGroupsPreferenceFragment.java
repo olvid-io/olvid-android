@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -195,6 +195,7 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
 
         {
             final ListPreference displayNameFormatPreference = screen.findPreference(SettingsActivity.PREF_KEY_CONTACT_DISPLAY_NAME_FORMAT);
+            final SwitchPreference allowFirstNamePreference = screen.findPreference(SettingsActivity.PREF_KEY_SOMETIMES_SHOW_FIRST_NAME_ONLY);
             final SwitchPreference sortByLastNamePreference = screen.findPreference(SettingsActivity.PREF_KEY_SORT_CONTACTS_BY_LAST_NAME);
             final SwitchPreference uppercaseLastNamePreference = screen.findPreference(SettingsActivity.PREF_KEY_UPPERCASE_LAST_NAME);
 
@@ -203,7 +204,7 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
                 return true;
             };
 
-            if (displayNameFormatPreference != null && sortByLastNamePreference != null && uppercaseLastNamePreference != null) {
+            if (displayNameFormatPreference != null && allowFirstNamePreference != null && sortByLastNamePreference != null && uppercaseLastNamePreference != null) {
                 displayNameHasLastNameFirst = displayNameFormatHasLastNameFirst(SettingsActivity.getContactDisplayNameFormat());
 
                 displayNameFormatPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
@@ -217,6 +218,7 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
                     contactDisplayNameFormatChanged = true;
                     return true;
                 });
+                allowFirstNamePreference.setOnPreferenceChangeListener(preferenceChangeListener);
                 sortByLastNamePreference.setOnPreferenceChangeListener(preferenceChangeListener);
                 uppercaseLastNamePreference.setOnPreferenceChangeListener(preferenceChangeListener);
             }

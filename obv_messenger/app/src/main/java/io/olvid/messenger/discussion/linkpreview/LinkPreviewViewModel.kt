@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -66,12 +66,12 @@ class LinkPreviewViewModel : ViewModel() {
         }
     }
 
-    fun linkPreviewLoader(fyle: Fyle, url: String, messageId: Long, onSuccess: (OpenGraph?) -> Unit) {
+    fun linkPreviewLoader(fyle: Fyle, fallbackUrl: String, messageId: Long, onSuccess: (OpenGraph?) -> Unit) {
         if (loaderJobs[messageId]?.isActive == true) {
             return
         }
         loaderJobs[messageId] = viewModelScope.launch {
-            onSuccess.invoke(linkPreviewRepository.decodeOpenGraph(fyle).also { it?.url = url })
+            onSuccess.invoke(linkPreviewRepository.decodeOpenGraph(fyle, fallbackUrl))
             loaderJobs.remove(messageId)
         }
     }

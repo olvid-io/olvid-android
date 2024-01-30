@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -16,7 +16,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
-package io.olvid.messenger.discussion
+package io.olvid.messenger.discussion.compose
 
 import android.Manifest.permission
 import android.R.attr
@@ -27,7 +27,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.PorterDuff.Mode.SRC_IN
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.os.Build.VERSION
@@ -75,12 +74,22 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat.SRC_IN
+import androidx.core.view.doOnLayout
 import androidx.core.view.inputmethod.EditorInfoCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
@@ -94,20 +103,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.drawable
-import io.olvid.messenger.R.id
-import io.olvid.messenger.R.layout
-import io.olvid.messenger.R.menu
-import io.olvid.messenger.R.plurals
-import io.olvid.messenger.R.string
-import io.olvid.messenger.R.style
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.DiscussionInputEditText
 import io.olvid.messenger.customClasses.DraftAttachmentAdapter
@@ -138,13 +140,21 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStat
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.tasks.AddFyleToDraftFromUriTask
 import io.olvid.messenger.databases.tasks.ClearDraftReplyTask
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask
 import io.olvid.messenger.databases.tasks.PostMessageInDiscussionTask
 import io.olvid.messenger.databases.tasks.SaveDraftTask
+import io.olvid.messenger.databases.tasks.SetDraftJsonExpirationTask
 import io.olvid.messenger.databases.tasks.UpdateMessageBodyTask
+import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.DiscussionActivity.DiscussionDelegate
+import io.olvid.messenger.discussion.DiscussionOwnedIdentityPopupWindow
+import io.olvid.messenger.discussion.DiscussionViewModel
+import io.olvid.messenger.discussion.Utils
+import io.olvid.messenger.discussion.compose.VoiceMessageRecorder.RequestAudioPermissionDelegate
+import io.olvid.messenger.discussion.compose.emoji.EmojiKeyboardFragment
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import io.olvid.messenger.discussion.location.SendLocationBasicDialogFragment
@@ -161,6 +171,7 @@ import io.olvid.messenger.services.UnifiedForegroundService.LocationSharingSubSe
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.BASIC
+import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.MAPS
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.NONE
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.OSM
@@ -172,12 +183,21 @@ import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
-class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnClickListener, AttachmentLongClickListener,
+val View.screenLocation
+    get(): IntArray {
+        val point = IntArray(2)
+        getLocationInWindow(point)
+        return point
+    }
+
+class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), OnClickListener,
+    AttachmentLongClickListener,
     OnMenuItemClickListener {
     private val discussionViewModel: DiscussionViewModel by activityViewModels { FACTORY }
     private val composeMessageViewModel: ComposeMessageViewModel by activityViewModels { FACTORY }
     private val linkPreviewViewModel: LinkPreviewViewModel by activityViewModels { FACTORY }
     private val mentionViewModel: MentionViewModel by activityViewModels { FACTORY }
+    private val ephemeralViewModel: EphemeralViewModel by activityViewModels { FACTORY }
     private var audioAttachmentServiceBinding: AudioAttachmentServiceBinding? = null
     private var ownedIdentityInitialView: InitialView? = null
     var discussionDelegate: DiscussionDelegate? = null
@@ -187,8 +207,8 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
     private var hasCamera = false
     private var animateLayoutChanges = false
     private var attachStuffPlus: ImageView? = null
-    private var attachStuffPlusGoldenDot: ImageView? = null
-    private var attachIconsGroup: LinearLayout? = null
+    private lateinit var attachStuffPlusGoldenDot: ImageView
+    private lateinit var attachIconsGroup: LinearLayout
     private var directAttachVoiceMessageImageView: ImageView? = null
     private var composeMessageEditGroup: ViewGroup? = null
     private var composeMessageEditBody: TextView? = null
@@ -203,7 +223,8 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
     private var composeMessageLinkPreviewImage: ImageView? = null
     private var newMessageAttachmentAdapter: DraftAttachmentAdapter? = null
     private var mentionCandidatesSpacer: View? = null
-    private var mentionCandidatesFragment: FilteredContactListFragment? = null
+    private val mentionCandidatesFragment by lazy { FilteredContactListFragment() }
+    private lateinit var popupMenu: ComposeView
     private val FACTORY: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (ComposeMessageViewModel::class.java.isAssignableFrom(modelClass)) {
@@ -218,7 +239,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 }
             }
             return try {
-                modelClass.newInstance()
+                modelClass.getDeclaredConstructor().newInstance()
             } catch (e: java.lang.InstantiationException) {
                 throw RuntimeException("Cannot create an instance of $modelClass", e)
             } catch (e: IllegalAccessException) {
@@ -242,7 +263,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             if (isGranted) {
                 takePicture()
             } else {
-                App.toast(string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT)
+                App.toast(R.string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT)
             }
         }
         requestPermissionForVideoLauncher = registerForActivityResult(
@@ -251,21 +272,21 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             if (isGranted) {
                 takeVideo()
             } else {
-                App.toast(string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT)
+                App.toast(R.string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT)
             }
         }
         requestPermissionForAudioLauncher = registerForActivityResult(
             RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                voiceMessageRecorder!!.setRecordPermission(true)
-                voiceMessageRecorder!!.startRecord()
+                voiceMessageRecorder?.setRecordPermission(true)
+                voiceMessageRecorder?.startRecord()
             } else {
-                val builder = SecureAlertDialogBuilder(context, style.CustomAlertDialog)
-                    .setTitle(string.dialog_title_voice_message_explanation)
-                    .setMessage(string.dialog_message_voice_message_explanation_blocked)
-                    .setNegativeButton(string.button_label_cancel, null)
-                    .setNeutralButton(string.button_label_app_settings) { dialog: DialogInterface?, which: Int ->
+                val builder = SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                    .setTitle(R.string.dialog_title_voice_message_explanation)
+                    .setMessage(R.string.dialog_message_voice_message_explanation_blocked)
+                    .setNegativeButton(R.string.button_label_cancel, null)
+                    .setNeutralButton(R.string.button_label_app_settings) { _, _ ->
                         val intent = Intent()
                         intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -281,10 +302,10 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 RequestPermission()
             ) { isGranted: Boolean ->
                 if (isGranted) {
-                    voiceMessageRecorder!!.setRecordPermission(true)
-                    voiceMessageRecorder!!.startRecord()
+                    voiceMessageRecorder?.setRecordPermission(true)
+                    voiceMessageRecorder?.startRecord()
                 } else {
-                    App.toast(string.toast_message_audio_permission_denied, Toast.LENGTH_SHORT)
+                    App.toast(R.string.toast_message_audio_permission_denied, Toast.LENGTH_SHORT)
                 }
             }
         attachFileLauncher = registerForActivityResult(
@@ -312,7 +333,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                     }
                     if (uris.size != clipData.itemCount) {
                         App.toast(
-                            string.toast_message_android_bug_attach_duplicate_uri,
+                            R.string.toast_message_android_bug_attach_duplicate_uri,
                             Toast.LENGTH_LONG
                         )
                     }
@@ -358,13 +379,15 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         }
     }
 
+    @OptIn(ExperimentalMaterialApi::class)
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         newMessageEditText = view.findViewById(R.id.compose_message_edit_text)
         if (SettingsActivity.useKeyboardIncognitoMode()) {
-            newMessageEditText?.imeOptions = newMessageEditText!!.imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
+            newMessageEditText?.imeOptions =
+                newMessageEditText!!.imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
         }
         newMessageEditText?.addTextChangedListener(object : TextChangeListener() {
             override fun afterTextChanged(editable: Editable) {
@@ -375,7 +398,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                     editable.formatMarkdown(
                         ContextCompat.getColor(
                             newMessageEditText!!.context,
-                            color.olvid_gradient_contrasted
+                            R.color.olvid_gradient_contrasted
                         )
                     )
                     if (!setShowAttachIcons(show = false, preserveOldSelection = false)) {
@@ -399,7 +422,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             }
         }
         mentionViewModel.mentionsStatus.observe(viewLifecycleOwner) { mentionStatus: MentionStatus? ->
-            if (mentionCandidatesFragment == null || newMessageEditText == null) {
+            if (newMessageEditText == null) {
                 return@observe
             }
             if (mentionStatus is None) {
@@ -407,7 +430,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 hideMentionPicker()
             } else if (mentionStatus is Filter) {
                 showMentionPicker()
-                mentionCandidatesFragment?.setFilter(mentionStatus.text)
+                mentionCandidatesFragment.setFilter(mentionStatus.text)
             } else if (mentionStatus is End) {
                 hideMentionPicker()
                 val mention = mentionStatus.mention
@@ -455,16 +478,15 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             }
         }
         mentionCandidatesSpacer = view.findViewById(R.id.mention_candidates_spacer)
-        mentionCandidatesFragment = FilteredContactListFragment()
-        mentionCandidatesFragment?.disableEmptyView()
-        mentionCandidatesFragment?.removeBottomPadding()
-        mentionCandidatesFragment?.setUnfilteredContacts(discussionViewModel.mentionCandidatesLiveData)
-        mentionCandidatesFragment?.disableAnimations()
+        mentionCandidatesFragment.disableEmptyView()
+        mentionCandidatesFragment.removeBottomPadding()
+        mentionCandidatesFragment.setUnfilteredContacts(discussionViewModel.mentionCandidatesLiveData)
+        mentionCandidatesFragment.disableAnimations()
         val transaction = childFragmentManager.beginTransaction()
-        transaction.replace(R.id.mention_candidates_placeholder, mentionCandidatesFragment!!)
-        transaction.hide(mentionCandidatesFragment!!)
+        transaction.replace(R.id.mention_candidates_placeholder, mentionCandidatesFragment)
+        transaction.hide(mentionCandidatesFragment)
         transaction.commit()
-        mentionCandidatesFragment?.setOnClickDelegate(object : FilteredContactListOnClickDelegate {
+        mentionCandidatesFragment.setOnClickDelegate(object : FilteredContactListOnClickDelegate {
             override fun contactClicked(view: View, contact: Contact) {
                 mentionViewModel.validateMention(contact)
             }
@@ -499,7 +521,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             ).run()
             callMeWhenDone?.run()
         }
-        newMessageEditText?.setOnEditorActionListener(OnEditorActionListener { v: TextView, actionId: Int, event: KeyEvent? ->
+        newMessageEditText?.setOnEditorActionListener(OnEditorActionListener { v: TextView, actionId: Int, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 onSendAction()
                 imm?.hideSoftInputFromWindow(v.windowToken, 0)
@@ -508,7 +530,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             false
         })
         if (SettingsActivity.getSendWithHardwareEnter()) {
-            newMessageEditText?.setOnKeyListener(View.OnKeyListener { v: View?, keyCode: Int, event: KeyEvent ->
+            newMessageEditText?.setOnKeyListener(View.OnKeyListener { _: View?, keyCode: Int, event: KeyEvent ->
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN && !event.isShiftPressed) {
                     onSendAction()
                     return@OnKeyListener true
@@ -519,7 +541,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
             newMessageEditText?.customSelectionActionModeCallback = object : Callback {
                 override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-                    menu.add(Menu.FIRST, 1111, 1, string.label_selection_formatting)
+                    menu.add(Menu.FIRST, 1111, 1, R.string.label_selection_formatting)
                     return true
                 }
 
@@ -533,51 +555,65 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
                     if (item.itemId == 1111) {
                         val popupMenu = PopupMenu(activity, newMessageEditText)
-                        popupMenu.inflate(menu.action_menu_text_selection)
+                        popupMenu.inflate(R.menu.action_menu_text_selection)
                         popupMenu.setOnMenuItemClickListener { menuItem: MenuItem ->
                             when (menuItem.itemId) {
                                 R.id.action_text_selection_bold -> {
                                     newMessageEditText?.insertMarkdown(MarkdownBold())
                                 }
+
                                 R.id.action_text_selection_italic -> {
                                     newMessageEditText?.insertMarkdown(MarkdownItalic())
                                 }
+
                                 R.id.action_text_selection_strikethrough -> {
                                     newMessageEditText?.insertMarkdown(MarkdownStrikeThrough())
                                 }
+
                                 R.id.action_text_selection_heading -> {
                                     return@setOnMenuItemClickListener false
                                 }
+
                                 R.id.action_text_selection_heading_1 -> {
                                     newMessageEditText?.insertMarkdown(MarkdownHeading(1))
                                 }
+
                                 R.id.action_text_selection_heading_2 -> {
                                     newMessageEditText?.insertMarkdown(MarkdownHeading(2))
                                 }
+
                                 R.id.action_text_selection_heading_3 -> {
                                     newMessageEditText?.insertMarkdown(MarkdownHeading(3))
                                 }
+
                                 R.id.action_text_selection_heading_4 -> {
                                     newMessageEditText?.insertMarkdown(MarkdownHeading(4))
                                 }
+
                                 R.id.action_text_selection_heading_5 -> {
                                     newMessageEditText?.insertMarkdown(MarkdownHeading(5))
                                 }
+
                                 R.id.action_text_selection_list -> {
                                     return@setOnMenuItemClickListener false
                                 }
+
                                 R.id.action_text_selection_list_bullet -> {
                                     newMessageEditText?.insertMarkdown(MarkdownListItem())
                                 }
+
                                 R.id.action_text_selection_list_ordered -> {
                                     newMessageEditText?.insertMarkdown(MarkdownOrderedListItem())
                                 }
+
                                 R.id.action_text_selection_quote -> {
                                     newMessageEditText?.insertMarkdown(MarkdownQuote())
                                 }
+
                                 R.id.action_text_selection_code -> {
                                     newMessageEditText?.insertMarkdown(MarkdownCode())
                                 }
+
                                 else -> {
                                     newMessageEditText?.insertMarkdown(null)
                                 }
@@ -622,30 +658,64 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             .addOnLayoutChangeListener(composeMessageSizeChangeListener)
         sendButton = view.findViewById(R.id.compose_message_send_button)
         sendButton?.setOnClickListener(this)
-        hasCamera = context?.packageManager?.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) ?: false
+        hasCamera =
+            context?.packageManager?.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) ?: false
         attachStuffPlus = view.findViewById(R.id.attach_stuff_plus)
         attachStuffPlus?.setOnClickListener(this)
         attachStuffPlusGoldenDot = view.findViewById(R.id.golden_dot)
         val recordingOverlay = view.findViewById<View>(R.id.recording_overlay)
         recordingOverlay.setOnClickListener(this)
         voiceMessageRecorder =
-            VoiceMessageRecorder(requireActivity(), recordingOverlay) { rationaleWasShown: Boolean ->
-                if (rationaleWasShown) {
-                    requestPermissionForAudioAfterRationaleLauncher?.launch(permission.RECORD_AUDIO)
-                } else {
-                    requestPermissionForAudioLauncher?.launch(permission.RECORD_AUDIO)
+            VoiceMessageRecorder(
+                requireActivity(),
+                recordingOverlay,
+                object : RequestAudioPermissionDelegate {
+                    override fun requestAudioPermission(rationaleWasShown: Boolean) {
+                        if (rationaleWasShown) {
+                            requestPermissionForAudioAfterRationaleLauncher?.launch(permission.RECORD_AUDIO)
+                        } else {
+                            requestPermissionForAudioLauncher?.launch(permission.RECORD_AUDIO)
+                        }
+                    }
+                }
+            )
+        directAttachVoiceMessageImageView =
+            view.findViewById(R.id.direct_attach_voice_message_button)
+        directAttachVoiceMessageImageView?.setOnTouchListener(voiceMessageRecorder)
+
+        attachIconsGroup = view.findViewById(R.id.attach_icons_group)
+        popupMenu = view.findViewById(R.id.popup_menu)
+        popupMenu.setContent {
+            AppCompatTheme {
+                EphemeralSettingsGroup(ephemeralViewModel = ephemeralViewModel, expanded = composeMessageViewModel.openEphemeralSettings)  {
+                    if (ephemeralViewModel.getValid()
+                            .value == true
+                    ) {
+                        val jsonExpiration = JsonExpiration()
+                        if (ephemeralViewModel.getReadOnce()) {
+                            jsonExpiration.setReadOnce(true)
+                        }
+                        jsonExpiration.setVisibilityDuration(ephemeralViewModel.getVisibility())
+                        jsonExpiration.setExistenceDuration(ephemeralViewModel.getExistence())
+                        App.runThread(
+                            SetDraftJsonExpirationTask(
+                                discussionViewModel.discussionId,
+                                jsonExpiration
+                            )
+                        )
+                    }
+                    composeMessageViewModel.openEphemeralSettings = false
                 }
             }
-        directAttachVoiceMessageImageView = view.findViewById(R.id.direct_attach_voice_message_button)
-        directAttachVoiceMessageImageView?.setOnTouchListener(voiceMessageRecorder)
-        attachIconsGroup = view.findViewById(R.id.attach_icons_group)
+        }
+
         val composeMessageCard =
             view.findViewById<ViewGroup>(R.id.compose_message_card)
         composeMessageEditGroup = view.findViewById(R.id.compose_message_edit_group)
         composeMessageEditBody = view.findViewById(R.id.compose_message_edit_body)
         val composeMessageEditClear =
             view.findViewById<ImageView>(R.id.compose_message_edit_clear)
-        composeMessageEditClear.setOnClickListener { v: View? ->
+        composeMessageEditClear.setOnClickListener {
             newMessageEditText?.setText("")
             composeMessageViewModel.clearDraftMessageEdit()
             composeMessageDelegate.hideSoftInputKeyboard()
@@ -659,17 +729,15 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             view.findViewById(R.id.compose_message_reply_attachment_count)
         val composeMessageReplyClear =
             view.findViewById<ImageView>(R.id.compose_message_reply_clear)
-        composeMessageReplyClear.setOnClickListener { v: View? ->
+        composeMessageReplyClear.setOnClickListener {
             App.runThread(
                 ClearDraftReplyTask(
                     discussionViewModel.discussionId
                 )
             )
         }
-        composeMessageReplyGroup?.setOnClickListener { v: View? ->
-            if (discussionDelegate != null) {
-                discussionDelegate?.scrollToMessage(composeMessageReplyMessageId)
-            }
+        composeMessageReplyGroup?.setOnClickListener {
+            discussionDelegate?.scrollToMessage(composeMessageReplyMessageId)
         }
 
         // link preview
@@ -683,7 +751,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             view.findViewById(R.id.message_link_preview_description)
         val composeMessageLinkPreviewClear =
             view.findViewById<ImageView>(R.id.message_link_preview_clear)
-        composeMessageLinkPreviewClear.setOnClickListener { v: View? -> linkPreviewViewModel.clearLinkPreview() }
+        composeMessageLinkPreviewClear.setOnClickListener { linkPreviewViewModel.clearLinkPreview() }
         linkPreviewViewModel.openGraph.observe(
             viewLifecycleOwner,
             Observer { openGraph: OpenGraph? ->
@@ -705,7 +773,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                     if (openGraph.bitmap != null) {
                         composeMessageLinkPreviewImage?.setImageBitmap(openGraph.bitmap)
                     } else {
-                        composeMessageLinkPreviewImage?.setImageResource(drawable.mime_type_icon_link)
+                        composeMessageLinkPreviewImage?.setImageResource(R.drawable.mime_type_icon_link)
                     }
                 } else {
                     composeMessageLinkPreviewGroup?.visibility = View.GONE
@@ -717,7 +785,8 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             composeMessageCard.findViewById<EmptyRecyclerView>(R.id.attachments_recycler_view)
 
         if (audioAttachmentServiceBinding == null) {
-            audioAttachmentServiceBinding = (activity as? DiscussionActivity)?.audioAttachmentServiceBinding
+            audioAttachmentServiceBinding =
+                (activity as? DiscussionActivity)?.audioAttachmentServiceBinding
             if (audioAttachmentServiceBinding == null) {
                 activity?.finish()
                 return
@@ -737,190 +806,202 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             viewLifecycleOwner,
             newMessageAttachmentAdapter!!
         )
-        composeMessageViewModel.getDraftMessageFyles().observe(viewLifecycleOwner) { fyleAndStatuses: List<FyleAndStatus?>? ->
-            hasAttachments = fyleAndStatuses.isNullOrEmpty().not()
-            updateComposeAreaLayout()
-        }
-        composeMessageViewModel.getDraftMessage().observe(viewLifecycleOwner, object : Observer<Message?> {
-            private var message: Message? = null
-            override fun onChanged(message: Message?) {
-                if (message != null && this.message != null) {
-                    if (message.id == this.message?.id) {
-                        val messageEditText =
-                            if (newMessageEditText?.text == null) "" else newMessageEditText?.text
-                                .toString()
-                        val oldMessageText =
-                            if (this.message!!.contentBody == null) "" else this.message!!.contentBody!!
-                        val newMessageText =
-                            if (message.contentBody == null) "" else message.contentBody!!
-                        val oldMentions =
-                            if (this.message!!.jsonMentions == null) "" else this.message!!.jsonMentions!!
-                        val newMentions =
-                            if (message.jsonMentions == null) "" else message.jsonMentions!!
-                        if (messageEditText == oldMessageText && oldMessageText != newMessageText || oldMentions != newMentions) {
-                            // the message text changed, but the input did not --> probably an external modification so we load the body from the new draft
-                            loadDraft(message)
-                        }
-                        this.message = message
-                        return
-                    }
-                }
-                this.message = message
-                loadDraft(message)
+        composeMessageViewModel.getDraftMessageFyles()
+            .observe(viewLifecycleOwner) { fyleAndStatuses: List<FyleAndStatus?>? ->
+                hasAttachments = fyleAndStatuses.isNullOrEmpty().not()
+                updateComposeAreaLayout()
             }
+        composeMessageViewModel.getDraftMessage()
+            .observe(viewLifecycleOwner, object : Observer<Message?> {
+                private var message: Message? = null
+                override fun onChanged(value: Message?) {
+                    if (value != null && this.message != null) {
+                        if (value.id == this.message?.id) {
+                            val messageEditText =
+                                if (newMessageEditText?.text == null) "" else newMessageEditText?.text
+                                    .toString()
+                            val oldMessageText =
+                                if (this.message!!.contentBody == null) "" else this.message!!.contentBody!!
+                            val newMessageText =
+                                if (value.contentBody == null) "" else value.contentBody!!
+                            val oldMentions =
+                                if (this.message!!.jsonMentions == null) "" else this.message!!.jsonMentions!!
+                            val newMentions =
+                                if (value.jsonMentions == null) "" else value.jsonMentions!!
+                            if (messageEditText == oldMessageText && oldMessageText != newMessageText || oldMentions != newMentions) {
+                                // the message text changed, but the input did not --> probably an external modification so we load the body from the new draft
+                                loadDraft(value)
+                            }
+                            this.message = value
+                            return
+                        }
+                    }
+                    this.message = value
+                    loadDraft(value)
+                }
 
-            private fun loadDraft(draftMessage: Message?) {
-                if (draftMessage?.contentBody != null) {
-                    if (newMessageEditText?.text != null && draftMessage.contentBody != newMessageEditText!!.text
-                            .toString()
-                    ) {
-                        try {
-                            val spannableString = SpannableString(draftMessage.contentBody)
-                            if (draftMessage.mentions != null) {
-                                for (mention in draftMessage.mentions) {
-                                    if (mention.rangeEnd <= spannableString.length) {
-                                        val color = getTextColor(
-                                            view.context,
-                                            mention.userIdentifier,
-                                            AppSingleton.getContactCustomHue(mention.userIdentifier)
-                                        )
-                                        spannableString.setSpan(
-                                            MentionUrlSpan(
+                private fun loadDraft(draftMessage: Message?) {
+                    if (draftMessage?.contentBody != null) {
+                        if (newMessageEditText?.text != null && draftMessage.contentBody != newMessageEditText!!.text
+                                .toString()
+                        ) {
+                            try {
+                                val spannableString = SpannableString(draftMessage.contentBody)
+                                if (draftMessage.mentions != null) {
+                                    for (mention in draftMessage.mentions) {
+                                        if (mention.rangeEnd <= spannableString.length) {
+                                            val color = getTextColor(
+                                                view.context,
                                                 mention.userIdentifier,
-                                                mention.length,
-                                                color,
-                                                null
-                                            ),
-                                            mention.rangeStart,
-                                            mention.rangeEnd,
-                                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                                        )
+                                                AppSingleton.getContactCustomHue(mention.userIdentifier)
+                                            )
+                                            spannableString.setSpan(
+                                                MentionUrlSpan(
+                                                    mention.userIdentifier,
+                                                    mention.length,
+                                                    color,
+                                                    null
+                                                ),
+                                                mention.rangeStart,
+                                                mention.rangeEnd,
+                                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                                            )
+                                        }
                                     }
                                 }
-                            }
-                            newMessageEditText?.setText(
-                                Utils.protectMentionUrlSpansWithFEFF(
-                                    spannableString
+                                newMessageEditText?.setText(
+                                    Utils.protectMentionUrlSpansWithFEFF(
+                                        spannableString
+                                    )
                                 )
-                            )
-                            newMessageEditText?.setSelection(newMessageEditText?.text?.length ?: 0)
-                            setShowAttachIcons(show = true, preserveOldSelection = true)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                                newMessageEditText?.setSelection(
+                                    newMessageEditText?.text?.length ?: 0
+                                )
+                                setShowAttachIcons(show = true, preserveOldSelection = true)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
                     }
                 }
-            }
-        })
+            })
 
         // edit message
-        composeMessageViewModel.getDraftMessageEdit().observe(viewLifecycleOwner) { editMessage: Message? ->
-            if (editMessage != null) {
-                composeMessageEditGroup!!.visibility = View.VISIBLE
-                Utils.applyBodyWithSpans(
-                    composeMessageEditBody!!,
-                    editMessage.senderIdentifier,
-                    editMessage,
-                    null,
-                    false,
-                    true
-                )
-                newMessageEditText?.setHint(string.label_edit_your_message)
-                composeMessageEditGroup!!.setOnClickListener { v: View? ->
-                    if (discussionDelegate != null) {
-                        discussionDelegate!!.scrollToMessage(editMessage.id)
-                    }
-                }
-                linkPreviewViewModel.reset()
-                if (newMessageEditText?.text != null) {
-                    newMessageEditText?.setText(
-                        Utils.protectMentionUrlSpansWithFEFF(
-                            newMessageEditText!!.text
-                        )
-                    )
+        composeMessageViewModel.getDraftMessageEdit()
+            .observe(viewLifecycleOwner) { editMessage: Message? ->
+                if (editMessage != null) {
+                    composeMessageEditGroup!!.visibility = View.VISIBLE
                     Utils.applyBodyWithSpans(
-                        newMessageEditText!!,
+                        composeMessageEditBody!!,
                         editMessage.senderIdentifier,
                         editMessage,
                         null,
                         false,
-                        false
+                        true
                     )
-                    newMessageEditText?.setSelection(newMessageEditText?.text?.length ?: 0)
+                    newMessageEditText?.setHint(R.string.label_edit_your_message)
+                    composeMessageEditGroup!!.setOnClickListener {
+                        if (discussionDelegate != null) {
+                            discussionDelegate!!.scrollToMessage(editMessage.id)
+                        }
+                    }
+                    linkPreviewViewModel.reset()
+                    if (newMessageEditText?.text != null) {
+                        newMessageEditText?.setText(
+                            Utils.protectMentionUrlSpansWithFEFF(
+                                newMessageEditText!!.text
+                            )
+                        )
+                        Utils.applyBodyWithSpans(
+                            newMessageEditText!!,
+                            editMessage.senderIdentifier,
+                            editMessage,
+                            null,
+                            false,
+                            false
+                        )
+                        newMessageEditText?.setSelection(newMessageEditText?.text?.length ?: 0)
+                    }
+                } else {
+                    composeMessageEditGroup!!.visibility = View.GONE
+                    composeMessageEditGroup!!.setOnClickListener(null)
+                    newMessageEditText?.setHint(R.string.hint_compose_your_message)
                 }
-            } else {
-                composeMessageEditGroup!!.visibility = View.GONE
-                composeMessageEditGroup!!.setOnClickListener(null)
-                newMessageEditText?.setHint(string.hint_compose_your_message)
+                context?.resources?.displayMetrics?.widthPixels?.let { updateIconsToShow(it) }
             }
-            context?.resources?.displayMetrics?.widthPixels?.let { updateIconsToShow(it) }
-        }
 
         // reply message
-        composeMessageViewModel.getDraftMessageReply().observe(viewLifecycleOwner) { draftReplyMessage: Message? ->
-            if (draftReplyMessage == null) {
-                composeMessageReplyGroup?.visibility = View.GONE
-                composeMessageReplyMessageId = -1
-            } else {
-                composeMessageReplyGroup?.visibility = View.VISIBLE
-                composeMessageReplyMessageId = draftReplyMessage.id
-                val displayName =
-                    AppSingleton.getContactCustomDisplayName(draftReplyMessage.senderIdentifier)
-                if (displayName != null) {
-                    composeMessageReplySenderName?.text = displayName
+        composeMessageViewModel.getDraftMessageReply()
+            .observe(viewLifecycleOwner) { draftReplyMessage: Message? ->
+                if (draftReplyMessage == null) {
+                    composeMessageReplyGroup?.visibility = View.GONE
+                    composeMessageReplyMessageId = -1
                 } else {
-                    composeMessageReplySenderName?.setText(string.text_deleted_contact)
-                }
-                val color = getTextColor(
-                    requireContext(),
-                    draftReplyMessage.senderIdentifier,
-                    AppSingleton.getContactCustomHue(draftReplyMessage.senderIdentifier)
-                )
-                composeMessageReplySenderName?.setTextColor(color)
-                val drawable = ContextCompat.getDrawable(
-                    requireContext(), drawable.background_reply_white
-                )
-                if (drawable is LayerDrawable) {
-                    val border = drawable.findDrawableByLayerId(R.id.reply_color_border)
-                    border.setColorFilter(color, SRC_IN)
-                    drawable.setDrawableByLayerId(R.id.reply_color_border, border)
-                    composeMessageReplyGroup?.background = drawable
-                }
-                if (draftReplyMessage.totalAttachmentCount > 0) {
-                    composeMessageReplyAttachmentCount?.visibility = View.VISIBLE
-                    composeMessageReplyAttachmentCount?.text = context?.resources?.getQuantityString(
-                        plurals.text_reply_attachment_count,
-                        draftReplyMessage.totalAttachmentCount,
-                        draftReplyMessage.totalAttachmentCount
+                    composeMessageReplyGroup?.visibility = View.VISIBLE
+                    composeMessageReplyMessageId = draftReplyMessage.id
+                    val displayName =
+                        AppSingleton.getContactCustomDisplayName(draftReplyMessage.senderIdentifier)
+                    if (displayName != null) {
+                        composeMessageReplySenderName?.text = displayName
+                    } else {
+                        composeMessageReplySenderName?.setText(R.string.text_deleted_contact)
+                    }
+                    val color = getTextColor(
+                        requireContext(),
+                        draftReplyMessage.senderIdentifier,
+                        AppSingleton.getContactCustomHue(draftReplyMessage.senderIdentifier)
                     )
-                } else {
-                    composeMessageReplyAttachmentCount?.visibility = View.GONE
-                }
-                if (draftReplyMessage.getStringContent(activity).isEmpty()) {
-                    composeMessageReplyBody?.visibility = View.GONE
-                } else {
-                    composeMessageReplyBody?.visibility = View.VISIBLE
-                    composeMessageReplyBody?.let {
-                        Utils.applyBodyWithSpans(
-                            it,
-                            if (discussionViewModel.discussion.value != null) discussionViewModel.discussion.value!!.bytesOwnedIdentity else null,
-                            draftReplyMessage,
-                            null,
-                            true,
-                            true
-                        )
+                    composeMessageReplySenderName?.setTextColor(color)
+                    val drawable = ContextCompat.getDrawable(
+                        requireContext(), R.drawable.background_reply_white
+                    )
+                    if (drawable is LayerDrawable) {
+                        val border = drawable.findDrawableByLayerId(R.id.reply_color_border)
+                        border.colorFilter =
+                            BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                                color,
+                                SRC_IN
+                            )
+                        drawable.setDrawableByLayerId(R.id.reply_color_border, border)
+                        composeMessageReplyGroup?.background = drawable
+                    }
+                    if (draftReplyMessage.totalAttachmentCount > 0) {
+                        composeMessageReplyAttachmentCount?.visibility = View.VISIBLE
+                        composeMessageReplyAttachmentCount?.text =
+                            context?.resources?.getQuantityString(
+                                R.plurals.text_reply_attachment_count,
+                                draftReplyMessage.totalAttachmentCount,
+                                draftReplyMessage.totalAttachmentCount
+                            )
+                    } else {
+                        composeMessageReplyAttachmentCount?.visibility = View.GONE
+                    }
+                    if (draftReplyMessage.getStringContent(activity).isEmpty()) {
+                        composeMessageReplyBody?.visibility = View.GONE
+                    } else {
+                        composeMessageReplyBody?.visibility = View.VISIBLE
+                        composeMessageReplyBody?.let {
+                            Utils.applyBodyWithSpans(
+                                it,
+                                if (discussionViewModel.discussion.value != null) discussionViewModel.discussion.value!!.bytesOwnedIdentity else null,
+                                draftReplyMessage,
+                                null,
+                                true,
+                                true
+                            )
+                        }
                     }
                 }
             }
-        }
         composeMessageViewModel.ephemeralSettingsChanged.observe(viewLifecycleOwner) { changed: Boolean? ->
             hideOrShowEphemeralMarker(
                 changed != null && changed
             )
         }
-        composeMessageViewModel.getRecordingLiveData().observe(viewLifecycleOwner) { recording: Boolean ->
-            this.recording = recording
-        }
+        composeMessageViewModel.getRecordingLiveData()
+            .observe(viewLifecycleOwner) { recording: Boolean ->
+                this.recording = recording
+            }
         context?.resources?.displayMetrics?.widthPixels?.let {
             updateIconsToShow(it)
         }
@@ -995,7 +1076,9 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 if (composeMessageViewModel.rawNewMessageText != null) {
                     try {
                         newMessageEditText?.setText(composeMessageViewModel.rawNewMessageText)
-                        newMessageEditText?.setSelection(composeMessageViewModel.rawNewMessageText?.length ?: 0)
+                        newMessageEditText?.setSelection(
+                            composeMessageViewModel.rawNewMessageText?.length ?: 0
+                        )
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -1011,24 +1094,22 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
 
     override fun onDestroy() {
         super.onDestroy()
-        if (voiceMessageRecorder != null) {
-            voiceMessageRecorder!!.stopRecord(true)
-        }
+        voiceMessageRecorder?.stopRecord(true)
     }
 
     private fun hideMentionPicker() {
-        if (mentionCandidatesFragment != null && mentionCandidatesFragment!!.isVisible) {
+        if (mentionCandidatesFragment.isVisible) {
             val transaction = childFragmentManager.beginTransaction()
-            transaction.hide(mentionCandidatesFragment!!)
+            transaction.hide(mentionCandidatesFragment)
             transaction.commit()
             mentionCandidatesSpacer!!.visibility = View.GONE
         }
     }
 
     private fun showMentionPicker() {
-        if (mentionCandidatesFragment != null && mentionCandidatesFragment!!.isHidden) {
+        if (mentionCandidatesFragment.isHidden) {
             val transaction = childFragmentManager.beginTransaction()
-            transaction.show(mentionCandidatesFragment!!)
+            transaction.show(mentionCandidatesFragment)
             transaction.commit()
             mentionCandidatesSpacer!!.visibility = View.INVISIBLE
         }
@@ -1036,15 +1117,16 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
 
     override fun onClick(view: View) {
         val id = view.id
-        if (voiceMessageRecorder!!.recording) {
-            voiceMessageRecorder!!.stopRecord(false)
+        if (voiceMessageRecorder?.isRecording() == true) {
+            voiceMessageRecorder?.stopRecord(false)
         } else if (id == R.id.attach_timer) {
-            val dialogFragment = SingleMessageEphemeralSettingsDialogFragment.newInstance(
-                discussionViewModel.discussionId
-            )
-            dialogFragment.show(childFragmentManager, "dialog")
+            composeMessageViewModel.openEphemeralSettings =
+                !composeMessageViewModel.openEphemeralSettings
             if (emojiKeyboardShowing) {
                 hideEmojiKeyboard()
+            }
+            if (composeMessageViewModel.openEphemeralSettings) {
+                ephemeralViewModel.setDiscussionId(discussionViewModel.discussionId, false)
             }
         } else if (id == R.id.compose_message_send_button) {
             onSendAction()
@@ -1082,7 +1164,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                     takePicture()
                 }
             } else {
-                App.toast(string.toast_message_device_has_no_camera, Toast.LENGTH_SHORT)
+                App.toast(R.string.toast_message_device_has_no_camera, Toast.LENGTH_SHORT)
             }
         } else if (id == R.id.attach_video) {
             if (hasCamera) {
@@ -1096,28 +1178,28 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                     takeVideo()
                 }
             } else {
-                App.toast(string.toast_message_device_has_no_camera, Toast.LENGTH_SHORT)
+                App.toast(R.string.toast_message_device_has_no_camera, Toast.LENGTH_SHORT)
             }
         } else if (id == R.id.attach_emoji) {
             showEmojiKeyboard()
         } else if (id == R.id.attach_location) {
             // if currently sharing location: stop sharing location
             if (LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.discussionId)) {
-                SecureAlertDialogBuilder(view.context, style.CustomAlertDialog)
-                    .setTitle(string.title_stop_sharing_location)
-                    .setMessage(string.label_stop_sharing_location)
-                    .setPositiveButton(string.button_label_stop) { dialogInterface: DialogInterface?, i: Int ->
+                SecureAlertDialogBuilder(view.context, R.style.CustomAlertDialog)
+                    .setTitle(R.string.title_stop_sharing_location)
+                    .setMessage(R.string.label_stop_sharing_location)
+                    .setPositiveButton(R.string.button_label_stop) { _, _ ->
                         LocationSharingSubService.stopSharingInDiscussion(
                             discussionViewModel.discussionId, false
                         )
                     }
-                    .setNegativeButton(string.button_label_cancel, null)
+                    .setNegativeButton(R.string.button_label_cancel, null)
                     .create()
                     .show()
                 return
             }
             when (SettingsActivity.getLocationIntegration()) {
-                OSM, MAPS -> {
+                OSM, MAPS, CUSTOM_OSM -> {
                     val dialogFragment = SendLocationMapDialogFragment.newInstance(
                         discussionViewModel.discussionId,
                         SettingsActivity.getLocationIntegration()
@@ -1133,13 +1215,18 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 }
 
                 NONE -> {
-                    LocationIntegrationSelectorDialog(view.context) { integration: LocationIntegrationEnum ->
-                        SettingsActivity.setLocationIntegration(integration.string)
-                        // re-run onClick if something was selected
-                        if (integration == OSM || integration == MAPS || integration == BASIC) {
-                            onClick(view)
+                    LocationIntegrationSelectorDialog(view.context, false, object : LocationIntegrationSelectorDialog.OnIntegrationSelectedListener {
+                        override fun onIntegrationSelected(
+                            integration: LocationIntegrationEnum,
+                            customOsmServerUrl: String?
+                        ) {
+                            SettingsActivity.setLocationIntegration(integration.string, customOsmServerUrl)
+                            // re-run onClick if something was selected
+                            if (integration == OSM || integration == MAPS || integration == BASIC || integration == CUSTOM_OSM) {
+                                onClick(view)
+                            }
                         }
-                    }.show()
+                    }).show()
                 }
             }
         } else if (id == R.id.attach_stuff_plus) {
@@ -1238,7 +1325,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
     ) {
         this.longClickedFyleAndStatus = longClickedFyleAndStatus
         val popup = PopupMenu(activity, clickedView)
-        popup.inflate(menu.popup_attachment_incomplete_or_draft)
+        popup.inflate(R.menu.popup_attachment_incomplete_or_draft)
         popup.setOnMenuItemClickListener(this)
         popup.show()
     }
@@ -1247,20 +1334,20 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         val itemId = menuItem.itemId
         if (itemId == R.id.popup_action_delete_attachment) {
             val builder = context?.let {
-                SecureAlertDialogBuilder(it, style.CustomAlertDialog)
-                    .setTitle(string.dialog_title_delete_attachment)
+                SecureAlertDialogBuilder(it, R.style.CustomAlertDialog)
+                    .setTitle(R.string.dialog_title_delete_attachment)
                     .setMessage(
                         getString(
-                            string.dialog_message_delete_attachment,
+                            R.string.dialog_message_delete_attachment,
                             longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.fileName
                         )
                     )
-                    .setPositiveButton(string.button_label_ok) { _, _ ->
+                    .setPositiveButton(R.string.button_label_ok) { _, _ ->
                         App.runThread(
                             DeleteAttachmentTask(longClickedFyleAndStatus)
                         )
                     }
-                    .setNegativeButton(string.button_label_cancel, null)
+                    .setNegativeButton(R.string.button_label_cancel, null)
             }
             builder?.create()?.show()
             return true
@@ -1277,7 +1364,8 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                     activity,
                     discussionViewModel.discussionId,
                     longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.messageId,
-                    longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.fyleId
+                    longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.fyleId,
+                    true
                 )
                 if (discussionDelegate != null) {
                     discussionDelegate!!.doNotMarkAsReadOnPause()
@@ -1334,15 +1422,18 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         override fun showSoftInputKeyboard() {
             if (activity != null) {
                 if (!emojiKeyboardShowing) {
-                    (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.showSoftInput(newMessageEditText, InputMethodManager.SHOW_IMPLICIT)
+                    (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.showSoftInput(
+                        newMessageEditText,
+                        InputMethodManager.SHOW_IMPLICIT
+                    )
                 }
                 setShowAttachIcons(show = false, preserveOldSelection = true)
             }
         }
 
         override fun stopVoiceRecorderIfRecording(): Boolean {
-            if (voiceMessageRecorder != null && voiceMessageRecorder!!.recording) {
-                voiceMessageRecorder!!.stopRecord(true)
+            if (voiceMessageRecorder?.isRecording() == true) {
+                voiceMessageRecorder?.stopRecord(true)
                 return true
             }
             return false
@@ -1397,7 +1488,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                     return if (viewType == VIEW_TYPE_ICON) {
                         IconOrderViewHolder(
                             inflater.inflate(
-                                layout.item_view_attach_icon_orderer,
+                                R.layout.item_view_attach_icon_orderer,
                                 parent,
                                 false
                             ),
@@ -1411,7 +1502,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                     } else {
                         IconOrderViewHolder(
                             inflater.inflate(
-                                layout.item_view_attach_icon_orderer_separator,
+                                R.layout.item_view_attach_icon_orderer_separator,
                                 parent,
                                 false
                             ), null
@@ -1501,11 +1592,11 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         }
         adapter.submitList(adapterIcons)
         val builder = Builder(
-            iconOrderRecyclerView.context, style.CustomAlertDialog
+            iconOrderRecyclerView.context, R.style.CustomAlertDialog
         )
-            .setTitle(string.dialog_title_choose_icon_order)
+            .setTitle(R.string.dialog_title_choose_icon_order)
             .setView(iconOrderRecyclerView)
-            .setPositiveButton(string.button_label_save) { dialog: DialogInterface?, which: Int ->
+            .setPositiveButton(R.string.button_label_save) { _: DialogInterface?, _: Int ->
                 val end = adapterIcons!!.indexOf(-1)
                 SettingsActivity.setComposeMessageIconPreferredOrder(
                     (if (end == -1) adapterIcons else adapterIcons!!.subList(
@@ -1515,7 +1606,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 )
                 updateIconsToShow(previousWidth)
             }
-            .setNegativeButton(string.button_label_cancel, null)
+            .setNegativeButton(R.string.button_label_cancel, null)
         builder.create().show()
     }
 
@@ -1531,10 +1622,10 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         val handle: View?
 
         init {
-            textView = itemView.findViewById(id.icon_text_view)
-            handle = itemView.findViewById(id.handle)
+            textView = itemView.findViewById(R.id.icon_text_view)
+            handle = itemView.findViewById(R.id.handle)
             if (handle != null && onHandlePressedListener != null) {
-                handle.setOnTouchListener(OnTouchListener { v: View?, event: MotionEvent ->
+                handle.setOnTouchListener(OnTouchListener { _: View?, event: MotionEvent ->
                     if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                         onHandlePressedListener.onHandlePressed(this)
                     }
@@ -1625,49 +1716,56 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         if (!SettingsActivity.getBetaFeaturesEnabled()) {
             iconsOverflow.remove(ICON_SEND_LOCATION)
         }
-        attachIconsGroup!!.removeAllViews()
+        attachIconsGroup.removeAllViews()
         for (icon in iconsShown) {
-            val imageView = ImageView(ContextThemeWrapper(activity, style.SubtleBlueRipple))
+            val imageView = ImageView(ContextThemeWrapper(activity, R.style.SubtleBlueRipple))
             imageView.layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
             imageView.setPadding(fourDp, 0, 0, 0)
-            imageView.setBackgroundResource(drawable.background_circular_ripple)
+            imageView.setBackgroundResource(R.drawable.background_circular_ripple)
             imageView.setImageResource(getImageResourceForIcon(icon))
             imageView.id = getViewIdForIcon(icon)
             imageView.setOnClickListener(this)
-            attachIconsGroup!!.addView(imageView, 0)
+            if (imageView.id == R.id.attach_timer) {
+                imageView.doOnLayout {
+                    it.post { attachTimerPosition = it.screenLocation }
+                }
+            }
+            attachIconsGroup.addView(imageView, 0)
         }
         currentLayout = 0 // do this to force relayout
         updateComposeAreaLayout()
     }
 
+    private var attachTimerPosition by mutableStateOf(intArrayOf(0, 0))
+
     private var widthAnimator: ValueAnimator? = null
     private var currentLayout = 0
     fun updateComposeAreaLayout() {
         if (recording || !hasAttachments && !hasText && !isEditMode()) {
-            sendButton!!.visibility = View.GONE
-            directAttachVoiceMessageImageView!!.visibility = View.VISIBLE
+            sendButton!!.isGone = true
+            directAttachVoiceMessageImageView!!.isVisible = true
         } else {
             if (isEditMode()) {
                 sendButton?.setImageDrawable(
                     ResourcesCompat.getDrawable(
-                        requireContext().resources, drawable.ic_send_edit, null
+                        requireContext().resources, R.drawable.ic_send_edit, null
                     )
                 )
             } else {
                 sendButton?.setImageDrawable(
                     context?.resources?.let {
                         ResourcesCompat.getDrawable(
-                            it, drawable.ic_send, null
+                            it, R.drawable.ic_send, null
                         )
                     }
                 )
             }
-            sendButton!!.visibility = View.VISIBLE
-            directAttachVoiceMessageImageView!!.visibility = View.GONE
+            sendButton!!.isVisible = true
+            directAttachVoiceMessageImageView!!.isGone = true
             sendButton!!.isEnabled =
                 (hasAttachments || composeMessageViewModel.trimmedNewMessageText != null) && !identicalEditMessage()
         }
-        val attachIconsGroupParams = attachIconsGroup!!.layoutParams as LayoutParams
+        val attachIconsGroupParams = attachIconsGroup.layoutParams as LayoutParams
         // depending on the state, pick the appropriate layout:
         // 1 - show a (+) and some icons on the side, with a compact message edit zone
         // 2 - only for "never overflow" mode in very wide screens where all icons are always displayed next to the (+)
@@ -1676,7 +1774,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         if (showAttachIcons && !isEditMode()) {
             if (currentLayout != 1) {
                 currentLayout = 1
-                attachStuffPlus!!.setImageResource(drawable.ic_attach_add)
+                attachStuffPlus!!.setImageResource(R.drawable.ic_attach_add)
                 newMessageEditText?.maxLines = 1
                 newMessageEditText?.isVerticalScrollBarEnabled = false
                 newMessageEditText?.movementMethod = null
@@ -1686,17 +1784,17 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                 if (animateLayoutChanges) {
                     widthAnimator = ValueAnimator.ofInt(
                         attachIconsGroupParams.width,
-                        attachIconsGroup!!.childCount * iconSize
+                        attachIconsGroup.childCount * iconSize
                     )
                     widthAnimator?.duration = 200
                     widthAnimator?.addUpdateListener { animation: ValueAnimator ->
                         attachIconsGroupParams.width = animation.animatedValue as Int
-                        attachIconsGroup!!.layoutParams = attachIconsGroupParams
+                        attachIconsGroup.layoutParams = attachIconsGroupParams
                     }
                     widthAnimator?.start()
                 } else {
-                    attachIconsGroupParams.width = attachIconsGroup!!.childCount * iconSize
-                    attachIconsGroup!!.layoutParams = attachIconsGroupParams
+                    attachIconsGroupParams.width = attachIconsGroup.childCount * iconSize
+                    attachIconsGroup.layoutParams = attachIconsGroupParams
                 }
             }
         } else {
@@ -1708,24 +1806,24 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             if (neverOverflow && !isEditMode()) {
                 if (currentLayout != 2) {
                     currentLayout = 2
-                    attachStuffPlus!!.setImageResource(drawable.ic_attach_add)
+                    attachStuffPlus!!.setImageResource(R.drawable.ic_attach_add)
                     if (widthAnimator != null) {
                         widthAnimator!!.cancel()
                     }
                     if (animateLayoutChanges) {
                         widthAnimator = ValueAnimator.ofInt(
                             attachIconsGroupParams.width,
-                            attachIconsGroup!!.childCount * iconSize
+                            attachIconsGroup.childCount * iconSize
                         )
                         widthAnimator?.duration = 200
                         widthAnimator?.addUpdateListener { animation: ValueAnimator ->
                             attachIconsGroupParams.width = animation.animatedValue as Int
-                            attachIconsGroup!!.layoutParams = attachIconsGroupParams
+                            attachIconsGroup.layoutParams = attachIconsGroupParams
                         }
                         widthAnimator?.start()
                     } else {
-                        attachIconsGroupParams.width = attachIconsGroup!!.childCount * iconSize
-                        attachIconsGroup!!.layoutParams = attachIconsGroupParams
+                        attachIconsGroupParams.width = attachIconsGroup.childCount * iconSize
+                        attachIconsGroup.layoutParams = attachIconsGroupParams
                     }
                 }
             } else {
@@ -1738,23 +1836,23 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
                         widthAnimator?.duration = 200
                         widthAnimator?.addUpdateListener { animation: ValueAnimator ->
                             attachIconsGroupParams.width = animation.animatedValue as Int
-                            attachIconsGroup!!.layoutParams = attachIconsGroupParams
+                            attachIconsGroup.layoutParams = attachIconsGroupParams
                         }
                         widthAnimator?.start()
                     } else {
                         attachIconsGroupParams.width = -3
-                        attachIconsGroup!!.layoutParams = attachIconsGroupParams
+                        attachIconsGroup.layoutParams = attachIconsGroupParams
                     }
                 }
                 if (!isEditMode()) {
                     if (currentLayout != 3) {
                         currentLayout = 3
-                        attachStuffPlus!!.setImageResource(drawable.ic_attach_chevron)
+                        attachStuffPlus!!.setImageResource(R.drawable.ic_attach_chevron)
                     }
                 } else {
                     if (currentLayout != 4) {
                         currentLayout = 4
-                        attachStuffPlus!!.setImageResource(drawable.ic_attach_emoji)
+                        attachStuffPlus!!.setImageResource(R.drawable.ic_attach_emoji)
                     }
                 }
             }
@@ -1779,24 +1877,24 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
 
     private fun hideOrShowEphemeralMarker(showMarker: Boolean) {
         showEphemeralMarker = showMarker
-        val attachTimeView = attachIconsGroup!!.findViewById<ImageView>(R.id.attach_timer)
+        val attachTimeView = attachIconsGroup.findViewById<ImageView>(R.id.attach_timer)
         if (attachTimeView != null) {
             if (showMarker) {
-                attachTimeView.setImageResource(drawable.ic_attach_timer_modified)
-                attachStuffPlusGoldenDot!!.visibility =
+                attachTimeView.setImageResource(R.drawable.ic_attach_timer_modified)
+                attachStuffPlusGoldenDot.visibility =
                     if (showAttachIcons || neverOverflow) View.GONE else View.VISIBLE
             } else {
-                attachTimeView.setImageResource(drawable.ic_attach_timer)
-                attachStuffPlusGoldenDot!!.visibility = View.GONE
+                attachTimeView.setImageResource(R.drawable.ic_attach_timer)
+                attachStuffPlusGoldenDot.visibility = View.GONE
             }
         } else {
-            attachStuffPlusGoldenDot!!.visibility = if (showMarker) View.VISIBLE else View.GONE
+            attachStuffPlusGoldenDot.visibility = if (showMarker) View.VISIBLE else View.GONE
         }
     }
 
     private fun showOverflowedPopupMenu() {
         @SuppressLint("InflateParams") val popupView = LayoutInflater.from(activity).inflate(
-            layout.popup_discussion_attach_stuff, null
+            R.layout.popup_discussion_attach_stuff, null
         )
         val popupWindow = PopupWindow(
             popupView,
@@ -1808,7 +1906,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         popupWindow.setBackgroundDrawable(
             ContextCompat.getDrawable(
                 popupView.context,
-                drawable.background_popup_discussion_owned_identity
+                R.drawable.background_popup_discussion_owned_identity
             )
         )
         val onClickListener = OnClickListener { v: View ->
@@ -1822,7 +1920,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
         if (iconsOverflow.size == 0) {
             popupAttachList.findViewById<View>(R.id.separator).visibility = View.GONE
         } else {
-            val greyColor = ContextCompat.getColor(popupView.context, color.grey)
+            val greyColor = ContextCompat.getColor(popupView.context, R.color.grey)
             val backgroundDrawable = TypedValue()
             popupView.context.theme.resolveAttribute(
                 attr.selectableItemBackground,
@@ -1831,7 +1929,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             )
             for (icon in iconsOverflow) {
                 val textView: TextView =
-                    AppCompatTextView(ContextThemeWrapper(activity, style.SubtleBlueRipple))
+                    AppCompatTextView(ContextThemeWrapper(activity, R.style.SubtleBlueRipple))
                 textView.id = getViewIdForIcon(icon)
                 textView.layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -1855,7 +1953,7 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
             }
         }
         val popupHeight = (iconsOverflow.size + 2) * iconSize + fourDp
-        popupWindow.animationStyle = style.FadeInAndOutAnimation
+        popupWindow.animationStyle = R.style.FadeInAndOutAnimation
         popupWindow.showAsDropDown(
             attachStuffPlus,
             fourDp / 2,
@@ -1866,18 +1964,18 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
 
     private fun getImageResourceForIcon(icon: Int): Int {
         return when (icon) {
-            ICON_ATTACH_FILE -> drawable.ic_attach_file
-            ICON_ATTACH_PICTURE -> drawable.ic_attach_image
+            ICON_ATTACH_FILE -> R.drawable.ic_attach_file
+            ICON_ATTACH_PICTURE -> R.drawable.ic_attach_image
             ICON_EPHEMERAL_SETTINGS -> if (showEphemeralMarker) {
-                drawable.ic_attach_timer_modified
+                R.drawable.ic_attach_timer_modified
             } else {
-                drawable.ic_attach_timer
+                R.drawable.ic_attach_timer
             }
 
-            ICON_TAKE_PICTURE -> drawable.ic_attach_camera
-            ICON_TAKE_VIDEO -> drawable.ic_attach_video
-            ICON_EMOJI -> drawable.ic_attach_emoji
-            ICON_SEND_LOCATION -> drawable.ic_attach_location
+            ICON_TAKE_PICTURE -> R.drawable.ic_attach_camera
+            ICON_TAKE_VIDEO -> R.drawable.ic_attach_video
+            ICON_EMOJI -> R.drawable.ic_attach_emoji
+            ICON_SEND_LOCATION -> R.drawable.ic_attach_location
             else -> 0
         }
     }
@@ -1897,13 +1995,13 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
 
     private fun getStringResourceForIcon(icon: Int): Int {
         return when (icon) {
-            ICON_ATTACH_FILE -> string.label_attach_file
-            ICON_ATTACH_PICTURE -> string.label_attach_image
-            ICON_EPHEMERAL_SETTINGS -> string.label_attach_timer
-            ICON_TAKE_PICTURE -> string.label_attach_camera
-            ICON_TAKE_VIDEO -> string.label_attach_video
-            ICON_EMOJI -> string.label_attach_emoji
-            ICON_SEND_LOCATION -> string.label_send_your_location
+            ICON_ATTACH_FILE -> R.string.label_attach_file
+            ICON_ATTACH_PICTURE -> R.string.label_attach_image
+            ICON_EPHEMERAL_SETTINGS -> R.string.label_attach_timer
+            ICON_TAKE_PICTURE -> R.string.label_attach_camera
+            ICON_TAKE_VIDEO -> R.string.label_attach_video
+            ICON_EMOJI -> R.string.label_attach_emoji
+            ICON_SEND_LOCATION -> R.string.label_send_your_location
             else -> 0
         }
     }
@@ -1950,7 +2048,8 @@ class ComposeMessageFragment : Fragment(layout.fragment_discussion_compose), OnC
     }
 
     private fun initializeEmojiKeyboard() {
-        emojiKeyboardFragment = EmojiKeyboardFragment()
+        emojiKeyboardFragment =
+            EmojiKeyboardFragment()
         emojiKeyboardFragment!!.setRestoreKeyboardListener {
             hideEmojiKeyboard()
             composeMessageDelegate.showSoftInputKeyboard()

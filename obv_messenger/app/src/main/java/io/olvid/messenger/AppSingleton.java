@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.util.Pair;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -78,7 +79,8 @@ import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
-import io.olvid.messenger.discussion.ComposeMessageFragment;
+import io.olvid.messenger.databases.tasks.migration.SetContactsAndPendingMembersFirstNamesTask;
+import io.olvid.messenger.discussion.compose.ComposeMessageFragment;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.services.BackupCloudProviderService;
@@ -170,6 +172,11 @@ public class AppSingleton {
             editor.apply();
         }
 
+        if (lastBuildExecuted != 0 && lastBuildExecuted < 226) {
+            // we added a first name to contacts and group v2 pending members
+            App.runThread(new SetContactsAndPendingMembersFirstNamesTask());
+        }
+
         // TODO: enable this once location is no longer in beta
 //        if (lastBuildExecuted != 0 && lastBuildExecuted < 171) {
 //            // if the user has customized attach icon order, add the send location icon so they see it
@@ -209,6 +216,7 @@ public class AppSingleton {
         }
 
         // set current App capabilities
+        //noinspection ArraysAsListWithZeroOrOneArgument
         ObvCapability.currentCapabilities.addAll(Arrays.asList(
                 // add App capabilities here
                 ObvCapability.WEBRTC_CONTINUOUS_ICE
@@ -914,7 +922,7 @@ public class AppSingleton {
 
     // region Contact names and info caches for main thread access
 
-    @NonNull private final MutableLiveData<HashMap<BytesKey, String>> contactNamesCache;
+    @NonNull private final MutableLiveData<HashMap<BytesKey, Pair<String, String>>> contactNamesCache; // the first element of the pair is the full display name, the second the first name (or custom name for both, if set)
     @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactHuesCache;
     @NonNull private final MutableLiveData<HashMap<BytesKey, String>> contactPhotoUrlsCache;
     @NonNull private final MutableLiveData<HashSet<BytesKey>> contactKeycloakManagedCache;
@@ -923,7 +931,7 @@ public class AppSingleton {
     @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactTrustLevelCache;
 
     @NonNull
-    public static LiveData<HashMap<BytesKey, String>> getContactNamesCache() {
+    public static LiveData<HashMap<BytesKey, Pair<String, String>>> getContactNamesCache() {
         return getInstance().contactNamesCache;
     }
 
@@ -973,7 +981,7 @@ public class AppSingleton {
             return;
         }
         List<Contact> contacts = AppDatabase.getInstance().contactDao().getAllForOwnedIdentitySync(ownedIdentity.bytesOwnedIdentity);
-        HashMap<BytesKey, String> contactNamesHashMap = new HashMap<>();
+        HashMap<BytesKey, Pair<String, String>> contactNamesHashMap = new HashMap<>();
         HashMap<BytesKey, Integer> contactHuesHashMap = new HashMap<>();
         HashMap<BytesKey, String> contactPhotoUrlsHashMap = new HashMap<>();
         HashSet<BytesKey> contactKeycloakManagedHashSet = new HashSet<>();
@@ -982,7 +990,7 @@ public class AppSingleton {
         HashMap<BytesKey, Integer> contactTrustLevelHashMap = new HashMap<>();
         for (Contact contact : contacts) {
             BytesKey key = new BytesKey(contact.bytesContactIdentity);
-            contactNamesHashMap.put(key, contact.getCustomDisplayName());
+            contactNamesHashMap.put(key, new Pair<>(contact.getCustomDisplayName(), contact.getFirstNameOrCustom()));
             if (contact.customNameHue != null) {
                 contactHuesHashMap.put(key, contact.customNameHue);
             }
@@ -1002,7 +1010,7 @@ public class AppSingleton {
         }
 
         BytesKey ownKey = new BytesKey(ownedIdentity.bytesOwnedIdentity);
-        contactNamesHashMap.put(ownKey, App.getContext().getString(R.string.text_you));
+        contactNamesHashMap.put(ownKey, new Pair<>(App.getContext().getString(R.string.text_you), App.getContext().getString(R.string.text_you)));
         if (ownedIdentity.photoUrl != null) {
             contactPhotoUrlsHashMap.put(ownKey, ownedIdentity.photoUrl);
         }
@@ -1017,7 +1025,7 @@ public class AppSingleton {
         for (Group2PendingMember pendingMember : pendingMembers) {
             BytesKey key = new BytesKey(pendingMember.bytesContactIdentity);
             if (!contactNamesHashMap.containsKey(key)) {
-                contactNamesHashMap.put(key, pendingMember.displayName);
+                contactNamesHashMap.put(key, new Pair<>(pendingMember.displayName, pendingMember.getFirstName()));
             }
         }
 
@@ -1034,7 +1042,22 @@ public class AppSingleton {
         if (getContactNamesCache().getValue() == null) {
             return null;
         }
-        return getContactNamesCache().getValue().get(new BytesKey(bytesContactIdentity));
+        Pair<String, String> cache = getContactNamesCache().getValue().get(new BytesKey(bytesContactIdentity));
+        if (cache != null) {
+            return cache.first;
+        }
+        return null;
+    }
+
+    public static String getContactFirstName(byte[] bytesContactIdentity) {
+        if (getContactNamesCache().getValue() == null) {
+            return null;
+        }
+        Pair<String, String> cache = getContactNamesCache().getValue().get(new BytesKey(bytesContactIdentity));
+        if (cache != null) {
+            return cache.second;
+        }
+        return null;
     }
 
     public static Integer getContactCustomHue(byte[] bytesContactIdentity) {
@@ -1079,12 +1102,12 @@ public class AppSingleton {
         return getContactTrustLevelCache().getValue().get(new BytesKey(bytesContactIdentity));
     }
 
-    public static void updateCachedCustomDisplayName(byte[] bytesContactIdentity, String customDisplayName) {
+    public static void updateCachedCustomDisplayName(@NonNull byte[] bytesContactIdentity, @NonNull String customDisplayName, @NonNull String firstNameOrCustom) {
         if (getContactNamesCache().getValue() == null) {
             return;
         }
-        HashMap<BytesKey, String> hashMap = getContactNamesCache().getValue();
-        hashMap.put(new BytesKey(bytesContactIdentity), customDisplayName);
+        HashMap<BytesKey, Pair<String, String>> hashMap = getContactNamesCache().getValue();
+        hashMap.put(new BytesKey(bytesContactIdentity), new Pair<>(customDisplayName, firstNameOrCustom));
         getInstance().contactNamesCache.postValue(hashMap);
     }
 
@@ -1166,7 +1189,7 @@ public class AppSingleton {
 
     public static void updateCacheContactDeleted(byte[] bytesContactIdentity) {
         BytesKey key = new BytesKey(bytesContactIdentity);
-        HashMap<BytesKey, String> namesHashMap = getContactNamesCache().getValue();
+        HashMap<BytesKey, Pair<String, String>> namesHashMap = getContactNamesCache().getValue();
         if (namesHashMap != null && namesHashMap.remove(key) != null) {
             getInstance().contactNamesCache.postValue(namesHashMap);
         }

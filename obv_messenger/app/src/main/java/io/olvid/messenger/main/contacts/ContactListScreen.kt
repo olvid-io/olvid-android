@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -386,6 +386,9 @@ private fun Contact(
                             SettingsActivity.getContactDisplayNameFormat(),
                             SettingsActivity.getUppercaseLastName()
                         )
+                    AppSingleton.getContactPhotoUrl(keycloakUserDetails.identity)?.let {
+                        initialView.setPhotoUrl(keycloakUserDetails.identity, it)
+                    } ?:
                     initialView.setInitial(
                         keycloakUserDetails.identity,
                         StringUtils.getInitial(

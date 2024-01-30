@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -39,6 +39,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
+import io.olvid.messenger.discussion.compose.EphemeralViewModel;
 
 
 public class DiscussionSettingsActivity extends LockableActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
@@ -73,12 +74,10 @@ public class DiscussionSettingsActivity extends LockableActivity implements Pref
     public static final String PREF_KEY_DISCUSSION_RETENTION_COUNT = "pref_key_discussion_retention_count";
     public static final String PREF_KEY_DISCUSSION_RETENTION_DURATION = "pref_key_discussion_retention_duration";
 
-    public static final String PREF_KEY_DISCUSSION_READ_ONCE = "pref_key_discussion_read_once";
-    public static final String PREF_KEY_DISCUSSION_VISIBILITY_DURATION = "pref_key_discussion_visibility_duration";
-    public static final String PREF_KEY_DISCUSSION_EXISTENCE_DURATION = "pref_key_discussion_existence_duration";
-
+    public static final String PREF_KEY_COMPOSE_EPHEMERAL_SETTINGS = "pref_key_compose_ephemeral_settings";
 
     private DiscussionSettingsViewModel discussionSettingsViewModel;
+    private EphemeralViewModel ephemeralViewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,56 +89,56 @@ public class DiscussionSettingsActivity extends LockableActivity implements Pref
         }
 
         discussionSettingsViewModel = new ViewModelProvider(this).get(DiscussionSettingsViewModel.class);
+        ephemeralViewModel = new ViewModelProvider(this).get(EphemeralViewModel.class);
 
         discussionSettingsViewModel.getDiscussionCustomization().observe(this, (DiscussionCustomization discussionCustomization) -> {
             discussionSettingsViewModel.notifySettingsChangedListeners(discussionCustomization);
 
             // if viewModel has not recorded any modifications, update its content
-            discussionSettingsViewModel.updateEphemeralSettingsFromCustomization(discussionCustomization);
             discussionSettingsViewModel.updateNotificationsFromCustomization(discussionCustomization);
         });
         discussionSettingsViewModel.getNonAdminGroupDiscussionLiveData().observe(this, (Boolean nonAdminGroup) -> discussionSettingsViewModel.notifyLockedOrNonGroupAdminChanged());
         discussionSettingsViewModel.getDiscussionLockedLiveData().observe(this, (Boolean locked) -> discussionSettingsViewModel.notifyLockedOrNonGroupAdminChanged());
 
+        if (savedInstanceState == null) {
+            DiscussionSettingsHeadersFragment settingsFragment = new DiscussionSettingsHeadersFragment();
+            getSupportFragmentManager().beginTransaction().replace(android.R.id.content, settingsFragment).commit();
 
-        DiscussionSettingsHeadersFragment settingsFragment = new DiscussionSettingsHeadersFragment();
-        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, settingsFragment).commit();
+            Intent intent = getIntent();
+            if (intent != null && intent.hasExtra(DISCUSSION_ID_INTENT_EXTRA)) {
+                long discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1);
+                discussionSettingsViewModel.setDiscussionId(discussionId);
 
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(DISCUSSION_ID_INTENT_EXTRA)) {
-            long discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1);
-            discussionSettingsViewModel.setDiscussionId(discussionId);
-
-
-            final String prefKey = intent.getStringExtra(SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA);
-            if (prefKey != null) {
-                final Handler handler = new Handler(Looper.getMainLooper());
-                handler.postDelayed(() -> {
-                    Preference preference = settingsFragment.findPreference(prefKey);
-                    if (preference != null && preference.isEnabled()) {
-                        int position = preference.getOrder() - (discussionSettingsViewModel.isLocked() ? 0 : 1);
-                        RecyclerView recyclerView = settingsFragment.getListView();
-                        if (recyclerView != null) {
-                            RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
-                            if (viewHolder != null) {
-                                viewHolder.itemView.setPressed(true);
-                                handler.postDelayed(() -> onPreferenceStartFragment(settingsFragment, preference), 600);
-                            } else {
-                                recyclerView.scrollToPosition(position);
-                                handler.postDelayed(() -> {
-                                    RecyclerView.ViewHolder reViewHolder = recyclerView.findViewHolderForAdapterPosition(position);
-                                    if (reViewHolder != null) {
-                                        reViewHolder.itemView.setPressed(true);
-                                    }
-                                }, 100);
-                                handler.postDelayed(() -> onPreferenceStartFragment(settingsFragment, preference), 700);
+                final String prefKey = intent.getStringExtra(SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA);
+                if (prefKey != null) {
+                    final Handler handler = new Handler(Looper.getMainLooper());
+                    handler.postDelayed(() -> {
+                        Preference preference = settingsFragment.findPreference(prefKey);
+                        if (preference != null && preference.isEnabled()) {
+                            int position = preference.getOrder() - (discussionSettingsViewModel.isLocked() ? 0 : 1);
+                            RecyclerView recyclerView = settingsFragment.getListView();
+                            if (recyclerView != null) {
+                                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
+                                if (viewHolder != null) {
+                                    viewHolder.itemView.setPressed(true);
+                                    handler.postDelayed(() -> onPreferenceStartFragment(settingsFragment, preference), 600);
+                                } else {
+                                    recyclerView.scrollToPosition(position);
+                                    handler.postDelayed(() -> {
+                                        RecyclerView.ViewHolder reViewHolder = recyclerView.findViewHolderForAdapterPosition(position);
+                                        if (reViewHolder != null) {
+                                            reViewHolder.itemView.setPressed(true);
+                                        }
+                                    }, 100);
+                                    handler.postDelayed(() -> onPreferenceStartFragment(settingsFragment, preference), 700);
+                                }
                             }
                         }
-                    }
-                }, 400);
+                    }, 400);
+                }
+            } else {
+                finish();
             }
-        } else {
-            finish();
         }
     }
 
@@ -160,16 +159,24 @@ public class DiscussionSettingsActivity extends LockableActivity implements Pref
         if (discussionSettingsViewModel.isMessageNotificationModified()) {
             discussionSettingsViewModel.saveCustomMessageNotification();
         }
-        if (discussionSettingsViewModel.isEphemeralSettingsModified()) {
+        if (Boolean.TRUE.equals(ephemeralViewModel.getDefaultsLoaded().getValue())
+                && Boolean.TRUE.equals(ephemeralViewModel.getSettingsModified().getValue())
+                && !discussionSettingsViewModel.isLocked()
+                && !discussionSettingsViewModel.isNonAdminGroupDiscussion()) {
             AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                     .setTitle(R.string.dialog_title_shared_ephemeral_settings_modified)
                     .setMessage(R.string.dialog_message_shared_ephemeral_settings_modified)
                     .setNegativeButton(R.string.button_label_discard, (dialog, which) -> {
-                        discussionSettingsViewModel.discardEphemeralSettings();
+                        ephemeralViewModel.reset();
                         super.onBackPressed();
                     })
                     .setPositiveButton(R.string.button_label_update, (dialog, which) -> {
-                        discussionSettingsViewModel.saveEphemeralSettingsAndNotifyPeers();
+                        discussionSettingsViewModel.saveEphemeralSettingsAndNotifyPeers(
+                                ephemeralViewModel.getReadOnce(),
+                                ephemeralViewModel.getVisibility(),
+                                ephemeralViewModel.getExistence()
+                        );
+                        ephemeralViewModel.discardDefaults();
                         super.onBackPressed();
                     });
             builder.create().show();

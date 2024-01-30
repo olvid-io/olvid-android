@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <Preference
         android:title="@string/label_group_choose_admins"
@@ -35,30 +34,9 @@
         android:title="@string/pref_discussion_category_shared_ephemeral_settings_title"
         android:summary="@string/pref_discussion_category_shared_ephemeral_settings_summary">
 
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="pref_key_discussion_read_once"
-            android:title="@string/pref_discussion_read_once_title"
-            android:summary="@string/pref_discussion_read_once_summary"
-            android:icon="@drawable/ic_pref_read_once"
-            android:order="10"/>
-        <ListPreference
-            android:defaultValue="null"
-            android:key="pref_key_discussion_visibility_duration"
-            android:icon="@drawable/ic_pref_visibility"
-            android:title="@string/pref_discussion_visibility_duration_title"
-            tools:summary="@string/pref_discussion_visibility_duration_summary_null"
-            android:entries="@array/discussion_ephemeral_duration"
-            android:entryValues="@array/discussion_ephemeral_duration_values"
-            android:order="20"/>
-        <ListPreference
-            android:defaultValue="null"
-            android:key="pref_key_discussion_existence_duration"
-            android:icon="@drawable/ic_pref_existence"
-            android:title="@string/pref_discussion_existence_duration_title"
-            tools:summary="@string/pref_discussion_existence_duration_summary_null"
-            android:entries="@array/discussion_ephemeral_duration"
-            android:entryValues="@array/discussion_ephemeral_duration_values"
-            android:order="30"/>
+        <io.olvid.messenger.customClasses.ComposeViewPreference
+            android:key="pref_key_compose_ephemeral_settings"
+            android:order="10"
+            />
     </io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory>
 </PreferenceScreen>

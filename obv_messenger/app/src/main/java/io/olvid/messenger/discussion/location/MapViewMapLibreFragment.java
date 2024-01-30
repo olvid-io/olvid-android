@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -138,13 +138,17 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
 
     private String getStyleUrl() {
-        String language = SettingsActivity.getLocationOpenStreetMapLanguage();
-        if (language.equals("fr") || language.equals("en")) {
-            return String.format("%s/styles/%s-%s/style.json", osmServerUrl, OSM_STYLE_NAME, language);
+        if (SettingsActivity.getLocationIntegration() == SettingsActivity.LocationIntegrationEnum.OSM) {
+            String language = SettingsActivity.getLocationOpenStreetMapLanguage();
+            if (language != null) {
+                return String.format("%s/styles/%s-%s/style.json", osmServerUrl, OSM_STYLE_NAME, language);
+            }
+        } else if (SettingsActivity.getLocationIntegration() == SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM) {
+            return SettingsActivity.getLocationCustomOsmServerUrl();
         }
-        triedStyleFallbackUrl = true;
-        return String.format("%s/styles/%s/style.json", osmServerUrl, OSM_STYLE_NAME);
+        return getFallbackStyleUrl();
     }
+
     private String getFallbackStyleUrl() {
         triedStyleFallbackUrl = true;
         return String.format("%s/styles/%s/style.json", osmServerUrl, OSM_STYLE_NAME);
@@ -154,17 +158,18 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     public void onMapReady(@NonNull MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
 
-        mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
-
-        if (mapFragment.getView() != null && mapFragment.getView() instanceof MapView) {
+        View mapView = mapFragment.getView();
+        if (mapView instanceof MapView) {
             // if style loading fail
-            ((MapView) mapFragment.getView()).addOnDidFailLoadingMapListener((errorMessage) -> {
-                Logger.d("Language style not found, trying fallback style");
+            ((MapView) mapView).addOnDidFailLoadingMapListener((errorMessage) -> {
+                Logger.w("OSM style not found, trying fallback style");
                 if (!triedStyleFallbackUrl) {
                     mapboxMap.setStyle(new Style.Builder().fromUri(getFallbackStyleUrl()), this::onStyleLoaded);
                 }
             });
         }
+
+        mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
     }
 
     public void onStyleLoaded(Style style) {

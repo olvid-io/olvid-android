@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -35,11 +35,13 @@ import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -76,6 +78,7 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked;
 import io.olvid.messenger.databases.tasks.StartAttachmentDownloadTask;
 import io.olvid.messenger.databases.tasks.StopAttachmentDownloadTask;
+import io.olvid.messenger.discussion.compose.EphemeralViewModel;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.services.MediaPlayerService;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -418,16 +421,8 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                                 holder.hiddenContentTextView.setTextColor(ContextCompat.getColor(activity, R.color.orange));
                                 if (visibilityDuration == null) {
                                     holder.hiddenContentTextView.setText(null); // this should never happen
-                                } else if (visibilityDuration < 60L) {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_s, visibilityDuration));
-                                } else if (visibilityDuration < 3_600L) {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_m, visibilityDuration / 60L));
-                                } else if (visibilityDuration < 86_400L) {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_h, visibilityDuration / 3_600L));
-                                } else if (visibilityDuration < 31_536_000L) {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_d, visibilityDuration / 86_400L));
                                 } else {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_y, visibilityDuration / 31_536_000L));
+                                    holder.hiddenContentTextView.setText(EphemeralViewModel.Companion.visibilitySetting(visibilityDuration));
                                 }
                             }
                             break;
@@ -508,8 +503,8 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                     if (holder.musicFailed) {
                         holder.attachmentImageView.setImageResource(R.drawable.mime_type_icon_audio_failed);
                     } else {
-                        audioAttachmentServiceBinding.loadAudioAttachment(fyleAndStatus, holder);
                         holder.attachmentImageView.setImageResource(R.drawable.mime_type_icon_audio);
+                        audioAttachmentServiceBinding.loadAudioAttachment(fyleAndStatus, holder);
                     }
                 }
             }
@@ -654,6 +649,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
             switch (holder.type) {
                 case TYPE_AUDIO: {
                     if (holder.audioInfoBound) {
+                        holder.attachmentFileName.setText(fyleAndStatus.fyleMessageJoinWithStatus.fileName);
                         break;
                     }
                     // we deliberately fall through if audio info is not yet bound
@@ -843,7 +839,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                             }
                             // we do not mark as opened here as this is done in the gallery activity
                             if (discussionId != null){
-                                App.openDiscussionGalleryActivity(activity, discussionId, fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
+                                App.openDiscussionGalleryActivity(activity, discussionId, fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndStatus.fyleMessageJoinWithStatus.fyleId, true);
                             } else {
                                 App.openMessageGalleryActivity(activity, fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
                             }
@@ -898,6 +894,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
         final TextView audioPlayerCurrentTime;
         final TextView audioPlayerTotalTime;
         final TextView audioAttachmentNotPlayed;
+        final TextView playbackSpeedSelectionTextView;
         final ImageView speakerOutputImageView;
         final LinearLayout etaGroup;
         final TextView etaSpeed;
@@ -906,6 +903,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
         FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus;
         private boolean musicFailed;
         private boolean audioInfoBound;
+        private float playbackSpeed = 0f;
 
         @SuppressLint("ClickableViewAccessibility")
         AttachmentViewHolder(View itemView, int viewType) {
@@ -929,6 +927,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
             audioPlayerCurrentTime = itemView.findViewById(R.id.current_time_text_view);
             audioPlayerTotalTime = itemView.findViewById(R.id.total_time_text_view);
             audioAttachmentNotPlayed = itemView.findViewById(R.id.audio_attachment_unplayed);
+            playbackSpeedSelectionTextView = itemView.findViewById(R.id.playback_speed_selection_text_view);
             speakerOutputImageView = itemView.findViewById(R.id.speaker_output_image_view);
             etaGroup = itemView.findViewById(R.id.eta_group);
             etaSpeed = itemView.findViewById(R.id.eta_speed);
@@ -953,8 +952,11 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                     return false;
                 });
             }
-            if (speakerOutputImageView  != null) {
+            if (speakerOutputImageView != null) {
                 speakerOutputImageView.setOnClickListener(v -> audioAttachmentServiceBinding.toggleSpeakerOutput());
+            }
+            if (playbackSpeedSelectionTextView != null) {
+                playbackSpeedSelectionTextView.setOnClickListener(this);
             }
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
@@ -965,7 +967,31 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
 
         @Override
         public void onClick(View view) {
-            if (attachmentFyles != null) {
+            if (view.getId() == R.id.playback_speed_selection_text_view) {
+                PopupMenu popup = new PopupMenu(activity, view);
+                Menu menu = popup.getMenu();
+                menu.add(0, 1, 1, R.string.menu_action_play_at_1x);
+                menu.add(0, 2, 2, R.string.menu_action_play_at_1_5x);
+                menu.add(0, 3, 3, R.string.menu_action_play_at_2x);
+                popup.setOnMenuItemClickListener(item -> {
+                    switch (item.getItemId()) {
+                        case 1: {
+                            audioAttachmentServiceBinding.setPlaybackSpeed(1f);
+                            break;
+                        }
+                        case 2: {
+                            audioAttachmentServiceBinding.setPlaybackSpeed(1.5f);
+                            break;
+                        }
+                        case 3: {
+                            audioAttachmentServiceBinding.setPlaybackSpeed(2f);
+                            break;
+                        }
+                    }
+                    return true;
+                });
+                popup.show();
+            } else if (attachmentFyles != null) {
                 attachmentClicked(this.getLayoutPosition(), type, musicFailed, view);
             }
         }
@@ -1017,20 +1043,25 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
             if (playing) {
                 audioPlayerCurrentTime.setTextColor(ContextCompat.getColor(activity, R.color.olvid_gradient_light));
                 attachmentImageView.setImageResource(R.drawable.ic_pause);
+                if (playbackSpeed > 0.1f) {
+                    playbackSpeedSelectionTextView.setVisibility(View.VISIBLE);
+                }
             } else {
                 audioPlayerCurrentTime.setTextColor(ContextCompat.getColor(activity, R.color.grey));
                 attachmentImageView.setImageResource(R.drawable.ic_play);
+                playbackSpeedSelectionTextView.setVisibility(View.GONE);
             }
         }
 
         @Override
-        public void bindAudioInfo(AudioAttachmentServiceBinding.AudioInfo audioInfo, MediaPlayerService.AudioOutput audioOutput) {
+        public void bindAudioInfo(AudioAttachmentServiceBinding.AudioInfo audioInfo, MediaPlayerService.AudioOutput audioOutput, float playbackSpeed) {
             audioInfoBound = true;
             if (audioInfo.failed) {
                 audioPlayerGroup.setVisibility(View.GONE);
                 speakerOutputImageView.setVisibility(View.GONE);
                 attachmentMimeType.setVisibility(View.VISIBLE);
                 attachmentSize.setVisibility(View.VISIBLE);
+                playbackSpeedSelectionTextView.setVisibility(View.GONE);
                 attachmentImageView.setImageResource(R.drawable.mime_type_icon_audio_failed);
                 musicFailed = true;
             } else {
@@ -1049,6 +1080,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                         speakerOutputImageView.setImageResource(R.drawable.ic_speaker_bluetooth_grey);
                         break;
                 }
+                setPlaybackSpeed(playbackSpeed);
                 audioPlayerGroup.setVisibility(View.VISIBLE);
                 attachmentMimeType.setVisibility(View.INVISIBLE);
                 attachmentSize.setVisibility(View.INVISIBLE);
@@ -1086,6 +1118,24 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
             }
             if ((somethingPlaying && (audioOutput == MediaPlayerService.AudioOutput.PHONE)) != (activity.getVolumeControlStream() == AudioManager.STREAM_VOICE_CALL)) {
                 activity.setVolumeControlStream((somethingPlaying && (audioOutput == MediaPlayerService.AudioOutput.PHONE)) ? AudioManager.STREAM_VOICE_CALL : AudioManager.USE_DEFAULT_STREAM_TYPE);
+            }
+        }
+
+        @Override
+        public void setPlaybackSpeed(float playbackSpeed) {
+            this.playbackSpeed = playbackSpeed;
+            if (playbackSpeed < 0.1) {
+                playbackSpeedSelectionTextView.setText(null);
+                playbackSpeedSelectionTextView.setVisibility(View.GONE);
+            } else {
+                // For now, we support only 1x, 1.5x and 2x
+                if (playbackSpeed < 1.1f) {
+                    playbackSpeedSelectionTextView.setText(R.string.text_speed_1x);
+                } else if (playbackSpeed < 1.6f) {
+                    playbackSpeedSelectionTextView.setText(R.string.text_speed_1_5x);
+                } else {
+                    playbackSpeedSelectionTextView.setText(R.string.text_speed_2x);
+                }
             }
         }
 

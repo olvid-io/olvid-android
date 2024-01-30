@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -95,9 +95,13 @@ public class SettingsPojo_0 {
     public Long default_existence_duration;
 
     public String map_integration;
+    public String custom_osm_server;
     public String osm_language;
     public Long location_share_duration;
     public Long location_share_interval;
+    public Boolean disable_address_lookup;
+    public String custom_address_server;
+
 
     public Integer camera_resize_resolution;
     public Boolean remove_jpeg_metadata;
@@ -186,9 +190,12 @@ public class SettingsPojo_0 {
         settingsPojo.default_existence_duration = SettingsActivity.getDefaultDiscussionExistenceDuration();
 
         settingsPojo.map_integration = SettingsActivity.getLocationIntegration().getString();
+        settingsPojo.custom_osm_server = (SettingsActivity.getLocationIntegration() == SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM) ? SettingsActivity.getLocationCustomOsmServerUrl() : null;
         settingsPojo.osm_language = SettingsActivity.getLocationOpenStreetMapRawLanguage();
         settingsPojo.location_share_duration = SettingsActivity.getLocationDefaultSharingDurationValue();
         settingsPojo.location_share_interval = SettingsActivity.getLocationDefaultSharingIntervalValue();
+        settingsPojo.disable_address_lookup = SettingsActivity.getLocationDisableAddressLookup();
+        settingsPojo.custom_address_server = SettingsActivity.getLocationCustomAddressServer();
 
         settingsPojo.camera_resize_resolution = SettingsActivity.getCameraResolution();
         settingsPojo.remove_jpeg_metadata = SettingsActivity.getMetadataRemovalPreference();
@@ -317,10 +324,12 @@ public class SettingsPojo_0 {
         if (default_visibility_duration != null && default_visibility_duration > 0) { SettingsActivity.setDefaultDiscussionVisibilityDuration(default_visibility_duration); }
         if (default_existence_duration != null && default_existence_duration > 0) { SettingsActivity.setDefaultDiscussionExistenceDuration(default_existence_duration); }
 
-        if (map_integration != null) { SettingsActivity.setLocationIntegration(map_integration); }
+        if (map_integration != null) { SettingsActivity.setLocationIntegration(map_integration, custom_osm_server); }
         if (osm_language != null) { SettingsActivity.setLocationOpenStreetMapRawLanguage(osm_language); }
         if (location_share_duration != null) { SettingsActivity.setLocationDefaultSharingDurationValue(location_share_duration); }
         if (location_share_interval != null) { SettingsActivity.setLocationDefaultSharingIntervalValue(location_share_interval); }
+        if (disable_address_lookup != null) { SettingsActivity.setLocationDisableAddressLookup(disable_address_lookup); }
+        if (custom_address_server != null) { SettingsActivity.setLocationCustomAddressServer(custom_address_server); }
 
         if (camera_resize_resolution != null) { SettingsActivity.setCameraResolution(camera_resize_resolution); }
         if (remove_jpeg_metadata != null) { SettingsActivity.setMetadataRemovalPreference(remove_jpeg_metadata); }

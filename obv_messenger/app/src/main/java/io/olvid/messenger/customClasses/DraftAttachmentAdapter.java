@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -325,7 +325,7 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
         }
 
         @Override
-        public void bindAudioInfo(AudioAttachmentServiceBinding.AudioInfo audioInfo, MediaPlayerService.AudioOutput audioOutput) {
+        public void bindAudioInfo(AudioAttachmentServiceBinding.AudioInfo audioInfo, MediaPlayerService.AudioOutput audioOutput, float playbackSpeed) {
             if (audioInfo.failed) {
                 attachmentImageView.setImageResource(R.drawable.mime_type_icon_audio_failed);
             } else {
@@ -344,6 +344,11 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
             if ((somethingPlaying && (audioOutput == MediaPlayerService.AudioOutput.PHONE)) != (activity.getVolumeControlStream() == AudioManager.STREAM_VOICE_CALL)) {
                 activity.setVolumeControlStream((somethingPlaying && (audioOutput == MediaPlayerService.AudioOutput.PHONE)) ? AudioManager.STREAM_VOICE_CALL : AudioManager.USE_DEFAULT_STREAM_TYPE);
             }
+        }
+
+        @Override
+        public void setPlaybackSpeed(float playbackSpeed) {
+            // nothing to do here
         }
 
         @Override

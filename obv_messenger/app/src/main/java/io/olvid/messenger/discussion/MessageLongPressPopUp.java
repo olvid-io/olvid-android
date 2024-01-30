@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -68,6 +68,8 @@ import io.olvid.messenger.databases.tasks.CopySelectedMessageTask;
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask;
 import io.olvid.messenger.databases.tasks.ShareSelectedMessageTask;
 import io.olvid.messenger.databases.tasks.UpdateReactionsTask;
+import io.olvid.messenger.discussion.compose.emoji.EmojiClickListener;
+import io.olvid.messenger.discussion.compose.emoji.EmojiPickerViewFactory;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MessageLongPressPopUp {
@@ -456,7 +458,7 @@ public class MessageLongPressPopUp {
 
 
             if (emojiPickerView == null) {
-                EmojiPickerViewFactory.EmojiClickListener emojiClickListener = new EmojiPickerViewFactory.EmojiClickListener() {
+                EmojiClickListener emojiClickListener = new EmojiClickListener() {
                     @Override
                     public void onClick(String emoji) {
                         react(emoji);

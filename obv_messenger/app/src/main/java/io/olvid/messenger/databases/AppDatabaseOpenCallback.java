@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -252,6 +252,8 @@ public class AppDatabaseOpenCallback implements Runnable {
 
 
     private void syncEngineDatabases() {
+        Logger.d("🔁 Starting App database synchronisation");
+        long timestamp = System.currentTimeMillis();
         try {
             List<Contact> appContacts = db.contactDao().getAllSync();
             List<OwnedIdentity> appOwnedIdentities = db.ownedIdentityDao().getAll();
@@ -288,6 +290,9 @@ public class AppDatabaseOpenCallback implements Runnable {
             for (OwnedIdentity appOwnedIdentity: appOwnedIdentities) {
                 identitiesHashMap.put(new BytesKey(appOwnedIdentity.bytesOwnedIdentity), appOwnedIdentity);
             }
+
+            Logger.d("🔁 Warmup: " + (System.currentTimeMillis() - timestamp));
+            timestamp = System.currentTimeMillis();
 
             ObvIdentity[] ownedIdentities = engine.getOwnedIdentities();
             for (final ObvIdentity ownedIdentity: ownedIdentities) {
@@ -346,10 +351,15 @@ public class AppDatabaseOpenCallback implements Runnable {
                 }
                 identitiesHashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
 
+                Logger.d("🔁 Sync owned identity: " + (System.currentTimeMillis() - timestamp));
+                timestamp = System.currentTimeMillis();
+
                 ////////////////
                 // synchronize OwnedDevices
                 new OwnedDevicesSynchronisationWithEngineTask(ownedIdentity.getBytesIdentity()).run();
 
+                Logger.d("🔁 Sync devices: " + (System.currentTimeMillis() - timestamp));
+                timestamp = System.currentTimeMillis();
 
                 ////////////////
                 // synchronize Contacts for this OwnedIdentity
@@ -451,7 +461,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                             try {
                                 contact.setIdentityDetailsAndDisplayName(contactIdentity.getIdentityDetails());
                                 contact.photoUrl = photoUrl;
-                                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
+                                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.firstName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
                                 db.contactDao().updatePhotoUrl(contact.bytesOwnedIdentity, contact.bytesContactIdentity, photoUrl);
 
                                 Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
@@ -503,6 +513,8 @@ public class AppDatabaseOpenCallback implements Runnable {
                     }
                 }
 
+                Logger.d("🔁 Sync contacts: " + (System.currentTimeMillis() - timestamp));
+                timestamp = System.currentTimeMillis();
 
                 // synchronize Groups for this OwnedIdentity
                 {
@@ -554,7 +566,12 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         }
                                     }
 
-                                    newGroup.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid));
+                                    newGroup.groupMembersNames = StringUtils.joinContactDisplayNames(
+                                            SettingsActivity.getAllowContactFirstName() ?
+                                                    db.groupDao().getGroupMembersFirstNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid)
+                                                    :
+                                                    db.groupDao().getGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid)
+                                    );
                                     db.groupDao().updateGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid, newGroup.groupMembersNames);
 
                                     HashSet<BytesKey> declinedSet = new HashSet<>();
@@ -615,7 +632,12 @@ public class AppDatabaseOpenCallback implements Runnable {
                                             db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                                         }
 
-                                        finalGroup.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid));
+                                        finalGroup.groupMembersNames = StringUtils.joinContactDisplayNames(
+                                                SettingsActivity.getAllowContactFirstName() ?
+                                                        db.groupDao().getGroupMembersFirstNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid)
+                                                        :
+                                                        db.groupDao().getGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid)
+                                        );
                                         db.groupDao().updateGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid, finalGroup.groupMembersNames);
 
                                         if (finalGroup.bytesGroupOwnerIdentity == null && !contactToAdd.isEmpty()) { // owned group --> check the customization
@@ -680,6 +702,8 @@ public class AppDatabaseOpenCallback implements Runnable {
                     }
                 }
 
+                Logger.d("🔁 Sync groups v1: " + (System.currentTimeMillis() - timestamp));
+                timestamp = System.currentTimeMillis();
 
                 // synchronize groups V2
                 {
@@ -697,6 +721,10 @@ public class AppDatabaseOpenCallback implements Runnable {
                         groups2HashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
                     }
                 }
+
+
+                Logger.d("🔁 Sync groups v2: " + (System.currentTimeMillis() - timestamp));
+                timestamp = System.currentTimeMillis();
             }
 
             // now, process all hashmaps to remove app-side-only identities/groups
@@ -746,5 +774,6 @@ public class AppDatabaseOpenCallback implements Runnable {
             e.printStackTrace();
             Logger.w("Error syncing Room database with Engine database");
         }
+        Logger.d("🔁 Finished App database synchronisation");
     }
 }

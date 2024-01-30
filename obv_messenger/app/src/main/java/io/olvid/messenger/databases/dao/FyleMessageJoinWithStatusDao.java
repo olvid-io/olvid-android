@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -194,7 +194,8 @@ public interface FyleMessageJoinWithStatusDao {
             " AND " + FyleMessageJoinWithStatus.ENGINE_NUMBER + " = :attachmentNumber")
     FyleMessageJoinWithStatus getByIdAndAttachmentNumber(long messageId, Integer attachmentNumber);
 
-    @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
+
+    String IMAGE_AND_VIDEO_FOR_DISCUSSION_QUERY = "SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
             " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
@@ -203,10 +204,17 @@ public interface FyleMessageJoinWithStatusDao {
             " AND ( FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
             " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL) " +
             " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
-            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT;
+
+    @Query(IMAGE_AND_VIDEO_FOR_DISCUSSION_QUERY +
             " ORDER BY mess." + Message.SORT_INDEX + " ASC, " +
             " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
     LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForDiscussion(Long discussionId);
+
+    @Query(IMAGE_AND_VIDEO_FOR_DISCUSSION_QUERY +
+            " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
+            " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForDiscussionDescending(Long discussionId);
 
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -216,6 +224,67 @@ public interface FyleMessageJoinWithStatusDao {
             " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL) " +
             " ORDER BY FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
     LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusForMessage(long messageId);
+
+    @Query("SELECT fyle.*, FMjoin.*, " + "mess." + Message.TIMESTAMP + " AS " + Message.TIMESTAMP + " FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
+            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " WHERE mess." + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND ( FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
+            " OR FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + "= 'image/svg+xml' " +
+            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL) " +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
+            " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
+            " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
+    LiveData<List<FyleAndStatusTimestamped>> getGalleryMediasForDiscussion(Long discussionId);
+
+    @Query("SELECT fyle.*, FMjoin.*, " + "mess." + Message.TIMESTAMP + " AS " + Message.TIMESTAMP + " FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
+            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " WHERE mess." + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " = '" + OpenGraph.MIME_TYPE + "' " +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
+            " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
+            " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
+    LiveData<List<FyleAndStatusTimestamped>> getGalleryLinksForDiscussion(Long discussionId);
+
+    @Query("SELECT fyle.*, FMjoin.*, " + "mess." + Message.TIMESTAMP + " AS " + Message.TIMESTAMP + " FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
+            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " WHERE mess." + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "' " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'audio/%' " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'video/%' " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'image/%' " +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
+            " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
+            " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
+    LiveData<List<FyleAndStatusTimestamped>> getGalleryDocumentsForDiscussion(Long discussionId);
+
+    @Query("SELECT fyle.*, FMjoin.*, " + "mess." + Message.TIMESTAMP + " AS " + Message.TIMESTAMP + " FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
+            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " WHERE mess." + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'audio/%' " +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
+            " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
+            " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
+    LiveData<List<FyleAndStatusTimestamped>> getGalleryAudiosForDiscussion(Long discussionId);
 
 
     String IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY = "SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
@@ -365,6 +434,12 @@ public interface FyleMessageJoinWithStatusDao {
 
 
 
+    class FyleAndStatusTimestamped {
+        @Embedded
+        public FyleAndStatus fyleAndStatus;
+        public long timestamp;
+    }
+
     class FyleAndOrigin {
         @Embedded
         public FyleAndStatus fyleAndStatus;
@@ -391,13 +466,20 @@ public interface FyleMessageJoinWithStatusDao {
             return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonMetadata);
         }
 
-        public Uri getContentUri() {
+        public Uri getContentUriForExternalSharing() {
             if (fyle.sha256 == null) {
                 return null;
             }
             byte[] randomizer = new byte[16];
             new SecureRandom().nextBytes(randomizer);
             return Uri.parse(BuildConfig.CONTENT_PROVIDER_URI_PREFIX + Logger.toHexString(fyle.sha256) + "/" + fyleMessageJoinWithStatus.messageId + "/" + Logger.toHexString(randomizer));
+        }
+
+        public Uri getDeterministicContentUriForGallery() {
+            if (fyle.sha256 == null) {
+                return null;
+            }
+            return Uri.parse(BuildConfig.CONTENT_PROVIDER_URI_PREFIX + Logger.toHexString(fyle.sha256) + "/" + fyleMessageJoinWithStatus.messageId + "/00000000000000000000000000000000");
         }
 
         @Override

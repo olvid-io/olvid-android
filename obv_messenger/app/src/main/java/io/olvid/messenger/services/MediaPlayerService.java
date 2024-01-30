@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,6 +20,9 @@
 package io.olvid.messenger.services;
 
 
+import static androidx.media3.common.C.WAKE_MODE_LOCAL;
+
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -28,23 +31,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ServiceInfo;
-import android.media.AudioAttributes;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
-import android.os.PowerManager;
+import android.os.Looper;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.os.HandlerCompat;
 import androidx.media.AudioAttributesCompat;
 import androidx.media.AudioFocusRequestCompat;
 import androidx.media.AudioManagerCompat;
+import androidx.media3.common.C;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,7 +60,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import io.olvid.engine.Logger;
-import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.BytesKey;
@@ -82,7 +89,7 @@ public class MediaPlayerService extends Service {
 
     private final Timer timer = new Timer("MediaPlayerService-Timer");
 
-    private final NoExceptionSingleThreadExecutor executor = new NoExceptionSingleThreadExecutor("MediaPlayerService-Executor");
+    private final Handler mainThreadHandler = HandlerCompat.createAsync(Looper.getMainLooper());
     private final WiredHeadsetReceiver wiredHeadsetReceiver = new WiredHeadsetReceiver();
     private ConnectedDevicesCallback connectedDevicesCallback = null;
 
@@ -91,15 +98,17 @@ public class MediaPlayerService extends Service {
     private FyleMessageJoinWithStatusDao.FyleAndStatus loadedMedia;
     private boolean mediaPlaying = false;
     private boolean useSpeakerOutput = false;
+    private float playbackSpeed = 1f; // one of 1f, 1.5f or 2f
     private boolean wiredHeadsetConnected = false;
     private boolean bluetoothHeadsetConnected = false;
-    MediaPlayer mediaPlayer = null;
+    Player mediaPlayer = null;
     boolean mediaPlayerPrepared = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
         this.useSpeakerOutput = SettingsActivity.getUseSpeakerOutputForMediaPlayer();
+        this.playbackSpeed = SettingsActivity.getPlaybackSpeedForMediaPlayer();
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         registerReceivers();
     }
@@ -132,74 +141,109 @@ public class MediaPlayerService extends Service {
         stopTimer();
         timer.cancel();
         unregisterReceivers();
-        executor.shutdownNow();
     }
 
     public void loadMedia(@NonNull FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, @Nullable Long discussionId, long seekTimeMs) {
-        executor.execute(() -> {
-            this.discussionId = discussionId;
-            this.loadedMedia = fyleAndStatus;
-            this.mediaPlaying = false;
-            this.mediaTimeMs = 0;
+        this.discussionId = discussionId;
+        this.loadedMedia = fyleAndStatus;
+        this.mediaPlaying = false;
+        this.mediaTimeMs = 0;
 
-            for (PlaybackListener playbackListener : playbackListeners) {
-                playbackListener.onMediaChanged(new BytesKey(loadedMedia.fyle.sha256));
-                playbackListener.onProgress(seekTimeMs);
-            }
+        for (PlaybackListener playbackListener : playbackListeners) {
+            playbackListener.onMediaChanged(new BytesKey(loadedMedia.fyle.sha256));
+            playbackListener.onProgress(seekTimeMs);
+        }
 
-            startPlayback(seekTimeMs);
-        });
+        startPlayback(seekTimeMs);
     }
 
     public void setUseSpeakerOutput(boolean useSpeakerOutput) {
-        executor.execute(() -> {
-            if (useSpeakerOutput != this.useSpeakerOutput) {
-                this.useSpeakerOutput = useSpeakerOutput;
+        if (useSpeakerOutput != this.useSpeakerOutput) {
+            this.useSpeakerOutput = useSpeakerOutput;
 
-                if (mediaPlayer != null) {
-                    // a media is currently playing (or paused) --> restart the playback from the same point
-                    if (audioFocusRequest != null) {
-                        AudioManagerCompat.abandonAudioFocusRequest(audioManager, audioFocusRequest);
-                        audioFocusRequest = null;
+            if (mediaPlayer != null) {
+                // a media is currently playing (or paused) --> restart the playback from the same point
+                if (audioFocusRequest != null) {
+                    AudioManagerCompat.abandonAudioFocusRequest(audioManager, audioFocusRequest);
+                    audioFocusRequest = null;
+                }
+                internalRequestAudioFocus();
+
+                // re-prepare and re-start the playback
+                try {
+                    long seekTimeMs = mediaPlayer.getCurrentPosition();
+
+                    mediaPlayerPrepared = false;
+
+                    if (useSpeakerOutput) {
+                        mediaPlayer.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
+                                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                                .setUsage(C.USAGE_MEDIA)
+                                .build(), false);
+                    } else {
+                        mediaPlayer.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
+                                .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
+                                .setUsage(C.USAGE_VOICE_COMMUNICATION)
+                                .build(), false);
                     }
-                    internalRequestAudioFocus();
 
-                    // re-prepare and re-start the playback
-                    try {
-                        long seekTimeMs = mediaPlayer.getCurrentPosition();
+                    mediaPlayer.setMediaItem(MediaItem.fromUri(App.absolutePathFromRelative(loadedMedia.fyle.filePath)));
 
-                        mediaPlayerPrepared = false;
-                        mediaPlayer.reset();
-                        if (useSpeakerOutput) {
-                            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
-                                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                                    .build());
-                        } else {
-                            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
-                                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                                    .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-                                    .build());
-                        }
-                        mediaPlayer.setDataSource(App.absolutePathFromRelative(loadedMedia.fyle.filePath));
-                        mediaPlayer.setOnCompletionListener(mp -> stopPlayback());
-                        mediaPlayer.prepare();
-                        mediaPlayer.seekTo((int) seekTimeMs);
-                        mediaPlayerPrepared = true;
-                        if (mediaPlaying) {
-                            try {
-                                Thread.sleep(200);
-                            } catch (InterruptedException ignored) { }
-                            mediaPlayer.start();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    mediaPlayer.prepare();
+                    mediaPlayer.seekTo((int) seekTimeMs);
+                    mediaPlayerPrepared = true;
+                    if (mediaPlaying) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException ignored) {}
+                        internalSetPlaybackSpeed(false);
+                        mediaPlayer.play();
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-        });
+        }
     }
 
+    public void internalSetPlaybackSpeed(boolean showToast) {
+        if (mediaPlayer.getAvailableCommands().contains(Player.COMMAND_SET_SPEED_AND_PITCH)) {
+            mediaPlayer.setPlaybackSpeed(playbackSpeed);
+            for (PlaybackListener playbackListener : playbackListeners) {
+                playbackListener.onPlaybackSpeedChange(playbackSpeed);
+            }
+        } else {
+            if (showToast) {
+                App.toast(R.string.toast_message_playback_speed_not_supported_on_device, Toast.LENGTH_SHORT);
+            }
+
+            for (PlaybackListener playbackListener : playbackListeners) {
+                playbackListener.onPlaybackSpeedChange(0);
+            }
+        }
+    }
+
+    public void setPlaybackSpeed(float playbackSpeed) {
+        if (playbackSpeed != this.playbackSpeed) {
+            this.playbackSpeed = playbackSpeed;
+            SettingsActivity.setPlaybackSpeedForMediaPlayer(playbackSpeed);
+
+            if (mediaPlayer != null) {
+               internalSetPlaybackSpeed(true);
+            }
+        }
+    }
+
+    public float getPlaybackSpeed() {
+        if (mediaPlayer != null && mediaPlayer.getAvailableCommands().contains(Player.COMMAND_SET_SPEED_AND_PITCH)) {
+            return playbackSpeed;
+        } else {
+            return 0;
+        }
+    }
+
+
+    @SuppressLint("ForegroundServiceType")
     private void internalStartForeground(boolean paused) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, AndroidNotificationManager.MEDIA_PLAYER_SERVICE_NOTIFICATION_CHANNEL_ID);
         builder.setContentTitle(getString(R.string.notification_title_now_playing))
@@ -320,31 +364,41 @@ public class MediaPlayerService extends Service {
 
         try {
             if (mediaPlayer == null) {
-                mediaPlayer = new MediaPlayer();
-                mediaPlayer.setLooping(false);
-                mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-            } else {
-                mediaPlayer.setOnCompletionListener(null);
+                mediaPlayer = new ExoPlayer.Builder(this)
+                        .setWakeMode(WAKE_MODE_LOCAL)
+                        .build();
+                mediaPlayer.addListener(
+                        new Player.Listener() {
+                            @Override
+                            public void onPlaybackStateChanged(int playbackState) {
+                                Player.Listener.super.onPlaybackStateChanged(playbackState);
+                                if (playbackState == Player.STATE_ENDED) {
+                                    //player back ended
+                                    stopPlayback();
+                                }
+                            }
+                        });
             }
             mediaPlayerPrepared = false;
-            mediaPlayer.reset();
+
             if (useSpeakerOutput) {
-                mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build());
+                mediaPlayer.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
+                        .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                        .setUsage(C.USAGE_MEDIA)
+                        .build(), false);
             } else {
-                mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                        .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-                        .build());
+                mediaPlayer.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
+                        .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
+                        .setUsage(C.USAGE_VOICE_COMMUNICATION)
+                        .build(), false);
             }
-            mediaPlayer.setDataSource(App.absolutePathFromRelative(loadedMedia.fyle.filePath));
-            mediaPlayer.setOnCompletionListener(mp -> stopPlayback());
+
+            mediaPlayer.setMediaItem(MediaItem.fromUri(App.absolutePathFromRelative(loadedMedia.fyle.filePath)));
             mediaPlayer.prepare();
             mediaPlayer.seekTo((int) seekTimeMs);
             mediaPlayerPrepared = true;
-            mediaPlayer.start();
+            internalSetPlaybackSpeed(false);
+            mediaPlayer.play();
             startTimer();
             mediaPlaying = true;
             for (PlaybackListener playbackListener : playbackListeners) {
@@ -352,7 +406,7 @@ public class MediaPlayerService extends Service {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            for (PlaybackListener playbackListener: playbackListeners) {
+            for (PlaybackListener playbackListener : playbackListeners) {
                 playbackListener.onFail(loadedMedia);
             }
             stopPlayback();
@@ -360,11 +414,11 @@ public class MediaPlayerService extends Service {
     }
 
     private void startTimer() {
-        executor.execute(() -> {
-            if (timerTask == null) {
-                timerTask = new TimerTask() {
-                    @Override
-                    public void run() {
+        if (timerTask == null) {
+            timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    mainThreadHandler.post(() -> {
                         if (mediaPlayer != null && mediaPlayerPrepared) {
                             try {
                                 long timeMs = mediaPlayer.getCurrentPosition();
@@ -375,74 +429,67 @@ public class MediaPlayerService extends Service {
                                 // do nothing
                             }
                         }
-                    }
-                };
-                timer.scheduleAtFixedRate(timerTask, PROGRESS_UPDATE_TIME_MS, PROGRESS_UPDATE_TIME_MS);
-            }
-        });
+                    });
+                }
+            };
+            timer.scheduleAtFixedRate(timerTask, PROGRESS_UPDATE_TIME_MS, PROGRESS_UPDATE_TIME_MS);
+        }
     }
 
     private void stopTimer() {
-        executor.execute(() -> {
-            if (timerTask != null) {
-                timerTask.cancel();
-                timerTask = null;
-            }
-        });
+        if (timerTask != null) {
+            timerTask.cancel();
+            timerTask = null;
+        }
     }
 
     private void pausePlayback() {
-        executor.execute(() -> {
-            if (mediaPlayer != null && mediaPlayerPrepared) {
-                internalStartForeground(true);
-                stopForeground(false);
-                mediaPlayer.pause();
-                stopTimer();
-                mediaPlaying = false;
-                for (PlaybackListener playbackListener : playbackListeners) {
-                    playbackListener.onPause();
-                }
+        if (mediaPlayer != null && mediaPlayerPrepared) {
+            internalStartForeground(true);
+            stopForeground(false);
+            mediaPlayer.pause();
+            stopTimer();
+            mediaPlaying = false;
+            for (PlaybackListener playbackListener : playbackListeners) {
+                playbackListener.onPause();
             }
-        });
+        }
     }
 
     private void unPausePlayback() {
-        executor.execute(() -> {
-            if (mediaPlayer != null && mediaPlayerPrepared) {
-                if (!mediaPlaying) {
-                    internalStartForeground(false);
-                    mediaPlayer.start();
-                    startTimer();
-                    mediaPlaying = true;
-                    for (PlaybackListener playbackListener : playbackListeners) {
-                        playbackListener.onPlay();
-                    }
+        if (mediaPlayer != null && mediaPlayerPrepared) {
+            if (!mediaPlaying) {
+                internalStartForeground(false);
+                internalSetPlaybackSpeed(false);
+                mediaPlayer.play();
+                startTimer();
+                mediaPlaying = true;
+                for (PlaybackListener playbackListener : playbackListeners) {
+                    playbackListener.onPlay();
                 }
             }
-        });
+        }
     }
 
     private void stopPlayback() {
-        executor.execute(() -> {
-            for (PlaybackListener playbackListener : playbackListeners) {
-                playbackListener.onStop();
-            }
-            loadedMedia = null;
-            stopTimer();
-            if (mediaPlayer != null) {
-                mediaPlayerPrepared = false;
-                mediaPlayer.release();
-                mediaPlayer = null;
-            }
-            if (audioFocusRequest != null) {
-                AudioManagerCompat.abandonAudioFocusRequest(audioManager, audioFocusRequest);
-                audioFocusRequest = null;
-            }
-            stopForeground(true);
-            if (playbackListeners.isEmpty()) {
-                stopSelf();
-            }
-        });
+        for (PlaybackListener playbackListener : playbackListeners) {
+            playbackListener.onStop();
+        }
+        loadedMedia = null;
+        stopTimer();
+        if (mediaPlayer != null) {
+            mediaPlayerPrepared = false;
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        if (audioFocusRequest != null) {
+            AudioManagerCompat.abandonAudioFocusRequest(audioManager, audioFocusRequest);
+            audioFocusRequest = null;
+        }
+        stopForeground(true);
+        if (playbackListeners.isEmpty()) {
+            stopSelf();
+        }
     }
 
     @Override
@@ -469,29 +516,26 @@ public class MediaPlayerService extends Service {
     }
 
     public void addPlaybackListener(@NonNull PlaybackListener playbackListener) {
-        executor.execute(() -> {
-            this.playbackListeners.add(playbackListener);
+        this.playbackListeners.add(playbackListener);
 
-            updateAudioOutputs();
-            if (loadedMedia != null) {
-                playbackListener.onMediaChanged(new BytesKey(loadedMedia.fyle.sha256));
-                if (mediaPlaying) {
-                    playbackListener.onPlay();
-                } else {
-                    playbackListener.onPause();
-                }
-                playbackListener.onProgress(mediaTimeMs);
+        updateAudioOutputs();
+        if (loadedMedia != null) {
+            playbackListener.onMediaChanged(new BytesKey(loadedMedia.fyle.sha256));
+            if (mediaPlaying) {
+                playbackListener.onPlay();
+            } else {
+                playbackListener.onPause();
             }
-        });
+            Logger.e("addPlaybackListener " + mediaTimeMs);
+            playbackListener.onProgress(mediaTimeMs);
+        }
     }
 
     public void removePlaybackListener(@NonNull PlaybackListener playbackListener) {
-        executor.execute(() -> {
-            this.playbackListeners.remove(playbackListener);
-            if (!mediaPlaying && this.playbackListeners.isEmpty()) {
-                stopPlayback();
-            }
-        });
+        this.playbackListeners.remove(playbackListener);
+        if (!mediaPlaying && this.playbackListeners.isEmpty()) {
+            stopPlayback();
+        }
     }
 
     @Nullable
@@ -508,16 +552,22 @@ public class MediaPlayerService extends Service {
 
     public interface PlaybackListener {
         void onMediaChanged(BytesKey bytesKey);
+
         void onPause();
+
         void onPlay();
+
         void onProgress(long timeMs);
+
         void onStop();
+
         void onFail(FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus);
+
         void onSpeakerOutputChange(AudioOutput audioOutput);
+
+        // when called with playbackSpeed == 0, this means the current mediaplayer does not support playback speed change
+        void onPlaybackSpeedChange(float playbackSpeed);
     }
-
-
-
 
 
     private void registerReceivers() {
@@ -545,10 +595,8 @@ public class MediaPlayerService extends Service {
             if (intent.getAction() == null || !AudioManager.ACTION_HEADSET_PLUG.equals(intent.getAction())) {
                 return;
             }
-            executor.execute(() -> {
-                wiredHeadsetConnected = (1 == intent.getIntExtra("state", 0));
-                updateAudioOutputs();
-            });
+            wiredHeadsetConnected = (1 == intent.getIntExtra("state", 0));
+            updateAudioOutputs();
         }
     }
 
@@ -567,18 +615,16 @@ public class MediaPlayerService extends Service {
         }
 
         private void refreshDevices() {
-            executor.execute(() -> {
-                wiredHeadsetConnected = false;
-                bluetoothHeadsetConnected = false;
-                for (AudioDeviceInfo audioDeviceInfo : audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
-                    if (audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET) {
-                        wiredHeadsetConnected = true;
-                    } else if (audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP) {
-                        bluetoothHeadsetConnected = true;
-                    }
+            wiredHeadsetConnected = false;
+            bluetoothHeadsetConnected = false;
+            for (AudioDeviceInfo audioDeviceInfo : audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
+                if (audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET) {
+                    wiredHeadsetConnected = true;
+                } else if (audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP) {
+                    bluetoothHeadsetConnected = true;
                 }
-                updateAudioOutputs();
-            });
+            }
+            updateAudioOutputs();
         }
     }
 
@@ -591,36 +637,36 @@ public class MediaPlayerService extends Service {
 
     // must be called on executor
     private void updateAudioOutputs() {
-        if (wiredHeadsetConnected) {
-            setUseSpeakerOutput(true);
-            for (PlaybackListener playbackListener : playbackListeners) {
-                playbackListener.onSpeakerOutputChange(AudioOutput.HEADSET);
+        mainThreadHandler.post(() -> {
+            if (wiredHeadsetConnected) {
+                setUseSpeakerOutput(true);
+                for (PlaybackListener playbackListener : playbackListeners) {
+                    playbackListener.onSpeakerOutputChange(AudioOutput.HEADSET);
+                }
+            } else if (bluetoothHeadsetConnected) {
+                setUseSpeakerOutput(true);
+                for (PlaybackListener playbackListener : playbackListeners) {
+                    playbackListener.onSpeakerOutputChange(AudioOutput.BLUETOOTH);
+                }
+            } else {
+                boolean useSpeakerOutput = SettingsActivity.getUseSpeakerOutputForMediaPlayer();
+                for (PlaybackListener playbackListener : playbackListeners) {
+                    playbackListener.onSpeakerOutputChange(useSpeakerOutput ? AudioOutput.LOUDSPEAKER : AudioOutput.PHONE);
+                }
+                setUseSpeakerOutput(useSpeakerOutput);
             }
-        } else if (bluetoothHeadsetConnected) {
-            setUseSpeakerOutput(true);
-            for (PlaybackListener playbackListener : playbackListeners) {
-                playbackListener.onSpeakerOutputChange(AudioOutput.BLUETOOTH);
-            }
-        } else {
-            boolean useSpeakerOutput = SettingsActivity.getUseSpeakerOutputForMediaPlayer();
-            for (PlaybackListener playbackListener : playbackListeners) {
-                playbackListener.onSpeakerOutputChange(useSpeakerOutput ? AudioOutput.LOUDSPEAKER : AudioOutput.PHONE);
-            }
-            setUseSpeakerOutput(useSpeakerOutput);
-        }
+        });
     }
 
 
     public void toggleAudioOutput() {
-        executor.execute(() -> {
-            // if a wired/bluetooth headset is connected, toggling the output has no effect
-            if (!wiredHeadsetConnected && !bluetoothHeadsetConnected) {
-                SettingsActivity.setUseSpeakerOutputForMediaPlayer(!useSpeakerOutput);
-                for (PlaybackListener playbackListener : playbackListeners) {
-                    playbackListener.onSpeakerOutputChange(!useSpeakerOutput ? AudioOutput.LOUDSPEAKER : AudioOutput.PHONE);
-                }
-                setUseSpeakerOutput(!useSpeakerOutput);
+        // if a wired/bluetooth headset is connected, toggling the output has no effect
+        if (!wiredHeadsetConnected && !bluetoothHeadsetConnected) {
+            SettingsActivity.setUseSpeakerOutputForMediaPlayer(!useSpeakerOutput);
+            for (PlaybackListener playbackListener : playbackListeners) {
+                playbackListener.onSpeakerOutputChange(!useSpeakerOutput ? AudioOutput.LOUDSPEAKER : AudioOutput.PHONE);
             }
-        });
+            setUseSpeakerOutput(!useSpeakerOutput);
+        }
     }
 }

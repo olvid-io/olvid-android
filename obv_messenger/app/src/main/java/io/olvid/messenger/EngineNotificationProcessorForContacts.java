@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -152,7 +152,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                             try {
                                 createdContact = new Contact(contactIdentity.getBytesIdentity(), bytesOwnedIdentity, contactIdentity.getIdentityDetails(), hasUntrustedPublishedDetails, null, contactIdentity.isKeycloakManaged(), contactIdentity.isActive(), oneToOne, trustLevel);
                                 if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                                    AppSingleton.updateCachedCustomDisplayName(createdContact.bytesContactIdentity, createdContact.getCustomDisplayName());
+                                    AppSingleton.updateCachedCustomDisplayName(createdContact.bytesContactIdentity, createdContact.getCustomDisplayName(), createdContact.getFirstNameOrCustom());
                                     AppSingleton.updateCachedKeycloakManaged(createdContact.bytesContactIdentity, createdContact.keycloakManaged);
                                     AppSingleton.updateCachedActive(createdContact.bytesContactIdentity, createdContact.active);
                                     AppSingleton.updateCachedOneToOne(createdContact.bytesContactIdentity, createdContact.oneToOne);

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -124,22 +124,25 @@ class LinkPreviewRepository {
         }
     }
 
-    suspend fun decodeOpenGraph(fyle: Fyle): OpenGraph? {
+    suspend fun decodeOpenGraph(fyle: Fyle, fallbackUrl: String?): OpenGraph? {
         return withContext(Dispatchers.IO) {
-            cache.get(fyle.filePath) ?: try {
-                FileInputStream(App.absolutePathFromRelative(fyle.filePath)).use { fis ->
-                    ByteArrayOutputStream().use { byteArrayOutputStream ->
-                        val buffer = ByteArray(262144)
-                        var c: Int
-                        while (fis.read(buffer).also { c = it } != -1) {
-                            byteArrayOutputStream.write(buffer, 0, c)
+            fyle.filePath?.let {
+                cache.get(fyle.filePath) ?: try {
+                    FileInputStream(App.absolutePathFromRelative(fyle.filePath)).use { fis ->
+                        ByteArrayOutputStream().use { byteArrayOutputStream ->
+                            val buffer = ByteArray(262144)
+                            var c: Int
+                            while (fis.read(buffer).also { c = it } != -1) {
+                                byteArrayOutputStream.write(buffer, 0, c)
+                            }
+                            OpenGraph.of(Encoded(byteArrayOutputStream.toByteArray()), fallbackUrl)
+                                .also { cache.put(fyle.filePath, it) }
                         }
-                        OpenGraph.of(Encoded(byteArrayOutputStream.toByteArray())).also { cache.put(fyle.filePath, it) }
                     }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    null
                 }
-            } catch (e: IOException) {
-                e.printStackTrace()
-                null
             }
         }
     }

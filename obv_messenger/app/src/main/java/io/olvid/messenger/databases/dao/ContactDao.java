@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -42,13 +42,19 @@ public interface ContactDao {
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.IDENTITY_DETAILS + " = :identityDetails, " +
             Contact.DISPLAY_NAME + " = :displayName, " +
+            Contact.FIRST_NAME + " = :firstName, " +
             Contact.CUSTOM_DISPLAY_NAME + " = :customDisplayName, " +
             Contact.SORT_DISPLAY_NAME + " = :sortDisplayName, " +
             Contact.FULL_SEARCH_DISPLAY_NAME + " = :fullSearchDisplayName " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateAllDisplayNames(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String identityDetails, String displayName, String customDisplayName, byte[] sortDisplayName, String fullSearchDisplayName);
+    void updateAllDisplayNames(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String identityDetails, String displayName, String firstName, String customDisplayName, byte[] sortDisplayName, String fullSearchDisplayName);
 
+    @Query("UPDATE " + Contact.TABLE_NAME +
+            " SET " + Contact.FIRST_NAME + " = :firstName " +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
+    void updateFirstName(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String firstName);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.KEYCLOAK_MANAGED + " = :keycloakManaged " +
@@ -164,13 +170,6 @@ public interface ContactDao {
             " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
     LiveData<List<Contact>> getAllForOwnedIdentityWithChannelAndGroupV2Capability(byte[] ownedIdentityBytes);
-
-    @Query("SELECT COUNT(*) > 0 FROM " + Contact.TABLE_NAME +
-            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND " + Contact.ACTIVE + " = 1 " +
-            " AND " + Contact.CAPABILITY_GROUPS_V2 + " = 0 " +
-            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 ")
-    LiveData<Boolean> nonGroupV2ContactExists(byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +

@@ -207,6 +207,9 @@
         <activity android:name=".gallery.GalleryActivity"
             android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".discussion.gallery.DiscussionMediaGalleryActivity"
+            android:configChanges="orientation|screenSize|screenLayout"
+            android:theme="@style/AppTheme.NoActionBar.Black"/>
         <activity
             android:name=".activities.ShareActivity"
             android:taskAffinity=""

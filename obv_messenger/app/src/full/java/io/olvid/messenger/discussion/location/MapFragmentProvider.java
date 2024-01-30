@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -25,6 +25,7 @@ public class MapFragmentProvider {
     public static MapViewAbstractFragment getMapFragmentForProvider(SettingsActivity.LocationIntegrationEnum integration) {
         switch (integration) {
             case OSM:
+            case CUSTOM_OSM:
                 return new MapViewMapLibreFragment();
             case MAPS:
                 return new MapViewGoogleMapsFragment();

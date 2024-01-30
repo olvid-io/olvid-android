@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -127,7 +127,7 @@ class OnboardingFlowActivity : AppCompatActivity() {
             addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             addFlags(WindowManager.LayoutParams.FLAG_SECURE)
             setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-            // todo use WindowInsets for android 30
+            // TODO use WindowInsets for android 30
         }
 
         val transferSource = intent.getBooleanExtra(TRANSFER_SOURCE_INTENT_EXTRA, false)

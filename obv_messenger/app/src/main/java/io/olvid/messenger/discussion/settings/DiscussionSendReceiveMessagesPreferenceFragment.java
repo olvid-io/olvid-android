@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -87,7 +87,7 @@ public class DiscussionSendReceiveMessagesPreferenceFragment extends PreferenceF
     }
 
     @Override
-    public void onSettingsChanged(DiscussionCustomization discussionCustomization) {
+    public void onSettingsChanged(@Nullable DiscussionCustomization discussionCustomization) {
         if (readReceiptPreference != null) {
             readReceiptPreference.setValue(discussionSettingsDataStore.getString(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_READ_RECEIPT, "null"));
         }

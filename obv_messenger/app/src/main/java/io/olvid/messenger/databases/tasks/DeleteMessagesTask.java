@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -155,68 +155,11 @@ public class DeleteMessagesTask implements Runnable {
                             break;
                     }
                     fyles.add(fyleAndStatus.fyle);
-
-                    // delete the fyle message join for deleteEverywhere, as the cascade delete will not work
-                    if (deleteEverywhere && !wholeDiscussion) {
-                        db.fyleMessageJoinWithStatusDao().delete(fyleAndStatus.fyleMessageJoinWithStatus);
-                    }
                 }
             }
         }
 
-        if (deleteEverywhere && !wholeDiscussion) {
-            List<Message> infoMessages = new ArrayList<>();
-            // simply wipe the messages
-            long timestamp = System.currentTimeMillis();
-            for (Message message : messages) {
-                switch (message.messageType) {
-                    case Message.TYPE_GROUP_MEMBER_JOINED:
-                    case Message.TYPE_GROUP_MEMBER_LEFT:
-                    case Message.TYPE_LEFT_GROUP:
-                    case Message.TYPE_CONTACT_DELETED:
-                    case Message.TYPE_DISCUSSION_SETTINGS_UPDATE:
-                    case Message.TYPE_DISCUSSION_REMOTELY_DELETED:
-                    case Message.TYPE_PHONE_CALL:
-                    case Message.TYPE_NEW_PUBLISHED_DETAILS:
-                    case Message.TYPE_CONTACT_INACTIVE_REASON:
-                    case Message.TYPE_CONTACT_RE_ADDED:
-                    case Message.TYPE_RE_JOINED_GROUP:
-                    case Message.TYPE_JOINED_GROUP:
-                    case Message.TYPE_GAINED_GROUP_ADMIN:
-                    case Message.TYPE_LOST_GROUP_ADMIN:
-                    case Message.TYPE_SCREEN_SHOT_DETECTED:
-                    case Message.TYPE_MEDIATOR_INVITATION_SENT:
-                    case Message.TYPE_MEDIATOR_INVITATION_ACCEPTED:
-                    case Message.TYPE_MEDIATOR_INVITATION_IGNORED:
-                    case Message.TYPE_GAINED_GROUP_SEND_MESSAGE:
-                    case Message.TYPE_LOST_GROUP_SEND_MESSAGE:
-                        infoMessages.add(message);
-                        break;
-                    default:
-                        if (bytesOwnedIdentity == null) {
-                            Logger.e("Error: called DeleteMessagesTask with null bytesOwnedIdentity and deleteEverywhere!");
-                        } else {
-                            message.remoteDelete(db, bytesOwnedIdentity, timestamp);
-                        }
-                        if (message.wipedAttachmentCount == 0 && message.totalAttachmentCount != 0) {
-                            message.wipedAttachmentCount = message.totalAttachmentCount;
-                            message.totalAttachmentCount = 0;
-                            message.imageCount = 0;
-                            message.imageResolutions = null;
-                            db.messageDao().updateAttachmentCount(message.id, 0, 0, message.wipedAttachmentCount, null);
-                        }
-                        if (message.linkPreviewFyleId != null) {
-                            message.linkPreviewFyleId = null;
-                            db.messageDao().updateLinkPreviewFyleId(message.id, null);
-                        }
-                        break;
-                }
-            }
-            int size = infoMessages.size();
-            for (int i = 0; i < size; i += BATCH_SIZE) {
-                db.messageDao().delete(infoMessages.subList(i, Math.min(i + BATCH_SIZE, size)).toArray(new Message[0]));
-            }
-        } else {
+        {
             // actually delete the messages
             int size = messages.size();
             for (int i = 0; i < size; i += BATCH_SIZE) {

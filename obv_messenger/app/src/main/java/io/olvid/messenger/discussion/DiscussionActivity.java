@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -117,10 +117,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -177,6 +179,9 @@ import io.olvid.messenger.databases.tasks.ReplaceDiscussionDraftTask;
 import io.olvid.messenger.databases.tasks.SaveDraftTask;
 import io.olvid.messenger.databases.tasks.SaveMultipleAttachmentsTask;
 import io.olvid.messenger.databases.tasks.SetDraftReplyTask;
+import io.olvid.messenger.discussion.compose.ComposeMessageFragment;
+import io.olvid.messenger.discussion.compose.ComposeMessageViewModel;
+import io.olvid.messenger.discussion.compose.EphemeralViewModel;
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.discussion.location.FullscreenMapDialogFragment;
@@ -267,8 +272,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
     private Boolean locked = null;
 
-    private List<Long> messageIdsToMarkAsRead;
-    private List<Long> editedMessageIdsToMarkAsSeen;
+    private Set<Long> messageIdsToMarkAsRead;
+    private Set<Long> editedMessageIdsToMarkAsSeen;
     private long latestServerTimestampOfMessageToMarkAsRead = 0;
     private Runnable toolbarClickedCallback;
 
@@ -353,9 +358,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         rootBackgroundImageView = findViewById(R.id.discussion_root_background_imageview);
 
 
-        messageIdsToMarkAsRead = new ArrayList<>();
+        messageIdsToMarkAsRead = new HashSet<>();
         latestServerTimestampOfMessageToMarkAsRead = 0;
-        editedMessageIdsToMarkAsSeen = new ArrayList<>();
+        editedMessageIdsToMarkAsSeen = new HashSet<>();
 
         composeMessageFragment = new ComposeMessageFragment();
         composeMessageDelegate = composeMessageFragment.getComposeMessageDelegate();
@@ -907,7 +912,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
         // keep values and save draft after edit mode is on
         Message previousDraft = composeMessageViewModel.getDraftMessage().getValue();
-        Pair<String, List<JsonUserMention>> trimAndMentions = Utils.removeProtectionFEFFsAndTrim(composeMessageViewModel.getRawNewMessageText(), mentionViewModel.getMentions());
+        CharSequence rawText = composeMessageViewModel.getRawNewMessageText();
+        Pair<String, List<JsonUserMention>> trimAndMentions = Utils.removeProtectionFEFFsAndTrim(rawText == null ? "" : rawText, mentionViewModel.getMentions());
         App.runThread(new SaveDraftTask(discussionViewModel.getDiscussionId(), trimAndMentions.first, previousDraft, trimAndMentions.second));
         composeMessageViewModel.setDraftMessageEdit(message);
         if (composeMessageDelegate != null) {
@@ -1355,6 +1361,15 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 toolbarClickedCallback.run();
             }
             return true;
+        } else if (itemId == R.id.action_gallery) {
+            if (discussionViewModel.getDiscussionId() != null) {
+                 Discussion discussion = discussionViewModel.getDiscussion().getValue();
+                if (discussion != null) {
+                    markAsReadOnPause = false;
+                    App.openDiscussionMediaGalleryActivity(DiscussionActivity.this, discussion.id);
+                }
+            }
+            return true;
         } else if (itemId == R.id.action_settings) {
             if (discussionViewModel.getDiscussionId() != null) {
                 markAsReadOnPause = false;
@@ -1523,6 +1538,19 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     messageRecyclerView.smoothScrollToPosition(concatAdapter.getItemCount() - 1);
                 } else {
                     messageRecyclerView.scrollToPosition(concatAdapter.getItemCount() - 1);
+                    // when scrolling to the bottom, also mark all discussion messages read on exit
+                    List<Message> messages = discussionViewModel.getMessages().getValue();
+                    if (messages != null) {
+                        for (Message message : messages) {
+                            if (message.status == Message.STATUS_UNREAD
+                                    || message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ) {
+                                messageIdsToMarkAsRead.add(message.id);
+                            }
+                            if (message.edited == Message.EDITED_UNSEEN) {
+                                editedMessageIdsToMarkAsSeen.add(message.id);
+                            }
+                        }
+                    }
                 }
             }
         } else if (id == R.id.discussion_location_sharing_fab) {
@@ -1534,6 +1562,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             // open a map showing every sharing identity
             switch (SettingsActivity.getLocationIntegration()) {
                 case OSM:
+                case CUSTOM_OSM:
                 case MAPS: {
                     new FullscreenMapDialogFragment(null, discussionViewModel.getDiscussionId(), SettingsActivity.getLocationIntegration())
                             .show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
@@ -1804,7 +1833,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         } else if (itemId == R.id.popup_action_open_attachment) {
             if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(PreviewUtils.getNonNullMimeType(longClickedFyleAndStatus.fyleMessageJoinWithStatus.mimeType, longClickedFyleAndStatus.fyleMessageJoinWithStatus.fileName)) && SettingsActivity.useInternalImageViewer()) {
                 // we do not mark as opened here as this is done in the gallery activity
-                App.openDiscussionGalleryActivity(this, discussionViewModel.getDiscussionId(), longClickedFyleAndStatus.fyleMessageJoinWithStatus.messageId, longClickedFyleAndStatus.fyleMessageJoinWithStatus.fyleId);
+                App.openDiscussionGalleryActivity(this, discussionViewModel.getDiscussionId(), longClickedFyleAndStatus.fyleMessageJoinWithStatus.messageId, longClickedFyleAndStatus.fyleMessageJoinWithStatus.fyleId, true);
                 markAsReadOnPause = false;
             } else {
                 App.openFyleInExternalViewer(this, longClickedFyleAndStatus, () -> {
@@ -1816,7 +1845,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         } else if (itemId == R.id.popup_action_share_attachment) {
             if (longClickedFyleAndStatus != null) {
                 Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_STREAM, longClickedFyleAndStatus.getContentUri());
+                intent.putExtra(Intent.EXTRA_STREAM, longClickedFyleAndStatus.getContentUriForExternalSharing());
                 intent.setType(longClickedFyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
                 startActivity(Intent.createChooser(intent, getString(R.string.title_sharing_chooser)));
             }
@@ -3020,16 +3049,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                 if (discussion != null) {
                                     App.runThread(new InboundEphemeralMessageClicked(discussion.bytesOwnedIdentity, message.id));
                                 }
-                            } else if (expiration.getVisibilityDuration() < 60L) {
-                                holder.ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_s, expiration.getVisibilityDuration()));
-                            } else if (expiration.getVisibilityDuration() < 3_600L) {
-                                holder.ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_m, expiration.getVisibilityDuration() / 60L));
-                            } else if (expiration.getVisibilityDuration() < 86_400L) {
-                                holder.ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_h, expiration.getVisibilityDuration() / 3_600L));
-                            } else if (expiration.getVisibilityDuration() < 31_536_000L) {
-                                holder.ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_d, expiration.getVisibilityDuration() / 86_400L));
                             } else {
-                                holder.ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_y, expiration.getVisibilityDuration() / 31_536_000L));
+                                holder.ephemeralTimerTextView.setText(EphemeralViewModel.Companion.visibilitySetting(expiration.getVisibilityDuration()));
                             }
                         }
                     }
@@ -3373,17 +3394,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             if (jsonSharedSettings.getJsonExpiration().getVisibilityDuration() != null) {
                                 holder.settingsUpdateVisibilityDuration.setVisibility(View.VISIBLE);
                                 long duration = jsonSharedSettings.getJsonExpiration().getVisibilityDuration();
-                                if (duration < 60) {
-                                    holder.settingsUpdateVisibilityDuration.setText(getString(R.string.text_visible_timer_s, duration));
-                                } else if (duration < 3600) {
-                                    holder.settingsUpdateVisibilityDuration.setText(getString(R.string.text_visible_timer_m, duration / 60));
-                                } else if (duration < 86400) {
-                                    holder.settingsUpdateVisibilityDuration.setText(getString(R.string.text_visible_timer_h, duration / 3600));
-                                } else if (duration < 31536000) {
-                                    holder.settingsUpdateVisibilityDuration.setText(getString(R.string.text_visible_timer_d, duration / 86400));
-                                } else {
-                                    holder.settingsUpdateVisibilityDuration.setText(getString(R.string.text_visible_timer_y, duration / 31536000));
-                                }
+                                holder.settingsUpdateVisibilityDuration.setText(EphemeralViewModel.Companion.visibilitySetting(duration));
                                 ephemeral = true;
                             } else {
                                 holder.settingsUpdateVisibilityDuration.setVisibility(View.GONE);
@@ -3391,17 +3402,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             if (jsonSharedSettings.getJsonExpiration().getExistenceDuration() != null) {
                                 holder.settingsUpdateExistenceDuration.setVisibility(View.VISIBLE);
                                 long duration = jsonSharedSettings.getJsonExpiration().getExistenceDuration();
-                                if (duration < 60) {
-                                    holder.settingsUpdateExistenceDuration.setText(getString(R.string.text_existence_timer_s, duration));
-                                } else if (duration < 3600) {
-                                    holder.settingsUpdateExistenceDuration.setText(getString(R.string.text_existence_timer_m, duration / 60));
-                                } else if (duration < 86400) {
-                                    holder.settingsUpdateExistenceDuration.setText(getString(R.string.text_existence_timer_h, duration / 3600));
-                                } else if (duration < 31536000) {
-                                    holder.settingsUpdateExistenceDuration.setText(getString(R.string.text_existence_timer_d, duration / 86400));
-                                } else {
-                                    holder.settingsUpdateExistenceDuration.setText(getString(R.string.text_existence_timer_y, duration / 31536000));
-                                }
+                                holder.settingsUpdateExistenceDuration.setText(EphemeralViewModel.Companion.existenceSetting(duration));
                                 ephemeral = true;
                             } else {
                                 holder.settingsUpdateExistenceDuration.setVisibility(View.GONE);
@@ -3729,6 +3730,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 public void onClick(View v) {
                     switch (SettingsActivity.getLocationIntegration()) {
                         case OSM:
+                        case CUSTOM_OSM:
                         case MAPS: {
                             // if a map integration is configured: open fullscreen map (behaviour will change depending on message.locationType)
                             new FullscreenMapDialogFragment(message, discussionViewModel.getDiscussionId(), SettingsActivity.getLocationIntegration())
@@ -3749,10 +3751,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         case NONE:
                         default: {
                             // if no integration is configured, offer to choose an integration
-                            new LocationIntegrationSelectorDialog(DiscussionActivity.this, (SettingsActivity.LocationIntegrationEnum integration) -> {
-                                SettingsActivity.setLocationIntegration(integration.getString());
+                            new LocationIntegrationSelectorDialog(DiscussionActivity.this, false, (SettingsActivity.LocationIntegrationEnum integration, String customOsmServerUrl) -> {
+                                SettingsActivity.setLocationIntegration(integration.getString(), customOsmServerUrl);
                                 // re-run onClick if something was selected
-                                if (integration == SettingsActivity.LocationIntegrationEnum.OSM || integration == SettingsActivity.LocationIntegrationEnum.MAPS || integration == SettingsActivity.LocationIntegrationEnum.BASIC) {
+                                if (integration == SettingsActivity.LocationIntegrationEnum.OSM || integration == SettingsActivity.LocationIntegrationEnum.MAPS || integration == SettingsActivity.LocationIntegrationEnum.BASIC || integration == SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM) {
                                     this.onClick(v);
                                 }
                             }).show();
@@ -3815,7 +3817,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     builder.create()
                             .show();
                 } else if (itemId == R.id.popup_action_location_message_change_integration) {
-                    new LocationIntegrationSelectorDialog(DiscussionActivity.this, (SettingsActivity.LocationIntegrationEnum integration) -> SettingsActivity.setLocationIntegration(integration.getString())).show();
+                    new LocationIntegrationSelectorDialog(DiscussionActivity.this, true, (SettingsActivity.LocationIntegrationEnum integration, String customOsmServerUrl) -> SettingsActivity.setLocationIntegration(integration.getString(), customOsmServerUrl)).show();
                 }
                 return true;
             });
@@ -3831,8 +3833,15 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         }
 
         private void openLocationPreviewInGallery(Message message) {
-            // we use -1 as fyleId as there is only one attachment and we do not need to fetch it's fyleId
-            App.openMessageGalleryActivity(DiscussionActivity.this, message.id, -1);
+            App.runThread(() -> {
+                List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(message.id);
+                if (fyleAndStatuses.size() == 1) {
+                    App.openDiscussionGalleryActivity(DiscussionActivity.this, discussionViewModel.getDiscussionId(), message.id, fyleAndStatuses.get(0).fyle.id, true);
+                } else {
+                    // in case we don't have a single attachment, simply open the message gallery... This should never happen :)
+                    App.openMessageGalleryActivity(DiscussionActivity.this, message.id, -1);
+                }
+            });
         }
 
         private class SwipeCallback extends ItemTouchHelper.SimpleCallback implements MessageAttachmentAdapter.BlockMessageSwipeListener {
@@ -4068,7 +4077,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
             private final ImageView callBackButton;
             private final TextView callDurationTextView;
-            private final ImageView newDetailsIcon;
             private final ImageView newDetailsRedDot;
             private final Observer<Integer> newDetailsObserver;
 
@@ -4137,7 +4145,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         @Override
                         public boolean onDoubleTap(@NonNull MotionEvent e) {
                             Message message = messages.get(getBindingAdapterPosition() - 1);
-                            if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                            if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
+                                    && message.wipeStatus != Message.WIPE_STATUS_WIPED
+                                    && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
+                                    && !message.isLocationMessage()) {
                                 enterEditMode(messages.get(getBindingAdapterPosition() - 1));
                                 return true;
                             }
@@ -4317,26 +4328,21 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 }
 
                 if (viewType == ViewType.NEW_PUBLISHED_DETAILS) {
-                    newDetailsIcon = itemView.findViewById(R.id.new_published_details_icon);
                     newDetailsRedDot = itemView.findViewById(R.id.new_published_details_red_dot);
                     newDetailsObserver = (Integer publishedDetailsStatus) -> {
                         if (publishedDetailsStatus != null) {
                             switch (publishedDetailsStatus) {
                                 case Group.PUBLISHED_DETAILS_NEW_UNSEEN: // same as Contact.PUBLISHED_DETAILS_NEW_UNSEEN
-                                    newDetailsIcon.setVisibility(View.VISIBLE);
                                     newDetailsRedDot.setVisibility(View.VISIBLE);
                                     return;
                                 case Group.PUBLISHED_DETAILS_NEW_SEEN: // same as Contact.PUBLISHED_DETAILS_NEW_SEEN
-                                    newDetailsIcon.setVisibility(View.VISIBLE);
                                     newDetailsRedDot.setVisibility(View.GONE);
                                     return;
                             }
                         }
-                        newDetailsIcon.setVisibility(View.GONE);
                         newDetailsRedDot.setVisibility(View.GONE);
                     };
                 } else {
-                    newDetailsIcon = null;
                     newDetailsRedDot = null;
                     newDetailsObserver = null;
                 }
@@ -4392,17 +4398,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     if (remaining < 0) {
                         remaining = 0;
                     }
-                    if (remaining < 60) {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_s, remaining));
-                    } else if (remaining < 3_600) {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_m, remaining / 60));
-                    } else if (remaining < 86_400) {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_h, remaining / 3_600));
-                    } else if (remaining < 31_536_000L) {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_d, remaining / 86_400));
-                    } else {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_y, remaining / 31_536_000));
-                    }
+                    ephemeralTimerTextView.setText(EphemeralViewModel.Companion.visibilitySetting(remaining));
                 }
 
                 // still show the expiration timer outside the message if there is one

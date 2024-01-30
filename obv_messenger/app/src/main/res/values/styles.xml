@@ -28,6 +28,10 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="AppTheme.NoActionBar.Black">
+        <item name="android:windowBackground">@color/black</item>
+    </style>
+
     <style name="AppTheme.NoActionBar.LightBlueStatusBar">
         <item name="android:windowBackground">@color/almostWhite</item>
         <item name="android:statusBarColor">@color/olvid_gradient_light</item>

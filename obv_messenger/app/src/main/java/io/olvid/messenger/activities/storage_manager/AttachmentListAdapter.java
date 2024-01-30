@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,7 +26,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -79,7 +78,6 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentFromAllMessagesTask;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.discussion.DiscussionActivity;
-import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.services.MediaPlayerService;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -429,13 +427,6 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                             }
                             App.openOwnedIdentityGalleryActivity(activity, AppSingleton.getBytesCurrentIdentity(), sortOrder, viewModel.getCurrentSortOrder().ascending, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
                         }
-                    } else if (fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().equals(OpenGraph.MIME_TYPE)) {
-                        OpenGraph openGraph = new OpenGraph();
-                        openGraph.setUrl(fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fileName);
-                        Uri uri = openGraph.getSafeUri();
-                        if (uri != null) {
-                            App.openLink(activity, uri);
-                        }
                     } else {
                         App.openFyleInExternalViewer(activity, fyleAndOrigin.fyleAndStatus, null);
                     }
@@ -463,7 +454,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         }
 
         @Override
-        public void bindAudioInfo(AudioAttachmentServiceBinding.AudioInfo audioInfo, MediaPlayerService.AudioOutput audioOutput) {
+        public void bindAudioInfo(AudioAttachmentServiceBinding.AudioInfo audioInfo, MediaPlayerService.AudioOutput audioOutput, float playbackSpeed) {
             if (audioInfo.failed) {
                 attachmentImageView.setImageResource(R.drawable.mime_type_icon_audio_failed);
             } else {
@@ -482,6 +473,11 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
             if ((somethingPlaying && (audioOutput == MediaPlayerService.AudioOutput.PHONE)) != (activity.getVolumeControlStream() == AudioManager.STREAM_VOICE_CALL)) {
                 activity.setVolumeControlStream((somethingPlaying && (audioOutput == MediaPlayerService.AudioOutput.PHONE)) ? AudioManager.STREAM_VOICE_CALL : AudioManager.USE_DEFAULT_STREAM_TYPE);
             }
+        }
+
+        @Override
+        public void setPlaybackSpeed(float playbackSpeed) {
+            // nothing to do here
         }
 
         @Override

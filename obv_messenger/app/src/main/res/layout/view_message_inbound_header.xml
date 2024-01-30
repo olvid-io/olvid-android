@@ -205,9 +205,10 @@
 
     <ImageView
         android:id="@+id/direct_delete_image_view"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="3dp"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginBottom="-6dp"
+        android:translationY="-4dp"
         android:visibility="gone"
         tools:visibility="visible"
         android:background="?attr/selectableItemBackgroundBorderless"

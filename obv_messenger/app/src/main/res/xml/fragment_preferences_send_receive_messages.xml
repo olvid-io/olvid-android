@@ -52,6 +52,14 @@
         android:icon="@drawable/ic_pref_retain_wiped"
         android:defaultValue="false" />
 
+    <SwitchPreference
+        android:order="21"
+        android:key="pref_key_retain_remote_deleted_messages"
+        android:title="@string/pref_retain_remote_deleted_messages_title"
+        android:summary="@string/pref_retain_remote_deleted_messages_summary"
+        android:icon="@drawable/ic_pref_retain_remote_deleted"
+        android:defaultValue="true" />
+
     <io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory
         android:order="30"
         app:iconSpaceReserved="false"

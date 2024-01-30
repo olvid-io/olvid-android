@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -64,9 +64,6 @@ class OpenGraphParser {
                     OG_TITLE -> {
                         openGraphResult.title = tag.attr(OPEN_GRAPH_KEY)
                     }
-                    OG_SITE_NAME -> {
-                        openGraphResult.siteName = tag.attr(OPEN_GRAPH_KEY)
-                    }
                     OG_TYPE -> {
                         openGraphResult.type = tag.attr(OPEN_GRAPH_KEY)
                     }
@@ -104,7 +101,7 @@ class OpenGraphParser {
         private const val OG_IMAGE = "og:image"
         private const val OG_DESCRIPTION = "og:description"
         private const val OG_TITLE = "og:title"
-        private const val OG_SITE_NAME = "og:site_name"
+//        private const val OG_SITE_NAME = "og:site_name"
         private const val OG_TYPE = "og:type"
     }
 }

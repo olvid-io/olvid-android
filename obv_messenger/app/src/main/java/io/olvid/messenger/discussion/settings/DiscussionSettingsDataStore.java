@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -172,38 +172,6 @@ public class DiscussionSettingsDataStore extends PreferenceDataStore {
                 });
                 break;
             }
-            case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_VISIBILITY_DURATION: {
-                if (value == null) {
-                    break;
-                }
-                Long visibilityDuration = null;
-                if (!"null".equals(value)) {
-                    try {
-                        visibilityDuration = Long.parseLong(value);
-                    } catch (Exception e) {
-                        // do nothing
-                    }
-                }
-                discussionSettingsViewModel.setSettingsVisibilityDuration(visibilityDuration);
-                discussionSettingsViewModel.notifySettingsChangedListeners(discussionSettingsViewModel.getDiscussionCustomization().getValue());
-                break;
-            }
-            case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_EXISTENCE_DURATION: {
-                if (value == null) {
-                    break;
-                }
-                Long existenceDuration = null;
-                if (!"null".equals(value)) {
-                    try {
-                        existenceDuration = Long.parseLong(value);
-                    } catch (Exception e) {
-                        // do nothing
-                    }
-                }
-                discussionSettingsViewModel.setSettingsExistenceDuration(existenceDuration);
-                discussionSettingsViewModel.notifySettingsChangedListeners(discussionSettingsViewModel.getDiscussionCustomization().getValue());
-                break;
-            }
             case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_RETENTION_COUNT: {
                 if (value == null) {
                     break;
@@ -352,11 +320,6 @@ public class DiscussionSettingsDataStore extends PreferenceDataStore {
                         (DiscussionCustomization discussionCustomization) -> discussionCustomization.prefMuteNotifications = value);
                 break;
             }
-            case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_READ_ONCE: {
-                discussionSettingsViewModel.setSettingsReadOnce(value);
-                discussionSettingsViewModel.notifySettingsChangedListeners(discussionSettingsViewModel.getDiscussionCustomization().getValue());
-                break;
-            }
         }
     }
 
@@ -386,9 +349,6 @@ public class DiscussionSettingsDataStore extends PreferenceDataStore {
                     return discussionCustomization.shouldMuteNotifications();
                 }
                 return false;
-            }
-            case DiscussionSettingsActivity.PREF_KEY_DISCUSSION_READ_ONCE: {
-                return discussionSettingsViewModel.getSettingsReadOnce();
             }
             default:
                 return false;

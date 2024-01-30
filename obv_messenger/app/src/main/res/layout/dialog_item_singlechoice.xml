@@ -11,7 +11,7 @@
     android:gravity="center_vertical"
     android:minHeight="48dp"
     android:textColor="@color/almostBlack"
-    android:textSize="18sp"
+    android:textSize="16sp"
     tools:text="Test text"
     android:ellipsize="end"
     app:drawableStartCompat="@drawable/radio_circle" />

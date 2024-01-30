@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -274,97 +274,110 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
             if (messageShouldBeRemoteDeleted) {
                 // a request to remote delete the received message was already received!
-                Pair<Long, Boolean> transactionResult = db.runInTransaction(() -> {
-                    boolean sendExpireIntent = false;
 
-                    final Message message;
-                    if (messageSender.type == MessageSender.Type.CONTACT) {
-                        message = new Message(
-                                db,
-                                jsonMessage.getSenderSequenceNumber(),
-                                jsonMessage,
-                                jsonReturnReceipt,
-                                obvMessage.getServerTimestamp(),
-                                Message.STATUS_READ,
-                                Message.TYPE_INBOUND_MESSAGE,
-                                discussion.id,
-                                obvMessage.getIdentifier(),
-                                messageSender.getSenderIdentity(),
-                                jsonMessage.getSenderThreadIdentifier(),
-                                0,
-                                0
-                        );
-                    } else {
-                        message = new Message(
-                                db,
-                                jsonMessage.getSenderSequenceNumber(),
-                                jsonMessage,
-                                jsonReturnReceipt,
-                                obvMessage.getServerTimestamp(),
-                                Message.STATUS_SENT_FROM_ANOTHER_DEVICE,
-                                Message.TYPE_OUTBOUND_MESSAGE,
-                                discussion.id,
-                                obvMessage.getIdentifier(),
-                                messageSender.getSenderIdentity(),
-                                jsonMessage.getSenderThreadIdentifier(),
-                                0,
-                                0
-                        );
-                    }
-                    message.missedMessageCount = processSequenceNumber(db, discussion.id, messageSender.getSenderIdentity(), jsonMessage.getSenderThreadIdentifier(), jsonMessage.getSenderSequenceNumber());
-                    message.contentBody = null;
-                    message.jsonLocation = null;
-                    message.locationType = Message.LOCATION_TYPE_NONE;
-                    message.jsonReply = null;
-                    message.forwarded = false;
-                    message.mentioned = false;
-                    message.edited = Message.EDITED_NONE;
-                    message.wipeStatus = Message.WIPE_STATUS_REMOTE_DELETED;
-                    message.wipedAttachmentCount = obvMessage.getAttachments().length;
-                    message.limitedVisibility = false;
-
-                    message.id = db.messageDao().insert(message);
-
-                    if (discussion.updateLastMessageTimestamp(obvMessage.getServerTimestamp())) {
-                        db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
-                    }
-
-                    db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_UPLOADED, obvMessage.getServerTimestamp()));
-                    db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_DELIVERED, System.currentTimeMillis()));
-                    db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_REMOTE_DELETED, remoteDeleteAndEditRequest.serverTimestamp, remoteDeleteAndEditRequest.remoteDeleter));
-
-                    if (jsonExpiration != null) {
-                        if (jsonExpiration.getExistenceDuration() != null) {
-                            long elapsedTimeBeforeDownload = obvMessage.getDownloadTimestamp() - obvMessage.getServerTimestamp();
-                            if (elapsedTimeBeforeDownload < 0) {
-                                elapsedTimeBeforeDownload = 0;
-                            }
-                            long expirationTimestamp = obvMessage.getLocalDownloadTimestamp() + jsonExpiration.getExistenceDuration() * 1000L - elapsedTimeBeforeDownload;
-                            MessageExpiration messageExpiration = new MessageExpiration(message.id, expirationTimestamp, false);
-                            db.messageExpirationDao().insert(messageExpiration);
-                            sendExpireIntent = true;
-                        }
-                    }
-
+                // check if we should keep a trace of this remote deleted message
+                if (Arrays.equals(messageSender.bytesOwnedIdentity, remoteDeleteAndEditRequest.remoteDeleter)
+                        || !SettingsActivity.getRetainRemoteDeletedMessages()) {
+                    // no need to create a "remote deleted message"
                     db.remoteDeleteAndEditRequestDao().delete(remoteDeleteAndEditRequest);
                     db.reactionRequestDao().delete(reactionRequests.toArray(new ReactionRequest[0]));
+                    if (jsonReturnReceipt != null) {
+                        AppSingleton.getEngine().sendReturnReceipt(messageSender.bytesOwnedIdentity, messageSender.getSenderIdentity(), Message.RETURN_RECEIPT_STATUS_DELIVERED, jsonReturnReceipt.nonce, jsonReturnReceipt.key, null);
+                    }
+                } else {
+                    // we create a "remote deleted message"
+                    Pair<Long, Boolean> transactionResult = db.runInTransaction(() -> {
+                        boolean sendExpireIntent = false;
 
-                    return new Pair<>(message.id, sendExpireIntent);
-                });
+                        final Message message;
+                        if (messageSender.type == MessageSender.Type.CONTACT) {
+                            message = new Message(
+                                    db,
+                                    jsonMessage.getSenderSequenceNumber(),
+                                    jsonMessage,
+                                    jsonReturnReceipt,
+                                    obvMessage.getServerTimestamp(),
+                                    Message.STATUS_READ,
+                                    Message.TYPE_INBOUND_MESSAGE,
+                                    discussion.id,
+                                    obvMessage.getIdentifier(),
+                                    messageSender.getSenderIdentity(),
+                                    jsonMessage.getSenderThreadIdentifier(),
+                                    0,
+                                    0
+                            );
+                        } else {
+                            message = new Message(
+                                    db,
+                                    jsonMessage.getSenderSequenceNumber(),
+                                    jsonMessage,
+                                    jsonReturnReceipt,
+                                    obvMessage.getServerTimestamp(),
+                                    Message.STATUS_SENT_FROM_ANOTHER_DEVICE,
+                                    Message.TYPE_OUTBOUND_MESSAGE,
+                                    discussion.id,
+                                    obvMessage.getIdentifier(),
+                                    messageSender.getSenderIdentity(),
+                                    jsonMessage.getSenderThreadIdentifier(),
+                                    0,
+                                    0
+                            );
+                        }
+                        message.missedMessageCount = processSequenceNumber(db, discussion.id, messageSender.getSenderIdentity(), jsonMessage.getSenderThreadIdentifier(), jsonMessage.getSenderSequenceNumber());
+                        message.contentBody = null;
+                        message.jsonLocation = null;
+                        message.locationType = Message.LOCATION_TYPE_NONE;
+                        message.jsonReply = null;
+                        message.forwarded = false;
+                        message.mentioned = false;
+                        message.edited = Message.EDITED_NONE;
+                        message.wipeStatus = Message.WIPE_STATUS_REMOTE_DELETED;
+                        message.wipedAttachmentCount = obvMessage.getAttachments().length;
+                        message.limitedVisibility = false;
 
-                if (transactionResult.second) {
-                    App.runThread(MessageExpirationService::scheduleNextExpiration);
-                }
+                        message.id = db.messageDao().insert(message);
 
-                Message message = db.messageDao().get(transactionResult.first);
-                if (message == null) {
-                    Logger.w("Failed to insert new message in db.");
-                    return;
-                }
+                        if (discussion.updateLastMessageTimestamp(obvMessage.getServerTimestamp())) {
+                            db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                        }
 
-                if (jsonReturnReceipt != null) {
-                    // send DELIVERED return receipt
-                    message.sendMessageReturnReceipt(discussion, Message.RETURN_RECEIPT_STATUS_DELIVERED);
+                        db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_UPLOADED, obvMessage.getServerTimestamp()));
+                        db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_DELIVERED, System.currentTimeMillis()));
+                        db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_REMOTE_DELETED, remoteDeleteAndEditRequest.serverTimestamp, remoteDeleteAndEditRequest.remoteDeleter));
+
+                        if (jsonExpiration != null) {
+                            if (jsonExpiration.getExistenceDuration() != null) {
+                                long elapsedTimeBeforeDownload = obvMessage.getDownloadTimestamp() - obvMessage.getServerTimestamp();
+                                if (elapsedTimeBeforeDownload < 0) {
+                                    elapsedTimeBeforeDownload = 0;
+                                }
+                                long expirationTimestamp = obvMessage.getLocalDownloadTimestamp() + jsonExpiration.getExistenceDuration() * 1000L - elapsedTimeBeforeDownload;
+                                MessageExpiration messageExpiration = new MessageExpiration(message.id, expirationTimestamp, false);
+                                db.messageExpirationDao().insert(messageExpiration);
+                                sendExpireIntent = true;
+                            }
+                        }
+
+                        db.remoteDeleteAndEditRequestDao().delete(remoteDeleteAndEditRequest);
+                        db.reactionRequestDao().delete(reactionRequests.toArray(new ReactionRequest[0]));
+
+                        return new Pair<>(message.id, sendExpireIntent);
+                    });
+
+                    if (transactionResult.second) {
+                        App.runThread(MessageExpirationService::scheduleNextExpiration);
+                    }
+
+                    Message message = db.messageDao().get(transactionResult.first);
+                    if (message == null) {
+                        Logger.w("Failed to insert new message in db.");
+                        return;
+                    }
+
+                    if (jsonReturnReceipt != null) {
+                        // send DELIVERED return receipt
+                        message.sendMessageReturnReceipt(discussion, Message.RETURN_RECEIPT_STATUS_DELIVERED);
+                    }
                 }
 
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
@@ -882,10 +895,14 @@ public class HandleNewMessageNotificationTask implements Runnable {
                         UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussion.id, true);
                     }
 
-                    db.runInTransaction(() -> {
-                        message.remoteDelete(db, messageSender.getSenderIdentity(), serverTimestamp);
-                        message.deleteAttachments(db);
-                    });
+                    if (messageSender.type == MessageSender.Type.OWNED_IDENTITY || !SettingsActivity.getRetainRemoteDeletedMessages()) {
+                        db.runInTransaction(() -> message.delete(db));
+                    } else {
+                        db.runInTransaction(() -> {
+                            message.remoteDelete(db, messageSender.getSenderIdentity(), serverTimestamp);
+                            message.deleteAttachments(db);
+                        });
+                    }
                     AndroidNotificationManager.remoteDeleteMessageNotification(discussion, message.id);
                 }
             } else {

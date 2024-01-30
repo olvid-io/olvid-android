@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -23,12 +23,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.switchMap
-import io.olvid.messenger.AppSingleton
-import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
-import io.olvid.messenger.databases.entity.OwnedIdentity
-import io.olvid.messenger.settings.SettingsActivity
 
 class GroupCreationViewModel : ViewModel() {
     var selectedContacts: List<Contact>? = null
@@ -50,21 +45,8 @@ class GroupCreationViewModel : ViewModel() {
     val chooseAdmins = MutableLiveData(false)
     val admins = MutableLiveData<HashSet<Contact>>(hashSetOf())
 
-    // ephemeral settings
-    var settingsReadOnce = SettingsActivity.getDefaultDiscussionReadOnce()
-    var settingsVisibilityDuration: Long? =
-        SettingsActivity.getDefaultDiscussionVisibilityDuration()
-    var settingsExistenceDuration: Long? = SettingsActivity.getDefaultDiscussionExistenceDuration()
-
     private val selectedTab = MutableLiveData<Int>()
     val subtitleLiveData = SubtitleLiveData(selectedContactCount, selectedTab)
-    private val searchOpenedLiveData = MutableLiveData(false)
-    val showGroupV2WarningLiveData = ShowGroupV2WarningLiveData(
-        searchOpenedLiveData,
-        AppSingleton.getCurrentIdentityLiveData().switchMap { currentOwnedIdentity: OwnedIdentity ->
-            AppDatabase.getInstance().contactDao()
-                .nonGroupV2ContactExists(currentOwnedIdentity.bytesOwnedIdentity)
-        })
 
     fun isCustomGroup(): LiveData<Boolean> {
         return customGroup
@@ -75,10 +57,6 @@ class GroupCreationViewModel : ViewModel() {
     }
     fun setSelectedTab(selectedTab: Int) {
         this.selectedTab.postValue(selectedTab)
-    }
-
-    fun setSearchOpened(opened: Boolean) {
-        searchOpenedLiveData.postValue(opened)
     }
 
     class SubtitleLiveData(
@@ -101,33 +79,6 @@ class GroupCreationViewModel : ViewModel() {
         private fun selectedTabChanged(selectedTab: Int?) {
             this.selectedTab = selectedTab ?: GroupCreationActivity.CONTACTS_SELECTION_TAB
             postValue(Pair(this.selectedTab, selectedContactCount))
-        }
-    }
-
-    class ShowGroupV2WarningLiveData(
-        searchOpenedLiveData: LiveData<Boolean>,
-        nonGroupV2ContactLiveData: LiveData<Boolean>
-    ) : MediatorLiveData<Boolean?>() {
-        private var searchOpened = false
-        private var nonGroupV2Contact = false
-
-        init {
-            addSource(
-                searchOpenedLiveData, ::searchOpenedChanged
-            )
-            addSource(
-                nonGroupV2ContactLiveData, ::nonGroupV2ContactChanged
-            )
-        }
-
-        private fun searchOpenedChanged(searchOpened: Boolean?) {
-            this.searchOpened = searchOpened != null && searchOpened
-            postValue(nonGroupV2Contact && !this.searchOpened)
-        }
-
-        private fun nonGroupV2ContactChanged(nonGroupV2Contact: Boolean?) {
-            this.nonGroupV2Contact = nonGroupV2Contact != null && nonGroupV2Contact
-            postValue(this.nonGroupV2Contact && !searchOpened)
         }
     }
 }

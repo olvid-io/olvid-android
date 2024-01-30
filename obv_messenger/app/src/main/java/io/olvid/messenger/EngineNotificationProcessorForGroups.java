@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -139,7 +139,11 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                             db.pendingGroupMemberDao().insert(pendingGroupMember);
                         }
 
-                        group.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
+                        group.groupMembersNames = StringUtils.joinContactDisplayNames(
+                                SettingsActivity.getAllowContactFirstName() ?
+                                        db.groupDao().getGroupMembersFirstNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
+                                        :
+                                        db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
                         db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
 
                         // if createdByMeOnOtherDevice, query my devices for the sharedSettings
@@ -195,7 +199,12 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                         contactGroupJoin = new ContactGroupJoin(bytesGroupUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                         db.contactGroupJoinDao().insert(contactGroupJoin);
 
-                                        group.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
+                                        group.groupMembersNames = StringUtils.joinContactDisplayNames(
+                                                SettingsActivity.getAllowContactFirstName() ?
+                                                        db.groupDao().getGroupMembersFirstNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
+                                                        :
+                                                        db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
+                                        );
                                         db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
 
                                         Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity);
@@ -269,7 +278,12 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                 if (contactGroupJoin != null) {
                                     db.contactGroupJoinDao().delete(contactGroupJoin);
 
-                                    group.groupMembersNames = StringUtils.joinContactDisplayNames(db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
+                                    group.groupMembersNames = StringUtils.joinContactDisplayNames(
+                                            SettingsActivity.getAllowContactFirstName() ?
+                                                    db.groupDao().getGroupMembersFirstNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
+                                                    :
+                                                    db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
+                                    );
                                     db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
 
                                     Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, contact.bytesContactIdentity);

@@ -247,6 +247,7 @@
     <string name="text_nobody">Nobody</string>
     <string name="text_draft_message_prefix">Draft: %1$s</string>
     <string name="text_outbound_message_prefix">You: %1$s</string>
+    <string name="text_inbound_group_message_prefix">%1$s:\u0020</string>
     <string name="text_today">Today</string>
     <string name="text_deleted_contact">Deleted contact</string>
     <string name="text_deleted_group">Deleted group</string>
@@ -916,12 +917,6 @@
     <string name="text_group_details_updated">Group details updated</string>
     <string name="dialog_title_sd_card_ringtone_bugged_android_9">Android 9 Notification Sound Bug</string>
     <string name="dialog_message_sd_card_ringtone_bugged_android_9">Olvid is unable to use the message notification sound you selected. It was deactivated. A bug in Android 9 prevents the use of custom notification sounds to apps that do not request access to external storage/SD card.\n\nYou should try selecting a standard notification sound. Until then, your notifications will remain silent!</string>
-    <string name="dialog_title_ephemeral_message_settings">Ephemeral message</string>
-    <string name="text_default_ephemeral_settings_for_discussion">Default settings for this discussion</string>
-    <string name="dialog_message_ephemeral_message_settings">Use the settings below to modify the visibility and existence durations of your next message. You may only use more restrictive settings than the discussion\'s default.</string>
-    <string name="text_visible_for">Visible for</string>
-    <string name="text_existence_for">Exists for</string>
-    <string name="button_label_reset">Reset</string>
     <string name="text_unit_s">seconds</string>
     <string name="text_unit_m">minutes</string>
     <string name="text_unit_h">hours</string>
@@ -1277,8 +1272,8 @@
     <string name="debug_label_server">Server:</string>
     <string name="debug_label_identity_link">ID link:</string>
     <string name="debug_label_capabilities">Capabilities:</string>
-    <string name="debug_label_capability_continuous_gathering">VoIP v2: %1$s</string>
-    <string name="debug_label_capability_groups_v2">Groups v2: %1$s</string>
+    <string name="debug_label_capability_continuous_gathering">VoIP v2: %1$b</string>
+    <string name="debug_label_capability_groups_v2">Groups v2: %1$b</string>
     <string name="bullet">-</string>
     <string name="pref_use_system_emojis_title">Use system emoji font (when available)</string>
     <string name="pref_use_system_emojis_summary">When activated, the system font will be used for supported emoji caracters. Otherwise, the embedded font will be used.</string>
@@ -1313,7 +1308,7 @@
     <string name="pref_text_auto_join_groups_everyone">From everyone</string>
     <string name="pref_text_auto_join_groups_contacts">From your contacts</string>
     <string name="pref_text_auto_join_groups_nobody">From nobody</string>
-    <string name="debug_label_capability_one_to_one_contacts">2-level address book: %1$s</string>
+    <string name="debug_label_capability_one_to_one_contacts">2-level address book: %1$b</string>
     <string name="button_label_invite">Invite</string>
     <string name="explanation_contact_not_one_to_one">To have a private discussion with %1$s and add them to your contacts, press \"Invite\".</string>
     <string name="label_contact_not_one_to_one">This user is not yet a contact</string>
@@ -1453,8 +1448,8 @@
     <string name="label_location_message_content_altitude">Altitude: %1$s</string>
     <string name="label_location_message_content_precision">Accuracy: %1$s</string>
     <string name="label_waiting_for_location">Waiting for location</string>
-    <string name="dialog_title_enable_location">Enable location</string>
-    <string name="label_enable_location">Please enable location to continue</string>
+    <string name="dialog_title_enable_location">Enable location?</string>
+    <string name="label_enable_location">Location is currently disabled on your device. You need to enable it in the settings to continue.</string>
     <string name="button_label_open_settings">Open settings</string>
     <string name="label_metadata_kind_location_sharing_latest_update">Latest location update</string>
     <string name="label_metadata_kind_location_sharing_end">Sharing ended</string>
@@ -1506,6 +1501,7 @@
     <string name="label_attachment_download_failed">Attachment download failed</string>
     <string name="pref_category_location">Location sharing</string>
     <string name="location_integration_basic">Do not use any map provider</string>
+    <string name="location_integration_custom_osm">Custom OpenStreetMap server</string>
     <string name="location_integration_open_street_map">Use OpenStreetMap (provided by Olvid)</string>
     <string name="location_integration_google_maps">Use Google Maps</string>
     <string name="menu_action_location_message_open_preview">Open preview</string>
@@ -1519,6 +1515,7 @@
     <string name="location_map_language_default">Use system language</string>
     <string name="location_map_language_english">English</string>
     <string name="location_map_language_french">French</string>
+    <string name="location_map_language_international">International</string>
     <string name="dialog_title_osm_attributions">Attributions</string>
     <string name="message_too_many_attempts">Too many attempts, please wait…</string>
     <string name="x_seconds">%1$02ds</string>
@@ -1589,6 +1586,8 @@
     <string name="text_setting_permanent_foreground_service">\u2023 Use a permanent foreground service:\u0020</string>
     <string name="text_setting_share_app_version">\u2023 Share app and OS version with Olvid:\u0020</string>
     <string name="text_setting_map_integration">\u2023 Map provider integration:\u0020</string>
+    <string name="text_setting_address_lookup_server">\u2023 Custom address server:\u0020</string>
+    <string name="text_setting_disable_address_lookup">\u2023 Disable address lookup:\u0020</string>
     <string name="text_setting_notify_certificate_change">\u2023 Notify when a server certifcate changes:\u0020</string>
     <string name="text_setting_sending_foreground_service">\u2023 Enable the \"message being sent\" notification:\u0020</string>
     <string name="text_setting_auto_join_groups">\u2023 Automatically accept group invitations from:\u0020</string>
@@ -1629,7 +1628,6 @@
     <string name="text_you_captured_sensitive_message">You took a screenshot of a sensitive message</string>
     <string name="text_unknown_member_captured_sensitive_message">An unknown user took a screenshot of a sensitive message</string>
     <string name="text_xxx_captured_sensitive_message">%1$s took a screenshot of a sensitive message</string>
-    <string name="text_contact_with_outdated_olvid_explanation">Please choose who to add to this group. Can\'t find the user you are looking for? Please ask them to upgrade to the latest version of Olvid\u00a0🚀.</string>
     <string name="text_clone_v1_to_v2_explanation">This group does not support more than one administrator. You can clone it into a new one that will\u00a0🚀!</string>
     <string name="button_label_clone_this_group">Clone this group</string>
     <string name="dialog_title_introducing_groups_v2">Introducing new groups!</string>
@@ -1647,6 +1645,7 @@
     <string name="label_fetching_address">Fetching address…</string>
     <string name="label_no_address_found">No address found</string>
     <string name="label_zoom_in_for_address">Zoom in for address lookup</string>
+    <string name="label_address_lookup_disabled">Address lookup disabled</string>
     <string name="content_description_cancel_message_edit">Cancel message edit</string>
     <string name="dialog_title_introducing_mentions">Introducing user mentions!</string>
     <string name="dialog_message_introducing_mentions">Olvid now allows mentioning a user in a discussion\u00a0🫵! Simply type @ followed by a letter or their name to see who can be mentioned.\nIn addition, when muting\u00a0💤 a discussion or a profile, you can now choose to only be notified when you are explicitly mentioned in a message.\n\nNote that your contacts will need to update to the latest version of Olvid to actually see you mentioned them.</string>
@@ -1813,6 +1812,11 @@
     <string name="onboarding_transfer_devices_loading_title">Retreiving device list…</string>
     <string name="dialog_title_introducing_multi_device">Introducing Olvid Desktop and mutli-device!</string>
     <string name="dialog_message_introducing_multi_device">Olvid is now available for **your computer** (Windows and macOS). You can download the latest version from:\nhttps://olvid.io/download/\n\nWith the **multi-device** support, start a conversation on your phone and continue it on your computer. Sharing files between your devices and with your contacts has never been easier!</string>
+    <string name="label_gallery">Gallery</string>
+    <string name="label_gallery_no_content">No content found</string>
+    <string name="label_medias">Medias</string>
+    <string name="label_documents">Doc.</string>
+    <string name="label_links">Links</string>
     <string name="contact_list_tab_contact">Contacts</string>
     <string name="contact_list_tab_directory">Directory</string>
     <string name="contact_list_tab_others">Others</string>
@@ -1824,6 +1828,37 @@
     <string name="menu_action_invite_all_members">Invite all group members</string>
     <string name="dialog_title_invite_all_group_members">Invite all group members?</string>
     <string name="toast_message_no_member_can_be_invited">No group member to invite</string>
+    <string name="pref_retain_remote_deleted_messages_title">Keep track of remote deleted messages</string>
+    <string name="pref_retain_remote_deleted_messages_summary">When activated, messages that are \"deleted everywhere\" by someone else leave a marker in the discussion.</string>
+    <string name="dialog_title_delete_remote_deleted_messages">Delete all remote deleted message markers?</string>
+    <string name="button_label_do_nothing">Do nothing</string>
+    <string name="menu_action_go_to_message">Go to message</string>
+    <string name="preset_ephemeral_settings_custom">Custom</string>
+    <string name="preset_ephemeral_read_once">Read once</string>
+    <string name="preset_ephemeral_visibility_duration">Visibility duration</string>
+    <string name="preset_ephemeral_existence_duration">Existence duration</string>
+    <string name="preset_ephemeral_read_once_explanation">Read once messages and attachments are displayed once and are deleted when closing the discussion.</string>
+    <string name="preset_ephemeral_visibility_duration_explanation">Defines how long the message will be displayed when the user reads it.</string>
+    <string name="preset_ephemeral_existence_duration_explanation">Time after which the message is deleted, whether it was read or not.</string>
+    <string name="ephemeral_settings_invalid">You may only use more restrictive settings than the discussion\'s default.</string>
+    <string name="pref_sometimes_show_first_name_only_title">Sometimes only show a first name</string>
+    <string name="pref_sometimes_show_first_name_only_summary">When activated, your contact\'s first name may be shown instead of their full name for a more compact display.</string>
+    <string name="pref_location_disable_address_lookup_title">Disable address lookup</string>
+    <string name="dialog_title_custom_osm_url">OpenStreetMap server URL</string>
+    <string name="hint_custom_osm_url">OpenStreetMap style file URL</string>
+    <string name="dialog_message_custom_osm_url">Please enter the URL of the **style file** you want to use for OpenStreetMap. This URL should be something like: *https://map.olvid.io/styles/planet/style.json*\n\nNote that the tile server referenced in this file may learn some information about your position. Be sure to **use a server you trust**.</string>
+    <string name="pref_location_custom_address_server">Use a custom reverse address server</string>
+    <string name="pref_location_disable_address_lookup_summary">Address lookup allows getting the street address of a location being shared.</string>
+    <string name="dialog_title_custom_address_server_url">Custom address server</string>
+    <string name="hint_custom_address_server_url">Address lookup server URL</string>
+    <string name="dialog_message_custom_address_server_url">Olvid only supports **Pelias** servers for address lookup. Please enter the URL of the server you want to query below, it should be something like *https://pelias.olvid.io*, and queries will be sent to the */v1/reverse* entry point.\n\nNote that this server may learn some information about your position. Be sure to **use a server you trust**.</string>
+    <string name="toast_message_playback_speed_not_supported_on_device">Unable to change playback speed</string>
+    <string name="text_speed_1x">1\u00d7</string>
+    <string name="text_speed_1_5x">1.5\u00d7</string>
+    <string name="text_speed_2x">2\u00d7</string>
+    <string name="menu_action_play_at_1x">Play at normal speed (1\u00d7)</string>
+    <string name="menu_action_play_at_1_5x">Play at a faster speed (1.5\u00d7)</string>
+    <string name="menu_action_play_at_2x">Play at the fastest speed (2\u00d7)</string>
 
 
     <plurals name="dialog_message_invite_all_group_members">
@@ -1951,5 +1986,9 @@
     <plurals name="other_members_count">
         <item quantity="one">1\u00a0member</item>
         <item quantity="other">%1$d\u00a0members</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">You currently have 1 remote deleted message in your discussions. Do you want to delete it?</item>
+        <item quantity="other">You currently have %1$d remote deleted messages in your discussions. Do you want to delete all such markers?</item>
     </plurals>
 </resources>

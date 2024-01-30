@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -56,6 +56,7 @@ import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
+import io.olvid.messenger.settings.SettingsActivity;
 
 public class CreateOrUpdateGroupV2Task implements Runnable {
     private final ObvGroupV2 groupV2;
@@ -518,8 +519,9 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
                     Group2PendingMember group2PendingMember = new Group2PendingMember(groupV2.bytesOwnedIdentity, bytesGroupIdentifier, obvGroupV2PendingMember.bytesIdentity, obvGroupV2PendingMember.serializedDetails, obvGroupV2PendingMember.permissions);
                     db.group2PendingMemberDao().insert(group2PendingMember);
-                    if (AppSingleton.getContactCustomDisplayName(group2PendingMember.bytesContactIdentity) == null) {
-                        AppSingleton.updateCachedCustomDisplayName(group2PendingMember.bytesContactIdentity, group2PendingMember.displayName);
+                    if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), groupV2.bytesOwnedIdentity)
+                            && AppSingleton.getContactCustomDisplayName(group2PendingMember.bytesContactIdentity) == null) {
+                        AppSingleton.updateCachedCustomDisplayName(group2PendingMember.bytesContactIdentity, group2PendingMember.displayName, group2PendingMember.getFirstName());
                     }
                     if (!membersToRemove.containsKey(key)) {
                         // for keycloak groups, only insert a joined group message if the user's keycloakUserId actually joined the group
@@ -533,7 +535,12 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
 
                 // update the group members name field
-                group.groupMembersNames = StringUtils.joinContactDisplayNames(db.group2Dao().getGroupMembersNames(groupV2.bytesOwnedIdentity, bytesGroupIdentifier));
+                group.groupMembersNames = StringUtils.joinContactDisplayNames(
+                        SettingsActivity.getAllowContactFirstName() ?
+                                db.group2Dao().getGroupMembersFirstNames(groupV2.bytesOwnedIdentity, bytesGroupIdentifier)
+                                :
+                                db.group2Dao().getGroupMembersNames(groupV2.bytesOwnedIdentity, bytesGroupIdentifier)
+                );
                 db.group2Dao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.groupMembersNames);
 
                 if (!Objects.equals(discussion.title, group.getCustomName())) {

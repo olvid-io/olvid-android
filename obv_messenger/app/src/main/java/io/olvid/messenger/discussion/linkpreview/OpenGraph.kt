@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -35,20 +35,19 @@ data class OpenGraph(
     var originalUrl: String? = null,
     var url: String? = null,
     var image: String? = null,
-    var siteName: String? = null,
     var type: String? = null,
     var bitmap: Bitmap? = null
 ) {
     companion object {
         const val MIME_TYPE = "olvid/link-preview"
 
-        fun of(encoded: Encoded): OpenGraph {
+        fun of(encoded: Encoded, fallbackUrl: String?): OpenGraph {
             return OpenGraph().apply {
                 try {
                     val dictionary = encoded.decodeDictionary()
                     title = dictionary[DictionaryKey("title")]?.decodeString()
                     description = dictionary[DictionaryKey("desc")]?.decodeString()
-                    siteName = dictionary[DictionaryKey("site")]?.decodeString()
+                    url = dictionary[DictionaryKey("url")]?.decodeString() ?: fallbackUrl
                     dictionary[DictionaryKey("image")]?.decodeBytes()?.let {
                         bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
                     }
@@ -56,7 +55,7 @@ data class OpenGraph(
                     title = null
                     description = null
                     bitmap = null
-                    siteName = null
+                    url = null
                 }
             }
         }
@@ -85,7 +84,7 @@ data class OpenGraph(
             try {
                 Uri.parse(it).host?.let { host ->
                     val dottedHost = ".$host".lowercase(locale = Locale.ENGLISH)
-                    Companion.DOMAINS_WITH_LONG_DESCRIPTION.any { dottedHost.endsWith(it) }
+                    DOMAINS_WITH_LONG_DESCRIPTION.any { dottedHost.endsWith(it) }
                 }
             } catch (e : Exception) {
                 null
@@ -104,7 +103,7 @@ data class OpenGraph(
     }
 
     fun buildDescription() : String {
-        return description.takeIf { it.isNullOrEmpty().not() } ?: siteName.takeIf { it.isNullOrEmpty().not() } ?: url ?: ""
+        return description.takeIf { it.isNullOrEmpty().not() } ?: url ?: ""
     }
 
     fun encode(): Encoded {
@@ -115,8 +114,8 @@ data class OpenGraph(
         description?.let {
             map[DictionaryKey("desc")] = Encoded.of(it)
         }
-        siteName?.let {
-            map[DictionaryKey("site")] = Encoded.of(it)
+        url?.let {
+            map[DictionaryKey("url")] = Encoded.of(it)
         }
         bitmap?.let {
             map[DictionaryKey("image")] = Encoded.of(

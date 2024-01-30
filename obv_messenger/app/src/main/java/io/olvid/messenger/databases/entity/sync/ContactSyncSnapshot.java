@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -76,7 +76,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
             Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
             if (domain.contains(CUSTOM_NAME) && custom_name != null) {
                 contact.setCustomDisplayName(custom_name);
-                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
+                db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.firstName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
                 if (discussion != null) {
                     db.discussionDao().updateTitleAndPhotoUrl(discussion.id, contact.getCustomDisplayName(), discussion.photoUrl);
                 }

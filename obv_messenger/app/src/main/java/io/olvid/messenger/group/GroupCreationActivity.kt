@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -18,6 +18,7 @@
  */
 package io.olvid.messenger.group
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.InputType
 import android.util.Pair
@@ -25,7 +26,6 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.View.OnAttachStateChangeListener
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.Button
@@ -63,6 +63,7 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
+import io.olvid.messenger.discussion.compose.EphemeralViewModel
 import io.olvid.messenger.fragments.FilteredContactListFragment
 import io.olvid.messenger.group.GroupTypeModel.CustomGroup
 import io.olvid.messenger.group.GroupTypeModel.PrivateGroup
@@ -74,6 +75,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
     private val groupCreationViewModel: GroupCreationViewModel by viewModels()
     private val groupDetailsViewModel: OwnedGroupDetailsViewModel by viewModels()
     private val groupV2DetailsViewModel: GroupV2DetailsViewModel by viewModels()
+    private val ephemeralViewModel: EphemeralViewModel by viewModels()
     private val nextButton: Button by lazy { findViewById(R.id.button_next_tab) }
     private val previousButton: Button by lazy { findViewById(R.id.button_previous_tab) }
     private val confirmationButton: Button by lazy { findViewById(R.id.button_confirmation) }
@@ -86,6 +88,12 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
         }
         if (savedInstanceState == null) {
             groupDetailsViewModel.setBytesGroupOwnerAndUidOrIdentifier(ByteArray(0))
+            ephemeralViewModel.setDiscussionId(null, true)
+
+            // ephemeral settings
+            ephemeralViewModel.setReadOnce(SettingsActivity.getDefaultDiscussionReadOnce())
+            ephemeralViewModel.setVisibility(SettingsActivity.getDefaultDiscussionVisibilityDuration())
+            ephemeralViewModel.setExistence(SettingsActivity.getDefaultDiscussionExistenceDuration())
 
             // only look at intent when first creating the activity
             val intent = intent
@@ -131,40 +139,35 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                     ?: arrayListOf<BytesKey>()
             val preselectedContactBytesKeys = preselectedContactAdminBytesKeys + preselectedContactNonAdminBytesKeys
             if (preselectedContactBytesKeys.isNotEmpty()) {
-                val admins : HashSet<Contact> = hashSetOf()
-                    App.runThread {
-                        val preselectedContacts: MutableList<Contact> = ArrayList()
-                        for (bytesKey in preselectedContactBytesKeys) {
-                            val contact = AppDatabase.getInstance()
-                                .contactDao()[AppSingleton.getBytesCurrentIdentity(), bytesKey.bytes]
-                            if (contact != null) {
-                                preselectedContacts.add(contact)
-                                if (preselectedContactAdminBytesKeys.contains(bytesKey)) {
-                                    admins.add(contact)
-                                }
-                            }
-                        }
-                        if (preselectedContacts.isNotEmpty()) {
-                            runOnUiThread {
-                                groupCreationViewModel.admins.value = admins
-                                groupCreationViewModel.selectedContacts = preselectedContacts
-                                contactsSelectionFragment?.setInitiallySelectedContacts(
-                                    preselectedContacts
-                                )
+                App.runThread {
+                    val admins : HashSet<Contact> = hashSetOf()
+                    val preselectedContacts: MutableList<Contact> = ArrayList()
+                    for (bytesKey in preselectedContactBytesKeys) {
+                        val contact = AppDatabase.getInstance()
+                            .contactDao()[AppSingleton.getBytesCurrentIdentity(), bytesKey.bytes]
+                        if (contact != null) {
+                            preselectedContacts.add(contact)
+                            if (preselectedContactAdminBytesKeys.contains(bytesKey)) {
+                                admins.add(contact)
                             }
                         }
                     }
+                    if (preselectedContacts.isNotEmpty()) {
+                        runOnUiThread {
+                            groupCreationViewModel.admins.value = admins
+                            groupCreationViewModel.selectedContacts = preselectedContacts
+                            contactsSelectionFragment?.setInitiallySelectedContacts(
+                                preselectedContacts
+                            )
+                        }
+                    }
+                }
             }
         }
         setContentView(R.layout.activity_group_creation)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         subtitleTextView = toolbar.findViewById(R.id.subtitle)
-        val groupV2WarningMessage = findViewById<View>(R.id.group_v2_warning_message)
-        groupCreationViewModel.showGroupV2WarningLiveData.observe(this) { showGroupV2WarningMessage: Boolean? ->
-            groupV2WarningMessage.visibility =
-                if (showGroupV2WarningMessage != null && showGroupV2WarningMessage) View.VISIBLE else View.GONE
-        }
         val actionBar = supportActionBar
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
@@ -289,15 +292,6 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
             menuInflater.inflate(R.menu.menu_group_creation_contact_selection, menu)
             val searchView = menu.findItem(R.id.action_search).actionView as SearchView?
             if (searchView != null) {
-                searchView.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
-                    override fun onViewAttachedToWindow(v: View) {
-                        groupCreationViewModel.setSearchOpened(true)
-                    }
-
-                    override fun onViewDetachedFromWindow(v: View) {
-                        groupCreationViewModel.setSearchOpened(false)
-                    }
-                })
                 searchView.queryHint = getString(R.string.hint_search_contact_name)
                 if (SettingsActivity.useKeyboardIncognitoMode()) {
                     searchView.imeOptions =
@@ -326,6 +320,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
         return true
     }
 
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         val position = viewPager.currentItem
         if (position > 0) {
@@ -403,11 +398,9 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                 AppSingleton.setCreatedGroupEphemeralSettings(
                     JsonExpiration().takeIf { groupV2DetailsViewModel.getGroupTypeLiveData().value is CustomGroup }
                         ?.apply {
-                            readOnce = groupCreationViewModel.settingsReadOnce
-                            existenceDuration =
-                                groupCreationViewModel.settingsExistenceDuration
-                            visibilityDuration =
-                                groupCreationViewModel.settingsVisibilityDuration
+                            readOnce = ephemeralViewModel.getReadOnce()
+                            visibilityDuration = ephemeralViewModel.getVisibility()
+                            existenceDuration = ephemeralViewModel.getExistence()
                         }
                 )
                 val ownPermissions = Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet().apply {

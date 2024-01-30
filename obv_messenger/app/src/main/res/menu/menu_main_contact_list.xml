@@ -8,5 +8,5 @@
         android:orderInCategory="10"
         android:title="@string/menu_action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="ifRoom|collapseActionView" />
+        app:showAsAction="always|collapseActionView" />
 </menu>

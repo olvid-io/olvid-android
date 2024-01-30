@@ -3,9 +3,11 @@
     <string-array name="location_integration">
         <item>@string/location_integration_open_street_map</item>
         <item>@string/location_integration_basic</item>
+        <item>@string/location_integration_custom_osm</item>
     </string-array>
     <string-array name="location_integration_values">
         <item>osm</item>
         <item>basic</item>
+        <item>custom_osm</item>
     </string-array>
 </resources>

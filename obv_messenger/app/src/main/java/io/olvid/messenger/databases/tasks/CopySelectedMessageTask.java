@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -74,7 +74,7 @@ public class CopySelectedMessageTask implements Runnable {
                         mimeTypes.add("text/plain");
                     }
                     for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {
-                        clipItems.add(new ClipData.Item(fyleAndStatus.getContentUri()));
+                        clipItems.add(new ClipData.Item(fyleAndStatus.getContentUriForExternalSharing()));
                         mimeTypes.add(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
                     }
                     ClipDescription clipDescription = new ClipDescription(App.getContext().getString(R.string.label_message_copied_from_olvid), mimeTypes.toArray(new String[0]));

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,7 +20,7 @@
 package io.olvid.messenger.discussion.location;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
+import androidx.annotation.Nullable;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,21 +44,25 @@ public class RequestAndUpdateAddressFieldTask implements Runnable {
 
     private final double latitude;
     private final double longitude;
-    private final MutableLiveData<String> currentAddressLiveData;
+    private final AddressCallback addressCallback;
     private final static List<String> featuresLayersPriority = new ArrayList<>(Arrays.asList("address", "street", "venue", "country", "macroregion", "region")); // venue: points of interest, businesses, things with walls
     private final String peliasServer;
 
-    RequestAndUpdateAddressFieldTask(@NonNull String peliasServer, @NonNull LatLngWrapper latLngWrapper, MutableLiveData<String> currentAddressLiveData) {
+    RequestAndUpdateAddressFieldTask(@NonNull String peliasServer, @NonNull LatLngWrapper latLngWrapper, AddressCallback addressCallback) {
         this.peliasServer = peliasServer;
         this.latitude = latLngWrapper.getLatitude();
         this.longitude = latLngWrapper.getLongitude();
-        this.currentAddressLiveData = currentAddressLiveData;
+        this.addressCallback = addressCallback;
     }
 
     @Override
     public void run() {
         try {
-            URL requestUrl = new URL(String.format(Locale.ENGLISH, "%s/v1/reverse?point.lat=%f&point.lon=%f&lang=%s", peliasServer, latitude, longitude, SettingsActivity.getLocationOpenStreetMapLanguage()));
+            String lang = SettingsActivity.getLocationOpenStreetMapLanguage();
+            URL requestUrl = (lang != null) ?
+                    new URL(String.format(Locale.ENGLISH, "%s/v1/reverse?point.lat=%f&point.lon=%f&lang=%s", peliasServer, latitude, longitude, lang))
+                    :
+                    new URL(String.format(Locale.ENGLISH, "%s/v1/reverse?point.lat=%f&point.lon=%f", peliasServer, latitude, longitude));
             HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
             if (connection instanceof HttpsURLConnection && AppSingleton.getSslSocketFactory() != null) {
                 ((HttpsURLConnection) connection).setSSLSocketFactory(AppSingleton.getSslSocketFactory());
@@ -114,8 +118,8 @@ public class RequestAndUpdateAddressFieldTask implements Runnable {
                                 && mostRelevantFeature.getProperties().getLabel() != null
                                 && !mostRelevantFeature.getProperties().getLabel().isEmpty()) {
                             // update address live data value
-                            if (currentAddressLiveData != null) {
-                                currentAddressLiveData.postValue(mostRelevantFeature.getProperties().getLabel());
+                            if (addressCallback != null) {
+                                addressCallback.onAddressFound(this, mostRelevantFeature.getProperties().getLabel());
                             }
                             return;
                         } else {
@@ -129,8 +133,12 @@ public class RequestAndUpdateAddressFieldTask implements Runnable {
         } catch (IOException e) {
             Logger.e("RequestAndUpdateAddressFieldTask: Exception during pelias reverse request", e);
         }
-        if (currentAddressLiveData != null) {
-            currentAddressLiveData.postValue("");
+        if (addressCallback != null) {
+            addressCallback.onAddressFound(this, null);
         }
+    }
+
+    interface  AddressCallback {
+        public void onAddressFound(RequestAndUpdateAddressFieldTask requestAndUpdateAddressFieldTask, @Nullable String address);
     }
 }

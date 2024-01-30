@@ -1,0 +1,9 @@
+<vector android:height="32dp"
+    android:viewportHeight="24" android:viewportWidth="24"
+    android:width="32dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="@color/preference_icon_tint_list" android:pathData="M17,7h2v2h-2z"/>
+    <path android:fillColor="@color/preference_icon_tint_list" android:pathData="M17,11h2v2h-2z"/>
+    <path android:fillColor="@color/preference_icon_tint_list" android:pathData="M17,15h2v2h-2z"/>
+    <path android:fillColor="@color/preference_icon_tint_list" android:pathData="M1,11v10h6v-5h2v5h6V11L8,6L1,11zM13,19h-2v-5H5v5H3v-7l5,-3.5l5,3.5V19z"/>
+    <path android:fillColor="@color/preference_icon_tint_list" android:pathData="M10,3l0,1.97l2,1.43l0,-1.4l9,0l0,14l-4,0l0,2l6,0l0,-18z"/>
+</vector>

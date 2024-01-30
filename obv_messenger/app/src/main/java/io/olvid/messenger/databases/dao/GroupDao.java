@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -161,4 +161,15 @@ public interface GroupDao {
             " AND cgj." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid " +
             " ORDER BY c." + Contact.SORT_DISPLAY_NAME + " ASC ")
     String[] getGroupMembersNames(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+
+    @Nullable
+    @Query("SELECT COALESCE(c." + Contact.CUSTOM_DISPLAY_NAME + " , c." + Contact.FIRST_NAME + " , c." + Contact.DISPLAY_NAME + ") " +
+            " FROM " + Contact.TABLE_NAME + " AS c " +
+            " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS cgj " +
+            " ON c." + Contact.BYTES_OWNED_IDENTITY + " = cgj." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
+            " AND c." + Contact.BYTES_CONTACT_IDENTITY + " = cgj." + ContactGroupJoin.BYTES_CONTACT_IDENTITY +
+            " WHERE cgj." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND cgj." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid " +
+            " ORDER BY c." + Contact.SORT_DISPLAY_NAME + " ASC ")
+    String[] getGroupMembersFirstNames(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
 }

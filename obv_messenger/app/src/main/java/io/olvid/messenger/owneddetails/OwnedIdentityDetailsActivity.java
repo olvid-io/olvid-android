@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -81,6 +82,7 @@ import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -119,7 +121,6 @@ import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity;
 import io.olvid.messenger.openid.KeycloakManager;
-import io.olvid.messenger.owneddetails.EditOwnedIdentityDetailsDialogFragment;
 import io.olvid.messenger.plus_button.PlusButtonActivity;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -906,8 +907,8 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                 }
                 case 3:
                 case 4: { // rename device
-                    View dialogView = LayoutInflater.from(itemView.getContext()).inflate(R.layout.dialog_view_rename_device, null);
-                    TextView messageTextView = dialogView.findViewById(R.id.rename_device_dialog_message);
+                    View dialogView = LayoutInflater.from(itemView.getContext()).inflate(R.layout.dialog_view_message_and_input, null);
+                    TextView messageTextView = dialogView.findViewById(R.id.dialog_message);
                     if (popupItem.getItemId() == 3) {
                         // current device
                         messageTextView.setText(R.string.dialog_message_rename_current_device);
@@ -915,9 +916,12 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
                         // other device
                         messageTextView.setText(R.string.dialog_message_rename_other_device);
                     }
+                    TextInputLayout textInputLayout = dialogView.findViewById(R.id.dialog_text_layout);
+                    textInputLayout.setHint(R.string.hint_device_name);
 
-                    TextInputEditText deviceNameEditText = dialogView.findViewById(R.id.rename_device_dialog_edittext);
+                    TextInputEditText deviceNameEditText = dialogView.findViewById(R.id.dialog_edittext);
                     deviceNameEditText.setText(ownedDevice.displayName);
+                    deviceNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 
                     final AlertDialog.Builder builder = new SecureAlertDialogBuilder(itemView.getContext(), R.style.CustomAlertDialog)
                             .setTitle(R.string.dialog_title_rename_device)

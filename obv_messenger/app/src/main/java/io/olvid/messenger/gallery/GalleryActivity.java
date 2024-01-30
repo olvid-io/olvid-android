@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -96,7 +96,7 @@ import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 public class GalleryActivity extends LockableActivity {
     public static final String BYTES_OWNED_IDENTITY_INTENT_EXTRA = "bytes_owned_identity";
     public static final String BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA = "sort_order";
-    public static final String BYTES_OWNED_IDENTITY_ASCENDING_INTENT_EXTRA = "ascending";
+    public static final String ASCENDING_INTENT_EXTRA = "ascending";
     public static final String DISCUSSION_ID_INTENT_EXTRA = "discussion_id";
     public static final String DRAFT_INTENT_EXTRA = "draft";
     public static final String INITIAL_MESSAGE_ID_INTENT_EXTRA = "initial_message_id";
@@ -291,7 +291,7 @@ public class GalleryActivity extends LockableActivity {
         if (viewModel.getCurrentPagerPosition() == null) {
             byte[] bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA);
             String sortOrder = intent.getStringExtra(BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA);
-            Boolean ascending = intent.getBooleanExtra(BYTES_OWNED_IDENTITY_ASCENDING_INTENT_EXTRA, true);
+            Boolean ascending = intent.getBooleanExtra(ASCENDING_INTENT_EXTRA, true);
             long discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1);
             boolean draft = intent.getBooleanExtra(DRAFT_INTENT_EXTRA, false);
             long messageId = intent.getLongExtra(INITIAL_MESSAGE_ID_INTENT_EXTRA, -1);
@@ -299,7 +299,7 @@ public class GalleryActivity extends LockableActivity {
 
 
             if (discussionId != -1) {
-                viewModel.setDiscussionId(discussionId);
+                viewModel.setDiscussionId(discussionId, ascending);
             } else if (bytesOwnedIdentity != null) {
                 viewModel.setBytesOwnedIdentity(bytesOwnedIdentity, sortOrder, ascending);
             } else if (messageId != -1) {
@@ -663,7 +663,7 @@ public class GalleryActivity extends LockableActivity {
             FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = galleryAdapter.getItemAt(viewPager.getCurrentItem());
             if (fyleAndStatus != null) {
                 Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_STREAM, fyleAndStatus.getContentUri());
+                intent.putExtra(Intent.EXTRA_STREAM, fyleAndStatus.getContentUriForExternalSharing());
                 intent.setType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
                 startActivity(Intent.createChooser(intent, getString(R.string.title_sharing_chooser)));
             }

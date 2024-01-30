@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -83,7 +83,7 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                                 if (contact != null) {
                                     if (contactPojo.custom_name != null) {
                                         contact.setCustomDisplayName(contactPojo.custom_name);
-                                        db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
+                                        db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.firstName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
                                     }
 
                                     if (contactPojo.custom_hue != null) {

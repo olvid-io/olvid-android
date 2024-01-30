@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -62,6 +62,7 @@ public class Contact {
     public static final String BYTES_CONTACT_IDENTITY = "bytes_contact_identity";
     public static final String CUSTOM_DISPLAY_NAME = "custom_display_name";
     public static final String DISPLAY_NAME = "display_name";
+    public static final String FIRST_NAME = "first_name";
     public static final String SORT_DISPLAY_NAME = "sort_display_name";
     public static final String FULL_SEARCH_DISPLAY_NAME = "full_search_display_name";
     public static final String IDENTITY_DETAILS = "identity_details";
@@ -102,6 +103,10 @@ public class Contact {
     @ColumnInfo(name = DISPLAY_NAME)
     @NonNull
     public String displayName;
+
+    @ColumnInfo(name = FIRST_NAME)
+    @Nullable
+    public String firstName;
 
     @SuppressWarnings("NotNullFieldNotInitialized")
     @ColumnInfo(name = SORT_DISPLAY_NAME)
@@ -164,12 +169,14 @@ public class Contact {
     public boolean capabilityOneToOneContacts;
 
 
+
     // Constructor required by Room
-    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @Nullable String customDisplayName, @NonNull String displayName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, int newPublishedDetails, int deviceCount, int establishedChannelCount, @Nullable String photoUrl, @Nullable String customPhotoUrl, boolean keycloakManaged, @Nullable Integer customNameHue, @Nullable String personalNote, boolean active, boolean oneToOne, int trustLevel, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
+    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @Nullable String customDisplayName, @NonNull String displayName, @Nullable String firstName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, int newPublishedDetails, int deviceCount, int establishedChannelCount, @Nullable String photoUrl, @Nullable String customPhotoUrl, boolean keycloakManaged, @Nullable Integer customNameHue, @Nullable String personalNote, boolean active, boolean oneToOne, int trustLevel, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
         this.bytesContactIdentity = bytesContactIdentity;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customDisplayName = customDisplayName;
         this.displayName = displayName;
+        this.firstName = firstName;
         this.sortDisplayName = sortDisplayName;
         this.fullSearchDisplayName = fullSearchDisplayName;
         this.identityDetails = identityDetails;
@@ -188,7 +195,6 @@ public class Contact {
         this.capabilityGroupsV2 = capabilityGroupsV2;
         this.capabilityOneToOneContacts = capabilityOneToOneContacts;
     }
-
 
     // Constructor used when inserting a new contact
     @Ignore
@@ -235,10 +241,12 @@ public class Contact {
             this.identityDetails = null;
             this.displayName = "";
             this.sortDisplayName = new byte[0];
+            this.firstName = null;
         } else {
             this.identityDetails = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonIdentityDetails);
             this.displayName = jsonIdentityDetails.formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName());
             this.sortDisplayName = ContactDisplayNameFormatChangedTask.computeSortDisplayName(jsonIdentityDetails, this.customDisplayName, SettingsActivity.getSortContactsByLastName());
+            this.firstName = jsonIdentityDetails.getFirstName();
         }
         this.fullSearchDisplayName = computeFullSearchDisplayName(jsonIdentityDetails);
     }
@@ -284,11 +292,23 @@ public class Contact {
         return result;
     }
 
+    @NonNull
     public String getCustomDisplayName() {
         if (customDisplayName == null) {
             return displayName;
         }
         return customDisplayName;
+    }
+
+    @NonNull
+    public String getFirstNameOrCustom() {
+        if (customDisplayName != null) {
+            return customDisplayName;
+        } else if (firstName != null) {
+            return firstName;
+        } else {
+            return displayName;
+        }
     }
 
     public String getCustomPhotoUrl() {
@@ -343,6 +363,7 @@ public class Contact {
                     bytesOwnedIdentity,
                     null,
                     AppSingleton.getJsonObjectMapper().readValue(identityDetails, JsonIdentityDetails.class).formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()),
+                    null,
                     sortDisplayName,
                     fullSearchDisplayName,
                     identityDetails,
@@ -381,6 +402,7 @@ public class Contact {
                         ownedIdentity.bytesOwnedIdentity,
                         ownedIdentity.customDisplayName,
                         ownedIdentity.displayName,
+                        ownIdentityDetails.getFirstName(),
                         sortDisplayName,
                         fullSearchDisplayName,
                         ownedIdentity.identityDetails,

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -64,6 +64,32 @@ public class SendReceiveMessagesPreferenceFragment extends PreferenceFragmentCom
                         Logger.w("Failed to propagate default send read receipt setting change to other devices");
                         e.printStackTrace();
                     }
+                }
+                return true;
+            });
+        }
+
+        SwitchPreference retainRemoteDeletedPreference = screen.findPreference(SettingsActivity.PREF_KEY_RETAIN_REMOTE_DELETED_MESSAGES);
+        if (retainRemoteDeletedPreference != null) {
+            retainRemoteDeletedPreference.setOnPreferenceChangeListener((Preference preference, Object checked) -> {
+                if (checked instanceof Boolean && !(Boolean) checked) {
+                    App.runThread(() -> {
+                        // count Message.WIPE_STATUS_REMOTE_DELETED messages
+                        final int count = AppDatabase.getInstance().messageDao().countRemoteDeletedMessages();
+                        if (count > 0) {
+                            new Handler(Looper.getMainLooper()).post(() -> {
+
+                                final AlertDialog.Builder builder = new SecureAlertDialogBuilder(requireActivity(), R.style.CustomAlertDialog)
+                                        .setTitle(R.string.dialog_title_delete_remote_deleted_messages)
+                                        .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_remote_deleted_messages, count, count))
+                                        .setPositiveButton(R.string.button_label_delete, (DialogInterface dialog, int which) -> App.runThread(() -> {
+                                            AppDatabase.getInstance().messageDao().deleteAllRemoteDeletedMessages();
+                                        }))
+                                        .setNegativeButton(R.string.button_label_do_nothing, null);
+                                builder.create().show();
+                            });
+                        }
+                    });
                 }
                 return true;
             });

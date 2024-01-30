@@ -41,6 +41,7 @@
     <color name="attachmentBorder">#33000000</color>
     <color name="locationBorder">#c4c4c4</color>
 
+    <color name="mimeIcon">#99808080</color>
 
     <!-- New color -->
     <color name="dialogBackground">#ffffff</color>

@@ -1,3 +1,18 @@
+# Build 227 (1.4)
+2024-01-30
+
+- Minor fixes
+
+# ~~Build 226 (1.4)~~
+2024-01-28
+
+- New UI for ephemeral settings
+- New gallery view for discussions (with links and media)
+- Use of first name instead of "display name" when appropriate
+- Playback speed control for audio messages
+- [beta] possibility to use a custom OpenStreetsMap server
+- [beta] possibility to use a custom Pelias server for address lookup
+
 # Build 225 (1.3.1)
 2023-12-07
 

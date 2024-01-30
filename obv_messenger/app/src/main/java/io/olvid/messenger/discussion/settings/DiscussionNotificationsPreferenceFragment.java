@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -246,7 +246,7 @@ public class DiscussionNotificationsPreferenceFragment extends PreferenceFragmen
     }
 
     @Override
-    public void onSettingsChanged(DiscussionCustomization discussionCustomization) {
+    public void onSettingsChanged(@Nullable DiscussionCustomization discussionCustomization) {
         if (useCustomMessageNotificationPreference != null) {
             useCustomMessageNotificationPreference.setChecked(discussionSettingsDataStore.getBoolean(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_MESSAGE_CUSTOM_NOTIFICATION, false));
         }

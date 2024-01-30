@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -43,7 +43,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
@@ -52,7 +51,6 @@ import io.olvid.messenger.services.MediaPlayerService;
 public class AudioAttachmentServiceBinding implements MediaPlayerService.PlaybackListener {
     private final AppCompatActivity activity;
     private final Handler uiThreadHandler;
-    private final NoExceptionSingleThreadExecutor executor;
     private final Set<BytesKey> loadingAttachments;
     private final Map<BytesKey, List<WeakReference<AudioServiceBindableViewHolder>>> viewHolderAssociation;
     private final Map<BytesKey, AudioInfo> loadedAttachments;
@@ -68,7 +66,6 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
     public AudioAttachmentServiceBinding(AppCompatActivity activity) {
         this.activity = activity;
         this.uiThreadHandler = new Handler(Looper.getMainLooper());
-        this.executor = new NoExceptionSingleThreadExecutor("AudioAttachmentServiceBinding-Executor");
         this.loadingAttachments = new HashSet<>();
         this.viewHolderAssociation = new HashMap<>();
         this.loadedAttachments = new HashMap<>();
@@ -87,7 +84,6 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
 
     public void release() {
         serviceConnection.unBind();
-        executor.shutdownNow();
         viewHolderAssociation.clear();
         loadedAttachments.clear();
     }
@@ -95,66 +91,59 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
 
 
     public void loadAudioAttachment(final FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, final AudioServiceBindableViewHolder viewHolder) {
-        executor.execute(() -> {
-            BytesKey key = new BytesKey(fyleAndStatus.fyle.sha256);
-            List<WeakReference<AudioServiceBindableViewHolder>> viewHolders = viewHolderAssociation.get(key);
-            if (viewHolders == null) {
-                viewHolders = new ArrayList<>();
-                viewHolders.add(new WeakReference<>(viewHolder));
-                viewHolderAssociation.put(key, viewHolders);
-            } else {
-                // existing the list -> remove any expired WeakReference, check this ViewHolder is not already present
-                List<WeakReference<AudioServiceBindableViewHolder>> refreshedViewHolders = new ArrayList<>();
-                refreshedViewHolders.add(new WeakReference<>(viewHolder));
-                for (WeakReference<AudioServiceBindableViewHolder> weakReference : viewHolders) {
-                    AudioServiceBindableViewHolder vh = weakReference.get();
-                    if (vh == null || vh.equals(viewHolder)) {
-                        continue;
-                    }
-                    refreshedViewHolders.add(weakReference);
+        BytesKey key = new BytesKey(fyleAndStatus.fyle.sha256);
+        List<WeakReference<AudioServiceBindableViewHolder>> viewHolders = viewHolderAssociation.get(key);
+        if (viewHolders == null) {
+            viewHolders = new ArrayList<>();
+            viewHolders.add(new WeakReference<>(viewHolder));
+            viewHolderAssociation.put(key, viewHolders);
+        } else {
+            // existing the list -> remove any expired WeakReference, check this ViewHolder is not already present
+            List<WeakReference<AudioServiceBindableViewHolder>> refreshedViewHolders = new ArrayList<>();
+            refreshedViewHolders.add(new WeakReference<>(viewHolder));
+            for (WeakReference<AudioServiceBindableViewHolder> weakReference : viewHolders) {
+                AudioServiceBindableViewHolder vh = weakReference.get();
+                if (vh == null || vh.equals(viewHolder)) {
+                    continue;
                 }
-                viewHolderAssociation.put(key, refreshedViewHolders);
+                refreshedViewHolders.add(weakReference);
             }
+            viewHolderAssociation.put(key, refreshedViewHolders);
+        }
 
-            AudioInfo audioInfo = loadedAttachments.get(key);
-            if (audioInfo != null) {
-                uiThreadHandler.post(() -> {
-                    viewHolder.bindAudioInfo(audioInfo, audioOutput);
-                    if (key.equals(nowPlaying)) {
-                        viewHolder.updatePlayTimeMs(audioInfo, playTimeMs, playing);
-                    }
-                });
-            } else {
-                if (!loadingAttachments.contains(key)) {
-                    // in case this was never loaded
-                    loadingAttachments.add(key);
-                    App.runThread(new LoadAudioAttachmentTask(key, fyleAndStatus));
-                }
+        AudioInfo audioInfo = loadedAttachments.get(key);
+        if (audioInfo != null) {
+            viewHolder.bindAudioInfo(audioInfo, audioOutput, (mediaPlayerService != null) ? mediaPlayerService.getPlaybackSpeed() : 0f);
+            if (key.equals(nowPlaying)) {
+                viewHolder.updatePlayTimeMs(audioInfo, playTimeMs, playing);
             }
-        });
+        } else {
+            if (!loadingAttachments.contains(key)) {
+                // in case this was never loaded
+                loadingAttachments.add(key);
+                App.runThread(new LoadAudioAttachmentTask(key, fyleAndStatus));
+            }
+        }
     }
 
     public void seekAudioAttachment(@NonNull FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, int progress) {
         final BytesKey key = new BytesKey(fyleAndStatus.fyle.sha256);
-        executor.execute(() -> {
-            AudioInfo audioInfo = loadedAttachments.get(key);
-            if (audioInfo == null || audioInfo.durationMs == null) {
-                return;
+        AudioInfo audioInfo = loadedAttachments.get(key);
+        if (audioInfo == null || audioInfo.durationMs == null) {
+            return;
+        }
+        long timeMs = (progress * audioInfo.durationMs)/1000L;
+        if (key.equals(nowPlaying)) {
+            if (mediaPlayerService != null) {
+                mediaPlayerService.seekMedia(timeMs);
             }
-            long timeMs = (progress * audioInfo.durationMs)/1000L;
-            if (key.equals(nowPlaying)) {
-                if (mediaPlayerService != null) {
-                    mediaPlayerService.seekMedia(timeMs);
-                }
-            } else {
-                updatePlayTimeMs(key, timeMs, false);
-            }
-        });
+        } else {
+            updatePlayTimeMs(key, timeMs, false);
+        }
     }
 
     public void playPause(@NonNull FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Long discussionId) {
         final BytesKey key = new BytesKey(fyleAndStatus.fyle.sha256);
-        executor.execute(() -> {
             if (mediaPlayerService != null) {
                 if (key.equals(nowPlaying)) {
                     mediaPlayerService.playPause();
@@ -172,102 +161,98 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
                     mediaPlayerService.loadMedia(fyleAndStatus, discussionId, seekTimeMs);
                 }
             }
-        });
     }
 
 
     @Override
     public void onMediaChanged(BytesKey bytesKey) {
         long timeMs = playTimeMs;
-        executor.execute(() -> {
             updatePlayTimeMs(timeMs, false); // pause the previously playing media
             nowPlaying = bytesKey;
-        });
     }
 
     @Override
     public void onPause() {
-        executor.execute(() -> updatePlayTimeMs(playTimeMs, false));
+      updatePlayTimeMs(playTimeMs, false);
     }
 
     @Override
     public void onPlay() {
-        executor.execute(() -> updatePlayTimeMs(playTimeMs, true));
+        updatePlayTimeMs(playTimeMs, true);
     }
 
     @Override
     public void onProgress(long timeMs) {
-        executor.execute(() -> updatePlayTimeMs(timeMs, this.playing));
+        updatePlayTimeMs(timeMs, this.playing);
     }
 
     @Override
     public void onStop() {
-        executor.execute(() -> {
             updatePlayTimeMs(0, false);
             nowPlaying = null;
-        });
     }
 
     @Override
     public void onFail(@NonNull final FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus) {
         BytesKey key = new BytesKey(fyleAndStatus.fyle.sha256);
-        executor.execute(() -> {
-            AudioInfo audioInfo = loadedAttachments.get(key);
-            if (audioInfo != null) {
-                audioInfo.failed = true;
-                App.toast(activity.getString(R.string.toast_message_unable_to_play_audio, fyleAndStatus.fyleMessageJoinWithStatus.fileName), Toast.LENGTH_SHORT, Gravity.BOTTOM);
+        AudioInfo audioInfo = loadedAttachments.get(key);
+        if (audioInfo != null) {
+            audioInfo.failed = true;
+            App.toast(activity.getString(R.string.toast_message_unable_to_play_audio, fyleAndStatus.fyleMessageJoinWithStatus.fileName), Toast.LENGTH_SHORT, Gravity.BOTTOM);
 
-                List<WeakReference<AudioServiceBindableViewHolder>> associatedViewHolders = viewHolderAssociation.get(key);
-                if (associatedViewHolders == null) {
-                    return;
-                }
-                List<AudioServiceBindableViewHolder> viewHolders = new ArrayList<>();
-                for (WeakReference<AudioServiceBindableViewHolder> weakReference : associatedViewHolders) {
-                    AudioServiceBindableViewHolder vh = weakReference.get();
-                    if (vh != null) {
-                        viewHolders.add(vh);
-                    }
-                }
-                uiThreadHandler.post(() -> {
-                    for (AudioServiceBindableViewHolder viewHolder : viewHolders) {
-                        viewHolder.setFailed(true);
-                        viewHolder.bindAudioInfo(audioInfo, audioOutput);
-                    }
-                });
+            List<WeakReference<AudioServiceBindableViewHolder>> associatedViewHolders = viewHolderAssociation.get(key);
+            if (associatedViewHolders == null) {
+                return;
             }
-        });
+            for (WeakReference<AudioServiceBindableViewHolder> weakReference : associatedViewHolders) {
+                AudioServiceBindableViewHolder vh = weakReference.get();
+                if (vh != null) {
+                    vh.setFailed(true);
+                    vh.bindAudioInfo(audioInfo, audioOutput, 0f);
+                }
+            }
+        }
     }
 
     @Override
     public void onSpeakerOutputChange(MediaPlayerService.AudioOutput audioOutput) {
-        executor.execute(() -> {
-            this.audioOutput = audioOutput;
+        this.audioOutput = audioOutput;
 
-            // notify all view holders of output change
-            List<AudioServiceBindableViewHolder> viewHolders = new ArrayList<>();
-            for (List<WeakReference<AudioServiceBindableViewHolder>> viewHolderWeakReferences : viewHolderAssociation.values()) {
-                for (WeakReference<AudioServiceBindableViewHolder> viewHolderWeakReference : viewHolderWeakReferences) {
-                    AudioServiceBindableViewHolder vh = viewHolderWeakReference.get();
-                    if (vh != null) {
-                        viewHolders.add(vh);
-                    }
+        // notify all view holders of output change
+        for (List<WeakReference<AudioServiceBindableViewHolder>> viewHolderWeakReferences : viewHolderAssociation.values()) {
+            for (WeakReference<AudioServiceBindableViewHolder> viewHolderWeakReference : viewHolderWeakReferences) {
+                AudioServiceBindableViewHolder vh = viewHolderWeakReference.get();
+                if (vh != null) {
+                    vh.setAudioOutput(this.audioOutput, nowPlaying != null && this.playing);
                 }
             }
+        }
+    }
 
-            uiThreadHandler.post(() -> {
-                for (AudioServiceBindableViewHolder viewHolder : viewHolders) {
-                    viewHolder.setAudioOutput(this.audioOutput, nowPlaying != null && this.playing);
+    // when called with playbackSpeed == 0, this means the current mediaplayer does not support playback speed change
+    @Override
+    public void onPlaybackSpeedChange(float playbackSpeed) {
+        // notify all view holders of output change
+        for (List<WeakReference<AudioServiceBindableViewHolder>> viewHolderWeakReferences : viewHolderAssociation.values()) {
+            for (WeakReference<AudioServiceBindableViewHolder> viewHolderWeakReference : viewHolderWeakReferences) {
+                AudioServiceBindableViewHolder vh = viewHolderWeakReference.get();
+                if (vh != null) {
+                    vh.setPlaybackSpeed(playbackSpeed);
                 }
-            });
-        });
+            }
+        }
     }
 
     public void toggleSpeakerOutput() {
-        executor.execute(() -> {
-            if (mediaPlayerService != null) {
-                mediaPlayerService.toggleAudioOutput();
-            }
-        });
+        if (mediaPlayerService != null) {
+            mediaPlayerService.toggleAudioOutput();
+        }
+    }
+
+    public void setPlaybackSpeed(float playbackSpeed) {
+        if (mediaPlayerService != null) {
+            mediaPlayerService.setPlaybackSpeed(playbackSpeed);
+        }
     }
 
     private class LoadAudioAttachmentTask implements Runnable {
@@ -295,10 +280,9 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
             } catch (Exception e) {
                 // do nothing
             }
-            executor.execute(() -> {
+            uiThreadHandler.post(() -> {
                 loadingAttachments.remove(key);
                 loadedAttachments.put(key, audioInfo);
-                List<AudioServiceBindableViewHolder> viewHolders = new ArrayList<>();
                 List<WeakReference<AudioServiceBindableViewHolder>> associatedViewHolders = viewHolderAssociation.get(key);
                 if (associatedViewHolders == null) {
                     return;
@@ -306,17 +290,12 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
                 for (WeakReference<AudioServiceBindableViewHolder> weakReference : associatedViewHolders) {
                     AudioServiceBindableViewHolder vh = weakReference.get();
                     if (vh != null) {
-                        viewHolders.add(vh);
-                    }
-                }
-                uiThreadHandler.post(() -> {
-                    for (AudioServiceBindableViewHolder viewHolder : viewHolders) {
-                        viewHolder.bindAudioInfo(audioInfo, audioOutput);
+                        vh.bindAudioInfo(audioInfo, audioOutput, (mediaPlayerService != null) ? mediaPlayerService.getPlaybackSpeed() : 0f);
                         if (key.equals(nowPlaying)) {
-                            viewHolder.updatePlayTimeMs(audioInfo, playTimeMs, playing);
+                            vh.updatePlayTimeMs(audioInfo, playTimeMs, playing);
                         }
                     }
-                });
+                }
             });
         }
     }
@@ -355,11 +334,9 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
         if (viewHolders.isEmpty()) {
             viewHolderAssociation.remove(key);
         } else {
-            uiThreadHandler.post(() -> {
-                for (AudioServiceBindableViewHolder viewHolder : viewHolders) {
-                    viewHolder.updatePlayTimeMs(audioInfo, playTimeMs, playing);
-                }
-            });
+            for (AudioServiceBindableViewHolder viewHolder : viewHolders) {
+                viewHolder.updatePlayTimeMs(audioInfo, playTimeMs, playing);
+            }
         }
     }
 
@@ -381,16 +358,14 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (service instanceof MediaPlayerService.MediaPlayerServiceBinder) {
-                executor.execute(() -> {
                     mediaPlayerService = ((MediaPlayerService.MediaPlayerServiceBinder) service).getService();
                     mediaPlayerService.addPlaybackListener(AudioAttachmentServiceBinding.this);
-                });
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            executor.execute(() -> mediaPlayerService = null);
+            mediaPlayerService = null;
         }
 
         public void unBind() {
@@ -410,9 +385,13 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
 
     public interface AudioServiceBindableViewHolder {
         void updatePlayTimeMs(AudioInfo audioInfo, long playTimeMs, boolean playing);
-        void bindAudioInfo(AudioInfo audioInfo, MediaPlayerService.AudioOutput audioOutput);
+        // when called with playbackSpeed == 0, this means the current mediaplayer does not support playback speed change
+        void bindAudioInfo(AudioInfo audioInfo, MediaPlayerService.AudioOutput audioOutput, float playbackSpeed);
         void setFailed(boolean failed);
         void setAudioOutput(MediaPlayerService.AudioOutput audioOutput, boolean somethingPlaying);
+
+        // when called with playbackSpeed == 0, this means the current mediaplayer does not support playback speed change
+        void setPlaybackSpeed(float playbackSpeed);
         FyleMessageJoinWithStatusDao.FyleAndStatus getFyleAndStatus();
     }
 }

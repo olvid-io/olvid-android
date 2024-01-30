@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2022 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -80,6 +80,8 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
 
     private TextView addressTextView;
     private TextView fetchingAddressTextView;
+    private boolean showAddress = false;
+    private boolean showFetchingAddress = false;
 
     private ImageView mapCenterPointerImageView;
     private ImageView mapCenterPointerShadowImageView;
@@ -139,13 +141,15 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
 
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_NoActionBar_Transparent);
 
-
-        String peliasServer = AppSingleton.getEngine().getAddressServerUrl(AppSingleton.getBytesCurrentIdentity());
-        if (peliasServer != null) {
-            this.peliasServer = peliasServer;
+        String customPeliasServer = SettingsActivity.getLocationCustomAddressServer();
+        if (customPeliasServer != null) {
+            this.peliasServer = customPeliasServer;
+        } else {
+            String peliasServer = AppSingleton.getEngine().getAddressServerUrl(AppSingleton.getBytesCurrentIdentity());
+            if (peliasServer != null) {
+                this.peliasServer = peliasServer;
+            }
         }
-
-        checkPermissionsAndUpdateDialog();
     }
 
     @SuppressLint("MissingPermission")
@@ -169,7 +173,9 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
             // when map is ready: show center pointer, and hide spinner
 
             // if location is possible use current location as center and manually request address
-            if (isLocationPermissionGranted(this.activity) && isLocationEnabled()) {
+            if (!isLocationPermissionGranted(activity)) {
+                requestLocationPermission();
+            } else {
                 skipNextMarkerAnimation = true;
                 mapView.centerOnCurrentLocation(false);
             }
@@ -197,8 +203,7 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
             // handle marker center animations
             if (latLngWrapper == null) {
                 moveCenterMarkerUp();
-            }
-            else {
+            } else {
                 moveCenterMarkerDown();
             }
 
@@ -208,11 +213,22 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
                 addressRequestTask = null;
             }
             // launch a new delayed request if there are coordinates
-            if (latLngWrapper != null) {
+            if (SettingsActivity.getLocationDisableAddressLookup()) {
+                currentAddressLiveData.postValue(" ");
+            } else if (latLngWrapper != null) {
                 if (mapView.getCameraZoom() < RequestAndUpdateAddressFieldTask.MIN_ZOOM_FOR_REQUESTS) {
                     currentAddressLiveData.postValue(" ");
                 } else {
-                    this.addressRequestTask = new RequestAndUpdateAddressFieldTask(peliasServer, latLngWrapper, currentAddressLiveData);
+                    currentAddressLiveData.postValue(null);
+                    this.addressRequestTask = new RequestAndUpdateAddressFieldTask(peliasServer, latLngWrapper, (RequestAndUpdateAddressFieldTask requestTask, @Nullable String address) -> {
+                        if (addressRequestTask == requestTask) {
+                            if (address == null) {
+                                currentAddressLiveData.postValue("");
+                            } else {
+                                currentAddressLiveData.postValue(address);
+                            }
+                        }
+                    });
                     handler.postDelayed(() -> {
                         if (this.addressRequestTask != null) {
                             App.runThread(this.addressRequestTask);
@@ -220,7 +236,9 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
                     }, 100);
                 }
             } else {
-                currentAddressLiveData.postValue(null);
+                if (mapView.getCameraZoom() >= RequestAndUpdateAddressFieldTask.MIN_ZOOM_FOR_REQUESTS) {
+                    currentAddressLiveData.postValue(null);
+                }
             }
         });
 
@@ -229,66 +247,62 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
         // update current address field when requests update live data
         currentAddressLiveData.observe(this, (String address) -> {
             if (address == null) {
-                fade(addressTextView, thirtyTwoDp, false, View.GONE);
                 fetchingAddressTextView.setText(R.string.label_fetching_address);
-                fade(fetchingAddressTextView, thirtyTwoDp, false, View.VISIBLE);
+                fade(addressTextView, thirtyTwoDp, false, false);
+                fade(fetchingAddressTextView, thirtyTwoDp, false, true);
             } else if (address.length() == 0) {
-                fade(addressTextView, thirtyTwoDp, false, View.GONE);
                 fetchingAddressTextView.setText(R.string.label_no_address_found);
-                fade(fetchingAddressTextView, thirtyTwoDp, false, View.VISIBLE);
+                fade(addressTextView, thirtyTwoDp, false, false);
+                fade(fetchingAddressTextView, thirtyTwoDp, false, true);
             } else if (" ".equals(address)) {
-                fade(addressTextView, thirtyTwoDp, false, View.GONE);
                 fetchingAddressTextView.setText(R.string.label_zoom_in_for_address);
-                fade(fetchingAddressTextView, thirtyTwoDp, false, View.VISIBLE);
+                fade(addressTextView, thirtyTwoDp, false, false);
+                fade(fetchingAddressTextView, thirtyTwoDp, false, true);
+            } else if (" ".equals(address)) {
+                fetchingAddressTextView.setText(R.string.label_address_lookup_disabled);
+                fade(addressTextView, thirtyTwoDp, false, false);
+                fade(fetchingAddressTextView, thirtyTwoDp, false, true);
             } else {
                 addressTextView.setText(address);
-                fade(addressTextView, thirtyTwoDp, true, View.VISIBLE);
-                fade(fetchingAddressTextView, thirtyTwoDp, true, View.GONE);
+                fade(addressTextView, thirtyTwoDp, true, true);
+                fade(fetchingAddressTextView, thirtyTwoDp, true, false);
             }
         });
-        addressTextView.setVisibility(View.GONE);
-        fetchingAddressTextView.setVisibility(View.GONE);
+        addressTextView.setVisibility(View.VISIBLE);
+        fetchingAddressTextView.setVisibility(View.VISIBLE);
 
         return rootView;
     }
 
-    @IntDef({View.VISIBLE, View.INVISIBLE, View.GONE})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Visibility {}
 
-    private void fade(View view, int translationPx, boolean directionUp, @Visibility int targetVisibility) {
-        if (view.getVisibility() != targetVisibility) {
-            Animation animation = view.getAnimation();
-            if (animation != null) {
-                animation.cancel();
-            }
+    private void fade(View view, int translationPx, boolean directionUp, boolean showView) {
+        boolean currentShowView;
+        if (view.getId() == R.id.send_location_maps_choose_address_text_view) {
+            currentShowView = showAddress;
+            showAddress = showView;
+        } else {
+            currentShowView = showFetchingAddress;
+            showFetchingAddress = showView;
+        }
+        if (currentShowView != showView) {
+            view.clearAnimation();
             AnimationSet set = new AnimationSet(true);
-            Animation translate = new TranslateAnimation(0, 0, (targetVisibility == View.VISIBLE) ? (directionUp ? translationPx : -translationPx) : 0, (targetVisibility == View.VISIBLE) ? 0 : (directionUp ? -translationPx : translationPx));
+
+            Animation translate = new TranslateAnimation(0, 0,
+                    showView ? (directionUp ? translationPx : -translationPx) : 0,
+                    showView ? 0 : (directionUp ? -translationPx : translationPx));
             translate.setDuration(250);
             translate.setFillAfter(true);
-            Animation fade = new AlphaAnimation((targetVisibility == View.VISIBLE) ? 0f : 1f, (targetVisibility == View.VISIBLE) ? 1f : 0f);
+
+            Animation fade = new AlphaAnimation(
+                    showView ? 0f : 1f,
+                    showView ? 1f : 0f);
             fade.setDuration(250);
             fade.setFillAfter(true);
+
             set.addAnimation(translate);
             set.addAnimation(fade);
-            set.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    if (targetVisibility == View.VISIBLE) {
-                        view.setVisibility(View.VISIBLE);
-                    }
-                }
-
-                @Override
-                public void onAnimationEnd(@NonNull Animation animation) {
-                    if (targetVisibility == View.GONE) {
-                        view.setVisibility(View.GONE);
-                    }
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {}
-            });
+            set.setFillAfter(true);
             view.startAnimation(set);
         }
     }
@@ -367,8 +381,7 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
         if (!isLocationPermissionGranted(activity)) {
             requestLocationPermission();
             return ;
-        }
-        else if (!isLocationEnabled()) {
+        } else if (!isLocationEnabled()) {
             requestLocationActivation(activity);
             return ;
         }
@@ -406,6 +419,7 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
             Logger.e("SendLocationMapLibre: trying to get marker up but it is already up");
         }
     }
+
     private void moveCenterMarkerDown() {
         if (skipNextMarkerAnimation) {
             skipNextMarkerAnimation = false;

@@ -241,7 +241,8 @@
     <string name="text_left_the_group">%1$s a quitté le groupe</string>
     <string name="text_nobody">Personne</string>
     <string name="text_draft_message_prefix">Brouillon\u00a0: %1$s</string>
-    <string name="text_outbound_message_prefix">Vous\u00a0: %1$s</string>
+    <string name="text_outbound_message_prefix">Vous : %1$s</string>
+    <string name="text_inbound_group_message_prefix">%1$s :\u0020</string>
     <string name="text_today">aujourd\'hui</string>
     <string name="text_deleted_contact">Contact supprimé</string>
     <string name="text_deleted_group">Groupe supprimé</string>
@@ -909,12 +910,6 @@
     <string name="text_group_details_updated">Détails du groupe mis à jour</string>
     <string name="dialog_title_sd_card_ringtone_bugged_android_9">Bug de notification Android 9</string>
     <string name="dialog_message_sd_card_ringtone_bugged_android_9">Olvid ne peut pas utiliser la sonnerie de notification que vous avez choisie. Elle a été désactivée. Un bug Android 9 empêche l\'utilisation de sonneries de notification personnalisées dans les applcations ne demandant pas l\'accès au stockage externe/la carte SD.\n\nVous devriez essayer de choisir une sonnerie de notification standard. D\'ici là, vos notifications seront silencieuses\u00a0!</string>
-    <string name="dialog_title_ephemeral_message_settings">Message éphémère</string>
-    <string name="text_default_ephemeral_settings_for_discussion">Paramètres par défaut pour cette discussion</string>
-    <string name="dialog_message_ephemeral_message_settings">Utilisez les paramètres ci-dessous pour modifier les durées de visibilité et d\'existence de votre prochain message. Vous ne pouvez pas choisir des paramètres moins restrictifs que les paramètres par défaut de la discussion.</string>
-    <string name="text_visible_for">Visible pendant</string>
-    <string name="text_existence_for">Existe pendant</string>
-    <string name="button_label_reset">Réinitialiser</string>
     <string name="text_unit_s">secondes</string>
     <string name="text_unit_m">minutes</string>
     <string name="text_unit_h">heures</string>
@@ -1257,8 +1252,8 @@
     <string name="debug_label_server">Serveur\u00a0:</string>
     <string name="debug_label_identity_link">Lien d\'ID\u00a0:</string>
     <string name="debug_label_capabilities">Aptitudes\u00a0:</string>
-    <string name="debug_label_capability_continuous_gathering">VoIP v2\u00a0: %1$s</string>
-    <string name="debug_label_capability_groups_v2">Groupes v2\u00a0: %1$s</string>
+    <string name="debug_label_capability_continuous_gathering">VoIP v2\u00a0: %1$b</string>
+    <string name="debug_label_capability_groups_v2">Groupes v2\u00a0: %1$b</string>
     <string name="bullet">\u2022</string>
     <string name="pref_use_system_emojis_title">Utiliser la police emoji du système (si disponible)</string>
     <string name="pref_use_system_emojis_summary">Activez cette option pour utiliser la police de caractères système pour les emoji qu\'elle gère. Sinon, la police embarquée sera utilisée.</string>
@@ -1293,7 +1288,7 @@
     <string name="pref_text_auto_join_groups_everyone">De la part de tout le monde</string>
     <string name="pref_text_auto_join_groups_contacts">De la part de vos contacts</string>
     <string name="pref_text_auto_join_groups_nobody">De la part de personne</string>
-    <string name="debug_label_capability_one_to_one_contacts">Carnet de contacts à 2 niveaux\u00a0: %1$s</string>
+    <string name="debug_label_capability_one_to_one_contacts">Carnet de contacts à 2 niveaux\u00a0: %1$b</string>
     <string name="button_label_invite">Inviter</string>
     <string name="explanation_contact_not_one_to_one">Pour démarrer une discussion privée avec %1$s et l\'ajouter à vos contacts, appuyez sur «\u00a0Inviter\u00a0».</string>
     <string name="label_contact_not_one_to_one">Cet utilisateur n\'est pas encore un contact</string>
@@ -1431,8 +1426,8 @@
     <string name="label_location_message_content_altitude">Altitude\u00a0: %1$s</string>
     <string name="label_location_message_content_precision">Précision\u00a0: %1$s</string>
     <string name="label_waiting_for_location">En attente de la position</string>
-    <string name="dialog_title_enable_location">Activer la position</string>
-    <string name="label_enable_location">Merci d\'activer la position pour continuer</string>
+    <string name="dialog_title_enable_location">Activer la localisation</string>
+    <string name="label_enable_location">La localisation est actuellement désactivée sur votre appareil. Vous devez l\'activer dans les paramètres pour continuer.</string>
     <string name="button_label_open_settings">Ouvrir les paramètres</string>
     <string name="label_metadata_kind_location_sharing_latest_update">Dernière mise à jour de la position</string>
     <string name="label_metadata_kind_location_sharing_end">Fin du partage</string>
@@ -1483,6 +1478,7 @@
     <string name="label_attachment_download_failed">Erreur de téléchargement de la pièce jointe</string>
     <string name="pref_category_location">Partage de position</string>
     <string name="location_integration_basic">Ne pas utiliser de service de cartographie</string>
+    <string name="location_integration_custom_osm">Serveur OpenStreetMap personnalisé</string>
     <string name="location_integration_open_street_map">Utiliser OpenStreetMap (opéré par Olvid)</string>
     <string name="location_integration_google_maps">Utiliser Google Maps</string>
     <string name="menu_action_location_message_open_preview">Ouvrir l\'aperçu</string>
@@ -1496,6 +1492,7 @@
     <string name="location_map_language_default">Langue du système</string>
     <string name="location_map_language_english">Anglais</string>
     <string name="location_map_language_french">Français</string>
+    <string name="location_map_language_international">International</string>
     <string name="dialog_title_osm_attributions">Attributions</string>
     <string name="message_too_many_attempts">Trop d\'essais, veuillez attendre…</string>
     <string name="x_seconds">%1$02ds</string>
@@ -1537,40 +1534,42 @@
     <string name="pref_text_issuer_changed">Si l\'émetteur du certificat a changé</string>
     <string name="text_notification_connection_blocked_title">Connexion bloquée</string>
     <string name="text_notification_connection_blocked_message">Olvid a détecté un certificat inconnu</string>
-    <string name="text_setting_beta">\u2023 Activer les fonctionnalités bêta\u00a0:\u0020</string>
-    <string name="text_setting_hide_notification_contents">\u2023 Masquer le contenu des notifications\u00a0:\u0020</string>
-    <string name="text_setting_allow_notification_suggestions">\u2023 Suggestions de réponses dans les notifications\u00a0:\u0020</string>
-    <string name="text_setting_expose_recent_discussions">\u2023 Maintenir une liste des discussions récentes\u00a0:\u0020</string>
-    <string name="text_setting_incognito_keyboard">\u2023 Utiliser le mode incognito du clavier\u00a0:\u0020</string>
-    <string name="text_setting_prevent_screen_capture">\u2023 Interdire les captures d\'écran\u00a0:\u0020</string>
-    <string name="text_setting_hidden_profile_policy">\u2023 Stratégie de fermeture des profils masqués\u00a0:\u0020</string>
-    <string name="text_setting_disable_push_notifications">\u2023 Désactiver les notifications push\u00a0:\u0020</string>
-    <string name="text_setting_permanent_websocket">\u2023 Connexion WebSocket permanente\u00a0:\u0020</string>
-    <string name="text_setting_internal_viewer">\u2023 Utiliser le visualiseur d\'images intégré\u00a0:\u0020</string>
-    <string name="text_setting_show_trust_level">\u2023 Afficher un indicateur de «\u00a0source de confiance\u00a0» des contacts\u00a0:\u0020</string>
-    <string name="text_setting_lock_biometry">\u2023 Déverrouiller par biométrie\u00a0:\u0020</string>
-    <string name="text_setting_lock_notification">\u2023 Notification de verrouillage permanente\u00a0:\u0020</string>
-    <string name="text_setting_lock_wipe_on_fail">\u2023 Effacer les message sensibles après 3 mauvais PINs\u00a0:\u0020</string>
-    <string name="text_setting_send_read_receipt">\u2023 Envoyer des confirmations de lecture\u00a0:\u0020</string>
-    <string name="text_setting_auto_open_limited_visibility">\u2023 Afficher les messages éphémères automatiquement\u00a0:\u0020</string>
-    <string name="text_setting_retain_wiped_outbound">\u2023 Conserver les messages au contenu effacé\u00a0:\u0020</string>
-    <string name="text_setting_remove_jpeg_metadata">\u2023 Supprimer les métadonnées JPEG\u00a0:\u0020</string>
-    <string name="text_setting_wc_keep_after_close">\u2023 Garder le client web en tâche de fond\u00a0:\u0020</string>
-    <string name="text_setting_wc_error_notification">\u2023 Notification d\'erreurs du client web\u00a0:\u0020</string>
-    <string name="text_setting_wc_inactivity_indicator">\u2023 Notification d\'inactivité du client web\u00a0:\u0020</string>
-    <string name="text_setting_wc_require_unlock">\u2023 Déverrouillage avant chaque connexion au client web\u00a0:\u0020</string>
-    <string name="text_setting_permanent_foreground_service">\u2023 Utiliser un service d\'avant-plan permanent\u00a0:\u0020</string>
-    <string name="text_setting_share_app_version">\u2023 Partager les versions de l\'app et de l\'OS avec Olvid\u00a0:\u0020</string>
-    <string name="text_setting_map_integration">\u2023 Service de cartographie:\u0020</string>
-    <string name="text_setting_notify_certificate_change">\u2023 Notifier quand un certificat serveur change\u00a0:\u0020</string>
-    <string name="text_setting_sending_foreground_service">\u2023 Notifications «\u00a0Envoi de message en cours\u00a0»\u00a0:\u0020</string>
-    <string name="text_setting_auto_join_groups">\u2023 Accepter automatiquement les invitations de groupe de la part de\u00a0:\u0020</string>
-    <string name="text_setting_lock_delay">\u2023 Délai de verrouillage\u00a0:\u0020</string>
-    <string name="text_setting_auto_download_size">\u2023 Télécharger automatiquement les pièces jointes\u00a0:\u0020</string>
-    <string name="text_setting_link_preview_inbound">\u2023 Prévisualisation des liens reçus\u00a0:\u0020</string>
-    <string name="text_setting_link_preview_outbound">\u2023 Prévisualisation des liens envoyés\u00a0:\u0020</string>
-    <string name="text_setting_block_unknown_certificate">\u2023 Bloquer les connexions utilisant un certificat inconnu\u00a0:\u0020</string>
-    <string name="text_setting_no_notify_certificate_change_for_previews">\u2023 Désactiver les notifications de changement de certificat pour les aperçus de liens\u00a0:\u0020</string>
+    <string name="text_setting_beta">\u2023 Activer les fonctionnalités bêta :\u0020</string>
+    <string name="text_setting_hide_notification_contents">\u2023 Masquer le contenu des notifications :\u0020</string>
+    <string name="text_setting_allow_notification_suggestions">\u2023 Suggestions de réponses dans les notifications :\u0020</string>
+    <string name="text_setting_expose_recent_discussions">\u2023 Maintenir une liste des discussions récentes :\u0020</string>
+    <string name="text_setting_incognito_keyboard">\u2023 Utiliser le mode incognito du clavier :\u0020</string>
+    <string name="text_setting_prevent_screen_capture">\u2023 Interdire les captures d\'écran :\u0020</string>
+    <string name="text_setting_hidden_profile_policy">\u2023 Stratégie de fermeture des profils masqués :\u0020</string>
+    <string name="text_setting_disable_push_notifications">\u2023 Désactiver les notifications push :\u0020</string>
+    <string name="text_setting_permanent_websocket">\u2023 Connexion WebSocket permanente :\u0020</string>
+    <string name="text_setting_internal_viewer">\u2023 Utiliser le visualiseur d\'images intégré :\u0020</string>
+    <string name="text_setting_show_trust_level">\u2023 Afficher un indicateur de « source de confiance » des contacts :\u0020</string>
+    <string name="text_setting_lock_biometry">\u2023 Déverrouiller par biométrie :\u0020</string>
+    <string name="text_setting_lock_notification">\u2023 Notification de verrouillage permanente :\u0020</string>
+    <string name="text_setting_lock_wipe_on_fail">\u2023 Effacer les message sensibles après 3 mauvais PINs :\u0020</string>
+    <string name="text_setting_send_read_receipt">\u2023 Envoyer des confirmations de lecture :\u0020</string>
+    <string name="text_setting_auto_open_limited_visibility">\u2023 Afficher les messages éphémères automatiquement :\u0020</string>
+    <string name="text_setting_retain_wiped_outbound">\u2023 Conserver les messages au contenu effacé :\u0020</string>
+    <string name="text_setting_remove_jpeg_metadata">\u2023 Supprimer les métadonnées JPEG :\u0020</string>
+    <string name="text_setting_wc_keep_after_close">\u2023 Garder le client web en tâche de fond :\u0020</string>
+    <string name="text_setting_wc_error_notification">\u2023 Notification d\'erreurs du client web :\u0020</string>
+    <string name="text_setting_wc_inactivity_indicator">\u2023 Notification d\'inactivité du client web :\u0020</string>
+    <string name="text_setting_wc_require_unlock">\u2023 Déverrouillage avant chaque connexion au client web :\u0020</string>
+    <string name="text_setting_permanent_foreground_service">\u2023 Utiliser un service d\'avant-plan permanent :\u0020</string>
+    <string name="text_setting_share_app_version">\u2023 Partager les versions de l\'app et de l\'OS avec Olvid :\u0020</string>
+    <string name="text_setting_map_integration">\u2023 Service de cartographie :\u0020</string>
+    <string name="text_setting_address_lookup_server">\u2023 Serveur d\'adresses personnalisé :\u0020</string>
+    <string name="text_setting_disable_address_lookup">\u2023 Désactiver la recherche d\'adresse :\u0020</string>
+    <string name="text_setting_notify_certificate_change">\u2023 Notifier quand un certificat serveur change :\u0020</string>
+    <string name="text_setting_sending_foreground_service">\u2023 Notifications « Envoi de message en cours » :\u0020</string>
+    <string name="text_setting_auto_join_groups">\u2023 Accepter automatiquement les invitations de groupe de la part de :\u0020</string>
+    <string name="text_setting_lock_delay">\u2023 Délai de verrouillage :\u0020</string>
+    <string name="text_setting_auto_download_size">\u2023 Télécharger automatiquement les pièces jointes :\u0020</string>
+    <string name="text_setting_link_preview_inbound">\u2023 Prévisualisation des liens reçus :\u0020</string>
+    <string name="text_setting_link_preview_outbound">\u2023 Prévisualisation des liens envoyés :\u0020</string>
+    <string name="text_setting_block_unknown_certificate">\u2023 Bloquer les connexions utilisant un certificat inconnu :\u0020</string>
+    <string name="text_setting_no_notify_certificate_change_for_previews">\u2023 Désactiver les notifications de changement de certificat pour les aperçus de liens :\u0020</string>
     <string name="text_setting_connectivity_indicator">\u2023 Indicateur de connexion réseau\u00a0:\u0020</string>
     <string name="text_setting_yes">oui</string>
     <string name="text_setting_no">non</string>
@@ -1599,7 +1598,6 @@
     <string name="text_you_captured_sensitive_message">Vous avez fait une capture d\'un message sensible</string>
     <string name="text_unknown_member_captured_sensitive_message">Un utilisateur inconnu a fait une capture d\'un message sensible</string>
     <string name="text_xxx_captured_sensitive_message">%1$s a fait une capture d\'un message sensible</string>
-    <string name="text_contact_with_outdated_olvid_explanation">Choisissez qui ajouter à ce groupe. Vous ne trouvez pas la personne que vous cherchez\u00a0? Demandez-lui de mettre à jour Olvid\u00a0🚀\u00a0!</string>
     <string name="text_clone_v1_to_v2_explanation">Ce groupe ne permet pas d\'avoir plusieurs administrateurs. Mais vous pouvez le cloner en un nouveau groupe de dernière génération qui le permettra\u00a0🚀\u00a0!</string>
     <string name="button_label_clone_this_group">Cloner ce groupe</string>
     <string name="dialog_title_introducing_groups_v2">Découvrez les nouveaux groupes\u00a0!</string>
@@ -1617,6 +1615,7 @@
     <string name="label_fetching_address">Recherche de l\'adresse…</string>
     <string name="label_no_address_found">Aucune adresse trouvée</string>
     <string name="label_zoom_in_for_address">Zoomez pour chercher l\'adresse</string>
+    <string name="label_address_lookup_disabled">Recherche d\'adresse désactivée</string>
     <string name="content_description_cancel_message_edit">Annuler l\'édition de message</string>
     <string name="dialog_title_introducing_mentions">Découvrez les mentions\u00a0!</string>
     <string name="dialog_message_introducing_mentions">Olvid vous permet maintenant de mentionner une personne dans une discussion\u00a0🫵\u00a0! Saisissez simplement @ suivi d\'une lettre de leur nom pour voir qui peut être mentionné.\nPar ailleurs, quand vous passez une discussion ou un profil en silencieux\u00a0💤, vous pouvez choisir de n\'être notifié que si l\'on vous mentionne explicitement dans un message.\n\nNotez que vos contacts devront avoir la dernière version d\'Olvid pour effectivement voir que vous les avez mentionnés.</string>
@@ -1783,6 +1782,11 @@
     <string name="onboarding_transfer_devices_loading_title">Récupération de la liste d\'appareils…</string>
     <string name="dialog_title_introducing_multi_device">Découvrez Olvid Desktop et le mutli-apareils !</string>
     <string name="dialog_message_introducing_multi_device">Olvid est maintenant disponible pour **votre ordinateur** (Windows et macOS). Vous pouvez télécharger la dernière version sur :\nhttps://olvid.io/download/\n\nAvec le support du **multi-appareil**, commencez une conversation sur votre téléphone pour la poursuivre sur votre ordinateur. Partager des fichiers entre vos appareils et avec vos contacts n\'a jamais été aussi simple !</string>
+    <string name="label_gallery">Galerie</string>
+    <string name="label_gallery_no_content">Aucun contenu trouvé</string>
+    <string name="label_medias">Médias</string>
+    <string name="label_documents">Doc.</string>
+    <string name="label_links">Liens</string>
     <string name="contact_list_tab_contact">Contacts</string>
     <string name="contact_list_tab_directory">Annuaire</string>
     <string name="contact_list_tab_others">Autres</string>
@@ -1794,6 +1798,37 @@
     <string name="menu_action_invite_all_members">Inviter tous les membres</string>
     <string name="dialog_title_invite_all_group_members">Inviter tous les membres ?</string>
     <string name="toast_message_no_member_can_be_invited">Aucun membre du group à inviter</string>
+    <string name="pref_retain_remote_deleted_messages_title">Garder une trace des messages supprimés à distance</string>
+    <string name="pref_retain_remote_deleted_messages_summary">Quand cette option est activée, les messages « supprimés partout » par un autre utilisateur laissent une trace dans la discussion.</string>
+    <string name="dialog_title_delete_remote_deleted_messages">Supprimer toute trace des messages supprimés à distance ?</string>
+    <string name="button_label_do_nothing">Ne rien faire</string>
+    <string name="menu_action_go_to_message">Aller au message</string>
+    <string name="preset_ephemeral_settings_custom">Personnalisée</string>
+    <string name="preset_ephemeral_read_once">Visible une seul fois</string>
+    <string name="preset_ephemeral_visibility_duration">Durée de visibilité</string>
+    <string name="preset_ephemeral_existence_duration">Durée d\'existence</string>
+    <string name="preset_ephemeral_read_once_explanation">Les messages et pièces jointes visibles une seule fois sont effacés quand l\'on sort de la discussion.</string>
+    <string name="preset_ephemeral_visibility_duration_explanation">Définit le temps pendant lequel le message sera affiché quand le destinataire le lira.</string>
+    <string name="preset_ephemeral_existence_duration_explanation">Temps après lequel le message est effacé, qu\'il ait été lu ou pas.</string>
+    <string name="ephemeral_settings_invalid">Vous ne pouvez pas choisir des paramètres moins restrictifs que les paramètres par défaut de la discussion.</string>
+    <string name="pref_sometimes_show_first_name_only_title">Parfois n\'afficher qu\'un prénom</string>
+    <string name="pref_sometimes_show_first_name_only_summary">Quand cette option est activée, le prénom de vos contacts peut être affiché au lieu de leur nom complet pour un affichage plus compact.</string>
+    <string name="pref_location_disable_address_lookup_title">Désactiver la recherche d\'adresse</string>
+    <string name="dialog_title_custom_osm_url">URL du serveur OpenStreetMap</string>
+    <string name="hint_custom_osm_url">URL du fichier de style OpenStreetMap</string>
+    <string name="dialog_message_custom_osm_url">Veuillez entrer l\'URL du **fichier de style** OpenStreetMap à utiliser. Cette URL devrait ressembler à : *https://map.olvid.io/styles/planet/style.json*\n\nNotez que le serveur de tuiles référencé dans ce fichier risque d\'avoir accès à des informations sur votre position. Veillez à **utiliser un serveur de confiance**.</string>
+    <string name="pref_location_custom_address_server">Utiliser un serveur d\'adresses personnalisé</string>
+    <string name="pref_location_disable_address_lookup_summary">La recherche d\'adresse permet d\'obtenir l\'adresse postale d\'une position lors d\'un partage.</string>
+    <string name="dialog_title_custom_address_server_url">Serveur d\'adresses personnalisé</string>
+    <string name="hint_custom_address_server_url">URL du serveur de recherche d\'adresses</string>
+    <string name="dialog_message_custom_address_server_url">Olvid ne gère que des serveurs **Pelias** pour la recherche d\'adresses. Veuillez entrer l\'URL du serveur que vous souhaitez interroger ci-dessous, elle devrait avoir la forme *https://pelias.olvid.io* et les requêtes seront envoyées au point d\'entrée */v1/reverse*.\n\nNotez que ce serveur risque d\'avoir accès à des informations sur votre position. Veillez à **utiliser un serveur de confiance**.</string>
+    <string name="toast_message_playback_speed_not_supported_on_device">Impossible de modifier la vitesse de lecture</string>
+    <string name="text_speed_1x">1\u00d7</string>
+    <string name="text_speed_1_5x">1,5\u00d7</string>
+    <string name="text_speed_2x">2\u00d7</string>
+    <string name="menu_action_play_at_1x">Écouter à vitesse normale (1\u00d7)</string>
+    <string name="menu_action_play_at_1_5x">Écouter plus rapidement (1,5\u00d7)</string>
+    <string name="menu_action_play_at_2x">Écouter le plus vite possible (2\u00d7)</string>
 
 
     <plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity">
@@ -1923,5 +1958,9 @@
     <plurals name="other_members_count" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0membre</item>
         <item quantity="other">%1$d\u00a0membres</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Vous avez actuellement un message supprimé à distance dans vos discussions. Souhaitez-vous le supprimer ?</item>
+        <item quantity="other">Vous avez actuellement %1$d messages supprimés à distance dans vos discussions. Souhaitez-vous tous les supprimer ?</item>
     </plurals>
 </resources>

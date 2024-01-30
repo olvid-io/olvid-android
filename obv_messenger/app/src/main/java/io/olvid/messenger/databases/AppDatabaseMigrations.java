@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -41,6 +41,16 @@ import io.olvid.messenger.customClasses.StringUtils;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[]{
+            new Migration(65, 66) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 65 TO 66");
+
+                    database.execSQL("ALTER TABLE `contact_table` ADD COLUMN `first_name` TEXT DEFAULT NULL");
+                    database.execSQL("ALTER TABLE `group2_pending_member_table` ADD COLUMN `first_name` TEXT DEFAULT NULL");
+                }
+            },
+
             new Migration(64, 65) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
@@ -49,6 +59,7 @@ class AppDatabaseMigrations {
                     database.execSQL("ALTER TABLE `owned_device_table` ADD COLUMN `trusted` INTEGER NOT NULL DEFAULT 0");
                 }
             },
+
             new Migration(63, 64) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
@@ -57,6 +68,7 @@ class AppDatabaseMigrations {
                     database.execSQL("CREATE TABLE IF NOT EXISTS `owned_device_table` (`bytes_owned_identity` BLOB NOT NULL, `bytes_device_uid` BLOB NOT NULL, `display_name` TEXT, `current_device` INTEGER NOT NULL, `channel_confirmed` INTEGER NOT NULL, `last_registration_timestamp` INTEGER, `expiration_timestamp` INTEGER, PRIMARY KEY(`bytes_owned_identity`, `bytes_device_uid`), FOREIGN KEY(`bytes_owned_identity`) REFERENCES `identity_table`(`bytes_owned_identity`) ON UPDATE NO ACTION ON DELETE CASCADE )");
                 }
             },
+
             new Migration(62, 63) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
@@ -65,6 +77,7 @@ class AppDatabaseMigrations {
                     database.execSQL("ALTER TABLE `message_table` ADD COLUMN `mentioned` INTEGER NOT NULL DEFAULT 0");
                  }
             },
+
             new Migration(61, 62) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
@@ -84,6 +97,7 @@ class AppDatabaseMigrations {
 
                 }
             },
+
             new Migration(60, 61) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {
@@ -92,6 +106,7 @@ class AppDatabaseMigrations {
                     database.execSQL("ALTER TABLE `invitation_table` ADD COLUMN `discussion_id` INTEGER DEFAULT NULL");
                 }
             },
+
             new Migration(59, 60) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

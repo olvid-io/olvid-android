@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -189,6 +189,24 @@ public interface Group2Dao {
             " AND " + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
             " ) ORDER BY ord ASC ")
     String[] getGroupMembersNames(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+
+    @Nullable
+    @Query("SELECT mname FROM ( " +
+            " SELECT COALESCE(c." + Contact.CUSTOM_DISPLAY_NAME + ", c." + Contact.FIRST_NAME + ", c." + Contact.DISPLAY_NAME + ") AS mname, c." + Contact.SORT_DISPLAY_NAME + " AS ord " +
+            " FROM " + Contact.TABLE_NAME + " AS c " +
+            " INNER JOIN " + Group2Member.TABLE_NAME + " AS gm " +
+            " ON c." + Contact.BYTES_OWNED_IDENTITY + " = gm." + Group2Member.BYTES_OWNED_IDENTITY +
+            " AND c." + Contact.BYTES_CONTACT_IDENTITY + " = gm." + Group2Member.BYTES_CONTACT_IDENTITY +
+            " WHERE gm." + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND gm." + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+
+            " UNION " +
+
+            " SELECT COALESCE(" + Group2PendingMember.FIRST_NAME + ", " + Group2PendingMember.DISPLAY_NAME + ") AS mname, " + Group2PendingMember.SORT_DISPLAY_NAME + " AS ord FROM " + Group2PendingMember.TABLE_NAME +
+            " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+            " ) ORDER BY ord ASC ")
+    String[] getGroupMembersFirstNames(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
 
 
     @Query("SELECT * FROM (" +

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -95,6 +95,7 @@ import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 import io.olvid.messenger.databases.entity.jsons.JsonMessageReference;
+import io.olvid.messenger.discussion.compose.EphemeralViewModel;
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel;
 import io.olvid.messenger.viewModels.MessageDetailsViewModel;
 
@@ -433,15 +434,7 @@ public class MessageDetailsActivity extends LockableActivity {
                         // this should never happen, the jsonExpiration should have been wiped when received
                         Logger.w("Weird, message has expiration and is neither read once nor limited visibility");
                     } else if (expiration.getVisibilityDuration() < 60L) {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_s, expiration.getVisibilityDuration()));
-                    } else if (expiration.getVisibilityDuration() < 3_600L) {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_m, expiration.getVisibilityDuration() / 60L));
-                    } else if (expiration.getVisibilityDuration() < 86_400L) {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_h, expiration.getVisibilityDuration() / 3_600L));
-                    } else if (expiration.getVisibilityDuration() < 31_536_000L) {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_d, expiration.getVisibilityDuration() / 86_400L));
-                    } else {
-                        ephemeralTimerTextView.setText(getString(R.string.text_visible_timer_y, expiration.getVisibilityDuration() / 31_536_000L));
+                        ephemeralTimerTextView.setText(EphemeralViewModel.Companion.visibilitySetting(expiration.getVisibilityDuration()));
                     }
                 }
             }

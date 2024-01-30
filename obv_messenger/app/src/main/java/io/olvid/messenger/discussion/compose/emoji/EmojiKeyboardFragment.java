@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -17,7 +17,7 @@
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.olvid.messenger.discussion;
+package io.olvid.messenger.discussion.compose.emoji;
 
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -36,7 +36,7 @@ public class EmojiKeyboardFragment extends Fragment {
     private InputConnection inputConnection;
     private RestoreKeyboardListener restoreKeyboardListener;
 
-    private final EmojiPickerViewFactory.EmojiClickListener emojiClickListener = new EmojiPickerViewFactory.EmojiClickListener() {
+    private final EmojiClickListener emojiClickListener = new EmojiClickListener() {
         @Override
         public void onClick(String emoji) {
             if (inputConnection != null) {
@@ -57,7 +57,7 @@ public class EmojiKeyboardFragment extends Fragment {
         }
     };
 
-    private final EmojiPickerViewFactory.EmojiKeyboardListener emojiKeyboardListener = new EmojiPickerViewFactory.EmojiKeyboardListener() {
+    private final EmojiKeyboardListener emojiKeyboardListener = new EmojiKeyboardListener() {
         @Override
         public void onBackspace() {
             if (inputConnection != null) {
@@ -97,7 +97,7 @@ public class EmojiKeyboardFragment extends Fragment {
         this.restoreKeyboardListener = restoreKeyboardListener;
     }
 
-    interface RestoreKeyboardListener {
+    public interface RestoreKeyboardListener {
         void onRestoreKeyboard();
     }
 }

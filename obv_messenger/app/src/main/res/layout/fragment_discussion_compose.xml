@@ -369,6 +369,11 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/attach_stuff_plus"/>
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/popup_menu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/recording_overlay"
         android:layout_width="0dp"

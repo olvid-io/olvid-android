@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -134,7 +134,7 @@ public class Utils {
             });
         });
     }
-    static void applyBodyWithSpans(@NonNull TextView textView, @Nullable byte[] bytesOwnedIdentity, @NonNull Message message, @Nullable List<Pattern> searchPatterns, boolean linkifyLinks, boolean markdown) {
+    public static void applyBodyWithSpans(@NonNull TextView textView, @Nullable byte[] bytesOwnedIdentity, @NonNull Message message, @Nullable List<Pattern> searchPatterns, boolean linkifyLinks, boolean markdown) {
         SpannableString result = new SpannableString(message.getStringContent(textView.getContext()));
         try {
             // call linkify first as it removes existing spans
@@ -191,7 +191,7 @@ public class Utils {
     }
 
 
-    static CharSequence protectMentionUrlSpansWithFEFF(Spanned input) {
+    public static CharSequence protectMentionUrlSpansWithFEFF(Spanned input) {
         List<MentionUrlSpan> mentionUrlSpans = new ArrayList<>(Arrays.asList(input.getSpans(0, input.length(), MentionUrlSpan.class)));
         //noinspection ComparatorCombinators
         Collections.sort(mentionUrlSpans, (o1, o2) -> Integer.compare(input.getSpanStart(o1), input.getSpanStart(o2)));
@@ -208,7 +208,7 @@ public class Utils {
         return ssb;
     }
 
-    static Pair<String, List<JsonUserMention>> removeProtectionFEFFsAndTrim(@NonNull CharSequence protectedMessageBody, @Nullable Collection<JsonUserMention> mentions) {
+    public static Pair<String, List<JsonUserMention>> removeProtectionFEFFsAndTrim(@NonNull CharSequence protectedMessageBody, @Nullable Collection<JsonUserMention> mentions) {
         // sort the mentions
         ArrayList<JsonUserMention> sortedMentions = mentions == null ? new ArrayList<>() : new ArrayList<>(mentions);
         //noinspection ComparatorCombinators

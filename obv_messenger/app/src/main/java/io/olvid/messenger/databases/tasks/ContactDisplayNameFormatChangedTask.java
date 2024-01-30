@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -60,7 +60,7 @@ public class ContactDisplayNameFormatChangedTask implements Runnable {
                     // then, compute the sortDisplayName
                     contact.sortDisplayName = computeSortDisplayName(collator, identityDetails, contact.customDisplayName, lastNameSort);
 
-                    db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
+                    db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.firstName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
 
                     Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                     if (discussion != null) {
@@ -93,7 +93,4 @@ public class ContactDisplayNameFormatChangedTask implements Runnable {
             return collator.getCollationKey(concat).toByteArray();
         }
     }
-
-
-
 }

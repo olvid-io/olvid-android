@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -71,7 +71,7 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
     // used to manually request location permission and activation on first launch
     private boolean firstCallToOnStart = true;
     // map integrations use this fragment for sharing location, behaviour is a little bit different
-    private final boolean shareLocationOnly;
+    private final boolean continuousLocationSharing;
 
     private LocationManager locationManager;
     private FragmentActivity activity;
@@ -102,20 +102,20 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
     // os need an empty public constructor
     public SendLocationBasicDialogFragment() {
         this.discussionId = 0;
-        this.shareLocationOnly = false;
+        this.continuousLocationSharing = false;
     }
 
     public SendLocationBasicDialogFragment(long discussionId) {
         super();
         this.discussionId = discussionId;
-        this.shareLocationOnly = false;
+        this.continuousLocationSharing = false;
     }
 
     // used when sharing location with some map integration
-    public SendLocationBasicDialogFragment(long discussionId, boolean shareLocationOnly) {
+    public SendLocationBasicDialogFragment(long discussionId, boolean continuousLocationSharing) {
         super();
         this.discussionId = discussionId;
-        this.shareLocationOnly = shareLocationOnly;
+        this.continuousLocationSharing = continuousLocationSharing;
     }
 
     @Nullable
@@ -254,7 +254,7 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
 
             // when in share location only we try to use last know locations to be able to start location sharing even if gps is not available
             // not in normal mode cause we do not want to be able to send a location that is not your current location !
-            if (shareLocationOnly) {
+            if (continuousLocationSharing) {
                 for (String p : locationManager.getProviders(true)) {
                     onLocationUpdate(locationManager.getLastKnownLocation(p));
                 }
@@ -287,7 +287,7 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
         rootView.setVisibility(View.VISIBLE);
 
         // if share location only: force sharing mode and hide switch
-        if (shareLocationOnly) {
+        if (continuousLocationSharing) {
             shareLocationSwitch.setEnabled(false);
             shareLocationSwitch.setChecked(true);
             shareLocationSwitch.setVisibility(View.GONE);
@@ -370,7 +370,7 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
             }
             dismiss();
             // if shareLocationOnly dismiss parent (map fragment) fragment when start sharing
-            if (shareLocationOnly && getParentFragment() != null && getParentFragment() instanceof DialogFragment) {
+            if (continuousLocationSharing && getParentFragment() != null && getParentFragment() instanceof DialogFragment) {
                 ((DialogFragment) getParentFragment()).dismiss();
             }
         }

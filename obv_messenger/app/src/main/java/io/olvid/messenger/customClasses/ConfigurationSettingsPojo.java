@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2024 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -69,6 +69,10 @@ public class ConfigurationSettingsPojo {
     public Integer rw; // retain_wiped_outbound;
 
     public Integer mi; // map_integration
+    public String co; // custom_osm_server --> non-null implies map_integration = CUSTOM_OSM
+    public Integer da; // disable_address_lookup
+    public String ca; // custom_address_server
+
     public Integer rj; // remove_jpeg_metadata;
 
     public Integer wk; // wc_keep_after_close;
@@ -130,7 +134,10 @@ public class ConfigurationSettingsPojo {
         if (ao != null) { pojo.auto_open_limited_visibility = ao != 0; }
         if (rw != null) { pojo.retain_wiped_outbound = rw != 0; }
 
-        if (mi != null) {
+        if (co != null) {
+            pojo.map_integration = SettingsActivity.PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM;
+            pojo.custom_osm_server = co;
+        } else if (mi != null) {
             switch (mi) {
                 case 1:
                     pojo.map_integration = SettingsActivity.PREF_VALUE_LOCATION_INTEGRATION_MAPS;
@@ -143,6 +150,12 @@ public class ConfigurationSettingsPojo {
                     pojo.map_integration = SettingsActivity.PREF_VALUE_LOCATION_INTEGRATION_BASIC;
                     break;
             }
+        }
+        if (ca != null) {
+            pojo.disable_address_lookup = false;
+            pojo.custom_address_server = ca;
+        } else if (da != null) {
+            pojo.disable_address_lookup = da != 0;
         }
 
         if (rj != null) { pojo.remove_jpeg_metadata = rj != 0; }
@@ -276,7 +289,9 @@ public class ConfigurationSettingsPojo {
         if (ao != null) { sb.append(highlight(c, R.string.text_setting_auto_open_limited_visibility)).append(bool(c, ao != 0)).append("\n"); }
         if (rw != null) { sb.append(highlight(c, R.string.text_setting_retain_wiped_outbound)).append(bool(c, rw != 0)).append("\n"); }
 
-        if (mi != null) {
+        if (co != null) {
+            sb.append(highlight(c, R.string.text_setting_map_integration)).append(co).append("\n");
+        } else if (mi != null) {
             sb.append(highlight(c, R.string.text_setting_map_integration));
             switch (mi) {
                 case 1:
@@ -290,7 +305,15 @@ public class ConfigurationSettingsPojo {
                     sb.append(c.getString(R.string.text_setting_none));
                     break;
             }
+            sb.append("\n");
         }
+        if (ca != null) {
+            sb.append(highlight(c, R.string.text_setting_address_lookup_server)).append(ca).append("\n");
+        } else if (da != null) {
+            sb.append(highlight(c, R.string.text_setting_disable_address_lookup)).append(bool(c, da != 0)).append("\n");
+        }
+
+
         if (rj != null) { sb.append(highlight(c, R.string.text_setting_remove_jpeg_metadata)).append(bool(c, rj != 0)).append("\n"); }
 
         if (wk != null) { sb.append(highlight(c, R.string.text_setting_wc_keep_after_close)).append(bool(c, wk != 0)).append("\n"); }
