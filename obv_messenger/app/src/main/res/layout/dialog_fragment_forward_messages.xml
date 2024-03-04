@@ -171,10 +171,19 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/button_forward"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/discussion_filter"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            android:background="@drawable/background_gradient_dialog_background_bottom"
+            app:layout_constraintBottom_toTopOf="@id/button_forward"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
 
         <TextView
             android:id="@+id/button_cancel"

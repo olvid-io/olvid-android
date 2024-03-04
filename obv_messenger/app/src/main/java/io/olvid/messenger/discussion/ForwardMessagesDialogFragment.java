@@ -58,6 +58,7 @@ import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
+import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.ForwardMessagesTask;
 import io.olvid.messenger.fragments.FilteredDiscussionListFragment;
@@ -169,7 +170,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
 
         FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
 
-        LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(viewModel.getForwardMessageOwnedIdentityLiveData(), new Function1<OwnedIdentity, LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>>>() {
+        LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(viewModel.getForwardMessageOwnedIdentityLiveData(), new Function1<>() {
             byte[] bytesOwnedIdentity = null;
 
             @Override
@@ -192,6 +193,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
         });
 
         filteredDiscussionListFragment.setUseDialogBackground(true);
+        filteredDiscussionListFragment.setBottomPadding(8);
         filteredDiscussionListFragment.setShowPinned(true);
         filteredDiscussionListFragment.setUnfilteredDiscussions(unfilteredDiscussions);
         filteredDiscussionListFragment.setDiscussionFilterEditText(contactNameFilter);
@@ -283,6 +285,17 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
             }
             dismiss();
             App.runThread(new ForwardMessagesTask(viewModel.getMessageIdsToForward(), selectedDiscussionIds));
+
+            OwnedIdentity forwardOwnedIdentity = viewModel.getForwardMessageOwnedIdentityLiveData().getValue();
+            Discussion originalDiscussion = viewModel.getDiscussion().getValue();
+            if (selectedDiscussionIds.size() == 1
+                    && forwardOwnedIdentity != null
+                    && originalDiscussion != null
+                    && Arrays.equals(forwardOwnedIdentity.bytesOwnedIdentity, originalDiscussion.bytesOwnedIdentity)
+                    && selectedDiscussionIds.get(0) != originalDiscussion.id) {
+                // we have forwarded a message in a single discussion, using the current owned identity
+                App.openDiscussionActivity(activity, selectedDiscussionIds.get(0));
+            }
         }
     }
 

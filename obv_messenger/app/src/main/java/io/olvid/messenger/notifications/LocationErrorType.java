@@ -22,5 +22,4 @@ package io.olvid.messenger.notifications;
 public enum LocationErrorType {
     LOCATION_DISABLED,
     LOCATION_PERMISSION_DENIED,
-    UPDATE_TIMEOUT,
 }

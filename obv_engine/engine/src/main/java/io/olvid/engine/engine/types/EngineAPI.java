@@ -236,7 +236,7 @@ public interface EngineAPI {
     void startFreeTrial(byte[] bytesOwnedIdentity);
     void verifyReceipt(byte[] bytesOwnedIdentity, String storeToken);
     void queryServerWellKnown(String server);
-    String getOsmServerUrl(byte[] bytesOwnedIdentity);
+    List<JsonOsmStyle> getOsmStyles(byte[] bytesOwnedIdentity);
     String getAddressServerUrl(byte[] bytesOwnedIdentity);
 
     void propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom obvSyncAtom) throws Exception;

@@ -25,11 +25,13 @@ import android.view.View;
 import android.widget.PopupMenu;
 
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.LocationShareQuality;
 
 public class ShareLocationPopupMenu extends PopupMenu {
     private long[] durationArray;
-    private String[] shortStringArray;
-    private String[] longStringArray;
+    private LocationShareQuality[] qualityArray;
+    private CharSequence[] shortStringArray;
+    private CharSequence[] longStringArray;
 
     public static ShareLocationPopupMenu getDurationPopUpMenu(Context context, View anchor) {
         ShareLocationPopupMenu popupMenu = new ShareLocationPopupMenu(context, anchor);
@@ -40,8 +42,8 @@ public class ShareLocationPopupMenu extends PopupMenu {
         for (int i = 0; i < stringDurationArray.length; i++) {
             popupMenu.durationArray[i] = Long.parseLong(stringDurationArray[i]);
         }
-        popupMenu.shortStringArray = context.getResources().getStringArray(R.array.share_location_duration_short_strings);
-        popupMenu.longStringArray = context.getResources().getStringArray(R.array.share_location_duration_long_strings);
+        popupMenu.shortStringArray = context.getResources().getTextArray(R.array.share_location_duration_short_strings);
+        popupMenu.longStringArray = context.getResources().getTextArray(R.array.share_location_duration_long_strings);
 
         for (int i = 0 ; i < popupMenu.durationArray.length; i++) {
             popupMenu.getMenu().add(0, i, i, popupMenu.shortStringArray[i]);
@@ -49,19 +51,19 @@ public class ShareLocationPopupMenu extends PopupMenu {
         return popupMenu;
     }
 
-    public static ShareLocationPopupMenu getIntervalPopUpMenu(Context context, View anchor) {
+    public static ShareLocationPopupMenu getQualityPopUpMenu(Context context, View anchor) {
         ShareLocationPopupMenu popupMenu = new ShareLocationPopupMenu(context, anchor);
 
         // convert duration string array to int array
-        String[] stringDurationArray = context.getResources().getStringArray(R.array.share_location_interval_values);
-        popupMenu.durationArray = new long[stringDurationArray.length];
-        for (int i = 0; i < stringDurationArray.length; i++) {
-            popupMenu.durationArray[i] = Long.parseLong(stringDurationArray[i]);
+        String[] stringQualityArray = context.getResources().getStringArray(R.array.share_location_quality_values);
+        popupMenu.qualityArray = new LocationShareQuality[stringQualityArray.length];
+        for (int i = 0; i < stringQualityArray.length; i++) {
+            popupMenu.qualityArray[i] = LocationShareQuality.fromValue(Integer.parseInt(stringQualityArray[i]));
         }
-        popupMenu.shortStringArray = context.getResources().getStringArray(R.array.share_location_interval_short_strings);
-        popupMenu.longStringArray = context.getResources().getStringArray(R.array.share_location_interval_long_strings);
+        popupMenu.shortStringArray = context.getResources().getTextArray(R.array.share_location_quality_short_strings);
+        popupMenu.longStringArray = context.getResources().getTextArray(R.array.share_location_quality_long_strings);
 
-        for (int i = 0 ; i < popupMenu.durationArray.length; i++) {
+        for (int i = 0 ; i < popupMenu.qualityArray.length; i++) {
             popupMenu.getMenu().add(0, i, i, popupMenu.shortStringArray[i]);
         }
         return popupMenu;
@@ -81,7 +83,14 @@ public class ShareLocationPopupMenu extends PopupMenu {
         return durationArray[item.getItemId()];
     }
 
-    public String getItemLongString(MenuItem item) {
+    public LocationShareQuality getItemQuality(MenuItem item) {
+        if (item.getItemId() < 0 || item.getItemId() >= qualityArray.length) {
+            return null;
+        }
+        return qualityArray[item.getItemId()];
+    }
+
+    public CharSequence getItemLongString(MenuItem item) {
         if (item.getItemId() < 0 || item.getItemId() >= longStringArray.length) {
             return null;
         }

@@ -7,16 +7,16 @@ repositories {
 dependencies {
     // do not update further: jackson >2.13 does not work on older Android APIs
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4'
-    implementation files('libs/sqlite-jdbc-3.42.0.1.jar')
+    implementation files('libs/sqlite-jdbc-3.45.1.0.jar')
 
-    implementation 'org.slf4j:slf4j-api:2.0.11'
-    implementation 'org.slf4j:slf4j-simple:2.0.11'
+    implementation 'org.slf4j:slf4j-api:2.0.12'
+    implementation 'org.slf4j:slf4j-simple:2.0.12'
 
-    implementation 'org.bitbucket.b_c:jose4j:0.9.4'
+    implementation 'org.bitbucket.b_c:jose4j:0.9.5'
 
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'net.iharder:base64:2.3.9'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.xerial:sqlite-jdbc:3.42.0.1' // only here to check if a new version is available
+    testImplementation 'org.xerial:sqlite-jdbc:3.45.1.0' // only here to check if a new version is available
 }

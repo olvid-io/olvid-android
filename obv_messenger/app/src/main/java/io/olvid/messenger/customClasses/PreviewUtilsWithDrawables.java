@@ -156,13 +156,21 @@ public class PreviewUtilsWithDrawables {
         private final int previewPixelSize;
 
         public PreviewUtilsScaleDownListener(int previewPixelSize) {
-            this.previewPixelSize = previewPixelSize;
+            if (previewPixelSize != PreviewUtils.MAX_SIZE && previewPixelSize > PreviewUtils.MAX_PREVIEW_PIXEL_SIZE) {
+             this.previewPixelSize =  PreviewUtils.MAX_PREVIEW_PIXEL_SIZE;
+            } else {
+                this.previewPixelSize = previewPixelSize;
+            }
         }
 
         @Override
         public void onHeaderDecoded(@NonNull ImageDecoder decoder, @NonNull ImageDecoder.ImageInfo info, @NonNull ImageDecoder.Source source) {
             width = info.getSize().getWidth();
             height = info.getSize().getHeight();
+            int maxPixelBytes = 4;
+            if (info.getColorSpace() != null && !info.getColorSpace().isSrgb()) {
+                maxPixelBytes = 8;
+            }
             partial = false;
             if (previewPixelSize != PreviewUtils.MAX_SIZE) {
                 int size = Math.max(info.getSize().getWidth(), info.getSize().getHeight());
@@ -170,8 +178,8 @@ public class PreviewUtilsWithDrawables {
                     int subSampling = size / previewPixelSize;
                     decoder.setTargetSampleSize(subSampling);
                 }
-            } else if (4 * width * height > PreviewUtils.MAX_BITMAP_SIZE) {
-                int scaled = (int) Math.sqrt((double) (4 * width * height) / PreviewUtils.MAX_BITMAP_SIZE) + 1;
+            } else if (maxPixelBytes * width * height > PreviewUtils.MAX_BITMAP_SIZE) {
+                int scaled = (int) Math.sqrt((double) (maxPixelBytes * width * height) / PreviewUtils.MAX_BITMAP_SIZE) + 1;
                 decoder.setTargetSize(width / scaled, height / scaled);
             }
             decoder.setOnPartialImageListener(this);

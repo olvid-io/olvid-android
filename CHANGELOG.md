@@ -1,3 +1,18 @@
+# Build 230 (1.5)
+2024-03-04
+
+- Backward compatibility with ongoin location sharing
+- Fix a small markdown bug
+
+# ~~Build 229 (1.5)~~
+2024-02-26
+
+- Location sharing comes out of beta!
+- Fix a crash with large 16-bit color depth PNG images
+- Restart button in troubleshooting activity
+- Update WebRTC and Sqlite-JDBC
+- Emoji 15.1 support
+
 # Build 227 (1.4)
 2024-01-30
 

@@ -158,7 +158,7 @@ public abstract class DiscussionDao {
 
     @Transaction
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " message.*, unread.count AS unread_count, (unreadMention.count != 0) AS unread_mention, " +
+            " message.*, unread.count AS unread_count, (unreadMention.count != 0) AS unread_mention, (locations.count != 0) AS locations_shared, " +
             PREFIX_DISCUSSION_CUSTOMIZATION_COLUMNS +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN ( SELECT id, " + Message.SENDER_SEQUENCE_NUMBER + ", " +
@@ -178,6 +178,9 @@ public abstract class DiscussionDao {
             " ON unread." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " AND " + Message.MENTIONED + " = 1" + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unreadMention " +
             " ON unreadMention." + Message.DISCUSSION_ID + " = disc.id " +
+            " LEFT JOIN ( SELECT COUNT(*) as count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.JSON_LOCATION + " NOT NULL " + " AND " +
+            Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE + ") AS locations" +
+            " ON locations." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN " + DiscussionCustomization.TABLE_NAME + " AS cust " +
             " ON cust." + DiscussionCustomization.DISCUSSION_ID + " = disc.id " +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
@@ -202,7 +205,7 @@ public abstract class DiscussionDao {
             " disc." + Discussion.ACTIVE + " AS disc_" + Discussion.ACTIVE + ", " +
             " disc." + Discussion.TRUST_LEVEL + " AS disc_" + Discussion.TRUST_LEVEL + ", " +
             " disc." + Discussion.STATUS + " AS disc_" + Discussion.STATUS + ", " +
-            " message.*, unread.count AS unread_count, (unreadMention.count != 0) AS unread_mention, " +
+            " message.*, unread.count AS unread_count, (unreadMention.count != 0) AS unread_mention, 0 AS locations_shared, " +
             PREFIX_DISCUSSION_CUSTOMIZATION_COLUMNS +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN ( SELECT id, " + Message.SENDER_SEQUENCE_NUMBER + ", " +
@@ -513,6 +516,9 @@ public abstract class DiscussionDao {
 
         @ColumnInfo(name = "unread_mention")
         public boolean unreadMention;
+
+        @ColumnInfo(name = "locations_shared")
+        public boolean locationsShared;
     }
 
     public static class DiscussionAndGroupMembersNames {

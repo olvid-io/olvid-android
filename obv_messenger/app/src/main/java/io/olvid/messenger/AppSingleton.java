@@ -177,15 +177,14 @@ public class AppSingleton {
             App.runThread(new SetContactsAndPendingMembersFirstNamesTask());
         }
 
-        // TODO: enable this once location is no longer in beta
-//        if (lastBuildExecuted != 0 && lastBuildExecuted < 171) {
-//            // if the user has customized attach icon order, add the send location icon so they see it
-//            List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
-//            if (icons != null && !icons.contains(ComposeMessageFragment.ICON_SEND_LOCATION)) {
-//                icons.add(0, ComposeMessageFragment.ICON_SEND_LOCATION);
-//                SettingsActivity.setComposeMessageIconPreferredOrder(icons);
-//            }
-//        }
+        if (lastBuildExecuted != 0 && lastBuildExecuted < 229) {
+            // if the user has customized attach icon order, add the send location icon so they see it
+            List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
+            if (icons != null && !icons.contains(ComposeMessageFragment.ICON_SEND_LOCATION)) {
+                icons.add(0, ComposeMessageFragment.ICON_SEND_LOCATION);
+                SettingsActivity.setComposeMessageIconPreferredOrder(icons);
+            }
+        }
 
         {
             // generate App directories

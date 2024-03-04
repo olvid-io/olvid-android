@@ -364,34 +364,22 @@
         <item>@string/location_sharing_duration_endless_full_string</item>
     </string-array>
 
-    <string-array name="share_location_interval_values">
-        <item>60000</item>
-        <item>300000</item>
-        <item>3600000</item>
+    <string-array name="share_location_quality_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
-    <string-array name="share_location_interval_short_strings">
-        <item>@string/location_sharing_interval_one_minute_short_string</item>
-        <item>@string/location_sharing_interval_five_minutes_short_string</item>
-        <item>@string/location_sharing_interval_one_hour_short_string</item>
+    <string-array name="share_location_quality_short_strings">
+        <item>@string/location_sharing_quality_precise_short_string</item>
+        <item>@string/location_sharing_quality_balanced_short_string</item>
+        <item>@string/location_sharing_quality_power_save_short_string</item>
     </string-array>
-    <string-array name="share_location_interval_long_strings">
-        <item>@string/location_sharing_interval_one_minute_full_string</item>
-        <item>@string/location_sharing_interval_five_minutes_full_string</item>
-        <item>@string/location_sharing_interval_one_hour_full_string</item>
+    <string-array name="share_location_quality_long_strings">
+        <item>@string/location_sharing_quality_precise_full_string</item>
+        <item>@string/location_sharing_quality_balanced_full_string</item>
+        <item>@string/location_sharing_quality_power_save_full_string</item>
     </string-array>
 
-    <string-array name="location_osm_language_entries">
-        <item>@string/location_map_language_default</item>
-        <item>@string/location_map_language_english</item>
-        <item>@string/location_map_language_french</item>
-        <item>@string/location_map_language_international</item>
-    </string-array>
-    <string-array name="location_osm_language_values">
-        <item>default</item>
-        <item>en</item>
-        <item>fr</item>
-        <item>intl</item>
-    </string-array>
     <string-array name="app_language_choice">
         <item>@string/pref_text_default_device_language</item>
         <item>@string/pref_text_english</item>

@@ -439,21 +439,20 @@ private fun Editable.setMarkdownSpanFromNode(
 
         is Heading -> {
             node.sourceSpans.first().let { sourceSpan ->
-                val delimiterStart = indexOf(MarkdownTag.HEADING.delimiter.repeat(node.level))
                 val start = sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex]
-                if (get(delimiterStart).toString() == MarkdownTag.HEADING.delimiter) { // ensure heading is triggered by # and not underlying - or =
+                if (get(start).toString() == MarkdownTag.HEADING.delimiter) { // ensure heading is triggered by # and not underlying - or =
                     setSpan(
                         markdownSpan,
-                        delimiterStart + node.level + 1,
+                        start + node.level + 1,
                         (sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex] + sourceSpan.length).coerceAtLeast(
-                            delimiterStart + node.level + 1
+                            start + node.level + 1
                         ),
                         SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     setSpan(
                         MarkdownDelimiter(color = highlightColor),
                         start,
-                        delimiterStart + node.level + 1,
+                        start + node.level + 1,
                         SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                 }

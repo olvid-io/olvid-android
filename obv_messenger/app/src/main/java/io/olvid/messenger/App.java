@@ -22,6 +22,8 @@ package io.olvid.messenger;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -634,6 +636,12 @@ public class App extends Application implements DefaultLifecycleObserver {
         final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
                 .setTitle(R.string.dialog_title_confirm_open_link)
                 .setMessage(uri.toString())
+                .setNeutralButton(R.string.button_label_copy, (dialog, which) -> {
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText(uri.toString(), uri.toString());
+                    clipboard.setPrimaryClip(clip);
+                    toast(R.string.toast_message_link_copied, Toast.LENGTH_SHORT);
+                })
                 .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
                     try {
                         context.startActivity(new Intent(Intent.ACTION_VIEW, uri));

@@ -77,6 +77,7 @@ import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalPermissionsApi::class)
 class TroubleshootingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,6 +133,8 @@ class TroubleshootingActivity : ComponentActivity() {
                 val list : ArrayList<Triple<Boolean, Boolean, TroubleshootingItemType>> = ArrayList() // triple is (valid, critical, TroubleshootItemType)
                 if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
                     list.add(Triple(postNotificationsState.status.isGranted, true, TroubleshootingItemType.NOTIFICATIONS))
+                } else {
+                    list.add(Triple(true, false, TroubleshootingItemType.NOTIFICATIONS))
                 }
 
                 if (VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -239,16 +242,17 @@ class TroubleshootingActivity : ComponentActivity() {
                                                     ObvFirebaseMessagingService.getLastPushNotificationTimestamp()
                                                 )
                                             }
-                                        )
+                                        ) + "\n" + stringResource(id = string.dialog_message_about_deprioritized_push_notification, ObvFirebaseMessagingService.getDeprioritizedMessageCount(), ObvFirebaseMessagingService.getHighPriorityMessageCount())
                                     } else "",
                                     titleInvalid = stringResource(id = string.troubleshooting_notifications_invalid_title),
                                     descriptionInvalid = stringResource(id = string.troubleshooting_notifications_invalid_description),
                                     valid = postNotificationsState.status.isGranted
                                 ) {
                                     TextButton(
-                                        onClick =
-                                        {
-                                            notificationsPermissionLauncher.launch(permission.POST_NOTIFICATIONS)
+                                        onClick = {
+                                            if (VERSION.SDK_INT >= VERSION_CODES.M) {
+                                                notificationsPermissionLauncher.launch(permission.POST_NOTIFICATIONS)
+                                            }
                                         }
                                     ) {
                                         Text(text = stringResource(id = string.troubleshooting_request_permission))
@@ -512,6 +516,8 @@ class TroubleshootingActivity : ComponentActivity() {
                     }
 
                     AppVersionHeader(betaEnabled = SettingsActivity.getBetaFeaturesEnabled())
+                    
+                    RestartAppButton()
                 }
             }
         }

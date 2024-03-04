@@ -1449,17 +1449,17 @@
     <string name="button_label_send">Envoyer</string>
     <string name="button_label_start_sharing">Partager</string>
     <string name="location_sharing_duration_one_hour_short_string">1\u00a0heure</string>
-    <string name="location_sharing_duration_one_hour_full_string">Partager la position pendant 1\u00a0heure</string>
+    <string name="location_sharing_duration_one_hour_full_string">Partager la position pendant <b>1 heure</b></string>
     <string name="location_sharing_duration_three_hours_short_string">3\u00a0heures</string>
-    <string name="location_sharing_duration_three_hours_full_string">Partager la position pendant 3\u00a0heures</string>
+    <string name="location_sharing_duration_three_hours_full_string">Partager la position pendant <b>3 heures</b></string>
     <string name="location_sharing_duration_endless_short_string">Pas de limite</string>
-    <string name="location_sharing_duration_endless_full_string">Partager la position indéfiniement</string>
-    <string name="location_sharing_interval_one_minute_short_string">1\u00a0minute</string>
-    <string name="location_sharing_interval_one_minute_full_string">Envoyer la position toutes les minutes</string>
-    <string name="location_sharing_interval_five_minutes_short_string">5\u00a0minutes</string>
-    <string name="location_sharing_interval_five_minutes_full_string">Envoyer la position toutes les 5\u00a0minutes</string>
-    <string name="location_sharing_interval_one_hour_short_string">1\u00a0heure</string>
-    <string name="location_sharing_interval_one_hour_full_string">Envoyer la position toutes les heures</string>
+    <string name="location_sharing_duration_endless_full_string">Partager la position <b>indéfiniement</b></string>
+    <string name="location_sharing_quality_precise_short_string">Précis</string>
+    <string name="location_sharing_quality_balanced_short_string">Équilibré</string>
+    <string name="location_sharing_quality_power_save_short_string">Économie d\'énergie</string>
+    <string name="location_sharing_quality_precise_full_string">Mode de partage <b>précis</b></string>
+    <string name="location_sharing_quality_balanced_full_string">Mode de partage <b>équilibré</b></string>
+    <string name="location_sharing_quality_power_save_full_string">Mode de partage <b>économie d\'énergie</b></string>
     <string name="label_sharing_location_until">Partage de la position jusqu\'à %1$s</string>
     <string name="button_label_end_sharing_location">Arrêter le partage</string>
     <string name="label_location_sharing_ended">Partage terminé</string>
@@ -1488,11 +1488,6 @@
     <string name="pref_location_share_duration_title">Durée par défaut du partage</string>
     <string name="pref_location_integration_title">Intégration avec un service de cartographie</string>
     <string name="pref_location_hide_notifications_title">Masquer toutes les notifications d\'erreurs relatives au partage de position</string>
-    <string name="pref_location_osm_language_title">Langue des cartes OpenStreetMap</string>
-    <string name="location_map_language_default">Langue du système</string>
-    <string name="location_map_language_english">Anglais</string>
-    <string name="location_map_language_french">Français</string>
-    <string name="location_map_language_international">International</string>
     <string name="dialog_title_osm_attributions">Attributions</string>
     <string name="message_too_many_attempts">Trop d\'essais, veuillez attendre…</string>
     <string name="x_seconds">%1$02ds</string>
@@ -1603,6 +1598,7 @@
     <string name="dialog_title_introducing_groups_v2">Découvrez les nouveaux groupes\u00a0!</string>
     <string name="dialog_message_introducing_groups_v2">Olvid permet maintenant d\'avoir plusieurs administrateurs par groupe\u00a0👑\u00a0! Cela ne change rien à vos «\u00a0anciens groupes\u00a0», mais fonctionnera pour tous les nouveaux groupes que vous créerez à partir de maintenant. Pour en bénéficier, vos contacts doivent avoir la dernière version d\'Olvid.\n\nVous voulez essayer\u00a0? Rendez vous sur l\'onglet des groupes et créez un nouveau groupe. Une fois créé, vous pourrez le modifier pour accorder les droits d\'administration à autant de participants que vous le voulez\u00a0!</string>
     <string name="dialog_message_about_last_push_notification">Dernière notification push\u00a0: %1$s</string>
+    <string name="dialog_message_about_deprioritized_push_notification">Notifications push dépriorisés : %1$d/%2$d</string>
     <string name="text_message_too_large_for_webclient">[Message trop long pour être affiché dans le client web]</string>
     <string name="text_invalid_shortcut">Raccourci invalide</string>
     <string name="text_feature_initiate_secure_calls_from_another_profile">Émettre des appels sécurisés\n(disponible grâce à un autre profil)</string>
@@ -1804,7 +1800,7 @@
     <string name="button_label_do_nothing">Ne rien faire</string>
     <string name="menu_action_go_to_message">Aller au message</string>
     <string name="preset_ephemeral_settings_custom">Personnalisée</string>
-    <string name="preset_ephemeral_read_once">Visible une seul fois</string>
+    <string name="preset_ephemeral_read_once">Visible une seule fois</string>
     <string name="preset_ephemeral_visibility_duration">Durée de visibilité</string>
     <string name="preset_ephemeral_existence_duration">Durée d\'existence</string>
     <string name="preset_ephemeral_read_once_explanation">Les messages et pièces jointes visibles une seule fois sont effacés quand l\'on sort de la discussion.</string>
@@ -1829,6 +1825,25 @@
     <string name="menu_action_play_at_1x">Écouter à vitesse normale (1\u00d7)</string>
     <string name="menu_action_play_at_1_5x">Écouter plus rapidement (1,5\u00d7)</string>
     <string name="menu_action_play_at_2x">Écouter le plus vite possible (2\u00d7)</string>
+    <string name="pref_location_share_quality_title">Mode de partage par défaut</string>
+    <string name="pref_experimental_push_priority_title">Use experimental push notification priority</string>
+    <string name="label_sharing_your_location">Vous partagez votre position</string>
+    <string name="menu_action_open_map">Ouvrir la carte</string>
+    <string name="language_short_string">fr</string>
+    <string name="menu_action_google_maps_normal">Normale</string>
+    <string name="menu_action_google_maps_satellite">Satellite</string>
+    <string name="menu_action_google_maps_terrain">Relief</string>
+    <string name="menu_action_google_maps_hybrid">Hybride</string>
+    <string name="button_label_copy">Copier</string>
+    <string name="toast_message_link_copied">Lien copié dans le presse-papier</string>
+    <string name="button_label_force_restart">Redémarrer l\'application</string>
+    <string name="dialog_title_restart_app">Redémarrer l\'application ?</string>
+    <string name="dialog_message_restart_app">Souhaitez-vous forcer le redémarrage d\'Olvid ?</string>
+    <string name="call_encrypted_notice">Appel chiffré de bout en bout</string>
+    <string name="pref_hide_group_member_changes_title">Masquer les messages de modification de groupe</string>
+    <string name="pref_hide_group_member_changes_summary">Une fois cette option activée, les messages indiquant qu\'un membre à rejoint ou quitté un groupe ne seront plus affichés dans vos discussions.</string>
+
+
 
 
     <plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity">
@@ -1962,5 +1977,13 @@
     <plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Vous avez actuellement un message supprimé à distance dans vos discussions. Souhaitez-vous le supprimer ?</item>
         <item quantity="other">Vous avez actuellement %1$d messages supprimés à distance dans vos discussions. Souhaitez-vous tous les supprimer ?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d contact partage sa position</item>
+        <item quantity="other">%1$d contacts partagent leur position</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity">
+        <item quantity="one">Vous and %1$d autre partagez votre position</item>
+        <item quantity="other">Vous and %1$d autres partagez votre position</item>
     </plurals>
 </resources>

@@ -59,24 +59,27 @@ import java.util.concurrent.Executor;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.HandlerExecutor;
+import io.olvid.messenger.customClasses.LocationShareQuality;
 import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.databases.tasks.PostLocationMessageInDiscussionTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragment implements View.OnClickListener {
 
+    public static final String DISCUSSION_ID_KEY = "discussion_id";
+    public static final String CONTINUOUS_SHARING_KEY = "continuous_sharing";
     private static final double GREEN_PRECISION_LIMIT = 20.0;
     private static final double ORANGE_PRECISION_LIMIT = 50.0;
 
     // used to manually request location permission and activation on first launch
     private boolean firstCallToOnStart = true;
     // map integrations use this fragment for sharing location, behaviour is a little bit different
-    private final boolean continuousLocationSharing;
+    private long discussionId;
+    private boolean continuousLocationSharing;
 
     private LocationManager locationManager;
     private FragmentActivity activity;
 
-    private final long discussionId;
 
     private Location currentLocation = null;
     private final LocationListenerCompat locationListenerCompat = this::onLocationUpdate;
@@ -91,39 +94,46 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch shareLocationSwitch;
     private TextView shareLocationDurationTextView;
-    private Long shareLocationCurrentDuration = null;
-    private long shareLocationCurrentInterval;
+    private Long shareLocationCurrentDuration;
+    private LocationShareQuality shareLocationCurrentQuality;
 
     private ConstraintLayout shareLocationIntervalLayout;
     private TextView shareLocationIntervalTextView;
 
     private Button validateButton;
 
-    // os need an empty public constructor
-    public SendLocationBasicDialogFragment() {
-        this.discussionId = 0;
-        this.continuousLocationSharing = false;
+    public static SendLocationBasicDialogFragment newInstance(long discussionId) {
+        return newInstance(discussionId, false);
     }
 
-    public SendLocationBasicDialogFragment(long discussionId) {
-        super();
-        this.discussionId = discussionId;
-        this.continuousLocationSharing = false;
+    public static SendLocationBasicDialogFragment newInstance(long discussionId, boolean continuousLocationSharing) {
+        SendLocationBasicDialogFragment fragment = new SendLocationBasicDialogFragment();
+        Bundle args = new Bundle();
+        args.putLong(DISCUSSION_ID_KEY, discussionId);
+        args.putBoolean(CONTINUOUS_SHARING_KEY, continuousLocationSharing);
+        fragment.setArguments(args);
+        return fragment;
     }
 
-    // used when sharing location with some map integration
-    public SendLocationBasicDialogFragment(long discussionId, boolean continuousLocationSharing) {
-        super();
-        this.discussionId = discussionId;
-        this.continuousLocationSharing = continuousLocationSharing;
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // get activity
+        this.activity = requireActivity();
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            this.discussionId = arguments.getLong(DISCUSSION_ID_KEY);
+            this.continuousLocationSharing = arguments.getBoolean(CONTINUOUS_SHARING_KEY);
+        } else {
+            dismiss();
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // get activity
-        this.activity = requireActivity();
-
         // inflate view
         rootView = inflater.inflate(R.layout.fragment_send_location_basic, container, false);
 
@@ -145,8 +155,9 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
         cancelButton.setOnClickListener(this);
 
         // share duration default value
-        shareLocationDurationTextView.setText(SettingsActivity.getLocationDefaultSharingDurationLongString(activity));
         shareLocationCurrentDuration = SettingsActivity.getLocationDefaultSharingDurationValue();
+        shareLocationDurationTextView.setText(SettingsActivity.getLocationDefaultSharingDurationLongString(activity));
+
         // share duration dropdown menu setup
         shareLocationDurationTextView.setOnClickListener((view) -> {
             ShareLocationPopupMenu shareLocationPopupMenu = ShareLocationPopupMenu.getDurationPopUpMenu(this.activity, view);
@@ -164,17 +175,18 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
             shareLocationPopupMenu.show();
         });
 
-        // share interval default value
-        shareLocationIntervalTextView.setText(SettingsActivity.getLocationDefaultSharingIntervalLongString(activity));
-        shareLocationCurrentInterval = SettingsActivity.getLocationDefaultSharingIntervalValue();
+        // share quality default value
+        shareLocationCurrentQuality = SettingsActivity.getLocationDefaultShareQuality();
+        shareLocationIntervalTextView.setText(shareLocationCurrentQuality.getFullString(activity));
+
         // share duration dropdown menu setup
         shareLocationIntervalTextView.setOnClickListener((view) -> {
-            ShareLocationPopupMenu shareLocationPopupMenu = ShareLocationPopupMenu.getIntervalPopUpMenu(this.activity, view);
+            ShareLocationPopupMenu shareLocationPopupMenu = ShareLocationPopupMenu.getQualityPopUpMenu(this.activity, view);
             shareLocationPopupMenu.setOnMenuItemClickListener(item -> {
                 // set text
                 shareLocationIntervalTextView.setText(shareLocationPopupMenu.getItemLongString(item));
-                // keep duration in memory
-                shareLocationCurrentInterval = shareLocationPopupMenu.getItemDuration(item);
+                // keep quality in memory
+                shareLocationCurrentQuality = shareLocationPopupMenu.getItemQuality(item);
                 // enable sharing if it was not
                 if (!shareLocationSwitch.isChecked()) {
                     shareLocationSwitch.setChecked(true);
@@ -385,7 +397,7 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
         }
 
         // post first location message (will start location sharing service)
-        App.runThread(PostLocationMessageInDiscussionTask.startLocationSharingInDiscussionTask(currentLocation, discussionId, true, shareExpirationInMs, shareLocationCurrentInterval));
+        App.runThread(PostLocationMessageInDiscussionTask.startLocationSharingInDiscussionTask(currentLocation, discussionId, true, shareExpirationInMs, shareLocationCurrentQuality));
     }
 
     // dismiss if request for permission or location activation was canceled

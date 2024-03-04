@@ -21,6 +21,7 @@ package io.olvid.engine.metamanager;
 
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import io.olvid.engine.datatypes.Identity;
@@ -31,6 +32,7 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ReceivedAttachment;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
+import io.olvid.engine.engine.types.JsonOsmStyle;
 
 public interface NetworkFetchDelegate {
     void downloadMessages(Identity ownedIdentity, UID deviceUid);
@@ -65,6 +67,6 @@ public interface NetworkFetchDelegate {
     void startFreeTrial(Identity ownedIdentity);
     void verifyReceipt(Identity ownedIdentity, String storeToken);
     void queryServerWellKnown(String server);
-    String getOsmServerUrl(String server);
+    List<JsonOsmStyle> getOsmStyles(String server);
     String getAddressServerUrl(String server);
 }

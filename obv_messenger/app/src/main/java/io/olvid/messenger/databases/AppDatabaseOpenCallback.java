@@ -161,12 +161,12 @@ public class AppDatabaseOpenCallback implements Runnable {
             Logger.w("Error cleaning up pre-discussions without invitation.");
         }
 
-        // Update all Messages/attachments
+        // Update all attachments
         try {
             engine.resendAllAttachmentNotifications();
         } catch (Exception e) {
             e.printStackTrace();
-            Logger.w("Error syncing Room messages with Engine attachments.");
+            Logger.w("Error syncing Room attachments with Engine attachments.");
         }
 
         // Check status of all uploading/downloading Fyle
@@ -202,6 +202,9 @@ public class AppDatabaseOpenCallback implements Runnable {
                         downloadingFyle.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
                     }
                 } else if (engine.isInboxAttachmentReceived(downloadingFyle.bytesOwnedIdentity, downloadingFyle.engineMessageIdentifier, downloadingFyle.engineNumber)) {
+                    // If a message still exists in the engine, a download completed notification will be resent by the call to resendAllAttachmentNotifications() above.
+                    // However, if the message no longer exists, all we can do is mark the app attachment as downloaded,
+                    // but we do not have anything in the engine to fetch to actually complete the download
                     downloadingFyle.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
                     db.fyleMessageJoinWithStatusDao().updateStatus(downloadingFyle.messageId, downloadingFyle.fyleId, downloadingFyle.status);
                     downloadingFyle.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);

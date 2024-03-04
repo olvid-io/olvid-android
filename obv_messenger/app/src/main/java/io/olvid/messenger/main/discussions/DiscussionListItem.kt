@@ -53,6 +53,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -85,6 +86,7 @@ fun DiscussionListItem(
     locked: Boolean,
     mentioned: Boolean,
     pinned: Boolean,
+    locationsShared: Boolean,
     attachmentCount: Int,
     onClick: () -> Unit,
     isPreDiscussion :Boolean,
@@ -218,6 +220,14 @@ fun DiscussionListItem(
                         )
                     }
 
+                    AnimatedVisibility(visible = locationsShared) {
+                        Image(
+                            modifier = Modifier.size(22.dp),
+                            painter = painterResource(id = R.drawable.ic_attach_location),
+                            contentDescription = "location",
+                            colorFilter = ColorFilter.tint(colorResource(id = R.color.olvid_gradient_contrasted))
+                        )
+                    }
                     AnimatedVisibility(visible = mentioned) {
                         Image(
                             modifier = Modifier.size(20.dp),
@@ -367,6 +377,7 @@ private fun DiscussionListItemPreview() {
             mentioned = true,
             locked = false,
             pinned = true,
+            locationsShared = true,
             isPreDiscussion = false,
             attachmentCount = 3,
             onClick = {},

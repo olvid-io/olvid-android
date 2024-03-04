@@ -45,6 +45,7 @@ import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.settings.SettingsActivity;
 
 
 public class DiscussionViewModel extends ViewModel {
@@ -97,7 +98,11 @@ public class DiscussionViewModel extends ViewModel {
             if (discussionId == null) {
                 return null;
             }
-            return db.messageDao().getDiscussionMessages(discussionId);
+            if (SettingsActivity.getHideGroupMemberChanges()) {
+                return db.messageDao().getDiscussionMessagesWithoutGroupMemberChanges(discussionId);
+            } else {
+                return db.messageDao().getDiscussionMessages(discussionId);
+            }
         });
 
         discussionLiveData = Transformations.switchMap(discussionIdLiveData, (Long discussionId) -> {

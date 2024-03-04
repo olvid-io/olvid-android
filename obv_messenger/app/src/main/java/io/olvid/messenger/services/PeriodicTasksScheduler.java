@@ -63,7 +63,7 @@ public class PeriodicTasksScheduler {
     public static final long PERIODIC_TASKS_DEBUG_LOG_MAX_SIZE = 1_000_000L;
 
     public static final String DOWNLOAD_MESSAGES_WORK_NAME = "download_messages";
-    public static final int DOWNLOAD_MESSAGES_INTERVAL_IN_SECONDS = 900; // this is the minimum allowed by Android
+    public static final int DOWNLOAD_MESSAGES_INTERVAL_IN_SECONDS = 1_800; // 900 is the minimum allowed by Android --> we increase it a bit to reduce useless message polling
 
     public static final String VACUUM_DB_WORK_NAME = "vacuum_db";
     public static final int VACUUM_DB_INTERVAL_IN_HOURS = 11;

@@ -56,6 +56,7 @@ import io.olvid.messenger.databases.tasks.UpdateMessageImageResolutionsTask;
 public class PreviewUtils {
 
     public static final int MAX_SIZE = 100_000; // constant to indicate that previews should be as large as possible
+    public static final int MAX_PREVIEW_PIXEL_SIZE = 4_000; // previews larger than this could be larger than MAX_BITMAP_SIZE
     public static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024;
 
     // region Implement a local in-memory cache of miniature bitmaps
@@ -162,6 +163,11 @@ public class PreviewUtils {
         if (fyle.sha256 == null) {
             return null;
         }
+
+        if (previewPixelSize > MAX_PREVIEW_PIXEL_SIZE) {
+            previewPixelSize = MAX_PREVIEW_PIXEL_SIZE;
+        }
+
         String cacheKey = Logger.toHexString(fyle.sha256) + "_" + fyleMessageJoinWithStatus.getNonNullMimeType();
         if (fyle.isComplete()) {
             SizeAndBitmap sizeAndBitmap = thumbnailCache.get(cacheKey);

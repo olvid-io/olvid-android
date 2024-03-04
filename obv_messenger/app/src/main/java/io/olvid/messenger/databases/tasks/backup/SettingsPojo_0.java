@@ -38,6 +38,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.activities.ShortcutActivity;
+import io.olvid.messenger.customClasses.LocationShareQuality;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Invitation;
@@ -96,9 +97,8 @@ public class SettingsPojo_0 {
 
     public String map_integration;
     public String custom_osm_server;
-    public String osm_language;
     public Long location_share_duration;
-    public Long location_share_interval;
+    public Integer location_share_quality;
     public Boolean disable_address_lookup;
     public String custom_address_server;
 
@@ -191,9 +191,8 @@ public class SettingsPojo_0 {
 
         settingsPojo.map_integration = SettingsActivity.getLocationIntegration().getString();
         settingsPojo.custom_osm_server = (SettingsActivity.getLocationIntegration() == SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM) ? SettingsActivity.getLocationCustomOsmServerUrl() : null;
-        settingsPojo.osm_language = SettingsActivity.getLocationOpenStreetMapRawLanguage();
         settingsPojo.location_share_duration = SettingsActivity.getLocationDefaultSharingDurationValue();
-        settingsPojo.location_share_interval = SettingsActivity.getLocationDefaultSharingIntervalValue();
+        settingsPojo.location_share_quality = SettingsActivity.getLocationDefaultShareQuality().value;
         settingsPojo.disable_address_lookup = SettingsActivity.getLocationDisableAddressLookup();
         settingsPojo.custom_address_server = SettingsActivity.getLocationCustomAddressServer();
 
@@ -325,9 +324,8 @@ public class SettingsPojo_0 {
         if (default_existence_duration != null && default_existence_duration > 0) { SettingsActivity.setDefaultDiscussionExistenceDuration(default_existence_duration); }
 
         if (map_integration != null) { SettingsActivity.setLocationIntegration(map_integration, custom_osm_server); }
-        if (osm_language != null) { SettingsActivity.setLocationOpenStreetMapRawLanguage(osm_language); }
         if (location_share_duration != null) { SettingsActivity.setLocationDefaultSharingDurationValue(location_share_duration); }
-        if (location_share_interval != null) { SettingsActivity.setLocationDefaultSharingIntervalValue(location_share_interval); }
+        if (location_share_quality != null) { SettingsActivity.setLocationDefaultShareQuality(LocationShareQuality.fromValue(location_share_quality)); }
         if (disable_address_lookup != null) { SettingsActivity.setLocationDisableAddressLookup(disable_address_lookup); }
         if (custom_address_server != null) { SettingsActivity.setLocationCustomAddressServer(custom_address_server); }
 

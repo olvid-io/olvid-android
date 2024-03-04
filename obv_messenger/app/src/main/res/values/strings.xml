@@ -22,7 +22,7 @@
     <string name="pref_text_autodownload_size_100M">Smaller than 100MB</string>
     <string name="pref_text_autodownload_size_disabled">Never download automatically</string>
     <string name="pref_text_autodownload_size_unlimited">Always download automatically</string>
-     <string name="button_label_abort">Abort</string>
+    <string name="button_label_abort">Abort</string>
     <string name="button_label_accept">Accept</string>
     <string name="button_label_app_settings">App settings</string>
     <string name="button_label_cancel">Cancel</string>
@@ -183,7 +183,7 @@
     <string name="menu_action_edit_group_details">Edit group details</string>
     <string name="menu_action_edit_my_details">Edit my Details</string>
     <string name="menu_action_group_details">Group Details</string>
-    <string name="menu_action_import_from_clipboard">Import invitation from Clipboard</string>
+    <string name="menu_action_import_from_clipboard">Import invitation from clipboard</string>
     <string name="menu_action_leave_group">Leave group</string>
     <string name="menu_action_open">Open</string>
     <string name="menu_action_recreate_channels">Recreate secure channels</string>
@@ -1472,17 +1472,17 @@
     <string name="button_label_send">Send</string>
     <string name="button_label_start_sharing">Start sharing</string>
     <string name="location_sharing_duration_one_hour_short_string">1\u00a0hour</string>
-    <string name="location_sharing_duration_one_hour_full_string">Share location for 1\u00a0hour</string>
+    <string name="location_sharing_duration_one_hour_full_string">Share location for <b>1 hour</b></string>
     <string name="location_sharing_duration_three_hours_short_string">3\u00a0hours</string>
-    <string name="location_sharing_duration_three_hours_full_string">Share location for 3\u00a0hours</string>
+    <string name="location_sharing_duration_three_hours_full_string">Share location for <b>3 hours</b></string>
     <string name="location_sharing_duration_endless_short_string">Endless</string>
-    <string name="location_sharing_duration_endless_full_string">Share location until stopped</string>
-    <string name="location_sharing_interval_one_minute_short_string">1\u00a0minute</string>
-    <string name="location_sharing_interval_one_minute_full_string">Send location every minute</string>
-    <string name="location_sharing_interval_five_minutes_short_string">5\u00a0minutes</string>
-    <string name="location_sharing_interval_five_minutes_full_string">Send location every 5\u00a0minutes</string>
-    <string name="location_sharing_interval_one_hour_short_string">1\u00a0hour</string>
-    <string name="location_sharing_interval_one_hour_full_string">Send location every hour</string>
+    <string name="location_sharing_duration_endless_full_string">Share location <b>until stopped</b></string>
+    <string name="location_sharing_quality_precise_short_string">Precise</string>
+    <string name="location_sharing_quality_balanced_short_string">Balanced</string>
+    <string name="location_sharing_quality_power_save_short_string">Power save</string>
+    <string name="location_sharing_quality_precise_full_string"><b>Precise</b> location sharing mode</string>
+    <string name="location_sharing_quality_balanced_full_string"><b>Balanced</b> location sharing mode</string>
+    <string name="location_sharing_quality_power_save_full_string"><b>Power save</b> location sharing mode</string>
     <string name="label_sharing_location_until">Sharing location until: %1$s</string>
     <string name="button_label_end_sharing_location">Stop sharing</string>
     <string name="label_location_sharing_ended">Location sharing ended</string>
@@ -1511,11 +1511,6 @@
     <string name="pref_location_share_duration_title">Default share duration</string>
     <string name="pref_location_integration_title">Integration with a map provider</string>
     <string name="pref_location_hide_notifications_title">Hide all error notifications related to location sharing</string>
-    <string name="pref_location_osm_language_title">OpenStreetMap language</string>
-    <string name="location_map_language_default">Use system language</string>
-    <string name="location_map_language_english">English</string>
-    <string name="location_map_language_french">French</string>
-    <string name="location_map_language_international">International</string>
     <string name="dialog_title_osm_attributions">Attributions</string>
     <string name="message_too_many_attempts">Too many attempts, please wait…</string>
     <string name="x_seconds">%1$02ds</string>
@@ -1633,6 +1628,7 @@
     <string name="dialog_title_introducing_groups_v2">Introducing new groups!</string>
     <string name="dialog_message_introducing_groups_v2">Olvid now supports new groups with multiple administrators\u00a0👑! This does not change anything to your existing \"old groups\" but applies to all groups you create from now on. To benefit from this, your contacts need to use the latest version of Olvid.\n\nWant to try this out? Tap on the group tab and create a new group. Once created, you may edit it to grant administrator privilege to as many members as you wish!</string>
     <string name="dialog_message_about_last_push_notification">Latest push notification: %1$s</string>
+    <string name="dialog_message_about_deprioritized_push_notification">De-prioritized push notifications: %1$d/%2$d</string>
     <string name="text_message_too_large_for_webclient">[Message too large to display in web client]</string>
     <string name="text_invalid_shortcut">Invalid shortcut</string>
     <string name="text_feature_initiate_secure_calls_from_another_profile">Initiate secure calls\n(available through another profile)</string>
@@ -1768,7 +1764,7 @@
     <string name="label_key_escrow_successful">Key escrow successful</string>
     <string name="label_key_escrow_failed">Key escrow failed</string>
 
-    <string name="troubleshooting_notifications_valid_title">Notifactions</string>
+    <string name="troubleshooting_notifications_valid_title">Notifications</string>
     <string name="troubleshooting_notifications_valid_description">To be notified when a contact sends you a message, you need to allow Olvid to display notifications.</string>
     <string name="troubleshooting_notifications_invalid_title">Notifications disabled</string>
     <string name="troubleshooting_notifications_invalid_description">Notifications are currently disabled for Olvid. Unless you enable them, you will not be notified when receiving a message from your contacts.</string>
@@ -1859,6 +1855,26 @@
     <string name="menu_action_play_at_1x">Play at normal speed (1\u00d7)</string>
     <string name="menu_action_play_at_1_5x">Play at a faster speed (1.5\u00d7)</string>
     <string name="menu_action_play_at_2x">Play at the fastest speed (2\u00d7)</string>
+    <string name="pref_location_share_quality_title">Default share quality</string>
+    <string name="pref_experimental_push_priority_title">Use experimental push notification priority</string>
+    <string name="label_sharing_your_location">You are sharing your location</string>
+    <string name="menu_action_open_map">Open map</string>
+    <string name="language_short_string">en</string>
+    <string name="menu_action_google_maps_normal">Normal</string>
+    <string name="menu_action_google_maps_satellite">Satellite</string>
+    <string name="menu_action_google_maps_terrain">Terrain</string>
+    <string name="menu_action_google_maps_hybrid">Hybrid</string>
+    <string name="button_label_copy">Copy</string>
+    <string name="toast_message_link_copied">Link copied to clipboard</string>
+    <string name="button_label_force_restart">Restart application</string>
+    <string name="dialog_title_restart_app">Restart application?</string>
+    <string name="dialog_message_restart_app">Do you want to force a restart of Olvid?</string>
+    <string name="call_encrypted_notice">End-to-end encrypted call</string>
+    <string name="pref_hide_group_member_changes_title">Hide group member change messages</string>
+    <string name="pref_hide_group_member_changes_summary">When activated, messages indicating that a group member joined or left a group will not be displayed in your discussions.</string>
+
+
+
 
 
     <plurals name="dialog_message_invite_all_group_members">
@@ -1990,5 +2006,13 @@
     <plurals name="dialog_message_delete_remote_deleted_messages">
         <item quantity="one">You currently have 1 remote deleted message in your discussions. Do you want to delete it?</item>
         <item quantity="other">You currently have %1$d remote deleted messages in your discussions. Do you want to delete all such markers?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 contact is sharing their location</item>
+        <item quantity="other">%1$d contacts are sharing their location</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">You and 1 other are sharing their location</item>
+        <item quantity="other">You and %1$d others are sharing their location</item>
     </plurals>
 </resources>

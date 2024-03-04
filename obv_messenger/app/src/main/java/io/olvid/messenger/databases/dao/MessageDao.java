@@ -172,6 +172,14 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " ASC")
     LiveData<List<Message>> getDiscussionMessages(long discussionId);
 
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_JOINED +
+            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_LEFT +
+            " ORDER BY " + Message.SORT_INDEX + " ASC")
+    LiveData<List<Message>> getDiscussionMessagesWithoutGroupMemberChanges(long discussionId);
+
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " DESC LIMIT :count")
     LiveData<List<Message>> getLastDiscussionMessages(long discussionId, int count);
 
@@ -501,8 +509,7 @@ public interface MessageDao {
             " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
             " AND " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.SENDER_IDENTIFIER + " = :senderIdentifier " +
-            " ORDER BY " + Message.SORT_INDEX + " ASC "
-    )
+            " ORDER BY " + Message.SORT_INDEX + " ASC ")
     List<Message> getCurrentLocationSharingMessagesOfIdentityInDiscussion(byte[] senderIdentifier, long discussionId);
 
     @Query("SELECT id FROM " + Message.TABLE_NAME +

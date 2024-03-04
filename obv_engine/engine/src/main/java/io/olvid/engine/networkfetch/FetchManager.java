@@ -23,6 +23,7 @@ package io.olvid.engine.networkfetch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -41,6 +42,7 @@ import io.olvid.engine.datatypes.containers.ReceivedAttachment;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.encoder.DecodingException;
+import io.olvid.engine.engine.types.JsonOsmStyle;
 import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
 import io.olvid.engine.metamanager.IdentityDelegate;
@@ -585,9 +587,9 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     }
 
     @Override
-    public String getOsmServerUrl(String server) {
+    public List<JsonOsmStyle> getOsmStyles(String server) {
         try {
-            return wellKnownCoordinator.getOsmUrl(server);
+            return wellKnownCoordinator.getOsmStyles(server);
         } catch (Exception ignored) {
             return null;
         }

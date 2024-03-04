@@ -11,6 +11,16 @@
         app:useSimpleSummaryProvider="true"
         android:icon="@drawable/ic_pref_group"
         android:order="10" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="pref_key_hide_group_member_changes"
+        app:singleLineTitle="false"
+        android:title="@string/pref_hide_group_member_changes_title"
+        android:summary="@string/pref_hide_group_member_changes_summary"
+        android:icon="@drawable/ic_pref_hide_group_member_changes"
+        android:order="12" />
+
     <SwitchPreference
         android:defaultValue="false"
         android:key="pref_key_show_trust_levels"

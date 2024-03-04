@@ -36,9 +36,19 @@ import io.olvid.messenger.settings.SettingsActivity;
 
 public class ObvFirebaseMessagingService extends FirebaseMessagingService {
     private static Long lastPushNotificationTimestamp = null;
+    private static int deprioritizedMessageCount = 0;
+    private static int highPriorityMessageCount = 0;
 
     public static Long getLastPushNotificationTimestamp() {
         return lastPushNotificationTimestamp;
+    }
+
+    public static int getDeprioritizedMessageCount() {
+        return deprioritizedMessageCount;
+    }
+
+    public static int getHighPriorityMessageCount() {
+        return highPriorityMessageCount;
     }
 
     @Override
@@ -46,7 +56,14 @@ public class ObvFirebaseMessagingService extends FirebaseMessagingService {
         super.onMessageReceived(remoteMessage);
 
         lastPushNotificationTimestamp = System.currentTimeMillis();
-        Logger.d("FIREBASE Message received");
+        Logger.d("FIREBASE Message received. Priority: " + ((remoteMessage.getPriority() == RemoteMessage.PRIORITY_HIGH) ? "HIGH" : "NORMAL"));
+        if (remoteMessage.getOriginalPriority() == RemoteMessage.PRIORITY_HIGH) {
+            highPriorityMessageCount++;
+            if (remoteMessage.getPriority() != remoteMessage.getOriginalPriority()) {
+                deprioritizedMessageCount++;
+                Logger.e("message was deprioritized!");
+            }
+        }
         Map<String, String> data = remoteMessage.getData();
         String identityString = data.get("identity");
         String topic = data.get("topic");

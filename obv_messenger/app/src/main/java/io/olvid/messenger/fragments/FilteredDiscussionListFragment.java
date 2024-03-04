@@ -73,7 +73,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
 
     private Observer<List<Long>> selectedDiscussionIdsObserver;
 
-    private boolean removeBottomPadding = false;
+    private Integer bottomPaddingDp = null;
     private boolean useDialogBackground = false;
     private boolean showPinned = false;
     private boolean selectable = false;
@@ -107,8 +107,11 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
         filteredDiscussionListViewModel.getFilteredDiscussions().observe(getViewLifecycleOwner(), filteredDiscussionListAdapter);
         recyclerView.setAdapter(filteredDiscussionListAdapter);
 
-        if (removeBottomPadding) {
-            recyclerView.setPadding(0,0,0,0);
+        if (bottomPaddingDp != null) {
+            try {
+                float density = inflater.getContext().getResources().getConfiguration().densityDpi / 160f;
+                recyclerView.setPadding(0, 0, 0, (int) (bottomPaddingDp * density));
+            } catch (Exception ignored) { }
         }
         if (emptyView != null) {
             recyclerView.setEmptyView(emptyView);
@@ -196,8 +199,8 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
         this.onClickDelegate = onClickDelegate;
     }
 
-    public void removeBottomPadding() {
-        removeBottomPadding = true;
+    public void setBottomPadding(int bottomPaddingDp) {
+        this.bottomPaddingDp = bottomPaddingDp;
     }
 
     public void setUseDialogBackground(boolean useDialogBackground) {

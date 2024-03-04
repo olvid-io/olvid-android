@@ -68,9 +68,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -251,7 +254,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
     private EmptyRecyclerView messageRecyclerView;
     private LinearLayoutManager messageListLinearLayoutManager;
     private FloatingActionButton scrollDownFab;
-    private FloatingActionButton locationSharingFab;
+    private ViewGroup locationSharingGroup;
+    private TextView locationSharingTextView;
     private ImageView rootBackgroundImageView;
     private DiscussionDelegate discussionDelegate;
 
@@ -492,6 +496,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             scrolling = (state == RecyclerView.SCROLL_STATE_DRAGGING) || (state == RecyclerView.SCROLL_STATE_SETTLING);
             if (scrolling ^ wasScrolling) {
                 messageRecyclerView.invalidate();
+                if (scrolling) {
+                    setLocationSharingGroupVisibility(false, false);
+                } else {
+                    setLocationSharingGroupVisibility(true, false);
+                }
             }
             messageDateItemDecoration.setScrolling(scrolling);
             if (state == RecyclerView.SCROLL_STATE_DRAGGING) {
@@ -509,20 +518,35 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         scrollDownFab = findViewById(R.id.discussion_scroll_down_fab);
         scrollDownFab.setOnClickListener(this);
 
-        locationSharingFab = findViewById(R.id.discussion_location_sharing_fab);
-        locationSharingFab.setOnClickListener(this);
+        locationSharingGroup = findViewById(R.id.discussion_location_sharing_group);
+        locationSharingTextView = locationSharingGroup.findViewById(R.id.discussion_location_sharing_text_view);
+        locationSharingGroup.setOnClickListener(this);
+        locationSharingGroup.findViewById(R.id.discussion_location_sharing_menu_dots).setOnClickListener(this);
 
         discussionViewModel.getCurrentlySharingLocationMessagesLiveData().observe(this, messages -> {
             if (messages == null || messages.size() == 0) {
-                locationSharingFab.hide();
+                if (locationSharingGroup.getVisibility() == View.VISIBLE) {
+                    setLocationSharingGroupVisibility(false, true);
+                }
                 return;
             }
-            if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.getDiscussionId())) {
-                locationSharingFab.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.red, null)));
-            } else {
-                locationSharingFab.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.green, null)));
+            if (locationSharingGroup.getVisibility() == View.GONE) {
+                locationSharingGroup.setVisibility(View.VISIBLE);
+                setLocationSharingGroupVisibility(true, false);
             }
-            locationSharingFab.show();
+            if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.getDiscussionId())) {
+                locationSharingGroup.setBackgroundResource(R.drawable.background_rounded_dialog_red_outline);
+                if (messages.size() == 1) {
+                    locationSharingTextView.setText(R.string.label_sharing_your_location);
+                } else {
+                    locationSharingTextView.setText(getResources().getQuantityString(R.plurals.label_you_and_xxx_contacts_sharing_their_location, messages.size() - 1, messages.size() - 1));
+                }
+                locationSharingTextView.requestLayout();
+            } else {
+                locationSharingGroup.setBackgroundResource(R.drawable.background_rounded_dialog);
+                locationSharingTextView.setText(getResources().getQuantityString(R.plurals.label_xxx_contacts_sharing_their_position, messages.size(), messages.size()));
+                locationSharingTextView.requestLayout();
+            }
         });
 
         // when a cached name or photo changes --> reload the messages
@@ -909,15 +933,16 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             // prevent editing location messages
             return;
         }
-
-        // keep values and save draft after edit mode is on
-        Message previousDraft = composeMessageViewModel.getDraftMessage().getValue();
-        CharSequence rawText = composeMessageViewModel.getRawNewMessageText();
-        Pair<String, List<JsonUserMention>> trimAndMentions = Utils.removeProtectionFEFFsAndTrim(rawText == null ? "" : rawText, mentionViewModel.getMentions());
-        App.runThread(new SaveDraftTask(discussionViewModel.getDiscussionId(), trimAndMentions.first, previousDraft, trimAndMentions.second));
-        composeMessageViewModel.setDraftMessageEdit(message);
-        if (composeMessageDelegate != null) {
-            composeMessageDelegate.showSoftInputKeyboard();
+        if (discussionViewModel.getDiscussionId() != null) {
+            // keep values and save draft after edit mode is on
+            Message previousDraft = composeMessageViewModel.getDraftMessage().getValue();
+            CharSequence rawText = composeMessageViewModel.getRawNewMessageText();
+            Pair<String, List<JsonUserMention>> trimAndMentions = Utils.removeProtectionFEFFsAndTrim(rawText == null ? "" : rawText, mentionViewModel.getMentions());
+            App.runThread(new SaveDraftTask(discussionViewModel.getDiscussionId(), trimAndMentions.first, previousDraft, trimAndMentions.second));
+            composeMessageViewModel.setDraftMessageEdit(message);
+            if (composeMessageDelegate != null) {
+                composeMessageDelegate.showSoftInputKeyboard();
+            }
         }
     }
 
@@ -1553,9 +1578,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     }
                 }
             }
-        } else if (id == R.id.discussion_location_sharing_fab) {
-            if (discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue() == null
-                    || discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().size() == 0) {
+        } else if (id == R.id.discussion_location_sharing_group) {
+            List<Message> sharingMessages = discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue();
+            if (sharingMessages == null || sharingMessages.size() == 0) {
                 return;
             }
 
@@ -1564,7 +1589,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 case OSM:
                 case CUSTOM_OSM:
                 case MAPS: {
-                    new FullscreenMapDialogFragment(null, discussionViewModel.getDiscussionId(), SettingsActivity.getLocationIntegration())
+                    FullscreenMapDialogFragment.newInstance(null, discussionViewModel.getDiscussionId(), SettingsActivity.getLocationIntegration())
                             .show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
                     break;
                 }
@@ -1572,48 +1597,88 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 case BASIC:
                 case NONE:
                 default: {
-                    // if only one sharing message go to it, do not show menu
-                    if (discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().size() == 1) {
-                        messageListAdapter.requestScrollToMessageId(discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().get(0).id, true, true);
-                        return;
-                    }
-
-                    PopupMenu locationMessagePopUp = new PopupMenu(DiscussionActivity.this, view);
-                    List<Message> messagesShownInMenu = new ArrayList<>(discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue().size());
-
-                    int index = 0;
-                    // handle current identity first
-                    for (Message message : discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue()) {
-                        if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
-                            locationMessagePopUp.getMenu().add(0, messagesShownInMenu.size(), index, "You");
-                            messagesShownInMenu.add(message);
-                            break;
-                        }
-                    }
-
-                    for (Message message : discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue()) {
-                        if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE) {
-                            String displayName = AppSingleton.getContactCustomDisplayName(message.senderIdentifier);
-                            locationMessagePopUp.getMenu().add(0, messagesShownInMenu.size(), index, displayName);
-                            messagesShownInMenu.add(message);
-                        }
-                    }
-
-                    locationMessagePopUp.setOnMenuItemClickListener((item) -> {
-                        if (item.getItemId() < 0 || item.getItemId() >= messagesShownInMenu.size()) {
-                            return false;
-                        }
-                        Message message = messagesShownInMenu.get(item.getItemId());
-                        messageListAdapter.requestScrollToMessageId(message.id, true, true);
-                        return true;
-                    });
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        locationMessagePopUp.setGravity(Gravity.TOP | Gravity.END);
-                    }
-                    locationMessagePopUp.show();
+                    locationGoToMessageOrShowPopup(sharingMessages, view);
                 }
             }
+        } else if (id == R.id.discussion_location_sharing_menu_dots) {
+            List<Message> sharingMessages = discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue();
+            if (sharingMessages == null || sharingMessages.size() == 0) {
+                return;
+            }
+
+            PopupMenu popup = new PopupMenu(this, view);
+            Menu menu = popup.getMenu();
+            menu.add(0, 1, 1, R.string.menu_action_go_to_message);
+            if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.getDiscussionId())) {
+                menu.add(0, 2, 2, R.string.menu_action_location_message_stop_sharing);
+            }
+            SettingsActivity.LocationIntegrationEnum locationIntegration = SettingsActivity.getLocationIntegration();
+            if (locationIntegration == SettingsActivity.LocationIntegrationEnum.OSM || locationIntegration == SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM || locationIntegration == SettingsActivity.LocationIntegrationEnum.MAPS) {
+                menu.add(0, 3, 3, R.string.menu_action_open_map);
+            }
+            popup.setOnMenuItemClickListener(item -> {
+                switch (item.getItemId()) {
+                    case 1: {
+                        locationGoToMessageOrShowPopup(sharingMessages, view);
+                        break;
+                    }
+                    case 2: {
+                        UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussionViewModel.getDiscussionId(), false);
+                        break;
+                    }
+                    case 3: {
+                        FullscreenMapDialogFragment.newInstance(null, discussionViewModel.getDiscussionId(), locationIntegration)
+                                .show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
+                        break;
+                    }
+                }
+                return true;
+            });
+            popup.show();
         }
+    }
+
+    private void locationGoToMessageOrShowPopup(@NonNull List<Message> sharingMessages, View view) {
+        // if only one sharing message go to it, do not show menu
+        if (sharingMessages.size() == 1) {
+            messageListAdapter.requestScrollToMessageId(sharingMessages.get(0).id, true, true);
+            return;
+        }
+
+        // otherwise, build a popup menu
+        PopupMenu locationMessagePopUp = new PopupMenu(this, view);
+        List<Message> messagesShownInMenu = new ArrayList<>(sharingMessages.size());
+
+        int index = 0;
+        // show owned identity first
+        for (Message message : sharingMessages) {
+            if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                locationMessagePopUp.getMenu().add(0, messagesShownInMenu.size(), index, "You");
+                messagesShownInMenu.add(message);
+                break;
+            }
+        }
+
+        for (Message message : sharingMessages) {
+            if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE) {
+                String displayName = AppSingleton.getContactCustomDisplayName(message.senderIdentifier);
+                locationMessagePopUp.getMenu().add(0, messagesShownInMenu.size(), index, displayName);
+                messagesShownInMenu.add(message);
+            }
+        }
+
+        locationMessagePopUp.setOnMenuItemClickListener((item) -> {
+            if (item.getItemId() < 0 || item.getItemId() >= messagesShownInMenu.size()) {
+                return false;
+            }
+            Message message = messagesShownInMenu.get(item.getItemId());
+            messageListAdapter.requestScrollToMessageId(message.id, true, true);
+            return true;
+        });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            locationMessagePopUp.setGravity(Gravity.TOP | Gravity.END);
+        }
+        locationMessagePopUp.show();
     }
 
 
@@ -3063,8 +3128,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         holder.adapter.setHidden(expiration.getVisibilityDuration(), readOnce, true);
                         holder.attachmentFyles.observe(DiscussionActivity.this, holder.adapter);
                     }
-                } else if (message.messageType == Message.TYPE_INBOUND_MESSAGE
-                        || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                } else if ((message.messageType == Message.TYPE_INBOUND_MESSAGE
+                        || message.messageType == Message.TYPE_OUTBOUND_MESSAGE)) {
                     if (holder.standardHeaderView != null && holder.ephemeralHeaderView != null) { // true for inbound messages
                         holder.standardHeaderView.setVisibility(View.VISIBLE);
                         holder.ephemeralHeaderView.setVisibility(View.GONE);
@@ -3138,7 +3203,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         }
                     }
 
-                    Utils.applyBodyWithSpans(holder.messageContentTextView, discussionViewModel.getDiscussion().getValue() == null ? null : discussionViewModel.getDiscussion().getValue().bytesOwnedIdentity, message, getHighlightPatternsForMessage(message), true, true);
+                    if (!message.isLocationMessage()) {
+                        Utils.applyBodyWithSpans(holder.messageContentTextView, discussionViewModel.getDiscussion().getValue() == null ? null : discussionViewModel.getDiscussion().getValue().bytesOwnedIdentity, message, getHighlightPatternsForMessage(message), true, true);
+                    }
 
                     if (message.hasAttachments()) {
                         if (holder.attachmentFyles != null) {
@@ -3500,11 +3567,12 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                            constraintSet.setMargin(R.id.message_link_preview_image, ConstraintLayout.LayoutParams.END, DipKt.toPx(4, DiscussionActivity.this));
                            constraintSet.constrainWidth(R.id.message_link_preview_image, ConstraintLayout.LayoutParams.MATCH_CONSTRAINT);
                            constraintSet.constrainHeight(R.id.message_link_preview_image, ConstraintLayout.LayoutParams.MATCH_CONSTRAINT);
-                           float ratio = openGraph.getBitmap().getWidth() / (float) openGraph.getBitmap().getHeight();
+                            //noinspection DataFlowIssue
+                            float ratio = openGraph.getBitmap().getWidth() / (float) openGraph.getBitmap().getHeight();
                            if (ratio < 0.7) {
                                ratio = 0.7f;
                            }
-                           constraintSet.setDimensionRatio(R.id.message_link_preview_image, "" + ratio);
+                           constraintSet.setDimensionRatio(R.id.message_link_preview_image, Float.toString(ratio));
                            constraintSet.clear(R.id.message_link_preview_description, ConstraintSet.BOTTOM);
                            holder.messageLinkPreviewTitle.setPadding(DipKt.toPx(8, DiscussionActivity.this), 0, DipKt.toPx(4, DiscussionActivity.this), 0);
                            holder.messageLinkPreviewDescription.setPadding(DipKt.toPx(8, DiscussionActivity.this), 0, DipKt.toPx(4, DiscussionActivity.this), 0);
@@ -3733,7 +3801,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         case CUSTOM_OSM:
                         case MAPS: {
                             // if a map integration is configured: open fullscreen map (behaviour will change depending on message.locationType)
-                            new FullscreenMapDialogFragment(message, discussionViewModel.getDiscussionId(), SettingsActivity.getLocationIntegration())
+                            FullscreenMapDialogFragment.newInstance(message, discussionViewModel.getDiscussionId(), SettingsActivity.getLocationIntegration())
                                     .show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
                             break;
                         }
@@ -4719,6 +4787,48 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     }
                 }
             }
+        }
+    }
+
+    private void setLocationSharingGroupVisibility(boolean visible, boolean setViewGoneAfterAnimation) {
+        locationSharingGroup.clearAnimation();
+        int offset = (int) (32 * getResources().getDisplayMetrics().density); // 32 dp in pixels
+        if (locationSharingGroup.getVisibility() == View.VISIBLE) {
+            AnimationSet set = new AnimationSet(true);
+
+            Animation translate = new TranslateAnimation(0, 0,
+                    visible ? -offset : 0,
+                    visible ? 0 : -offset);
+            translate.setDuration(250);
+            translate.setFillAfter(true);
+
+            Animation fade = new AlphaAnimation(
+                    visible ? 0f : 1f,
+                    visible ? 1f : 0f);
+            fade.setDuration(250);
+            fade.setFillAfter(true);
+
+            set.addAnimation(translate);
+            set.addAnimation(fade);
+            set.setFillAfter(true);
+
+            if (!visible && setViewGoneAfterAnimation) {
+                set.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        locationSharingGroup.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+                    }
+                });
+            }
+            locationSharingGroup.startAnimation(set);
         }
     }
 

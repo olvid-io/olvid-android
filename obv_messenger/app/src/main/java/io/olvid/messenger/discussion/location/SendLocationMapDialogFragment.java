@@ -75,9 +75,6 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
 
     private MapViewAbstractFragment mapView;
 
-    private FloatingActionButton currentLocationButtonFab;
-    private FloatingActionButton backButtonFab;
-
     private TextView addressTextView;
     private TextView fetchingAddressTextView;
     private boolean showAddress = false;
@@ -188,8 +185,11 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
 
         loadingSpinnerLayout = rootView.findViewById(R.id.send_location_map_loading_spinner_layout);
 
-        currentLocationButtonFab = rootView.findViewById(R.id.send_location_maps_current_location_fab);
-        backButtonFab = rootView.findViewById(R.id.send_location_maps_back_fab);
+        FloatingActionButton currentLocationButtonFab = rootView.findViewById(R.id.send_location_maps_current_location_fab);
+        FloatingActionButton backButtonFab = rootView.findViewById(R.id.send_location_maps_back_fab);
+        ImageView layersButton = rootView.findViewById(R.id.send_location_layers_button);
+        mapView.setLayersButtonVisibilitySetter((Boolean visible) -> layersButton.setVisibility((visible != null && visible) ? View.VISIBLE : View.GONE));
+        layersButton.setOnClickListener(mapView::onLayersButtonClicked);
 
         // setup button
         rootView.findViewById(R.id.button_send_location).setOnClickListener(this::handleSendLocationButtonClick);
@@ -220,7 +220,7 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
                     currentAddressLiveData.postValue(" ");
                 } else {
                     currentAddressLiveData.postValue(null);
-                    this.addressRequestTask = new RequestAndUpdateAddressFieldTask(peliasServer, latLngWrapper, (RequestAndUpdateAddressFieldTask requestTask, @Nullable String address) -> {
+                    this.addressRequestTask = new RequestAndUpdateAddressFieldTask(activity, peliasServer, latLngWrapper, (RequestAndUpdateAddressFieldTask requestTask, @Nullable String address) -> {
                         if (addressRequestTask == requestTask) {
                             if (address == null) {
                                 currentAddressLiveData.postValue("");
@@ -359,7 +359,7 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
     }
 
     public void handleShareLocationButtonClick(View v) {
-        SendLocationBasicDialogFragment fragment = new SendLocationBasicDialogFragment(discussionId, true);
+        SendLocationBasicDialogFragment fragment = SendLocationBasicDialogFragment.newInstance(discussionId, true);
         fragment.show(getChildFragmentManager(), "send-location-fragment-share-dialog");
     }
 

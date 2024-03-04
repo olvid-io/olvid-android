@@ -116,6 +116,20 @@
         android:drawablePadding="8dp"
         android:drawableStart="@drawable/ic_location_sharing" />
 
+
+    <ImageView
+        android:id="@+id/send_location_layers_button"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/map_layers"
+        style="@style/GreyRipple"
+        android:background="@drawable/background_circular_ripple"
+        />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/send_location_maps_send_location_layout"
         android:layout_width="0dp"

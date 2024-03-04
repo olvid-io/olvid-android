@@ -351,9 +351,11 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
         val bytesOwnedIdentity = groupDetailsViewModel.bytesOwnedIdentity
         val bytesGroupIdentifier = groupDetailsViewModel.bytesGroupIdentifier
         App.runThread {
-            val detailsAndPhotos = AppSingleton.getEngine()
+            val detailsAndPhotos: ObvGroupV2DetailsAndPhotos? = AppSingleton.getEngine()
                 .getGroupV2DetailsAndPhotos(bytesOwnedIdentity, bytesGroupIdentifier)
-            runOnUiThread { displayEngineGroupCards(detailsAndPhotos) }
+            if (detailsAndPhotos != null) {
+                runOnUiThread { displayEngineGroupCards(detailsAndPhotos) }
+            }
         }
     }
 

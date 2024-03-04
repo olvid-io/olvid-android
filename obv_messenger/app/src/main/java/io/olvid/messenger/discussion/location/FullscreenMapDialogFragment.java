@@ -33,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,6 +51,7 @@ import java.util.List;
 import java.util.Set;
 
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.AppDatabase;
@@ -58,32 +60,50 @@ import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment {
+    public static final String DISCUSSION_ID_KEY = "discussion_id";
+    public static final String INTEGRATION_KEY = "integration";
+    public static final String MESSAGE_LOCATION_TYPE_KEY = "message_location_type";
+    public static final String MESSAGE_JSON_LOCATION_KEY = "message_json_location";
+    public static final String MESSAGE_ID_KEY = "message_id";
+    public static final String MESSAGE_SENDER_IDENTIFIER_KEY = "message_sender_identifier";
+    public static final String MESSAGE_CONTENT_BODY_KEY = "message_content_body";
 
-    private final Message message;
-    private final long discussionId;
-    private final SettingsActivity.LocationIntegrationEnum integration;
+//    private final Message message;
+    private Long messageId;
+    private byte[] messageSenderIdentifier;
+    private int messageLocationType;
+    private JsonLocation messageJsonLocation;
+    private String messageContentBody;
+    private long discussionId;
+    private SettingsActivity.LocationIntegrationEnum integration;
 
     private FragmentActivity activity;
 
-    private View rootView;
-
     MapViewAbstractFragment mapView;
 
-    private FloatingActionButton centerOnMarkersFab;
     private FloatingActionButton openInThirdPartyAppFab;
-    private FloatingActionButton backFab;
 
     private LiveData<List<Message>> sharingLocationMessageLiveData;
     private final List<Long> currentlyShownMessagesIdList = new ArrayList<>(); // contains message id of all messages with a symbol currently shown on map
     // need to center on marker on first call of sharingLocationMessageLiveData observer
     private boolean centerOnMarkersOnNextLocationMessagesUpdate;
 
-    // show a sharing location map for a discussion or message
-    public FullscreenMapDialogFragment(Message message, long discussionId, SettingsActivity.LocationIntegrationEnum integration) {
-        this.message = message;
-        this.discussionId = discussionId;
-        this.integration = integration;
+    public static FullscreenMapDialogFragment newInstance(@Nullable Message message, long discussionId, SettingsActivity.LocationIntegrationEnum integration) {
+        FullscreenMapDialogFragment fragment = new FullscreenMapDialogFragment();
+        Bundle args = new Bundle();
+        if (message != null) {
+            args.putLong(MESSAGE_ID_KEY, message.id);
+            args.putByteArray(MESSAGE_SENDER_IDENTIFIER_KEY, message.senderIdentifier);
+            args.putInt(MESSAGE_LOCATION_TYPE_KEY, message.locationType);
+            args.putString(MESSAGE_JSON_LOCATION_KEY, message.jsonLocation);
+            args.putString(MESSAGE_CONTENT_BODY_KEY, message.contentBody);
+        }
+        args.putLong(DISCUSSION_ID_KEY, discussionId);
+        args.putInt(INTEGRATION_KEY, integration.ordinal());
+        fragment.setArguments(args);
+        return fragment;
     }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,6 +114,24 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
 
         // make fragment transparent
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_NoActionBar_Transparent);
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            if (arguments.containsKey(MESSAGE_ID_KEY)) {
+                messageId = arguments.getLong(MESSAGE_ID_KEY);
+                messageSenderIdentifier = arguments.getByteArray(MESSAGE_SENDER_IDENTIFIER_KEY);
+                messageLocationType = arguments.getInt(MESSAGE_LOCATION_TYPE_KEY);
+                String serializedJsonLocation = arguments.getString(MESSAGE_JSON_LOCATION_KEY);
+                try {
+                    messageJsonLocation = AppSingleton.getJsonObjectMapper().readValue(serializedJsonLocation, JsonLocation.class);
+                } catch (Exception ignored) { }
+                messageContentBody = arguments.getString(MESSAGE_CONTENT_BODY_KEY);
+            }
+            discussionId = arguments.getLong(DISCUSSION_ID_KEY);
+            integration = SettingsActivity.LocationIntegrationEnum.values()[arguments.getInt(INTEGRATION_KEY)];
+        } else {
+            dismiss();
+        }
     }
 
     @Override
@@ -112,7 +150,7 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_fullscreen_map, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_fullscreen_map, container, false);
 
         mapView = MapFragmentProvider.getMapFragmentForProvider(integration);
         if (mapView == null) {
@@ -123,19 +161,22 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
 
         mapView.setOnMapReadyCallback(this::onMapReadyCallback);
 
-        centerOnMarkersFab = rootView.findViewById(R.id.fullscreen_map_center_on_markers_fab);
-        openInThirdPartyAppFab = rootView.findViewById(R.id.fullscreen_map_open_in_third_party_app_fab);
-        backFab = rootView.findViewById(R.id.fullscreen_map_back_fab);
+        ImageView layersButton = rootView.findViewById(R.id.fullscreen_map_layers_button);
+        mapView.setLayersButtonVisibilitySetter((Boolean visible) -> layersButton.setVisibility((visible != null && visible) ? View.VISIBLE : View.GONE));
+        layersButton.setOnClickListener(mapView::onLayersButtonClicked);
 
         // setup fabs
+        FloatingActionButton centerOnMarkersFab = rootView.findViewById(R.id.fullscreen_map_center_on_markers_fab);
         centerOnMarkersFab.setImageDrawable(AppCompatResources.getDrawable(activity, R.drawable.ic_location_center_on_markers));
         centerOnMarkersFab.setOnClickListener(this::handleCenterOnMarkersFabClick);
         centerOnMarkersFab.setVisibility(View.VISIBLE);
 
+        openInThirdPartyAppFab = rootView.findViewById(R.id.fullscreen_map_open_in_third_party_app_fab);
         openInThirdPartyAppFab.setImageDrawable(AppCompatResources.getDrawable(activity, R.drawable.ic_open_location_in_third_party_app_48));
         openInThirdPartyAppFab.setOnClickListener(this::handleOpenInThirdPartyAppFabClick);
         openInThirdPartyAppFab.setVisibility(View.VISIBLE);
 
+        FloatingActionButton backFab = rootView.findViewById(R.id.fullscreen_map_back_fab);
         backFab.setOnClickListener(this::handleBackFabClick);
 
         return rootView;
@@ -147,12 +188,13 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
         mapView.setEnableCurrentLocation(isLocationPermissionGranted(this.activity) && isLocationEnabled());
 
         // if showing a location or a finished sharing: zoom on location, center camera and add a pointer on it
-        if (message != null && message.locationType != Message.LOCATION_TYPE_SHARE) {
-            JsonLocation location = message.getJsonLocation();
-            if (message.locationType == Message.LOCATION_TYPE_SEND) {
-                mapView.addMarker(message.id, getPinMarkerIcon(), new LatLngWrapper(location), location.getPrecision());
-            } else if (message.locationType == Message.LOCATION_TYPE_SHARE_FINISHED) {
-                mapView.addMarker(message.id, getInitialViewMarkerIcon(message.senderIdentifier), new LatLngWrapper(location), location.getPrecision());
+        if (messageId != null && messageLocationType != Message.LOCATION_TYPE_SHARE) {
+            if (messageJsonLocation != null) {
+                if (messageLocationType == Message.LOCATION_TYPE_SEND) {
+                    mapView.addMarker(messageId, getPinMarkerIcon(), new LatLngWrapper(messageJsonLocation), messageJsonLocation.getPrecision());
+                } else if (messageLocationType == Message.LOCATION_TYPE_SHARE_FINISHED) {
+                    mapView.addMarker(messageId, getInitialViewMarkerIcon(messageSenderIdentifier), new LatLngWrapper(messageJsonLocation), messageJsonLocation.getPrecision());
+                }
             }
             mapView.centerOnMarkers(false, false);
         } else {
@@ -213,9 +255,8 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
         // if live sharing, open bottom sheet, otherwise open third party app on fab click
         if (sharingLocationMessageLiveData != null && sharingLocationMessageLiveData.getValue() != null) {
             FullscreenMapBottomSheetDialog.newInstance(discussionId, this).show(activity.getSupportFragmentManager(), "fullscreen-map-bottom-sheet");
-        } else if (message != null) {
-            JsonLocation jsonLocation = message.getJsonLocation();
-            App.openLocationInMapApplication(activity, jsonLocation.getTruncatedLatitudeString(), jsonLocation.getTruncatedLongitudeString(), message.contentBody, null);
+        } else if (messageId != null) {
+            App.openLocationInMapApplication(activity, messageJsonLocation.getTruncatedLatitudeString(), messageJsonLocation.getTruncatedLongitudeString(), messageContentBody, null);
         }
     }
 

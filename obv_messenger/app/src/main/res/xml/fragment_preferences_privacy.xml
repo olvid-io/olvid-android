@@ -60,5 +60,5 @@
             android:summary="@string/pref_permanent_websocket_summary"
             android:title="@string/pref_permanent_websocket_title"
             android:icon="@drawable/ic_pref_websocket"
-            android:order="51" />
+            android:order="52" />
 </PreferenceScreen>

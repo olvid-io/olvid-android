@@ -20,6 +20,7 @@
 package io.olvid.messenger.discussion.location;
 
 import android.graphics.Bitmap;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,10 +51,13 @@ public abstract class MapViewAbstractFragment extends Fragment {
     abstract double getCameraZoom();
     abstract void launchMapSnapshot(@NonNull Consumer<Bitmap> onSnapshotReadyCallback);
 
+    abstract void setLayersButtonVisibilitySetter(Consumer<Boolean> layersButtonVisibilitySetter);
+    abstract void onLayersButtonClicked(View view);
+
     // customize map
-    abstract void setGestureEnabled(boolean enabled);
-    abstract void setOnMapClickListener(Runnable clickListener);
-    abstract void setOnMapLongClickListener(Runnable clickListener);
+//    abstract void setGestureEnabled(boolean enabled);
+//    abstract void setOnMapClickListener(Runnable clickListener);
+//    abstract void setOnMapLongClickListener(Runnable clickListener);
 
     // markers api (use first call in onMapReadyCallback)
     abstract void addMarker(long id, Bitmap icon, @NonNull LatLngWrapper latLngWrapper, @Nullable Float precision);
@@ -99,14 +103,14 @@ public abstract class MapViewAbstractFragment extends Fragment {
                 east += 360;
             }
 
-            if ((360 - largestGapValue) < 0.005 && (latNorth - latSouth) < 0.05) {
+            if ((largestGapValue == 0 || (360 - largestGapValue) < 0.005) && (latNorth - latSouth) < 0.05) {
                 return new Pair<>(
-                        new LatLngWrapper((latSouth + latNorth) / 2,
-                                (west + east) / 2),
+                        new LatLngWrapper((latSouth + latNorth) / 2, (west + east) / 2),
                         null);
             } else {
                 return new Pair<>(new LatLngWrapper(latSouth, west), new LatLngWrapper(latNorth, east));
             }
         }
     }
+
 }

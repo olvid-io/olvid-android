@@ -26,9 +26,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
@@ -131,9 +135,6 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.googleMap = googleMap;
 
-        googleMap.getUiSettings().setCompassEnabled(true);
-        repositionCompass();
-
         // setup listeners for map gestures
         googleMap.setOnCameraMoveStartedListener((reason) -> {
             currentCameraCenterLiveData.postValue(null);
@@ -149,9 +150,16 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
 
         // customize map
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+        googleMap.getUiSettings().setCompassEnabled(true);
+        googleMap.getUiSettings().setMapToolbarEnabled(true);
+        repositionCompass();
+
         googleMap.setBuildingsEnabled(false);
         googleMap.setIndoorEnabled(false);
         googleMap.setTrafficEnabled(false);
+        // reuse the map type that was previously used
+        googleMap.setMapType(SettingsActivity.getLocationLastGoogleMapType());
+
 
         // setup markers listeners
         googleMap.setOnMarkerClickListener(marker -> {
@@ -171,22 +179,22 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
 
     private void repositionCompass() {
         try {
-            int twelveDp = (int) (12 * activity.getResources().getDisplayMetrics().density);
             View mapView = mapFragment.getView();
             if (mapView != null) {
                 View compass = mapView.findViewWithTag("GoogleMapCompass");
                 if (compass != null) {
+                    int sixteenDp = (int) (16 * activity.getResources().getDisplayMetrics().density);
                     compass.post(() -> {
                         try {
                             // create layoutParams, giving it our wanted width and height(important, by default the width is "match parent")
-                            RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(compass.getHeight(), compass.getHeight());
+                            RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(sixteenDp * 2, sixteenDp * 2);
                             // position on top right
                             rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
                             rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
                             rlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                             rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
                             //give compass margin
-                            rlp.setMargins(0, twelveDp * 2, twelveDp, 0);
+                            rlp.setMargins(0, sixteenDp * 4, sixteenDp, 0);
                             compass.setLayoutParams(rlp);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -289,31 +297,72 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
     }
 
     @Override
-    public void setGestureEnabled(boolean enabled) {
-        if (googleMap == null) {
-            Logger.i("GoogleMapMapView: setGestureEnabled: googleMap is not ready to use");
-            return;
-        }
-        googleMap.getUiSettings().setAllGesturesEnabled(enabled);
+    void setLayersButtonVisibilitySetter(Consumer<Boolean> layersButtonVisibilitySetter) {
+        layersButtonVisibilitySetter.accept(true);
     }
 
     @Override
-    public void setOnMapClickListener(Runnable clickListener) {
-        if (googleMap == null) {
-            Logger.i("GoogleMapMapView: setOnMapClickListener: googleMap is not ready to use");
-            return;
+    void onLayersButtonClicked(View view) {
+        if (googleMap != null) {
+            PopupMenu popup = new PopupMenu(activity, view, Gravity.TOP | Gravity.END);
+            Menu menu = popup.getMenu();
+            MenuItem normal = menu.add(0, GoogleMap.MAP_TYPE_NORMAL, 0, R.string.menu_action_google_maps_normal);
+            MenuItem satellite = menu.add(0, GoogleMap.MAP_TYPE_SATELLITE, 1, R.string.menu_action_google_maps_satellite);
+            MenuItem hybrid = menu.add(0, GoogleMap.MAP_TYPE_HYBRID, 2, R.string.menu_action_google_maps_hybrid);
+            MenuItem terrain = menu.add(0, GoogleMap.MAP_TYPE_TERRAIN, 3, R.string.menu_action_google_maps_terrain);
+            menu.setGroupCheckable(0, true, true);
+            switch (googleMap.getMapType()) {
+                case GoogleMap.MAP_TYPE_NORMAL:
+                    normal.setChecked(true);
+                    break;
+                case GoogleMap.MAP_TYPE_SATELLITE:
+                    satellite.setChecked(true);
+                    break;
+                case GoogleMap.MAP_TYPE_HYBRID:
+                    hybrid.setChecked(true);
+                    break;
+                case GoogleMap.MAP_TYPE_TERRAIN:
+                    terrain.setChecked(true);
+                    break;
+            }
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() != googleMap.getMapType()) {
+                    googleMap.setMapType(item.getItemId());
+                    SettingsActivity.setLocationLastGoogleMapType(item.getItemId());
+                }
+                return true;
+            });
+            popup.show();
         }
-        googleMap.setOnMapClickListener((latLng) -> clickListener.run());
     }
 
-    @Override
-    public void setOnMapLongClickListener(Runnable clickListener) {
-        if (googleMap == null) {
-            Logger.i("GoogleMapMapView: setOnMapLongClickListener: googleMap is not ready to use");
-            return;
-        }
-        googleMap.setOnMapLongClickListener((latLng) -> clickListener.run());
-    }
+
+    //    @Override
+//    public void setGestureEnabled(boolean enabled) {
+//        if (googleMap == null) {
+//            Logger.i("GoogleMapMapView: setGestureEnabled: googleMap is not ready to use");
+//            return;
+//        }
+//        googleMap.getUiSettings().setAllGesturesEnabled(enabled);
+//    }
+//
+//    @Override
+//    public void setOnMapClickListener(Runnable clickListener) {
+//        if (googleMap == null) {
+//            Logger.i("GoogleMapMapView: setOnMapClickListener: googleMap is not ready to use");
+//            return;
+//        }
+//        googleMap.setOnMapClickListener((latLng) -> clickListener.run());
+//    }
+//
+//    @Override
+//    public void setOnMapLongClickListener(Runnable clickListener) {
+//        if (googleMap == null) {
+//            Logger.i("GoogleMapMapView: setOnMapLongClickListener: googleMap is not ready to use");
+//            return;
+//        }
+//        googleMap.setOnMapLongClickListener((latLng) -> clickListener.run());
+//    }
 
     @Override
     public void setOnMapReadyCallback(@Nullable Runnable callback) {
@@ -427,7 +476,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 0));
         } else if (bounds.second == null) { // count == 1 || ((latNorth-latSouth < 0.005) && (lonEast-lonWest < 0.005))
             // else center on single symbol
-            float zoom = Float.max(DEFAULT_ZOOM, googleMap.getCameraPosition().zoom);
+            float zoom = markersPositions.size() == 1 ? Float.max(DEFAULT_ZOOM, googleMap.getCameraPosition().zoom) : DEFAULT_ZOOM;
             if (animate) {
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bounds.first.toGoogleMaps(), zoom), TRANSITION_DURATION_MS, null);
             } else {

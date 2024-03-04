@@ -22,11 +22,12 @@ package io.olvid.engine.networkfetch.datatypes;
 
 import java.util.List;
 
+import io.olvid.engine.engine.types.JsonOsmStyle;
 import io.olvid.engine.networkfetch.coordinators.WellKnownCoordinator;
 
 public interface WellKnownCacheDelegate {
     String getWsUrl(String server) throws WellKnownCoordinator.NotCachedException;
     List<String> getTurnUrls(String server) throws WellKnownCoordinator.NotCachedException;
-    String getOsmUrl(String server) throws WellKnownCoordinator.NotCachedException;
+    List<JsonOsmStyle> getOsmStyles(String server) throws WellKnownCoordinator.NotCachedException;
     String getAddressUrl(String server) throws WellKnownCoordinator.NotCachedException;
 }

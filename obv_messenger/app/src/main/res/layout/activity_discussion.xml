@@ -29,7 +29,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/discussion_toolbar"
-        app:layout_constraintBottom_toBottomOf="@id/fab_layout"
+        app:layout_constraintBottom_toTopOf="@id/discussion_invitation"
         app:layout_constraintVertical_bias=".2"
         android:gravity="center_horizontal">
         <ProgressBar
@@ -63,58 +63,77 @@
         app:layout_constraintTop_toTopOf="@+id/discussion_toolbar"
         tools:listitem="@layout/item_view_message_inbound" />
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/fab_layout"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/discussion_location_sharing_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_max="wrap"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:orientation="horizontal"
+        android:layout_marginHorizontal="32dp"
+        android:background="@drawable/background_rounded_dialog"
+        android:elevation="4dp"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:paddingVertical="4dp"
+        app:layout_constraintTop_toBottomOf="@id/discussion_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <TextView
+            android:id="@+id/discussion_location_sharing_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/RobotoMedium"
+            android:textSize="14sp"
+            android:gravity="center_vertical"
+            app:drawableStartCompat="@drawable/ic_location_sharing_grey"
+            android:drawablePadding="4dp"
+            tools:text="Sharing your location"
+            android:paddingEnd="40dp"
+            android:paddingStart="4dp"
+            android:textColor="@color/greyTint"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+        <ImageView
+            android:id="@+id/discussion_location_sharing_menu_dots"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_three_dots_grey"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@null"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/discussion_scroll_down_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="80dp"
-        android:minHeight="80dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        android:contentDescription="@null"
+        app:backgroundTint="@color/accent"
+        app:fabSize="mini"
+        tools:visibility="visible"
+        app:rippleColor="@color/blackOverlay"
+        app:srcCompat="@drawable/ic_down"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         app:layout_constraintBottom_toTopOf="@id/discussion_invitation"
         app:layout_constraintEnd_toEndOf="parent"
-        android:orientation="vertical"
-        android:animateLayoutChanges="true"
-        android:paddingVertical="8dp"
-        android:clipToPadding="false"
-        android:gravity="bottom|end"
-        >
+        />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/discussion_location_sharing_fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="gone"
-            android:contentDescription="@null"
-            app:backgroundTint="@color/accent"
-            app:fabSize="mini"
-            app:rippleColor="@color/blackOverlay"
-            app:srcCompat="@drawable/ic_location_white"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/discussion_scroll_down_fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="gone"
-            android:contentDescription="@null"
-            app:backgroundTint="@color/accent"
-            app:fabSize="mini"
-            app:rippleColor="@color/blackOverlay"
-            app:srcCompat="@drawable/ic_down"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            />
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/discussion_toolbar"
@@ -128,6 +147,7 @@
         app:popupTheme="@style/AppTheme"
         app:contentInsetStart="0dp"
         app:contentInsetEnd="0dp"
+        android:elevation="8dp"
         android:clickable="true"
         android:focusable="true">
 

@@ -27,26 +27,40 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.ImageSpan;
+import android.text.style.StyleSpan;
+import android.util.ArrayMap;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.location.LocationManagerCompat;
 import androidx.core.util.Consumer;
 import androidx.core.util.Pair;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
 
+import com.mapbox.geojson.MultiPolygon;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -62,13 +76,24 @@ import com.mapbox.mapboxsdk.maps.SupportMapFragment;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
+import com.mapbox.mapboxsdk.style.layers.FillLayer;
+import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.mapboxsdk.style.layers.LineLayer;
+import com.mapbox.mapboxsdk.style.layers.PropertyValue;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.style.sources.Source;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.JsonOsmStyle;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
@@ -77,12 +102,13 @@ import io.olvid.messenger.settings.SettingsActivity;
 
 public class MapViewMapLibreFragment extends MapViewAbstractFragment implements OnMapReadyCallback {
 
-    private static final String DEFAULT_OSM_SERVER_URL = "https://map.olvid.io";
-    private static final String OSM_STYLE_NAME = "planet";
+    private static final String FALLBACK_OSM_STYLE_URL = "https://map.olvid.io/styles/osm.json";
+    public static final String OSM_STYLE_LANGUAGE_PLACEHOLDER = "[LANG]";
     private static final double DEFAULT_ZOOM = 15;
     private static final int TRANSITION_DURATION_MS = 500;
 
     @Nullable private Runnable onMapReadyCallback = null;
+    @Nullable private Consumer<Boolean> layersButtonVisibilitySetter = null;
     private FragmentActivity activity;
 
     private SupportMapFragment mapFragment;
@@ -91,6 +117,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     // symbols and markers
     private @Nullable SymbolManager symbolManager;
     private final HashMap<Long, Symbol> symbolsByIdHashMap = new HashMap<>();
+    private final HashMap<Long, List<Point>> precisionCirclesHashMap = new HashMap<>();
 
     // current camera center live data (set to null if camera is moving)
     private final MutableLiveData<LatLngWrapper> currentCameraCenterLiveData = new MutableLiveData<>();
@@ -100,7 +127,9 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
     // store previously centered marker to unset Zindex
     private Symbol currentlyCenteredSymbol = null;
-    private String osmServerUrl = DEFAULT_OSM_SERVER_URL;
+    @NonNull
+    private Map<String, JsonOsmStyle> osmServerStyles = Collections.emptyMap();
+    private String currentStyleId = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -109,6 +138,8 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         // get current activity
         this.activity = requireActivity();
 
+        loadStyleUrls();
+
         // init MapView
         Mapbox.getInstance(this.activity);
 
@@ -116,11 +147,6 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         MapboxMapOptions options = MapboxMapOptions.createFromAttributes(this.activity);
         mapFragment = SupportMapFragment.newInstance(options);
         mapFragment.getMapAsync(this);
-
-        String osmServer = AppSingleton.getEngine().getOsmServerUrl(AppSingleton.getBytesCurrentIdentity());
-        if (osmServer != null) {
-            this.osmServerUrl = osmServer;
-        }
     }
 
     @Nullable
@@ -137,21 +163,56 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     }
 
 
-    private String getStyleUrl() {
+    private void loadStyleUrls() {
         if (SettingsActivity.getLocationIntegration() == SettingsActivity.LocationIntegrationEnum.OSM) {
-            String language = SettingsActivity.getLocationOpenStreetMapLanguage();
-            if (language != null) {
-                return String.format("%s/styles/%s-%s/style.json", osmServerUrl, OSM_STYLE_NAME, language);
+            List<JsonOsmStyle> osmStyles = AppSingleton.getEngine().getOsmStyles(AppSingleton.getBytesCurrentIdentity());
+            if (osmStyles == null || osmStyles.size() == 0) {
+                loadFallbackStyleUrl();
+            } else {
+                currentStyleId = SettingsActivity.getLocationLastOsmStyleId();
+                osmServerStyles = new LinkedHashMap<>();
+                for (JsonOsmStyle osmStyle : osmStyles) {
+                    if (osmStyle.id != null && osmStyle.url != null && osmStyle.name != null) {
+                        osmServerStyles.put(osmStyle.id, osmStyle);
+                    }
+                }
             }
         } else if (SettingsActivity.getLocationIntegration() == SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM) {
-            return SettingsActivity.getLocationCustomOsmServerUrl();
+            currentStyleId = "custom";
+            osmServerStyles = Collections.singletonMap("custom", new JsonOsmStyle("custom", SettingsActivity.getLocationCustomOsmServerUrl()));
+        } else {
+            loadFallbackStyleUrl();
         }
-        return getFallbackStyleUrl();
     }
 
-    private String getFallbackStyleUrl() {
+    private void loadFallbackStyleUrl() {
         triedStyleFallbackUrl = true;
-        return String.format("%s/styles/%s/style.json", osmServerUrl, OSM_STYLE_NAME);
+        currentStyleId = "fallback";
+        osmServerStyles = Collections.singletonMap("fallback", new JsonOsmStyle("fallback", FALLBACK_OSM_STYLE_URL));
+    }
+
+    @NonNull
+    private String getStyleUrl() {
+        if (currentStyleId != null) {
+            JsonOsmStyle osmStyle = osmServerStyles.get(currentStyleId);
+            if (osmStyle != null) {
+                return replaceLanguageInStyleUrl(osmStyle);
+            }
+        }
+        for (Map.Entry<String, JsonOsmStyle> osmStyleEntry : osmServerStyles.entrySet()) {
+            currentStyleId = osmStyleEntry.getKey();
+            return replaceLanguageInStyleUrl(osmStyleEntry.getValue());
+        }
+        return "";
+    }
+
+    @NonNull
+    private String replaceLanguageInStyleUrl(@NonNull JsonOsmStyle osmStyle) {
+        String language = activity.getString(R.string.language_short_string);
+        if (osmStyle.name.containsKey(language)) {
+            return osmStyle.url.replace(OSM_STYLE_LANGUAGE_PLACEHOLDER, "_" + language);
+        }
+        return osmStyle.url.replace(OSM_STYLE_LANGUAGE_PLACEHOLDER, "_en");
     }
 
     @Override
@@ -164,12 +225,38 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             ((MapView) mapView).addOnDidFailLoadingMapListener((errorMessage) -> {
                 Logger.w("OSM style not found, trying fallback style");
                 if (!triedStyleFallbackUrl) {
-                    mapboxMap.setStyle(new Style.Builder().fromUri(getFallbackStyleUrl()), this::onStyleLoaded);
+                    loadFallbackStyleUrl();
+                    mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
                 }
             });
         }
 
-        mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
+        // set style, with a callback for the loading of the first style
+        mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onFirstStyleLoaded);
+    }
+
+    public void onFirstStyleLoaded(Style style) {
+        if (style == null || mapboxMap == null) {
+            Logger.i("MapLibre.onStyleLoaded: map not initialized or style is null");
+            return;
+        }
+
+        // first run the normal callback
+        onStyleLoaded(style);
+
+        // then run thing that need to be run only once
+        // setup listeners for map gestures
+        mapboxMap.addOnCameraMoveStartedListener((reason) -> {
+            currentCameraCenterLiveData.postValue(null);
+
+            if (reason == MapboxMap.OnCameraMoveStartedListener.REASON_API_GESTURE) {
+                setCurrentlyCenteredSymbol(null);
+            }
+        });
+        //noinspection DataFlowIssue
+        mapboxMap.addOnCameraIdleListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
+        //noinspection DataFlowIssue
+        mapboxMap.addOnCameraMoveCancelListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
     }
 
     public void onStyleLoaded(Style style) {
@@ -180,23 +267,31 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
         // setup ui
         mapboxMap.getUiSettings().setCompassEnabled(true);
-        int twelveDp = (int) (12 * activity.getResources().getDisplayMetrics().density);
-        mapboxMap.getUiSettings().setCompassMargins(0, twelveDp * 2, twelveDp, 0);
+        Drawable compass = ContextCompat.getDrawable(activity, R.drawable.map_compass);
+        if (compass != null) {
+            mapboxMap.getUiSettings().setCompassImage(compass);
+        }
+        int sixteenDp = (int) (16 * activity.getResources().getDisplayMetrics().density);
+        mapboxMap.getUiSettings().setCompassMargins(0, (osmServerStyles.size() > 1) ? sixteenDp * 4 : sixteenDp, sixteenDp, 0);
         mapboxMap.getUiSettings().setCompassGravity(Gravity.TOP | Gravity.END);
-
         mapboxMap.getUiSettings().setLogoEnabled(false);
+
+        if (layersButtonVisibilitySetter != null) {
+            layersButtonVisibilitySetter.accept(osmServerStyles.size() > 1);
+        }
 
         // show and change attributions
         mapboxMap.getUiSettings().setAttributionEnabled(true);
         mapboxMap.getUiSettings().setAttributionGravity(Gravity.BOTTOM | Gravity.START);
-        mapboxMap.getUiSettings().setAttributionMargins(twelveDp, twelveDp, twelveDp, twelveDp);
+        mapboxMap.getUiSettings().setAttributionMargins(sixteenDp, sixteenDp, sixteenDp, sixteenDp);
         mapboxMap.getUiSettings().setAttributionDialogManager(new MapLibreCustomAttributionDialogManager(this.activity, mapboxMap));
+
 
         // create symbol manager and set options
         if (mapFragment.getView() != null) {
             symbolManager = new SymbolManager((MapView) mapFragment.getView(), mapboxMap, style);
             symbolManager.setIconAllowOverlap(true);
-            symbolManager.setIconIgnorePlacement(false);
+            symbolManager.setIconIgnorePlacement(true);
 
             symbolManager.addClickListener((symbol) -> {
                 // center on all markers if clicking on same marker when we have multiple markers (to continue following marker if there is only one)
@@ -207,21 +302,13 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                 }
                 return true;
             });
-        }
-        else {
+        } else {
             Logger.w("Symbol manager cannot be created !");
         }
 
-        // setup listeners for map gestures
-        mapboxMap.addOnCameraMoveStartedListener((reason) -> {
-            currentCameraCenterLiveData.postValue(null);
+        // in case a circle was already added, recompute the precision circles layer
+        recomputePrecisionCirclesLayer();
 
-            if (reason == MapboxMap.OnCameraMoveStartedListener.REASON_API_GESTURE) {
-                setCurrentlyCenteredSymbol(null);
-            }
-        });
-        mapboxMap.addOnCameraIdleListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
-        mapboxMap.addOnCameraMoveCancelListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
 
         // call parent callback if set
         if (onMapReadyCallback != null) {
@@ -407,38 +494,85 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             onSnapshotReadyCallback.accept(result);
         });
     }
+
     @Override
-    public void setGestureEnabled(boolean enabled) {
-        if (mapboxMap == null || mapboxMap.getStyle() == null) {
-            Logger.i("MapLibreMapView: setGestureEnabled: mapboxMap is not ready to use");
-            return;
+    void setLayersButtonVisibilitySetter(Consumer<Boolean> layersButtonVisibilitySetter) {
+        this.layersButtonVisibilitySetter = layersButtonVisibilitySetter;
+        if (currentStyleId != null) {
+            layersButtonVisibilitySetter.accept(osmServerStyles.size() > 1);
         }
-        mapboxMap.getUiSettings().setAllGesturesEnabled(enabled);
     }
 
     @Override
-    public void setOnMapClickListener(Runnable clickListener) {
-        if (mapboxMap == null || mapboxMap.getStyle() == null) {
-            Logger.i("MapLibreMapView: setOnMapClickListener: mapboxMap is not ready to use");
+    void onLayersButtonClicked(View view) {
+        if (osmServerStyles.size() <= 1) {
             return;
         }
-        mapboxMap.addOnMapClickListener((latLng) -> {
-            clickListener.run();
-            return false;
+        ArrayList<String> menuStyleIds = new ArrayList<>(osmServerStyles.size());
+        PopupMenu popup = new PopupMenu(activity, view, Gravity.TOP | Gravity.END);
+        Menu menu = popup.getMenu();
+        int index = 0;
+        String lang = getString(R.string.language_short_string);
+        for (JsonOsmStyle osmStyle : osmServerStyles.values()) {
+            menuStyleIds.add(osmStyle.id);
+            CharSequence text;
+            if (osmStyle.name.containsKey(lang)) {
+                text = osmStyle.name.get(lang);
+            } else {
+                text = osmStyle.name.get("en");
+            }
+            MenuItem menuItem = menu.add(0, index, index, text);
+            if (Objects.equals(currentStyleId, osmStyle.id)) {
+                menuItem.setChecked(true);
+            }
+            index++;
+        }
+        menu.setGroupCheckable(0, true, true);
+        popup.setOnMenuItemClickListener(item -> {
+            if (!Objects.equals(currentStyleId, menuStyleIds.get(item.getItemId()))) {
+                currentStyleId = menuStyleIds.get(item.getItemId());
+                SettingsActivity.setLocationLastOsmStyleId(currentStyleId);
+                if (mapboxMap != null) {
+                    mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
+                }
+            }
+            return true;
         });
+        popup.show();
     }
 
-    @Override
-    public void setOnMapLongClickListener(Runnable clickListener) {
-        if (mapboxMap == null || mapboxMap.getStyle() == null) {
-            Logger.i("MapLibreMapView: setOnMapLongClickListener: mapboxMap is not ready to use");
-            return;
-        }
-        mapboxMap.addOnMapLongClickListener((latLng) -> {
-            clickListener.run();
-            return false;
-        });
-    }
+    //    @Override
+//    public void setGestureEnabled(boolean enabled) {
+//        if (mapboxMap == null || mapboxMap.getStyle() == null) {
+//            Logger.i("MapLibreMapView: setGestureEnabled: mapboxMap is not ready to use");
+//            return;
+//        }
+//        mapboxMap.getUiSettings().setAllGesturesEnabled(enabled);
+//    }
+//
+//    @Override
+//    public void setOnMapClickListener(Runnable clickListener) {
+//        if (mapboxMap == null || mapboxMap.getStyle() == null) {
+//            Logger.i("MapLibreMapView: setOnMapClickListener: mapboxMap is not ready to use");
+//            return;
+//        }
+//        mapboxMap.addOnMapClickListener((latLng) -> {
+//            clickListener.run();
+//            return false;
+//        });
+//    }
+//
+//    @Override
+//    public void setOnMapLongClickListener(Runnable clickListener) {
+//        if (mapboxMap == null || mapboxMap.getStyle() == null) {
+//            Logger.i("MapLibreMapView: setOnMapLongClickListener: mapboxMap is not ready to use");
+//            return;
+//        }
+//        mapboxMap.addOnMapLongClickListener((latLng) -> {
+//            clickListener.run();
+//            return false;
+//        });
+//    }
 
     @Override
     public void setOnMapReadyCallback(@Nullable Runnable onMapReadyCallback) {
@@ -464,6 +598,13 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                 .withLatLng(latLngWrapper.toMapLibre())
                 .withSymbolSortKey(0F));
         symbolsByIdHashMap.put(id, symbol);
+
+        if (precision != null) {
+            precisionCirclesHashMap.put(id, computePrecisionCirclePolyline(latLngWrapper.toMapLibre(), precision));
+            recomputePrecisionCirclesLayer();
+        } else if (precisionCirclesHashMap.remove(id) != null) {
+            recomputePrecisionCirclesLayer();
+        }
     }
 
     @Override
@@ -480,6 +621,13 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             if (symbol.equals(currentlyCenteredSymbol)) {
                 centerOnMarker(id, true);
             }
+        }
+
+        if (precision != null) {
+            precisionCirclesHashMap.put(id, computePrecisionCirclePolyline(latLngWrapper.toMapLibre(), precision));
+            recomputePrecisionCirclesLayer();
+        } else if (precisionCirclesHashMap.remove(id) != null) {
+            recomputePrecisionCirclesLayer();
         }
     }
 
@@ -499,6 +647,9 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             if (mapboxMap != null && mapboxMap.getStyle() != null) {
                 mapboxMap.getStyle().removeImage("marker-icon" + id);
             }
+        }
+        if (precisionCirclesHashMap.remove(id) != null) {
+            recomputePrecisionCirclesLayer();
         }
     }
 
@@ -532,7 +683,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.world(), 0), TRANSITION_DURATION_MS, cancelableCallback);
         } else if (bounds.second == null) {
             // else center on single symbol
-            double zoom = Math.max(DEFAULT_ZOOM, mapboxMap.getCameraPosition().zoom);
+            double zoom = markersPositions.size() == 1 ? Math.max(DEFAULT_ZOOM, mapboxMap.getCameraPosition().zoom) : DEFAULT_ZOOM;
             if (animate) {
                 mapboxMap.getUiSettings().setAllGesturesEnabled(false);
                 mapboxMap.easeCamera(CameraUpdateFactory.newLatLngZoom(bounds.first.toMapLibre(), zoom), TRANSITION_DURATION_MS, cancelableCallback);
@@ -545,8 +696,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             if (animate) {
                 mapboxMap.getUiSettings().setAllGesturesEnabled(false);
                 mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(bounds.second.getLatitude(), bounds.second.getLongitude(), bounds.first.getLatitude(), bounds.first.getLongitude()), padding), TRANSITION_DURATION_MS, cancelableCallback);
-            }
-            else {
+            } else {
                 mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(bounds.second.getLatitude(), bounds.second.getLongitude(), bounds.first.getLatitude(), bounds.first.getLongitude()), padding));
             }
         }
@@ -598,5 +748,73 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         }
 
         currentlyCenteredSymbol = symbol;
+    }
+
+
+    private final static int CIRCLE_POLYLINE_STEPS = 90;
+    @NonNull
+    private List<Point> computePrecisionCirclePolyline(@NonNull LatLng center, float radiusMeters) {
+        // convert radius meters to radians
+        double radiusRadians = (double) radiusMeters / 6373000d;
+        // convert center coordinates to radians too
+        double centerLat = (center.getLatitude() % 360) * Math.PI / 180;
+        double centerLong = (center.getLongitude() % 360) * Math.PI / 180;
+
+        List<Point> points = new ArrayList<>();
+        for (int i = 0; i < CIRCLE_POLYLINE_STEPS; i++) {
+            double angle = i * 2 * Math.PI / CIRCLE_POLYLINE_STEPS;
+            double pointLat =  Math.asin(Math.sin(centerLat) * Math.cos(radiusRadians) + Math.cos(centerLat) * Math.sin(radiusRadians) * Math.cos(angle));
+            double pointLong =  centerLong + Math.atan2(
+                    Math.sin(angle) * Math.sin(radiusRadians) * Math.cos(centerLat),
+                    Math.cos(radiusRadians) - Math.sin(centerLat) * Math.sin(pointLat)
+            );
+            points.add(Point.fromLngLat(
+                    pointLong * 180 / Math.PI,
+                    pointLat * 180 / Math.PI
+            ));
+        }
+
+        // re-add the first point to close the curve
+        points.add(points.get(0));
+        return points;
+    }
+
+
+    private void recomputePrecisionCirclesLayer() {
+        if (mapboxMap != null && symbolManager != null) {
+            Style style = mapboxMap.getStyle();
+            if (style != null) {
+                // remove any outdated source/layer
+                Layer circlesLayer = style.getLayer("circles-layer");
+                if (circlesLayer != null) {
+                    style.removeLayer(circlesLayer);
+                }
+                Layer circleOutlinesLayer = style.getLayer("circle-outlines-layer");
+                if (circleOutlinesLayer != null) {
+                    style.removeLayer(circleOutlinesLayer);
+                }
+                Source circlesSource = style.getSource("precision-circles");
+                if (circlesSource != null) {
+                    style.removeSource(circlesSource);
+                }
+
+                List<List<List<Point>>> circles = new ArrayList<>();
+                for (List<Point> circle : precisionCirclesHashMap.values()) {
+                    circles.add(Collections.singletonList(circle));
+                }
+                circlesSource = new GeoJsonSource("precision-circles", MultiPolygon.fromLngLats(circles));
+                circlesLayer = new FillLayer("circles-layer", "precision-circles").withProperties(
+                        new PropertyValue<String>("fill-color", "#0099ff"),
+                        new PropertyValue<Float>("fill-opacity", 0.094f)
+                );
+                circleOutlinesLayer = new LineLayer("circle-outlines-layer", "precision-circles").withProperties(
+                        new PropertyValue<String>("line-color", "#0099ff"),
+                        new PropertyValue<Float>("line-opacity", 0.266f)
+                );
+                style.addSource(circlesSource);
+                style.addLayerBelow(circlesLayer, symbolManager.getLayerId());
+                style.addLayerAbove(circleOutlinesLayer, "circles-layer");
+            }
+        }
     }
 }

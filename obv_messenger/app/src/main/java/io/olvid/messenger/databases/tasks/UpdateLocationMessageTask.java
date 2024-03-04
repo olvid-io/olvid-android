@@ -105,7 +105,9 @@ public class UpdateLocationMessageTask implements Runnable {
         try {
             obvPostMessageOutput = Message.postUpdateMessageMessage(originalMessage);
             if (!obvPostMessageOutput.isMessagePostedForAtLeastOneContact()) {
-                throw new Exception("Message not sent");
+                Logger.w("Trying to post location update message in discussion without contacts. Stopping location share.");
+                UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussionId, true);
+                return;
             }
         } catch (Exception e) {
             Logger.e("UpdateLocationMessageTask: Unable to update location message", e);

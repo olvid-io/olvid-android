@@ -40,6 +40,7 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
+import io.olvid.engine.engine.types.JsonOsmStyle;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.networkfetch.databases.CachedWellKnown;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
@@ -153,13 +154,13 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
         if (updated) {
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED_SERVER_KEY, server);
-            userInfo.put(DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED_SERVER_CONFIG_KEY, jsonWellKnown.getServerConfig());
-            userInfo.put(DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED_APP_INFO_KEY, jsonWellKnown.getAppInfo());
+            userInfo.put(DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED_SERVER_CONFIG_KEY, jsonWellKnown.serverConfig);
+            userInfo.put(DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED_APP_INFO_KEY, jsonWellKnown.appInfo);
             notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED, userInfo);
         } else {
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_SUCCESS_SERVER_KEY, wellKnownDownloadOperation.getServer());
-            userInfo.put(DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_SUCCESS_APP_INFO_KEY, jsonWellKnown.getAppInfo());
+            userInfo.put(DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_SUCCESS_APP_INFO_KEY, jsonWellKnown.appInfo);
             notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WELL_KNOWN_DOWNLOAD_SUCCESS, userInfo);
         }
     }
@@ -191,7 +192,7 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
         if (jsonWellKnown.serverConfig == null) {
             return null;
         }
-        return jsonWellKnown.serverConfig.getWebSocketUrl();
+        return jsonWellKnown.serverConfig.webSocketUrl;
     }
 
     @Override
@@ -211,7 +212,7 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
     }
 
     @Override
-    public String getOsmUrl(String server) throws NotCachedException {
+    public List<JsonOsmStyle> getOsmStyles(String server) throws NotCachedException {
         if (!cacheInitialized) {
             throw new NotCachedException();
         }
@@ -223,7 +224,7 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
         if (jsonWellKnown.serverConfig == null) {
             return null;
         }
-        return jsonWellKnown.serverConfig.osmServerUrl;
+        return jsonWellKnown.serverConfig.osmStyles;
     }
 
     @Override
@@ -244,75 +245,24 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class JsonWellKnown {
-        JsonWellKnownServerConfig serverConfig;
-        Map<String, Integer> appInfo;
-
         @JsonProperty("server")
-        public JsonWellKnownServerConfig getServerConfig() {
-            return serverConfig;
-        }
-
-        @JsonProperty("server")
-        public void setServerConfig(JsonWellKnownServerConfig serverConfig) {
-            this.serverConfig = serverConfig;
-        }
-
+        public JsonWellKnownServerConfig serverConfig;
         @JsonProperty("app")
-        public Map<String, Integer> getAppInfo() {
-            return appInfo;
-        }
-
-        @JsonProperty("app")
-        public void setAppInfo(Map<String, Integer> appInfo) {
-            this.appInfo = appInfo;
-        }
+        public Map<String, Integer> appInfo;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class JsonWellKnownServerConfig {
-        String webSocketUrl;
-        List<String> turnServerUrls;
-        String osmServerUrl;
-        String addressServerUrl;
-
         @JsonProperty("ws_server")
-        public String getWebSocketUrl() {
-            return webSocketUrl;
-        }
-
-        @JsonProperty("ws_server")
-        public void setWebSocketUrl(String webSocketUrl) {
-            this.webSocketUrl = webSocketUrl;
-        }
-
+        public String webSocketUrl;
         @JsonProperty("turn_servers")
-        public List<String> getTurnServerUrls() {
-            return turnServerUrls;
-        }
-
-        @JsonProperty("turn_servers")
-        public void setTurnServerUrls(List<String> turnServerUrls) {
-            this.turnServerUrls = turnServerUrls;
-        }
-
-        @JsonProperty("osm_server")
-        public String getOsmServerUrl() {
-            return osmServerUrl;
-        }
-
-        @JsonProperty("osm_server")
-        public void setOsmServerUrl(String osmServerUrl) {
-            this.osmServerUrl = osmServerUrl;
-        }
-
+        public List<String> turnServerUrls;
+        // no longer used since we have osmStyles
+        //        @JsonProperty("osm_server")
+        //        public String osmServerUrl;
         @JsonProperty("address_server")
-        public String getAddressServerUrl() {
-            return addressServerUrl;
-        }
-
-        @JsonProperty("address_server")
-        public void setAddressServerUrl(String addressServerUrl) {
-            this.addressServerUrl = addressServerUrl;
-        }
+        public String addressServerUrl;
+        @JsonProperty("osm_styles")
+        public List<JsonOsmStyle> osmStyles;
     }
 }

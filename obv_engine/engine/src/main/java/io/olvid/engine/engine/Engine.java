@@ -85,6 +85,7 @@ import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
+import io.olvid.engine.engine.types.JsonOsmStyle;
 import io.olvid.engine.engine.types.ObvAttachment;
 import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvBackupKeyVerificationOutput;
@@ -2425,10 +2426,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public String getOsmServerUrl(byte[] bytesOwnedIdentity) {
+    public List<JsonOsmStyle> getOsmStyles(byte[] bytesOwnedIdentity) {
         try {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            return fetchManager.getOsmServerUrl(ownedIdentity.getServer());
+            return fetchManager.getOsmStyles(ownedIdentity.getServer());
         } catch (Exception ignored) {
             return null;
         }

@@ -782,7 +782,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
             cancelButton.setOnClickListener(v -> dismiss());
 
             FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
-            filteredDiscussionListFragment.removeBottomPadding();
+            filteredDiscussionListFragment.setBottomPadding(0);
             filteredDiscussionListFragment.setShowPinned(true);
             filteredDiscussionListFragment.setUnfilteredDiscussions(viewModel.getDiscussionListLiveData());
             filteredDiscussionListFragment.setDiscussionFilterEditText(dialogContactNameFilter);

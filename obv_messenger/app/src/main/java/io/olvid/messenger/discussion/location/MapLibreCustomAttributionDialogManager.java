@@ -22,7 +22,6 @@ package io.olvid.messenger.discussion.location;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.Uri;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -41,14 +40,16 @@ public class MapLibreCustomAttributionDialogManager extends AttributionDialogMan
     private final String[] attributionsNames = new String[]{
             "© OpenMapTiles",
             "© OpenStreetMap contributors",
+            "© ProtoMaps",
             "© MapLibre",
             "© Olvid"
     };
     private final String[] attributionsUrls = new String[]{
             "https://www.openmaptiles.org/",
-            "https://www.openstreetmap.org/copyright ",
+            "https://www.openstreetmap.org/copyright",
+            "https://github.com/protomaps/basemaps",
             "https://maplibre.org/",
-            "https://olvid.io"
+            "https://olvid.io/"
     };
 
     public MapLibreCustomAttributionDialogManager(@NonNull Context context, @NonNull MapboxMap mapboxMap) {
@@ -67,8 +68,7 @@ public class MapLibreCustomAttributionDialogManager extends AttributionDialogMan
     @Override
     public void onClick(DialogInterface dialog, int which) {
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(attributionsUrls[which]));
-            context.startActivity(intent);
+            App.openLink(context, Uri.parse(attributionsUrls[which]));
         } catch (Exception e) {
             e.printStackTrace();
             App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);

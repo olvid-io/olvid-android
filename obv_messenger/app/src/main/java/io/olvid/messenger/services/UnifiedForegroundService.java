@@ -74,6 +74,7 @@ import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.HandlerExecutor;
+import io.olvid.messenger.customClasses.LocationShareQuality;
 import io.olvid.messenger.customClasses.LockScreenOrNotActivity;
 import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.PreviewUtils;
@@ -334,6 +335,7 @@ public class UnifiedForegroundService extends Service {
         return showLockScreenNotification || showWebClientNotification || showPermanentNotification || showMessageSendingNotification || showLocationSharingNotification;
     }
 
+    @SuppressLint("ForegroundServiceType")
     private void stopOrRestartForegroundService() {
         boolean showWebClientNotification = webClientSubService != null && WebClientSubService.isRunning;
         boolean showLockScreenNotification = SettingsActivity.useApplicationLockScreen() && (!LockSubService.locked || SettingsActivity.keepLockServiceOpen());
@@ -997,7 +999,7 @@ public class UnifiedForegroundService extends Service {
         private static final String SYNC_SHARING_MESSAGES_ACTION = "sync"; // check share location message in db and expires them or restart sharing
         private static final String DISCUSSION_ID_INTENT_EXTRA = "discussion_id"; // long
         private static final String SHARING_EXPIRATION_INTENT_EXTRA = "sharing_duration"; // long (optional)
-        private static final String SHARING_INTERVAL_INTENT_EXTRA = "sharing_interval"; // long
+        private static final String SHARING_QUALITY_INTENT_EXTRA = "sharing_quality"; // int
         private static final String MESSAGE_ID_INTENT_EXTRA = "message_id"; // id of message to update with new location
 
         private static UnifiedForegroundService unifiedForegroundService = null;
@@ -1015,8 +1017,8 @@ public class UnifiedForegroundService extends Service {
                     long discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1);
                     long messageId = intent.getLongExtra(MESSAGE_ID_INTENT_EXTRA, -1);
                     long shareExpiration = intent.getLongExtra(SHARING_EXPIRATION_INTENT_EXTRA, -1); // optional (in ms)
-                    long shareInterval = intent.getLongExtra(SHARING_INTERVAL_INTENT_EXTRA, -1); // (in ms)
-                    if (discussionId != -1 && shareInterval != -1 && messageId != -1) {
+                    int shareQuality = intent.getIntExtra(SHARING_QUALITY_INTENT_EXTRA, LocationShareQuality.QUALITY_PRECISE.value); // value of io.olvid.messenger.customClasses.LocationShareQuality
+                    if (discussionId != -1 && messageId != -1) {
                         App.runThread(() -> {
                             //noinspection SynchronizeOnNonFinalField
                             synchronized (subscriber) {
@@ -1027,9 +1029,8 @@ public class UnifiedForegroundService extends Service {
                                 Discussion discussion = AppDatabase.getInstance().discussionDao().getById(discussionId);
                                 if (discussion != null) {
                                     // if expiration is not set use null value (endless sharing)
-                                    subscriber.startSharingInDiscussion(discussion.bytesOwnedIdentity, discussionId, shareExpiration == -1 ? null : shareExpiration, shareInterval, messageId);
-                                }
-                                else {
+                                    subscriber.startSharingInDiscussion(discussion.bytesOwnedIdentity, discussionId, shareExpiration == -1 ? null : shareExpiration, LocationShareQuality.fromValue(shareQuality), messageId);
+                                } else {
                                     Logger.e("LocationSharingSubService: discussion not found in database !!");
                                 }
                                 if (!isSharingLocation && subscriber.isCurrentlySharingLocation()) {
@@ -1075,7 +1076,7 @@ public class UnifiedForegroundService extends Service {
                             restartSharingIntent.putExtra(LocationSharingSubService.DISCUSSION_ID_INTENT_EXTRA, message.discussionId);
                             restartSharingIntent.putExtra(LocationSharingSubService.MESSAGE_ID_INTENT_EXTRA, message.id);
                             restartSharingIntent.putExtra(LocationSharingSubService.SHARING_EXPIRATION_INTENT_EXTRA, jsonLocation.getSharingExpiration());
-                            restartSharingIntent.putExtra(LocationSharingSubService.SHARING_INTERVAL_INTENT_EXTRA, jsonLocation.getSharingInterval());
+                            restartSharingIntent.putExtra(LocationSharingSubService.SHARING_QUALITY_INTENT_EXTRA, jsonLocation.getQuality());
                             onStartCommand(START_SHARING_ACTION, restartSharingIntent);
                         }
                     }
@@ -1123,13 +1124,13 @@ public class UnifiedForegroundService extends Service {
             return null;
         }
 
-        public static void startSharingInDiscussion(long discussionId, @Nullable Long shareExpirationInMs, long shareIntervalInMs, long messageId) {
+        public static void startSharingInDiscussion(long discussionId, @Nullable Long shareExpirationInMs, LocationShareQuality quality, long messageId) {
             Intent startSharingPositionIntent = new Intent(App.getContext(), UnifiedForegroundService.class);
             startSharingPositionIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_LOCATION_SHARING);
             startSharingPositionIntent.setAction(LocationSharingSubService.START_SHARING_ACTION);
             startSharingPositionIntent.putExtra(LocationSharingSubService.DISCUSSION_ID_INTENT_EXTRA, discussionId);
             startSharingPositionIntent.putExtra(LocationSharingSubService.SHARING_EXPIRATION_INTENT_EXTRA, shareExpirationInMs);
-            startSharingPositionIntent.putExtra(LocationSharingSubService.SHARING_INTERVAL_INTENT_EXTRA, shareIntervalInMs);
+            startSharingPositionIntent.putExtra(LocationSharingSubService.SHARING_QUALITY_INTENT_EXTRA, quality.value);
             startSharingPositionIntent.putExtra(LocationSharingSubService.MESSAGE_ID_INTENT_EXTRA, messageId);
             App.getContext().startService(startSharingPositionIntent);
         }
@@ -1191,34 +1192,30 @@ public class UnifiedForegroundService extends Service {
         // ---------- Core sharing engine: subscribe to location updates and handle updates of location
         // ---------- for every registered discussion
         private static class LocationUpdatesSubscriber implements LocationListenerCompat {
+            public static final long RETRY_DELAY_MS = 60_000; // after an error, wait this long before retying
+
             private final HashMap<Long, DiscussionSharingHolder> holdersByDiscussionId = new HashMap<>();
             // we consider that if user started sharing location we obviously used location manager before
             private final LocationManager locationManager = (LocationManager) App.getContext().getSystemService(Context.LOCATION_SERVICE);
             private final Executor executor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ? App.getContext().getMainExecutor() : new HandlerExecutor(Looper.getMainLooper());
             private final Handler timerHandler = new Handler(Looper.getMainLooper());
-            private final Runnable locationUpdateTimedOutTask = this::locationUpdateTimedOut;
             private final LocationListenerCompat fakeLocationListenerForGps = (Location location) -> {};
-            private Long currentSharingInterval;
 
             // return null if holdersByDiscussionId is empty
-            private @Nullable Long getShortestShareInterval() {
-                Long shortest = null;
+            private @Nullable LocationShareQuality getMostPreciseRequestedQuality() {
+                LocationShareQuality mostPrecise = null;
                 for (Map.Entry<Long, DiscussionSharingHolder> entry : holdersByDiscussionId.entrySet()) {
-                    if (shortest == null) {
-                        shortest = entry.getValue().shareInterval;
-                    } else {
-                        shortest = Math.min(shortest, entry.getValue().shareInterval);
+                    if (mostPrecise == null || entry.getValue().quality.value < mostPrecise.value) {
+                        mostPrecise = entry.getValue().quality;
                     }
                 }
-                return shortest;
+                return mostPrecise;
             }
 
             @SuppressLint("MissingPermission")
             private void refreshLocationUpdatesSubscription() {
                 synchronized (holdersByDiscussionId) {
                     try {
-                        timerHandler.removeCallbacks(this.locationUpdateTimedOutTask);
-
                         // if no more sharing discussion: remove location updates
                         if (holdersByDiscussionId.isEmpty()) {
                             Logger.d("No more discussion sharing location, removing updates");
@@ -1233,57 +1230,73 @@ public class UnifiedForegroundService extends Service {
                             return;
                         }
 
-                        currentSharingInterval = getShortestShareInterval();
-                        if (currentSharingInterval == null) {
+                        LocationShareQuality mostPreciseShareQuality = getMostPreciseRequestedQuality();
+                        if (mostPreciseShareQuality == null) {
                             // this never happens, currentSharingInterval is null only if holdersByDiscussionId is empty
                             return;
                         }
 
                         if (!isLocationPermissionGranted()) {
                             AndroidNotificationManager.displayLocationErrorNotification(LocationErrorType.LOCATION_PERMISSION_DENIED);
-                            timerHandler.postDelayed(this::refreshLocationUpdatesSubscription, currentSharingInterval);
+                            timerHandler.postDelayed(this::refreshLocationUpdatesSubscription, RETRY_DELAY_MS);
                             return;
                         } else {
                             AndroidNotificationManager.clearLocationNotification(LocationErrorType.LOCATION_PERMISSION_DENIED);
                         }
 
-                        // if location disabled or permission is denied: show notification and setup a timer
                         if (!isLocationEnabled()) {
                             AndroidNotificationManager.displayLocationErrorNotification(LocationErrorType.LOCATION_DISABLED);
-                            timerHandler.postDelayed(this::refreshLocationUpdatesSubscription, currentSharingInterval);
+                            timerHandler.postDelayed(this::refreshLocationUpdatesSubscription, RETRY_DELAY_MS);
                             return;
                         } else {
                             AndroidNotificationManager.clearLocationNotification(LocationErrorType.LOCATION_DISABLED);
                         }
 
-                        LocationRequestCompat locationRequest = new LocationRequestCompat.Builder(currentSharingInterval)
-                                .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
-                                .build();
-                        String provider = locationManager.getBestProvider(new Criteria(), true);
-                        if (provider == null) {
-                            Logger.e("LocationSharingSubService: could not find a BestProvider");
-                            AndroidNotificationManager.displayLocationErrorNotification(LocationErrorType.UPDATE_TIMEOUT);
-                            timerHandler.postDelayed(this::refreshLocationUpdatesSubscription, currentSharingInterval);
-                            return;
-                        } else {
-                            AndroidNotificationManager.clearLocationNotification(LocationErrorType.UPDATE_TIMEOUT);
+                        int locationQuality;
+                        switch (mostPreciseShareQuality) {
+                            case QUALITY_BALANCED:
+                                locationQuality = LocationRequestCompat.QUALITY_BALANCED_POWER_ACCURACY;
+                                break;
+                            case QUALITY_POWER_SAVE:
+                                locationQuality = LocationRequestCompat.QUALITY_LOW_POWER;
+                                break;
+                            case QUALITY_PRECISE:
+                            default:
+                                locationQuality = LocationRequestCompat.QUALITY_HIGH_ACCURACY;
+                                break;
                         }
 
-                        // remove previous updates
+                        LocationRequestCompat locationRequest = new LocationRequestCompat.Builder(mostPreciseShareQuality.getMinUpdateFrequencyMs())
+                                .setQuality(locationQuality)
+                                .setMaxUpdateDelayMillis(mostPreciseShareQuality.getDefaultUpdateFrequencyMs())
+                                .build();
+
+
+                        // unregister any previously registered provider
                         LocationManagerCompat.removeUpdates(locationManager, this);
                         LocationManagerCompat.removeUpdates(locationManager, fakeLocationListenerForGps);
 
-                        // re-subscribe with new parameters
-                        LocationManagerCompat.requestLocationUpdates(locationManager, provider, locationRequest, executor, this);
-                        if (!Objects.equals(provider, LocationManager.GPS_PROVIDER) && locationManager.getProviders(true).contains(LocationManager.GPS_PROVIDER)) {
-                            // if the provider is not the GPS, but the GPS is available, still enable gps callback (on Android 12 emulator, fused does not always trigger updates on its own)
-                            LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.GPS_PROVIDER, locationRequest, executor, fakeLocationListenerForGps);
-                        }
 
-                        // start time out
-                        timerHandler.postDelayed(this.locationUpdateTimedOutTask, 2 * currentSharingInterval);
+                        List<String> providers = locationManager.getProviders(true);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && providers.contains(LocationManager.FUSED_PROVIDER)) {
+                            LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.FUSED_PROVIDER, locationRequest, executor, this);
+                            if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                                // also enable gps callback (on Android 12 emulator, fused does not always trigger updates on its own)
+                                LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.GPS_PROVIDER, locationRequest, executor, fakeLocationListenerForGps);
+                            }
+                        } else if (providers.contains(LocationManager.GPS_PROVIDER) || providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                            if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                                LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.GPS_PROVIDER, locationRequest, executor, this);
+                            }
+                            if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                                LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.NETWORK_PROVIDER, locationRequest, executor, this);
+                            }
+                        } else {
+                            // device does not have a GPS enabled? display a random error message. This should never happen on real devices.
+                            AndroidNotificationManager.displayLocationErrorNotification(LocationErrorType.LOCATION_PERMISSION_DENIED);
+                        }
                     } catch (Exception e) {
-                        Logger.e("SharingLocationService: registerToLocationUpdates: unexpected exception !", e);
+                        Logger.e("SharingLocationService: requestLocationUpdates() unexpected exception!", e);
                     }
                 }
             }
@@ -1298,8 +1311,45 @@ public class UnifiedForegroundService extends Service {
                                 LocationSharingSubService.stopSharingInDiscussion(holder.discussionId, false);
                                 continue;
                             }
-                            // currentSharingInterval is the min between all holder sharingIntervals --> only send update if the next update message is expected to be sent before our next location update
-                            if (holder.nextUpdateTimestamp <= System.currentTimeMillis() + currentSharingInterval) {
+
+                            // We filter here to avoid too frequent updates if the position did not change much
+                            boolean sendUpdate;
+                            String provider = location.getProvider();
+                            if (provider == null) {
+                                provider = "";
+                            }
+                            switch (provider) {
+                                case LocationManager.GPS_PROVIDER: {
+                                    sendUpdate = ((
+                                            holder.lastSharedLocation == null
+                                                    || LocationManager.NETWORK_PROVIDER.equals(holder.lastSharedLocation.getProvider()) // always prefer gps updates to previously received network updates
+                                                    || location.distanceTo(holder.lastSharedLocation) > holder.quality.getMinUpdateDistanceMeters())
+                                            && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .9 * holder.quality.getMinUpdateFrequencyMs()))
+                                            || (System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs());
+                                    break;
+                                }
+                                case LocationManager.NETWORK_PROVIDER: {
+                                    // when receiving network updates, if the previous update was GPS, only send if we are almost sure no gps update was available since then
+                                    if (holder.lastSharedLocation != null && LocationManager.GPS_PROVIDER.equals(holder.lastSharedLocation.getProvider())) {
+                                        sendUpdate = System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs() + holder.quality.getMinUpdateFrequencyMs();
+                                    } else {
+                                        // don't update too frequently between network updates to give the GPS a chance to send a better update
+                                        sendUpdate = (holder.lastSharedLocation == null || location.distanceTo(holder.lastSharedLocation) > holder.quality.getMinUpdateDistanceMeters())
+                                                && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .9 * holder.quality.getMinUpdateFrequencyMs())
+                                                || (System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs());
+                                    }
+                                    break;
+                                }
+                                case LocationManager.FUSED_PROVIDER:
+                                default: {
+                                    sendUpdate = (holder.lastSharedLocation == null || location.distanceTo(holder.lastSharedLocation) > holder.quality.getMinUpdateDistanceMeters())
+                                            && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .9 * holder.quality.getMinUpdateFrequencyMs())
+                                            || (System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs());
+                                    break;
+                                }
+                            }
+
+                            if (sendUpdate) {
                                 holder.updateLocation(location);
                             }
                         }
@@ -1307,10 +1357,6 @@ public class UnifiedForegroundService extends Service {
 
                     // clear all notifications
                     AndroidNotificationManager.clearLocationNotification(null);
-
-                    // reinitialize time out
-                    timerHandler.removeCallbacks(this.locationUpdateTimedOutTask);
-                    timerHandler.postDelayed(this.locationUpdateTimedOutTask, 2 * currentSharingInterval);
                 } catch (Exception e) {
                     Logger.e("SharingLocationService: onLocationChanged: unexpected exception !", e);
                 }
@@ -1326,23 +1372,6 @@ public class UnifiedForegroundService extends Service {
                 AndroidNotificationManager.displayLocationErrorNotification(LocationErrorType.LOCATION_DISABLED);
             }
 
-            // Timer tasks
-            synchronized private void locationUpdateTimedOut() {
-                AndroidNotificationManager.displayLocationErrorNotification(LocationErrorType.UPDATE_TIMEOUT);
-
-                // check sharing has expired
-                synchronized (holdersByDiscussionId) {
-                    for (Map.Entry<Long, DiscussionSharingHolder> entry : holdersByDiscussionId.entrySet()) {
-                        if (entry.getValue().shareExpiration != null && entry.getValue().shareExpiration < System.currentTimeMillis()) {
-                            endSharingInDiscussion(entry.getKey(), false);
-                        }
-                    }
-                }
-
-                // refresh timeout
-                timerHandler.removeCallbacks(this.locationUpdateTimedOutTask);
-                timerHandler.postDelayed(this.locationUpdateTimedOutTask, currentSharingInterval);
-            }
 
             // PUBLIC API
             public boolean isSharingLocationInDiscussion(long discussionId) {
@@ -1352,7 +1381,7 @@ public class UnifiedForegroundService extends Service {
                 return holdersByDiscussionId.size() != 0;
             }
 
-            synchronized void startSharingInDiscussion(byte[] bytesOwnedIdentity, long discussionId, @Nullable Long shareExpiration, long shareInterval, long messageId) {
+            synchronized void startSharingInDiscussion(byte[] bytesOwnedIdentity, long discussionId, @Nullable Long shareExpiration, LocationShareQuality quality, long messageId) {
                 synchronized (holdersByDiscussionId) {
                     // check if not already sharing
                     DiscussionSharingHolder holder = holdersByDiscussionId.get(discussionId);
@@ -1360,7 +1389,7 @@ public class UnifiedForegroundService extends Service {
                         holder.endSharing(false);
                     }
 
-                    holder = new DiscussionSharingHolder(bytesOwnedIdentity, discussionId, shareExpiration, shareInterval, messageId);
+                    holder = new DiscussionSharingHolder(bytesOwnedIdentity, discussionId, shareExpiration, quality, messageId);
                     holdersByDiscussionId.put(discussionId, holder);
                     refreshLocationUpdatesSubscription();
                 }
@@ -1416,22 +1445,25 @@ public class UnifiedForegroundService extends Service {
             private final byte[] bytesOwnedIdentity;
             private final long discussionId;
             private final @Nullable Long shareExpiration;
-            private final long shareInterval;
+            private final LocationShareQuality quality;
             private final long messageId;
-            private long nextUpdateTimestamp;
+            private Location lastSharedLocation;
+            private long lastUpdateTimestamp;
 
-            DiscussionSharingHolder(byte[] bytesOwnedIdentity, long discussionId, @Nullable Long shareExpiration, long shareInterval, long messageId) {
+            DiscussionSharingHolder(byte[] bytesOwnedIdentity, long discussionId, @Nullable Long shareExpiration, LocationShareQuality quality, long messageId) {
                 this.bytesOwnedIdentity = bytesOwnedIdentity;
                 this.discussionId = discussionId;
                 this.shareExpiration = shareExpiration;
-                this.shareInterval = shareInterval;
+                this.quality = quality;
                 this.messageId = messageId;
-                this.nextUpdateTimestamp = 0;
+                this.lastSharedLocation = null;
+                this.lastUpdateTimestamp = 0;
             }
 
             void updateLocation(Location location) {
+                this.lastSharedLocation = location;
+                this.lastUpdateTimestamp = System.currentTimeMillis();
                 App.runThread(UpdateLocationMessageTask.createPostSharingLocationUpdateMessage(this.discussionId, this.messageId, location));
-                this.nextUpdateTimestamp = System.currentTimeMillis() + this.shareInterval;
             }
 
             void endSharing(boolean synchronously) {
@@ -1451,8 +1483,7 @@ public class UnifiedForegroundService extends Service {
                 // need run task synchronously in some databases tasks
                 if (synchronously) {
                     task.run();
-                }
-                else {
+                } else {
                     App.runThread(task);
                 }
             }

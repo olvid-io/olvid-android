@@ -35,6 +35,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.LocationShareQuality;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JsonLocation {
@@ -50,7 +51,8 @@ public class JsonLocation {
     public long timestamp; // location timestamp
     // -- sharing message fields --
     public Long count; // null if not sharing
-    public Long sharingInterval; // null if not sharing (else in ms)
+    public Integer quality; // one of QUALITY_PRECISE, QUALITY_BALANCED, or QUALITY_POWER_SAVE for sharing. Null for TYPE_SEND
+//    public Long sharingInterval; // null if not sharing (else in ms)
     public Long sharingExpiration; // can be null if endless sharing (else in ms)
     // -- location --
     public double latitude;
@@ -63,7 +65,8 @@ public class JsonLocation {
     public JsonLocation() {
     }
 
-    public JsonLocation(int type, @Nullable Long sharingExpiration, @Nullable Long sharingInterval, @Nullable Long count, double latitude, double longitude, Double altitude, Float precision, long timestamp) {
+    @JsonIgnore
+    public JsonLocation(int type, @Nullable Long sharingExpiration, @Nullable LocationShareQuality quality, @Nullable Long count, double latitude, double longitude, Double altitude, Float precision, long timestamp) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
@@ -72,14 +75,14 @@ public class JsonLocation {
         this.type = type;
         this.count = count;
         this.sharingExpiration = sharingExpiration;
-        this.sharingInterval = sharingInterval;
+        this.quality = (quality == null) ? null : quality.value;
     }
 
-    public static JsonLocation startSharingLocationMessage(@Nullable Long sharingExpiration, @NotNull Long interval, @NotNull Location location) {
+    public static JsonLocation startSharingLocationMessage(@Nullable Long sharingExpiration, LocationShareQuality quality, @NotNull Location location) {
         return new JsonLocation(
                 TYPE_SHARING,
                 sharingExpiration,
-                interval,
+                quality,
                 1L,
                 location.getLatitude(),
                 location.getLongitude(),
@@ -93,7 +96,7 @@ public class JsonLocation {
         return new JsonLocation(
                 TYPE_SHARING,
                 originalJsonLocation.getSharingExpiration(),
-                originalJsonLocation.getSharingInterval(),
+                originalJsonLocation.getShareQuality(),
                 originalJsonLocation.getCount() + 1,
                 location.getLatitude(),
                 location.getLongitude(),
@@ -145,15 +148,34 @@ public class JsonLocation {
         this.sharingExpiration = sharingExpiration;
     }
 
-    @JsonProperty("i")
-    public Long getSharingInterval() {
-        return sharingInterval;
+    @JsonIgnore
+    @Nullable
+    public LocationShareQuality getShareQuality() {
+        if (quality == null) {
+            return null;
+        }
+        return LocationShareQuality.fromValue(quality);
     }
 
-    @JsonProperty("i")
-    public void setSharingInterval(Long sharingInterval) {
-        this.sharingInterval = sharingInterval;
+    @JsonProperty("q")
+    public Integer getQuality() {
+        return quality;
     }
+
+    @JsonProperty("q")
+    public void setQuality(Integer quality) {
+        this.quality = quality;
+    }
+
+    //    @JsonProperty("i")
+//    public Long getSharingInterval() {
+//        return sharingInterval;
+//    }
+//
+//    @JsonProperty("i")
+//    public void setSharingInterval(Long sharingInterval) {
+//        this.sharingInterval = sharingInterval;
+//    }
 
     // -- message metadata --
     @JsonProperty("t")

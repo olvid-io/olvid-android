@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import io.olvid.engine.Logger;
+import io.olvid.messenger.customClasses.LocationShareQuality;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -41,7 +42,7 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
     private final boolean showToast;
     private final Location location;
     private final Long shareExpirationInMs;
-    private final Long shareIntervalInMs;
+    private final LocationShareQuality quality;
     private final boolean isSharingLocationMessage;
 
     // post simple location message
@@ -50,17 +51,17 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
     }
 
     // post sharing location message
-    public static PostLocationMessageInDiscussionTask startLocationSharingInDiscussionTask(Location location, long discussionId, boolean showToast, @Nullable Long shareExpiration, @NotNull Long interval) {
-        return new PostLocationMessageInDiscussionTask(location, discussionId, showToast, shareExpiration, interval, true);
+    public static PostLocationMessageInDiscussionTask startLocationSharingInDiscussionTask(Location location, long discussionId, boolean showToast, @Nullable Long shareExpiration, @NotNull LocationShareQuality quality) {
+        return new PostLocationMessageInDiscussionTask(location, discussionId, showToast, shareExpiration, quality, true);
     }
 
-    private PostLocationMessageInDiscussionTask(@NotNull Location location, long discussionId, boolean showToast, @Nullable Long shareExpirationInMs, @Nullable Long shareIntervalInMs, boolean isSharingLocationMessage) {
+    private PostLocationMessageInDiscussionTask(@NotNull Location location, long discussionId, boolean showToast, @Nullable Long shareExpirationInMs, @Nullable LocationShareQuality quality, boolean isSharingLocationMessage) {
         this.db = AppDatabase.getInstance();
         this.discussionId = discussionId;
         this.showToast = showToast;
         this.location = location;
         this.shareExpirationInMs = shareExpirationInMs;
-        this.shareIntervalInMs = shareIntervalInMs;
+        this.quality = quality;
         this.isSharingLocationMessage = isSharingLocationMessage;
     }
 
@@ -80,7 +81,7 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
 
         final JsonMessage jsonMessage = new JsonMessage();
         if (isSharingLocationMessage) {
-            jsonMessage.setJsonLocation(JsonLocation.startSharingLocationMessage(shareExpirationInMs, shareIntervalInMs, location));
+            jsonMessage.setJsonLocation(JsonLocation.startSharingLocationMessage(shareExpirationInMs, quality, location));
         } else {
             jsonMessage.setJsonLocation(JsonLocation.sendLocationMessage(location));
         }
@@ -115,7 +116,7 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
 
             // start sharing location service for this discussion
             if (isSharingLocationMessage) {
-                UnifiedForegroundService.LocationSharingSubService.startSharingInDiscussion(discussionId, shareExpirationInMs, shareIntervalInMs, message.id);
+                UnifiedForegroundService.LocationSharingSubService.startSharingInDiscussion(discussionId, shareExpirationInMs, quality, message.id);
             }
         });
     }

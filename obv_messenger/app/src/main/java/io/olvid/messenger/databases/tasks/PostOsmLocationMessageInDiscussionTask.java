@@ -71,7 +71,9 @@ public class PostOsmLocationMessageInDiscussionTask implements Runnable {
 
         final JsonMessage jsonMessage = new JsonMessage();
         JsonLocation jsonLocation = JsonLocation.sendLocationMessage(location);
-        jsonLocation.setAddress(address);
+        if (address != null) {
+            jsonLocation.setAddress(address.trim());
+        }
         jsonMessage.setJsonLocation(jsonLocation);
         jsonMessage.setBody(jsonMessage.getJsonLocation().getLocationMessageBody());
 

@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.troubleshooting
 
+import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Build.VERSION
@@ -46,8 +48,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.ripple.rememberRipple
@@ -86,6 +90,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
+import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.main.Utils
 import kotlinx.coroutines.delay
@@ -109,7 +114,7 @@ fun AppVersionHeader(betaEnabled: Boolean) {
             modifier = Modifier
                 .widthIn(max = 400.dp)
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                .padding(start = 16.dp, end = 16.dp),
             text = AnnotatedString(stringResource(
                 string.troubleshooting_header,
                 BuildConfig.VERSION_NAME + if (betaEnabled) " beta" else "",
@@ -123,6 +128,41 @@ fun AppVersionHeader(betaEnabled: Boolean) {
         )
     }
 }
+
+@Composable
+fun RestartAppButton() {
+    val context = LocalContext.current
+    Row (
+        modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.End
+    ) {
+        OutlinedButton(
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = colorResource(id = R.color.red)),
+            border = BorderStroke(1.dp, colorResource(id = R.color.red)),
+            onClick = {
+                SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                    .setTitle(R.string.dialog_title_restart_app)
+                    .setMessage(R.string.dialog_message_restart_app)
+                    .setNegativeButton(R.string.button_label_cancel, null)
+                    .setPositiveButton(R.string.button_label_force_restart, object : DialogInterface.OnClickListener {
+                        override fun onClick(dialog: DialogInterface?, which: Int) {
+                            try {
+                                val packageManager = context.packageManager
+                                val intent = packageManager.getLaunchIntentForPackage(context.packageName)
+                                val mainIntent = Intent.makeRestartActivityTask(intent!!.component)
+                                mainIntent.setPackage(context.packageName)
+                                context.startActivity(mainIntent)
+                                Runtime.getRuntime().exit(0)
+                            } catch (_: Exception) {}
+                        }
+                    })
+                    .create().show()
+            }) {
+            Text(text = stringResource(id = R.string.button_label_force_restart))
+        }
+    }
+}
+
 
 @Composable
 fun FaqLinkHeader(openFaq: () -> Unit, onBack: () -> Unit) {

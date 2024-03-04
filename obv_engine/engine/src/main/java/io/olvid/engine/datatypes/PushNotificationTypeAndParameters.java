@@ -28,6 +28,7 @@ public class PushNotificationTypeAndParameters {
     public static final byte PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX = 0x12;
     public static final byte PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON = 0x13;
 
+    //    public static final byte PUSH_NOTIFICATION_TYPE_ANDROID_EXPERIMENT = (byte) (0x80);
     //    public static final byte PUSH_NOTIFICATION_TYPE_NONE = (byte) 0xff;
 
     public final byte pushNotificationType;

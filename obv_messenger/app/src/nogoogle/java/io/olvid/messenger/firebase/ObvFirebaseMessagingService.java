@@ -23,4 +23,11 @@ public class ObvFirebaseMessagingService {
     public static Long getLastPushNotificationTimestamp() {
         return null;
     }
+    public static int getDeprioritizedMessageCount() {
+        return 0;
+    }
+
+    public static int getHighPriorityMessageCount() {
+        return 0;
+    }
 }

@@ -1208,9 +1208,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 }
 
                 BASIC -> {
-                    val dialogFragment = SendLocationBasicDialogFragment(
-                        discussionViewModel.discussionId
-                    )
+                    val dialogFragment = SendLocationBasicDialogFragment.newInstance(discussionViewModel.discussionId)
                     dialogFragment.show(childFragmentManager, "send-location-fragment-basic")
                 }
 
@@ -1587,9 +1585,6 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         } else {
             adapterIcons!!.add(-1)
         }
-        if (!SettingsActivity.getBetaFeaturesEnabled()) {
-            adapterIcons!!.remove(ICON_SEND_LOCATION)
-        }
         adapter.submitList(adapterIcons)
         val builder = Builder(
             iconOrderRecyclerView.context, R.style.CustomAlertDialog
@@ -1687,9 +1682,6 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             icons.remove(ICON_TAKE_PICTURE)
             icons.remove(ICON_TAKE_VIDEO)
         }
-        if (!SettingsActivity.getBetaFeaturesEnabled()) {
-            icons.remove(ICON_SEND_LOCATION)
-        }
 
         // Compose area layout
         // 4 + 36 + (36 x icon_count) + 4 || 6 + 24 + 2 + [ text ] + 32 || 4 = 112 + [ text ] + (36 x icon_count)
@@ -1712,9 +1704,6 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                     iconsOverflow.add(icon)
                 }
             }
-        }
-        if (!SettingsActivity.getBetaFeaturesEnabled()) {
-            iconsOverflow.remove(ICON_SEND_LOCATION)
         }
         attachIconsGroup.removeAllViews()
         for (icon in iconsShown) {

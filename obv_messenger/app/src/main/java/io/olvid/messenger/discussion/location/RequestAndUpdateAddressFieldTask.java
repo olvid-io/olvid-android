@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.discussion.location;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -37,18 +39,21 @@ import javax.net.ssl.HttpsURLConnection;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.R;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class RequestAndUpdateAddressFieldTask implements Runnable {
     public static final double MIN_ZOOM_FOR_REQUESTS = 15;
 
+    private final Context context;
     private final double latitude;
     private final double longitude;
     private final AddressCallback addressCallback;
     private final static List<String> featuresLayersPriority = new ArrayList<>(Arrays.asList("address", "street", "venue", "country", "macroregion", "region")); // venue: points of interest, businesses, things with walls
     private final String peliasServer;
 
-    RequestAndUpdateAddressFieldTask(@NonNull String peliasServer, @NonNull LatLngWrapper latLngWrapper, AddressCallback addressCallback) {
+    RequestAndUpdateAddressFieldTask(@NonNull Context context, @NonNull String peliasServer, @NonNull LatLngWrapper latLngWrapper, AddressCallback addressCallback) {
+        this.context = context;
         this.peliasServer = peliasServer;
         this.latitude = latLngWrapper.getLatitude();
         this.longitude = latLngWrapper.getLongitude();
@@ -58,11 +63,7 @@ public class RequestAndUpdateAddressFieldTask implements Runnable {
     @Override
     public void run() {
         try {
-            String lang = SettingsActivity.getLocationOpenStreetMapLanguage();
-            URL requestUrl = (lang != null) ?
-                    new URL(String.format(Locale.ENGLISH, "%s/v1/reverse?point.lat=%f&point.lon=%f&lang=%s", peliasServer, latitude, longitude, lang))
-                    :
-                    new URL(String.format(Locale.ENGLISH, "%s/v1/reverse?point.lat=%f&point.lon=%f", peliasServer, latitude, longitude));
+            URL requestUrl = new URL(String.format(Locale.ENGLISH, "%s/v1/reverse?point.lat=%f&point.lon=%f&lang=%s", peliasServer, latitude, longitude, context.getString(R.string.language_short_string)));
             HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
             if (connection instanceof HttpsURLConnection && AppSingleton.getSslSocketFactory() != null) {
                 ((HttpsURLConnection) connection).setSSLSocketFactory(AppSingleton.getSslSocketFactory());

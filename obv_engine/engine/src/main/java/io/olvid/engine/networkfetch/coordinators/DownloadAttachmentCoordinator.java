@@ -120,7 +120,7 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
         Logger.d("Download attachment coordinator queueing new DownloadAttachmentOperation.");
         DownloadAttachmentOperation op = new DownloadAttachmentOperation(fetchManagerSessionFactory, sslSocketFactory, ownedIdentity, messageUid, attachmentNumber, priorityCategory, initialPriority, this,null, this);
         switch (priorityCategory) {
-            case DownloadAttachmentPriorityCategory.WEIGHT:
+            case DownloadAttachmentPriorityCategory.WEIGHT: {
                 downloadAttachmentOperationWeightQueue.queue(op);
                 PriorityOperation lowestPriorityExecutingOperation = downloadAttachmentOperationWeightQueue.getExecutingOperationThatShouldBeCancelledWhenQueueingWithHigherPriority();
                 if (lowestPriorityExecutingOperation != null && lowestPriorityExecutingOperation.getPriority() > initialPriority) {
@@ -128,14 +128,16 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                     lowestPriorityExecutingOperation.cancel(DownloadAttachmentOperation.RFC_DOES_NOT_HAVE_THE_HIGHEST_PRIORITY);
                 }
                 break;
-            case DownloadAttachmentPriorityCategory.TIMESTAMP:
+            }
+            case DownloadAttachmentPriorityCategory.TIMESTAMP: {
                 downloadAttachmentOperationTimestampQueue.queue(op);
-                lowestPriorityExecutingOperation = downloadAttachmentOperationTimestampQueue.getExecutingOperationThatShouldBeCancelledWhenQueueingWithHigherPriority();
+                PriorityOperation lowestPriorityExecutingOperation = downloadAttachmentOperationTimestampQueue.getExecutingOperationThatShouldBeCancelledWhenQueueingWithHigherPriority();
                 if (lowestPriorityExecutingOperation != null && lowestPriorityExecutingOperation.getPriority() > initialPriority) {
                     Logger.d("Canceling a DownloadAttachmentOperation with lower priority " + lowestPriorityExecutingOperation.getPriority());
                     lowestPriorityExecutingOperation.cancel(DownloadAttachmentOperation.RFC_DOES_NOT_HAVE_THE_HIGHEST_PRIORITY);
                 }
                 break;
+            }
             default:
                 Logger.w("Trying to queue a DownloadAttachmentOperation with unknown priorityCategory " + priorityCategory);
         }
@@ -187,7 +189,7 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
             case DownloadAttachmentOperation.RFC_INVALID_CHUNK:
             case DownloadAttachmentOperation.RFC_ATTACHMENT_CANNOT_BE_FETCHED:
             case DownloadAttachmentOperation.RFC_UNABLE_TO_WRITE_CHUNK_TO_FILE:
-            case DownloadAttachmentOperation.RFC_UPLOAD_CANCELLED_BY_SENDER:
+            case DownloadAttachmentOperation.RFC_UPLOAD_CANCELLED_BY_SENDER: {
                 // We do not try to download the attachment again and mark it for deletion. We notify that the downloadAttachment failed.
                 try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
                     InboxAttachment attachment = InboxAttachment.get(fetchManagerSession, ownedIdentity, messageUid, attachmentNumber);
@@ -208,6 +210,7 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_ATTACHMENT_NUMBER_KEY, attachmentNumber);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED, userInfo);
                 break;
+            }
             case DownloadAttachmentOperation.RFC_ATTACHMENT_CANNOT_BE_FOUND:
             case DownloadAttachmentOperation.RFC_FETCH_NOT_REQUESTED:
             case DownloadAttachmentOperation.RFC_MARKED_FOR_DELETION:
@@ -217,27 +220,29 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                 // wait for identity to become active again
                 waitForIdentityReactivation(ownedIdentity, messageUid, attachmentNumber, priorityCategory, initialPriority);
                 break;
-            case DownloadAttachmentOperation.RFC_DOES_NOT_HAVE_THE_HIGHEST_PRIORITY:
+            case DownloadAttachmentOperation.RFC_DOES_NOT_HAVE_THE_HIGHEST_PRIORITY: {
                 queueNewDownloadAttachmentOperation(ownedIdentity, messageUid, attachmentNumber, priorityCategory, initialPriority);
 
-                userInfo = new HashMap<>();
+                HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED_OWNED_IDENTITY_KEY, ownedIdentity);
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED_MESSAGE_UID_KEY, messageUid);
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED_ATTACHMENT_NUMBER, attachmentNumber);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED, userInfo);
                 break;
+            }
             case DownloadAttachmentOperation.RFC_INVALID_SIGNED_URL: {
                 waitForRefreshedUrls(ownedIdentity, messageUid, attachmentNumber, priorityCategory, initialPriority);
                 refreshInboxAttachmentSignedUrlDelegate.refreshInboxAttachmentSignedUrl(ownedIdentity, messageUid, attachmentNumber);
                 break;
             }
-            case DownloadAttachmentOperation.RFC_DOWNLOAD_PAUSED:
-                userInfo = new HashMap<>();
+            case DownloadAttachmentOperation.RFC_DOWNLOAD_PAUSED: {
+                HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED_OWNED_IDENTITY_KEY, ownedIdentity);
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED_MESSAGE_UID_KEY, messageUid);
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED_ATTACHMENT_NUMBER, attachmentNumber);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED, userInfo);
                 break;
+            }
             case DownloadAttachmentOperation.RFC_NOT_YET_AVAILABLE_ON_SERVER:
             case DownloadAttachmentOperation.RFC_NETWORK_ERROR:
             default:

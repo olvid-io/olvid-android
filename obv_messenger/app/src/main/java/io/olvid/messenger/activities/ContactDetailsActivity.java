@@ -219,7 +219,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
         View groupEmptyView = findViewById(R.id.contact_group_list_empty_view);
 
         contactGroupDiscussionsFragment = new FilteredDiscussionListFragment();
-        contactGroupDiscussionsFragment.removeBottomPadding();
+        contactGroupDiscussionsFragment.setBottomPadding(0);
         contactGroupDiscussionsFragment.setEmptyView(groupEmptyView);
         contactGroupDiscussionsFragment.setOnClickDelegate((view, searchableDiscussion) -> App.openDiscussionActivity(view.getContext(), searchableDiscussion.discussionId));
 

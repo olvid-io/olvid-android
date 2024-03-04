@@ -1644,12 +1644,6 @@ public class AndroidNotificationManager {
                     builder.setContentIntent(contentPendingIntent);
                     break;
                 }
-                case UPDATE_TIMEOUT: {
-                    builder.setSmallIcon(R.drawable.ic_location_current_location_disabled)
-                            .setContentTitle(App.getContext().getString(R.string.text_notification_location_updates_unavailable_title))
-                            .setContentText(App.getContext().getString(R.string.text_notification_location_updates_unavailable_message));
-                    break;
-                }
             }
             notificationManager.notify(getLocationErrorNotificationId(errorType), builder.build());
         });
@@ -1661,7 +1655,6 @@ public class AndroidNotificationManager {
             if (errorType == null) {
                 clearLocationNotification(LocationErrorType.LOCATION_DISABLED);
                 clearLocationNotification(LocationErrorType.LOCATION_PERMISSION_DENIED);
-                clearLocationNotification(LocationErrorType.UPDATE_TIMEOUT);
             } else {
                 notificationManager.cancel(getLocationErrorNotificationId(errorType));
             }

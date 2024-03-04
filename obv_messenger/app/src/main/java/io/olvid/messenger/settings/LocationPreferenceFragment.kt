@@ -43,20 +43,16 @@ class LocationPreferenceFragment : PreferenceFragmentCompat() {
         val screen = preferenceScreen ?: return
 
         val mapIntegrationPreference = screen.findPreference<ListPreference>(SettingsActivity.PREF_KEY_LOCATION_INTEGRATION)
-        val osmLanguagePreference = screen.findPreference<Preference>(SettingsActivity.PREF_KEY_LOCATION_OSM_LANGUAGE)
-        if (mapIntegrationPreference != null && osmLanguagePreference != null) {
+        if (mapIntegrationPreference != null) {
             mapIntegrationPreference.onPreferenceClickListener = Preference.OnPreferenceClickListener { preference: Preference? ->
                 LocationIntegrationSelectorDialog(mapIntegrationPreference.context, true, object : OnIntegrationSelectedListener {
                     override fun onIntegrationSelected(integration: LocationIntegrationEnum, customOsmServerUrl: String?) {
                         SettingsActivity.setLocationIntegration(integration.string, customOsmServerUrl)
                         mapIntegrationPreference.value = integration.string
-                        osmLanguagePreference.isVisible = integration == LocationIntegrationEnum.OSM
                     }
                 }).show()
                 true
             }
-
-            osmLanguagePreference.isVisible = SettingsActivity.getLocationIntegration() == LocationIntegrationEnum.OSM
         }
 
 

@@ -92,7 +92,7 @@ public class DiscussionSearchDialogFragment extends DialogFragment {
         cancelButton.setOnClickListener(v -> dismiss());
 
         FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
-        filteredDiscussionListFragment.removeBottomPadding();
+        filteredDiscussionListFragment.setBottomPadding(0);
         if (AppSingleton.getBytesCurrentIdentity() != null) {
             filteredDiscussionListFragment.setUnfilteredDiscussions(AppDatabase.getInstance().discussionDao().getAllWithGroupMembersNames(AppSingleton.getBytesCurrentIdentity()));
         }
