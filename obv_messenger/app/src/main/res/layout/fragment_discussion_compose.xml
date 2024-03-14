@@ -297,7 +297,7 @@
                 android:paddingTop="5dp"
                 android:paddingEnd="6dp"
                 android:paddingBottom="7dp"
-                android:theme="@style/AccentRipple"
+                android:theme="@style/SubtleBlueRipple"
                 app:tint="@color/accent_tint_list"
                 app:layout_constraintBottom_toBottomOf="@id/compose_message_edit_text"
                 app:layout_constraintEnd_toEndOf="parent"

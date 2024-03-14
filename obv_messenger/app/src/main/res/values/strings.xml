@@ -553,6 +553,11 @@
     <string name="webrtc_status_contact_kicked">Contact left the call</string>
     <string name="webrtc_status_contact_failed">Call failed</string>
     <string name="plus_count" translatable="false">+%1$d</string>
+    <string name="webrtc_add_participants">Add participants</string>
+    <string name="webrtc_screen_sharing_ongoing">You are sharing your screen</string>
+    <string name="webrtc_stop_screen_sharing">Stop sharing</string>
+    <string name="webrtc_speaking_while_muted">Your microphone is muted</string>
+    <string name="webrtc_speaking_while_muted_action">Unmute</string>
     <string name="content_description_reject_call_button">Reject call button</string>
     <string name="content_description_accept_call_button">Accept call button</string>
     <string name="content_description_toggle_audio_output_button">Toggle audio output button</string>
@@ -976,7 +981,7 @@
     <string name="pref_disable_push_notifications_summary">If you disable push notifications you will not be notified of new messages when Olvid is in the background. Keep in mind that Olvid never sends any data in these push notifications: the only information Google gets from them is that you received a message in Olvid.</string>
     <string name="pref_permanent_websocket_title">Maintain a permanent WebSocket connection</string>
     <string name="pref_permanent_websocket_summary">When activated, Olvid will maintain a permanent connection to its server. This can improve message reception speed and reliability, but it may drain your battery.</string>
-    <string name="pref_low_bandwidth_calls_title">Use low bandwidth during calls</string>
+    <string name="pref_low_bandwidth_calls_title">Use low bandwidth during audio calls</string>
     <string name="pref_low_bandwidth_calls_summary">When activated, the bandwidth used during calls will be reduced. This may reduce sound quality but can improve connection stability.</string>
     <string name="notification_title_olvid_is_running">Olvid is running</string>
     <string name="button_label_only_disable_push">Only disable push</string>
@@ -1044,8 +1049,10 @@
     <string name="button_label_remind_me_later">Remind me later</string>
     <string name="hint_personal_note">Personal note</string>
     <string name="toast_message_unable_to_restore_app_data">WARNING: some application customization could not be restored</string>
-    <string name="dialog_title_webrtc_permissions_blocked">Audio recording permission denied</string>
-    <string name="dialog_message_webrtc_permissions_blocked">It appears that some permissions required for Olvid\'s secure phone calls are permanently denied.\n\nPlease open the App Settings and manually allow Olvid to record audio and manage phone calls.</string>
+    <string name="dialog_title_webrtc_permissions_audio_blocked">Audio recording permission denied</string>
+    <string name="dialog_title_webrtc_permissions_camera_blocked">Video recording permission denied</string>
+    <string name="dialog_message_webrtc_permissions_audio_blocked">It appears that some permissions required for Olvid\'s secure phone calls are permanently denied.\n\nPlease open the App Settings and manually allow Olvid to record audio and manage phone calls.</string>
+    <string name="dialog_message_webrtc_permissions_camera_blocked">It appears that some permissions required for Olvid\'s secure video calls are permanently denied.\n\nPlease open the App Settings and manually allow Olvid to use camera, record audio and manage phone calls.</string>
     <string name="text_nothing_to_see_here">Nothing to see here…</string>
     <string name="dialog_title_missing_messages">Missing messages</string>
     <string name="dialog_message_missing_messages">This missing message indicator tells you that a gap was detected in the numbering sequence of messages received from your contact.\n\nThis can either be that the sending of a message was cancelled (the message will never reach you), or that a larger message (typically with attachment) has not finished uploading yet (you should receive it soon).</string>
@@ -1842,7 +1849,7 @@
     <string name="pref_location_disable_address_lookup_title">Disable address lookup</string>
     <string name="dialog_title_custom_osm_url">OpenStreetMap server URL</string>
     <string name="hint_custom_osm_url">OpenStreetMap style file URL</string>
-    <string name="dialog_message_custom_osm_url">Please enter the URL of the **style file** you want to use for OpenStreetMap. This URL should be something like: *https://map.olvid.io/styles/planet/style.json*\n\nNote that the tile server referenced in this file may learn some information about your position. Be sure to **use a server you trust**.</string>
+    <string name="dialog_message_custom_osm_url">Please enter the URL of the **style file** you want to use for OpenStreetMap. This URL should be something like: *https://map.olvid.io/styles/osm.json*\n\nNote that the tile server referenced in this file may learn some information about your position. Be sure to **use a server you trust**.</string>
     <string name="pref_location_custom_address_server">Use a custom reverse address server</string>
     <string name="pref_location_disable_address_lookup_summary">Address lookup allows getting the street address of a location being shared.</string>
     <string name="dialog_title_custom_address_server_url">Custom address server</string>
@@ -1872,9 +1879,16 @@
     <string name="call_encrypted_notice">End-to-end encrypted call</string>
     <string name="pref_hide_group_member_changes_title">Hide group member change messages</string>
     <string name="pref_hide_group_member_changes_summary">When activated, messages indicating that a group member joined or left a group will not be displayed in your discussions.</string>
-
-
-
+    <string name="pref_category_call">Secure audio &amp; video calls</string>
+    <string name="pref_hardware_noise_suppressor_title">Use hardware noise suppressor</string>
+    <string name="pref_hardware_echo_canceler_title">Use hardware echo canceler</string>
+    <string name="pref_video_resolution_title">Video call send resolution</string>
+    <string name="pref_text_360p" translatable="false">360p</string>
+    <string name="pref_text_480p" translatable="false">480p</string>
+    <string name="pref_text_720p" translatable="false">720p</string>
+    <string name="pref_text_1080p" translatable="false">1080p</string>
+    <string name="text_ongoing_call">Ongoing call: %1$s</string>
+    <string name="text_audio_output_no_sound">No output</string>
 
 
     <plurals name="dialog_message_invite_all_group_members">

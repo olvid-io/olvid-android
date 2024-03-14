@@ -27,7 +27,6 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.text.style.BackgroundColorSpan;
 import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,6 +57,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
+import io.olvid.messenger.customClasses.SearchHighlightSpan;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -229,7 +229,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
     class FilteredDiscussionListAdapter extends RecyclerView.Adapter<FilteredDiscussionListAdapter.DiscussionViewHolder> implements Observer<List<FilteredDiscussionListViewModel.SearchableDiscussion>> {
         private List<FilteredDiscussionListViewModel.SearchableDiscussion> filteredDiscussions;
         private final LayoutInflater inflater;
-        private final BackgroundColorSpan[] highlightedSpans;
+        private final SearchHighlightSpan[] highlightedSpans;
 
         private static final int TYPE_DIRECT = 1;
         private static final int TYPE_GROUP = 2;
@@ -239,9 +239,9 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
         FilteredDiscussionListAdapter() {
             this.inflater = LayoutInflater.from(FilteredDiscussionListFragment.this.getContext());
             setHasStableIds(true);
-            highlightedSpans = new BackgroundColorSpan[10];
+            highlightedSpans = new SearchHighlightSpan[10];
             for (int i=0; i<highlightedSpans.length; i++) {
-                highlightedSpans[i] = new BackgroundColorSpan(ContextCompat.getColor(App.getContext(), R.color.accentOverlay));
+                highlightedSpans[i] = new SearchHighlightSpan(App.getContext());
             }
         }
 

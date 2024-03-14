@@ -29,7 +29,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -92,7 +91,6 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.core.util.Pair;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
@@ -496,11 +494,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             scrolling = (state == RecyclerView.SCROLL_STATE_DRAGGING) || (state == RecyclerView.SCROLL_STATE_SETTLING);
             if (scrolling ^ wasScrolling) {
                 messageRecyclerView.invalidate();
-                if (scrolling) {
-                    setLocationSharingGroupVisibility(false, false);
-                } else {
-                    setLocationSharingGroupVisibility(true, false);
-                }
+                setLocationSharingGroupVisibility(!scrolling, false);
             }
             messageDateItemDecoration.setScrolling(scrolling);
             if (state == RecyclerView.SCROLL_STATE_DRAGGING) {
@@ -524,7 +518,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         locationSharingGroup.findViewById(R.id.discussion_location_sharing_menu_dots).setOnClickListener(this);
 
         discussionViewModel.getCurrentlySharingLocationMessagesLiveData().observe(this, messages -> {
-            if (messages == null || messages.size() == 0) {
+            if (messages == null || messages.isEmpty()) {
                 if (locationSharingGroup.getVisibility() == View.VISIBLE) {
                     setLocationSharingGroupVisibility(false, true);
                 }
@@ -643,7 +637,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     return true;
                 } else if (item.getItemId() == R.id.action_forward_messages) {
                     final List<Long> selectedMessageIds = discussionViewModel.getSelectedMessageIds().getValue();
-                    if (selectedMessageIds != null && selectedMessageIds.size() > 0) {
+                    if (selectedMessageIds != null && !selectedMessageIds.isEmpty()) {
                         discussionViewModel.setMessageIdsToForward(new ArrayList<>(selectedMessageIds));
                         Utils.openForwardMessageDialog(DiscussionActivity.this, selectedMessageIds, discussionViewModel::deselectAll);
                     }
@@ -678,7 +672,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
 
             if (discussion.isLocked()) {
-                if (discussion.title == null || discussion.title.length() == 0) {
+                if (discussion.title == null || discussion.title.isEmpty()) {
                     SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_discussion));
                     spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     toolBarTitle.setText(spannableString);
@@ -714,7 +708,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         break;
                     }
                     case Discussion.TYPE_GROUP_V2: {
-                        if (discussion.title == null || discussion.title.length() == 0) {
+                        if (discussion.title == null || discussion.title.isEmpty()) {
                             SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_group));
                             spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             toolBarTitle.setText(spannableString);
@@ -1360,7 +1354,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 switch (discussion.discussionType) {
                     case Discussion.TYPE_CONTACT: {
                         List<Contact> contacts = discussionViewModel.getDiscussionContacts().getValue();
-                        if (contacts != null && contacts.size() > 0 && contacts.get(0).establishedChannelCount > 0) {
+                        if (contacts != null && !contacts.isEmpty() && contacts.get(0).establishedChannelCount > 0) {
                             App.startWebrtcCall(this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
                         }
                         break;
@@ -1412,7 +1406,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 if (discussion != null) {
                     App.runThread(() -> {
                         final String title;
-                        if (discussion.title.length() == 0) {
+                        if (discussion.title.isEmpty()) {
                             title = getString(R.string.text_unnamed_discussion);
                         } else {
                             title = discussion.title;
@@ -1437,7 +1431,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             if (discussion != null) {
                 App.runThread(() -> {
                     final String title;
-                    if (discussion.title.length() == 0) {
+                    if (discussion.title.isEmpty()) {
                         title = getString(R.string.text_unnamed_discussion);
                     } else {
                         title = discussion.title;
@@ -1580,7 +1574,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
         } else if (id == R.id.discussion_location_sharing_group) {
             List<Message> sharingMessages = discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue();
-            if (sharingMessages == null || sharingMessages.size() == 0) {
+            if (sharingMessages == null || sharingMessages.isEmpty()) {
                 return;
             }
 
@@ -1602,7 +1596,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             }
         } else if (id == R.id.discussion_location_sharing_menu_dots) {
             List<Message> sharingMessages = discussionViewModel.getCurrentlySharingLocationMessagesLiveData().getValue();
-            if (sharingMessages == null || sharingMessages.size() == 0) {
+            if (sharingMessages == null || sharingMessages.isEmpty()) {
                 return;
             }
 
@@ -2285,7 +2279,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 messageRecyclerView.scrollToPosition(messages.size());
                 doScrollToMessageId();
             } else if (scroll) {
-                if (messages.size() > 0) {
+                if (!messages.isEmpty()) {
                     this.cancelScheduledScroll = false;
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         if (cancelScheduledScroll) {
@@ -2483,7 +2477,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             position--;
 
             int changesMask = 0;
-            if (payloads.size() == 0) {
+            if (payloads.isEmpty()) {
                 changesMask = -1;
             } else {
                 for (Object payload : payloads) {
@@ -2756,7 +2750,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         holder.directDeleteImageView.setVisibility(View.GONE);
                     }
 
-                    if (body.length() == 0) {
+                    if (body.isEmpty()) {
                         holder.messageContentTextView.setVisibility(View.GONE);
                     } else if (message.wipeStatus == Message.WIPE_STATUS_WIPED
                             || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
@@ -2916,7 +2910,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
             if ((changesMask & REACTIONS_CHANGE_MASK) != 0) {
                 if (holder.reactionsDynamicFlow != null) {
-                    if (message.reactions == null || message.reactions.equals("")) {
+                    if (message.reactions == null || message.reactions.isEmpty()) {
                         holder.reactionsDynamicFlow.setVisibility(View.GONE);
                     } else {
                         holder.reactionsDynamicFlow.setVisibility(View.VISIBLE);
@@ -2985,9 +2979,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 }
             }
 
-            if ((changesMask & LOCATION_CHANGE_MASK) != 0) {
+            if ((changesMask & (LOCATION_CHANGE_MASK | BODY_OR_HIGHLIGHT_CHANGE_MASK)) != 0) {
                 if (message.isLocationMessage()) {
-                    setLocationMessageContent(message, holder);
+                    setLocationMessageContent(message, holder, getHighlightPatternsForMessage(message));
                 }
             }
 
@@ -3166,7 +3160,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                     } else {
                                         holder.messageReplyAttachmentCount.setVisibility(View.GONE);
                                     }
-                                    if (replyMessage.getStringContent(DiscussionActivity.this).length() == 0) {
+                                    if (replyMessage.getStringContent(DiscussionActivity.this).isEmpty()) {
                                         holder.messageReplyBody.setVisibility(View.GONE);
                                     } else {
                                         holder.messageReplyBody.setVisibility(View.VISIBLE);
@@ -3685,7 +3679,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             discussionViewModel.getNewDetailsUpdate().removeObserver(holder.newDetailsObserver);
         }
 
-        private void setLocationMessageContent(Message message, MessageViewHolder holder) {
+        private void setLocationMessageContent(Message message, MessageViewHolder holder, List<Pattern> searchPatterns) {
             final JsonMessage jsonMessage = message.getJsonMessage();
 
             holder.messageContentTextView.setVisibility(View.VISIBLE);
@@ -3713,7 +3707,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
             // set address if possible
             if (jsonMessage.getJsonLocation().getAddress() != null && !jsonMessage.getJsonLocation().getAddress().isEmpty()) {
-                holder.addressTextView.setText(jsonMessage.getJsonLocation().getAddress());
+                if (searchPatterns != null) {
+                    holder.addressTextView.setText(DiscussionSearch.highlightString(new SpannableString(jsonMessage.getJsonLocation().getAddress()), searchPatterns));
+                } else {
+                    holder.addressTextView.setText(jsonMessage.getJsonLocation().getAddress());
+                }
             } else {
                 holder.addressTextView.setText(null);
             }
@@ -4105,7 +4103,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         }
 
 
-        class MessageViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
+        public class MessageViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
             private final ViewType viewType;
             private final ConstraintLayout messageRootView;
             private final SizeAwareCardView messageContentCardView;
@@ -4711,7 +4709,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         Discussion discussion = discussionViewModel.getDiscussion().getValue();
                         if (discussion != null && discussion.isNormalOrReadOnly() && discussion.discussionType == Discussion.TYPE_CONTACT) {
                             List<Contact> contacts = discussionViewModel.getDiscussionContacts().getValue();
-                            if (contacts != null && contacts.size() > 0 && contacts.get(0).establishedChannelCount > 0) {
+                            if (contacts != null && !contacts.isEmpty() && contacts.get(0).establishedChannelCount > 0) {
                                 App.startWebrtcCall(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
                             }
                         }

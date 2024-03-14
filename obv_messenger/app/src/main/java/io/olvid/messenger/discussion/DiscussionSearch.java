@@ -21,13 +21,11 @@ package io.olvid.messenger.discussion;
 
 import android.text.InputType;
 import android.text.Spannable;
-import android.text.style.BackgroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -37,8 +35,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.SearchHighlightSpan;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -75,9 +75,9 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
             searchView.setOnQueryTextListener(this);
         }
 
-        highlightedSpans = new BackgroundColorSpan[10];
+        highlightedSpans = new SearchHighlightSpan[10];
         for (int i=0; i<highlightedSpans.length; i++) {
-            highlightedSpans[i] = new BackgroundColorSpan(ContextCompat.getColor(activity, R.color.accentOverlay));
+            highlightedSpans[i] = new SearchHighlightSpan(activity);
         }
     }
 
@@ -194,12 +194,12 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
             String[] filters = filterString.trim().split("\\s+");
             patterns = new ArrayList<>();
             for (String filter : filters) {
-                if (filter.trim().length() != 0) {
+                if (!filter.trim().isEmpty()) {
                     patterns.add(Pattern.compile(Pattern.quote(StringUtils.unAccent(filter))));
                 }
             }
 
-            if (patterns.size() > 0) {
+            if (!patterns.isEmpty()) {
                 final List<Message> messages = messageListAdapter.messages;
                 if (messages != null) {
 
@@ -296,7 +296,17 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
         if (message.contentBody == null || (message.messageType != Message.TYPE_OUTBOUND_MESSAGE && message.messageType != Message.TYPE_INBOUND_MESSAGE)) {
             return false;
         }
-        String body = StringUtils.unAccent(message.contentBody);
+
+        String body;
+        if (message.isLocationMessage()) {
+            if (message.contentBody.trim().startsWith("https://")) {
+                return false;
+            }
+            int pos = message.contentBody.lastIndexOf("https");
+            body = StringUtils.unAccent((pos == -1) ? message.contentBody.trim() : message.contentBody.substring(0, pos));
+        } else {
+            body = StringUtils.unAccent(message.contentBody);
+        }
         for (Pattern pattern : patterns) {
             if (!pattern.matcher(body).find()) {
                 return false;
@@ -305,7 +315,7 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
         return true;
     }
 
-    static class MessageHighlightInfo {
+    public static class MessageHighlightInfo {
         final long messageId;
         final List<Pattern> patterns;
 
@@ -315,7 +325,7 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
         }
     }
 
-    private static BackgroundColorSpan[] highlightedSpans = null;
+    private static SearchHighlightSpan[] highlightedSpans = null;
 
     public static CharSequence highlightString(@NonNull Spannable input, @NonNull List<Pattern> patterns) {
         if (highlightedSpans == null) {

@@ -13,7 +13,7 @@ Note that this doesn't mean that Olvid uses no servers (it does). It means that 
 
 If you need help using Olvid, first have a look at our FAQ at [https://olvid.io/faq/](https://olvid.io/faq/). We also have a few short tutorial videos available in [English](https://www.youtube.com/channel/UCO8UuhbgCyVSTRi4QEschqA) and in [French](https://www.youtube.com/channel/UC6aLiDb04Rfh4MoqDpJoLeg).
 
-If you are looking for **technical documentation**, have a look at our [technology page](https://olvid.io/technology/) where you can find some technical specifications and the reports of the audits Olvid went through to get its [CSPN certifications](https://www.ssi.gouv.fr/entreprise/produits-certifies/produits-certifies-cspn/#type_13).
+If you are looking for **technical documentation**, have a look at our [technology page](https://olvid.io/technology/) where you can find some technical specifications and the reports of the audits Olvid went through to get its [CSPN certifications](https://cyber.gouv.fr/produits-certifies?sort_bef_combine=field_date_de_certification_value_DESC&field_cat_target_id%5B587%5D=587).
 
 
 ## Send us feedback

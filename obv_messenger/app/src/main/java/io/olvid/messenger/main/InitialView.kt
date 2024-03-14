@@ -41,7 +41,7 @@ import io.olvid.messenger.customClasses.InitialView
 
 @Composable
 fun InitialView(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.requiredSize(56.dp),
     initialViewSetup: (initialView: InitialView) -> Unit,
     unreadMessages: Boolean = false,
     admin: Boolean = false,

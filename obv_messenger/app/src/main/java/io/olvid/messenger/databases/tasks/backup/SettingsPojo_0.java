@@ -106,6 +106,9 @@ public class SettingsPojo_0 {
     public Integer camera_resize_resolution;
     public Boolean remove_jpeg_metadata;
 
+
+    public Boolean low_bandwidth_calls;
+
     public String automatic_backup_configuration;
 
     public Boolean share_app_version;
@@ -115,7 +118,6 @@ public class SettingsPojo_0 {
     public Boolean sending_foreground_service;
     public String connectivity_indicator;
     public String qr_correction_level;
-    public Boolean low_bandwidth_calls;
     public Boolean debug_log_level;
 
     public Boolean wc_send_on_enter;
@@ -332,6 +334,8 @@ public class SettingsPojo_0 {
         if (camera_resize_resolution != null) { SettingsActivity.setCameraResolution(camera_resize_resolution); }
         if (remove_jpeg_metadata != null) { SettingsActivity.setMetadataRemovalPreference(remove_jpeg_metadata); }
 
+        if (low_bandwidth_calls != null) { SettingsActivity.setUseLowBandwidthInCalls(low_bandwidth_calls); }
+
         if (automatic_backup_configuration != null) {
             try {
                 BackupCloudProviderService.CloudProviderConfiguration configuration = AppSingleton.getJsonObjectMapper().readValue(automatic_backup_configuration, BackupCloudProviderService.CloudProviderConfiguration.class);
@@ -348,7 +352,6 @@ public class SettingsPojo_0 {
         if (sending_foreground_service != null) { SettingsActivity.setSendingForegroundService(sending_foreground_service); }
         if (connectivity_indicator != null) { SettingsActivity.setPingConnectivityIndicator(connectivity_indicator); }
         if (qr_correction_level != null) { SettingsActivity.setQrCorrectionLevel(qr_correction_level); }
-        if (low_bandwidth_calls != null) { SettingsActivity.setUseLowBandwidthInCalls(low_bandwidth_calls); }
         if (debug_log_level != null) { SettingsActivity.setUseDebugLogLevel(debug_log_level); }
 
         if (wc_send_on_enter != null) { SettingsActivity.setWebclientSendOnEnter(wc_send_on_enter); }

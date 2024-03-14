@@ -401,4 +401,17 @@
         <item>issuer</item>
         <item>always</item>
     </string-array>
+
+    <string-array name="video_resolution">
+        <item>@string/pref_text_360p</item>
+        <item>@string/pref_text_480p</item>
+        <item>@string/pref_text_720p</item>
+        <item>@string/pref_text_1080p</item>
+    </string-array>
+    <string-array name="video_resolution_values">
+        <item>360</item>
+        <item>480</item>
+        <item>720</item>
+        <item>1080</item>
+    </string-array>
 </resources>

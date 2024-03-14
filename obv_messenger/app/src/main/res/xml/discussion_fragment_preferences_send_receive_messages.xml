@@ -9,6 +9,7 @@
         android:key="pref_key_discussion_read_receipt"
         android:title="@string/pref_discussion_read_receipt_title"
         app:useSimpleSummaryProvider="true"
+        app:singleLineTitle="false"
         android:icon="@drawable/ic_pref_read_receipt"
         android:order="10"/>
     <ListPreference
@@ -18,6 +19,7 @@
         android:key="pref_key_discussion_auto_open_limited_visibility_inbound"
         android:title="@string/pref_auto_open_limited_visibility_inbound_title"
         app:useSimpleSummaryProvider="true"
+        app:singleLineTitle="false"
         android:icon="@drawable/ic_pref_auto_open"
         android:order="20"/>
     <ListPreference
@@ -27,6 +29,7 @@
         android:key="pref_key_discussion_retain_wiped_outbound_messages"
         android:title="@string/pref_retain_wiped_outbound_messages_title"
         app:useSimpleSummaryProvider="true"
+        app:singleLineTitle="false"
         android:icon="@drawable/ic_pref_retain_wiped"
         android:order="30"/>
 

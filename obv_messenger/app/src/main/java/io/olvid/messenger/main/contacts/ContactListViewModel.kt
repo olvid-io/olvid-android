@@ -21,6 +21,7 @@ package io.olvid.messenger.main.contacts
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.AnnotatedString
@@ -59,6 +60,7 @@ class ContactListViewModel : ViewModel() {
     private var keycloakSearchAdditionalResults = 0
 
     var keycloakManaged = mutableStateOf(false)
+    var selectedContacts = mutableStateListOf<Contact>() // TODO: change this to a BytesKey -> Contact map for better preformance
 
     fun setUnfilteredContacts(unfilteredContacts: List<Contact>?) {
         this.unfilteredContacts = unfilteredContacts.orEmpty()
@@ -85,7 +87,7 @@ class ContactListViewModel : ViewModel() {
                 }
             }
             val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
-            if (filterPatterns != null && ownedIdentity != null && ownedIdentity.keycloakManaged
+            if (filterPatterns != null && ownedIdentity != null && keycloakManaged.value
             ) {
                 if (filter != keycloakSearchResultsFilter || !Arrays.equals(
                         ownedIdentity.bytesOwnedIdentity,

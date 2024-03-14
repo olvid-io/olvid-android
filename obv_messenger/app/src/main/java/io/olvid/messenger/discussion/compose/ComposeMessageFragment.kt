@@ -1023,7 +1023,11 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         }
     }
 
+    private var sending = false
     private fun sendMessage() {
+        if (sending) {
+            return
+        }
         composeMessageLinkPreviewGroup!!.visibility = View.GONE
         if (discussionViewModel.discussionId != null) {
             if (composeMessageViewModel.trimmedNewMessageText != null || composeMessageViewModel.hasAttachments()) {
@@ -1031,21 +1035,31 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                     discussionDelegate!!.markMessagesRead()
                 }
                 val trimAndMentions = Utils.removeProtectionFEFFsAndTrim(
-                    composeMessageViewModel.rawNewMessageText ?: "", mentionViewModel.mentions
+                    composeMessageViewModel.rawNewMessageText ?: "",
+                    mentionViewModel.mentions
                 )
-                App.runThread(
-                    PostMessageInDiscussionTask(
-                        trimAndMentions.first,
-                        discussionViewModel.discussionId,
-                        true,
-                        linkPreviewViewModel.openGraph.value,
-                        trimAndMentions.second
+
+                // if there is a link preview currently loading, delay message sending a bit (max 2 second)
+                sending = true
+                sendButton?.isEnabled = false
+                linkPreviewViewModel.waitForPreview {
+                    App.runThread(
+                        PostMessageInDiscussionTask(
+                            trimAndMentions.first,
+                            discussionViewModel.discussionId,
+                            true,
+                            linkPreviewViewModel.openGraph.value,
+                            trimAndMentions.second
+                        )
                     )
-                )
-                newMessageEditText?.setText("")
-                linkPreviewViewModel.reset()
+                    sending = false
+                    linkPreviewViewModel.reset()
+                    newMessageEditText?.setText("")
+                    sendButton?.isEnabled = true
+                }
             }
         }
+
     }
 
     private fun editMessage(messageId: Long) {

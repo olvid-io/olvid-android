@@ -154,11 +154,6 @@
         <item name="colorControlHighlight">@color/alwaysWhiteOverlay</item>
     </style>
 
-    <!-- OnClick use only in discussion activity for send message-->
-    <style name="AccentRipple" parent="AppTheme">
-        <item name="colorControlHighlight">@color/accentOverlay</item>
-    </style>
-
     <style name="BlueOrWhiteRipple" parent="AppTheme">
         <item name="colorControlHighlight">@color/blueOrWhiteOverlay</item>
     </style>

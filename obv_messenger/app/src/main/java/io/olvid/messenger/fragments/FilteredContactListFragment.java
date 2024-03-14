@@ -28,7 +28,6 @@ import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
-import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +38,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
@@ -62,8 +60,9 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
-import io.olvid.messenger.customClasses.LoadAwareAdapter;
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
+import io.olvid.messenger.customClasses.LoadAwareAdapter;
+import io.olvid.messenger.customClasses.SearchHighlightSpan;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -254,7 +253,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     class FilteredContactListAdapter extends LoadAwareAdapter<FilteredContactListAdapter.ContactViewHolder> implements Observer<List<FilteredContactListViewModel.SelectableContact>> {
         private List<FilteredContactListViewModel.SelectableContact> filteredContacts = null;
         private final LayoutInflater inflater;
-        private final BackgroundColorSpan[] highlightedSpans;
+        private final SearchHighlightSpan[] highlightedSpans;
 
         private static final int DISPLAY_NAME_OR_PHOTO_CHANGE_MASK = 1;
         private static final int ESTABLISHED_CHANNEL_CHANGE_MASK = 2;
@@ -264,9 +263,9 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
 
         FilteredContactListAdapter() {
             this.inflater = LayoutInflater.from(FilteredContactListFragment.this.getContext());
-            highlightedSpans = new BackgroundColorSpan[10];
+            highlightedSpans = new SearchHighlightSpan[10];
             for (int i=0; i<highlightedSpans.length; i++) {
-                highlightedSpans[i] = new BackgroundColorSpan(ContextCompat.getColor(App.getContext(), R.color.accentOverlay));
+                highlightedSpans[i] = new SearchHighlightSpan(App.getContext());
             }
         }
 

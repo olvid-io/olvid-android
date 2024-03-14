@@ -7,6 +7,7 @@
         android:key="pref_key_language_webclient"
         android:title="@string/pref_webclient_language"
         app:useSimpleSummaryProvider="true"
+        app:singleLineTitle="false"
         android:icon="@drawable/ic_pref_language"
         android:order="10" />
     <ListPreference
@@ -16,6 +17,7 @@
         android:key="pref_key_theme_webclient"
         android:title="@string/pref_webclient_theme"
         app:useSimpleSummaryProvider="true"
+        app:singleLineTitle="false"
         android:icon="@drawable/ic_pref_dark_mode"
         android:order="20" />
     <SwitchPreference

@@ -16,8 +16,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdk 34
-        versionCode 230
-        versionName "1.5"
+        versionCode 233
+        versionName "2.0"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr']
@@ -165,15 +165,15 @@ dependencies {
     implementation 'androidx.emoji2:emoji2-bundled:1.5.0-alpha01'
     implementation 'androidx.activity:activity:1.8.2'
     implementation 'androidx.biometric:biometric:1.1.0'
-    implementation 'androidx.camera:camera-camera2:1.3.1'
-    implementation 'androidx.camera:camera-lifecycle:1.3.1'
-    implementation 'androidx.camera:camera-view:1.3.1'
+    implementation 'androidx.camera:camera-camera2:1.3.2'
+    implementation 'androidx.camera:camera-lifecycle:1.3.2'
+    implementation 'androidx.camera:camera-view:1.3.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.exifinterface:exifinterface:1.3.7'
     implementation 'androidx.fragment:fragment:1.6.2'
-    implementation 'androidx.media3:media3-exoplayer:1.2.1'
-    implementation 'androidx.media3:media3-ui:1.2.1'
+    implementation 'androidx.media3:media3-exoplayer:1.3.0'
+    implementation 'androidx.media3:media3-ui:1.3.0'
     implementation 'androidx.media:media:1.7.0'
     implementation 'androidx.navigation:navigation-fragment:2.7.7'
     implementation 'androidx.navigation:navigation-ui:2.7.7'
@@ -194,7 +194,7 @@ dependencies {
 
     // openID
     implementation 'net.openid:appauth:0.11.1'
-    implementation 'org.bitbucket.b_c:jose4j:0.9.5'
+    implementation 'org.bitbucket.b_c:jose4j:0.9.6'
 
     // map libre integration
     implementation 'org.maplibre.gl:android-sdk:10.2.0'
@@ -209,7 +209,7 @@ dependencies {
     ///////////
 
     // Billing
-    fullImplementation 'com.android.billingclient:billing:6.1.0'
+    fullImplementation 'com.android.billingclient:billing:6.2.0'
 
     // Firebase
     fullImplementation('com.google.firebase:firebase-messaging:23.4.1') {
@@ -220,7 +220,7 @@ dependencies {
 
     // google map integration
     fullImplementation 'com.google.android.gms:play-services-maps:18.2.0'
-    fullImplementation 'com.google.android.gms:play-services-location:21.1.0'
+    fullImplementation 'com.google.android.gms:play-services-location:21.2.0'
 
     // Google Drive
     fullImplementation 'com.google.android.gms:play-services-auth:21.0.0'

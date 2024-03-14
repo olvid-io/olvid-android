@@ -41,6 +41,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -107,7 +108,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
                 label = {
                     Text(text = stringResource(id = string.hint_first_name))
                 },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, capitalization = KeyboardCapitalization.Words),
                 colors = TextFieldDefaults.outlinedTextFieldColors(focusedLabelColor = colorResource(id = color.olvid_gradient_contrasted), focusedBorderColor = colorResource(id = color.olvid_gradient_contrasted), cursorColor = colorResource(id = color.olvid_gradient_contrasted))
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -120,7 +121,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
                         text = stringResource(id = string.hint_last_name)
                     )
                 },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, capitalization = KeyboardCapitalization.Words),
                 keyboardActions = KeyboardActions(
                     onDone = { onboardingFlowViewModel.createSimpleIdentity(onSuccess = { onIdentityCreated.invoke() }) }
                 ),

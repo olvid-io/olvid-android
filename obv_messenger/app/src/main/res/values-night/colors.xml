@@ -26,7 +26,8 @@
     <color name="lighterGrey_75">#bf1d1d1d</color>
     <color name="darkGrey">#c7c7c7</color>
 
-    <color name="accentOverlay">#8870959E</color>
+<!--    <color name="searchHighlightColor">#ff0a660d</color>-->
+    <color name="searchHighlightColor">#fffff426</color>
     <color name="whiteOverlay">#bb000000</color>
 
     <color name="attachmentBorder">#33ffffff</color>

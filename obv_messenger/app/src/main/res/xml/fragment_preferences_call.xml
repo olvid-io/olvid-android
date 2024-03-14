@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+        <DropDownPreference
+            android:key="pref_key_video_resolution"
+            android:title="@string/pref_video_resolution_title"
+            app:singleLineTitle="false"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_pref_hd"
+            android:entries="@array/video_resolution"
+            android:entryValues="@array/video_resolution_values"
+            android:defaultValue="720"
+            android:order="10" />
+        <SwitchPreference
+            android:key="pref_key_hardware_noise_suppressor"
+            android:title="@string/pref_hardware_noise_suppressor_title"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_pref_noise"
+            android:order="30"
+            />
+        <SwitchPreference
+            android:key="pref_key_hardware_echo_canceler"
+            android:title="@string/pref_hardware_echo_canceler_title"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_pref_echo"
+            android:order="32"
+            />
+        <SwitchPreference
+            android:key="pref_key_low_bandwidth_calls"
+            android:title="@string/pref_low_bandwidth_calls_title"
+            android:summary="@string/pref_low_bandwidth_calls_summary"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_pref_low_bandwidth"
+            android:order="40"
+            />
+</PreferenceScreen>

@@ -22,6 +22,7 @@
             android:key="pref_key_discussion_retention_duration"
             android:title="@string/pref_discussion_retention_duration_title"
             tools:summary="@string/pref_text_app_default"
+            app:singleLineTitle="false"
             android:entries="@array/discussion_retention_duration"
             android:entryValues="@array/discussion_retention_duration_values"/>
     </io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory>

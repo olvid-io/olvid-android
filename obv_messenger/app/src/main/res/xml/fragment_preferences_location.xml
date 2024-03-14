@@ -17,6 +17,7 @@
         android:key="pref_key_location_share_duration"
         android:title="@string/pref_location_share_duration_title"
         app:useSimpleSummaryProvider="true"
+        app:singleLineTitle="false"
         android:icon="@drawable/ic_pref_interval"
         android:order="20"
         />
@@ -28,6 +29,7 @@
         android:key="pref_key_location_default_share_quality"
         android:title="@string/pref_location_share_quality_title"
         app:useSimpleSummaryProvider="true"
+        app:singleLineTitle="false"
         android:icon="@drawable/ic_pref_pin"
         android:order="30"
         />

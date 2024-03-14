@@ -1,3 +1,16 @@
+# Build 233 (2.0)
+2024-03-14
+
+- Fix an issue with video calls reconnection
+- Minor improvements to video calls
+
+# ~~Build 232 (2.0)~~
+2024-03-10
+
+- Support for video calls (up to 3 participants)!
+- Allow to delay message sending if a preview is being loaded
+- Add a "passive" listener when sharing location
+
 # Build 230 (1.5)
 2024-03-04
 

@@ -546,6 +546,11 @@
     <string name="webrtc_status_contact_hanged_up">Le contact a raccroché</string>
     <string name="webrtc_status_contact_kicked">Le contact a quitté l\'appel</string>
     <string name="webrtc_status_contact_failed">Appel échoué</string>
+    <string name="webrtc_add_participants">Ajout de participants</string>
+    <string name="webrtc_screen_sharing_ongoing">Vous partagez votre écran</string>
+    <string name="webrtc_stop_screen_sharing">Arrêter le partage</string>
+    <string name="webrtc_speaking_while_muted">Votre micro est coupé</string>
+    <string name="webrtc_speaking_while_muted_action">Réactiver</string>
     <string name="content_description_reject_call_button">Bouton rejeter l\'appel</string>
     <string name="content_description_accept_call_button">Bouton accepter l\'appel</string>
     <string name="content_description_toggle_audio_output_button">Bouton de choix de sortie audio</string>
@@ -970,7 +975,7 @@
     <string name="pref_permanent_websocket_title">Maintenir une connexion WebSocket permanente</string>
     <string name="pref_permanent_websocket_summary">Une fois cette option activée, Olvid maintiendra une connexion permanente avec son serveur. Cela peut améliorer la fiabilité et la vitesse de réception des messages mais risque de vider votre batterie plus vite.</string>
     <string name="pref_low_bandwidth_calls_title">Limiter la bande passante des appels</string>
-    <string name="pref_low_bandwidth_calls_summary">Une fois cette option activée, la bande passante utilisée lors des appels sera réduite. Cela risque d\'affecter la qualité du son, mais peut améliorer la stabilité de la connexion.</string>
+    <string name="pref_low_bandwidth_calls_summary">Une fois cette option activée, la bande passante utilisée lors des appels audio sera réduite. Cela risque d\'affecter la qualité du son, mais peut améliorer la stabilité de la connexion.</string>
     <string name="notification_title_olvid_is_running">Olvid est en marche</string>
     <string name="button_label_only_disable_push">Seulement désactiver push</string>
     <string name="button_label_enable_permanent_websocket">Activer une WebSocket permanente</string>
@@ -1037,8 +1042,10 @@
     <string name="button_label_remind_me_later">Me rappeler plus tard</string>
     <string name="hint_personal_note">Note personnelle</string>
     <string name="toast_message_unable_to_restore_app_data">ATTENTION\u00a0: certains paramètres de l\'application n\'ont pas pu être restaurés</string>
-    <string name="dialog_title_webrtc_permissions_blocked">Autorisations d\'enregistrement audio</string>
-    <string name="dialog_message_webrtc_permissions_blocked">Certaines autorisations nécessaires à l\'utilisation des appels sécurisés Olvid sont refusées de façon permanente.\n\nVeuillez ouvrir les paramètres de l\'application pour manuellement accorder à Olvid les permissions d\'enregistrer l\'audio et de gérer les appels.</string>
+    <string name="dialog_title_webrtc_permissions_audio_blocked">Autorisations d\'enregistrement audio</string>
+    <string name="dialog_title_webrtc_permissions_camera_blocked">Autorisations d\'enregistrement vidéo</string>
+    <string name="dialog_message_webrtc_permissions_audio_blocked">Certaines autorisations nécessaires à l\'utilisation des appels sécurisés Olvid sont refusées de façon permanente.\n\nVeuillez ouvrir les paramètres de l\'application pour manuellement accorder à Olvid les permissions d\'enregistrer l\'audio et de gérer les appels.</string>
+    <string name="dialog_message_webrtc_permissions_camera_blocked">Certaines autorisations nécessaires à l\'utilisation des appels vidéo sécurisés Olvid sont refusées de façon permanente.\n\nVeuillez ouvrir les paramètres de l\'application pour manuellement accorder à Olvid les permissions d\'utiliser l\'appareil photo, d\'enregistrer l\'audio et de gérer les appels.</string>
     <string name="text_nothing_to_see_here">Il n\'y a rien à voir ici…</string>
     <string name="dialog_title_missing_messages">Messages manquants</string>
     <string name="dialog_message_missing_messages">Cet indicateur de message manquant vous prévient qu\'un trou a été détecté dans la séquence de numérotation des messages reçus de votre contact.\n\nCeci est soit dû à l\'annulation d\'envoi d\'un message (vous ne recevrez jamais ce message), soit à l\'envoi d\'un message plus gros (en général, avec des pièces jointes) qui n\'a pas encore été entièrement déposé sur le serveur (vous devriez le recevoir prochainement).</string>
@@ -1812,7 +1819,7 @@
     <string name="pref_location_disable_address_lookup_title">Désactiver la recherche d\'adresse</string>
     <string name="dialog_title_custom_osm_url">URL du serveur OpenStreetMap</string>
     <string name="hint_custom_osm_url">URL du fichier de style OpenStreetMap</string>
-    <string name="dialog_message_custom_osm_url">Veuillez entrer l\'URL du **fichier de style** OpenStreetMap à utiliser. Cette URL devrait ressembler à : *https://map.olvid.io/styles/planet/style.json*\n\nNotez que le serveur de tuiles référencé dans ce fichier risque d\'avoir accès à des informations sur votre position. Veillez à **utiliser un serveur de confiance**.</string>
+    <string name="dialog_message_custom_osm_url">Veuillez entrer l\'URL du **fichier de style** OpenStreetMap à utiliser. Cette URL devrait ressembler à : *https://map.olvid.io/styles/osm.json*\n\nNotez que le serveur de tuiles référencé dans ce fichier risque d\'avoir accès à des informations sur votre position. Veillez à **utiliser un serveur de confiance**.</string>
     <string name="pref_location_custom_address_server">Utiliser un serveur d\'adresses personnalisé</string>
     <string name="pref_location_disable_address_lookup_summary">La recherche d\'adresse permet d\'obtenir l\'adresse postale d\'une position lors d\'un partage.</string>
     <string name="dialog_title_custom_address_server_url">Serveur d\'adresses personnalisé</string>
@@ -1842,9 +1849,12 @@
     <string name="call_encrypted_notice">Appel chiffré de bout en bout</string>
     <string name="pref_hide_group_member_changes_title">Masquer les messages de modification de groupe</string>
     <string name="pref_hide_group_member_changes_summary">Une fois cette option activée, les messages indiquant qu\'un membre à rejoint ou quitté un groupe ne seront plus affichés dans vos discussions.</string>
-
-
-
+    <string name="pref_category_call">Appels audio &amp; vidéo sécurisés</string>
+    <string name="pref_hardware_noise_suppressor_title">Utiliser la réduction de bruit matérielle</string>
+    <string name="pref_hardware_echo_canceler_title">Utiliser l\'annulateur d\'echo matériel</string>
+    <string name="pref_video_resolution_title">Résolution en envoi des appels vidéo</string>
+    <string name="text_ongoing_call">Appel en cours : %1$s</string>
+    <string name="text_audio_output_no_sound">Aucun son</string>
 
     <plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Vous êtes sur le point d\'inviter chaque membre de ce groupe avec lequel vous avez un canal (actuellement 1 membre) à une discussion privée.\nSouhaitez-vous poursuivre ?</item>

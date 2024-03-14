@@ -22,8 +22,8 @@
         android:key="pref_key_discussion_remote_delete"
         android:icon="@drawable/ic_pref_remote_delete"
         android:title="@string/pref_discussion_remote_delete_title"
-        app:singleLineTitle="false"
         app:useSimpleSummaryProvider="true"
+        app:singleLineTitle="false"
         android:entries="@array/discussion_remote_delete"
         android:entryValues="@array/discussion_remote_delete_values" />
 

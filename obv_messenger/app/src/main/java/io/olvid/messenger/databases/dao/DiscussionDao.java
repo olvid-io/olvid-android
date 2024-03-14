@@ -179,7 +179,7 @@ public abstract class DiscussionDao {
             " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " AND " + Message.MENTIONED + " = 1" + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unreadMention " +
             " ON unreadMention." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN ( SELECT COUNT(*) as count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.JSON_LOCATION + " NOT NULL " + " AND " +
-            Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE + ") AS locations" +
+            Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE + " GROUP BY " + Message.DISCUSSION_ID + ") AS locations" +
             " ON locations." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN " + DiscussionCustomization.TABLE_NAME + " AS cust " +
             " ON cust." + DiscussionCustomization.DISCUSSION_ID + " = disc.id " +

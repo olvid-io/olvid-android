@@ -25,8 +25,8 @@
         <ListPreference
             android:key="pref_key_block_untrusted_certificate"
             android:defaultValue="issuer"
-            app:singleLineTitle="false"
             app:useSimpleSummaryProvider="true"
+            app:singleLineTitle="false"
             android:title="@string/pref_block_untrusted_certificate_title"
             android:entries="@array/block_untrusted_certificate"
             android:entryValues="@array/block_untrusted_certificate_values"
@@ -101,14 +101,6 @@
             app:useSimpleSummaryProvider="true"
             android:icon="@drawable/ic_pref_language"
             android:order="35" />
-        <SwitchPreference
-            android:key="pref_key_low_bandwidth_calls"
-            android:title="@string/pref_low_bandwidth_calls_title"
-            android:summary="@string/pref_low_bandwidth_calls_summary"
-            android:defaultValue="false"
-            android:icon="@drawable/ic_pref_low_bandwidth"
-            android:order="36"
-            />
         <SwitchPreference
             android:defaultValue="false"
             android:key="pref_key_debug_log_level"

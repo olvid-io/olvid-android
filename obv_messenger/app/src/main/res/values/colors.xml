@@ -30,7 +30,7 @@
     <color name="lighterGrey_75">#bff1f1f1</color>
     <color name="darkGrey">#757575</color>
 
-    <color name="accentOverlay">#6670959E</color>
+    <color name="searchHighlightColor">#fffff426</color>
     <color name="greyOverlay">#66808080</color>
     <color name="greySubtleOverlay">#22808080</color>
     <color name="whiteOverlay">#bbffffff</color>

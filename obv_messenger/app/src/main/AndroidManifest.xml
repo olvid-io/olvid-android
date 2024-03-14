@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
@@ -303,6 +304,8 @@
             android:label="@string/activity_title_webrtc_call"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:launchMode="singleTask"
             android:taskAffinity=""
             tools:targetApi="o_mr1" />
@@ -362,7 +365,7 @@
             android:name=".webrtc.WebrtcCallService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="microphone|specialUse">
+            android:foregroundServiceType="microphone|specialUse|mediaProjection">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="This service is started for VoIP both outgoing and incoming VoIP calls. For outgoing calls, the microphone permission is already granted and service can be started as microphone, for incoming calls we start a foreground service while the phone is ringing, following the reception of a push notification. As soon as the recipient picks up the call and grants audio permission, the foreground service is restarted as a microphone service."/>
         </service>

@@ -31,7 +31,6 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.style.BackgroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,6 +68,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
+import io.olvid.messenger.customClasses.SearchHighlightSpan;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.customClasses.TextChangeListener;
@@ -272,7 +272,7 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
         private int missingResults;
         @Nullable private final byte[] bytesOwnedIdentity;
         @NonNull private final ClickListener clickListener;
-        private final BackgroundColorSpan[] highlightedSpans;
+        private final SearchHighlightSpan[] highlightedSpans;
         private final List<Pattern> patterns;
 
         public static final int VIEW_TYPE_NORMAL = 0;
@@ -282,9 +282,9 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
             this.bytesOwnedIdentity = bytesOwnedIdentity;
             this.clickListener = clickListener;
             this.patterns = new ArrayList<>();
-            highlightedSpans = new BackgroundColorSpan[10];
+            highlightedSpans = new SearchHighlightSpan[10];
             for (int i=0; i<highlightedSpans.length; i++) {
-                highlightedSpans[i] = new BackgroundColorSpan(ContextCompat.getColor(App.getContext(), R.color.accentOverlay));
+                highlightedSpans[i] = new SearchHighlightSpan(App.getContext());
             }
         }
 

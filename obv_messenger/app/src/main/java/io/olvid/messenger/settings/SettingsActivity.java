@@ -293,6 +293,20 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_REMOVE_METADATA = "pref_key_remove_metadata";
     static final boolean PREF_KEY_REMOVE_METADATA_DEFAULT = false;
 
+    // CALL SETTINGS
+
+    static final String PREF_KEY_VIDEO_RESOLUTION = "pref_key_video_resolution";
+    static final int PREF_KEY_VIDEO_RESOLUTION_DEFAULT = 720;
+
+    static final String PREF_KEY_HARDWARE_NOISE_SUPPRESSOR = "pref_key_hardware_noise_suppressor";
+    static final boolean PREF_KEY_HARDWARE_NOISE_SUPPRESSOR_DEFAULT = false;
+
+    static final String PREF_KEY_HARDWARE_ECHO_CANCELER = "pref_key_hardware_echo_canceler";
+    static final boolean PREF_KEY_HARDWARE_ECHO_CANCELER_DEFAULT = false;
+
+    static final String PREF_KEY_LOW_BANDWIDTH_CALLS = "pref_key_low_bandwidth_calls";
+    static final boolean PREF_KEY_LOW_BANDWIDTH_CALLS_DEFAULT = false;
+
 
     // OTHER SETTINGS
     static final String PREF_KEY_SEND_WITH_HARDWARE_ENTER = "pref_key_send_with_hardware_enter";
@@ -341,9 +355,6 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_DEBUG_LOG_LEVEL = "pref_key_debug_log_level";
     static final boolean PREF_KEY_DEBUG_LOG_LEVEL_DEFAULT = false;
-
-    static final String PREF_KEY_LOW_BANDWIDTH_CALLS = "pref_key_low_bandwidth_calls";
-    static final boolean PREF_KEY_LOW_BANDWIDTH_CALLS_DEFAULT = false;
 
     static final String PREF_KEY_USE_LEGACY_ZXING_SCANNER = "pref_key_use_legacy_zxing_scanner";
     static final boolean PREF_KEY_USE_LEGACY_ZXING_SCANNER_DEFAULT = false;
@@ -1282,6 +1293,22 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
+    public static int getVideoSendResolution() {
+        String resolution = PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREF_KEY_VIDEO_RESOLUTION, null);
+        if (resolution != null) {
+            try {
+                return Integer.parseInt(resolution);
+            } catch (Exception ignored) { }
+        }
+        return PREF_KEY_VIDEO_RESOLUTION_DEFAULT;
+    }
+
+    public static boolean useHardwareNoiseSuppressor() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_HARDWARE_NOISE_SUPPRESSOR, PREF_KEY_HARDWARE_NOISE_SUPPRESSOR_DEFAULT);
+    }
+    public static boolean useHardwareEchoCanceler() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_HARDWARE_ECHO_CANCELER, PREF_KEY_HARDWARE_ECHO_CANCELER_DEFAULT);
+    }
 
     public static boolean useLowBandwidthInCalls() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_LOW_BANDWIDTH_CALLS, PREF_KEY_LOW_BANDWIDTH_CALLS_DEFAULT);

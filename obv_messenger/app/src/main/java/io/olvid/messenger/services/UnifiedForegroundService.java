@@ -1002,6 +1002,7 @@ public class UnifiedForegroundService extends Service {
         private static final String SHARING_QUALITY_INTENT_EXTRA = "sharing_quality"; // int
         private static final String MESSAGE_ID_INTENT_EXTRA = "message_id"; // id of message to update with new location
 
+        public static final long PASSIVE_PROVIDER_UPDATE_INTERVAL_MILLIS = 3_000; // never update more than every 3 seconds, even with passive provider
         private static UnifiedForegroundService unifiedForegroundService = null;
         private static boolean isSharingLocation = false;
         private static LocationUpdatesSubscriber subscriber;
@@ -1278,6 +1279,10 @@ public class UnifiedForegroundService extends Service {
 
 
                         List<String> providers = locationManager.getProviders(true);
+                        if (providers.contains(LocationManager.PASSIVE_PROVIDER)) { // this should always be the case (if the documentation is correct)
+                            LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.PASSIVE_PROVIDER, new LocationRequestCompat.Builder(PASSIVE_PROVIDER_UPDATE_INTERVAL_MILLIS).build(), executor, this);
+                        }
+
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && providers.contains(LocationManager.FUSED_PROVIDER)) {
                             LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.FUSED_PROVIDER, locationRequest, executor, this);
                             if (providers.contains(LocationManager.GPS_PROVIDER)) {
@@ -1324,7 +1329,7 @@ public class UnifiedForegroundService extends Service {
                                             holder.lastSharedLocation == null
                                                     || LocationManager.NETWORK_PROVIDER.equals(holder.lastSharedLocation.getProvider()) // always prefer gps updates to previously received network updates
                                                     || location.distanceTo(holder.lastSharedLocation) > holder.quality.getMinUpdateDistanceMeters())
-                                            && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .9 * holder.quality.getMinUpdateFrequencyMs()))
+                                            && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .5 * holder.quality.getMinUpdateFrequencyMs()))
                                             || (System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs());
                                     break;
                                 }
@@ -1335,7 +1340,7 @@ public class UnifiedForegroundService extends Service {
                                     } else {
                                         // don't update too frequently between network updates to give the GPS a chance to send a better update
                                         sendUpdate = (holder.lastSharedLocation == null || location.distanceTo(holder.lastSharedLocation) > holder.quality.getMinUpdateDistanceMeters())
-                                                && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .9 * holder.quality.getMinUpdateFrequencyMs())
+                                                && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .5 * holder.quality.getMinUpdateFrequencyMs())
                                                 || (System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs());
                                     }
                                     break;
@@ -1343,7 +1348,7 @@ public class UnifiedForegroundService extends Service {
                                 case LocationManager.FUSED_PROVIDER:
                                 default: {
                                     sendUpdate = (holder.lastSharedLocation == null || location.distanceTo(holder.lastSharedLocation) > holder.quality.getMinUpdateDistanceMeters())
-                                            && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .9 * holder.quality.getMinUpdateFrequencyMs())
+                                            && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .5 * holder.quality.getMinUpdateFrequencyMs())
                                             || (System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs());
                                     break;
                                 }

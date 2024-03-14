@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -45,8 +46,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Badge
 import androidx.compose.material.BadgedBox
+import androidx.compose.material.Checkbox
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -59,10 +63,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -79,6 +86,7 @@ import io.olvid.messenger.R.color
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
@@ -95,17 +103,20 @@ data class ContactFilterTab(val label: String, val filter: (ContactOrKeycloakDet
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ContactListScreen(
+    modifier: Modifier = Modifier.fillMaxSize(),
     contactListViewModel: ContactListViewModel,
     refreshing: Boolean,
-    onRefresh: () -> Unit,
+    onRefresh: (() -> Unit)?,
     onClick: (contact: ContactOrKeycloakDetails) -> Unit,
     onInvite: (contact: Contact) -> Unit,
     onScrollStart: (() -> Unit)? = null,
-    contactMenu: ContactMenu,
+    onSelectionDone: (() -> Unit)? = null,
+    contactMenu: ContactMenu? = null,
+    selectable: Boolean = false
 ) {
 
     val contacts by contactListViewModel.filteredContacts.observeAsState()
-    val refreshState = rememberPullRefreshState(refreshing, onRefresh)
+    val refreshState = onRefresh?.let { rememberPullRefreshState(refreshing, onRefresh) }
     val tabs = arrayListOf(
         ContactFilterTab(
             label = stringResource(id = R.string.contact_list_tab_contact),
@@ -126,9 +137,8 @@ fun ContactListScreen(
 
     AppCompatTheme {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pullRefresh(refreshState)
+            modifier = modifier
+                .then(refreshState?.let { Modifier.pullRefresh(it) } ?: Modifier)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 val pagerState =
@@ -185,27 +195,89 @@ fun ContactListScreen(
                                                         contactOrKeycloakDetails = contactOrKeycloakDetails,
                                                         contactListViewModel = contactListViewModel,
                                                         contactMenu = contactMenu,
-                                                        onClick = onClick,
+                                                        onClick =
+                                                        if (selectable) {
+                                                            {
+                                                                contactListViewModel.selectedContacts.find {
+                                                                    it.bytesContactIdentity.contentEquals(
+                                                                        contactOrKeycloakDetails.contact?.bytesContactIdentity
+                                                                    )
+                                                                }?.let {
+                                                                    contactListViewModel.selectedContacts.remove(
+                                                                        it
+                                                                    )
+                                                                } ifNull {
+                                                                    contactOrKeycloakDetails.contact?.let { contact ->
+                                                                        contactListViewModel.selectedContacts.add(
+                                                                            contact
+                                                                        )
+                                                                    }
+                                                                }
+                                                            }
+                                                        } else {
+                                                            onClick
+                                                        },
                                                         endContent =
+                                                        if (selectable) {
+                                                            {
+                                                                Checkbox(
+                                                                    checked = contactListViewModel.selectedContacts.any {
+                                                                        it.bytesContactIdentity.contentEquals(
+                                                                            contactOrKeycloakDetails.contact?.bytesContactIdentity
+                                                                        )
+                                                                    },
+                                                                    onCheckedChange = { checked ->
+                                                                        contactOrKeycloakDetails.contact?.let { contact ->
+                                                                            if (checked) {
+                                                                                contactListViewModel.selectedContacts.add(
+                                                                                    contact
+                                                                                )
+                                                                            } else {
+                                                                                contactListViewModel.selectedContacts.removeIf {
+                                                                                    it.bytesContactIdentity.contentEquals(
+                                                                                        contact.bytesContactIdentity
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                )
+                                                            }
+                                                        } else {
                                                             when {
                                                                 contactOrKeycloakDetails.contactType == CONTACT
                                                                         && contactOrKeycloakDetails.contact?.oneToOne == false
-                                                                        && contactOrKeycloakDetails.contact.shouldShowChannelCreationSpinner().not() -> {
+                                                                        && contactOrKeycloakDetails.contact.shouldShowChannelCreationSpinner()
+                                                                    .not() -> {
                                                                     {
                                                                         TextButton(onClick = {
-                                                                            onInvite.invoke(contactOrKeycloakDetails.contact)
+                                                                            onInvite.invoke(
+                                                                                contactOrKeycloakDetails.contact
+                                                                            )
                                                                         }) {
-                                                                            Text(text = stringResource(id = R.string.button_label_invite))
+                                                                            Text(
+                                                                                text = stringResource(
+                                                                                    id = R.string.button_label_invite
+                                                                                )
+                                                                            )
                                                                         }
                                                                     }
                                                                 }
 
-                                                                contactOrKeycloakDetails.contactType == KEYCLOAK && AppSingleton.getContactTrustLevel(contactOrKeycloakDetails.keycloakUserDetails?.identity) == null -> {
+                                                                contactOrKeycloakDetails.contactType == KEYCLOAK && AppSingleton.getContactTrustLevel(
+                                                                    contactOrKeycloakDetails.keycloakUserDetails?.identity
+                                                                ) == null -> {
                                                                     {
                                                                         TextButton(onClick = {
-                                                                            onClick.invoke(contactOrKeycloakDetails)
+                                                                            onClick.invoke(
+                                                                                contactOrKeycloakDetails
+                                                                            )
                                                                         }) {
-                                                                            Text(text = stringResource(id = R.string.button_label_add))
+                                                                            Text(
+                                                                                text = stringResource(
+                                                                                    id = R.string.button_label_add
+                                                                                )
+                                                                            )
                                                                         }
                                                                     }
                                                                 }
@@ -213,6 +285,7 @@ fun ContactListScreen(
                                                                 else -> {
                                                                     null
                                                                 }
+                                                            }
                                                         }
                                                     )
                                                 }
@@ -254,16 +327,35 @@ fun ContactListScreen(
                         androidx.compose.animation.AnimatedVisibility(
                             visible = contactListViewModel.keycloakSearchInProgress && page == 2,
                             enter = EnterTransition.None,
-                            exit =  fadeOut(),
+                            exit = fadeOut(),
                         ) {
                             KeycloakSearching()
                         }
                     }
                 }
             }
-            RefreshingIndicator(refreshing = refreshing, refreshState = refreshState)
+            refreshState?.let {
+                RefreshingIndicator(refreshing = refreshing, refreshState = refreshState)
+            }
+            if (selectable) {
+                IconButton(modifier = Modifier
+                    .padding(bottom = 32.dp)
+                    .align(BottomEnd)
+                    .requiredSize(56.dp)
+                    .background(
+                        color = Color(0xFF2F65F5).copy(alpha = if (contactListViewModel.selectedContacts.isNotEmpty()) 1f else .6f),
+                        shape = RoundedCornerShape(size = 12.92308.dp)
+                    ),
+                    enabled = contactListViewModel.selectedContacts.isNotEmpty(),
+                    onClick = { onSelectionDone?.invoke() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_arrow_forward),
+                        tint = Color.White,
+                        contentDescription = "validate"
+                    )
+                }
+            }
         }
-
     }
 }
 
@@ -292,7 +384,7 @@ private fun Header(
                 text = {
                     if (contactListViewModel.getFilter().isNullOrEmpty()) {
                         Text(text = tab.label, softWrap = false, overflow = TextOverflow.Ellipsis)
-                    } else if ( index == 2 && contactListViewModel.keycloakSearchInProgress) {
+                    } else if (index == 2 && contactListViewModel.keycloakSearchInProgress) {
                         BadgedBox(badge = {
                             CircularProgressIndicator(
                                 modifier = Modifier
@@ -302,7 +394,11 @@ private fun Header(
                                 strokeWidth = 2.dp
                             )
                         }) {
-                            Text(text = tab.label, softWrap = false, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                text = tab.label,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     } else {
                         BadgedBox(badge = {
@@ -323,7 +419,11 @@ private fun Header(
                                 )
                             }
                         }) {
-                            Text(text = tab.label, softWrap = false, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                text = tab.label,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     }
                 }
@@ -336,7 +436,7 @@ private fun Header(
 private fun Contact(
     contactOrKeycloakDetails: ContactOrKeycloakDetails,
     contactListViewModel: ContactListViewModel,
-    contactMenu: ContactMenu,
+    contactMenu: ContactMenu? = null,
     onClick: (contact: ContactOrKeycloakDetails) -> Unit,
     endContent: (@Composable () -> Unit)? = null
 ) {
@@ -344,18 +444,16 @@ private fun Contact(
         title = contactOrKeycloakDetails.getAnnotatedName()
             .highlight(
                 SpanStyle(
-                    background = colorResource(
-                        id = color.accentOverlay
-                    )
+                    background = colorResource(id = color.searchHighlightColor),
+                    color = colorResource(id = color.black)
                 ),
                 contactListViewModel.filterPatterns
             ),
         body = contactOrKeycloakDetails.getAnnotatedDescription()
             ?.highlight(
                 SpanStyle(
-                    background = colorResource(
-                        id = color.accentOverlay
-                    )
+                    background = colorResource(id = color.searchHighlightColor),
+                    color = colorResource(id = color.black)
                 ),
                 contactListViewModel.filterPatterns
             ),
@@ -403,7 +501,7 @@ private fun Contact(
                 else -> {}
             }
         },
-        onRenameContact = if (contactOrKeycloakDetails.contactType != KEYCLOAK) {
+        onRenameContact = if (contactMenu != null && contactOrKeycloakDetails.contactType != KEYCLOAK) {
             {
                 contactOrKeycloakDetails.contact?.let {
                     contactMenu.rename(
@@ -412,7 +510,7 @@ private fun Contact(
                 }
             }
         } else null,
-        onCallContact = if (contactOrKeycloakDetails.contactType != KEYCLOAK) {
+        onCallContact = if (contactMenu != null && contactOrKeycloakDetails.contactType != KEYCLOAK) {
             {
                 contactOrKeycloakDetails.contact?.let {
                     contactMenu.call(
@@ -421,7 +519,7 @@ private fun Contact(
                 }
             }
         } else null,
-        onDeleteContact = if (contactOrKeycloakDetails.contactType != KEYCLOAK) {
+        onDeleteContact = if (contactMenu != null && contactOrKeycloakDetails.contactType != KEYCLOAK) {
             {
                 contactOrKeycloakDetails.contact?.let {
                     contactMenu.delete(
@@ -484,7 +582,13 @@ private fun KeycloakMissingCount(missingResults: Int?) {
             modifier = Modifier
                 .padding(4.dp)
                 .align(Center),
-            text = missingResults?.let {pluralStringResource(id = R.plurals.text_keycloak_missing_search_result, missingResults, missingResults) }
+            text = missingResults?.let {
+                pluralStringResource(
+                    id = R.plurals.text_keycloak_missing_search_result,
+                    missingResults,
+                    missingResults
+                )
+            }
                 ?: stringResource(id = string.text_keycloak_missing_some_search_result),
             color = colorResource(id = color.grey),
             textAlign = TextAlign.Center,
