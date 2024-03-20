@@ -52,6 +52,7 @@ public class ContactDevice implements ObvDatabase {
     static final String OWNED_IDENTITY = "owned_identity";
     private byte[] serializedDeviceCapabilities;
     static final String SERIALIZED_DEVICE_CAPABILITIES = "serialized_device_capabilities";
+    // TODO: add a last ping sent timestamp to limit useless contact discoveries
 
     public UID getUid() {
         return uid;

@@ -197,6 +197,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                         protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(identityManagerSession.session, contactIdentity.getOwnedIdentity(), contactIdentity.getContactIdentity());
                     }
                 }
+                identityManagerSession.session.commit();
             }
         } catch (Exception e) {
             e.printStackTrace();

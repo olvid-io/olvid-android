@@ -19,9 +19,11 @@
 
 package io.olvid.messenger.webrtc.components
 
+import android.content.Context
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -31,11 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.viewinterop.AndroidView
-import io.olvid.engine.Logger
 import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder
 import org.webrtc.RendererCommon
 import org.webrtc.VideoTrack
@@ -51,9 +49,11 @@ fun VideoRenderer(
     modifier: Modifier = Modifier,
     videoTrack: VideoTrack,
     zoomable: Boolean = false,
-    mirror: Boolean = false
+    mirror: Boolean = false,
+    matchVideoAspectRatio: Boolean = false,
+    pipAspectCallback: ((Context, Int, Int) -> Unit)? = null,
+    fitVideo: Boolean = false
 ) {
-    val density = LocalDensity.current
     val trackState: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
@@ -62,30 +62,18 @@ fun VideoRenderer(
             cleanTrack(view, trackState)
         }
     }
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
 
-    BoxWithConstraints(modifier = modifier) {
-        val width = with(density) {
-            maxWidth.toPx()
-        }
-        val height = with(density) {
-            maxHeight.toPx()
-        }
+    val scaleAndOffsetControl = remember { ScaleAndOffsetControl() }
+    var videoAspectRatio by remember { mutableFloatStateOf(1f) }
 
-        val maxX = (scale - 1) * width / 2
-        val maxY = (scale - 1) * height / 2
-
+    Box(modifier = modifier) {
         val state = rememberTransformableState { zoomChange, offsetChange, _ ->
-            scale = (scale * zoomChange).coerceIn(1f, 3f)
-            offset = Offset(
-                x = (offset.x + offsetChange.x * scale).coerceIn(-maxX, maxX),
-                y = (offset.y + offsetChange.y * scale).coerceIn(-maxY, maxY)
-            )
+            scaleAndOffsetControl.applyTransformation(zoomChange = zoomChange, offsetChange = offsetChange)
         }
+
         AndroidView(
             factory = { context ->
-                VideoTextureViewRenderer(context).apply {
+                VideoTextureViewRenderer(context, scaleAndOffsetControl).apply {
                     WebrtcPeerConnectionHolder.eglBase?.eglBaseContext?.let {
                         init(
                             it,
@@ -93,14 +81,19 @@ fun VideoRenderer(
                             object : RendererCommon.RendererEvents {
                                 override fun onFirstFrameRendered() = Unit
 
-                                override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
-                                    // TODO: adjust min scale with this
-                                    Logger.d("onFrameResolutionChanged ${p0}x${p1} - $p2")
+                                override fun onFrameResolutionChanged(width: Int, height: Int, rotation: Int) {
+                                    videoAspectRatio = width / height.toFloat()
+                                    pipAspectCallback?.invoke(context, width, height)
                                 }
                             }
                         )
                     }
                     setupVideo(trackState, videoTrack, this)
+                    if (fitVideo) {
+                        scaleAndOffsetControl.setFit()
+                    } else {
+                        scaleAndOffsetControl.setFill()
+                    }
                     view = this
                 }
             },
@@ -108,18 +101,16 @@ fun VideoRenderer(
                 setupVideo(trackState, videoTrack, v)
                 v.setMirror(mirror)
             },
-            modifier = modifier.then(
-                if (zoomable) {
-                    Modifier
-                        .graphicsLayer(
-                            scaleX = scale,
-                            scaleY = scale,
-                            translationX = offset.x,
-                            translationY = offset.y
-                        )
-                        .transformable(state = state)
-                } else Modifier
-            )
+            modifier = modifier
+                .then(
+                    if (matchVideoAspectRatio) {
+                        Modifier.aspectRatio(videoAspectRatio)
+                    } else Modifier
+                ).then(
+                    if (zoomable) {
+                        Modifier.transformable(state = state)
+                    } else Modifier
+                )
         )
     }
 }

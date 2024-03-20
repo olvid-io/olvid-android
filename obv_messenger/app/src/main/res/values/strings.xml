@@ -1889,6 +1889,7 @@
     <string name="pref_text_1080p" translatable="false">1080p</string>
     <string name="text_ongoing_call">Ongoing call: %1$s</string>
     <string name="text_audio_output_no_sound">No output</string>
+    <string name="toast_message_video_calls_xxx_participants">Video calls are limited to %1$d participants</string>
 
 
     <plurals name="dialog_message_invite_all_group_members">

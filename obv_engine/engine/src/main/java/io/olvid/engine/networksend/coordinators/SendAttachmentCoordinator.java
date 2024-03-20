@@ -36,6 +36,7 @@ import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.PriorityOperation;
 import io.olvid.engine.datatypes.PriorityOperationQueue;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.IdentityAndUid;
 import io.olvid.engine.datatypes.containers.IdentityAndUidAndNumber;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.datatypes.notifications.UploadNotifications;
@@ -286,5 +287,9 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
         public long getInitialPriority() {
             return initialPriority;
         }
+    }
+
+    public interface MessageBatchProvider {
+        IdentityAndUid[] getBatchOFMessageUids();
     }
 }

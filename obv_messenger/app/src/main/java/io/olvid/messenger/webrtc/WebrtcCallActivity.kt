@@ -26,7 +26,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.graphics.Point
 import android.media.projection.MediaProjectionConfig
 import android.media.projection.MediaProjectionManager
@@ -40,6 +39,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.WindowManager.LayoutParams
 import android.widget.Toast
@@ -98,10 +98,6 @@ import io.olvid.messenger.webrtc.components.CallAction.ToggleMicrophone
 import io.olvid.messenger.webrtc.components.CallAction.ToggleSpeaker
 import io.olvid.messenger.webrtc.components.CallScreen
 import io.olvid.messenger.webrtc.components.enterPictureInPicture
-import org.webrtc.PeerConnection
-import org.webrtc.RTCStatsCollectorCallback
-import org.webrtc.RTCStatsReport
-import org.webrtc.VideoTrack
 
 private const val REQUEST_MEDIA_PROJECTION = 314
 
@@ -229,6 +225,11 @@ class WebrtcCallActivity : AppCompatActivity() {
                             }
 
                             ToggleCamera -> {
+                                if ((webrtcCallService?.getCallParticipantsLiveData()?.value?.size ?: 0) > WebrtcPeerConnectionHolder.MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO) {
+                                    App.toast(getString(R.string.toast_message_video_calls_xxx_participants, WebrtcPeerConnectionHolder.MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO + 1), Toast.LENGTH_SHORT, Gravity.BOTTOM)
+                                    return@CallScreen
+                                }
+
                                 if (
                                     ContextCompat.checkSelfPermission(
                                         this,
@@ -255,6 +256,11 @@ class WebrtcCallActivity : AppCompatActivity() {
                             }
 
                             ShareScreen -> {
+                                if ((webrtcCallService?.getCallParticipantsLiveData()?.value?.size ?: 0) > WebrtcPeerConnectionHolder.MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO) {
+                                    App.toast(getString(R.string.toast_message_video_calls_xxx_participants, WebrtcPeerConnectionHolder.MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO + 1), Toast.LENGTH_SHORT, Gravity.BOTTOM)
+                                    return@CallScreen
+                                }
+
                                 val width: Int
                                 val height: Int
                                 if (VERSION.SDK_INT >= VERSION_CODES.R) {
@@ -303,7 +309,9 @@ class WebrtcCallActivity : AppCompatActivity() {
                         contentColor = Color.White,
                         onDismissRequest = onDismiss,
                         buttons = {
-                            Row(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, bottom = 8.dp, end = 16.dp),
+                            Row(modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, bottom = 8.dp, end = 16.dp),
                                 horizontalArrangement = Arrangement.End) {
                                 dialog.additionalButton?.let { button ->
                                     button()

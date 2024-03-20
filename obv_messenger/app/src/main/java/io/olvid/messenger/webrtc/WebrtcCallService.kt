@@ -139,6 +139,7 @@ import io.olvid.messenger.webrtc.WebrtcCallService.State.WAITING_FOR_AUDIO_PERMI
 import io.olvid.messenger.webrtc.WebrtcCallService.WakeLock.ALL
 import io.olvid.messenger.webrtc.WebrtcCallService.WakeLock.PROXIMITY
 import io.olvid.messenger.webrtc.WebrtcCallService.WakeLock.WIFI
+import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder.Companion.MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO
 import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder.Companion.audioDeviceModule
 import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder.Companion.localScreenTrack
 import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder.Companion.localVideoTrack
@@ -176,7 +177,6 @@ import org.webrtc.CameraVideoCapturer
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
-import org.webrtc.VideoTrack
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -298,7 +298,7 @@ class WebrtcCallService : Service() {
         private set
     private var bluetoothAutoConnect = true
     var wiredHeadsetConnected = false
-    var availableAudioOutputs = if (VERSION.SDK_INT >= VERSION_CODES.M) mutableStateListOf(PHONE, LOUDSPEAKER, MUTED) else mutableStateListOf(PHONE, LOUDSPEAKER)
+    var availableAudioOutputs = mutableStateListOf(PHONE, LOUDSPEAKER, MUTED)
         private set
 
     var selectedParticipant: ByteArray? by mutableStateOf(bytesOwnedIdentity)
@@ -1141,7 +1141,7 @@ class WebrtcCallService : Service() {
             }
             callParticipant.setPeerState(RINGING)
             if (_state == INITIALIZING_CALL || _state == BUSY) {
-                outgoingCallRinger!!.ring(RING)
+                outgoingCallRinger?.ring(RING)
                 setState(State.RINGING)
             }
         }
@@ -1166,7 +1166,7 @@ class WebrtcCallService : Service() {
                 createLogEntry(CallLogItem.STATUS_BUSY)
             }
             if (_state == INITIALIZING_CALL) {
-                outgoingCallRinger!!.ring(Type.BUSY)
+                outgoingCallRinger?.ring(Type.BUSY)
                 setState(BUSY)
             }
         }
@@ -1181,9 +1181,8 @@ class WebrtcCallService : Service() {
             if (callParticipant.peerState != START_CALL_MESSAGE_SENT && callParticipant.peerState != RINGING) {
                 return@execute
             }
-            if (_state == State.RINGING || _state == BUSY) {
-                outgoingCallRinger!!.stop()
-            }
+            outgoingCallRinger?.stop()
+
             val peerSdpDescription: String = try {
                 gunzip(gzippedPeerSdpDescription)
             } catch (e: IOException) {
@@ -1257,8 +1256,8 @@ class WebrtcCallService : Service() {
     private fun hangUpCallInternal() {
         // notify peer that you hung up (it's not just a connection loss)
         sendHangedUpMessage(callParticipants.values)
-        if (soundPool != null && _state != CALL_ENDED) { // do not play if state is already call ended
-            soundPool!!.play(disconnectSound, 1f, 1f, 0, 0, 1f)
+        if (_state != CALL_ENDED && selectedAudioOutput != MUTED) { // do not play if state is already call ended
+            soundPool?.play(disconnectSound, 1f, 1f, 0, 0, 1f)
         }
         createLogEntry(CallLogItem.STATUS_MISSED)
         setState(CALL_ENDED)
@@ -1549,6 +1548,9 @@ class WebrtcCallService : Service() {
             if (_state == CALL_ENDED || _state == FAILED) {
                 return@execute
             }
+            if (callParticipant.peerState == KICKED || callParticipant.peerState == HANGED_UP || callParticipant.peerState == PeerState.FAILED) {
+                return@execute
+            }
             callParticipant.setPeerState(RECONNECTING)
             updateStateFromPeerStates()
         }
@@ -1581,8 +1583,8 @@ class WebrtcCallService : Service() {
             }
             acquireWakeLock(WIFI)
             createLogEntry(CallLogItem.STATUS_SUCCESSFUL)
-            if (soundPool != null) {
-                soundPool!!.play(connectSound, 1f, 1f, 0, 0, 1f)
+            if (selectedAudioOutput != MUTED) {
+                soundPool?.play(connectSound, 1f, 1f, 0, 0, 1f)
             }
             if (callDurationTimer != null) {
                 callDurationTimer = null
@@ -1872,8 +1874,7 @@ class WebrtcCallService : Service() {
                 if (Arrays.equals(
                         jsonContactBytesAndName.bytesContactIdentity,
                         bytesOwnedIdentity
-                    )
-                ) {
+                    )) {
                     // the received array contains the user himself
                     continue
                 }
@@ -1943,6 +1944,7 @@ class WebrtcCallService : Service() {
     }
 
     // endregion
+
     // region Setters and Getters
     private fun setState(state: State) {
         if (this._state == FAILED) {
@@ -2012,7 +2014,7 @@ class WebrtcCallService : Service() {
     }
 
     fun toggleCamera() {
-        if (cameraEnabled.not()) {
+        if (cameraEnabled.not() && callParticipants.size <= MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO) {
             try {
                 localVideoTrack?.setEnabled(true)
             } catch (ignored: Exception) {
@@ -2055,7 +2057,7 @@ class WebrtcCallService : Service() {
     }
 
     fun toggleScreenShare(intent: Intent? = null) {
-        if (screenShareActive.not()) {
+        if (screenShareActive.not() && callParticipants.size <= MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO) {
             if (screenCapturerAndroid == null) {
                 intent?.let {
                     // restart the ongoing foreground service to set the correct foreground service type
@@ -2200,8 +2202,13 @@ class WebrtcCallService : Service() {
                 bluetoothHeadsetManager!!.disconnectAudio()
             }
 
-            if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                audioDeviceModule?.setSpeakerMute(audioOutput == MUTED) ?: return@execute
+            audioDeviceModule?.setSpeakerMute(audioOutput == MUTED)
+            if (audioOutput == MUTED) {
+                outgoingCallRinger?.stop()
+                reconnectingStreamId?.let {
+                    soundPool?.stop(it)
+                }
+                soundPool
             }
 
             when (audioOutput) {
@@ -2231,6 +2238,7 @@ class WebrtcCallService : Service() {
     }
 
     // endregion
+
     // region Helper methods
     fun shouldISendTheOfferToCallParticipant(callParticipant: CallParticipant): Boolean {
         return BytesKey(bytesOwnedIdentity).compareTo(BytesKey(callParticipant.bytesContactIdentity)) > 0
@@ -2238,10 +2246,6 @@ class WebrtcCallService : Service() {
 
     fun synchronizeOnExecutor(runnable: Runnable) {
         executor.execute(runnable)
-    }
-
-    fun getActiveLocalVideo(): VideoTrack? {
-        return if (screenShareActive) localScreenTrack else if (cameraEnabled) localVideoTrack else null
     }
 
     fun getCallParticipant(bytesContactIdentity: ByteArray?): CallParticipant? {
@@ -2265,6 +2269,15 @@ class WebrtcCallService : Service() {
             pojos.add(CallParticipantPojo(callParticipant))
         }
         callParticipantsLiveData.postValue(pojos)
+        if (callParticipants.size > MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO) {
+            // we disable video
+            if (cameraEnabled) {
+                toggleCamera()
+            }
+            if (screenShareActive) {
+                toggleScreenShare()
+            }
+        }
     }
 
     private fun updateStateFromPeerStates() {
@@ -2287,19 +2300,19 @@ class WebrtcCallService : Service() {
             }
         }
         if (callParticipants.size == 1 && allReconnecting) {
-            if (reconnectingStreamId == null) {
-                reconnectingStreamId = soundPool!!.play(reconnectingSound, .5f, .5f, 0, -1, 1f)
+            if (reconnectingStreamId == null && selectedAudioOutput != MUTED) {
+                reconnectingStreamId = soundPool?.play(reconnectingSound, .5f, .5f, 0, -1, 1f)
             }
         } else {
-            if (reconnectingStreamId != null) {
-                soundPool!!.stop(reconnectingStreamId!!)
+            reconnectingStreamId?.let {
+                soundPool?.stop(it)
                 reconnectingStreamId = null
             }
         }
         if (allPeersAreInFinalState) {
             createLogEntry(CallLogItem.STATUS_MISSED) // this only create the log if it was not yet created
-            if (soundPool != null && _state != CALL_ENDED) {
-                soundPool!!.play(disconnectSound, 1f, 1f, 0, 0, 1f)
+            if (_state != CALL_ENDED && selectedAudioOutput != MUTED) {
+                soundPool?.play(disconnectSound, 1f, 1f, 0, 0, 1f)
             }
             setState(CALL_ENDED)
             stopThisService()
@@ -2324,9 +2337,7 @@ class WebrtcCallService : Service() {
                     }
                 }
             }
-            if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                audioOutputs.add(MUTED)
-            }
+            audioOutputs.add(MUTED)
             if (!audioOutputs.contains(selectedAudioOutput)) {
                 selectAudioOutput(audioOutputs[0])
             }
@@ -2900,7 +2911,8 @@ class WebrtcCallService : Service() {
     }
 
     // endregion
-// region Service lifecycle
+
+    // region Service lifecycle
     override fun onCreate() {
         super.onCreate()
         webrtcMessageReceivedBroadcastReceiver = WebrtcMessageReceivedBroadcastReceiver()
@@ -2925,31 +2937,19 @@ class WebrtcCallService : Service() {
             callLogItem!!.duration = callDuration.value!!
             App.runThread { AppDatabase.getInstance().callLogItemDao().update(callLogItem) }
         }
-        if (outgoingCallRinger != null) {
-            outgoingCallRinger!!.stop()
-        }
-        if (incomingCallRinger != null) {
-            incomingCallRinger!!.stop()
-        }
-        if (soundPool != null) {
-            soundPool!!.release()
-        }
-        if (videoCapturer != null) {
-            try {
-                videoCapturer!!.stopCapture()
-            } catch (ignored: InterruptedException) {
-            }
-            videoCapturer!!.dispose()
-            videoCapturer = null
-        }
-        if (screenCapturerAndroid != null) {
-            try {
-                screenCapturerAndroid!!.stopCapture()
-            } catch (ignored: InterruptedException) {
-            }
-            screenCapturerAndroid!!.dispose()
-            screenCapturerAndroid = null
-        }
+        outgoingCallRinger?.stop()
+        incomingCallRinger?.stop()
+        soundPool?.release()
+        try {
+            videoCapturer?.stopCapture()
+        } catch (ignored: InterruptedException) { }
+        videoCapturer?.dispose()
+        videoCapturer = null
+        try {
+            screenCapturerAndroid?.stopCapture()
+        } catch (ignored: InterruptedException) { }
+        screenCapturerAndroid?.dispose()
+        screenCapturerAndroid = null
         unregisterScreenOffReceiver()
         unregisterWiredHeadsetReceiver()
         timeoutTimer.cancel()
@@ -3191,7 +3191,8 @@ class WebrtcCallService : Service() {
     }
 
     // endregion
-// region Send messages via Oblivious channel
+
+    // region Send messages via Oblivious channel
     @Throws(IOException::class)
     fun sendStartCallMessage(
         callParticipant: CallParticipant,
@@ -3600,17 +3601,16 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
     }
 
     // endregion
-// region JsonDataChannelMessages
+
+    // region JsonDataChannelMessages
     private inner class DataChannelListener(private val callParticipant: CallParticipant) :
         DataChannelMessageListener {
         override fun onConnect() {
             executor.execute {
                 sendDataChannelMessage(callParticipant, JsonMutedInnerMessage(microphoneMuted))
                 sendDataChannelMessage(callParticipant, JsonVideoSupportedInnerMessage(true))
-                sendDataChannelMessage(
-                    callParticipant,
-                    JsonVideoSharingInnerMessage(cameraEnabled)
-                )
+                sendDataChannelMessage(callParticipant, JsonVideoSharingInnerMessage(cameraEnabled))
+                sendDataChannelMessage(callParticipant, JsonScreenSharingInnerMessage(screenShareActive))
                 if (isCaller) {
                     sendDataChannelMessage(
                         callParticipant,
@@ -3744,6 +3744,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
     }
 
     // endregion
+
     inner class CallParticipant {
         internal val role: Role
 
@@ -3945,7 +3946,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
     }
 
     // device orientation change listener for screen capture on API < 34
-    val orientationChangeBroadcastReceiver = object: BroadcastReceiver() {
+    private val orientationChangeBroadcastReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             context?.resources?.configuration?.let { configuration ->
                 if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && screenWidth > screenHeight

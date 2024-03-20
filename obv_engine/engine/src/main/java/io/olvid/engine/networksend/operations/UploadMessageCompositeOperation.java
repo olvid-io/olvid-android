@@ -35,16 +35,12 @@ public class UploadMessageCompositeOperation extends Operation {
     public static final int RFC_NETWORK_ERROR = 3;
     public static final int RFC_IDENTITY_IS_INACTIVE = 10;
 
-    private final SendManagerSessionFactory sendManagerSessionFactory;
-    private final SSLSocketFactory sslSocketFactory;
     private final Identity ownedIdentity;
     private final UID messageUid;
     private final Operation[] suboperations;
 
     public UploadMessageCompositeOperation(SendManagerSessionFactory sendManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, UID messageUid, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
         super(IdentityAndUid.computeUniqueUid(ownedIdentity, messageUid), onFinishCallback, onCancelCallback);
-        this.sendManagerSessionFactory = sendManagerSessionFactory;
-        this.sslSocketFactory = sslSocketFactory;
         this.ownedIdentity = ownedIdentity;
         this.messageUid = messageUid;
         this.suboperations = new Operation[2];

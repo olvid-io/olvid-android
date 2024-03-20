@@ -17,11 +17,29 @@
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.olvid.engine.engine.types;
+package io.olvid.messenger.webrtc.components
 
-public enum RegisterApiKeyResult {
-    SUCCESS,
-    INVALID_KEY,
-    FAILED,
-    WAIT_FOR_SERVER_SESSION,
+import androidx.compose.ui.geometry.Offset
+
+
+class ScaleAndOffsetControl {
+    interface ScaleAndOffsetControlListener {
+        fun onFit()
+        fun onFill()
+        fun onTransformation(zoomChange: Float, offsetChangeX: Float, offsetChangeY: Float)
+    }
+
+    var listener: ScaleAndOffsetControlListener? = null
+
+    fun setFit() {
+        listener?.onFit()
+    }
+
+    fun setFill() {
+        listener?.onFill()
+    }
+
+    fun applyTransformation(zoomChange: Float, offsetChange: Offset) {
+        listener?.onTransformation(zoomChange, offsetChange.x, offsetChange.y)
+    }
 }

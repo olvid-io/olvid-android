@@ -88,6 +88,7 @@ public abstract class Constants {
 
     public static final int DEFAULT_ATTACHMENT_CHUNK_LENGTH = 4*2048*1024;
     public static final int MAX_MESSAGE_EXTENDED_CONTENT_LENGTH = 50 * 1024;
+    public static final int MAX_UPLOAD_MESSAGE_BATCH_SIZE = 50;
 
     public static final UID BROADCAST_UID = new UID(new byte[]{(byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff});
 
@@ -110,6 +111,7 @@ public abstract class Constants {
     // prefixes for various types of signature
 
     public static final int SIGNATURE_PADDING_LENGTH = 16;
+
     public enum SignatureContext {
         SERVER_AUTHENTICATION,
         MUTUAL_SCAN,

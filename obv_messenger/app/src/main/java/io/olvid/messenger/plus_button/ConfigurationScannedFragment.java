@@ -516,6 +516,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
                         });
                         break;
                     case FAILED:
+                    case WAIT_FOR_SERVER_SESSION:
                         new Handler(Looper.getMainLooper()).post(() -> {
                             activateButton.setEnabled(true);
                             activationSpinner.setVisibility(View.GONE);

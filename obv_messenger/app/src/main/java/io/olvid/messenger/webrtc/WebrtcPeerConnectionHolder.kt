@@ -125,6 +125,7 @@ class WebrtcPeerConnectionHolder(
 
     companion object {
 
+        const val MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO = 2
         const val OLVID_STREAM_ID = "OlvidStreamId"
         const val VIDEO_STREAM_ID = "video"
         const val SCREENCAST_STREAM_ID = "screencast"
@@ -153,10 +154,10 @@ class WebrtcPeerConnectionHolder(
             HashSet(mutableListOf("opus", "PCMU", "PCMA", "telephone-event", "red"))
         private const val ADDITIONAL_OPUS_OPTIONS =
             ";cbr=1" // by default send and receive are mono, no need to add "stereo=0;sprop-stereo=0"
-        const val FIELD_TRIAL_INTEL_VP8 = "WebRTC-IntelVP8/Enabled/"
-        const val FIELD_TRIAL_H264_HIGH_PROFILE = "WebRTC-H264HighProfile/Enabled/"
-        const val FIELD_TRIAL_H264_SIMULCAST = "WebRTC-H264Simulcast/Enabled/"
-        const val FIELD_TRIAL_FLEX_FEC =
+        private const val FIELD_TRIAL_INTEL_VP8 = "WebRTC-IntelVP8/Enabled/"
+        private const val FIELD_TRIAL_H264_HIGH_PROFILE = "WebRTC-H264HighProfile/Enabled/"
+        private const val FIELD_TRIAL_H264_SIMULCAST = "WebRTC-H264Simulcast/Enabled/"
+        private const val FIELD_TRIAL_FLEX_FEC =
             "WebRTC-FlexFEC-03/Enabled/WebRTC-FlexFEC-03-Advertised/Enabled/"
         var eglBase: EglBase? = null
         var peerConnectionFactory: PeerConnectionFactory? = null
@@ -434,7 +435,7 @@ class WebrtcPeerConnectionHolder(
                 } else {
                     screenSender = peerConnection?.addTrack(
                         localScreenTrack,
-                        listOf(OLVID_STREAM_ID, SCREENCAST_STREAM_ID)
+                        listOf(SCREENCAST_STREAM_ID) // screencast does not need to be synchronized with voice
                     )
                     return true
                 }
@@ -522,33 +523,6 @@ class WebrtcPeerConnectionHolder(
             )
 
             else -> {}
-        }
-    }
-
-    fun restartIce() {
-        peerConnection?.let { peerConnection ->
-            if (peerConnection.signalingState() == HAVE_LOCAL_OFFER) {
-                // rollback to a stable set before creating the new restart offer
-                peerConnection.setLocalDescription(
-                    sessionDescriptionObserver, SessionDescription(
-                        ROLLBACK, ""
-                    )
-                )
-            } else if (peerConnection.signalingState() == HAVE_REMOTE_OFFER) {
-                // we received a remote offer
-                // if we are the offer sender, rollback and send a new offer, otherwise juste wait for the answer process to finish
-                if (webrtcCallService.shouldISendTheOfferToCallParticipant(callParticipant)) {
-                    peerConnection.setLocalDescription(
-                        sessionDescriptionObserver, SessionDescription(
-                            ROLLBACK, ""
-                        )
-                    )
-                } else {
-                    return
-                }
-            }
-
-            peerConnection.restartIce()
         }
     }
 
@@ -1101,7 +1075,7 @@ class WebrtcPeerConnectionHolder(
         }
 
         override fun onSetSuccess() {
-            Logger.w("☎ onSetSuccess")
+            Logger.d("☎ onSetSuccess")
             // called when local or remote description are set
             // This automatically triggers ICE gathering or connection establishment --> nothing to do for GATHER_ONCE
         }

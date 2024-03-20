@@ -166,7 +166,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     private void loadStyleUrls() {
         if (SettingsActivity.getLocationIntegration() == SettingsActivity.LocationIntegrationEnum.OSM) {
             List<JsonOsmStyle> osmStyles = AppSingleton.getEngine().getOsmStyles(AppSingleton.getBytesCurrentIdentity());
-            if (osmStyles == null || osmStyles.size() == 0) {
+            if (osmStyles == null || osmStyles.isEmpty()) {
                 loadFallbackStyleUrl();
             } else {
                 currentStyleId = SettingsActivity.getLocationLastOsmStyleId();
@@ -225,8 +225,8 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             ((MapView) mapView).addOnDidFailLoadingMapListener((errorMessage) -> {
                 Logger.w("OSM style not found, trying fallback style");
                 if (!triedStyleFallbackUrl) {
-                    loadFallbackStyleUrl();
-                    mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
+                    triedStyleFallbackUrl = true;
+                    mapboxMap.setStyle(new Style.Builder().fromUri(FALLBACK_OSM_STYLE_URL), this::onStyleLoaded);
                 }
             });
         }
@@ -264,6 +264,9 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             Logger.i("MapLibre.onStyleLoaded: map not initialized or style is null");
             return;
         }
+
+        // reset this to allow reloading it when the user selects another not found style
+        triedStyleFallbackUrl = false;
 
         // setup ui
         mapboxMap.getUiSettings().setCompassEnabled(true);
@@ -313,6 +316,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         // call parent callback if set
         if (onMapReadyCallback != null) {
             onMapReadyCallback.run();
+            onMapReadyCallback = null;
         }
     }
 

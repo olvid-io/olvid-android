@@ -126,12 +126,14 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                     PendingDeleteFromServer.create(fetchManagerSession, inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
                 }
             }
+            fetchManagerSession.session.commit();
 
             // check all decrypted messages, with attachments, that are not yet marked as listed on the server
             InboxMessage[] messagesToMarkAsListedOnServer = InboxMessage.getMessagesThatCanBeMarkedAsListedOnServer(fetchManagerSession);
             for (InboxMessage inboxMessage : messagesToMarkAsListedOnServer) {
                 fetchManagerSession.markAsListedOnServerListener.messageCanBeMarkedAsListedOnServer(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -672,7 +672,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             byte[] serverSessionToken = fetchManager.getServerAuthenticationToken(ownedIdentity);
             if (serverSessionToken == null) {
                 fetchManager.createServerSession(ownedIdentity);
-                return RegisterApiKeyResult.FAILED;
+                return RegisterApiKeyResult.WAIT_FOR_SERVER_SESSION;
             }
 
             StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, new ServerQuery.RegisterApiKeyQuery(ownedIdentity, serverSessionToken, Logger.getUuidString(apiKey))));
@@ -693,7 +693,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                         }
                         case StandaloneServerQueryOperation.RFC_INVALID_SERVER_SESSION: {
                             recreateServerSession(bytesOwnedIdentity);
-                            break;
+                            return RegisterApiKeyResult.WAIT_FOR_SERVER_SESSION;
                         }
                         case StandaloneServerQueryOperation.RFC_UNSUPPORTED_SERVER_QUERY_TYPE:
                         case StandaloneServerQueryOperation.RFC_NETWORK_ERROR:

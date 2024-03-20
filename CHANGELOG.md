@@ -1,3 +1,11 @@
+# Built 234 (2.0.1)
+2024-03-20
+
+- Several improvements to the video calls UI
+- Fix a api key registration bug on first Keycloak binding
+- Minor improvements to OpenStreetMaps integration
+- Redesign of the message upload coordinator for improved performances when sending many messages
+
 # Build 233 (2.0)
 2024-03-14
 

@@ -589,16 +589,7 @@ public class KeycloakManager {
                             try {
                                 UUID newApiKey = UUID.fromString(keycloakUserDetailsAndStuff.apiKey);
                                 if (!Objects.equals(Logger.getUuidString(newApiKey), kms.ownApiKey)) {
-                                    App.runThread(() -> {
-                                        if (AppSingleton.getEngine().registerOwnedIdentityApiKeyOnServer(identityBytesKey.bytes, newApiKey) == RegisterApiKeyResult.SUCCESS) {
-                                            try {
-                                                AppSingleton.getEngine().saveKeycloakApiKey(identityBytesKey.bytes, keycloakUserDetailsAndStuff.apiKey);
-                                                kms.ownApiKey = keycloakUserDetailsAndStuff.apiKey;
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    });
+                                    App.runThread(() -> registerMeApiKeyOnServer(kms, identityBytesKey, newApiKey));
                                 }
                             } catch (Exception e) {
                                 // do nothing
@@ -671,6 +662,35 @@ public class KeycloakManager {
                 }
             }));
         });
+    }
+
+    private static void registerMeApiKeyOnServer(KeycloakManagerState kms, BytesKey identityBytesKey, UUID apiKey) {
+        // retry at most 10 times
+        for (int i=0; i<10; i++) {
+            RegisterApiKeyResult registerApiKeyResult = AppSingleton.getEngine().registerOwnedIdentityApiKeyOnServer(identityBytesKey.bytes, apiKey);
+            Logger.d("Registering Keycloak api key on server: " + registerApiKeyResult);
+            switch (registerApiKeyResult) {
+                case SUCCESS:
+                    try {
+                        AppSingleton.getEngine().saveKeycloakApiKey(identityBytesKey.bytes, Logger.getUuidString(apiKey));
+                        kms.ownApiKey = Logger.getUuidString(apiKey);
+                        return;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case WAIT_FOR_SERVER_SESSION:
+                    // wait a bit, then try again
+                    try {
+                        Thread.sleep((3 + i) * 1000);
+                    } catch (InterruptedException ignored) { }
+                    break;
+                case INVALID_KEY:
+                case FAILED:
+                    // non-retriable failure, abort
+                    return;
+            }
+        }
     }
 
     private static class KeycloakManagerState {

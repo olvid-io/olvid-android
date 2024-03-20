@@ -16,8 +16,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdk 34
-        versionCode 233
-        versionName "2.0"
+        versionCode 234
+        versionName "2.0.1"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr']
@@ -197,7 +197,7 @@ dependencies {
     implementation 'org.bitbucket.b_c:jose4j:0.9.6'
 
     // map libre integration
-    implementation 'org.maplibre.gl:android-sdk:10.2.0'
+    implementation 'org.maplibre.gl:android-sdk:10.3.0'
     implementation 'org.maplibre.gl:android-plugin-annotation-v9:2.0.2'
 
     final def commonmark_version = "0.21.0"
@@ -227,7 +227,7 @@ dependencies {
     fullImplementation('com.google.http-client:google-http-client-gson:1.44.1') {
         exclude group: 'org.apache.httpcomponents'
     }
-    fullImplementation('com.google.api-client:google-api-client-android:2.3.0') {
+    fullImplementation('com.google.api-client:google-api-client-android:2.4.0') {
         exclude group: 'org.apache.httpcomponents'
     }
     fullImplementation('com.google.apis:google-api-services-drive:v3-rev20221219-2.0.0') {

@@ -1161,7 +1161,7 @@
     <string name="link_label_invitation_url">Ajouter un contact</string>
     <string name="link_label_configuration_url">Importer une configuration ou une licence</string>
     <string name="dialog_title_chose_profile_keycloak_configuration">Choisissez le profil qui sera géré par le fournisseur d\'identités de votre entreprise</string>
-    <string name="dialog_title_chose_profile_configuration">Choisissez le profil auquel appliquer cette configuration/license</string>
+    <string name="dialog_title_chose_profile_configuration">Choisissez le profil auquel appliquer cette configuration/licence</string>
     <string name="dialog_title_chose_profile_web_client">Choisissez le profil à connecter au client web Olvid</string>
     <string name="dialog_title_chose_profile_invitation">Choisissez le profil avec lequel inviter ce contact</string>
     <string name="toast_message_create_new_profile_then_reopen_this_link">Veuillez d\'abord créer un profil, puis ouvrir à nouveau le lien</string>
@@ -1459,8 +1459,8 @@
     <string name="location_sharing_duration_one_hour_full_string">Partager la position pendant <b>1 heure</b></string>
     <string name="location_sharing_duration_three_hours_short_string">3\u00a0heures</string>
     <string name="location_sharing_duration_three_hours_full_string">Partager la position pendant <b>3 heures</b></string>
-    <string name="location_sharing_duration_endless_short_string">Pas de limite</string>
-    <string name="location_sharing_duration_endless_full_string">Partager la position <b>indéfiniement</b></string>
+    <string name="location_sharing_duration_endless_short_string">Indéfiniment</string>
+    <string name="location_sharing_duration_endless_full_string">Partager la position <b>indéfiniment</b></string>
     <string name="location_sharing_quality_precise_short_string">Précis</string>
     <string name="location_sharing_quality_balanced_short_string">Équilibré</string>
     <string name="location_sharing_quality_power_save_short_string">Économie d\'énergie</string>
@@ -1611,7 +1611,7 @@
     <string name="text_feature_initiate_secure_calls_from_another_profile">Émettre des appels sécurisés\n(disponible grâce à un autre profil)</string>
     <string name="dialog_title_confirm_open_link">Ouvrir ce lien dans votre navigateur\u00a0?</string>
     <string name="toast_message_unable_to_open_url">Impossible d\'ouvrir l\'URL</string>
-    <string name="text_explanation_location_map_provider">Choisir un service de cartographie vous permet de séléctionner précisément la position que vous souhaitez partager sur une carte. Toutefois, cela peut divulguer votre position (ou celle de vos contacts) à ce fournisseur de service.</string>
+    <string name="text_explanation_location_map_provider">Choisir un service de cartographie vous permet de sélectionner précisément la position que vous souhaitez partager sur une carte. Toutefois, cela peut divulguer votre position (ou celle de vos contacts) à ce fournisseur de service.</string>
     <string name="text_explanation_location_map_provider_settings">Ce choix peut être modifié dans les paramètres de l\'application.</string>
     <string name="button_label_choose_provider">Choisir un service</string>
     <string name="button_label_live_share">Partage en direct</string>
@@ -1709,7 +1709,7 @@
     <string name="notification_title_unnamed_device_expiration">Désactivation de votre appareil</string>
     <string name="notification_message_unnamed_device_expiration">Votre appareil Olvid sera désactivé d\'ici %1$s</string>
     <string name="dialog_title_add_device_explanation">Ajouter un appareil ?</string>
-    <string name="dialog_message_add_device_explanation">Ajouter un appareil permet de facilement transférer votre profil vers un nouvel appareil ou, si vous avez une license multi-appareils, de recevoir vos messages simultanément sur les deux. **N\'ajoutez que des appareils auxquels vous faites confiance !**\n\nVérifiez que vous avez une **connexion internet stable** sur vos deux appareils avant de poursuivre.</string>
+    <string name="dialog_message_add_device_explanation">Ajouter un appareil permet de facilement transférer votre profil vers un nouvel appareil ou, si vous avez une licence multi-appareils, de recevoir vos messages simultanément sur les deux. **N\'ajoutez que des appareils auxquels vous faites confiance !**\n\nVérifiez que vous avez une **connexion internet stable** sur vos deux appareils avant de poursuivre.</string>
     <string name="onboarding_transfer_successful_title">Import de votre profil réussi</string>
     <string name="onboarding_transfer_successful_subtitle">Si vous avez plusieurs profils, peut-être souhaitez-vous les importer également ?</string>
     <string name="button_label_activate_another_profile">Importer un autre profil</string>
@@ -1855,6 +1855,7 @@
     <string name="pref_video_resolution_title">Résolution en envoi des appels vidéo</string>
     <string name="text_ongoing_call">Appel en cours : %1$s</string>
     <string name="text_audio_output_no_sound">Aucun son</string>
+    <string name="toast_message_video_calls_xxx_participants">Les appels vidéo sont limités à %1$d participants</string>
 
     <plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Vous êtes sur le point d\'inviter chaque membre de ce groupe avec lequel vous avez un canal (actuellement 1 membre) à une discussion privée.\nSouhaitez-vous poursuivre ?</item>

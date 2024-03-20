@@ -28,7 +28,6 @@ import android.util.AttributeSet
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import org.webrtc.EglBase
-import org.webrtc.EglRenderer
 import org.webrtc.GlRectDrawer
 import org.webrtc.RendererCommon.RendererEvents
 import org.webrtc.ThreadUtils
@@ -41,6 +40,7 @@ import java.util.concurrent.CountDownLatch
  */
 class VideoTextureViewRenderer @JvmOverloads constructor(
   context: Context,
+  val scaleAndOffsetControl: ScaleAndOffsetControl? = null,
   attrs: AttributeSet? = null
 ) : TextureView(context, attrs), VideoSink, SurfaceTextureListener {
 
@@ -52,7 +52,7 @@ class VideoTextureViewRenderer @JvmOverloads constructor(
   /**
    * Renderer used to render the video.
    */
-  private val eglRenderer: EglRenderer = EglRenderer(resourceName)
+  private val eglRenderer: CustomEglRenderer = CustomEglRenderer(resourceName, scaleAndOffsetControl)
 
   /**
    * Callback used for reporting render events.

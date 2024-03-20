@@ -20,12 +20,15 @@
 package io.olvid.messenger.webrtc.components
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.EaseOutExpo
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -46,6 +49,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,15 +58,17 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -89,7 +95,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -126,7 +131,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
-import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
@@ -304,12 +308,13 @@ private fun BoxScope.PreCall(
     status: String = "",
     cameraEnabled: Boolean = false,
     videoTrack: VideoTrack?,
+    mirror: Boolean = true,
     initialViewSetup: (initialView: InitialView) -> Unit = {}
 ) {
 
     videoTrack?.let {
         if (cameraEnabled) {
-            VideoRenderer(modifier = Modifier.fillMaxSize(), videoTrack = it, zoomable = true, mirror = true)
+            VideoRenderer(modifier = Modifier.fillMaxSize(), videoTrack = it, zoomable = true, mirror = mirror)
         }
     }
 
@@ -381,12 +386,14 @@ private fun BoxScope.PreCall(
 }
 
 @Composable
-private fun OlvidLogo() {
+private fun OlvidLogo(
+    large: Boolean = false
+) {
     Box(
         modifier = Modifier
-            .size(16.dp)
+            .size(if (large) 48.dp else 16.dp)
             .background(
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(if (large) 12.dp else 4.dp),
                 brush = Brush.verticalGradient(
                     listOf(
                         colorResource(id = R.color.olvid_gradient_light),
@@ -398,7 +405,7 @@ private fun OlvidLogo() {
         Image(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(14.dp),
+                .size(if (large) 42.dp else 14.dp),
             painter = painterResource(id = R.drawable.icon_olvid_no_padding),
             contentDescription = "Olvid"
         )
@@ -413,7 +420,7 @@ fun PreCallScreenPreview() {
             .fillMaxHeight()
             .background(Color.Black)) {
             PreCall(
-                "Alice Barrin",
+                "Alice Border",
                 "Connexion...",
                 false,
                 null
@@ -449,6 +456,9 @@ fun CallScreen(
     val iAmTheCaller = webrtcCallService?.isCaller ?: false
 
     val microphoneMuted = webrtcCallService?.getMicrophoneMuted()?.observeAsState()
+    val pipAspectCallback: (Context, Int, Int) -> Unit = { contextArg, width, height ->
+        setPictureInPictureAspectRatio(context = contextArg, width = width, height = height)
+    }
 
     val unfilteredContacts =
         AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
@@ -484,12 +494,12 @@ fun CallScreen(
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
 
         insetsController.apply {
-            if (fullScreenMode) {
+            systemBarsBehavior = if (fullScreenMode) {
                 hide(WindowInsetsCompat.Type.navigationBars())
-                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             } else {
                 show(WindowInsetsCompat.Type.navigationBars())
-                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+                WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
             }
         }
     }
@@ -540,7 +550,8 @@ fun CallScreen(
                     webrtcCallService,
                     peekHeight,
                     onCallAction,
-                    isPip = true
+                    isPip = true,
+                    pipAspectCallback = pipAspectCallback
                 )
             }
         } else {
@@ -595,10 +606,11 @@ fun CallScreen(
                 ) {
                     if (callState?.value == CALL_IN_PROGRESS || callState?.value == CALL_ENDED) {
                         VideoCallContent(
-                            participants,
-                            webrtcCallService,
-                            peekHeight,
-                            onCallAction,
+                            participants = participants,
+                            webrtcCallService = webrtcCallService,
+                            peekHeight = peekHeight,
+                            onCallAction = onCallAction,
+                            pipAspectCallback = pipAspectCallback
                         )
                     } else {
                         var initialViewSetup: (InitialView) -> Unit by remember {
@@ -607,6 +619,8 @@ fun CallScreen(
                         var name by remember {
                             mutableStateOf("")
                         }
+                        val selectedCamera by webrtcCallService.selectedCameraLiveData.observeAsState()
+
                         LaunchedEffect(callParticipants) {
                             App.runThread {
                                 if (callParticipants?.value.orEmpty().size > 1 && webrtcCallService.bytesGroupOwnerAndUidOrIdentifier != null) {
@@ -684,18 +698,20 @@ fun CallScreen(
                             },
                             initialViewSetup = initialViewSetup,
                             cameraEnabled = webrtcCallService.cameraEnabled,
-                            videoTrack = localVideoTrack?.takeIf { callState?.value != CALL_ENDED }
+                            videoTrack = localVideoTrack?.takeIf { callState?.value != CALL_ENDED },
+                            mirror = selectedCamera?.mirror == true
                         )
                     }
 
                     AnimatedVisibility(
                         modifier = Modifier.align(Alignment.TopEnd),
                         visible = !fullScreenMode,
-                        enter = slideInVertically(),
-                        exit = slideOutVertically()
+                        enter = slideInVertically() + fadeIn(),
+                        exit = slideOutVertically() + fadeOut()
                     ) {
                         SpeakerToggle(
                             modifier = Modifier
+                                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.End))
                                 .padding(top = 10.dp, end = 10.dp),
                             audioOutputs = webrtcCallService.availableAudioOutputs, { audioOutput ->
                                 webrtcCallService.selectAudioOutput(audioOutput)
@@ -719,7 +735,7 @@ private fun ColumnScope.CallBottomSheetContent(
     webrtcCallService: WebrtcCallService?,
     onCallAction: (CallAction) -> Unit,
     microphoneMuted: State<Boolean?>?,
-    callState: State<WebrtcCallService.State?>?,
+    @Suppress("UNUSED_PARAMETER") callState: State<WebrtcCallService.State?>?,
     contact: Contact?,
     callDuration: State<Int?>?,
     callParticipants: State<List<CallParticipantPojo>?>?,
@@ -954,158 +970,188 @@ private fun ColumnScope.CallBottomSheetContent(
     Spacer(modifier = Modifier.height(navigationBarHeight))
 }
 
-@Composable
-fun BoxScope.MultiVideoCallContent(
-    participants: List<CallParticipantPojo>,
-    webrtcCallService: WebrtcCallService,
-    peekHeight: Dp
-) {
-    val selectedCamera by webrtcCallService.selectedCameraLiveData.observeAsState()
-    // multi
-    Column {
-        LazyRow(
-            modifier = Modifier.padding(
-                start = 16.dp,
-                top = 8.dp,
-                bottom = 10.dp
-            ),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(items = participants.filterNot {
-                it.bytesContactIdentity.contentEquals(
-                    webrtcCallService.selectedParticipant
-                )
-            }) { callParticipant ->
-                val remoteVideoTrack =
-                    webrtcCallService.getCallParticipant(callParticipant.bytesContactIdentity)?.peerConnectionHolder?.remoteVideoTrack
-                Card(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clickable {
-                            webrtcCallService.selectedParticipant =
-                                callParticipant.bytesContactIdentity
-                        },
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    CallParticipant(
-                        callParticipant = callParticipant,
-                        videoTrack = remoteVideoTrack,
-                        audioLevel = webrtcCallService.getCallParticipant(callParticipant.bytesContactIdentity)?.peerConnectionHolder?.peerAudioLevel
-                    )
-
-                }
-
-            }
-        }
-        if (webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity!!)) {
-            if (webrtcCallService.screenShareActive) {
-                ScreenShareOngoing { webrtcCallService.toggleScreenShare() }
-            } else {
-                CallParticipant(
-                    modifier = Modifier
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = 20.dp,
-                                topEnd = 20.dp
-                            )
-                        )
-                        .fillMaxSize(),
-                    bytesOwnedIdentity = webrtcCallService.bytesOwnedIdentity,
-                    mirror = selectedCamera?.mirror == true,
-                    videoTrack = localVideoTrack.takeIf { webrtcCallService.cameraEnabled },
-                    screenTrack = localScreenTrack.takeIf { webrtcCallService.screenShareActive },
-                    zoomable = true,
-                    audioLevel = webrtcCallService.getAudioLevel(webrtcCallService.bytesOwnedIdentity)
-                )
-            }
-        } else {
-            val remoteVideoTrack =
-                webrtcCallService.getCallParticipant(webrtcCallService.selectedParticipant)?.peerConnectionHolder?.remoteVideoTrack
-            CallParticipant(
-                callParticipant = CallParticipantPojo(
-                    webrtcCallService.getCallParticipant(
-                        webrtcCallService.selectedParticipant
-                    )!!
-                ), videoTrack = remoteVideoTrack,
-                zoomable = true,
-                audioLevel = webrtcCallService.getAudioLevel(webrtcCallService.selectedParticipant)
-            )
-        }
-    }
-    if (webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity!!)
-            .not()
-    ) {
-        Card(
-            modifier = Modifier
-                .size(120.dp)
-                .align(Alignment.BottomEnd)
-                .offset(y = -peekHeight)
-                .clickable {
-                    webrtcCallService.selectedParticipant =
-                        webrtcCallService.bytesOwnedIdentity!!
-                }
-                .padding(end = 16.dp, bottom = 8.dp),
-            shape = RoundedCornerShape(20.dp)
-        ) {
-            CallParticipant(
-                bytesOwnedIdentity = webrtcCallService.bytesOwnedIdentity,
-                mirror = selectedCamera?.mirror == true,
-                videoTrack = localVideoTrack.takeIf { webrtcCallService.cameraEnabled },
-                screenTrack = localScreenTrack.takeIf { webrtcCallService.screenShareActive },
-                audioLevel = webrtcCallService.getAudioLevel(webrtcCallService.bytesOwnedIdentity)
-            )
-        }
-    }
-}
+//@Composable
+//fun BoxScope.MultiVideoCallContent(
+//    participants: List<CallParticipantPojo>,
+//    webrtcCallService: WebrtcCallService,
+//    peekHeight: Dp
+//) {
+//    val selectedCamera by webrtcCallService.selectedCameraLiveData.observeAsState()
+//    // multi
+//    Column {
+//        LazyRow(
+//            modifier = Modifier.padding(
+//                start = 16.dp,
+//                top = 8.dp,
+//                bottom = 10.dp
+//            ),
+//            horizontalArrangement = Arrangement.spacedBy(10.dp)
+//        ) {
+//            items(items = participants.filterNot {
+//                it.bytesContactIdentity.contentEquals(
+//                    webrtcCallService.selectedParticipant
+//                )
+//            }) { callParticipant ->
+//                val remoteVideoTrack =
+//                    webrtcCallService.getCallParticipant(callParticipant.bytesContactIdentity)?.peerConnectionHolder?.remoteVideoTrack
+//                Card(
+//                    modifier = Modifier
+//                        .size(72.dp)
+//                        .clickable {
+//                            webrtcCallService.selectedParticipant =
+//                                callParticipant.bytesContactIdentity
+//                        },
+//                    shape = RoundedCornerShape(12.dp)
+//                ) {
+//                    CallParticipant(
+//                        callParticipant = callParticipant,
+//                        videoTrack = remoteVideoTrack,
+//                        audioLevel = webrtcCallService.getCallParticipant(callParticipant.bytesContactIdentity)?.peerConnectionHolder?.peerAudioLevel
+//                    )
+//
+//                }
+//
+//            }
+//        }
+//        if (webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity!!)) {
+//            if (webrtcCallService.screenShareActive) {
+//                ScreenShareOngoing { webrtcCallService.toggleScreenShare() }
+//            } else {
+//                CallParticipant(
+//                    modifier = Modifier
+//                        .clip(
+//                            RoundedCornerShape(
+//                                topStart = 20.dp,
+//                                topEnd = 20.dp
+//                            )
+//                        )
+//                        .fillMaxSize(),
+//                    bytesOwnedIdentity = webrtcCallService.bytesOwnedIdentity,
+//                    mirror = selectedCamera?.mirror == true,
+//                    videoTrack = localVideoTrack.takeIf { webrtcCallService.cameraEnabled },
+//                    screenTrack = localScreenTrack.takeIf { webrtcCallService.screenShareActive },
+//                    zoomable = true,
+//                    audioLevel = webrtcCallService.getAudioLevel(webrtcCallService.bytesOwnedIdentity)
+//                )
+//            }
+//        } else {
+//            val remoteVideoTrack =
+//                webrtcCallService.getCallParticipant(webrtcCallService.selectedParticipant)?.peerConnectionHolder?.remoteVideoTrack
+//            CallParticipant(
+//                callParticipant = CallParticipantPojo(
+//                    webrtcCallService.getCallParticipant(
+//                        webrtcCallService.selectedParticipant
+//                    )!!
+//                ), videoTrack = remoteVideoTrack,
+//                zoomable = true,
+//                audioLevel = webrtcCallService.getAudioLevel(webrtcCallService.selectedParticipant)
+//            )
+//        }
+//    }
+//    if (webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity!!)
+//            .not()
+//    ) {
+//        Card(
+//            modifier = Modifier
+//                .size(120.dp)
+//                .align(Alignment.BottomEnd)
+//                .offset(y = -peekHeight)
+//                .clickable {
+//                    webrtcCallService.selectedParticipant =
+//                        webrtcCallService.bytesOwnedIdentity!!
+//                }
+//                .padding(end = 16.dp, bottom = 8.dp),
+//            shape = RoundedCornerShape(20.dp)
+//        ) {
+//            CallParticipant(
+//                bytesOwnedIdentity = webrtcCallService.bytesOwnedIdentity,
+//                mirror = selectedCamera?.mirror == true,
+//                videoTrack = localVideoTrack.takeIf { webrtcCallService.cameraEnabled },
+//                screenTrack = localScreenTrack.takeIf { webrtcCallService.screenShareActive },
+//                audioLevel = webrtcCallService.getAudioLevel(webrtcCallService.bytesOwnedIdentity)
+//            )
+//        }
+//    }
+//}
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 private fun AudioCallContent(
     participants: List<CallParticipantPojo>,
     webrtcCallService: WebrtcCallService,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit,
+    isPip: Boolean = false
 ) {
-    val haptics = LocalHapticFeedback.current
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(participants) { audioParticipant ->
-            var menu by remember {
-                mutableStateOf(false)
+    if (isPip) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            OlvidLogo(large = true)
+            Spacer(modifier = Modifier.height(32.dp))
+            Row (verticalAlignment = Alignment.CenterVertically)
+            {
+                Image(
+                    modifier = Modifier.size(32.dp),
+                    painter = painterResource(id = R.drawable.ic_phone_outgoing),
+                    contentDescription = stringResource(id = R.string.text_ongoing_call)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = participants.size.toString(),
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White
+                )
             }
-            Box {
-                DropdownMenu(
-                    expanded = menu,
-                    onDismissRequest = { menu = false }) {
-                    DropdownMenuItem(onClick = {
-                        menu = false
-                        webrtcCallService.callerKickParticipant(
-                            audioParticipant.bytesContactIdentity
-                        )
-                    }) {
-                        Text(text = stringResource(id = R.string.dialog_title_webrtc_kick_participant))
-                    }
+        }
+    } else {
+        val haptics = LocalHapticFeedback.current
+        LazyColumn(
+            modifier = Modifier.padding(top = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items(participants) { audioParticipant ->
+                var menu by remember {
+                    mutableStateOf(false)
                 }
-                AudioParticipant(modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .combinedClickable(
-                        onClick = {
-                            if (audioParticipant.contact?.oneToOne == true) {
-                                onCallAction(GoToDiscussion(audioParticipant.contact))
-                            }
-                        },
-                        onLongClick = {
-                            if (webrtcCallService.isCaller && participants.size > 1) {
-                                haptics.performHapticFeedback(
-                                    HapticFeedbackType.LongPress
-                                )
-                                menu = true
-                            }
+                Box {
+                    DropdownMenu(
+                        expanded = menu,
+                        onDismissRequest = { menu = false }) {
+                        DropdownMenuItem(onClick = {
+                            menu = false
+                            webrtcCallService.callerKickParticipant(
+                                audioParticipant.bytesContactIdentity
+                            )
+                        }) {
+                            Text(text = stringResource(id = R.string.dialog_title_webrtc_kick_participant))
                         }
-                    ),
-                    initialViewSetup = audioParticipant.initialViewSetup(),
-                    name = audioParticipant.displayName ?: "",
-                    isMute = audioParticipant.peerIsMuted,
-                    state = audioParticipant.peerState,
-                    audioLevel = webrtcCallService.getAudioLevel(audioParticipant.bytesContactIdentity))
+                    }
+                    AudioParticipant(modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .combinedClickable(
+                            onClick = {
+                                if (audioParticipant.contact?.oneToOne == true) {
+                                    onCallAction(GoToDiscussion(audioParticipant.contact))
+                                }
+                            },
+                            onLongClick = {
+                                if (webrtcCallService.isCaller && participants.size > 1) {
+                                    haptics.performHapticFeedback(
+                                        HapticFeedbackType.LongPress
+                                    )
+                                    menu = true
+                                }
+                            }
+                        ),
+                        initialViewSetup = audioParticipant.initialViewSetup(),
+                        name = audioParticipant.displayName ?: "",
+                        isMute = audioParticipant.peerIsMuted,
+                        state = audioParticipant.peerState,
+                        audioLevel = webrtcCallService.getAudioLevel(audioParticipant.bytesContactIdentity))
+                }
             }
         }
     }
@@ -1118,7 +1164,8 @@ private fun VideoCallContent(
     webrtcCallService: WebrtcCallService,
     peekHeight: Dp,
     onCallAction: (CallAction) -> Unit,
-    isPip: Boolean = false
+    isPip: Boolean = false,
+    pipAspectCallback: ((Context, Int, Int) -> Unit)? = null
 ) {
     val selectedCamera by webrtcCallService.selectedCameraLiveData.observeAsState()
     val speakingColor = colorResource(id = R.color.olvid_gradient_light)
@@ -1148,17 +1195,18 @@ private fun VideoCallContent(
                 modifier = Modifier.fillMaxSize(),
                 zoomable = true,
                 audioLevel = webrtcCallService.getAudioLevel(participants.firstOrNull()?.bytesContactIdentity),
-                isPip = isPip
+                isPip = isPip,
+                pipAspectCallback = pipAspectCallback
             )
             AnimatedVisibility(!isPip) {
                 Card(
                     modifier = Modifier
-                        .size(120.dp)
+                        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Start))
+                        .padding(start = 10.dp, top = 10.dp)
                         .clickable {
                             webrtcCallService.selectedParticipant =
                                 webrtcCallService.bytesOwnedIdentity!!
                         }
-                        .padding(start = 10.dp, top = 10.dp)
                         .border(
                             width = 2.dp,
                             color = borderColorOwned,
@@ -1167,6 +1215,7 @@ private fun VideoCallContent(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     CallParticipant(
+                        modifier = Modifier.sizeIn(maxWidth = 120.dp, maxHeight = 120.dp),
                         bytesOwnedIdentity = webrtcCallService.bytesOwnedIdentity,
                         mirror = selectedCamera?.mirror == true,
                         videoTrack = localVideoTrack.takeIf { webrtcCallService.cameraEnabled },
@@ -1187,25 +1236,28 @@ private fun VideoCallContent(
                     zoomable = true,
                     modifier = Modifier.fillMaxSize(),
                     audioLevel = webrtcCallService.getAudioLevel(webrtcCallService.bytesOwnedIdentity),
-                    isPip = isPip
+                    isPip = isPip,
+                    fitVideo = true
                 )
             }
             AnimatedVisibility(!isPip) {
                 Card(
                     modifier = Modifier
-                        .size(120.dp)
+                        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Start))
+                        .padding(start = 10.dp, top = 10.dp)
                         .clickable {
                             webrtcCallService.selectedParticipant =
                                 participants.firstOrNull()?.bytesContactIdentity!!
-                        }
-                        .padding(start = 10.dp, top = 10.dp),
+                        },
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     CallParticipant(
+                        modifier = Modifier.sizeIn(maxWidth = 120.dp, maxHeight = 120.dp),
                         callParticipant = participants.firstOrNull(),
                         videoTrack = remoteVideoTrack,
                         screenTrack = remoteScreenTrack,
-                        audioLevel = webrtcCallService.getAudioLevel(participants.firstOrNull()?.bytesContactIdentity)
+                        audioLevel = webrtcCallService.getAudioLevel(participants.firstOrNull()?.bytesContactIdentity),
+                        pipAspectCallback = pipAspectCallback
                     )
                 }
             }
@@ -1225,6 +1277,10 @@ private fun VideoCallContent(
             label = "borderColor",
             animationSpec = tween(durationMillis = 1000, easing = EaseOutExpo)
         )
+        val context = LocalContext.current
+        LaunchedEffect(Unit) {
+            pipAspectCallback?.invoke(context, 9, 16)
+        }
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
@@ -1301,7 +1357,7 @@ private fun VideoCallContent(
         AnimatedVisibility(!isPip) {
             Card(
                 modifier = Modifier
-                    .size(120.dp)
+                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Start))
                     .padding(start = 10.dp, top = 10.dp)
                     .border(
                         width = 2.dp,
@@ -1311,6 +1367,7 @@ private fun VideoCallContent(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 CallParticipant(
+                    modifier = Modifier.sizeIn(maxWidth = 120.dp, maxHeight = 120.dp),
                     bytesOwnedIdentity = webrtcCallService.bytesOwnedIdentity,
                     mirror = selectedCamera?.mirror == true,
                     videoTrack = localVideoTrack.takeIf { webrtcCallService.cameraEnabled },
@@ -1319,10 +1376,15 @@ private fun VideoCallContent(
             }
         }
     } else if (participants.size > 2) {
+        val context = LocalContext.current
+        LaunchedEffect(Unit) {
+            pipAspectCallback?.invoke(context, 9, 16)
+        }
         AudioCallContent(
             participants = participants,
             webrtcCallService = webrtcCallService,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
+            isPip = isPip
         )
         //MultiVideoCallContent(participants = participants, webrtcCallService = webrtcCallService, peekHeight = peekHeight)
     }
@@ -1346,8 +1408,11 @@ fun CallParticipant(
     zoomable: Boolean = false,
     peekHeight: Dp = 0.dp,
     audioLevel: Double?,
-    isPip: Boolean = false
+    isPip: Boolean = false,
+    pipAspectCallback: ((Context, Int, Int) -> Unit)? = null,
+    fitVideo: Boolean = false
 ) {
+
     BoxWithConstraints(modifier = modifier) {
         val largeLayout = maxWidth > 200.dp
         val hasVideo = callParticipant?.peerVideoSharing != false && videoTrack.isEnabledSafe()
@@ -1359,37 +1424,42 @@ fun CallParticipant(
                     modifier = Modifier.fillMaxSize(),
                     videoTrack = screenTrack!!,
                     zoomable = zoomable,
-                    mirror = false
+                    mirror = false,
+                    pipAspectCallback = pipAspectCallback,
+                    fitVideo = true
                 )
                 if (hasVideo) {
                     Card(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
+                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Start))
                             .then(
                                 if (isPip)
                                     Modifier
                                         .offset(x = 4.dp, y = (-4).dp)
-                                        .size(60.dp)
+                                        .sizeIn(maxWidth = 60.dp, maxHeight = 60.dp)
                                 else
                                     Modifier
                                         .offset(x = 10.dp, y = -(peekHeight + 10.dp))
-                                        .size(120.dp)
+                                        .sizeIn(maxWidth = 120.dp, maxHeight = 120.dp)
                             ),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         VideoRenderer(
-                            modifier = Modifier.fillMaxSize(),
                             videoTrack = videoTrack!!,
-                            mirror = mirror
+                            mirror = mirror,
+                            matchVideoAspectRatio = true
                         )
                     }
                 }
             } else {
                 VideoRenderer(
-                    modifier = Modifier.fillMaxSize(),
                     videoTrack = videoTrack!!,
                     zoomable = zoomable,
-                    mirror = mirror
+                    mirror = mirror,
+                    matchVideoAspectRatio = !largeLayout,
+                    pipAspectCallback = pipAspectCallback,
+                    fitVideo = fitVideo
                 )
             }
             callParticipant?.peerState.takeUnless { it == CONNECTED }?.let {
@@ -1410,6 +1480,10 @@ fun CallParticipant(
                 )
             }
         } else {
+            val context = LocalContext.current
+            LaunchedEffect(Unit) {
+                pipAspectCallback?.invoke(context, 9, 16)
+            }
             val radius by animateFloatAsState(
                 targetValue = audioLevel?.toFloat() ?: 0f,
                 animationSpec = tween(durationMillis = 600),
@@ -1491,8 +1565,29 @@ fun CallParticipant(
                 ))?.let { name ->
                 Text(
                     modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(start = 8.dp, bottom = peekHeight + if (hasVideo && hasScreenShare) 128.dp else 8.dp)
+                        .then(
+                            if (hasVideo && hasScreenShare)
+                                Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .windowInsetsPadding(
+                                        WindowInsets.systemBars.only(
+                                            WindowInsetsSides.End
+                                        )
+                                    )
+                            else
+                                Modifier
+                                    .align(Alignment.BottomStart)
+                                    .windowInsetsPadding(
+                                        WindowInsets.systemBars.only(
+                                            WindowInsetsSides.Start
+                                        )
+                                    )
+                        )
+                        .padding(
+                            start = 6.dp,
+                            bottom = peekHeight + 6.dp,
+                            end = 6.dp
+                        )
                         .background(
                             colorResource(id = R.color.blackOverlay),
                             RoundedCornerShape(12.dp)
@@ -1727,16 +1822,17 @@ fun AudioParticipant(
                 color = Color.LightGray
             )
         }
-        AnimatedVisibility(visible = isMute) {
+        if(isMute) {
             Icon(
                 modifier = Modifier
-                    .size(20.dp),
+                    .size(32.dp)
+                    .background(colorResource(id = R.color.red), CircleShape)
+                    .padding(4.dp),
                 painter = painterResource(id = R.drawable.ic_microphone_off),
                 tint = Color.White,
                 contentDescription = "muted"
             )
-        }
-        AnimatedVisibility(visible = isMute.not()) {
+        } else {
             AudioLevel(
                 modifier = Modifier.size(32.dp),
                 audioLevel = audioLevel

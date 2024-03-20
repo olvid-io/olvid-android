@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient_olvid"
+    android:background="@color/black"
     tools:context=".webrtc.WebrtcIncomingCallActivity">
 
     <TextView
@@ -22,7 +22,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView8"
+        app:layout_constraintTop_toBottomOf="@+id/encrypted_call_text_view"
         app:layout_constraintVertical_bias="0.33"
         app:layout_constraintVertical_chainStyle="packed" />
 
@@ -30,14 +30,14 @@
         android:id="@+id/portrait_color_circle_image_view"
         android:layout_width="192dp"
         android:layout_height="192dp"
-        app:layout_constraintTop_toTopOf="@id/contact_initial_view"
-        app:layout_constraintBottom_toBottomOf="@id/contact_initial_view"
-        app:layout_constraintStart_toStartOf="@id/contact_initial_view"
-        app:layout_constraintEnd_toEndOf="@id/contact_initial_view"
         android:src="@drawable/initial_view_color_circle"
         android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/contact_initial_view"
+        app:layout_constraintEnd_toEndOf="@id/contact_initial_view"
+        app:layout_constraintStart_toStartOf="@id/contact_initial_view"
+        app:layout_constraintTop_toTopOf="@id/contact_initial_view"
         tools:visibility="visible"
-        />
+        android:importantForAccessibility="no" />
 
     <io.olvid.messenger.customClasses.InitialView
         android:id="@+id/contact_initial_view"
@@ -121,8 +121,8 @@
         android:id="@+id/accept_call_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
         android:layout_marginBottom="64dp"
         android:foreground="?attr/selectableItemBackground"
         android:theme="@style/AlwaysWhiteRipple"
@@ -137,8 +137,9 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@string/content_description_accept_call_button"
             android:src="@drawable/button_answer_call"
-            android:contentDescription="@string/content_description_accept_call_button" />
+            tools:ignore="ImageContrastCheck" />
     </androidx.cardview.widget.CardView>
 
     <TextView
@@ -153,14 +154,30 @@
         app:layout_constraintTop_toTopOf="@+id/contact_initial_view"
         tools:text="+2" />
 
+
     <ImageView
-        android:id="@+id/imageView8"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:id="@+id/encrypted_call_logo"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/olvid_icon"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintBottom_toBottomOf="@id/encrypted_call_text_view"
+        app:layout_constraintEnd_toStartOf="@id/encrypted_call_text_view"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/olvid" />
+        app:layout_constraintTop_toTopOf="@id/encrypted_call_text_view" />
+
+    <TextView
+        android:id="@+id/encrypted_call_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="14sp"
+        android:text="@string/call_encrypted_notice"
+        android:textColor="@color/greyTint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/encrypted_call_logo"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

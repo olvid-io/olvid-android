@@ -148,43 +148,39 @@ fun ContactListItem(
 
             Row(verticalAlignment = CenterVertically) {
 
-                endContent?.let {
-                    it.invoke()
-                } ?: kotlin.run {
-                    AnimatedVisibility(visible = publishedDetails) {
-                        BoxWithConstraints(
+                AnimatedVisibility(visible = publishedDetails) {
+                    BoxWithConstraints(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .size(width = 24.dp, height = 18.dp)
+                    ) {
+                        Image(
                             modifier = Modifier
-                                .padding(end = 8.dp)
-                                .size(width = 24.dp, height = 18.dp)
-
-                        ) {
+                                .fillMaxWidth()
+                                .align(Alignment.BottomStart),
+                            painter = painterResource(id = drawable.ic_olvid_card),
+                            contentDescription = ""
+                        )
+                        if (publishedDetailsNotification) {
                             Image(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.BottomStart),
-                                painter = painterResource(id = drawable.ic_olvid_card),
-                                contentDescription = ""
-                            )
-                            if (publishedDetailsNotification) {
-                                Image(
-                                    modifier = Modifier
-                                        .size(maxWidth.times(0.4f))
-                                        .align(Alignment.TopEnd)
-                                        .offset(x = 4.dp, y = (-4).dp),
-                                    painter = painterResource(id = drawable.ic_dot_white_bordered),
-                                    contentDescription = stringResource(
-                                        id = string.content_description_message_status
-                                    )
+                                    .size(maxWidth.times(0.4f))
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 4.dp, y = (-4).dp),
+                                painter = painterResource(id = drawable.ic_dot_white_bordered),
+                                contentDescription = stringResource(
+                                    id = string.content_description_message_status
                                 )
-                            }
+                            )
                         }
                     }
-
-                    AnimatedVisibility(visible = shouldAnimateChannel) {
-                        EstablishingChannel()
-                    }
-
                 }
+
+                AnimatedVisibility(visible = shouldAnimateChannel) {
+                    EstablishingChannel()
+                }
+
+                endContent?.invoke()
             }
         }
     }

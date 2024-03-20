@@ -33,9 +33,8 @@ import io.olvid.messenger.R
 internal fun enterPictureInPicture(context: Context) {
     if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val aspect = Rational(9, 16) // TODO: use incoming video aspect ratio?
             val params = PictureInPictureParams.Builder()
-                .setAspectRatio(aspect).apply {
+                .setAspectRatio(pipAspect).apply {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         setAutoEnterEnabled(false)
                     }
@@ -48,6 +47,17 @@ internal fun enterPictureInPicture(context: Context) {
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             context.findActivity()?.enterPictureInPictureMode()
         }
+    }
+}
+
+internal var pipAspect = Rational(9, 16)
+
+internal fun setPictureInPictureAspectRatio(context: Context, width: Int, height: Int) {
+    pipAspect = Rational(width, height)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        context.findActivity()?.setPictureInPictureParams(PictureInPictureParams.Builder()
+            .setAspectRatio(pipAspect)
+            .build())
     }
 }
 

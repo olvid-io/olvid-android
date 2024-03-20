@@ -21,36 +21,51 @@ package io.olvid.engine.networksend.coordinators;
 
 
 import java.sql.SQLException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.ExponentialBackoffRepeatingScheduler;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.OperationQueue;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.IdentityAndUid;
+import io.olvid.engine.datatypes.containers.StringAndBoolean;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.networksend.databases.OutboxMessage;
 import io.olvid.engine.networksend.datatypes.SendManagerSession;
 import io.olvid.engine.networksend.datatypes.SendManagerSessionFactory;
+import io.olvid.engine.networksend.operations.BatchUploadMessagesCompositeOperation;
 import io.olvid.engine.networksend.operations.UploadMessageCompositeOperation;
 
-public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageListener, Operation.OnCancelCallback, Operation.OnFinishCallback {
+public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageListener {
+
     private final SendManagerSessionFactory sendManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private NotificationListeningDelegate notificationListeningDelegate;
 
-    private final OperationQueue sendMessageOperationQueue;
+    private final OperationQueue sendMessageWithAttachmentOperationQueue;
     private final ExponentialBackoffRepeatingScheduler<IdentityAndUid> scheduler;
+
+    private final HashMap<String, Queue<IdentityAndUid>> userContentMessageUidsByServer;
+    private final NoDuplicateOperationQueue batchSendUserContentMessageOperationQueue;
+    private final HashMap<String, Queue<IdentityAndUid>> protocolMessageUidsByServer;
+    private final NoDuplicateOperationQueue batchSendProtocolMessageOperationQueue;
+    private final ExponentialBackoffRepeatingScheduler<StringAndBoolean> batchScheduler;
 
     private boolean initialQueueingPerformed = false;
     private final Object lock = new Object();
@@ -65,10 +80,22 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
         this.sendManagerSessionFactory = sendManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
 
-        sendMessageOperationQueue = new OperationQueue(true);
-        sendMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator");
+        sendMessageWithAttachmentOperationQueue = new OperationQueue(true);
+        sendMessageWithAttachmentOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithAttachment");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
+
+
+        userContentMessageUidsByServer = new HashMap<>();
+        batchSendUserContentMessageOperationQueue = new NoDuplicateOperationQueue();
+        batchSendUserContentMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithUserContent");
+
+        protocolMessageUidsByServer = new HashMap<>();
+        batchSendProtocolMessageOperationQueue = new NoDuplicateOperationQueue();
+        batchSendProtocolMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-Protocol");
+
+        batchScheduler = new ExponentialBackoffRepeatingScheduler<>();
+
 
         awaitingIdentityReactivationOperations = new HashMap<>();
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
@@ -89,7 +116,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
             try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
                 OutboxMessage[] outboxMessages = OutboxMessage.getAll(sendManagerSession);
                 for (OutboxMessage outboxMessage: outboxMessages) {
-                    queueNewSendMessageCompositeOperation(outboxMessage.getOwnedIdentity(), outboxMessage.getUid());
+                    queueNewSendMessageCompositeOperation(outboxMessage.getServer(), outboxMessage.getOwnedIdentity(), outboxMessage.getUid(), outboxMessage.getAttachments().length != 0, outboxMessage.isApplicationMessage());
                 }
                 initialQueueingPerformed = true;
             } catch (SQLException e) {
@@ -98,17 +125,84 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
         }
     }
 
-    private void queueNewSendMessageCompositeOperation(Identity ownedIdentity, UID messageUid) {
-        UploadMessageCompositeOperation op = new UploadMessageCompositeOperation(sendManagerSessionFactory, sslSocketFactory, ownedIdentity, messageUid, this, this);
-        sendMessageOperationQueue.queue(op);
+    private void queueNewSendMessageCompositeOperation(String server, Identity ownedIdentity, UID messageUid, boolean hasAttachment, boolean hasUserContent) {
+        if (hasAttachment || server == null) {
+            UploadMessageCompositeOperation op = new UploadMessageCompositeOperation(sendManagerSessionFactory, sslSocketFactory, ownedIdentity, messageUid, this::onFinishCallbackWithAttachment, this::onCancelCallbackWithAttachment);
+            sendMessageWithAttachmentOperationQueue.queue(op);
+        } else if (hasUserContent) {
+            if (ownedIdentity != null && messageUid != null) {
+                synchronized (userContentMessageUidsByServer) {
+                    Queue<IdentityAndUid> queue = userContentMessageUidsByServer.get(server);
+                    if (queue == null) {
+                        queue = new ArrayDeque<>();
+                        userContentMessageUidsByServer.put(server, queue);
+                    }
+                    queue.add(new IdentityAndUid(ownedIdentity, messageUid));
+                }
+            }
+            BatchUploadMessagesCompositeOperation op = new BatchUploadMessagesCompositeOperation(sendManagerSessionFactory, sslSocketFactory, server, true, () -> {
+                List<IdentityAndUid> messageIdentitiesAndUids = new ArrayList<>();
+                synchronized (userContentMessageUidsByServer) {
+                    Queue<IdentityAndUid> queue = userContentMessageUidsByServer.get(server);
+                    if (queue != null && !queue.isEmpty()) {
+                        do {
+                            messageIdentitiesAndUids.add(queue.remove());
+                            if (messageIdentitiesAndUids.size() == Constants.MAX_UPLOAD_MESSAGE_BATCH_SIZE) {
+                                break;
+                            }
+                        } while (!queue.isEmpty());
+                    }
+                }
+                return messageIdentitiesAndUids.toArray(new IdentityAndUid[0]);
+            }, this::onFinishCallbackUserContent, this::onCancelCallbackUserContent);
+            batchSendUserContentMessageOperationQueue.queue(op);
+        } else {
+            if (ownedIdentity != null && messageUid != null) {
+                synchronized (protocolMessageUidsByServer) {
+                    Queue<IdentityAndUid> queue = protocolMessageUidsByServer.get(server);
+                    if (queue == null) {
+                        queue = new ArrayDeque<>();
+                        protocolMessageUidsByServer.put(server, queue);
+                    }
+                    queue.add(new IdentityAndUid(ownedIdentity, messageUid));
+                }
+            }
+            BatchUploadMessagesCompositeOperation op = new BatchUploadMessagesCompositeOperation(sendManagerSessionFactory, sslSocketFactory, server, false, () -> {
+                List<IdentityAndUid> messageIdentitiesAndUids = new ArrayList<>();
+                synchronized (protocolMessageUidsByServer) {
+                    Queue<IdentityAndUid> queue = protocolMessageUidsByServer.get(server);
+                    if (queue != null && !queue.isEmpty()) {
+                        do {
+                            messageIdentitiesAndUids.add(queue.remove());
+                            if (messageIdentitiesAndUids.size() == Constants.MAX_UPLOAD_MESSAGE_BATCH_SIZE) {
+                                break;
+                            }
+                        } while (!queue.isEmpty());
+                    }
+                }
+                return messageIdentitiesAndUids.toArray(new IdentityAndUid[0]);
+            }, this::onFinishCallbackProtocol, this::onCancelCallbackProtocol);
+            batchSendProtocolMessageOperationQueue.queue(op);
+        }
     }
 
     private void scheduleNewSendMessageCompositeOperationQueueing(final Identity ownedIdentity, final UID messageUid) {
-        scheduler.schedule(new IdentityAndUid(ownedIdentity, messageUid), () -> queueNewSendMessageCompositeOperation(ownedIdentity, messageUid), "UploadMessageCompositeOperation");
+        scheduler.schedule(
+                new IdentityAndUid(ownedIdentity, messageUid),
+                () -> queueNewSendMessageCompositeOperation(null, ownedIdentity, messageUid, true, true),
+                "UploadMessageCompositeOperation");
+    }
+
+    private void scheduleNewBatchSendMessageCompositeOperationQueueing(String server, boolean hasUserContent) {
+        batchScheduler.schedule(
+                new StringAndBoolean(server, hasUserContent),
+                () -> queueNewSendMessageCompositeOperation(server, null, null, false, hasUserContent),
+                "BatchUploadMessagesCompositeOperation");
     }
 
     public void retryScheduledNetworkTasks() {
         scheduler.retryScheduledRunnables();
+        batchScheduler.retryScheduledRunnables();
     }
 
     private void waitForIdentityReactivation(Identity ownedIdentity, UID messageUid) {
@@ -122,15 +216,121 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
         awaitingIdentityReactivationOperationsLock.unlock();
     }
 
-    @Override
-    public void onFinishCallback(Operation operation) {
+
+
+    public void onFinishCallbackProtocol(Operation operation) {
+        String server = ((BatchUploadMessagesCompositeOperation) operation).getServer();
+        List<IdentityAndUid> identityInactiveMessageUids = ((BatchUploadMessagesCompositeOperation) operation).getIdentityInactiveMessageUids();
+        batchScheduler.clearFailedCount(new StringAndBoolean(server, false));
+
+        // if there are still some messages in the queue, reschedule a batch operation
+        synchronized (protocolMessageUidsByServer) {
+            Queue<IdentityAndUid> queue = protocolMessageUidsByServer.get(server);
+            if (queue != null && !queue.isEmpty()) {
+                queueNewSendMessageCompositeOperation(server, null, null, false, false);
+            }
+        }
+
+        // handle message the operations couldn't because of inactive identity
+        for (IdentityAndUid identityAndUid : identityInactiveMessageUids) {
+            waitForIdentityReactivation(identityAndUid.ownedIdentity, identityAndUid.uid);
+        }
+    }
+
+    public void onCancelCallbackProtocol(Operation operation) {
+        String server = ((BatchUploadMessagesCompositeOperation) operation).getServer();
+        IdentityAndUid[] identityAndMessageUids = ((BatchUploadMessagesCompositeOperation) operation).getMessageIdentitiesAndUids();
+        Integer rfc = operation.getReasonForCancel();
+        Logger.i("BatchUploadMessagesCompositeOperation (protocol) cancelled for reason " + rfc);
+        if (rfc == null) {
+            rfc = Operation.RFC_NULL;
+        }
+        //noinspection SwitchStatementWithTooFewBranches
+        switch (rfc) {
+            case BatchUploadMessagesCompositeOperation.RFC_BATCH_TOO_LARGE:
+                if (identityAndMessageUids != null) {
+                    // if the payload is too large when batching, queue each message individually
+                    for (IdentityAndUid identityAndMessageUid : identityAndMessageUids) {
+                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.ownedIdentity, identityAndMessageUid.uid, true, true);
+                    }
+                }
+                break;
+            default:
+                // re-add all messageUids to the queue and schedule a new operation later
+                if (identityAndMessageUids != null) {
+                    synchronized (protocolMessageUidsByServer) {
+                        Queue<IdentityAndUid> queue = protocolMessageUidsByServer.get(server);
+                        if (queue == null) {
+                            queue = new ArrayDeque<>();
+                            protocolMessageUidsByServer.put(server, queue);
+                        }
+                        queue.addAll(Arrays.asList(identityAndMessageUids));
+                    }
+                }
+                scheduleNewBatchSendMessageCompositeOperationQueueing(server, false);
+        }
+    }
+
+    public void onFinishCallbackUserContent(Operation operation) {
+        String server = ((BatchUploadMessagesCompositeOperation) operation).getServer();
+        List<IdentityAndUid> identityInactiveMessageUids = ((BatchUploadMessagesCompositeOperation) operation).getIdentityInactiveMessageUids();
+        batchScheduler.clearFailedCount(new StringAndBoolean(server, true));
+
+        // if there are still some messages in the queue, reschedule a batch operation
+        synchronized (userContentMessageUidsByServer) {
+            Queue<IdentityAndUid> queue = userContentMessageUidsByServer.get(server);
+            if (queue != null && !queue.isEmpty()) {
+                queueNewSendMessageCompositeOperation(server, null, null, false, true);
+            }
+        }
+
+        // handle message the operations couldn't because of inactive identity
+        for (IdentityAndUid identityAndUid : identityInactiveMessageUids) {
+            waitForIdentityReactivation(identityAndUid.ownedIdentity, identityAndUid.uid);
+        }
+    }
+
+    public void onCancelCallbackUserContent(Operation operation) {
+        String server = ((BatchUploadMessagesCompositeOperation) operation).getServer();
+        IdentityAndUid[] identityAndMessageUids = ((BatchUploadMessagesCompositeOperation) operation).getMessageIdentitiesAndUids();
+        Integer rfc = operation.getReasonForCancel();
+        Logger.i("BatchUploadMessagesCompositeOperation (user content) cancelled for reason " + rfc);
+        if (rfc == null) {
+            rfc = Operation.RFC_NULL;
+        }
+        //noinspection SwitchStatementWithTooFewBranches
+        switch (rfc) {
+            case BatchUploadMessagesCompositeOperation.RFC_BATCH_TOO_LARGE:
+                if (identityAndMessageUids != null) {
+                    // if the payload is too large when batching, queue each message individually
+                    for (IdentityAndUid identityAndMessageUid : identityAndMessageUids) {
+                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.ownedIdentity, identityAndMessageUid.uid, true, true);
+                    }
+                }
+                break;
+            default:
+                // re-add all messageUids to the queue
+                if (identityAndMessageUids != null) {
+                    synchronized (userContentMessageUidsByServer) {
+                        Queue<IdentityAndUid> queue = userContentMessageUidsByServer.get(server);
+                        if (queue == null) {
+                            queue = new ArrayDeque<>();
+                            userContentMessageUidsByServer.put(server, queue);
+                        }
+                        queue.addAll(Arrays.asList(identityAndMessageUids));
+                    }
+                }
+                scheduleNewBatchSendMessageCompositeOperationQueueing(server, true);
+        }
+    }
+
+    public void onFinishCallbackWithAttachment(Operation operation) {
         Identity ownedIdentity = ((UploadMessageCompositeOperation) operation).getOwnedIdentity();
         UID messageUid = ((UploadMessageCompositeOperation) operation).getMessageUid();
         scheduler.clearFailedCount(new IdentityAndUid(ownedIdentity, messageUid));
     }
 
-    @Override
-    public void onCancelCallback(Operation operation) {
+    public void onCancelCallbackWithAttachment(Operation operation) {
         Identity ownedIdentity = ((UploadMessageCompositeOperation) operation).getOwnedIdentity();
         UID messageUid = ((UploadMessageCompositeOperation) operation).getMessageUid();
         Integer rfc = operation.getReasonForCancel();
@@ -152,8 +352,8 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
     // Notification received from OutboxMessage database
 
     @Override
-    public void newMessageToSend(Identity ownedIdentity, UID messageUid) {
-        queueNewSendMessageCompositeOperation(ownedIdentity, messageUid);
+    public void newMessageToSend(String server, Identity ownedIdentity, UID messageUid, boolean hasAttachment, boolean hasUserContent) {
+        queueNewSendMessageCompositeOperation(server, ownedIdentity, messageUid, hasAttachment, hasUserContent);
     }
 
     class NotificationListener implements io.olvid.engine.datatypes.NotificationListener {
@@ -171,7 +371,8 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
                 if (messageUids != null) {
                     awaitingIdentityReactivationOperations.remove(ownedIdentity);
                     for (UID messageUid: messageUids) {
-                        queueNewSendMessageCompositeOperation(ownedIdentity, messageUid);
+                        // if unsure, queue in the traditional message upload queue, even if there is no attachment
+                        queueNewSendMessageCompositeOperation(null, ownedIdentity, messageUid, true, true);
                     }
                 }
                 awaitingIdentityReactivationOperationsLock.unlock();

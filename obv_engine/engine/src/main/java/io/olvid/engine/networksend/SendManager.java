@@ -146,7 +146,8 @@ public class SendManager implements NetworkSendDelegate, SendManagerSessionFacto
                 messageToSend.getEncryptedContent(),
                 messageToSend.getEncryptedExtendedContent(),
                 messageToSend.isApplicationMessage(),
-                messageToSend.isVoipMessage()
+                messageToSend.isVoipMessage(),
+                messageToSend.getAttachments() != null && messageToSend.getAttachments().length != 0
         );
 
         if (messageToSend.getHeaders() != null) {

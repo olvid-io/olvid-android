@@ -149,13 +149,16 @@ public class OutboxMessage implements ObvDatabase {
 
     // region constructors
 
-    public static OutboxMessage create(SendManagerSession sendManagerSession, Identity ownedIdentity, UID uid, String server, EncryptedBytes encryptedContent, EncryptedBytes encryptedExtendedContent, boolean isApplicationMessage, boolean isVoipMessage) {
+    public static OutboxMessage create(SendManagerSession sendManagerSession, Identity ownedIdentity, UID uid, String server, EncryptedBytes encryptedContent, EncryptedBytes encryptedExtendedContent, boolean isApplicationMessage, boolean isVoipMessage, boolean hasAttachments) {
         if (ownedIdentity == null || uid == null || server == null || encryptedContent == null) {
             return null;
         }
         try {
             OutboxMessage outboxMessage = new OutboxMessage(sendManagerSession, ownedIdentity, uid, server, encryptedContent, encryptedExtendedContent, isApplicationMessage, isVoipMessage);
             outboxMessage.insert();
+            if (hasAttachments) {
+                outboxMessage.commitHookBits |= HOOK_BIT_HAS_ATTACHMENTS;
+            }
             return outboxMessage;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -215,6 +218,39 @@ public class OutboxMessage implements ObvDatabase {
                 } else {
                     return null;
                 }
+            }
+        }
+    }
+
+    public static OutboxMessage[] getManyWithoutUidFromServer(SendManagerSession sendManagerSession, Identity ownedIdentity, String server, UID[] uids) throws SQLException {
+        if (uids == null) {
+            return null;
+        }
+
+        // build a ?,? string
+        int count = uids.length;
+        StringBuilder sb = new StringBuilder(count * 2);
+        while (count-- > 1) {
+            sb.append("?,");
+        }
+        sb.append("?");
+
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + OWNED_IDENTITY + " = ? " +
+                " AND " + SERVER + " = ? " +
+                " AND " + UID_FROM_SERVER + " IS NULL " +
+                " AND " + UID_ + " IN (" + sb + ");")) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            statement.setString(2, server);
+            for (int i = 0; i < uids.length; i++) {
+                statement.setBytes(i + 3, uids[i].getBytes());
+            }
+            try (ResultSet res = statement.executeQuery()) {
+                List<OutboxMessage> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new OutboxMessage(sendManagerSession, res));
+                }
+                return list.toArray(new OutboxMessage[0]);
             }
         }
     }
@@ -411,12 +447,13 @@ public class OutboxMessage implements ObvDatabase {
 
 
     public interface NewOutboxMessageListener {
-        void newMessageToSend(Identity ownedIdentity, UID messageUid);
+        void newMessageToSend(String server, Identity ownedIdentity, UID messageUid, boolean hasAttachment, boolean hasUserContent);
     }
 
     private long commitHookBits = 0;
     private static final long HOOK_BIT_INSERT = 0x1;
     private static final long HOOK_BIT_ACKNOWLEDGED = 0x2;
+    private static final long HOOK_BIT_HAS_ATTACHMENTS = 0x4;
 
     private long acknowledgedTimestampFromSever;
 
@@ -424,7 +461,7 @@ public class OutboxMessage implements ObvDatabase {
     public void wasCommitted() {
         if ((commitHookBits & HOOK_BIT_INSERT) != 0) {
             if (sendManagerSession.newOutboxMessageListener != null) {
-                sendManagerSession.newOutboxMessageListener.newMessageToSend(ownedIdentity, uid);
+                sendManagerSession.newOutboxMessageListener.newMessageToSend(server, ownedIdentity, uid, (commitHookBits & HOOK_BIT_HAS_ATTACHMENTS) != 0, isApplicationMessage);
             }
         }
         if ((commitHookBits & HOOK_BIT_ACKNOWLEDGED) != 0) {
