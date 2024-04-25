@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
@@ -42,9 +43,12 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 
 public class ImageViewPreference extends Preference {
     ImageView widgetImageView = null;
+    CardView widgetCardView = null;
     DiscussionCustomization.ColorJson colorJson;
     String imagePath;
     Integer color;
+    Integer imageResource;
+    boolean removeElevation = false;
 
     public ImageViewPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -70,6 +74,7 @@ public class ImageViewPreference extends Preference {
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         widgetImageView = (ImageView) holder.findViewById(R.id.imageView);
+        widgetCardView = (CardView) holder.findViewById(R.id.cardView);
         redraw();
     }
 
@@ -77,6 +82,7 @@ public class ImageViewPreference extends Preference {
         this.colorJson = colorJson;
         this.imagePath = null;
         this.color = null;
+        this.imageResource = null;
         redraw();
     }
 
@@ -84,6 +90,7 @@ public class ImageViewPreference extends Preference {
         this.colorJson = null;
         this.imagePath = imagePath;
         this.color = null;
+        this.imageResource = null;
         redraw();
     }
 
@@ -91,6 +98,20 @@ public class ImageViewPreference extends Preference {
         this.colorJson = null;
         this.imagePath = null;
         this.color = color;
+        this.imageResource = null;
+        redraw();
+    }
+
+    public void setImageResource(Integer imageResource) {
+        this.colorJson = null;
+        this.imagePath = null;
+        this.color = null;
+        this.imageResource = imageResource;
+        redraw();
+    }
+
+    public void removeElevation() {
+        this.removeElevation = true;
         redraw();
     }
 
@@ -98,10 +119,20 @@ public class ImageViewPreference extends Preference {
         if (widgetImageView == null) {
             return;
         }
+        if (removeElevation && widgetCardView != null) {
+            widgetCardView.setCardElevation(0f);
+        }
         if (colorJson != null) {
             widgetImageView.setBackgroundColor(0xff000000 + colorJson.color);
             widgetImageView.setImageResource(R.drawable.pref_imageview_color_preview);
-            widgetImageView.setImageAlpha(255 - (int)(colorJson.alpha*255));
+            widgetImageView.setImageAlpha(255 - (int) (colorJson.alpha * 255));
+        } else if (imageResource != null) {
+            if (widgetCardView != null) {
+                widgetCardView.setCardBackgroundColor(0x00ffffff);
+            }
+            widgetImageView.setBackgroundColor(0x00ffffff);
+            widgetImageView.setImageAlpha(255);
+            widgetImageView.setImageResource(imageResource);
         } else if (imagePath != null) {
             widgetImageView.setBackgroundColor(0x00ffffff);
             widgetImageView.setImageAlpha(255);

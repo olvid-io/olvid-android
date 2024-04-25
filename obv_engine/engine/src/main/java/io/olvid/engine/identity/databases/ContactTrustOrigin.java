@@ -33,11 +33,11 @@ import java.util.List;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
+import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
-import io.olvid.engine.datatypes.TrustLevel;
 
 
 @SuppressWarnings("FieldMayBeFinal")

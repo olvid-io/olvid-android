@@ -19,10 +19,10 @@
 
 package io.olvid.messenger.discussion.location;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
 
 // automatically generated: json object returned by pelias reverse api
 @JsonIgnoreProperties(ignoreUnknown = true)

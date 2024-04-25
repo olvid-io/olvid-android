@@ -103,7 +103,7 @@ fun CallLogItem.getStatusImageResource(): Int {
             CallLogItem.STATUS_SUCCESSFUL -> R.drawable.ic_call_outgoing
             CallLogItem.STATUS_BUSY -> R.drawable.ic_phone_busy_out
             CallLogItem.STATUS_REJECTED -> R.drawable.ic_phone_rejected_out
-            CallLogItem.STATUS_MISSED,
+            CallLogItem.STATUS_MISSED -> R.drawable.ic_phone_missed_out
             CallLogItem.STATUS_FAILED -> R.drawable.ic_call_failed
             else -> R.drawable.ic_phone_grey
         }

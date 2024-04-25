@@ -22,10 +22,17 @@ package io.olvid.messenger.databases;
 import androidx.annotation.NonNull;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 import androidx.sqlite.db.SupportSQLiteOpenHelper;
-import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory;
+
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory;
+
+import java.nio.charset.StandardCharsets;
 
 public class PragmaSQLiteOpenHelperFactory implements SupportSQLiteOpenHelper.Factory {
-    private final FrameworkSQLiteOpenHelperFactory frameworkSQLiteOpenHelperFactory = new FrameworkSQLiteOpenHelperFactory();
+    private final SupportOpenHelperFactory frameworkSQLiteOpenHelperFactory;
+
+    public PragmaSQLiteOpenHelperFactory(@NonNull String dbKey) {
+        frameworkSQLiteOpenHelperFactory = new SupportOpenHelperFactory(dbKey.getBytes(StandardCharsets.UTF_8));
+    }
 
     @NonNull
     @Override

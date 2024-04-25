@@ -108,11 +108,11 @@
     <string name="label_selection_list_ordered">Numérotée</string>
     <string name="label_selection_quote">Citation</string>
     <string name="label_selection_heading">Titre</string>
-    <string name="label_selection_heading_1">Titre1</string>
-    <string name="label_selection_heading_2">Titre2</string>
-    <string name="label_selection_heading_3">Titre3</string>
-    <string name="label_selection_heading_4">Titre4</string>
-    <string name="label_selection_heading_5">Titre5</string>
+    <string name="label_selection_heading_1">Titre 1</string>
+    <string name="label_selection_heading_2">Titre 2</string>
+    <string name="label_selection_heading_3">Titre 3</string>
+    <string name="label_selection_heading_4">Titre 4</string>
+    <string name="label_selection_heading_5">Titre 5</string>
     <string name="label_selection_bold">Gras</string>
     <string name="label_selection_italic">Italique</string>
     <string name="label_selection_strikethrough">Barré</string>
@@ -369,6 +369,8 @@
     <string name="toast_message_new_password_set">Mot de passe de déverrouillage enregistré</string>
     <string name="dialog_title_pin_verification">Saisissez votre PIN actuel</string>
     <string name="text_pin_verification_explanation">Avant de poursuivre, vous devez saisir votre PIN actuel.</string>
+    <string name="pref_lock_neutral_title">Écran de vérrouillage neutre</string>
+    <string name="pref_lock_neutral_summary">Une fois cette option activée, l\'écran de vérrouillage ne mentionnera plus Olvid et n\'affichera plus le logo</string>
     <string name="pref_lock_grace_time_title">Délai de verrouillage</string>
     <string name="pref_lock_grace_time_dialog_message">Délai de verrouillage quand Olvid passe en arrière-plan</string>
     <string name="pref_text_lock_grace_time_instant">Verrouiller Olvid instantanément</string>
@@ -414,7 +416,7 @@
     <string name="text_title_backup_file_selected">Fichier de sauvegarde sélectionné</string>
     <string name="text_title_backup_cloud_account_selected">Sauvegarde cloud sélectionnée</string>
     <string name="toast_message_error_opening_backup_file">Impossible d\'ouvrir le fichier de sauvegarde sélectionné. Veuillez réessayer.</string>
-    <string name="text_backup_key_verification_failed">Échec de vérification de la clé de sauvegarde.\nVeuillez vérifiez que vous avez bien saisie la bonne clé.</string>
+    <string name="text_backup_key_verification_failed">Échec de vérification de la clé de sauvegarde.\nVeuillez vérifiez que vous avez bien saisi la bonne clé.</string>
     <string name="text_backup_key_verification_failed_short">Échec de vérification de la clé de sauvegarde.\nLa clé saisie est trop courte.</string>
     <string name="text_backup_key_verification_failed_long">Échec de vérification de la clé de sauvegarde.\nLa clé saisie est trop longue.</string>
     <string name="button_label_verify">Vérifier</string>
@@ -863,8 +865,6 @@
     <string name="hint_identity_provider_client_id">«\u00a0Client ID\u00a0» du serveur</string>
     <string name="hint_identity_provider_client_secret">«\u00a0Client secret\u00a0» du serveur</string>
     <string name="text_filename_hidden">(Nom de fichier masqué)</string>
-    <string name="label_stop_recording_release">Relâchez pour arrêter l\'enregistrement</string>
-    <string name="label_stop_recording_tap">Toucher pour arrêter l\'enregistrement</string>
     <string name="label_authenticating">Authentification…</string>
     <string name="label_retrieving_user_details">Récupération des détails…</string>
     <string name="toast_message_unable_to_retrieve_details">Impossible de récupérer les détails de votre identité. Veuillez réessayer.</string>
@@ -923,7 +923,7 @@
     <string name="pref_export_app_databases_title">Exporter les bases de données</string>
     <string name="pref_export_app_databases_summary">L\'export des bases de données vous permet de savoir exactement ce qu\'Olvid stocke en interne.\nAttention\u00a0: ces bases de données contiennent toutes vos informations sensibles, garder les en lieu sûr\u00a0!</string>
     <string name="dialog_title_export_app_databases">Export des bases de données</string>
-    <string name="dialog_message_export_app_databases">En cliquant exporter, Olvid va générer un fichier zip contenant les bases de données de l\'engine et de l\'application elle-même. Un dialogue vous demandera de choisir où sauver ce fichier zip.\n\nAttention\u00a0: ces bases de données contiennent toutes vos informations sensibles, gardez-les en lieu sûr\u00a0!</string>
+    <string name="dialog_message_export_app_databases">En cliquant exporter, Olvid va générer un fichier zip contenant les bases de données de l\'engine et de l\'application elle-même. Un dialogue vous demandera de choisir où sauver ce fichier zip.\n\n**Attention : ces bases de données contiennent toutes vos informations sensibles, gardez-les en lieu sûr !**</string>
     <string name="button_label_export">Exporter</string>
     <string name="toast_message_error_exporting_db">Erreur d\'export des bases de données. Veuillez réessayer.</string>
     <string name="toast_message_success_exporting_db">Export des bases de données réussi</string>
@@ -940,6 +940,7 @@
     <string name="pref_text_display_name_format_last_first">Charbonneau Gilles</string>
     <string name="pref_text_display_name_format_last_first_company">Charbonneau Gilles (Omni Tech)</string>
     <string name="pref_text_display_name_format_last_first_position_company">Charbonneau Gilles (Développeur @ Omni Tech)</string>
+    <string name="text_unanswered_call">Appel sans réponse</string>
     <string name="text_failed_call">Appel téléphonique échoué</string>
     <string name="text_busy_call">Appel reçu occupé</string>
     <string name="text_busy_outgoing_call">Appel émis occupé</string>
@@ -957,6 +958,7 @@
     <string name="text_missed_incoming_call_with_contacts">Appel manqué de %1$s</string>
     <string name="text_rejected_incoming_call_with_contacts">Appel décliné de %1$s</string>
     <string name="text_busy_incoming_call_with_contacts">Appel de %1$s quand vous étiez occupé</string>
+    <string name="text_unanswered_outgoing_call_with_contacts">Appel sans réponse avec %1$s</string>
     <string name="text_failed_outgoing_call_with_contacts">Appel échoué avec %1$s</string>
     <string name="text_outgoing_call_with_contacts">Appel téléphonique avec %1$s</string>
     <string name="text_busy_outgoing_call_with_contacts">Appel quand %1$s était occupé</string>
@@ -982,7 +984,7 @@
     <string name="dialog_title_disable_push_confirmation">Désactiver les notifications push</string>
     <string name="dialog_message_disable_push_confirmation">Si vous désactivez les notifications push de Google, vous ne serez plus notifié instantanément des nouveaux messages.\n\nVous pouvez à la place activer une connexion WebSocket permanente aux serveurs d\'Olvid qui pourra jouer le même rôle (mais risque de vider votre batterie plus vite).</string>
     <string name="pref_permanent_foreground_service_title">Utiliser un service d\'avant-plan</string>
-    <string name="pref_permanent_foreground_service_summary">Utiliser un service d\'avant plan évite à Olvid de se faire arrêter par le système. Une petite icone est affichée dans la zone de notifications et peut être cachée via les paramètres du système.</string>
+    <string name="pref_permanent_foreground_service_summary">Utiliser un service d\'avant plan évite à Olvid de se faire arrêter par le système. Une petite icône est affichée dans la zone de notifications et peut être cachée via les paramètres du système.</string>
     <string name="pref_share_app_version_title">Partager les versions de l\'app et de l\'OS avec Olvid</string>
     <string name="pref_share_app_version_summary">Quand cette option est activée, l\'application partage sa version et la version de votre OS (et rien de plus) avec les serveurs d\'Olvid. Ces données sont une aide précieuse lors du déploiement de nouvelles fonctionnalités.</string>
     <string name="text_app_uptime_hours">%1$dh\u00a0%2$02dm\u00a0%3$02ds</string>
@@ -1762,7 +1764,7 @@
     <string name="troubleshooting_alarm_invalid_description">Olvid utilise des alarmes pour programmer de façon précise le verrouillage de l\'écran et l\'effacement des messages éphémères.\nL\'autorisation de définir de telles alarmes a été révoquée, ce qui peut entrainer le dysfonctionnement de ces fonctions de sécurité.\n\nNous vous encourageons fortement à autoriser la définition d\'alarmes et rappels en appuyant sur «\u00a0paramètres d\'Olvid\u00a0».</string>
     <string name="troubleshooting_incoming_call_valid_title">Notifications d\'appel</string>
     <string name="troubleshooting_incoming_call_valid_description">La réception d\'un appel nécessite l\'affichage d\'une notification d\'appel entrant en plein écran. Cette autorisation est réglée correctement.</string>
-    <string name="troubleshooting_incoming_call_invalid_description">La réception d\'un appel nécessite l\'affichage d\'une notification d\'appel entrant en plein écran. Olvid n\'a pas pour l\'instnt l\'autorisation d\'afficher une telle notification. Appuyez sur «\u00a0Paramètres d\'Olvid\u00a0» pour autoriser les notifications en plein écran.</string>
+    <string name="troubleshooting_incoming_call_invalid_description">La réception d\'un appel nécessite l\'affichage d\'une notification d\'appel entrant en plein écran. Olvid n\'a pas pour l\'instant l\'autorisation d\'afficher une telle notification. Appuyez sur «\u00a0Paramètres d\'Olvid\u00a0» pour autoriser les notifications en plein écran.</string>
     <string name="troubleshooting_google_valid_title">Services Google Play absents</string>
     <string name="troubleshooting_google_valid_description">Une connexion WebSocket permanente aux serveurs d\'Olvid est correctement configurée.</string>
     <string name="troubleshooting_google_invalid_description">Les services Google Play ne sont pas disponibles sur votre appareil. Olvid s\'appuie sur ces services pour recevoir les notifications de messages entrants. Sans eux, vous ne recevrez vos nouveaux messages que quand Olvid est en avant-plan.\n\nVous pouvez à la place activer une connexion WebSocket permanente aux serveurs d\'Olvid qui pourra jouer le même rôle (mais risque de vider votre batterie légèrement plus vite).</string>
@@ -1856,6 +1858,32 @@
     <string name="text_ongoing_call">Appel en cours : %1$s</string>
     <string name="text_audio_output_no_sound">Aucun son</string>
     <string name="toast_message_video_calls_xxx_participants">Les appels vidéo sont limités à %1$d participants</string>
+    <string name="explanation_empty_global_search">Aucun résultat trouvé</string>
+    <string name="global_search_result_groups">Groupes</string>
+    <string name="global_search_result_contacts">Contacts</string>
+    <string name="global_search_result_messages">Messages</string>
+    <string name="global_search_result_attachments">Pièces jointes</string>
+    <string name="button_label_send_read_receipts">Notifier mes contacts</string>
+    <string name="button_label_do_not_send">Ne pas les notifier</string>
+    <string name="button_label_ask_later">Me redemander plus tard</string>
+    <string name="dialog_message_prompt_user_for_read_receipts">Souhaitez-vous que vos contacts puissent savoir quand vous lisez leurs messages ?</string>
+    <string name="dialog_title_prompt_user_for_read_receipts">Accusés de lecture</string>
+    <string name="pref_app_icon_title">Icône de l\'application</string>
+    <string name="pref_app_icon_summary">Vous en avez assez de l\'icône bleue classique d\'Olvid ? Essayez quelque chose de différent !</string>
+    <string name="pref_app_icon_fragment_title">Modifiez l\'icône de l\'application</string>
+    <string name="pref_app_icon_fragment_summary">Le nom et l\'icône de l\'application seront modifiés sur votre écran d\'accueil. Cela ne s\'appliquera pas à l\'icône des notifications.</string>
+    <string name="pref_app_icon_apply">Appliquer et fermer l\'application</string>
+    <string name="pref_app_icon_shortcut_warning_title">Raccourcis de discussion</string>
+    <string name="pref_app_icon_shortcut_warning_text">Notez que changer l\'icône de l\'application supprimera les raccourcis de discussions que vous avez créés. Il faudra le recréer.</string>
+    <string name="app_name_weather">Météo</string>
+    <string name="app_name_gem">Diamants</string>
+    <string name="app_name_rosace">Notes</string>
+    <string name="app_name_ghost">Fantôme</string>
+    <string name="app_name_bubbles">Messages</string>
+    <string name="hint_search_anything">Rechercher partout…</string>
+    <string name="global_search_result_other_discussions">Autres discussions</string>
+    <string name="at_least_xxx">Au moins %1$d</string>
+
 
     <plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Vous êtes sur le point d\'inviter chaque membre de ce groupe avec lequel vous avez un canal (actuellement 1 membre) à une discussion privée.\nSouhaitez-vous poursuivre ?</item>
@@ -1900,6 +1928,10 @@
     <plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
         <item quantity="one">Appel de groupe avec %2$s et un autre</item>
         <item quantity="other">Appel de groupe avec %2$s et %1$d autres</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
+        <item quantity="one">Appel de groupe sans réponse avec %2$s et un autre</item>
+        <item quantity="other">Appel de groupe sans réponse avec %2$s et %1$d autres</item>
     </plurals>
     <plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
         <item quantity="one">Appel de groupe échoué avec %2$s et un autre</item>

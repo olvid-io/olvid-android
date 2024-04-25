@@ -23,9 +23,9 @@ package io.olvid.engine.metamanager;
 import java.sql.SQLException;
 
 import io.olvid.engine.datatypes.Identity;
-import io.olvid.engine.datatypes.containers.MessageToSend;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.MessageToSend;
 
 public interface NetworkSendDelegate {
     void post(Session session, MessageToSend messageToSend);

@@ -44,6 +44,8 @@ import androidx.camera.core.MeteringPoint;
 import androidx.camera.core.MeteringPointFactory;
 import androidx.camera.core.Preview;
 import androidx.camera.core.SurfaceOrientedMeteringPointFactory;
+import androidx.camera.core.resolutionselector.ResolutionSelector;
+import androidx.camera.core.resolutionselector.ResolutionStrategy;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
@@ -138,7 +140,9 @@ public class QRCodeScannerFragment extends Fragment {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 Preview preview = new Preview.Builder()
-                        .setTargetResolution(new Size(previewView.getWidth(), previewView.getHeight()))
+                        .setResolutionSelector(new ResolutionSelector.Builder()
+                                .setResolutionStrategy(new ResolutionStrategy(new Size(previewView.getWidth(), previewView.getHeight()), ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER))
+                                .build())
                         .build();
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
 

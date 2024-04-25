@@ -285,6 +285,13 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/owned_identity_initial_view" />
 
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/voice_recorder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@id/attachments_recycler_view"/>
+
+
             <ImageButton
                 android:id="@+id/compose_message_send_button"
                 android:layout_width="32dp"
@@ -373,93 +380,5 @@
         android:id="@+id/popup_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/recording_overlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/tab_bar_size"
-            android:background="@color/whiteOverlay"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/recording_button_border"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:contentDescription="@null"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/recording_label"
-            app:layout_constraintHorizontal_bias="0.55"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/recording_circle_border" />
-
-        <ImageView
-            android:id="@+id/recording_initialization_spinner"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:visibility="gone"
-            tools:visibility="visible"
-            android:contentDescription="@null"
-            android:src="@drawable/recording_init_spinner"
-            app:layout_constraintTop_toTopOf="@id/recording_button_border"
-            app:layout_constraintBottom_toBottomOf="@+id/recording_button_border"
-            app:layout_constraintEnd_toEndOf="@+id/recording_button_border"
-            app:layout_constraintStart_toStartOf="@+id/recording_button_border"
-            />
-
-        <ImageView
-            android:id="@+id/recording_red_button"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:contentDescription="@null"
-            app:layout_constraintTop_toTopOf="@id/recording_button_border"
-            app:layout_constraintBottom_toBottomOf="@+id/recording_button_border"
-            app:layout_constraintEnd_toEndOf="@+id/recording_button_border"
-            app:layout_constraintStart_toStartOf="@+id/recording_button_border"
-            app:srcCompat="@drawable/recording_red_circle" />
-
-        <TextView
-            android:id="@+id/recording_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:text="@string/label_recording"
-            android:textColor="@color/almostBlack"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/recording_button_border"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/recording_button_border"
-            app:layout_constraintTop_toTopOf="@+id/recording_button_border" />
-
-        <TextView
-            android:id="@+id/recording_stop_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/label_stop_recording_tap"
-            android:textColor="@color/almostBlack"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="@id/recording_label"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@id/recording_button_border"
-            app:layout_constraintTop_toBottomOf="@+id/recording_button_border" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

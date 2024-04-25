@@ -58,6 +58,7 @@ import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPublicKey;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.datatypes.key.symmetric.MACKey;
+import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
@@ -66,7 +67,6 @@ import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
-import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 
 
 @SuppressWarnings("FieldMayBeFinal")

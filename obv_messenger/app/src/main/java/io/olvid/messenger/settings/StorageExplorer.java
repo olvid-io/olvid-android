@@ -54,8 +54,8 @@ import java.util.List;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
-import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
+import io.olvid.messenger.customClasses.LockableActivity;
 import io.olvid.messenger.customClasses.StringUtils;
 
 @RequiresApi(api = Build.VERSION_CODES.N)

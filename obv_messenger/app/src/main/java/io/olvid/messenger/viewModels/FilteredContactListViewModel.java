@@ -63,7 +63,7 @@ public class FilteredContactListViewModel extends ViewModel {
             String[] parts = filter.trim().split("\\s+");
             filterPatterns = new ArrayList<>(parts.length);
             for (String part: parts) {
-                if (part.length() > 0) {
+                if (!part.isEmpty()) {
                     filterPatterns.add(Pattern.compile(Pattern.quote(StringUtils.unAccent(part))));
                 }
             }

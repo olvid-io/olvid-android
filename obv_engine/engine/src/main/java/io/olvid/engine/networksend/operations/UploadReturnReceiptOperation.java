@@ -19,11 +19,18 @@
 
 package io.olvid.engine.networksend.operations;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.AuthEnc;
+import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
@@ -31,7 +38,9 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.IdentityAndLong;
 import io.olvid.engine.encoder.Encoded;
+import io.olvid.engine.networksend.coordinators.SendReturnReceiptCoordinator;
 import io.olvid.engine.networksend.databases.ReturnReceipt;
 import io.olvid.engine.networksend.datatypes.SendManagerSession;
 import io.olvid.engine.networksend.datatypes.SendManagerSessionFactory;
@@ -39,31 +48,41 @@ import io.olvid.engine.networksend.datatypes.SendManagerSessionFactory;
 
 public class UploadReturnReceiptOperation extends Operation {
 
-
     public static final int RFC_RETURN_RECEIPT_NOT_FOUND = 1;
-    public static final int RFC_IDENTITY_IS_INACTIVE = 2;
 
     private final SendManagerSessionFactory sendManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
-    private final Identity ownedIdentity;
-    private final long returnReceiptId;
+    private final String server;
     private final PRNG prng;
+    private final SendReturnReceiptCoordinator.ReturnReceiptBatchProvider returnReceiptBatchProvider;
+    private final List<IdentityAndLong> identityInactiveReturnReceiptIds;
+    private IdentityAndLong[] returnReceiptOwnedIdentitiesAndIds;
 
-    public UploadReturnReceiptOperation(SendManagerSessionFactory sendManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, long returnReceiptId, PRNG prng, OnFinishCallback onFinishCallback, OnCancelCallback onCancelCallback) {
-        super(UID.fromLong(returnReceiptId), onFinishCallback, onCancelCallback);
+    public UploadReturnReceiptOperation(SendManagerSessionFactory sendManagerSessionFactory, SSLSocketFactory sslSocketFactory, String server, PRNG prng, SendReturnReceiptCoordinator.ReturnReceiptBatchProvider returnReceiptBatchProvider , OnFinishCallback onFinishCallback, OnCancelCallback onCancelCallback) {
+        super(computeUniqueUid(server), onFinishCallback, onCancelCallback);
         this.sendManagerSessionFactory = sendManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
-        this.ownedIdentity = ownedIdentity;
-        this.returnReceiptId = returnReceiptId;
+        this.server = server;
         this.prng = prng;
+        this.returnReceiptBatchProvider = returnReceiptBatchProvider;
+        this.identityInactiveReturnReceiptIds = new ArrayList<>();
     }
 
-    public Identity getOwnedIdentity() {
-        return ownedIdentity;
+    private static UID computeUniqueUid(String server) {
+        Hash sha256 = Suite.getHash(Hash.SHA256);
+        return new UID(sha256.digest(server.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public long getReturnReceiptId() {
-        return returnReceiptId;
+    public String getServer() {
+        return server;
+    }
+
+    public IdentityAndLong[] getReturnReceiptOwnedIdentitiesAndIds() {
+        return returnReceiptOwnedIdentitiesAndIds;
+    }
+
+    public List<IdentityAndLong> getIdentityInactiveReturnReceiptIds() {
+        return identityInactiveReturnReceiptIds;
     }
 
     @Override
@@ -74,54 +93,74 @@ public class UploadReturnReceiptOperation extends Operation {
     @Override
     public void doExecute() {
         boolean finished = false;
-        ReturnReceipt returnReceipt;
         try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
             try {
-                returnReceipt = ReturnReceipt.get(sendManagerSession, returnReceiptId);
+                returnReceiptOwnedIdentitiesAndIds = returnReceiptBatchProvider.getBatchOFReturnReceiptIds();
+                List<ReturnReceiptAndEncryptedPayload> returnReceiptAndEncryptedPayloads = new ArrayList<>();
 
-                if (returnReceipt == null) {
-                    cancel(RFC_RETURN_RECEIPT_NOT_FOUND);
-                    return;
+                Logger.d("UploadReturnReceiptOperation uploading a batch of " + returnReceiptOwnedIdentitiesAndIds.length);
+
+                HashMap<Identity, List<Long>> returnReceiptIdsByIdentity = new HashMap<>();
+                for (IdentityAndLong identityAndUid : returnReceiptOwnedIdentitiesAndIds) {
+                    List<Long> list = returnReceiptIdsByIdentity.get(identityAndUid.identity);
+                    if (list == null) {
+                        list = new ArrayList<>();
+                        returnReceiptIdsByIdentity.put(identityAndUid.identity, list);
+                    }
+                    list.add(identityAndUid.lng);
                 }
+
+                for (Map.Entry<Identity, List<Long>> entry : returnReceiptIdsByIdentity.entrySet()) {
+                    Identity ownedIdentity = entry.getKey();
+                    List<Long> returnReceiptIds = entry.getValue();
+                    // we need to block sending return receipts for any inactive ownedIdentity
+                    if (!sendManagerSession.identityDelegate.isActiveOwnedIdentity(sendManagerSession.session,ownedIdentity)) {
+                        for (Long returnReceiptId : returnReceiptIds) {
+                            identityInactiveReturnReceiptIds.add(new IdentityAndLong(ownedIdentity, returnReceiptId));
+                        }
+                    } else {
+                        ReturnReceipt[] returnReceipts = ReturnReceipt.getMany(sendManagerSession, returnReceiptIds.toArray(new Long[0]));
+                        for (ReturnReceipt returnReceipt : returnReceipts) {
+                            // compute the encryptedPayload
+                            final Encoded payload;
+                            if (returnReceipt.getAttachmentNumber() == null) {
+                                payload = Encoded.of(new Encoded[]{
+                                        Encoded.of(returnReceipt.getOwnedIdentity()),
+                                        Encoded.of(returnReceipt.getStatus()),
+                                });
+                            } else {
+                                payload = Encoded.of(new Encoded[]{
+                                        Encoded.of(returnReceipt.getOwnedIdentity()),
+                                        Encoded.of(returnReceipt.getStatus()),
+                                        Encoded.of(returnReceipt.getAttachmentNumber()),
+                                });
+                            }
+                            AuthEnc authEnc = Suite.getAuthEnc(returnReceipt.getKey());
+                            EncryptedBytes encryptedPayload = authEnc.encrypt(returnReceipt.getKey(), payload.getBytes(), prng);
+
+                            returnReceiptAndEncryptedPayloads.add(new ReturnReceiptAndEncryptedPayload(returnReceipt, encryptedPayload));
+                        }
+                    }
+                }
+
                 if (cancelWasRequested()) {
                     return;
                 }
 
-                // compute the encryptedPayload
-                final Encoded payload;
-                if (returnReceipt.getAttachmentNumber() == null) {
-                    payload = Encoded.of(new Encoded[]{
-                            Encoded.of(returnReceipt.getOwnedIdentity()),
-                            Encoded.of(returnReceipt.getStatus()),
-                    });
-                } else {
-                    payload = Encoded.of(new Encoded[]{
-                            Encoded.of(returnReceipt.getOwnedIdentity()),
-                            Encoded.of(returnReceipt.getStatus()),
-                            Encoded.of(returnReceipt.getAttachmentNumber()),
-                    });
-                }
-                AuthEnc authEnc = Suite.getAuthEnc(returnReceipt.getKey());
-                EncryptedBytes encryptedPayload = authEnc.encrypt(returnReceipt.getKey(), payload.getBytes(), prng);
 
-                UploadReturnReceiptServerMethod serverMethod = new UploadReturnReceiptServerMethod(
-                        returnReceipt.getContactIdentity().getServer(),
-                        returnReceipt.getContactIdentity(),
-                        returnReceipt.getContactDeviceUids(),
-                        returnReceipt.getNonce(),
-                        encryptedPayload);
+                UploadReturnReceiptServerMethod serverMethod = new UploadReturnReceiptServerMethod(server, returnReceiptAndEncryptedPayloads);
                 serverMethod.setSslSocketFactory(sslSocketFactory);
 
-                byte returnStatus = serverMethod.execute(sendManagerSession.identityDelegate.isActiveOwnedIdentity(sendManagerSession.session, ownedIdentity));
+                byte returnStatus = serverMethod.execute(true);
 
                 sendManagerSession.session.startTransaction();
                 switch (returnStatus) {
                     case ServerMethod.OK:
-                        returnReceipt.delete();
+                        for (ReturnReceiptAndEncryptedPayload returnReceiptAndEncryptedPayload : returnReceiptAndEncryptedPayloads) {
+                            returnReceiptAndEncryptedPayload.returnReceipt.delete();
+                        }
+
                         finished = true;
-                        return;
-                    case ServerMethod.IDENTITY_IS_NOT_ACTIVE:
-                        cancel(RFC_IDENTITY_IS_INACTIVE);
                         return;
                     default:
                         cancel(null);
@@ -151,17 +190,11 @@ class UploadReturnReceiptServerMethod extends ServerMethod {
     private static final String SERVER_METHOD_PATH = "/uploadReturnReceipt";
 
     private final String server;
-    private final Identity contactIdentity;
-    private final UID[] contactDeviceUids;
-    private final byte[] nonce;
-    private final EncryptedBytes encryptedPayload;
+    private final List<ReturnReceiptAndEncryptedPayload> returnReceiptAndEncryptedPayloads;
 
-    public UploadReturnReceiptServerMethod(String server, Identity contactIdentity, UID[] contactDeviceUids, byte[] nonce, EncryptedBytes encryptedPayload) {
+    public UploadReturnReceiptServerMethod(String server, List<ReturnReceiptAndEncryptedPayload> returnReceiptAndEncryptedPayloads) {
         this.server = server;
-        this.contactIdentity = contactIdentity;
-        this.contactDeviceUids = contactDeviceUids;
-        this.nonce = nonce;
-        this.encryptedPayload = encryptedPayload;
+        this.returnReceiptAndEncryptedPayloads = returnReceiptAndEncryptedPayloads;
     }
 
     @Override
@@ -176,12 +209,16 @@ class UploadReturnReceiptServerMethod extends ServerMethod {
 
     @Override
     protected byte[] getDataToSend() {
-        return Encoded.of(new Encoded[]{
-                Encoded.of(contactIdentity),
-                Encoded.of(contactDeviceUids),
-                Encoded.of(nonce),
-                Encoded.of(encryptedPayload),
-        }).getBytes();
+        List<Encoded> encodeds = new ArrayList<>();
+        for (ReturnReceiptAndEncryptedPayload returnReceiptAndEncryptedPayload : returnReceiptAndEncryptedPayloads) {
+            encodeds.add(Encoded.of(new Encoded[]{
+                    Encoded.of(returnReceiptAndEncryptedPayload.returnReceipt.getContactIdentity()),
+                    Encoded.of(returnReceiptAndEncryptedPayload.returnReceipt.getContactDeviceUids()),
+                    Encoded.of(returnReceiptAndEncryptedPayload.returnReceipt.getNonce()),
+                    Encoded.of(returnReceiptAndEncryptedPayload.encryptedPayload)
+            }));
+        }
+        return Encoded.of(encodeds.toArray(new Encoded[0])).getBytes();
     }
 
     @Override
@@ -192,5 +229,15 @@ class UploadReturnReceiptServerMethod extends ServerMethod {
     @Override
     protected boolean isActiveIdentityRequired() {
         return true;
+    }
+}
+
+class ReturnReceiptAndEncryptedPayload {
+    final ReturnReceipt returnReceipt;
+    final EncryptedBytes encryptedPayload;
+
+    public ReturnReceiptAndEncryptedPayload(ReturnReceipt returnReceipt, EncryptedBytes encryptedPayload) {
+        this.returnReceipt = returnReceipt;
+        this.encryptedPayload = encryptedPayload;
     }
 }

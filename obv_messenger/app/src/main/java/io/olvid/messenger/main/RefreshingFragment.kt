@@ -31,7 +31,6 @@ import io.olvid.engine.engine.types.EngineNotifications
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import java.util.*
 
 open class RefreshingFragment : Fragment(), OnRefreshListener, EngineNotificationListener {
 
@@ -89,7 +88,7 @@ open class RefreshingFragment : Fragment(), OnRefreshListener, EngineNotificatio
                 userInfo[EngineNotifications.SERVER_POLLED_BYTES_OWNED_IDENTITY_KEY] as ByteArray?
             val success = userInfo[EngineNotifications.SERVER_POLLED_SUCCESS_KEY] as Boolean?
             if (success != null
-                && Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())
+                && bytesOwnedIdentity.contentEquals(AppSingleton.getBytesCurrentIdentity())
             ) {
                 if (refreshingViewModel.isRefreshing.value) {
                     Handler(Looper.getMainLooper()).post {

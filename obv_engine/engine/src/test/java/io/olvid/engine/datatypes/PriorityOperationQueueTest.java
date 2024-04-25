@@ -19,11 +19,12 @@
 
 package io.olvid.engine.datatypes;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import io.olvid.engine.Logger;
-
-import static org.junit.Assert.*;
 
 public class PriorityOperationQueueTest {
     @Test

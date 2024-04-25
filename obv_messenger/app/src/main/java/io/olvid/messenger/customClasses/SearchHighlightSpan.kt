@@ -20,8 +20,6 @@
 package io.olvid.messenger.customClasses
 
 import android.content.Context
-import android.os.Parcel
-import android.text.ParcelableSpan
 import android.text.TextPaint
 import android.text.style.CharacterStyle
 import android.text.style.UpdateAppearance

@@ -86,7 +86,7 @@ public class CreateServerSessionCoordinator implements Operation.OnFinishCallbac
                     userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_API_KEY_STATUS_KEY, serverSession.getApiKeyStatus());
                     userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_PERMISSIONS_KEY, serverSession.getPermissions());
                     userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_API_KEY_EXPIRATION_TIMESTAMP_KEY, serverSession.getApiKeyExpirationTimestamp());
-                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED, userInfo);
+                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_SERVER_SESSION_EXISTS, userInfo);
                 }
             }
             fetchManagerSession.session.commit();

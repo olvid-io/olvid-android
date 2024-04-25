@@ -159,23 +159,28 @@
     </style>
 
     <style name="Heading1">
-        <item name="android:textSize">36sp</item>
+        <item name="android:textSize">27sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="Heading2">
-        <item name="android:textSize">33sp</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="Heading3">
-        <item name="android:textSize">30sp</item>
+        <item name="android:textSize">21sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="Heading4">
-        <item name="android:textSize">27sp</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="Heading5">
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="RobotoMedium">

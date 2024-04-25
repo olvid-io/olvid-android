@@ -38,7 +38,6 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.sync.AppSyncSnapshot;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.openid.KeycloakManager;
-import io.olvid.messenger.settings.SettingsActivity;
 
 public class AppBackupAndSyncDelegate implements ObvBackupAndSyncDelegate {
     EngineNotificationListener engineNotificationListener;

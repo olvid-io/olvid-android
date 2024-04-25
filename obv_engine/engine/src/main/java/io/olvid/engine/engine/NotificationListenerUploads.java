@@ -26,7 +26,6 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.notifications.UploadNotifications;
-import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.notification.NotificationManager;
 

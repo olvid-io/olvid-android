@@ -96,6 +96,7 @@ import io.olvid.messenger.services.UnifiedForegroundService;
 )
 public class Message {
     public static final String TABLE_NAME = "message_table";
+    public static final String FTS_TABLE_NAME = "message_table_fts";
 
     public static final String SENDER_SEQUENCE_NUMBER = "sender_sequence_number";
     public static final String CONTENT_BODY = "content_body";
@@ -791,7 +792,7 @@ public class Message {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(message.discussionId);
 
-        if (!discussion.isNormal()) {
+        if (!discussion.isNormalOrReadOnly()) {
             Logger.e("Trying to react a message in a locked discussion!!!");
             return true;
         }

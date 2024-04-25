@@ -20,7 +20,6 @@
 package io.olvid.engine.networksend.operations;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,7 +32,7 @@ import io.olvid.engine.datatypes.OperationQueue;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.IdentityAndUid;
 import io.olvid.engine.datatypes.containers.StringAndBoolean;
-import io.olvid.engine.networksend.coordinators.SendAttachmentCoordinator;
+import io.olvid.engine.networksend.coordinators.SendMessageCoordinator;
 import io.olvid.engine.networksend.datatypes.SendManagerSessionFactory;
 
 
@@ -45,11 +44,11 @@ public class BatchUploadMessagesCompositeOperation extends Operation {
     private final SendManagerSessionFactory sendManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
     private final String server;
-    private final SendAttachmentCoordinator.MessageBatchProvider messageBatchProvider;
+    private final SendMessageCoordinator.MessageBatchProvider messageBatchProvider;
     private IdentityAndUid[] messageIdentitiesAndUids;
     private Operation[] suboperations;
 
-    public BatchUploadMessagesCompositeOperation(SendManagerSessionFactory sendManagerSessionFactory, SSLSocketFactory sslSocketFactory, String server, boolean userContentMessages, SendAttachmentCoordinator.MessageBatchProvider messageBatchProvider, OnFinishCallback onFinishCallback, OnCancelCallback onCancelCallback) {
+    public BatchUploadMessagesCompositeOperation(SendManagerSessionFactory sendManagerSessionFactory, SSLSocketFactory sslSocketFactory, String server, boolean userContentMessages, SendMessageCoordinator.MessageBatchProvider messageBatchProvider, OnFinishCallback onFinishCallback, OnCancelCallback onCancelCallback) {
         super(StringAndBoolean.computeUniqueUid(server, userContentMessages), onFinishCallback, onCancelCallback);
         this.sendManagerSessionFactory = sendManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;

@@ -21,9 +21,12 @@ package io.olvid.engine.networksend.coordinators;
 
 
 import java.sql.SQLException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -31,10 +34,13 @@ import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.ExponentialBackoffRepeatingScheduler;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
 import io.olvid.engine.datatypes.Operation;
+import io.olvid.engine.datatypes.containers.IdentityAndLong;
+import io.olvid.engine.datatypes.containers.StringAndLong;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.networksend.databases.ReturnReceipt;
@@ -48,12 +54,13 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
     private NotificationListeningDelegate notificationListeningDelegate;
 
     private final PRNGService prng;
+    private final HashMap<String, Queue<IdentityAndLong>> returnReceiptOwnedIdentityAndIdByServer;
     private final NoDuplicateOperationQueue sendReturnReceiptOperationQueue;
-    private final ExponentialBackoffRepeatingScheduler<Long> scheduler;
+    private final ExponentialBackoffRepeatingScheduler<String> scheduler;
     private boolean initialQueueingPerformed = false;
     private final Object lock = new Object();
 
-    private final HashMap<Identity, List<Long>> awaitingIdentityReactivationOperations;
+    private final HashMap<Identity, List<StringAndLong>> awaitingIdentityReactivationOperations;
     private final Lock awaitingIdentityReactivationOperationsLock;
 
     private final NotificationListener notificationListener;
@@ -63,6 +70,7 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
         this.sslSocketFactory = sslSocketFactory;
         this.prng = prng;
 
+        returnReceiptOwnedIdentityAndIdByServer = new HashMap<>();
         sendReturnReceiptOperationQueue = new NoDuplicateOperationQueue();
         sendReturnReceiptOperationQueue.execute(1, "Engine-SendReturnReceiptCoordinator");
 
@@ -87,7 +95,7 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
             try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
                 ReturnReceipt[] returnReceipts = ReturnReceipt.getAll(sendManagerSession);
                 for (ReturnReceipt returnReceipt: returnReceipts) {
-                    queueNewSendReturnReceiptOperation(returnReceipt.getOwnedIdentity(), returnReceipt.getId());
+                    queueNewSendReturnReceiptOperation(returnReceipt.getContactIdentity().getServer(), returnReceipt.getOwnedIdentity(), returnReceipt.getId());
                 }
                 initialQueueingPerformed = true;
             } catch (SQLException e) {
@@ -96,65 +104,104 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
         }
     }
 
-    private void queueNewSendReturnReceiptOperation(Identity ownedIdentity, long returnReceiptId) {
-        Logger.d("Queueing new UploadReturnReceiptOperation " + returnReceiptId);
-        UploadReturnReceiptOperation op = new UploadReturnReceiptOperation(sendManagerSessionFactory, sslSocketFactory, ownedIdentity, returnReceiptId, prng, this, this);
+    private void queueNewSendReturnReceiptOperation(String server, Identity ownedIdentity, long returnReceiptId) {
+        if (ownedIdentity != null) {
+            synchronized (returnReceiptOwnedIdentityAndIdByServer) {
+                Queue<IdentityAndLong> queue = returnReceiptOwnedIdentityAndIdByServer.get(server);
+                if (queue == null) {
+                    queue = new ArrayDeque<>();
+                    returnReceiptOwnedIdentityAndIdByServer.put(server, queue);
+                }
+                queue.add(new IdentityAndLong(ownedIdentity, returnReceiptId));
+            }
+        }
+        UploadReturnReceiptOperation op = new UploadReturnReceiptOperation(sendManagerSessionFactory, sslSocketFactory, server, prng, () -> {
+            List<IdentityAndLong> returnReceiptOwnedIdentityAndId = new ArrayList<>();
+            synchronized (returnReceiptOwnedIdentityAndIdByServer) {
+                Queue<IdentityAndLong> queue = returnReceiptOwnedIdentityAndIdByServer.get(server);
+                if (queue != null && !queue.isEmpty()) {
+                    do {
+                        returnReceiptOwnedIdentityAndId.add(queue.remove());
+                        if (returnReceiptOwnedIdentityAndId.size() == Constants.MAX_UPLOAD_RETURN_RECEIPT_BATCH_SIZE) {
+                            break;
+                        }
+                    } while (!queue.isEmpty());
+                }
+            }
+            return returnReceiptOwnedIdentityAndId.toArray(new IdentityAndLong[0]);
+        }, this, this);
         sendReturnReceiptOperationQueue.queue(op);
     }
 
-    private void scheduleNewSendReturnReceiptOperation(final Identity ownedIdentity, final long returnReceiptId) {
-        scheduler.schedule(returnReceiptId, () -> queueNewSendReturnReceiptOperation(ownedIdentity, returnReceiptId), "UploadReturnReceiptOperation");
+    private void scheduleNewSendReturnReceiptOperation(String server) {
+        scheduler.schedule(server, () -> queueNewSendReturnReceiptOperation(server, null, 0), "UploadReturnReceiptOperation");
     }
 
     public void retryScheduledNetworkTasks() {
         scheduler.retryScheduledRunnables();
     }
 
-    private void waitForIdentityReactivation(Identity ownedIdentity, long id) {
+    private void waitForIdentityReactivation(Identity ownedIdentity, String server, long id) {
         awaitingIdentityReactivationOperationsLock.lock();
-        List<Long> list = awaitingIdentityReactivationOperations.get(ownedIdentity);
+        List<StringAndLong> list = awaitingIdentityReactivationOperations.get(ownedIdentity);
         if (list == null) {
             list = new ArrayList<>();
             awaitingIdentityReactivationOperations.put(ownedIdentity, list);
         }
-        list.add(id);
+        list.add(new StringAndLong(server, id));
         awaitingIdentityReactivationOperationsLock.unlock();
     }
 
 
     @Override
-    public void onCancelCallback(Operation operation) {
-        Identity ownedIdentity = ((UploadReturnReceiptOperation) operation).getOwnedIdentity();
-        long id = ((UploadReturnReceiptOperation) operation).getReturnReceiptId();
-        Integer rfc = operation.getReasonForCancel();
-        Logger.w("UploadReturnReceiptOperation cancelled for reason " + rfc);
-        if (rfc == null) {
-            rfc = Operation.RFC_NULL;
+    public void onFinishCallback(Operation operation) {
+        String server = ((UploadReturnReceiptOperation) operation).getServer();
+        List<IdentityAndLong> identityInactiveReturnReceiptIds = ((UploadReturnReceiptOperation) operation).getIdentityInactiveReturnReceiptIds();
+        scheduler.clearFailedCount(server);
+
+        // if there are still some messages in the queue, reschedule a batch operation
+        synchronized (returnReceiptOwnedIdentityAndIdByServer) {
+            Queue<IdentityAndLong> queue = returnReceiptOwnedIdentityAndIdByServer.get(server);
+            if (queue != null && !queue.isEmpty()) {
+                queueNewSendReturnReceiptOperation(server, null, 0);
+            }
         }
-        switch (rfc) {
-            case UploadReturnReceiptOperation.RFC_RETURN_RECEIPT_NOT_FOUND:
-                // nothing to do
-                break;
-            case UploadReturnReceiptOperation.RFC_IDENTITY_IS_INACTIVE:
-                waitForIdentityReactivation(ownedIdentity, id);
-                break;
-            default:
-                scheduleNewSendReturnReceiptOperation(ownedIdentity, id);
+
+        // handle message the operations couldn't because of inactive identity
+        for (IdentityAndLong identityAndLong : identityInactiveReturnReceiptIds) {
+            waitForIdentityReactivation(identityAndLong.identity, server, identityAndLong.lng);
         }
     }
 
     @Override
-    public void onFinishCallback(Operation operation) {
-        Logger.d("UploadReturnReceipt finished");
-        long returnReceiptId = ((UploadReturnReceiptOperation) operation).getReturnReceiptId();
-        scheduler.clearFailedCount(returnReceiptId);
+    public void onCancelCallback(Operation operation) {
+        String server = ((UploadReturnReceiptOperation) operation).getServer();
+        IdentityAndLong[] returnReceiptOwnedIdentitiesAndIds = ((UploadReturnReceiptOperation) operation).getReturnReceiptOwnedIdentitiesAndIds();
+        Integer rfc = operation.getReasonForCancel();
+        Logger.i("UploadReturnReceiptOperation cancelled for reason " + rfc);
+
+        if (returnReceiptOwnedIdentitiesAndIds != null) {
+            synchronized (returnReceiptOwnedIdentityAndIdByServer) {
+                Queue<IdentityAndLong> queue = returnReceiptOwnedIdentityAndIdByServer.get(server);
+                if (queue == null) {
+                    queue = new ArrayDeque<>();
+                    returnReceiptOwnedIdentityAndIdByServer.put(server, queue);
+                }
+                queue.addAll(Arrays.asList(returnReceiptOwnedIdentitiesAndIds));
+            }
+        }
+        scheduleNewSendReturnReceiptOperation(server);
     }
 
     // Notification received from OutboxAttachment database
-
     @Override
-    public void newReturnReceipt(Identity ownedIdentity, long returnReceiptId) {
-        queueNewSendReturnReceiptOperation(ownedIdentity, returnReceiptId);
+    public void newReturnReceipt(String server, Identity ownedIdentity, long returnReceiptId) {
+        queueNewSendReturnReceiptOperation(server, ownedIdentity, returnReceiptId);
+    }
+
+
+    public interface ReturnReceiptBatchProvider {
+        IdentityAndLong[] getBatchOFReturnReceiptIds();
     }
 
     class NotificationListener implements io.olvid.engine.datatypes.NotificationListener {
@@ -168,12 +215,12 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
                 }
 
                 awaitingIdentityReactivationOperationsLock.lock();
-                List<Long> list = awaitingIdentityReactivationOperations.get(ownedIdentity);
+                List<StringAndLong> list = awaitingIdentityReactivationOperations.get(ownedIdentity);
                 if (list != null) {
                     awaitingIdentityReactivationOperations.remove(ownedIdentity);
-                    for (Long id: list) {
-                        if (id != null) {
-                            queueNewSendReturnReceiptOperation(ownedIdentity, id);
+                    for (StringAndLong serverAndId: list) {
+                        if (serverAndId != null) {
+                            queueNewSendReturnReceiptOperation(serverAndId.string, ownedIdentity, serverAndId.lng);
                         }
                     }
                 }

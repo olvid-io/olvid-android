@@ -21,8 +21,6 @@ package io.olvid.engine.engine.datatypes;
 
 import java.sql.SQLException;
 
-import io.olvid.engine.engine.datatypes.EngineSession;
-
 public interface EngineSessionFactory {
     EngineSession getSession() throws SQLException;
 }

@@ -3259,7 +3259,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_rejected_out);
                             break;
                         }
-                        case -CallLogItem.STATUS_MISSED:
+                        case -CallLogItem.STATUS_MISSED: {
+                            holder.messageInfoTextView.setText(R.string.text_unanswered_call);
+                            holder.callBackButton.setImageResource(R.drawable.ic_phone_missed_out);
+                            break;
+                        }
                         case -CallLogItem.STATUS_FAILED: {
                             holder.messageInfoTextView.setText(R.string.text_failed_call);
                             holder.callBackButton.setImageResource(R.drawable.ic_phone_failed_out);
@@ -3346,6 +3350,12 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                                         }
                                                         break;
                                                     case CallLogItem.STATUS_MISSED:
+                                                        if (callLogItemAndContacts.contacts.size() < 2) {
+                                                            holder.callCachedString = getString(R.string.text_unanswered_outgoing_call_with_contacts, callLogItemAndContacts.oneContact.getCustomDisplayName());
+                                                        } else {
+                                                            holder.callCachedString = getResources().getQuantityString(R.plurals.text_unanswered_outgoing_group_call_with_contacts, callLogItemAndContacts.contacts.size() - 1, callLogItemAndContacts.contacts.size() - 1, callLogItemAndContacts.oneContact.getCustomDisplayName());
+                                                        }
+                                                        break;
                                                     case CallLogItem.STATUS_FAILED:
                                                         if (callLogItemAndContacts.contacts.size() < 2) {
                                                             holder.callCachedString = getString(R.string.text_failed_outgoing_call_with_contacts, callLogItemAndContacts.oneContact.getCustomDisplayName());

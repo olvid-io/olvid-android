@@ -31,9 +31,11 @@ import androidx.core.util.Pair
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.StringUtils2
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
@@ -306,7 +308,7 @@ fun ContactOrKeycloakDetails.getAnnotatedDescription(): AnnotatedString? {
                     if (contact.customDisplayName != null) {
                         append(
                             identityDetails.formatDisplayName(
-                                SettingsActivity.getContactDisplayNameFormat(),
+                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
                                 SettingsActivity.getUppercaseLastName()
                             )
                         )
@@ -335,21 +337,13 @@ fun AnnotatedString.highlight(
     spanStyle: SpanStyle,
     patterns: List<Pattern>?,
 ): AnnotatedString {
-    val unAccented = StringUtils.unAccent(text)
     return buildAnnotatedString {
         append(this@highlight)
-        patterns?.let {
-            for (pattern in patterns) {
-                val matcher = pattern.matcher(unAccented)
-                if (matcher.find()) {
-                    addStyle(
-                        spanStyle, StringUtils.unaccentedOffsetToActualOffset(
-                            text,
-                            matcher.start()
-                        ),
-                        StringUtils.unaccentedOffsetToActualOffset(text, matcher.end())
-                    )
-                }
+        patterns?.map {
+            Regex(it.toString())
+        }?.let {
+            StringUtils2.computeHighlightRanges(text, it).forEach { range ->
+                addStyle(spanStyle, range.first, range.second)
             }
         }
     }

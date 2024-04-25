@@ -19,6 +19,9 @@
 
 package io.olvid.engine.crypto;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -37,8 +40,6 @@ import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaPrivat
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaPublicKey;
 import io.olvid.engine.datatypes.key.asymmetric.SignaturePublicKey;
 import io.olvid.engine.encoder.Encoded;
-
-import static org.junit.Assert.*;
 
 public class AsymmetricCryptoUnitTest {
     static class TestVector {

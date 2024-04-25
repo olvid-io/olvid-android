@@ -94,7 +94,7 @@ class OpenGraphParser {
     companion object {
         private const val DOC_SELECT_OGTAGS = "meta[property^=og:]"
         private const val DOC_SELECT_DESCRIPTION = "meta[name=description]"
-        private const val DOC_SELECT_FAVICON = "link[href~=.*\\.(ico|png)]"
+        private const val DOC_SELECT_FAVICON = "link[rel~=icon][href~=.*\\.(ico|png)]"
         private const val DOC_SELECT_ITEMPROP = "meta[itemprop=image]"
         private const val OPEN_GRAPH_KEY = "content"
         private const val PROPERTY = "property"

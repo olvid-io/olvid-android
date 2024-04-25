@@ -1290,8 +1290,8 @@ private fun VideoCallContent(
             FlowRow(
                 modifier = Modifier
                     .padding(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.SpaceBetween,
                 maxItemsInEachRow = if (maxWidth > maxHeight) 2 else 1
             ) {
                 Card(
@@ -1315,8 +1315,11 @@ private fun VideoCallContent(
                 ) {
                     val remoteVideoTrack =
                         webrtcCallService.getCallParticipant(participants.first().bytesContactIdentity)?.peerConnectionHolder?.remoteVideoTrack
+                    val remoteScreenTrack =
+                        webrtcCallService.getCallParticipant(participants.first().bytesContactIdentity)?.peerConnectionHolder?.remoteScreenTrack
                     CallParticipant(
                         videoTrack = remoteVideoTrack,
+                        screenTrack = remoteScreenTrack,
                         callParticipant = participants.first(),
                         zoomable = true,
                         audioLevel = webrtcCallService.getAudioLevel(participants.first().bytesContactIdentity),
@@ -1344,8 +1347,11 @@ private fun VideoCallContent(
                 ) {
                     val remoteVideoTrack =
                         webrtcCallService.getCallParticipant(participants[1].bytesContactIdentity)?.peerConnectionHolder?.remoteVideoTrack
+                    val remoteScreenTrack =
+                        webrtcCallService.getCallParticipant(participants[1].bytesContactIdentity)?.peerConnectionHolder?.remoteScreenTrack
                     CallParticipant(
                         videoTrack = remoteVideoTrack,
+                        screenTrack = remoteScreenTrack,
                         callParticipant = participants[1],
                         zoomable = true,
                         audioLevel = webrtcCallService.getAudioLevel(participants[1].bytesContactIdentity),
@@ -1867,7 +1873,7 @@ private fun formatDuration(duration: Int): String {
         Locale.ENGLISH,
         "%d:%02d:%02d",
         hours,
-        duration / 60,
+        (duration / 60) % 60,
         duration % 60
     )
 }

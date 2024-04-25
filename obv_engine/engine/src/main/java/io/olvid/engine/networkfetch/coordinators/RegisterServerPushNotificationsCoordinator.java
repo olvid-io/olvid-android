@@ -30,17 +30,17 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
 import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.Operation;
+import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.IdentityAndUid;
-import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.networkfetch.databases.PushNotificationConfiguration;
 import io.olvid.engine.networkfetch.datatypes.CreateServerSessionDelegate;
+import io.olvid.engine.networkfetch.datatypes.DownloadMessagesAndListAttachmentsDelegate;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
-import io.olvid.engine.networkfetch.datatypes.DownloadMessagesAndListAttachmentsDelegate;
 import io.olvid.engine.networkfetch.datatypes.RegisterServerPushNotificationDelegate;
 import io.olvid.engine.networkfetch.operations.RegisterPushNotificationOperation;
 
@@ -259,7 +259,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
                 return;
             }
 
-            // alway do a register after a new client session, we no longer keep a list a awaiting identities
+            // always do a register after a new client session, we no longer keep a list a awaiting identities
             queueNewRegisterPushNotificationOperation((Identity) identityObject);
         }
     }

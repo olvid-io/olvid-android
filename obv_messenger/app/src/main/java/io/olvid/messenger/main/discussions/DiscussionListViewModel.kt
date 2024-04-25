@@ -31,6 +31,7 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.formatSingleLineMarkdown
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.DiscussionDao.DiscussionAndLastMessage
@@ -97,8 +98,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                                         ""
                                     )
                             )
-                            append(AnnotatedString(body).formatMarkdown())
-
+                            append(body.formatSingleLineMarkdown())
                         }
                     } else if (message.wipeStatus == Message.WIPE_STATUS_WIPED
                         || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
@@ -124,11 +124,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                                 string.text_outbound_message_prefix,
                                 ""
                             ))
-                            append(
-                                AnnotatedString(
-                                    body
-                                ).formatMarkdown()
-                            )
+                            append(body.formatSingleLineMarkdown())
                         }
                     }
                 }
@@ -209,7 +205,10 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                                 -CallLogItem.STATUS_REJECTED, CallLogItem.STATUS_REJECTED, CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE -> {
                                     context.getString(string.text_rejected_call)
                                 }
-                                -CallLogItem.STATUS_MISSED, -CallLogItem.STATUS_FAILED, CallLogItem.STATUS_FAILED -> {
+                                -CallLogItem.STATUS_MISSED -> {
+                                    context.getString(string.text_unanswered_call)
+                                }
+                                -CallLogItem.STATUS_FAILED, CallLogItem.STATUS_FAILED -> {
                                     context.getString(string.text_failed_call)
                                 }
                                 -CallLogItem.STATUS_SUCCESSFUL, CallLogItem.STATUS_SUCCESSFUL, CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE -> {
@@ -360,7 +359,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                             append(AnnotatedString(body).formatMarkdown())
                         }
                     } else {
-                        append(AnnotatedString(body).formatMarkdown())
+                        append(body.formatSingleLineMarkdown())
                     }
                 }
             }

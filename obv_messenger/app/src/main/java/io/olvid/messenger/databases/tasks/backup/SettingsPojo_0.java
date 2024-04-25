@@ -286,12 +286,14 @@ public class SettingsPojo_0 {
         if (auto_join_groups != null) {
             oldAutoJoinGroupsCategory = SettingsActivity.getAutoJoinGroups();
             SettingsActivity.setAutoJoinGroups(SettingsActivity.getAutoJoinGroupsFromString(auto_join_groups));
-
-            try {
-                AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingAutoJoinGroups(auto_join_groups));
-            } catch (Exception e) {
-                Logger.w("Failed to propagate auto join group setting change to other devices");
-                e.printStackTrace();
+            if (oldAutoJoinGroupsCategory != SettingsActivity.getAutoJoinGroups()) {
+                // only propagate if something did change
+                try {
+                    AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingAutoJoinGroups(auto_join_groups));
+                } catch (Exception e) {
+                    Logger.w("Failed to propagate auto join group setting change to other devices");
+                    e.printStackTrace();
+                }
             }
         }
         if (show_trust_level != null) { SettingsActivity.setShowTrustLevels(show_trust_level); }
@@ -308,13 +310,16 @@ public class SettingsPojo_0 {
         if (link_preview_inbound != null) { SettingsActivity.setLinkPreviewInbound(link_preview_inbound); }
         if (link_preview_outbound != null) { SettingsActivity.setLinkPreviewOutbound(link_preview_outbound); }
         if (send_read_receipt != null) {
-            SettingsActivity.setDefaultSendReadReceipt(send_read_receipt);
+            if (SettingsActivity.getDefaultSendReadReceipt() != send_read_receipt) {
+                // only propagate if something did change
+                SettingsActivity.setDefaultSendReadReceipt(send_read_receipt);
 
-            try {
-                AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts(send_read_receipt));
-            } catch (Exception e) {
-                Logger.w("Failed to propagate default send read receipt setting change to other devices");
-                e.printStackTrace();
+                try {
+                    AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts(send_read_receipt));
+                } catch (Exception e) {
+                    Logger.w("Failed to propagate default send read receipt setting change to other devices");
+                    e.printStackTrace();
+                }
             }
         }
         if (auto_open_limited_visibility != null) { SettingsActivity.setDefaultAutoOpenLimitedVisibilityInboundMessages(auto_open_limited_visibility); }

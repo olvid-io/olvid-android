@@ -23,7 +23,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.content.pm.PackageManager
-import android.graphics.drawable.AnimatedVectorDrawable
 import android.media.MediaRecorder
 import android.media.MediaRecorder.AudioEncoder
 import android.media.MediaRecorder.AudioSource
@@ -38,14 +37,14 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.WindowManager.LayoutParams
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import io.olvid.messenger.App
-import io.olvid.messenger.R.id
 import io.olvid.messenger.R.string
 import io.olvid.messenger.R.style
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
@@ -56,16 +55,15 @@ import java.util.Date
 import java.util.Locale
 import java.util.Timer
 import java.util.TimerTask
+import kotlin.concurrent.schedule
+import kotlin.math.log2
 
 internal class VoiceMessageRecorder(
     private val activity: FragmentActivity,
-    private val recordingOverlay: View,
     private val requestAudioPermissionDelegate: RequestAudioPermissionDelegate
 ) : OnTouchListener {
-    private val recordingInitializationSpinner: ImageView
-    private val recordingRedButton: View
-    private val recordingStopTextView: TextView
-    private val composeMessageViewModel: ComposeMessageViewModel
+    var opened by mutableStateOf(false)
+    private val composeMessageViewModel: ComposeMessageViewModel = ViewModelProvider(activity)[ComposeMessageViewModel::class.java]
     private var recordPermission: Boolean
     private var mediaRecorder: MediaRecorder? = null
     private var audioFile: File? = null
@@ -75,14 +73,13 @@ internal class VoiceMessageRecorder(
     private var sampleTask: TimerTask? = null
     private var wakeLock: WakeLock? = null
 
+    var soundWave by mutableStateOf(SampleAndTicker())
+
+    companion object {
+        const val SAMPLE_INTERVAL: Long = 102
+    }
+
     init {
-        recordingInitializationSpinner =
-            recordingOverlay.findViewById(id.recording_initialization_spinner)
-        recordingRedButton = recordingOverlay.findViewById(id.recording_red_button)
-        recordingStopTextView = recordingOverlay.findViewById(id.recording_stop_label)
-        composeMessageViewModel = ViewModelProvider(activity).get(
-            ComposeMessageViewModel::class.java
-        )
         recordPermission = ContextCompat.checkSelfPermission(
             activity,
             permission.RECORD_AUDIO
@@ -106,20 +103,13 @@ internal class VoiceMessageRecorder(
                 if (recording) {
                     return
                 }
-                activity.runOnUiThread {
-                    recordingOverlay.visibility = View.VISIBLE
-                    recordingRedButton.visibility = View.GONE
-                    recordingInitializationSpinner.visibility = View.VISIBLE
-                    val spinner = recordingInitializationSpinner.drawable
-                    if (spinner is AnimatedVectorDrawable) {
-                        spinner.start()
-                    }
-                }
+                opened = true
                 setRecording(true)
                 if (mediaRecorder != null) {
                     mediaRecorder?.release()
                     mediaRecorder = null
                 }
+                soundWave = SampleAndTicker()
                 val cacheDir = File(activity.cacheDir, App.CAMERA_PICTURE_FOLDER)
                 cacheDir.mkdirs()
                 audioFile = File(
@@ -148,7 +138,7 @@ internal class VoiceMessageRecorder(
                     )
                     mediaRecorder?.release()
                     mediaRecorder = null
-                    activity.runOnUiThread { recordingOverlay.visibility = View.GONE }
+                    opened = false
                     return
                 }
 
@@ -169,35 +159,28 @@ internal class VoiceMessageRecorder(
                         if (mediaRecorder == null || !recording) {
                             cancel()
                         }
-                        try {
-                            val amplitude = mediaRecorder!!.maxAmplitude
-                            if (!started && amplitude > 0) {
-                                started = true
-                                activity.runOnUiThread {
-                                    recordingInitializationSpinner.visibility = View.GONE
-                                    recordingRedButton.visibility = View.VISIBLE
+                        soundWave = soundWave.inc()
+                        if (soundWave.ticker == SampleAndTicker.TICKS_PER_SAMPLE) {
+                            try {
+                                val amplitude = (log2(mediaRecorder!!.maxAmplitude.toDouble()).toFloat() - 9).coerceAtLeast(0f) / 6
+                                if (!started && amplitude > 0) {
+                                    started = true
                                 }
+                                soundWave = soundWave.add(amplitude)
+                            } catch (e: Exception) {
+                                cancel()
                             }
-                            var log = (Math.log(amplitude.toDouble()) / Math.log(2.0)).toFloat()
-                            log = Math.max(0f, log - 8)
-                            val scale = 0.5f + log / 4
-                            activity.runOnUiThread {
-                                recordingRedButton.scaleX = scale
-                                recordingRedButton.scaleY = scale
-                            }
-                        } catch (e: Exception) {
-                            cancel()
                         }
                     }
                 }
-                timer.scheduleAtFixedRate(sampleTask, 0, 100)
+                timer.scheduleAtFixedRate(sampleTask, 0, SAMPLE_INTERVAL / SampleAndTicker.TICKS_PER_SAMPLE)
             }
         }
         timer.schedule(startRecordTask, 250)
         return true
     }
 
-    fun stopRecord(discard: Boolean) {
+    fun stopRecord(discard: Boolean, async: Boolean = true) {
         // release wake locks
         Handler(Looper.getMainLooper()).post {
             val window = activity.window
@@ -212,38 +195,43 @@ internal class VoiceMessageRecorder(
             startRecordTask = null
         }
         if (!recording) {
-            activity.runOnUiThread { recordingOverlay.visibility = View.GONE }
+            opened = false
         } else {
-            val stopTask: TimerTask = object : TimerTask() {
-                override fun run() {
-                    if (!recording) {
-                        return
-                    }
-                    setRecording(false)
-                    activity.runOnUiThread { recordingOverlay.visibility = View.GONE }
-                    if (mediaRecorder != null) {
-                        try {
-                            mediaRecorder!!.stop()
-                            mediaRecorder!!.release()
-                            mediaRecorder = null
-                            if (!discard && audioFile!!.length() > 0) {
-                                val discussionId = composeMessageViewModel.discussionId
-                                if (discussionId != null) {
-                                    AddFyleToDraftFromUriTask(
-                                        audioFile!!,
-                                        audioFile!!.name,
-                                        "audio/x-m4a",
-                                        discussionId
-                                    ).run()
-                                }
-                            }
-                        } catch (e: Exception) {
-                            // do nothing
-                        }
+            if (async) {
+                timer.schedule(delay = 300) {
+                    stopTask(discard)
+                }
+            } else {
+                stopTask(discard)
+            }
+        }
+    }
+
+    private fun stopTask(discard: Boolean) {
+        if (!recording) {
+            return
+        }
+        setRecording(false)
+        opened = false
+        mediaRecorder?.apply {
+            try {
+                stop()
+                release()
+                mediaRecorder = null
+                if (!discard && audioFile!!.length() > 0) {
+                    val discussionId = composeMessageViewModel.discussionId
+                    if (discussionId != null) {
+                        AddFyleToDraftFromUriTask(
+                            audioFile!!,
+                            audioFile!!.name,
+                            "audio/x-m4a",
+                            discussionId
+                        ).run()
                     }
                 }
+            } catch (e: Exception) {
+                // do nothing
             }
-            timer.schedule(stopTask, 300)
         }
     }
 
@@ -251,7 +239,6 @@ internal class VoiceMessageRecorder(
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 startRecord()
-                recordingStopTextView.setText(string.label_stop_recording_release)
             }
 
             MotionEvent.ACTION_UP -> {
@@ -280,7 +267,6 @@ internal class VoiceMessageRecorder(
                         }
                     } else {
                         // recording start success
-                        recordingStopTextView.setText(string.label_stop_recording_tap)
                         v.performClick()
                     }
                 }
@@ -289,10 +275,11 @@ internal class VoiceMessageRecorder(
         return true
     }
 
-    fun isRecording() : Boolean {
+    fun isRecording(): Boolean {
         return recording
     }
-     fun setRecording(recording: Boolean) {
+
+    fun setRecording(recording: Boolean) {
         this.recording = recording
         composeMessageViewModel.setRecording(recording)
     }
@@ -300,4 +287,23 @@ internal class VoiceMessageRecorder(
     internal interface RequestAudioPermissionDelegate {
         fun requestAudioPermission(rationaleWasShown: Boolean)
     }
+}
+
+data class SampleAndTicker(val samples: List<Float> = listOf(), val ticker: Int = 0) {
+    companion object {
+        val TICKS_PER_SAMPLE = 6
+    }
+
+    fun add(v: Float): SampleAndTicker {
+        return copy(samples = listOf(v) + samples, ticker = 0)
+    }
+
+    fun inc(): SampleAndTicker {
+        return copy(samples = samples, ticker = ticker + 1)
+    }
+
+    val size: Int
+        get() {
+            return samples.size
+        }
 }

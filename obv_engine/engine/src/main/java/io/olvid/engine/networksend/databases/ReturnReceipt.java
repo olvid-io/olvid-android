@@ -60,6 +60,7 @@ public class ReturnReceipt implements ObvDatabase {
     private Integer attachmentNumber;
     static final String ATTACHMENT_NUMBER = "attachment_number";
 
+
     public long getId() {
         return id;
     }
@@ -150,6 +151,36 @@ public class ReturnReceipt implements ObvDatabase {
         }
     }
 
+
+    public static ReturnReceipt[] getMany(SendManagerSession sendManagerSession, Long[] ids) throws SQLException {
+        if (ids == null) {
+            return null;
+        }
+
+        // build a ?,? string
+        int count = ids.length;
+        StringBuilder sb = new StringBuilder(count * 2);
+        while (count-- > 1) {
+            sb.append("?,");
+        }
+        sb.append("?");
+
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + ID + " IN (" + sb + ");")) {
+            for (int i = 0; i < ids.length; i++) {
+                statement.setLong(i + 1, ids[i]);
+            }
+            try (ResultSet res = statement.executeQuery()) {
+                List<ReturnReceipt> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new ReturnReceipt(sendManagerSession, res));
+                }
+                return list.toArray(new ReturnReceipt[0]);
+            }
+        }
+    }
+
+
     public static ReturnReceipt[] getAll(SendManagerSession sendManagerSession) throws SQLException {
         try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
@@ -236,7 +267,7 @@ public class ReturnReceipt implements ObvDatabase {
     // region hooks
 
     public interface NewReturnReceiptListener {
-        void newReturnReceipt(Identity ownedIdentity, long id);
+        void newReturnReceipt(String server, Identity ownedIdentity, long id);
     }
 
     private long commitHookBits = 0;
@@ -246,7 +277,7 @@ public class ReturnReceipt implements ObvDatabase {
     public void wasCommitted() {
         if ((commitHookBits & HOOK_BIT_INSERT) != 0) {
             if (sendManagerSession.newReturnReceiptListener != null) {
-                sendManagerSession.newReturnReceiptListener.newReturnReceipt(ownedIdentity, id);
+                sendManagerSession.newReturnReceiptListener.newReturnReceipt(contactIdentity.getServer(), ownedIdentity, id);
             }
         }
     }

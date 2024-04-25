@@ -34,8 +34,6 @@ import java.util.Objects;
 import io.olvid.engine.Logger;
 import io.olvid.engine.channel.datatypes.AuthEncKeyAndChannelInfo;
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;
-import io.olvid.engine.datatypes.Session;
-import io.olvid.engine.datatypes.notifications.ChannelNotifications;
 import io.olvid.engine.channel.datatypes.NetworkChannel;
 import io.olvid.engine.channel.datatypes.RatchetingOutput;
 import io.olvid.engine.crypto.AuthEnc;
@@ -44,11 +42,13 @@ import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.crypto.exceptions.DecryptionException;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.KeyId;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Seed;
+import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelProtocolMessageToSend;
@@ -58,9 +58,9 @@ import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
+import io.olvid.engine.datatypes.notifications.ChannelNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
-import io.olvid.engine.datatypes.Constants;
 
 
 public class ObliviousChannel extends NetworkChannel implements ObvDatabase {

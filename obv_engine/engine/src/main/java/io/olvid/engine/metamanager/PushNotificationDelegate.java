@@ -23,9 +23,9 @@ package io.olvid.engine.metamanager;
 import java.sql.SQLException;
 
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
-import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 
 public interface PushNotificationDelegate {
     void registerPushNotificationIfConfigurationChanged(Session session, Identity ownedIdentity, UID currentDeviceUid, PushNotificationTypeAndParameters pushNotificationTypeAndParameters) throws SQLException;

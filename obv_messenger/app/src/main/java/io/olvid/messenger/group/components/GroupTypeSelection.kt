@@ -61,8 +61,8 @@ import io.olvid.messenger.R.string
 import io.olvid.messenger.group.GroupTypeModel
 import io.olvid.messenger.group.GroupTypeModel.GroupType.CUSTOM
 import io.olvid.messenger.group.GroupTypeModel.GroupType.PRIVATE
-import io.olvid.messenger.group.GroupTypeModel.GroupType.SIMPLE
 import io.olvid.messenger.group.GroupTypeModel.GroupType.READ_ONLY
+import io.olvid.messenger.group.GroupTypeModel.GroupType.SIMPLE
 
 @Composable
 fun GroupTypeSelection(

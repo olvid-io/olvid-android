@@ -59,7 +59,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import javax.crypto.SecretKeyFactory;
@@ -155,6 +154,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     static final String PREF_KEY_FONT_SCALE = "pref_key_font_scale";
     static final String PREF_KEY_FONT_SCALE_DEFAULT = "1.0";
 
+    static final String PREF_KEY_APP_ICON = "pref_key_app_icon";
+
     static final String PREF_KEY_SCREEN_SCALE = "pref_key_screen_scale";
     static final String PREF_KEY_SCREEN_SCALE_DEFAULT = "1.0";
 
@@ -178,6 +179,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
 
     // PRIVACY
+
+    static final String PREF_KEY_LAST_READ_RECEIPT_PROMPT_ANSWER_TIMESTAMP = "pref_key_last_read_receipt_prompt_answer_timestamp";
     static final String PREF_KEY_READ_RECEIPT = "pref_key_send_read_receipt";
     static final boolean PREF_KEY_READ_RECEIPT_DEFAULT = false;
 
@@ -259,6 +262,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 
     static final String PREF_KEY_KEEP_LOCK_SERVICE_OPEN = "pref_key_keep_lock_service_open";
     static final boolean PREF_KEY_KEEP_LOCK_SERVICE_OPEN_DEFAULT = true;
+
+    static final String PREF_KEY_KEEP_LOCK_SCREEN_NEUTRAL = "pref_key_keep_lock_screen_neutral";
+    static final boolean PREF_KEY_KEEP_LOCK_SCREEN_NEUTRAL_DEFAULT = false;
 
     static final String PREF_KEY_PIN_IS_A_PASSWORD = "pref_key_pin_is_a_password";
     static final boolean PREF_KEY_PIN_IS_A_PASSWORD_DEFAULT = false;
@@ -472,7 +478,7 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
 //    static final long PREF_KEY_LOCATION_DEFAULT_SHARE_INTERVAL_DEFAULT = 60_000L;
 
     static final String PREF_KEY_LOCATION_DEFAULT_SHARE_QUALITY = "pref_key_location_default_share_quality";
-    static final LocationShareQuality PREF_KEY_LOCATION_DEFAULT_SHARE_QUALITY_DEFAULT = LocationShareQuality.QUALITY_PRECISE;
+    static final LocationShareQuality PREF_KEY_LOCATION_DEFAULT_SHARE_QUALITY_DEFAULT = LocationShareQuality.QUALITY_BALANCED;
 
     static final String PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS = "pref_key_location_hide_error_notifications";
     static final boolean PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS_DEFAULT = false;
@@ -915,8 +921,18 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
+    public static long getLastReadReceiptPromptAnswerTimestamp() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getLong(PREF_KEY_LAST_READ_RECEIPT_PROMPT_ANSWER_TIMESTAMP, 0);
+    }
+
+    public static void setLastReadReceiptPromptAnswerTimestamp(long timestampOrMinusOne) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+        editor.putLong(PREF_KEY_LAST_READ_RECEIPT_PROMPT_ANSWER_TIMESTAMP, timestampOrMinusOne);
+        editor.apply();
+    }
+
     public static boolean getDefaultSendReadReceipt() {
-        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(SettingsActivity.PREF_KEY_READ_RECEIPT, SettingsActivity.PREF_KEY_READ_RECEIPT_DEFAULT);
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_READ_RECEIPT, PREF_KEY_READ_RECEIPT_DEFAULT);
     }
 
     public static void setDefaultSendReadReceipt(boolean defaultSendReadReceipt) {
@@ -1552,6 +1568,10 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
         editor.putBoolean(PREF_KEY_KEEP_LOCK_SERVICE_OPEN, keepOpen);
         editor.apply();
+    }
+
+    public static boolean lockScreenNeutral() {
+        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(PREF_KEY_KEEP_LOCK_SCREEN_NEUTRAL, PREF_KEY_KEEP_LOCK_SCREEN_NEUTRAL_DEFAULT);
     }
 
     public static void setUseAutomaticBackup(boolean useAutomaticBackup) {

@@ -48,7 +48,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.R.color
 
 @Composable
-fun MainScreenEmptyList(@DrawableRes icon: Int, iconPadding: Dp = 0.dp, @StringRes title: Int, @StringRes subtitle: Int?) {
+fun MainScreenEmptyList(@DrawableRes icon: Int, iconPadding: Dp = 0.dp, @StringRes title: Int, @StringRes subtitle: Int? = null) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -86,6 +86,6 @@ fun MainScreenEmptyList(@DrawableRes icon: Int, iconPadding: Dp = 0.dp, @StringR
 @Composable
 private fun MainScreenEmptyListPreview() {
     AppCompatTheme {
-        MainScreenEmptyList(icon = R.drawable.ic_phone_log,title = R.string.explanation_empty_discussion_list, subtitle = R.string.explanation_empty_discussion_list_sub)
+        MainScreenEmptyList(icon = R.drawable.ic_phone_log, title = R.string.explanation_empty_discussion_list, subtitle = R.string.explanation_empty_discussion_list_sub)
     }
 }

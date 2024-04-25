@@ -27,20 +27,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Looper;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
-import android.text.style.StyleSpan;
-import android.util.ArrayMap;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -391,7 +385,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
             Executor executor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ? App.getContext().getMainExecutor() : new HandlerExecutor(Looper.getMainLooper());
             if (provider != null) {
-                LocationManagerCompat.getCurrentLocation(locationManager, provider, null, executor, location -> {
+                LocationManagerCompat.getCurrentLocation(locationManager, provider, (CancellationSignal) null, executor, location -> {
                     if (location != null) {
                         centerOnLocation(location, animate);
                         mapboxMap.getLocationComponent().forceLocationUpdate(location);

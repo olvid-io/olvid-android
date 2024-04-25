@@ -356,6 +356,10 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
         queueNewSendMessageCompositeOperation(server, ownedIdentity, messageUid, hasAttachment, hasUserContent);
     }
 
+    public interface MessageBatchProvider {
+        IdentityAndUid[] getBatchOFMessageUids();
+    }
+
     class NotificationListener implements io.olvid.engine.datatypes.NotificationListener {
         @Override
         public void callback(String notificationName, HashMap<String, Object> userInfo) {

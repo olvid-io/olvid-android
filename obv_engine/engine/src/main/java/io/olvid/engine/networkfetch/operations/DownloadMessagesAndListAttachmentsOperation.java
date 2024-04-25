@@ -21,7 +21,10 @@ package io.olvid.engine.networkfetch.operations;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -31,6 +34,7 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.networkfetch.databases.InboxAttachment;
@@ -47,6 +51,7 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
     public static final int RFC_IDENTITY_IS_INACTIVE = 4;
     public static final int RFC_DEVICE_NOT_REGISTERED = 5;
 
+    private static final Set<Identity> notifiedIdentities = new HashSet<>();
 
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
@@ -92,6 +97,18 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                 }
                 if (cancelWasRequested()) {
                     return;
+                }
+
+                // if this is the first listing for this identity, notify that a not-user-initiated listing is in progress
+                synchronized (notifiedIdentities) {
+                    if (!notifiedIdentities.contains(ownedIdentity)) {
+                        notifiedIdentities.add(ownedIdentity);
+
+                        HashMap<String, Object> userInfo = new HashMap<>();
+                        userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED_OWNED_IDENTITY_KEY, ownedIdentity);
+                        userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED_USER_INITIATED_KEY, false);
+                        fetchManagerSession.notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED, userInfo);
+                    }
                 }
 
                 DownloadMessagesAndListAttachmentsServerMethod serverMethod = new DownloadMessagesAndListAttachmentsServerMethod(

@@ -41,6 +41,29 @@ import io.olvid.messenger.customClasses.StringUtils;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[]{
+            new Migration(66, 67) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 66 TO 67");
+
+                    database.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS `message_table_fts` USING FTS4(`content_body` TEXT NOT NULL, tokenize=unicode61 `remove_diacritics=2`, content=`message_table`)");
+                    database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_message_table_fts_BEFORE_UPDATE BEFORE UPDATE ON `message_table` BEGIN DELETE FROM `message_table_fts` WHERE `docid`=OLD.`rowid`; END");
+                    database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_message_table_fts_BEFORE_DELETE BEFORE DELETE ON `message_table` BEGIN DELETE FROM `message_table_fts` WHERE `docid`=OLD.`rowid`; END");
+                    database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_message_table_fts_AFTER_UPDATE AFTER UPDATE ON `message_table` BEGIN INSERT INTO `message_table_fts`(`docid`, `content_body`) VALUES (NEW.`rowid`, NEW.`content_body`); END");
+                    database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_message_table_fts_AFTER_INSERT AFTER INSERT ON `message_table` BEGIN INSERT INTO `message_table_fts`(`docid`, `content_body`) VALUES (NEW.`rowid`, NEW.`content_body`); END");
+
+
+                    database.execSQL("ALTER TABLE `fyle_message_join_with_status` ADD COLUMN `text_extracted` INTEGER NOT NULL DEFAULT 0");
+                    database.execSQL("ALTER TABLE `fyle_message_join_with_status` ADD COLUMN `text_content` TEXT DEFAULT NULL");
+
+                    database.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS `fyle_message_join_with_status_fts` USING FTS4(`file_name` TEXT NOT NULL, `text_content` TEXT NOT NULL, tokenize=unicode61 `remove_diacritics=2`, content=`fyle_message_join_with_status`)");
+                    database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_fyle_message_join_with_status_fts_BEFORE_UPDATE BEFORE UPDATE ON `fyle_message_join_with_status` BEGIN DELETE FROM `fyle_message_join_with_status_fts` WHERE `docid`=OLD.`rowid`; END");
+                    database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_fyle_message_join_with_status_fts_BEFORE_DELETE BEFORE DELETE ON `fyle_message_join_with_status` BEGIN DELETE FROM `fyle_message_join_with_status_fts` WHERE `docid`=OLD.`rowid`; END");
+                    database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_fyle_message_join_with_status_fts_AFTER_UPDATE AFTER UPDATE ON `fyle_message_join_with_status` BEGIN INSERT INTO `fyle_message_join_with_status_fts`(`docid`, `file_name`, `text_content`) VALUES (NEW.`rowid`, NEW.`file_name`, NEW.`text_content`); END");
+                    database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_fyle_message_join_with_status_fts_AFTER_INSERT AFTER INSERT ON `fyle_message_join_with_status` BEGIN INSERT INTO `fyle_message_join_with_status_fts`(`docid`, `file_name`, `text_content`) VALUES (NEW.`rowid`, NEW.`file_name`, NEW.`text_content`); END");
+                }
+            },
+
             new Migration(65, 66) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

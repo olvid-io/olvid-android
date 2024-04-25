@@ -51,170 +51,195 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Discussion
+import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.main.invitations.getAnnotatedDate
 import io.olvid.messenger.main.invitations.getAnnotatedTitle
+import io.olvid.messenger.main.search.GlobalSearchScreen
+import io.olvid.messenger.main.search.GlobalSearchViewModel
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun DiscussionListScreen(
+    globalSearchViewModel: GlobalSearchViewModel,
     discussionListViewModel: DiscussionListViewModel,
     invitationListViewModel: InvitationListViewModel,
+    linkPreviewViewModel: LinkPreviewViewModel,
     refreshing: Boolean,
     onRefresh: () -> Unit,
     onClick: (discussion: Discussion) -> Unit,
     discussionMenu: DiscussionMenu
 ) {
+    val context = LocalContext.current
     val discussionsAndLastMessages by discussionListViewModel.discussions.observeAsState()
     val invitations by invitationListViewModel.invitations.observeAsState()
     val refreshState = rememberPullRefreshState(refreshing, onRefresh)
 
     AppCompatTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pullRefresh(refreshState)
-        ) {
-            val lazyListState = rememberLazyListState()
-            discussionsAndLastMessages?.let { list ->
-                if (list.isEmpty().not()) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = lazyListState,
-                        contentPadding = PaddingValues(bottom = 80.dp),
-                    ) {
-                        item(key = -1) { Box(modifier = Modifier.requiredHeight(1.dp).fillMaxWidth()){} }
+        if (globalSearchViewModel.filter.isNullOrEmpty().not()) {
+            GlobalSearchScreen(globalSearchViewModel, linkPreviewViewModel)
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pullRefresh(refreshState)
+            ) {
+                val lazyListState = rememberLazyListState()
+                discussionsAndLastMessages?.let { list ->
+                    if (list.isEmpty().not()) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            state = lazyListState,
+                            contentPadding = PaddingValues(bottom = 80.dp),
+                        ) {
+                            item(key = -1) {
+                                Box(
+                                    modifier = Modifier
+                                        .requiredHeight(1.dp)
+                                        .fillMaxWidth()
+                                ) {}
+                            }
 
-                        itemsIndexed(
-                            items = list,
-                            key = { _, item -> item.discussion.id }) { index, discussionAndLastMessage ->
-                            with(discussionAndLastMessage) {
-                                Box (modifier = Modifier.animateItemPlacement()){
-                                    val invitation by remember {
-                                        derivedStateOf {
-                                            invitations?.sortedBy { it.invitationTimestamp }
-                                                ?.find { it.discussionId == discussion.id }
+                            itemsIndexed(
+                                items = list,
+                                key = { _, item -> item.discussion.id }) { index, discussionAndLastMessage ->
+                                with(discussionAndLastMessage) {
+                                    Box(modifier = Modifier.animateItemPlacement()) {
+                                        val invitation by remember {
+                                            derivedStateOf {
+                                                invitations?.sortedBy { it.invitationTimestamp }
+                                                    ?.find { it.discussionId == discussion.id }
+                                            }
                                         }
-                                    }
-                                    DiscussionListItem(
-                                        title = invitation?.getAnnotatedTitle(LocalContext.current).takeIf { discussion.isPreDiscussion }
-                                            ?: getAnnotatedTitle(LocalContext.current),
-                                        body = invitation?.let { AnnotatedString(it.statusText) }
-                                            ?: getAnnotatedBody(LocalContext.current),
-                                        date = invitation?.getAnnotatedDate(LocalContext.current)
-                                            ?: getAnnotatedDate(LocalContext.current),
-                                        initialViewSetup = { initialView ->
-                                                invitation?.takeIf { discussion.isPreDiscussion }?.let {
-                                                    invitationListViewModel.initialViewSetup(
-                                                        initialView,
-                                                        it
-                                                    )
-                                                } ifNull {
+                                        DiscussionListItem(
+                                            title = invitation?.getAnnotatedTitle(context)
+                                                .takeIf { discussion.isPreDiscussion }
+                                                ?: getAnnotatedTitle(context),
+                                            body = invitation?.let { AnnotatedString(it.statusText) }
+                                                ?: getAnnotatedBody(context),
+                                            date = invitation?.getAnnotatedDate(context)
+                                                ?: getAnnotatedDate(context),
+                                            initialViewSetup = { initialView ->
+                                                invitation?.takeIf { discussion.isPreDiscussion }
+                                                    ?.let {
+                                                        invitationListViewModel.initialViewSetup(
+                                                            initialView,
+                                                            it
+                                                        )
+                                                    } ifNull {
                                                     initialView.setDiscussion(discussion)
                                                 }
-                                        },
-                                        customColor = discussionCustomization?.colorJson?.color?.minus(
-                                            0x1000000
-                                        ) ?: 0x00ffffff,
-                                        backgroundImageUrl = App.absolutePathFromRelative(
-                                            discussionCustomization?.backgroundImageUrl
-                                        ),
-                                        unread = (invitation?.requiresAction() == true) || discussion.unread,
-                                        unreadCount = unreadCount,
-                                        muted = discussionCustomization?.shouldMuteNotifications() == true,
-                                        locked = discussion.isLocked && invitation == null,
-                                        mentioned = unreadMention,
-                                        pinned = discussion.pinned,
-                                        locationsShared = locationsShared,
-                                        attachmentCount = if (message?.isLocationMessage == true) 0 else message?.totalAttachmentCount ?: 0,
-                                        onClick = { onClick(discussion) },
-                                        isPreDiscussion = discussion.isPreDiscussion,
-                                        onMarkAllDiscussionMessagesRead = {
-                                            discussionMenu.markAllDiscussionMessagesRead(
-                                                discussion.id
-                                            )
-                                        },
-                                        onMarkDiscussionAsUnread = {
-                                            discussionMenu.markDiscussionAsUnread(
-                                                discussion.id
-                                            )
-                                        },
-                                        onPinDiscussion = { pinned ->
-                                            discussionMenu.pinDiscussion(
-                                                discussionId = discussion.id,
-                                                pinned = pinned
-                                            )
-                                        },
-                                        onMuteDiscussion = { muted ->
-                                            discussionMenu.muteDiscussion(
-                                                discussionId = discussion.id,
-                                                muted = muted
-                                            )
-                                        },
-                                        onDeleteDiscussion = {
-                                            discussionMenu.deleteDiscussion(
-                                                discussion
-                                            )
-                                        },
-                                        renameActionName = if (discussion.isNormalOrReadOnly) {
-                                            when (discussion.discussionType) {
-                                                Discussion.TYPE_CONTACT ->
-                                                    stringResource(id = string.menu_action_rename_contact)
-                                                Discussion.TYPE_GROUP, Discussion.TYPE_GROUP_V2 ->
-                                                    stringResource(id = string.menu_action_rename_group)
-                                                else -> stringResource(id = string.menu_action_rename)
-                                            }
-                                        } else {
-                                            stringResource(id = string.menu_action_rename)
-                                        },
-                                        onRenameDiscussion = {
-                                            discussionMenu.renameDiscussion(
-                                                discussion
-                                            )
-                                        },
-                                        onOpenSettings = { discussionMenu.openSettings(discussion.id) }
-                                    )
-                                    if (index < list.size - 1) {
-                                        Spacer(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(start = 84.dp, end = 12.dp)
-                                                .requiredHeight(1.dp)
-                                                .align(Alignment.BottomStart)
-                                                .background(
-                                                    color = colorResource(id = R.color.lightGrey)
+                                            },
+                                            customColor = discussionCustomization?.colorJson?.color?.minus(
+                                                0x1000000
+                                            ) ?: 0x00ffffff,
+                                            backgroundImageUrl = App.absolutePathFromRelative(
+                                                discussionCustomization?.backgroundImageUrl
+                                            ),
+                                            unread = (invitation?.requiresAction() == true) || discussion.unread,
+                                            unreadCount = unreadCount,
+                                            muted = discussionCustomization?.shouldMuteNotifications() == true,
+                                            locked = discussion.isLocked && invitation == null,
+                                            mentioned = unreadMention,
+                                            pinned = discussion.pinned,
+                                            locationsShared = locationsShared,
+                                            attachmentCount = if (message?.isLocationMessage == true) 0 else message?.totalAttachmentCount
+                                                ?: 0,
+                                            onClick = { onClick(discussion) },
+                                            isPreDiscussion = discussion.isPreDiscussion,
+                                            onMarkAllDiscussionMessagesRead = {
+                                                discussionMenu.markAllDiscussionMessagesRead(
+                                                    discussion.id
                                                 )
+                                            },
+                                            onMarkDiscussionAsUnread = {
+                                                discussionMenu.markDiscussionAsUnread(
+                                                    discussion.id
+                                                )
+                                            },
+                                            onPinDiscussion = { pinned ->
+                                                discussionMenu.pinDiscussion(
+                                                    discussionId = discussion.id,
+                                                    pinned = pinned
+                                                )
+                                            },
+                                            onMuteDiscussion = { muted ->
+                                                discussionMenu.muteDiscussion(
+                                                    discussionId = discussion.id,
+                                                    muted = muted
+                                                )
+                                            },
+                                            onDeleteDiscussion = {
+                                                discussionMenu.deleteDiscussion(
+                                                    discussion
+                                                )
+                                            },
+                                            renameActionName = if (discussion.isNormalOrReadOnly) {
+                                                when (discussion.discussionType) {
+                                                    Discussion.TYPE_CONTACT ->
+                                                        stringResource(id = R.string.menu_action_rename_contact)
+
+                                                    Discussion.TYPE_GROUP, Discussion.TYPE_GROUP_V2 ->
+                                                        stringResource(id = R.string.menu_action_rename_group)
+
+                                                    else -> stringResource(id = R.string.menu_action_rename)
+                                                }
+                                            } else {
+                                                stringResource(id = R.string.menu_action_rename)
+                                            },
+                                            onRenameDiscussion = {
+                                                discussionMenu.renameDiscussion(
+                                                    discussion
+                                                )
+                                            },
+                                            onOpenSettings = {
+                                                discussionMenu.openSettings(
+                                                    discussion.id
+                                                )
+                                            }
                                         )
+                                        if (index < list.size - 1) {
+                                            Spacer(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(start = 84.dp, end = 12.dp)
+                                                    .requiredHeight(1.dp)
+                                                    .align(Alignment.BottomStart)
+                                                    .background(
+                                                        color = colorResource(id = R.color.lightGrey)
+                                                    )
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                } else {
-                    Box(modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        MainScreenEmptyList(
-                            icon = R.drawable.tab_discussions,
-                            iconPadding = 4.dp,
-                            title = R.string.explanation_empty_discussion_list,
-                            subtitle = R.string.explanation_empty_discussion_list_sub
-                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            MainScreenEmptyList(
+                                icon = R.drawable.tab_discussions,
+                                iconPadding = 4.dp,
+                                title = R.string.explanation_empty_discussion_list,
+                                subtitle = R.string.explanation_empty_discussion_list_sub
+                            )
+                        }
                     }
                 }
-            }
 
-            RefreshingIndicator(
-                refreshing = refreshing,
-                refreshState = refreshState,
-            )
+                RefreshingIndicator(
+                    refreshing = refreshing,
+                    refreshState = refreshState,
+                )
+            }
         }
     }
 }

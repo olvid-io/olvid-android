@@ -36,7 +36,7 @@
         android:entries="@array/font_scale_choice"
         android:entryValues="@array/font_scale_choice_values"
         android:icon="@drawable/ic_pref_font_scale"
-        android:order="12"/>
+        android:order="11"/>
 
     <DropDownPreference
         android:key="pref_key_screen_scale"
@@ -46,7 +46,16 @@
         android:entries="@array/font_scale_choice"
         android:entryValues="@array/font_scale_choice_values"
         android:icon="@drawable/ic_pref_screen_scale"
-        android:order="13"/>
+        android:order="12"/>
+
+    <io.olvid.messenger.customClasses.ImageViewPreference
+        android:key="pref_key_app_icon"
+        android:fragment="io.olvid.messenger.settings.AppIconSettingsPreferenceFragment"
+        android:defaultValue="default"
+        android:title="@string/pref_app_icon_title"
+        android:summary="@string/pref_app_icon_summary"
+        android:icon="@drawable/ic_pref_app_icon"
+        android:order="13" />
 
     <SwitchPreference
         android:key="pref_key_use_system_emojis"
@@ -54,7 +63,7 @@
         android:title="@string/pref_use_system_emojis_title"
         android:summary="@string/pref_use_system_emojis_summary"
         android:icon="@drawable/ic_pref_emoji"
-        android:order="13"
+        android:order="14"
         />
 
     <SwitchPreference

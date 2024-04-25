@@ -81,13 +81,14 @@ public class Session implements Connection {
 
     private Session(String dbPath, String dbKey, boolean sessionIsForUpgradeTables) throws SQLException {
         if (dbPath == null) {
-            throw new SQLException("dbPath is null, unable to createCurrentDevice a Session.");
+            throw new SQLException("dbPath is null, unable to create a Session.");
         }
         this.dbPath = dbPath;
         this.sessionCommitListeners = new LinkedHashSet<>();
         this.sessionIsForUpgradeTable = sessionIsForUpgradeTables;
         Properties properties = new Properties();
         properties.setProperty("secure_delete", "on");
+        properties.setProperty("temp_store", "2");
 //            properties.setProperty("journal_mode", "WAL"); // we comment for now. There Was a bug on API 28 during 15 -> 16 migration
         if (dbKey != null) {
             properties.setProperty("password", dbKey);
@@ -134,6 +135,17 @@ public class Session implements Connection {
     public void startTransaction() throws SQLException {
         globalWriteLock.lock();
         connection.setAutoCommit(false);
+    }
+
+    public static boolean databaseIsReadable(String dbPath, String dbKey) {
+        try (Session session = new Session(dbPath, dbKey, true)) {
+            try (Statement statement = session.createStatement()) {
+                statement.execute("SELECT count(*) FROM sqlite_master;");
+            }
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     @Override

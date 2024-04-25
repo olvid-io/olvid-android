@@ -43,9 +43,9 @@ import io.olvid.engine.metamanager.ProcessDownloadedMessageDelegate;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
 import io.olvid.engine.networkfetch.databases.PendingDeleteFromServer;
 import io.olvid.engine.networkfetch.datatypes.CreateServerSessionDelegate;
+import io.olvid.engine.networkfetch.datatypes.DownloadMessagesAndListAttachmentsDelegate;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
-import io.olvid.engine.networkfetch.datatypes.DownloadMessagesAndListAttachmentsDelegate;
 import io.olvid.engine.networkfetch.datatypes.RegisterServerPushNotificationDelegate;
 import io.olvid.engine.networkfetch.operations.DownloadMessagesAndListAttachmentsOperation;
 import io.olvid.engine.networkfetch.operations.ProcessWebsocketReceivedMessageOperation;
@@ -218,6 +218,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
         HashMap<String, Object> userInfo = new HashMap<>();
         userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY, identity);
         userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_SUCCESS_KEY, true);
+        userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_TRUNCATED_KEY, listingTruncated);
         notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_SERVER_POLLED, userInfo);
     }
 
@@ -256,6 +257,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                     HashMap<String, Object> userInfo = new HashMap<>();
                     userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY, identity);
                     userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_SUCCESS_KEY, false);
+                    userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_TRUNCATED_KEY, false);
                     notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_SERVER_POLLED, userInfo);
             }
         } else if (operation instanceof ProcessWebsocketReceivedMessageOperation) {

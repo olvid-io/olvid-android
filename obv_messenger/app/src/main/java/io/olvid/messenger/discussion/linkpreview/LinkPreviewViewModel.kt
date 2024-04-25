@@ -22,7 +22,6 @@ package io.olvid.messenger.discussion.linkpreview
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.olvid.engine.Logger
 import io.olvid.messenger.customClasses.StringUtils2
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Fyle
@@ -32,7 +31,6 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import java.lang.Exception
 
 class LinkPreviewViewModel : ViewModel() {
 

@@ -31,6 +31,7 @@ import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MenuItem.OnActionExpandListener
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnClickListener
@@ -39,8 +40,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -94,13 +97,13 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.discussion.DiscussionActivity
-import io.olvid.messenger.fragments.dialog.DiscussionSearchDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment.OnOwnedIdentitySelectedListener
 import io.olvid.messenger.main.calls.CallLogFragment
 import io.olvid.messenger.main.contacts.ContactListFragment
 import io.olvid.messenger.main.discussions.DiscussionListFragment
 import io.olvid.messenger.main.groups.GroupListFragment
+import io.olvid.messenger.main.search.GlobalSearchViewModel
 import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.onboarding.OnboardingActivity
 import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
@@ -118,9 +121,10 @@ import io.olvid.messenger.troubleshooting.TroubleshootingActivity
 import io.olvid.messenger.troubleshooting.TroubleshootingDataStore
 import io.olvid.messenger.troubleshooting.shouldShowTroubleshootingSnackbar
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.Arrays
 
 class MainActivity : LockableActivity(), OnClickListener {
+    private val globalSearchViewModel by viewModels<GlobalSearchViewModel>()
     private var root: CoordinatorLayout? = null
     private val ownInitialView: InitialView by lazy { findViewById(R.id.owned_identity_initial_view) }
     private var pingConnectivityDot: View? = null
@@ -357,6 +361,8 @@ class MainActivity : LockableActivity(), OnClickListener {
                 requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+
+        App.openAppDialogPromptUserForReadReceiptsIfRelevant()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -777,6 +783,44 @@ class MainActivity : LockableActivity(), OnClickListener {
 
             DISCUSSIONS_TAB -> {
                 menuInflater.inflate(R.menu.menu_main_discussion_list, menu)
+                val searchView = menu.findItem(R.id.action_search).actionView as SearchView?
+                if (searchView != null) {
+                    searchView.queryHint = getString(R.string.hint_search_anything)
+                    searchView.inputType =
+                        InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or InputType.TYPE_TEXT_VARIATION_FILTER
+                    if (SettingsActivity.useKeyboardIncognitoMode()) {
+                        searchView.imeOptions =
+                            searchView.imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
+                    }
+                    searchView.setOnSearchClickListener(OnClickListener { _ ->
+                        searchView.setOnQueryTextListener(object : OnQueryTextListener {
+                            override fun onQueryTextSubmit(query: String): Boolean {
+                                return true
+                            }
+
+                            override fun onQueryTextChange(newText: String): Boolean {
+                                AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
+                                    globalSearchViewModel.search(bytesOwnedIdentity = bytesOwnedIdentity, text = newText)
+                                }
+                                return true
+                            }
+                        })
+                        searchView.setOnCloseListener(SearchView.OnCloseListener {
+                            globalSearchViewModel.clear()
+                            false
+                        })
+                    })
+                }
+                menu.findItem(R.id.action_search)?.setOnActionExpandListener(object : OnActionExpandListener {
+                    override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                        return true
+                    }
+
+                    override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                        globalSearchViewModel.clear()
+                        return true
+                    }
+                })
             }
 
             CALLS_TAB -> {
@@ -806,15 +850,6 @@ class MainActivity : LockableActivity(), OnClickListener {
             )
             startActivity(intent)
             return true
-        } else if (itemId == R.id.action_search) {
-            if (viewPager.currentItem == DISCUSSIONS_TAB) {
-                val discussionSearchDialogFragment = DiscussionSearchDialogFragment.newInstance()
-                discussionSearchDialogFragment.show(
-                    supportFragmentManager,
-                    "discussion_search_dialog_fragment"
-                )
-                return true
-            }
         } else if (itemId == R.id.action_clear_log) {
             if (viewPager.currentItem == CALLS_TAB) {
                 val bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity()

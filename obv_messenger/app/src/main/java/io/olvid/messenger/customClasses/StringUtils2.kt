@@ -19,11 +19,18 @@
 
 package io.olvid.messenger.customClasses
 
+import android.icu.lang.UCharacter
+import android.os.Build
 import android.text.SpannableString
 import android.text.style.URLSpan
 import android.text.util.Linkify
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.util.PatternsCompat
+import io.olvid.messenger.customClasses.StringUtils.unAccentPattern
+import java.text.Normalizer
+import java.util.BitSet
+import java.util.Locale
+
 
 class StringUtils2 {
     companion object {
@@ -62,6 +69,45 @@ class StringUtils2 {
             }
             return null
         }
+
+
+        fun normalize(source: CharSequence?): String {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                UCharacter.toLowerCase(unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD)).replaceAll(""));
+            } else {
+                unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD)).replaceAll("").lowercase(Locale.getDefault());
+            }
+        }
+
+        fun computeHighlightRanges(input: String, unaccentedRegexes: List<Regex>): List<Pair<Int, Int>> {
+            val normalizedInput: String = normalize(input)
+            val positionMapping = PositionsMapping(input)
+
+            val highlighted = BitSet(input.length)
+            unaccentedRegexes.forEach { regex ->
+                regex.findAll(normalizedInput).forEach {
+                    highlighted.set(
+                        positionMapping.getIndex(it.range.first, true),
+                        positionMapping.getIndex(it.range.last, false) + 1 // range.last is inclusive!
+                    )
+                }
+            }
+
+
+            if (highlighted.isEmpty) {
+                return emptyList()
+            }
+
+            val result: MutableList<Pair<Int, Int>> = ArrayList()
+            var start = highlighted.nextSetBit(0)
+            while (start != -1) {
+                val end = highlighted.nextClearBit(start + 1)
+                result.add(Pair(start, end))
+                start = highlighted.nextSetBit(end)
+            }
+
+            return result
+        }
     }
 }
 
@@ -79,6 +125,70 @@ fun SpannableString.linkify(): SpannableString {
                 getSpanFlags(urlSpan)
             )
             removeSpan(urlSpan)
+        }
+    }
+}
+fun List<String>.fullTextSearchEscape(): String {
+    return this.joinToString(separator = " ", transform = {
+        "$it*"
+    })
+}
+
+
+data class PositionsMapping(val input: String) {
+
+    // Differences from normalized text to input text.
+    private var deltas: MutableMap<Int, Int> = LinkedHashMap()
+
+    // Indexes in normalized text that are ignored in input text.
+    private val gaps: BitSet = BitSet(input.length)
+
+    init {
+        compute()
+    }
+
+    /**
+     * @param pos the position in normalize text
+     * @param start whether the given position represents start or end of a range.
+     * @return the position in the input text.
+     */
+    fun getIndex(pos: Int, start: Boolean): Int {
+        // this SHOULD never happen, but it happened during a test...
+        if ((pos < 0) || (pos >= gaps.size())) {
+            return pos
+        }
+        var p = pos
+        if (gaps[pos]) {
+            // If the position is in a gap, find the first position outside it.
+            p = if (start) gaps.previousClearBit(p) else gaps.nextClearBit(p)
+        }
+        var offset = 0
+        // Deals with all deltas before the given position.
+        for (delta in deltas.entries) {
+            if (delta.key > p) {
+                break
+            }
+            offset += delta.value
+        }
+        return p + offset
+    }
+
+    private fun compute() {
+        // Compute Diacritical Marks and ligature delta from normalisation
+        var cur = 0
+        for (i in input.indices) {
+            val ch = input.substring(i, i + 1)
+            val normalized = StringUtils2.normalize(ch)
+            // Compute the delta between a substring of length one input and its normalization
+            val delta = ch.length - normalized.length
+            if (delta != 0) {
+                deltas[cur + normalized.length] = delta
+            }
+            // If the normalized is larger that the input string, mark sub position as gap.
+            if (delta < 0) {
+                gaps[cur + 1] = cur + normalized.length
+            }
+            cur += normalized.length
         }
     }
 }

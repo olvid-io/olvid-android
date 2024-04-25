@@ -131,7 +131,7 @@ public class StringUtils {
 
 
     public static String getInitial(String name) {
-        if ((name == null) || (name.length() == 0)) {
+        if ((name == null) || (name.isEmpty())) {
             return "";
         }
         BreakIterator breakIterator = BreakIterator.getCharacterInstance();
@@ -165,7 +165,7 @@ public class StringUtils {
 //        }
 //        return false;
 
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return false;
         }
 
@@ -220,17 +220,6 @@ public class StringUtils {
         } else {
             return unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFD)).replaceAll("").toLowerCase(Locale.getDefault());
         }
-    }
-
-    public static int unaccentedOffsetToActualOffset(CharSequence accented, int unaccentedOffset) {
-        int correctedOffset = unaccentedOffset;
-        int missed = 0;
-        try {
-            do {
-                correctedOffset += missed;
-            } while ((missed = unaccentedOffset - StringUtils.unAccent(accented.subSequence(0, correctedOffset)).length()) > 0);
-        } catch (Exception ignored) {}
-        return correctedOffset;
     }
 
     public static boolean isASubstringOfB(@NonNull String a, @NonNull String b) {

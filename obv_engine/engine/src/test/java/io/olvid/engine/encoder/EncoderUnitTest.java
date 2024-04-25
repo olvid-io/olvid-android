@@ -19,24 +19,24 @@
 
 package io.olvid.engine.encoder;
 
-import org.junit.Test;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.junit.Test;
+
+import java.math.BigInteger;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.HashMap;
 
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesPrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesPublicKey;
-
-import static org.junit.Assert.*;
 
 
 public class EncoderUnitTest {

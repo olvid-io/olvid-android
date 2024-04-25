@@ -19,6 +19,9 @@
 
 package io.olvid.engine.crypto;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -30,8 +33,6 @@ import java.math.BigInteger;
 import java.net.URL;
 
 import io.olvid.engine.datatypes.EdwardCurvePoint;
-
-import static org.junit.Assert.*;
 
 
 public class EdwardCurvesUnitTest {

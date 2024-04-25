@@ -52,6 +52,14 @@
             android:icon="@drawable/ic_pref_keep_service"
             android:dependency="pref_key_use_lock_screen"
             android:order="40"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_keep_lock_screen_neutral"
+            android:summary="@string/pref_lock_neutral_summary"
+            android:title="@string/pref_lock_neutral_title"
+            android:icon="@drawable/ic_pref_app_icon"
+            android:dependency="pref_key_use_lock_screen"
+            android:order="50"/>
         <Preference
             android:key="pref_key_reset_pin"
             android:summary="@string/pref_reset_pin_summary"

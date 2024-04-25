@@ -26,12 +26,12 @@ import java.util.List;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
-import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.networkfetch.databases.ServerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;

@@ -53,6 +53,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -129,6 +130,8 @@ public class LockScreenActivity extends AppCompatActivity {
 
         imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
+        boolean isNeutral = SettingsActivity.lockScreenNeutral();
+
         pinInput = findViewById(R.id.pin_input);
         pinInput.setEnabled(false);
         fingerprintButton = findViewById(R.id.fingerprint_icon);
@@ -171,13 +174,20 @@ public class LockScreenActivity extends AppCompatActivity {
         TextView customMessageTextView = findViewById(R.id.custom_message_text_view);
         ImageView olvidLogo = findViewById(R.id.olvid_logo);
         int customMessageResourceId = getIntent().getIntExtra(CUSTOM_MESSAGE_RESOURCE_ID_INTENT_EXTRA, -1);
-        if (customMessageResourceId != -1) {
-            customMessageTextView.setVisibility(View.VISIBLE);
-            customMessageTextView.setText(customMessageResourceId);
-            olvidLogo.setVisibility(View.GONE);
-        } else {
+        if (isNeutral) {
+            ConstraintLayout container = findViewById(R.id.lock_screen_container);
             customMessageTextView.setVisibility(View.GONE);
-            olvidLogo.setVisibility(View.VISIBLE);
+            olvidLogo.setVisibility(View.GONE);
+            container.setBackgroundColor(ContextCompat.getColor(this, R.color.black));
+        } else {
+            if (customMessageResourceId != -1) {
+                customMessageTextView.setVisibility(View.VISIBLE);
+                customMessageTextView.setText(customMessageResourceId);
+                olvidLogo.setVisibility(View.GONE);
+            } else {
+                customMessageTextView.setVisibility(View.GONE);
+                olvidLogo.setVisibility(View.VISIBLE);
+            }
         }
 
         biometricPrompt = new BiometricPrompt(this, ContextCompat.getMainExecutor(this), new BiometricPrompt.AuthenticationCallback() {
@@ -193,8 +203,12 @@ public class LockScreenActivity extends AppCompatActivity {
             }
         });
 
+        String promptTitle = getString(R.string.dialog_title_unlock_olvid);
+        if (isNeutral) {
+            promptTitle = promptTitle.replace("Olvid ", "");
+        }
         promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle(getString(R.string.dialog_title_unlock_olvid))
+                .setTitle(promptTitle)
                 .setNegativeButtonText(getString(R.string.button_label_cancel))
                 .setConfirmationRequired(false)
                 .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)

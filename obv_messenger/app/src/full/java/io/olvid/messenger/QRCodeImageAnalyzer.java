@@ -85,7 +85,7 @@ public class QRCodeImageAnalyzer implements ImageAnalysis.Analyzer {
                     running = true;
                     scanner.process(inputImage)
                             .addOnSuccessListener(barcodes -> {
-                                if (resultHandler != null && barcodes != null && barcodes.size() > 0) {
+                                if (resultHandler != null && barcodes != null && !barcodes.isEmpty()) {
                                     App.runThread(() -> {
                                         if (resultHandler.handleResult(barcodes.get(0).getRawValue())) {
                                             stop = true;

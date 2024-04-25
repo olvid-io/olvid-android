@@ -387,8 +387,8 @@ class WebrtcPeerConnectionHolder(
         localVideoTrack?.setEnabled(false)
     }
 
-    var videoSender: RtpSender? = null
-    var screenSender: RtpSender? = null
+    private var videoSender: RtpSender? = null
+    private var screenSender: RtpSender? = null
 
     // returns true if a track was actually added
     fun enableVideoTrack() : Boolean {

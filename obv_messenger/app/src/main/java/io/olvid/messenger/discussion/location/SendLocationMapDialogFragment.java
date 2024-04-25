@@ -45,7 +45,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
@@ -54,9 +53,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;

@@ -35,16 +35,16 @@ import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Chunk;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
+import io.olvid.engine.datatypes.notifications.UploadNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
-import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.networksend.datatypes.SendManagerSession;
-import io.olvid.engine.datatypes.notifications.UploadNotifications;
 
 public class OutboxAttachment implements ObvDatabase {
     static final String TABLE_NAME = "outbox_attachment";

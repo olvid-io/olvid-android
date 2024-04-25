@@ -101,7 +101,7 @@ internal fun LifecycleCheckerEffect(
 
 fun ComponentActivity.getBatteryOptimizationsState() =
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
-        (getSystemService(ComponentActivity.POWER_SERVICE) as? PowerManager)?.isIgnoringBatteryOptimizations(
+        (getSystemService(Context.POWER_SERVICE) as? PowerManager)?.isIgnoringBatteryOptimizations(
             packageName
         ) == true
     } else {
@@ -110,14 +110,14 @@ fun ComponentActivity.getBatteryOptimizationsState() =
 
 fun ComponentActivity.getAlarmState() =
     if (VERSION.SDK_INT >= VERSION_CODES.S) {
-        (getSystemService(ComponentActivity.ALARM_SERVICE) as? AlarmManager)?.canScheduleExactAlarms() == true
+        (getSystemService(Context.ALARM_SERVICE) as? AlarmManager)?.canScheduleExactAlarms() == true
     } else {
         true
     }
 
 fun ComponentActivity.getBackgroundState() =
     if (VERSION.SDK_INT >= VERSION_CODES.P) {
-        (getSystemService(ComponentActivity.ACTIVITY_SERVICE) as? ActivityManager)?.isBackgroundRestricted == false
+        (getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager)?.isBackgroundRestricted == false
     } else {
         true
     }

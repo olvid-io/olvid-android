@@ -21,8 +21,6 @@ package io.olvid.engine.datatypes;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class OperationsUnitTest {
     Integer j;
 

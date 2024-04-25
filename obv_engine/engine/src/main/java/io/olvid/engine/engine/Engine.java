@@ -49,30 +49,30 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.backup.BackupManager;
 import io.olvid.engine.channel.ChannelManager;
 import io.olvid.engine.crypto.AuthEnc;
+import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Signature;
+import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.EncryptedBytes;
+import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.OperationQueue;
+import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
+import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.TrustLevel;
+import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.ChannelApplicationMessageToSend;
+import io.olvid.engine.datatypes.containers.ChannelDialogMessageToSend;
+import io.olvid.engine.datatypes.containers.ChannelDialogResponseMessageToSend;
+import io.olvid.engine.datatypes.containers.DialogType;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
-import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesMDCKeyPair;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaMDCKeyPair;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
-import io.olvid.engine.crypto.PRNGService;
-import io.olvid.engine.crypto.Suite;
-import io.olvid.engine.datatypes.Identity;
-import io.olvid.engine.datatypes.Session;
-import io.olvid.engine.datatypes.UID;
-import io.olvid.engine.datatypes.containers.ChannelApplicationMessageToSend;
-import io.olvid.engine.datatypes.containers.ChannelDialogMessageToSend;
-import io.olvid.engine.datatypes.containers.ChannelDialogResponseMessageToSend;
-import io.olvid.engine.datatypes.containers.DialogType;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.databases.EngineDbSchemaVersion;
@@ -81,6 +81,8 @@ import io.olvid.engine.engine.datatypes.EngineSession;
 import io.olvid.engine.engine.datatypes.EngineSessionFactory;
 import io.olvid.engine.engine.datatypes.UserInterfaceDialogListener;
 import io.olvid.engine.engine.types.EngineAPI;
+import io.olvid.engine.engine.types.EngineNotificationListener;
+import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
@@ -94,23 +96,21 @@ import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvDeviceList;
 import io.olvid.engine.engine.types.ObvDeviceManagementRequest;
 import io.olvid.engine.engine.types.ObvDialog;
-import io.olvid.engine.engine.types.EngineNotificationListener;
-import io.olvid.engine.engine.types.EngineNotifications;
-import io.olvid.engine.engine.types.ObvPushNotificationType;
-import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
-import io.olvid.engine.engine.types.sync.ObvSyncAtom;
-import io.olvid.engine.engine.types.RegisterApiKeyResult;
-import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
-import io.olvid.engine.engine.types.identities.ObvGroupV2;
-import io.olvid.engine.engine.types.identities.ObvMutualScanUrl;
 import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.ObvPostMessageOutput;
+import io.olvid.engine.engine.types.ObvPushNotificationType;
 import io.olvid.engine.engine.types.ObvReturnReceipt;
-import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
-import io.olvid.engine.engine.types.identities.ObvTrustOrigin;
+import io.olvid.engine.engine.types.RegisterApiKeyResult;
+import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroup;
+import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
+import io.olvid.engine.engine.types.identities.ObvMutualScanUrl;
+import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
+import io.olvid.engine.engine.types.identities.ObvTrustOrigin;
+import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.identity.IdentityManager;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
 import io.olvid.engine.metamanager.EngineOwnedIdentityCleanupDelegate;
@@ -135,7 +135,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
 
     private final String dbPath;
-    @SuppressWarnings({"FieldCanBeLocal", "unused"}) // will be used once we use SQL cipher
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private final String dbKey;
     private final CreateSessionDelegate createSessionDelegate;
 
@@ -184,6 +184,43 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         File userDataDirectory = new File(baseDirectory, Constants.DOWNLOADED_USER_DATA_DIRECTORY);
         //noinspection ResultOfMethodCallIgnored
         userDataDirectory.mkdir();
+
+
+        // check whether the database is already encrypted with dbKey
+        if (dbKey != null && !Session.databaseIsReadable(dbPath, dbKey)) {
+            // database may not yet be encrypted, try to encrypt it
+            try {
+                Logger.i("Engine database may need to be encrypted");
+                long startTime = System.currentTimeMillis();
+
+                File dbFile = new File(baseDirectory, Constants.ENGINE_DB_FILENAME);
+                File tmpEncryptedDbFile = new File(baseDirectory, Constants.TMP_ENGINE_ENCRYPTED_DB_FILENAME);
+
+                try (Session session = Session.getUpgradeTablesSession(dbPath, null)) {
+                    try (Statement statement = session.createStatement()) {
+                        statement.execute("ATTACH DATABASE '" + tmpEncryptedDbFile.getPath() + "' AS encrypted KEY \"" + dbKey + "\";");
+                        statement.execute("SELECT sqlcipher_export('encrypted');");
+                        statement.execute("DETACH DATABASE encrypted;");
+                    }
+                }
+
+                boolean deleted = dbFile.delete();
+                if (deleted) {
+                    boolean renamed = tmpEncryptedDbFile.renameTo(dbFile);
+                    if (renamed) {
+                        Logger.i("Engine database encryption successful (took " + (System.currentTimeMillis() - startTime) + "ms)");
+                    } else {
+                        // If we reach this, data is probably lost...
+                        Logger.e("Engine database encryption error: Unable to rename encrypted database!");
+                    }
+                } else {
+                    throw new RuntimeException("Engine database encryption error: unable to delete unencrypted database!");
+                }
+            } catch (Exception fatal) {
+                // database is encrypted but not with the provided dbKey!
+                throw new RuntimeException("Database seems encrypted but cannot be opened with provided dbKey", fatal);
+            }
+        }
 
 
         // check whether a database upgrade is required
@@ -2480,6 +2517,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private boolean propagateEngineSyncAtomToOtherDevicesIfNeeded(Session session, Identity ownedIdentity, ObvSyncAtom obvSyncAtom) throws Exception {
         // the App should never be sending a non-app sync item
         if (obvSyncAtom.isAppSyncItem()) {
@@ -2522,8 +2560,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     @Override
     public void vacuumDatabase() throws Exception {
         try (EngineSession engineSession = getSession()) {
-            Statement statement = engineSession.session.createStatement();
-            statement.execute("VACUUM");
+            try (Statement statement = engineSession.session.createStatement()) {
+                statement.execute("VACUUM");
+                engineSession.session.commit();
+            }
         }
     }
 

@@ -44,17 +44,17 @@ import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
+import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
+import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
-import io.olvid.engine.datatypes.notifications.IdentityNotifications;
-import io.olvid.engine.datatypes.TrustLevel;
 
 
 @SuppressWarnings("FieldMayBeFinal")
@@ -285,6 +285,7 @@ public class ContactIdentity implements ObvDatabase {
         if (jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails() != null) {
             JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
             if (jsonKeycloakUserDetails != null) {
+                // the details are properly signed --> the call to markContactAsCertifiedByOwnKeycloak() will auto-trust the new details, so we can return
                 JsonIdentityDetails certifiedJsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
                 markContactAsCertifiedByOwnKeycloak(certifiedJsonIdentityDetails);
                 return;
@@ -298,13 +299,13 @@ public class ContactIdentity implements ObvDatabase {
 
         ///////
         // compare the old (trusted) and the new published details
-        // --> if only the signature change, directly trust
+        // --> if only the signature/position/company changed, directly trust
         // note that for signed details, it is already auto-trusted in markContactAsCertifiedByOwnKeycloak()
         ///////
         if (trustedDetailsVersion != publishedDetailsVersion) {
             ContactIdentityDetails trustedDetails = getTrustedDetails();
             ContactIdentityDetails publishedDetails = getPublishedDetails();
-            boolean same = publishedDetails.getJsonIdentityDetails().fieldsAreTheSame(trustedDetails.getJsonIdentityDetails());
+            boolean same = publishedDetails.getJsonIdentityDetails().firstAndLastNamesAreTheSame(trustedDetails.getJsonIdentityDetails());
             if (same) {
                 // check whether we are during the first channel creation --> in that case the trustedDetailsVersion is -1 and we auto trust even if the photo changed (it's always null for version 0)
                 if (trustedDetailsVersion != -1) {

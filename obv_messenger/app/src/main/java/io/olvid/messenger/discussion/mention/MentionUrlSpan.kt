@@ -23,7 +23,7 @@ import android.text.TextPaint
 import android.text.style.URLSpan
 import android.view.View
 
-class MentionUrlSpan(val userIdentifier: ByteArray?, val length: Int, val color: Int?, val onClick: (() -> Unit)?) : URLSpan(null) {
+data class MentionUrlSpan(val userIdentifier: ByteArray?, val length: Int, val color: Int?, val onClick: (() -> Unit)?) : URLSpan(null) {
 
     override fun onClick(widget: View) {
         onClick?.invoke()
@@ -35,5 +35,25 @@ class MentionUrlSpan(val userIdentifier: ByteArray?, val length: Int, val color:
             super.updateDrawState(drawState)
             drawState.isUnderlineText = true
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MentionUrlSpan
+
+        if (!userIdentifier.contentEquals(other.userIdentifier)) return false
+        if (length != other.length) return false
+        if (color != other.color) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = userIdentifier?.contentHashCode() ?: 0
+        result = 31 * result + length
+        result = 31 * result + (color ?: 0)
+        return result
     }
 }

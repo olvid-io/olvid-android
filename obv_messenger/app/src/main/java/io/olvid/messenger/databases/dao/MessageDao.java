@@ -82,6 +82,15 @@ public interface MessageDao {
     @Update
     void update(Message message);
 
+    @Query("SELECT m.* FROM " + Message.TABLE_NAME + " AS m " +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
+            " WHERE m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND " + Message.FTS_TABLE_NAME + " MATCH :query ORDER BY m." + Message.TIMESTAMP + " DESC LIMIT :limit ")
+    List<Message> globalSearch(byte[] bytesOwnedIdentity, String query, int limit);
+
+
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.TIMESTAMP + " = :timestamp, " +
             Message.SORT_INDEX + " = :sortIndex " +

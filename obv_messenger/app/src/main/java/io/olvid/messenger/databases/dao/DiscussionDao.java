@@ -377,6 +377,27 @@ public abstract class DiscussionDao {
             " ORDER BY status, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWithGroupMembersNames(byte[] ownedIdentityBytes);
 
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column status is used for sorting only
+    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " CASE disc." + Discussion.STATUS +
+            " WHEN " + Discussion.STATUS_NORMAL + " THEN 0 " +
+            " WHEN " + Discussion.STATUS_READ_ONLY + " THEN 0 " +
+            " ELSE 1 " +
+            " END AS status " +
+            " FROM " + Discussion.TABLE_NAME + " AS disc " +
+            " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
+            " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grp." + Group.BYTES_GROUP_OWNER_AND_UID +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = grp." + Group.BYTES_OWNED_IDENTITY +
+            " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP +
+            " LEFT JOIN " + Group2.TABLE_NAME + " AS grpp " +
+            " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grpp." + Group2.BYTES_GROUP_IDENTIFIER +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = grpp." + Group2.BYTES_OWNED_IDENTITY +
+            " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
+            " ORDER BY status DESC, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
+    public abstract List<DiscussionAndGroupMembersNames> getAllForGlobalSearch(byte[] ownedIdentityBytes);
+
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the columns is_group and status are used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +

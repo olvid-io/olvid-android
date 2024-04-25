@@ -79,6 +79,8 @@ public class PeriodicTasksScheduler {
 
     public static final String IMAGE_AND_VIDEO_RESOLUTION_WORK_NAME = "image_resolution";
     public static final int IMAGE_AND_VIDEO_RESOLUTION_INTERVAL_IN_HOURS = 2;
+    public static final String ATTACHMENT_TEXT_EXTRACTOR_WORK_NAME = "attachment_text_extractor";
+    public static final int ATTACHMENT_TEXT_EXTRACTOR_INTERVAL_IN_HOURS = 2;
 
     public static void schedulePeriodicTasks(Context context) {
         try {
@@ -89,14 +91,15 @@ public class PeriodicTasksScheduler {
                             .setInitialDelay(DOWNLOAD_MESSAGES_INTERVAL_IN_SECONDS, TimeUnit.SECONDS)
                             .setConstraints(GetMessagesWorker.getConstraints())
                             .build();
-            workManager.enqueueUniquePeriodicWork(DOWNLOAD_MESSAGES_WORK_NAME, ExistingPeriodicWorkPolicy.REPLACE, downloadMessagesWorkRequest);
+            workManager.enqueueUniquePeriodicWork(DOWNLOAD_MESSAGES_WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, downloadMessagesWorkRequest);
 
 
             PeriodicWorkRequest vacuumDbWorkRequest =
                     new PeriodicWorkRequest.Builder(VacuumDbWorker.class, VACUUM_DB_INTERVAL_IN_HOURS, TimeUnit.HOURS)
+                            .setInitialDelay(VACUUM_DB_INTERVAL_IN_HOURS, TimeUnit.HOURS)
                             .setConstraints(VacuumDbWorker.getConstraints())
                             .build();
-            workManager.enqueueUniquePeriodicWork(VACUUM_DB_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, vacuumDbWorkRequest);
+            workManager.enqueueUniquePeriodicWork(VACUUM_DB_WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, vacuumDbWorkRequest);
 
 
             PeriodicWorkRequest folderCleanerWorkRequest =
@@ -124,6 +127,13 @@ public class PeriodicTasksScheduler {
                             .setConstraints(ImageAndVideoResolutionWorker.getConstraints())
                             .build();
             workManager.enqueueUniquePeriodicWork(IMAGE_AND_VIDEO_RESOLUTION_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, imageAndVideoResolutionWorkRequest);
+
+            PeriodicWorkRequest attachmentTextExtractorWorkRequest =
+                    new PeriodicWorkRequest.Builder(AttachmentTextExtractorWorker.class, ATTACHMENT_TEXT_EXTRACTOR_INTERVAL_IN_HOURS, TimeUnit.HOURS)
+                            .setInitialDelay(1, TimeUnit.MINUTES)
+                            .setConstraints(AttachmentTextExtractorWorker.getConstraints())
+                            .build();
+            workManager.enqueueUniquePeriodicWork(ATTACHMENT_TEXT_EXTRACTOR_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, attachmentTextExtractorWorkRequest);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -139,6 +149,7 @@ public class PeriodicTasksScheduler {
             workManager.cancelUniqueWork(RETENTION_POLICY_WORK_NAME);
             workManager.cancelUniqueWork(REMOTE_DELETE_AND_EDIT_CLEANUP_WORK_NAME);
             workManager.cancelUniqueWork(IMAGE_AND_VIDEO_RESOLUTION_WORK_NAME);
+            workManager.cancelUniqueWork(ATTACHMENT_TEXT_EXTRACTOR_WORK_NAME);
 
             schedulePeriodicTasks(context);
         } catch (Exception e) {
@@ -210,8 +221,8 @@ public class PeriodicTasksScheduler {
         public Result doWork() {
             try {
                 logPeriodicTaskRun(getApplicationContext(), getClass());
-                AppDatabase.getInstance().rawDao().executeRawQuery(new SimpleSQLiteQuery("VACUUM"));
                 AppSingleton.getEngine().vacuumDatabase();
+                AppDatabase.getInstance().rawDao().executeRawQuery(new SimpleSQLiteQuery("VACUUM"));
             } catch (Exception e) {
                 e.printStackTrace();
                 return Result.failure();
@@ -430,6 +441,40 @@ public class PeriodicTasksScheduler {
                     } else {
                         fyleAndStatus.fyleMessageJoinWithStatus.imageResolution = "";
                         db.fyleMessageJoinWithStatusDao().updateImageResolution(fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndStatus.fyleMessageJoinWithStatus.fyleId, fyleAndStatus.fyleMessageJoinWithStatus.imageResolution);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return Result.failure();
+            }
+            return Result.success();
+        }
+
+    }
+    public static class AttachmentTextExtractorWorker extends Worker {
+        public AttachmentTextExtractorWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+            super(context, workerParams);
+        }
+
+        private static Constraints getConstraints() {
+            Constraints.Builder builder = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                    .setRequiresBatteryNotLow(true);
+            return builder.build();
+        }
+
+        @NonNull
+        @Override
+        public Result doWork() {
+            try {
+                logPeriodicTaskRun(getApplicationContext(), getClass());
+
+                AppDatabase db = AppDatabase.getInstance();
+                for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : db.fyleMessageJoinWithStatusDao().getCompleteFyleAndStatusForTextExtraction()) {
+                    try {
+                        fyleAndStatus.fyleMessageJoinWithStatus.computeTextContentForFullTextSearch(db, fyleAndStatus.fyle);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
                 }
             } catch (Exception e) {

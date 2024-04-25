@@ -21,14 +21,31 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="8dp"
+        app:layout_goneMarginEnd="16dp"
         android:textAllCaps="true"
         android:textColor="@color/primary700"
         android:textSize="14dp"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/header_count_text"
         app:layout_constraintStart_toEndOf="@+id/header_status_image"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="SpUsage"
         tools:text="sent" />
+
+    <TextView
+        android:id="@+id/header_count_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:textColor="@color/darkGrey"
+        android:textSize="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/header_status_text"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SpUsage"
+        tools:text="8/10" />
 </androidx.constraintlayout.widget.ConstraintLayout>

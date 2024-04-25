@@ -32,16 +32,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SearchHighlightSpan;
 import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.customClasses.StringUtils2;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.settings.SettingsActivity;
+import kotlin.Pair;
+import kotlin.text.Regex;
 
 public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuItem.OnActionExpandListener, SearchView.OnQueryTextListener {
     @NonNull private final FragmentActivity activity;
@@ -331,18 +332,19 @@ public class DiscussionSearch implements MenuItem.OnMenuItemClickListener, MenuI
         if (highlightedSpans == null) {
             return input;
         }
-
-        int i = 0;
-        String unAccented = StringUtils.unAccent(input.toString());
+        List<Regex> regexes = new ArrayList<>(patterns.size());
         for (Pattern pattern : patterns) {
+            regexes.add(new Regex(pattern.toString()));
+        }
+
+        List<Pair<Integer, Integer>> ranges = StringUtils2.Companion.computeHighlightRanges(input.toString(), regexes);
+        int i = 0;
+        for (Pair<Integer, Integer> range : ranges) {
             if (i == highlightedSpans.length) {
                 break;
             }
-            Matcher matcher = pattern.matcher(unAccented);
-            if (matcher.find()) {
-                input.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(input, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(input, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                i++;
-            }
+            input.setSpan(highlightedSpans[i], range.getFirst(), range.getSecond(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            i++;
         }
 
         return input;

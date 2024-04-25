@@ -23,8 +23,8 @@ package io.olvid.engine.datatypes.containers;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.engine.types.ObvTransferStep;
-import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 
 public class DialogType {
     public static final int DELETE_DIALOG_ID = -1;

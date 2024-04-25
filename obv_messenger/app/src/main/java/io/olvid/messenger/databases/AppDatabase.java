@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases;
 
+import android.database.Cursor;
+
 import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
@@ -26,7 +28,13 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import net.zetetic.database.sqlcipher.SQLiteDatabase;
+
+import java.io.File;
+
+import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
+import io.olvid.messenger.customClasses.DatabaseKey;
 import io.olvid.messenger.databases.dao.ActionShortcutConfigurationDao;
 import io.olvid.messenger.databases.dao.CallLogItemDao;
 import io.olvid.messenger.databases.dao.ContactDao;
@@ -62,6 +70,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
+import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatusFTS;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.Group2Member;
@@ -71,6 +80,7 @@ import io.olvid.messenger.databases.entity.KnownCertificate;
 import io.olvid.messenger.databases.entity.LatestDiscussionSenderSequenceNumber;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageExpiration;
+import io.olvid.messenger.databases.entity.MessageFTS;
 import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 import io.olvid.messenger.databases.entity.OwnedDevice;
@@ -90,8 +100,10 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
                 DiscussionCustomization.class,
                 Fyle.class,
                 FyleMessageJoinWithStatus.class,
+                FyleMessageJoinWithStatusFTS.class,
                 Invitation.class,
                 Message.class,
+                MessageFTS.class,
                 MessageExpiration.class,
                 MessageMetadata.class,
                 MessageRecipientInfo.class,
@@ -113,37 +125,64 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
 )
 @TypeConverters({ObvTypeConverters.class})
 public abstract class AppDatabase extends RoomDatabase {
-    public static final int DB_SCHEMA_VERSION = 66;
+    public static final int DB_SCHEMA_VERSION = 67;
+    public static final int DB_FTS_GLOBAL_SEARCH_VERSION = 1;
     public static final String DB_FILE_NAME = "app_database";
+    public static final String TMP_ENCRYPTED_DB_FILE_NAME = "encrypted_app_database";
 
     public abstract ContactDao contactDao();
+
     public abstract GroupDao groupDao();
+
     public abstract ContactGroupJoinDao contactGroupJoinDao();
+
     public abstract PendingGroupMemberDao pendingGroupMemberDao();
+
     public abstract DiscussionDao discussionDao();
+
     public abstract DiscussionCustomizationDao discussionCustomizationDao();
+
     public abstract FyleDao fyleDao();
+
     public abstract FyleMessageJoinWithStatusDao fyleMessageJoinWithStatusDao();
+
     public abstract InvitationDao invitationDao();
+
     public abstract MessageDao messageDao();
+
     public abstract MessageExpirationDao messageExpirationDao();
+
     public abstract MessageMetadataDao messageMetadataDao();
+
     public abstract MessageRecipientInfoDao messageRecipientInfoDao();
+
     public abstract OwnedIdentityDao ownedIdentityDao();
+
     public abstract OwnedDeviceDao ownedDeviceDao();
+
     public abstract CallLogItemDao callLogItemDao();
+
     public abstract RawDao rawDao();
+
     public abstract ReactionDao reactionDao();
+
     public abstract RemoteDeleteAndEditRequestDao remoteDeleteAndEditRequestDao();
+
     public abstract KnownCertificateDao knownCertificateDao();
+
     public abstract LatestDiscussionSenderSequenceNumberDao latestDiscussionSenderSequenceNumberDao();
+
     public abstract ReactionRequestDao reactionRequestDao();
+
     public abstract ActionShortcutConfigurationDao actionShortcutConfigurationDao();
+
     public abstract Group2Dao group2Dao();
+
     public abstract Group2MemberDao group2MemberDao();
+
     public abstract Group2PendingMemberDao group2PendingMemberDao();
 
-    private static final RoomDatabase.Callback roomDatabaseOpenCallback = new RoomDatabase.Callback(){
+    private static final RoomDatabase.Callback roomDatabaseOpenCallback = new RoomDatabase.Callback() {
         @Override
         public void onOpen(@NonNull SupportSQLiteDatabase db) {
             super.onOpen(db);
@@ -158,8 +197,59 @@ public abstract class AppDatabase extends RoomDatabase {
         if (instance == null) {
             synchronized (AppDatabase.class) {
                 if (instance == null) {
+                    System.loadLibrary("sqlcipher");
+                    File dbFile = new File(App.absolutePathFromRelative(DB_FILE_NAME));
+                    String dbKey = DatabaseKey.get(DatabaseKey.APP_DATABASE_SECRET);
+                    if (dbKey == null) {
+                        dbKey = "";
+                    }
+                    try {
+                        SQLiteDatabase db = SQLiteDatabase.openDatabase(dbFile.getPath(), dbKey, null, SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY, null);
+                        db.close();
+                    } catch (Exception ex) {
+                        Logger.i("App database may need to be encrypted");
+                        long startTime = System.currentTimeMillis();
+                        try {
+                            int oldUserVersion = -1;
+                            File tmpEncryptedDbFile = new File(App.absolutePathFromRelative(TMP_ENCRYPTED_DB_FILE_NAME));
+                            try (SQLiteDatabase db = SQLiteDatabase.openDatabase(dbFile.getPath(), "", null, SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY, null)) {
+                                db.rawExecSQL("ATTACH DATABASE '" + tmpEncryptedDbFile.getPath() + "' AS encrypted KEY \"" + dbKey + "\";");
+                                db.rawExecSQL("SELECT sqlcipher_export('encrypted');");
+                                db.rawExecSQL("DETACH DATABASE encrypted;");
+                                try (Cursor cursor = db.rawQuery("PRAGMA user_version;")) {
+                                    cursor.moveToNext();
+                                    oldUserVersion = cursor.getInt(0);
+                                }
+                            }
+
+                            // Now, we need to copy the PRAGMA user_version from original DB to the new one
+                            if (oldUserVersion == -1) {
+                                throw new Exception("Unable to read user_version from current database");
+                            } else {
+                                try (SQLiteDatabase db = SQLiteDatabase.openDatabase(tmpEncryptedDbFile.getPath(), dbKey, null, SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY, null)) {
+                                    db.rawExecSQL("PRAGMA user_version = " + oldUserVersion + ";");
+                                }
+                            }
+
+                            boolean deleted = dbFile.delete();
+                            if (deleted) {
+                                boolean renamed = tmpEncryptedDbFile.renameTo(dbFile);
+                                if (renamed) {
+                                    Logger.i("App database encryption successful (took " + (System.currentTimeMillis() - startTime) + "ms)");
+                                } else {
+                                    Logger.e("App database encryption error: Unable to rename encrypted database!");
+                                }
+                            } else {
+                                throw new RuntimeException("App database encryption error: unable to delete unencrypted database!");
+                            }
+                        } catch (Exception fatal) {
+                            // database is encrypted but not with the provided dbKey!
+                            throw new RuntimeException("Database seems encrypted but cannot be opened with provided dbKey", fatal);
+                        }
+                    }
+
                     instance = Room.databaseBuilder(App.getContext(), AppDatabase.class, App.absolutePathFromRelative(DB_FILE_NAME))
-                            .openHelperFactory(new PragmaSQLiteOpenHelperFactory())
+                            .openHelperFactory(new PragmaSQLiteOpenHelperFactory(dbKey))
                             .addCallback(roomDatabaseOpenCallback)
                             .addMigrations(AppDatabaseMigrations.MIGRATIONS)
                             .build();

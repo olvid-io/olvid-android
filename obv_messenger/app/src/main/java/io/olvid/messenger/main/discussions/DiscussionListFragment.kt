@@ -45,17 +45,21 @@ import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
+import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
 import io.olvid.messenger.main.RefreshingFragment
 import io.olvid.messenger.main.invitations.InvitationListViewModel
+import io.olvid.messenger.main.search.GlobalSearchViewModel
 import io.olvid.messenger.notifications.NotificationActionService
 
 
 class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
 
+    private val globalSearchViewModel: GlobalSearchViewModel by activityViewModels()
     private val discussionListViewModel: DiscussionListViewModel by activityViewModels()
     private val invitationListViewModel: InvitationListViewModel by activityViewModels()
+    private val linkPreviewViewModel : LinkPreviewViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,8 +71,10 @@ class DiscussionListFragment : RefreshingFragment(), DiscussionMenu {
             setContent {
                 val refreshing by refreshingViewModel.isRefreshing.collectAsStateWithLifecycle()
                 DiscussionListScreen(
+                    globalSearchViewModel = globalSearchViewModel,
                     discussionListViewModel = discussionListViewModel,
                     invitationListViewModel = invitationListViewModel,
+                    linkPreviewViewModel = linkPreviewViewModel,
                     refreshing = refreshing,
                     onRefresh = ::onRefresh,
                     onClick = ::discussionClicked,

@@ -34,7 +34,6 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.DialogType;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
-//import io.olvid.engine.protocol.databases.PostponedGroupManagementReceivedMessage;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
 import io.olvid.engine.protocol.datatypes.CoreProtocolMessage;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;

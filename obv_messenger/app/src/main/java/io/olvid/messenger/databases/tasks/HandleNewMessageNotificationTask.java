@@ -1068,7 +1068,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             return;
         }
 
-        Discussion discussion = getDiscussion(jsonReaction.getGroupUid(), jsonReaction.getGroupOwner(), jsonReaction.getGroupV2Identifier(), jsonReaction.getOneToOneIdentifier(), messageSender, GroupV2.Permission.SEND_MESSAGE);
+        Discussion discussion = getDiscussion(jsonReaction.getGroupUid(), jsonReaction.getGroupOwner(), jsonReaction.getGroupV2Identifier(), jsonReaction.getOneToOneIdentifier(), messageSender, null);
 
         if (discussion == null) {
             return;

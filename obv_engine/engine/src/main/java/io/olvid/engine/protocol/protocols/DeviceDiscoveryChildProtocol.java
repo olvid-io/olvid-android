@@ -32,11 +32,11 @@ import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
 import io.olvid.engine.protocol.datatypes.CoreProtocolMessage;
+import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocol;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocolMessage;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocolState;
 import io.olvid.engine.protocol.protocol_engine.InitialProtocolState;
-import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
 import io.olvid.engine.protocol.protocol_engine.ProtocolStep;
 
 public class DeviceDiscoveryChildProtocol extends ConcreteProtocol {

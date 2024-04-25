@@ -25,6 +25,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -204,6 +206,7 @@ public class JsonIdentityDetails {
     }
 
     @JsonIgnore
+    @Nullable
     public String formatPositionAndCompany(@SuppressWarnings("unused") String format) {
         // for now, format is not used, but it may become necessary if new formats are added
         return joinCompany(position, company);
@@ -286,6 +289,11 @@ public class JsonIdentityDetails {
             return false;
         }
         return Objects.equals(customFields, other.customFields);
+    }
+
+    @JsonIgnore
+    public boolean firstAndLastNamesAreTheSame(JsonIdentityDetails other) {
+        return Objects.equals(firstName, other.firstName) && Objects.equals(lastName, other.lastName);
     }
 
 

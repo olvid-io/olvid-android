@@ -19,6 +19,8 @@
 
 package io.olvid.engine.crypto;
 
+import static org.junit.Assert.assertEquals;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -29,8 +31,6 @@ import org.junit.Test;
 import java.net.URL;
 
 import io.olvid.engine.encoder.Encoded;
-
-import static org.junit.Assert.*;
 
 
 public class ProofOfWorkUnitTest {

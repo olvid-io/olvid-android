@@ -167,7 +167,7 @@ public class MessageLongPressPopUp {
         if ((message.messageType != Message.TYPE_OUTBOUND_MESSAGE && message.messageType != Message.TYPE_INBOUND_MESSAGE)
                 || message.wipeStatus == Message.WIPE_STATUS_WIPED
                 || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
-                || !discussion.isNormal()) {
+                || !discussion.isNormalOrReadOnly()) {
             // no reactions in this case
             reactionsPopUpLinearLayout.setVisibility(View.GONE);
         } else {

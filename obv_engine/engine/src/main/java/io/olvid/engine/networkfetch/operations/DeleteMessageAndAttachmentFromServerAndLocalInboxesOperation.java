@@ -20,6 +20,8 @@
 package io.olvid.engine.networkfetch.operations;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -27,7 +29,9 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.UidAndBoolean;
 import io.olvid.engine.encoder.Encoded;
+import io.olvid.engine.networkfetch.coordinators.DeleteMessageAndAttachmentsCoordinator;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
 import io.olvid.engine.networkfetch.databases.PendingDeleteFromServer;
 import io.olvid.engine.networkfetch.databases.ServerSession;
@@ -39,33 +43,28 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
     // possible reasons for cancel
     public static final int RFC_NETWORK_ERROR = 1;
     public static final int RFC_INVALID_SERVER_SESSION = 2;
-    public static final int RFC_MESSAGE_AND_ATTACHMENTS_CANNOT_BE_DELETED = 3;
 
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
     private final Identity ownedIdentity;
-    private final UID messageUid;
-    private final boolean markAsListed;
+    private final DeleteMessageAndAttachmentsCoordinator.MessageBatchProvider messageBatchProvider;
+    private UidAndBoolean[] messageUidsAndMarkAsListed;
 
-    public DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, UID messageUid, boolean markAsListed, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
-        super(InboxMessage.computeUniqueUid(ownedIdentity, messageUid, markAsListed), onFinishCallback, onCancelCallback);
+    public DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, DeleteMessageAndAttachmentsCoordinator.MessageBatchProvider messageBatchProvider, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
+        super(ownedIdentity.computeUniqueUid(), onFinishCallback, onCancelCallback);
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
         this.ownedIdentity = ownedIdentity;
-        this.messageUid = messageUid;
-        this.markAsListed = markAsListed;
+        this.messageBatchProvider = messageBatchProvider;
     }
 
-    public UID getMessageUid() {
-        return messageUid;
-    }
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
     }
 
-    public boolean getMarkAsListed() {
-        return markAsListed;
+    public UidAndBoolean[] getMessageUidsAndMarkAsListed() {
+        return messageUidsAndMarkAsListed;
     }
 
     @Override
@@ -78,25 +77,44 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
         boolean finished = false;
         try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
             try {
-                // message may be null in case of re-list of an already deleted message
-                InboxMessage message = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUid);
-                PendingDeleteFromServer pendingDeleteFromServer = null;
+                this.messageUidsAndMarkAsListed = messageBatchProvider.getBatchOFMessageUids();
 
-                if (markAsListed) {
-                    if (message == null || message.isMarkedAsListedOnServer()) {
-                        finished = true;
-                        return;
-                    }
-                } else {
-                    if (message != null && !message.canBeDeleted()) {
-                        cancel(RFC_MESSAGE_AND_ATTACHMENTS_CANNOT_BE_DELETED);
-                        return;
+
+                List<MessageAndPendingDeleteAndMarkAsListed> messageAndPendingDeletes = new ArrayList<>();
+                for (UidAndBoolean messageUidAndMarkAsListed : messageUidsAndMarkAsListed) {
+                    // message may be null in case of re-list of an already deleted message
+                    InboxMessage message = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUidAndMarkAsListed.uid);
+                    PendingDeleteFromServer pendingDeleteFromServer = null;
+
+                    if (messageUidAndMarkAsListed.bool) {
+                        if (message == null || message.isMarkedAsListedOnServer()) {
+                            continue;
+                        }
+                    } else {
+                        if (message != null && !message.canBeDeleted()) {
+                            continue;
+                        }
+
+                        pendingDeleteFromServer = PendingDeleteFromServer.get(fetchManagerSession, ownedIdentity, messageUidAndMarkAsListed.uid);
+                        if (pendingDeleteFromServer == null) {
+                            continue;
+                        }
                     }
 
-                    pendingDeleteFromServer = PendingDeleteFromServer.get(fetchManagerSession, ownedIdentity, messageUid);
-                    if (pendingDeleteFromServer == null) {
-                        finished = true;
-                        return;
+                    messageAndPendingDeletes.add(new MessageAndPendingDeleteAndMarkAsListed(message, pendingDeleteFromServer, messageUidAndMarkAsListed));
+                }
+
+                if (messageAndPendingDeletes.isEmpty()) {
+                    // nothing to actually do!
+                    finished = true;
+                    return;
+                }
+
+                if (messageUidsAndMarkAsListed.length != messageAndPendingDeletes.size()) {
+                    // some messages were skipped, update the messageUidsAndMarkAsListed to avoid unnecessary re-queues in case of failure
+                    messageUidsAndMarkAsListed = new UidAndBoolean[messageAndPendingDeletes.size()];
+                    for (int i=0; i<messageUidsAndMarkAsListed.length; i++) {
+                        messageUidsAndMarkAsListed[i] = messageAndPendingDeletes.get(i).messageUidAndMarkAsListed;
                     }
                 }
 
@@ -114,9 +132,8 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                 DeleteMessageAndAttachmentServerMethod serverMethod = new DeleteMessageAndAttachmentServerMethod(
                         ownedIdentity,
                         serverSessionToken,
-                        messageUid,
                         currentDeviceUid,
-                        markAsListed
+                        messageUidsAndMarkAsListed
                 );
                 serverMethod.setSslSocketFactory(sslSocketFactory);
 
@@ -125,18 +142,20 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                 fetchManagerSession.session.startTransaction();
                 switch (returnStatus) {
                     case ServerMethod.OK:
-                        if (markAsListed) {
-                            message.markAsListedOnServer();
-                        } else {
-                            pendingDeleteFromServer.delete();
-                            if (message != null) {
-                                message.delete();
+                        for (MessageAndPendingDeleteAndMarkAsListed messageAndPendingDeleteAndMarkAsListed : messageAndPendingDeletes) {
+                            if (messageAndPendingDeleteAndMarkAsListed.messageUidAndMarkAsListed.bool) {
+                                messageAndPendingDeleteAndMarkAsListed.message.markAsListedOnServer();
+                            } else {
+                                messageAndPendingDeleteAndMarkAsListed.pendingDeleteFromServer.delete();
+                                if (messageAndPendingDeleteAndMarkAsListed.message != null) {
+                                    messageAndPendingDeleteAndMarkAsListed.message.delete();
+                                }
                             }
                         }
                         finished = true;
                         return;
                     case ServerMethod.INVALID_SESSION:
-                        ServerSession.deleteCurrentTokenIfEqualTo(fetchManagerSession, serverSessionToken, pendingDeleteFromServer.getOwnedIdentity());
+                        ServerSession.deleteCurrentTokenIfEqualTo(fetchManagerSession, serverSessionToken, ownedIdentity);
                         fetchManagerSession.session.commit();
                         cancel(RFC_INVALID_SERVER_SESSION);
                         return;
@@ -170,17 +189,15 @@ class DeleteMessageAndAttachmentServerMethod extends ServerMethod {
     private final String server;
     private final Identity identity;
     private final byte[] token;
-    private final UID messageUid;
     private final UID currentDeviceUid;
-    private final boolean markAsListed;
+    private final UidAndBoolean[] messageUidsAndMarkAsListed;
 
-    DeleteMessageAndAttachmentServerMethod(Identity identity, byte[] token, UID messageUid, UID currentDeviceUid, boolean markAsListed) {
+    DeleteMessageAndAttachmentServerMethod(Identity identity, byte[] token, UID currentDeviceUid, UidAndBoolean[] messageUidsAndMarkAsListed) {
         this.server = identity.getServer();
         this.identity = identity;
         this.token = token;
-        this.messageUid = messageUid;
         this.currentDeviceUid = currentDeviceUid;
-        this.markAsListed = markAsListed;
+        this.messageUidsAndMarkAsListed = messageUidsAndMarkAsListed;
     }
 
     @Override
@@ -195,12 +212,17 @@ class DeleteMessageAndAttachmentServerMethod extends ServerMethod {
 
     @Override
     protected byte[] getDataToSend() {
+        Encoded[] encodedMessageUidsAndMarkAsListed = new Encoded[2* messageUidsAndMarkAsListed.length];
+        for (int i = 0; i< messageUidsAndMarkAsListed.length; i++) {
+            encodedMessageUidsAndMarkAsListed[2*i] = Encoded.of(messageUidsAndMarkAsListed[i].uid);
+            encodedMessageUidsAndMarkAsListed[2*i + 1] = Encoded.of(messageUidsAndMarkAsListed[i].bool);
+        }
+
         return Encoded.of(new Encoded[]{
                 Encoded.of(identity),
                 Encoded.of(token),
-                Encoded.of(messageUid),
                 Encoded.of(currentDeviceUid),
-                Encoded.of(markAsListed),
+                Encoded.of(encodedMessageUidsAndMarkAsListed),
         }).getBytes();
     }
 
@@ -212,5 +234,17 @@ class DeleteMessageAndAttachmentServerMethod extends ServerMethod {
     @Override
     protected boolean isActiveIdentityRequired() {
         return false;
+    }
+}
+
+class MessageAndPendingDeleteAndMarkAsListed {
+    final InboxMessage message;
+    final PendingDeleteFromServer pendingDeleteFromServer;
+    final UidAndBoolean messageUidAndMarkAsListed;
+
+    public MessageAndPendingDeleteAndMarkAsListed(InboxMessage message, PendingDeleteFromServer pendingDeleteFromServer, UidAndBoolean messageUidAndMarkAsListed) {
+        this.message = message;
+        this.pendingDeleteFromServer = pendingDeleteFromServer;
+        this.messageUidAndMarkAsListed = messageUidAndMarkAsListed;
     }
 }

@@ -19,6 +19,9 @@
 
 package io.olvid.engine.crypto;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -35,8 +38,6 @@ import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncAES256ThenSHA256Key;
 import io.olvid.engine.datatypes.key.symmetric.MACHmacSha256Key;
 import io.olvid.engine.datatypes.key.symmetric.SymEncCTRAES256Key;
-
-import static org.junit.Assert.*;
 
 
 public class SymmetricCryptoUnitTest {

@@ -19,12 +19,13 @@
 
 package io.olvid.engine.datatypes;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import java.security.SecureRandom;
 import java.util.Base64;
-
-import static org.junit.Assert.*;
 
 public class ObvBase64Test {
 

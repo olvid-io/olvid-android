@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -112,6 +113,7 @@ public class MessageDetailsActivity extends LockableActivity {
 
     RecyclerView recipientInfosRecyclerView;
     RecipientInfosAdapter recipientInfosAdapter;
+    RecipientInfoHeaderAndSeparatorDecoration recipientInfoHeaderAndSeparatorDecoration;
     EmptyRecyclerView metadataRecyclerView;
     MessageMetadataAdapter messageMetadataAdapter;
     View messageDetailsActivityRoot;
@@ -275,10 +277,11 @@ public class MessageDetailsActivity extends LockableActivity {
                 otherDeviceExplanationTextView.setVisibility(View.GONE);
 
                 recipientInfosAdapter = new RecipientInfosAdapter(this);
+                recipientInfoHeaderAndSeparatorDecoration = new RecipientInfoHeaderAndSeparatorDecoration();
 
                 recipientInfosRecyclerView.setAdapter(recipientInfosAdapter);
                 recipientInfosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-                recipientInfosRecyclerView.addItemDecoration(new RecipientInfoHeaderAndSeparatorDecoration());
+                recipientInfosRecyclerView.addItemDecoration(recipientInfoHeaderAndSeparatorDecoration);
                 messageDetailsViewModel.getMessageRecipientInfos().observe(this, recipientInfosAdapter);
             }
         }
@@ -743,16 +746,31 @@ public class MessageDetailsActivity extends LockableActivity {
     public class RecipientInfosAdapter extends RecyclerView.Adapter<RecipientInfosAdapter.ViewHolder> implements Observer<List<MessageRecipientInfo>> {
         private List<MessageRecipientInfo> messageRecipientInfos;
         private final LayoutInflater inflater;
+        final int[] counts;
 
         public RecipientInfosAdapter(Context context) {
             inflater = LayoutInflater.from(context);
+            counts = new int[6];
             setHasStableIds(true);
         }
 
         @Override
         public void onChanged(List<MessageRecipientInfo> messageRecipientInfos) {
             this.messageRecipientInfos = messageRecipientInfos;
+            recipientInfoHeaderAndSeparatorDecoration.clearCache();
+            recomputeCounts();
             notifyDataSetChanged();
+        }
+
+        private void recomputeCounts() {
+            Arrays.fill(counts, 0);
+            if (messageRecipientInfos != null) {
+                for (MessageRecipientInfo mri : messageRecipientInfos) {
+                    counts[mri.status()]++;
+                }
+                // 5 is for undelivered messages and corresponds to not sent yet or processing mri
+                counts[5] = counts[0] + counts[1];
+            }
         }
 
         @Override
@@ -844,6 +862,7 @@ public class MessageDetailsActivity extends LockableActivity {
             bitmapCache = new Bitmap[6];
         }
 
+        @SuppressLint("SetTextI18n")
         @Override
         public void onDraw(@NonNull Canvas canvas, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
             int childCount = parent.getChildCount();
@@ -863,30 +882,47 @@ public class MessageDetailsActivity extends LockableActivity {
                         View headerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_message_details_header, parent, false);
                         TextView textView = headerView.findViewById(R.id.header_status_text);
                         ImageView imageView = headerView.findViewById(R.id.header_status_image);
+                        TextView countView = headerView.findViewById(R.id.header_count_text);
+                        if (recipientInfosAdapter.messageRecipientInfos.size() > 2) {
+                            if (status == MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED_AND_READ) {
+                                countView.setText(getString(R.string.at_least_xxx, recipientInfosAdapter.counts[status]));
+                            } else {
+                                countView.setText(recipientInfosAdapter.counts[status] + "/" + recipientInfosAdapter.messageRecipientInfos.size());
+                            }
+                        } else {
+                            countView.setVisibility(View.GONE);
+                        }
+
                         switch (status) {
                             case MessageRecipientInfo.RECIPIENT_STATUS_NOT_SENT_YET:
                                 textView.setText(R.string.text_not_sent_yet);
                                 imageView.setImageResource(R.drawable.ic_message_status_not_sent_yet);
+                                countView.setText(recipientInfosAdapter.counts[status] + "/" + recipientInfosAdapter.messageRecipientInfos.size());
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_PROCESSING:
                                 textView.setText(R.string.text_processing);
                                 imageView.setImageResource(R.drawable.ic_sync);
+                                countView.setText(recipientInfosAdapter.counts[status] + "/" + recipientInfosAdapter.messageRecipientInfos.size());
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_SENT:
                                 textView.setText(R.string.text_sent);
                                 imageView.setImageResource(R.drawable.ic_message_status_sent);
+                                countView.setText((recipientInfosAdapter.counts[MessageRecipientInfo.RECIPIENT_STATUS_SENT] + recipientInfosAdapter.counts[MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED] + recipientInfosAdapter.counts[MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED_AND_READ]) + "/" + recipientInfosAdapter.messageRecipientInfos.size());
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED:
                                 textView.setText(R.string.text_delivered);
                                 imageView.setImageResource(R.drawable.ic_message_status_delivered);
+                                countView.setText((recipientInfosAdapter.counts[MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED] + recipientInfosAdapter.counts[MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED_AND_READ]) + "/" + recipientInfosAdapter.messageRecipientInfos.size());
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED_AND_READ:
                                 textView.setText(R.string.text_read);
                                 imageView.setImageResource(R.drawable.ic_message_status_delivered_and_read);
+                                countView.setText(getString(R.string.at_least_xxx, recipientInfosAdapter.counts[status]));
                                 break;
                             case 5: // 5 is for undelivered message
                                 textView.setText(R.string.text_undelivered);
                                 imageView.setImageResource(R.drawable.ic_message_status_undelivered);
+                                countView.setText(recipientInfosAdapter.counts[status] + "/" + recipientInfosAdapter.messageRecipientInfos.size());
                                 break;
                         }
                         headerView.measure(View.MeasureSpec.makeMeasureSpec(parent.getWidth(), View.MeasureSpec.EXACTLY),
@@ -919,6 +955,10 @@ public class MessageDetailsActivity extends LockableActivity {
             } else {
                 outRect.top += separatorHeight;
             }
+        }
+
+        public void clearCache() {
+            Arrays.fill(bitmapCache, null);
         }
     }
 
@@ -1084,6 +1124,7 @@ public class MessageDetailsActivity extends LockableActivity {
                         View headerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_message_details_header, parent, false);
                         TextView textView = headerView.findViewById(R.id.header_status_text);
                         ImageView imageView = headerView.findViewById(R.id.header_status_image);
+                        headerView.findViewById(R.id.header_count_text).setVisibility(View.GONE);
 
                         textView.setText(R.string.text_message_timeline);
                         imageView.setImageResource(R.drawable.ic_timer);

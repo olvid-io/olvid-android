@@ -40,7 +40,6 @@ import javax.net.ssl.HttpsURLConnection;
 import io.olvid.engine.Logger;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.settings.SettingsActivity;
 
 public class RequestAndUpdateAddressFieldTask implements Runnable {
     public static final double MIN_ZOOM_FOR_REQUESTS = 15;

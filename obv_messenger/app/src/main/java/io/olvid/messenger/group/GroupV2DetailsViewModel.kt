@@ -447,18 +447,22 @@ class GroupV2DetailsViewModel : ViewModel() {
                 val expectedPermissions = if (admin) adminPermissions else memberPermissions
 
                 if (groupMemberEntry.value.permissionAdmin != expectedPermissions.contains(Permission.GROUP_ADMIN)) {
-                    if (expectedPermissions.contains(Permission.GROUP_ADMIN)) {
-                        gainedAdmin.add(AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes))
-                    } else {
-                        lostAdmin.add(AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes))
+                    AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes)?.let {
+                        if (expectedPermissions.contains(Permission.GROUP_ADMIN)) {
+                            gainedAdmin.add(it)
+                        } else {
+                            lostAdmin.add(it)
+                        }
                     }
                 }
 
                 if (groupMemberEntry.value.permissionSendMessage != expectedPermissions.contains(Permission.SEND_MESSAGE)) {
-                    if (expectedPermissions.contains(Permission.SEND_MESSAGE)) {
-                        gainedSend.add(AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes))
-                    } else {
-                        lostSend.add(AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes))
+                    AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes)?.let {
+                        if (expectedPermissions.contains(Permission.SEND_MESSAGE)) {
+                            gainedSend.add(it)
+                        } else {
+                            lostSend.add(it)
+                        }
                     }
                 }
             }

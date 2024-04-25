@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory
+        android:order="4"
+        app:iconSpaceReserved="false"
+        android:key="pref_key_app_icon_header"
+        android:title="@string/pref_app_icon_fragment_title"
+        android:summary="@string/pref_app_icon_fragment_summary">
+
+        <io.olvid.messenger.customClasses.ComposeViewPreference
+            android:key="pref_key_app_icon"
+            android:order="10"
+            />
+    </io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory>
+</PreferenceScreen>

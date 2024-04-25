@@ -129,6 +129,8 @@ import io.olvid.messenger.services.MessageExpirationService;
 import io.olvid.messenger.services.NetworkStateMonitorReceiver;
 import io.olvid.messenger.services.PeriodicTasksScheduler;
 import io.olvid.messenger.services.UnifiedForegroundService;
+import io.olvid.messenger.settings.AppIcon;
+import io.olvid.messenger.settings.AppIconSettingKt;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.webrtc.WebrtcCallActivity;
 import io.olvid.messenger.webrtc.WebrtcCallService;
@@ -172,6 +174,8 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     public static boolean shouldActivitiesBeKilledOnLockAndHiddenProfileClosedOnBackground() { return killActivitiesOnLockAndCloseHiddenProfileOnBackground; }
 
+    public static AppIcon currentIcon;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -179,6 +183,8 @@ public class App extends Application implements DefaultLifecycleObserver {
         appStartTimestamp = System.currentTimeMillis();
 
         SettingsActivity.setDefaultNightMode();
+
+        currentIcon = AppIconSettingKt.getCurrentIcon();
 
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
 
@@ -575,18 +581,18 @@ public class App extends Application implements DefaultLifecycleObserver {
         }
     }
 
-    public static void openFyleInExternalViewer(Activity activity, FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Runnable onOpenCallback) {
+    public static void openFyleInExternalViewer(Context context, FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Runnable onOpenCallback) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(fyleAndStatus.getContentUriForExternalSharing(), fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        if (getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).size() == 0) {
+        if (getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
             // if the mime type is not openable, try to fallback to the default mime type from extension
             String extension = StringUtils2.Companion.getExtensionFromFilename(fyleAndStatus.fyleMessageJoinWithStatus.fileName);
             String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             if (type != null) {
                 intent.setDataAndType(fyleAndStatus.getContentUriForExternalSharing(), type);
             }
-            if (type == null || getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).size() == 0) {
+            if (type == null || getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
                 App.toast(R.string.toast_message_unable_to_open_file, Toast.LENGTH_SHORT);
                 return;
             }
@@ -598,11 +604,11 @@ public class App extends Application implements DefaultLifecycleObserver {
                 onOpenCallback.run();
             }
             killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
-            Intent lockIntent = new Intent(activity, LockScreenActivity.class);
-            activity.startActivity(lockIntent);
-            activity.startActivity(intent);
+            Intent lockIntent = new Intent(context, LockScreenActivity.class);
+            context.startActivity(lockIntent);
+            context.startActivity(intent);
         } else {
-            View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_view_message_and_checkbox, null);
+            View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_view_message_and_checkbox, null);
             TextView message = dialogView.findViewById(R.id.dialog_message);
             message.setText(R.string.dialog_message_open_external_app_warning);
             CheckBox checkBox = dialogView.findViewById(R.id.checkbox);
@@ -612,7 +618,7 @@ public class App extends Application implements DefaultLifecycleObserver {
                 editor.apply();
             });
 
-            AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog);
+            AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog);
             builder.setTitle(R.string.dialog_title_open_external_app_warning)
                     .setView(dialogView)
                     .setNegativeButton(R.string.button_label_cancel, null)
@@ -621,9 +627,9 @@ public class App extends Application implements DefaultLifecycleObserver {
                             onOpenCallback.run();
                         }
                         killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
-                        Intent lockIntent = new Intent(activity, LockScreenActivity.class);
-                        activity.startActivity(lockIntent);
-                        activity.startActivity(intent);
+                        Intent lockIntent = new Intent(context, LockScreenActivity.class);
+                        context.startActivity(lockIntent);
+                        context.startActivity(intent);
                     });
             builder.create().show();
         }
@@ -909,6 +915,25 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     public static void openAppDialogIntroducingMultiDeviceAndDesktop() {
         showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_MULTI_DEVICE, new HashMap<>());
+    }
+
+    public static void openAppDialogPromptUserForReadReceiptsIfRelevant() {
+        if (SettingsActivity.getDefaultSendReadReceipt()) {
+            // if read receipt are active, do not prompt
+            return;
+        }
+        long lastReadReceiptAnswer = SettingsActivity.getLastReadReceiptPromptAnswerTimestamp();
+        if (lastReadReceiptAnswer == -1 || (System.currentTimeMillis() - lastReadReceiptAnswer < 2 * 86_400_000L)) {
+            // if user already answered, or answered less than 2 days ago, do not prompt
+            return;
+        }
+        App.runThread(() -> {
+            if (AppDatabase.getInstance().contactDao().countAll() == 0) {
+                // if user has no contacts, do not prompt
+                return;
+            }
+            showDialog(null, AppDialogShowActivity.DIALOG_PROMPT_USER_FOR_READ_RECEIPTS, new HashMap<>());
+        });
     }
 
     private static void showDialog(@Nullable byte[] bytesDialogOwnedIdentity, String dialogTag, HashMap<String, Object> dialogParameters) {

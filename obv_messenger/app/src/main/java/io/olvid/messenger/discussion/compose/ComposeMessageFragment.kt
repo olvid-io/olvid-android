@@ -74,7 +74,9 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -379,7 +381,6 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -663,13 +664,29 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         attachStuffPlus = view.findViewById(R.id.attach_stuff_plus)
         attachStuffPlus?.setOnClickListener(this)
         attachStuffPlusGoldenDot = view.findViewById(R.id.golden_dot)
-        val recordingOverlay = view.findViewById<View>(R.id.recording_overlay)
-        recordingOverlay.setOnClickListener(this)
+        val voiceRecorderView = view.findViewById<ComposeView>(R.id.voice_recorder)
+        voiceRecorderView.setContent {
+            voiceMessageRecorder?.let {
+                AppCompatTheme {
+                    Box {
+                        AnimatedVisibility(
+                            visible = it.opened,
+                            enter = slideInHorizontally { it / 2 }) {
+                            SoundWave(voiceMessageRecorder?.soundWave ?: SampleAndTicker()) {
+                                voiceMessageRecorder?.stopRecord(
+                                    discard = false
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        voiceRecorderView.setOnClickListener(this)
         voiceMessageRecorder =
             VoiceMessageRecorder(
-                requireActivity(),
-                recordingOverlay,
-                object : RequestAudioPermissionDelegate {
+                activity = requireActivity(),
+                requestAudioPermissionDelegate = object : RequestAudioPermissionDelegate {
                     override fun requestAudioPermission(rationaleWasShown: Boolean) {
                         if (rationaleWasShown) {
                             requestPermissionForAudioAfterRationaleLauncher?.launch(permission.RECORD_AUDIO)
@@ -687,7 +704,10 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         popupMenu = view.findViewById(R.id.popup_menu)
         popupMenu.setContent {
             AppCompatTheme {
-                EphemeralSettingsGroup(ephemeralViewModel = ephemeralViewModel, expanded = composeMessageViewModel.openEphemeralSettings)  {
+                EphemeralSettingsGroup(
+                    ephemeralViewModel = ephemeralViewModel,
+                    expanded = composeMessageViewModel.openEphemeralSettings
+                ) {
                     if (ephemeralViewModel.getValid()
                             .value == true
                     ) {
@@ -1001,6 +1021,12 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         composeMessageViewModel.getRecordingLiveData()
             .observe(viewLifecycleOwner) { recording: Boolean ->
                 this.recording = recording
+                if (recording) {
+                    setShowAttachIcons(
+                        show = false,
+                        preserveOldSelection = true
+                    )
+                }
             }
         context?.resources?.displayMetrics?.widthPixels?.let {
             updateIconsToShow(it)
@@ -1030,7 +1056,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         }
         composeMessageLinkPreviewGroup!!.visibility = View.GONE
         if (discussionViewModel.discussionId != null) {
-            if (composeMessageViewModel.trimmedNewMessageText != null || composeMessageViewModel.hasAttachments()) {
+            if (composeMessageViewModel.trimmedNewMessageText != null || composeMessageViewModel.hasAttachments() || recording) {
                 if (discussionDelegate != null) {
                     discussionDelegate!!.markMessagesRead()
                 }
@@ -1043,15 +1069,18 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 sending = true
                 sendButton?.isEnabled = false
                 linkPreviewViewModel.waitForPreview {
-                    App.runThread(
+                    App.runThread {
+                        if (recording) {
+                            voiceMessageRecorder?.stopRecord(discard = false, async = false)
+                        }
                         PostMessageInDiscussionTask(
                             trimAndMentions.first,
                             discussionViewModel.discussionId,
                             true,
                             linkPreviewViewModel.openGraph.value,
                             trimAndMentions.second
-                        )
-                    )
+                        ).run()
+                    }
                     sending = false
                     linkPreviewViewModel.reset()
                     newMessageEditText?.setText("")
@@ -1131,9 +1160,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
 
     override fun onClick(view: View) {
         val id = view.id
-        if (voiceMessageRecorder?.isRecording() == true) {
-            voiceMessageRecorder?.stopRecord(false)
-        } else if (id == R.id.attach_timer) {
+        if (id == R.id.attach_timer) {
             composeMessageViewModel.openEphemeralSettings =
                 !composeMessageViewModel.openEphemeralSettings
             if (emojiKeyboardShowing) {
@@ -1222,23 +1249,30 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 }
 
                 BASIC -> {
-                    val dialogFragment = SendLocationBasicDialogFragment.newInstance(discussionViewModel.discussionId)
+                    val dialogFragment =
+                        SendLocationBasicDialogFragment.newInstance(discussionViewModel.discussionId)
                     dialogFragment.show(childFragmentManager, "send-location-fragment-basic")
                 }
 
                 NONE -> {
-                    LocationIntegrationSelectorDialog(view.context, false, object : LocationIntegrationSelectorDialog.OnIntegrationSelectedListener {
-                        override fun onIntegrationSelected(
-                            integration: LocationIntegrationEnum,
-                            customOsmServerUrl: String?
-                        ) {
-                            SettingsActivity.setLocationIntegration(integration.string, customOsmServerUrl)
-                            // re-run onClick if something was selected
-                            if (integration == OSM || integration == MAPS || integration == BASIC || integration == CUSTOM_OSM) {
-                                onClick(view)
+                    LocationIntegrationSelectorDialog(
+                        view.context,
+                        false,
+                        object : LocationIntegrationSelectorDialog.OnIntegrationSelectedListener {
+                            override fun onIntegrationSelected(
+                                integration: LocationIntegrationEnum,
+                                customOsmServerUrl: String?
+                            ) {
+                                SettingsActivity.setLocationIntegration(
+                                    integration.string,
+                                    customOsmServerUrl
+                                )
+                                // re-run onClick if something was selected
+                                if (integration == OSM || integration == MAPS || integration == BASIC || integration == CUSTOM_OSM) {
+                                    onClick(view)
+                                }
                             }
-                        }
-                    }).show()
+                        }).show()
                 }
             }
         } else if (id == R.id.attach_stuff_plus) {
@@ -1662,7 +1696,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
 
     // return true if an updateComposeAreaLayout was triggered
     fun setShowAttachIcons(show: Boolean, preserveOldSelection: Boolean): Boolean {
-        if (show == showAttachIcons) {
+        if (show == showAttachIcons && !recording) {
             return false
         }
         showAttachIcons = show
@@ -1744,7 +1778,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
     private var widthAnimator: ValueAnimator? = null
     private var currentLayout = 0
     fun updateComposeAreaLayout() {
-        if (recording || !hasAttachments && !hasText && !isEditMode()) {
+        if (!recording && !hasAttachments && !hasText && !isEditMode()) {
             sendButton!!.isGone = true
             directAttachVoiceMessageImageView!!.isVisible = true
         } else {
@@ -1766,7 +1800,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             sendButton!!.isVisible = true
             directAttachVoiceMessageImageView!!.isGone = true
             sendButton!!.isEnabled =
-                (hasAttachments || composeMessageViewModel.trimmedNewMessageText != null) && !identicalEditMessage()
+                (hasAttachments || composeMessageViewModel.trimmedNewMessageText != null || recording) && !identicalEditMessage()
         }
         val attachIconsGroupParams = attachIconsGroup.layoutParams as LayoutParams
         // depending on the state, pick the appropriate layout:

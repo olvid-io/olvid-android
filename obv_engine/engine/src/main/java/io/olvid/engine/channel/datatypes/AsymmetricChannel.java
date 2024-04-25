@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
@@ -35,7 +36,6 @@ import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
-import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.metamanager.EncryptionForIdentityDelegate;
 
 public class AsymmetricChannel extends NetworkChannel {

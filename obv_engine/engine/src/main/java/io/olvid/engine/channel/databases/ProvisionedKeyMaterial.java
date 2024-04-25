@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.KeyId;
 import io.olvid.engine.datatypes.ObvDatabase;
@@ -36,7 +37,6 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
-import io.olvid.engine.datatypes.Constants;
 
 
 public class ProvisionedKeyMaterial implements ObvDatabase {

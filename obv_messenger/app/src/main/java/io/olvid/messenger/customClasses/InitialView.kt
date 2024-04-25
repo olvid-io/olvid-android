@@ -59,7 +59,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
 import java.io.IOException
-import java.util.*
+import java.util.Arrays
 import kotlin.math.min
 
 class InitialView : View {

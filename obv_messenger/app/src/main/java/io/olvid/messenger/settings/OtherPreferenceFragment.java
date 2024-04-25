@@ -37,18 +37,25 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
+import net.zetetic.database.sqlcipher.SQLiteDatabase;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Statement;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Constants;
+import io.olvid.engine.datatypes.Session;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.DatabaseKey;
+import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
@@ -183,7 +190,7 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                 exportAppDbPreference.setOnPreferenceClickListener((Preference preference) -> {
                     AlertDialog dialog = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                             .setTitle(R.string.dialog_title_export_app_databases)
-                            .setMessage(R.string.dialog_message_export_app_databases)
+                            .setMessage(Markdown.formatMarkdown(getString(R.string.dialog_message_export_app_databases)))
                             .setNegativeButton(R.string.button_label_cancel, null)
                             .setPositiveButton(R.string.button_label_export, (DialogInterface dialogInterface, int which) -> {
                                 App.prepareForStartActivityForResult(this);
@@ -213,43 +220,62 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
         if (!StringUtils.validateUri(uri)) {
             return;
         }
-
         try (OutputStream os = activity.getContentResolver().openOutputStream(uri)) {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(os)) {
+                File plaintextDbFile = new File(App.absolutePathFromRelative("plaintext.db"));
+                if (plaintextDbFile.exists()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    plaintextDbFile.delete();
+                }
+
                 {
+                    String engineDbKey = DatabaseKey.get(DatabaseKey.ENGINE_DATABASE_SECRET);
+                    if (engineDbKey != null) {
+                        try (Session session = Session.getUpgradeTablesSession(App.absolutePathFromRelative(Constants.ENGINE_DB_FILENAME), engineDbKey)) {
+                            try (Statement statement = session.createStatement()) {
+                                statement.execute("ATTACH DATABASE '" + plaintextDbFile.getPath() + "' AS plaintext KEY ''");
+                                statement.execute("SELECT sqlcipher_export('plaintext');");
+                                statement.execute("DETACH DATABASE plaintext;");
+                            }
+                        } catch (Exception e) {
+                            Logger.e("Unable to decrypt engine database", e);
+                        }
+                    }
                     ZipEntry engineDb = new ZipEntry(Constants.ENGINE_DB_FILENAME);
                     zipOutputStream.putNextEntry(engineDb);
-                    try (FileInputStream fis = new FileInputStream(App.absolutePathFromRelative(Constants.ENGINE_DB_FILENAME))) {
+                    try (FileInputStream fis = new FileInputStream(plaintextDbFile.getPath())) {
                         byte[] buffer = new byte[262_144];
                         int c;
                         while ((c = fis.read(buffer)) != -1) {
                             zipOutputStream.write(buffer, 0, c);
                         }
                     }
+                    //noinspection ResultOfMethodCallIgnored
+                    plaintextDbFile.delete();
                 }
 
                 {
+                    String appDbKey = DatabaseKey.get(DatabaseKey.APP_DATABASE_SECRET);
+                    if (appDbKey != null) {
+                        try (SQLiteDatabase db = SQLiteDatabase.openDatabase(App.absolutePathFromRelative(AppDatabase.DB_FILE_NAME), appDbKey, null, SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY, null)) {
+                            db.rawExecSQL("ATTACH DATABASE '" + plaintextDbFile.getPath() + "' AS plaintext KEY '';");
+                            db.rawExecSQL("SELECT sqlcipher_export('plaintext');");
+                            db.rawExecSQL("DETACH DATABASE plaintext;");
+                        } catch (Exception ex) {
+                            Logger.e("Unable to decrypt app database", ex);
+                        }
+                    }
                     ZipEntry appDb = new ZipEntry(AppDatabase.DB_FILE_NAME);
                     zipOutputStream.putNextEntry(appDb);
-                    try (FileInputStream fis = new FileInputStream(App.absolutePathFromRelative(AppDatabase.DB_FILE_NAME))) {
+                    try (FileInputStream fis = new FileInputStream(plaintextDbFile.getPath())) {
                         byte[] buffer = new byte[262_144];
                         int c;
                         while ((c = fis.read(buffer)) != -1) {
                             zipOutputStream.write(buffer, 0, c);
                         }
                     }
-                }
-
-                {
-                    ZipEntry appWal = new ZipEntry(AppDatabase.DB_FILE_NAME + "-wal");
-                    zipOutputStream.putNextEntry(appWal);
-                    try (FileInputStream fis = new FileInputStream(App.absolutePathFromRelative(AppDatabase.DB_FILE_NAME + "-wal"))) {
-                        byte[] buffer = new byte[262_144];
-                        int c;
-                        while ((c = fis.read(buffer)) != -1) {
-                            zipOutputStream.write(buffer, 0, c);
-                        }
-                    }
+                    //noinspection ResultOfMethodCallIgnored
+                    plaintextDbFile.delete();
                 }
 
                 App.toast(R.string.toast_message_success_exporting_db, Toast.LENGTH_SHORT);

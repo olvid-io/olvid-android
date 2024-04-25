@@ -53,6 +53,7 @@ public abstract class DownloadNotifications {
     public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_MESSAGE_UID_KEY = "messageUid"; // UID
     public static final String NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_ATTACHMENT_NUMBER_KEY = "attachmentNumber";
 
+    public static final String NOTIFICATION_SERVER_SESSION_EXISTS = "network_fetch_notification_server_session_exists"; // used instead of created during initial queueing to refresh api key status in app
     public static final String NOTIFICATION_SERVER_SESSION_CREATED = "network_fetch_notification_server_session_created";
     public static final String NOTIFICATION_SERVER_SESSION_CREATED_IDENTITY_KEY = "identity";
     public static final String NOTIFICATION_SERVER_SESSION_CREATED_API_KEY_STATUS_KEY = "api_key_status"; // ServerSession.ApiKeyStatus
@@ -60,10 +61,15 @@ public abstract class DownloadNotifications {
     public static final String NOTIFICATION_SERVER_SESSION_CREATED_API_KEY_EXPIRATION_TIMESTAMP_KEY = "api_key_expiration_timestamp"; // long -> 0 means no expiration
 
 
+    public static final String NOTIFICATION_SERVER_POLL_REQUESTED = "network_fetch_notification_server_poll_requested";
+    public static final String NOTIFICATION_SERVER_POLL_REQUESTED_OWNED_IDENTITY_KEY = "owned_identity";
+    public static final String NOTIFICATION_SERVER_POLL_REQUESTED_USER_INITIATED_KEY = "user_initiated";
+
     public static final String NOTIFICATION_SERVER_POLLED = "network_fetch_notification_server_polled";
     public static final String NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY = "owned_identity";
     public static final String NOTIFICATION_SERVER_POLLED_SUCCESS_KEY = "success";
-    
+    public static final String NOTIFICATION_SERVER_POLLED_TRUNCATED_KEY = "truncated";
+
     public static final String NOTIFICATION_INBOX_ATTACHMENT_SIGNED_URL_REFRESHED = "network_fetch_notification_signed_url_refreshed";
     public static final String NOTIFICATION_INBOX_ATTACHMENT_SIGNED_URL_REFRESHED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
     public static final String NOTIFICATION_INBOX_ATTACHMENT_SIGNED_URL_REFRESHED_MESSAGE_UID_KEY = "message_uid";

@@ -23,6 +23,7 @@ package io.olvid.engine.networkfetch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,23 +34,24 @@ import javax.net.ssl.SSLSocketFactory;
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.AttachmentKeyAndMetadata;
 import io.olvid.engine.datatypes.containers.DecryptedApplicationMessage;
-import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 import io.olvid.engine.datatypes.containers.ReceivedAttachment;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
+import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.engine.types.JsonOsmStyle;
 import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
 import io.olvid.engine.metamanager.IdentityDelegate;
-import io.olvid.engine.metamanager.NotificationListeningDelegate;
-import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.metamanager.MetaManager;
 import io.olvid.engine.metamanager.NetworkFetchDelegate;
+import io.olvid.engine.metamanager.NotificationListeningDelegate;
+import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.metamanager.ObvManager;
 import io.olvid.engine.metamanager.ProcessDownloadedMessageDelegate;
 import io.olvid.engine.metamanager.PushNotificationDelegate;
@@ -291,6 +293,11 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @Override
     public void downloadMessages(Identity ownedIdentity, UID deviceUid) {
         downloadMessagesAndListAttachmentsCoordinator.downloadMessagesAndListAttachments(ownedIdentity, deviceUid);
+
+        HashMap<String, Object> userInfo = new HashMap<>();
+        userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED_OWNED_IDENTITY_KEY, ownedIdentity);
+        userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED_USER_INITIATED_KEY, true);
+        notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED, userInfo);
     }
 
     @Override
@@ -341,7 +348,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
             attachments[i].setKeyAndMetadata(attachmentKeyAndMetadata[i].getKey(),
                     attachmentKeyAndMetadata[i].getMetadata());
         }
-        inboxMessage.setPayloadAndFromIdentity(messagePayload, remoteIdentity, extendedPayloadKey, attachmentKeyAndMetadata.length > 0);
+        inboxMessage.setPayloadAndFromIdentity(messagePayload, remoteIdentity, extendedPayloadKey);
     }
 
 

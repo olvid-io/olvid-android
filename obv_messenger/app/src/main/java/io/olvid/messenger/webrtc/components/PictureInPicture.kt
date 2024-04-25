@@ -26,7 +26,6 @@ import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Rational
-import androidx.compose.ui.res.stringResource
 import io.olvid.messenger.R
 
 @Suppress("DEPRECATION")

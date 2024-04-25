@@ -77,12 +77,12 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder;
 import io.olvid.messenger.openid.jsons.JsonGroupsRequest;
 import io.olvid.messenger.openid.jsons.JsonGroupsResponse;
-import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
-import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
 import io.olvid.messenger.openid.jsons.JsonMeRequest;
 import io.olvid.messenger.openid.jsons.JsonMeResponse;
 import io.olvid.messenger.openid.jsons.JsonSearchRequest;
 import io.olvid.messenger.openid.jsons.JsonSearchResponse;
+import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
+import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
 
 public class KeycloakTasks {
     private static final String ME_PATH = "olvid-rest/me";

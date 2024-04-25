@@ -29,13 +29,13 @@ import java.util.List;
 
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;
 import io.olvid.engine.channel.datatypes.RatchetingOutput;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.encoder.DecodingException;
-import io.olvid.engine.datatypes.Constants;
 
 public class Provision implements ObvDatabase {
     static final String TABLE_NAME = "provision";

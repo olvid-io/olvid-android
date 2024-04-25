@@ -50,7 +50,6 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
@@ -60,6 +59,7 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
 import io.olvid.messenger.discussion.mention.MentionUrlSpan;
+import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class Utils {

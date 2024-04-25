@@ -49,7 +49,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.olvid.messenger.App;
@@ -58,10 +57,12 @@ import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.SearchHighlightSpan;
-import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.customClasses.StringUtils2;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel;
+import kotlin.Pair;
+import kotlin.text.Regex;
 
 public class FilteredDiscussionListFragment extends Fragment implements TextWatcher {
     private EditText discussionFilterEditText;
@@ -299,46 +300,44 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
 
                 List<Pattern> patterns = FilteredDiscussionListFragment.this.filteredDiscussionListViewModel.getFilterPatterns();
                 if (patterns != null) {
+                    List<Regex> regexes = new ArrayList<>(patterns.size());
+                    for (Pattern pattern : patterns) {
+                        regexes.add(new Regex(pattern.toString()));
+                    }
+                    List<Pair<Integer, Integer>> ranges = StringUtils2.Companion.computeHighlightRanges(discussion.title, regexes);
                     int i = 0;
                     Spannable highlightedTitle = new SpannableString(discussion.title);
-                    String unaccentTitle = StringUtils.unAccent(discussion.title);
-                    for (Pattern pattern : patterns) {
+                    for (Pair<Integer, Integer> range : ranges) {
                         if (i == highlightedSpans.length) {
                             break;
                         }
-                        Matcher matcher = pattern.matcher(unaccentTitle);
-                        if (matcher.find()) {
-                            highlightedTitle.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(discussion.title, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(discussion.title, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            i++;
-                        }
+                        highlightedTitle.setSpan(highlightedSpans[i], range.getFirst(), range.getSecond(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        i++;
                     }
                     holder.discussionTitleTextView.setText(highlightedTitle);
 
                     if (discussion.isGroupDiscussion) {
-                        if (discussion.groupMemberNameList.length() == 0) {
+                        if (discussion.groupMemberNameList.isEmpty()) {
                             StyleSpan sp = new StyleSpan(Typeface.ITALIC);
                             SpannableString ss = new SpannableString(getString(R.string.text_nobody));
                             ss.setSpan(sp, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             holder.discussionGroupMembersTextView.setText(ss);
                         } else {
                             i = 0;
+                            ranges = StringUtils2.Companion.computeHighlightRanges(discussion.groupMemberNameList, regexes);
                             Spannable highlightedGroupMembers = new SpannableString(discussion.groupMemberNameList);
-                            String unaccentGroupMemberNames = StringUtils.unAccent(discussion.groupMemberNameList);
-                            for (Pattern pattern : patterns) {
+                            for (Pair<Integer, Integer> range : ranges) {
                                 if (i == highlightedSpans.length) {
                                     break;
                                 }
-                                Matcher matcher = pattern.matcher(unaccentGroupMemberNames);
-                                if (matcher.find()) {
-                                    highlightedGroupMembers.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(discussion.groupMemberNameList, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(discussion.groupMemberNameList, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    i++;
-                                }
+                                highlightedGroupMembers.setSpan(highlightedSpans[i], range.getFirst(), range.getSecond(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                i++;
                             }
                             holder.discussionGroupMembersTextView.setText(highlightedGroupMembers);
                         }
                     }
                 } else {
-                    if (discussion.title.length() == 0) {
+                    if (discussion.title.isEmpty()) {
                         SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_discussion));
                         spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         holder.discussionTitleTextView.setText(spannableString);
@@ -346,7 +345,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                         holder.discussionTitleTextView.setText(discussion.title);
                     }
                     if (discussion.isGroupDiscussion) {
-                        if (discussion.groupMemberNameList.length() == 0) {
+                        if (discussion.groupMemberNameList.isEmpty()) {
                             StyleSpan sp = new StyleSpan(Typeface.ITALIC);
                             SpannableString ss = new SpannableString(getString(R.string.text_nobody));
                             ss.setSpan(sp, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

@@ -32,9 +32,9 @@ import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvDeviceManagementRequest;
-import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 
 public interface ProtocolStarterDelegate {
     void startDeviceDiscoveryProtocol(Identity ownedIdentity, Identity contactIdentity) throws Exception;

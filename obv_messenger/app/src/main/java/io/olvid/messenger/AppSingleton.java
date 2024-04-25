@@ -38,6 +38,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
+import androidx.sqlite.db.SimpleSQLiteQuery;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,14 +71,15 @@ import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.messenger.billing.BillingUtils;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.CustomSSLSocketFactory;
+import io.olvid.messenger.customClasses.DatabaseKey;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
-import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
+import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
 import io.olvid.messenger.databases.tasks.migration.SetContactsAndPendingMembersFirstNamesTask;
 import io.olvid.messenger.discussion.compose.ComposeMessageFragment;
@@ -93,6 +95,8 @@ public class AppSingleton {
     private static final String FIREBASE_TOKEN_SHARED_PREFERENCE_KEY = "firefase_token";
     private static final String LAST_BUILD_EXECUTED_PREFERENCE_KEY = "last_build";
     private static final String LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY = "last_android_sdk_version";
+    private static final String LAST_FTS_GLOBAL_SEARCH_VERSION_PREFERENCE_KEY = "last_fts_global_search_version";
+
 
     public static final String FYLE_DIRECTORY = "fyles";
     public static final String DISCUSSION_BACKGROUNDS_DIRECTORY = "discussion_backgrounds";
@@ -129,6 +133,7 @@ public class AppSingleton {
 
         int lastBuildExecuted = sharedPreferences.getInt(LAST_BUILD_EXECUTED_PREFERENCE_KEY, BuildConfig.VERSION_CODE);
         int lastAndroidSdkVersionExecuted = sharedPreferences.getInt(LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY, 0);
+        int lastFtsGlobalSearchVersion = sharedPreferences.getInt(LAST_FTS_GLOBAL_SEARCH_VERSION_PREFERENCE_KEY, 0);
 
         if (lastBuildExecuted != 0 && lastBuildExecuted < 89) {
             runNoBackupFolderMigration();
@@ -155,7 +160,7 @@ public class AppSingleton {
         }
 
         if (lastBuildExecuted != 0 && lastBuildExecuted < 205) {
-            // we fixed the rename task, run it again to fix all user displaynames
+            // we fixed the rename task, run it again to fix all user display names
             App.runThread(new ContactDisplayNameFormatChangedTask());
         }
 
@@ -221,9 +226,11 @@ public class AppSingleton {
                 ObvCapability.WEBRTC_CONTINUOUS_ICE
         ));
 
+
         // initialize Engine
         try {
-            this.engine = new Engine(App.getContext().getNoBackupFilesDir(), new AppBackupAndSyncDelegate(), null, this.sslSocketFactory,
+            System.loadLibrary("crypto_1_1");
+            this.engine = new Engine(App.getContext().getNoBackupFilesDir(), new AppBackupAndSyncDelegate(), DatabaseKey.get(DatabaseKey.ENGINE_DATABASE_SECRET), this.sslSocketFactory,
                     new Logger.LogOutputter() {
                         @Override
                         public void d(String s, String s1) {
@@ -303,7 +310,7 @@ public class AppSingleton {
             @Override
             public void onChanged(List<OwnedIdentity> ownedIdentities) {
                 if (ownedIdentities != null) {
-                    if (ownedIdentities.size() != 0) {
+                    if (!ownedIdentities.isEmpty()) {
                         selectIdentity(ownedIdentities.get(0).bytesOwnedIdentity, null);
                     } else {
                         selectIdentity(null, null);
@@ -322,7 +329,7 @@ public class AppSingleton {
         this.contactOneToOneCache = new MutableLiveData<>();
         this.contactTrustLevelCache = new MutableLiveData<>();
 
-        Observer<OwnedIdentity> currentIdentityObserverForNameCache = new Observer<OwnedIdentity>() {
+        Observer<OwnedIdentity> currentIdentityObserverForNameCache = new Observer<>() {
             byte[] bytesPreviousOwnedIdentity = null;
 
             @Override
@@ -345,6 +352,12 @@ public class AppSingleton {
             App.runThread(() -> {
                 AndroidNotificationManager.createChannels(lastBuildExecuted);
                 runBuildUpgrade(lastBuildExecuted, lastAndroidSdkVersionExecuted);
+            });
+        }
+
+        if (lastFtsGlobalSearchVersion != AppDatabase.DB_FTS_GLOBAL_SEARCH_VERSION) {
+            App.runThread(() -> {
+                runFtsGlobalSearchRebuild(lastFtsGlobalSearchVersion);
             });
         }
 
@@ -646,7 +659,7 @@ public class AppSingleton {
                                 // sleep 5s before retrying to register --> this leaves some time for the engine to create the first server session
                                 Thread.sleep(5_000);
                             } catch (InterruptedException ignored) { }
-                        } while (result == RegisterApiKeyResult.FAILED);
+                        } while (result == RegisterApiKeyResult.WAIT_FOR_SERVER_SESSION);
                     });
                 } else if (BuildConfig.USE_BILLING_LIB) {
                     BillingUtils.newIdentityAvailableForSubscription(ownedIdentity.bytesOwnedIdentity);
@@ -818,7 +831,7 @@ public class AppSingleton {
 
                             List<OwnedIdentity> ownedIdentities = db.ownedIdentityDao().getAllNotHidden();
                             byte[] bytesOwnedIdentityToSelect;
-                            if (ownedIdentities == null || ownedIdentities.size() == 0) {
+                            if (ownedIdentities == null || ownedIdentities.isEmpty()) {
                                 bytesOwnedIdentityToSelect = null;
                             } else {
                                 bytesOwnedIdentityToSelect = ownedIdentities.get(0).bytesOwnedIdentity;
@@ -898,6 +911,12 @@ public class AppSingleton {
         SharedPreferences.Editor editor = instance.sharedPreferences.edit();
         editor.putInt(LAST_BUILD_EXECUTED_PREFERENCE_KEY, buildVersion);
         editor.putInt(LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY, androidSdkVersion);
+        editor.apply();
+    }
+
+    private static void saveLastFtsGlobalSearchVersion(@SuppressWarnings("SameParameterValue") int lastFtsGlobalSearchVersion) {
+        SharedPreferences.Editor editor = instance.sharedPreferences.edit();
+        editor.putInt(LAST_FTS_GLOBAL_SEARCH_VERSION_PREFERENCE_KEY, lastFtsGlobalSearchVersion);
         editor.apply();
     }
 
@@ -1037,6 +1056,7 @@ public class AppSingleton {
         getInstance().contactTrustLevelCache.postValue(contactTrustLevelHashMap);
     }
 
+    @Nullable
     public static String getContactCustomDisplayName(byte[] bytesContactIdentity) {
         if (getContactNamesCache().getValue() == null) {
             return null;
@@ -1048,6 +1068,7 @@ public class AppSingleton {
         return null;
     }
 
+    @Nullable
     public static String getContactFirstName(byte[] bytesContactIdentity) {
         if (getContactNamesCache().getValue() == null) {
             return null;
@@ -1059,6 +1080,7 @@ public class AppSingleton {
         return null;
     }
 
+    @Nullable
     public static Integer getContactCustomHue(byte[] bytesContactIdentity) {
         if (getContactHuesCache().getValue() == null) {
             return null;
@@ -1066,6 +1088,7 @@ public class AppSingleton {
         return getContactHuesCache().getValue().get(new BytesKey(bytesContactIdentity));
     }
 
+    @Nullable
     public static String getContactPhotoUrl(byte[] bytesContactIdentity) {
         if (getContactPhotoUrlsCache().getValue() == null) {
             return null;
@@ -1094,6 +1117,7 @@ public class AppSingleton {
         return getContactOneToOneCache().getValue().contains(new BytesKey(bytesContactIdentity));
     }
 
+    @Nullable
     public static Integer getContactTrustLevel(byte[] bytesContactIdentity) {
         if (getContactTrustLevelCache().getValue() == null) {
             return null;
@@ -1228,18 +1252,6 @@ public class AppSingleton {
                 // trigger the download of all waiting userData in the engine
                 engine.downloadAllUserData();
             }
-            // removed: no longer required with new api key management
-//            if (lastBuildExecuted < 99) {
-//                // reset the apiKey to de hardcoded one
-//                boolean success = true;
-//                for (ObvIdentity ownedIdentity: engine.getOwnedIdentities()) {
-//                    success &= engine.registerOwnedIdentityApiKeyOnServer(ownedIdentity.getBytesIdentity(), UUID.fromString(BuildConfig.HARDCODED_API_KEY));
-//                }
-//                if (!success) {
-//                    Logger.e("Error resetting API key to HARDCODED one");
-//                    throw new Exception();
-//                }
-//            }
             if (lastBuildExecuted < 127) {
                 // recompute the number of images in all messages as the filtering method was changed
                 long migrationStartTime = System.currentTimeMillis();
@@ -1331,6 +1343,24 @@ public class AppSingleton {
                     Log.e("Logger", "Error migrating " + dbFileToMigrate + " to no backup folder.");
                 }
             }
+        }
+    }
+
+    private void runFtsGlobalSearchRebuild(int lastFtsGlobalSearchVersion) {
+        try {
+            Logger.i("FTS rebuild required");
+            long startTime = System.currentTimeMillis();
+            if (lastFtsGlobalSearchVersion < 1) {
+                // initial rebuild to index all messages received before the creation of the FTS table
+                Logger.i("- Rebuilding message table FTS");
+                AppDatabase.getInstance().rawDao().executeRawQuery(new SimpleSQLiteQuery("INSERT INTO message_table_fts(message_table_fts) VALUES ('rebuild')"));
+            }
+            saveLastFtsGlobalSearchVersion(AppDatabase.DB_FTS_GLOBAL_SEARCH_VERSION);
+            Logger.i("FTS rebuild finished in " + (System.currentTimeMillis() - startTime) + "ms");
+        } catch (Exception e) {
+            // rebuild failed, will be tried again at next startup...
+            Logger.w("FTS rebuild failed");
+            e.printStackTrace();
         }
     }
 

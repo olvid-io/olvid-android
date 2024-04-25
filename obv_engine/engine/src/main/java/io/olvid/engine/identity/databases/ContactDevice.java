@@ -32,10 +32,10 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
-import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 
 
 @SuppressWarnings("FieldMayBeFinal")
@@ -168,8 +168,10 @@ public class ContactDevice implements ObvDatabase {
             statement.setBytes(2, contactIdentity.getBytes());
             statement.setBytes(3, ownedIdentity.getBytes());
             statement.executeUpdate();
-            commitHookBits |= HOOK_BIT_CAPABILITIES_UPDATED;
-            identityManagerSession.session.addSessionCommitListener(this);
+            if (serializedDeviceCapabilities != null) {
+                commitHookBits |= HOOK_BIT_CAPABILITIES_UPDATED;
+                identityManagerSession.session.addSessionCommitListener(this);
+            }
         }
     }
 

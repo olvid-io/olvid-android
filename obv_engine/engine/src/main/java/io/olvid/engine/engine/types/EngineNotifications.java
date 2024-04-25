@@ -28,9 +28,14 @@ public abstract class EngineNotifications {
     public static final String UI_DIALOG_DIALOG_KEY = "dialog"; // ObvDialog
     public static final String UI_DIALOG_CREATION_TIMESTAMP_KEY = "creation_timestamp"; // long
 
+    public static final String SERVER_POLL_REQUESTED = "engine_notification_server_poll_requested";
+    public static final String SERVER_POLL_REQUESTED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
+    public static final String SERVER_POLL_REQUESTED_USER_INITIATED_KEY = "user_initiated"; // boolean
+
     public static final String SERVER_POLLED = "engine_notification_server_polled";
     public static final String SERVER_POLLED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
     public static final String SERVER_POLLED_SUCCESS_KEY = "success"; // boolean
+    public static final String SERVER_POLLED_TRUNCATED_KEY = "truncated"; // boolean --> if success == true, this indicates whether there are still some messages to list on the server
 
     public static final String NEW_MESSAGE_RECEIVED = "engine_notification_new_message_received";
     public static final String NEW_MESSAGE_RECEIVED_MESSAGE_KEY = "message"; // ObvMessage

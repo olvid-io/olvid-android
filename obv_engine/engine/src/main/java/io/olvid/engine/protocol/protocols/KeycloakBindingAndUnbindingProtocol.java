@@ -19,10 +19,14 @@
 
 package io.olvid.engine.protocol.protocols;
 
+import static io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol.FINISHED_STATE_ID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
+
+import java.util.HashMap;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
@@ -43,10 +47,6 @@ import io.olvid.engine.protocol.protocol_engine.ConcreteProtocolMessage;
 import io.olvid.engine.protocol.protocol_engine.ConcreteProtocolState;
 import io.olvid.engine.protocol.protocol_engine.InitialProtocolState;
 import io.olvid.engine.protocol.protocol_engine.ProtocolStep;
-
-import static io.olvid.engine.protocol.protocols.KeycloakContactAdditionProtocol.FINISHED_STATE_ID;
-
-import java.util.HashMap;
 
 public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
     public KeycloakBindingAndUnbindingProtocol(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, int currentStateId, Encoded encodedCurrentState, Identity ownedIdentity, PRNGService prng, ObjectMapper jsonObjectMapper) throws Exception {

@@ -53,13 +53,13 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.ObvCapability;
-import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
-import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
+import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
+import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.identity.databases.sync.IdentityManagerSyncSnapshot;
 import io.olvid.engine.identity.datatypes.KeycloakGroupBlob;
 

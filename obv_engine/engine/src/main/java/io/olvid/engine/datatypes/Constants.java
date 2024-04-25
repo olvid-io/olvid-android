@@ -24,11 +24,12 @@ import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
     public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 38;
-    public static final int SERVER_API_VERSION = 16;
+    public static final int SERVER_API_VERSION = 17;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
     // files / folders
     public static final String ENGINE_DB_FILENAME = "engine_db.sqlite";
+    public static final String TMP_ENGINE_ENCRYPTED_DB_FILENAME = "engine_encrypted_db.sqlite";
     public static final String INBOUND_ATTACHMENTS_DIRECTORY = "inbound_attachments";
     public static final String IDENTITY_PHOTOS_DIRECTORY = "identity_photos";
     public static final String DOWNLOADED_USER_DATA_DIRECTORY = "downloaded_user_data";
@@ -89,6 +90,8 @@ public abstract class Constants {
     public static final int DEFAULT_ATTACHMENT_CHUNK_LENGTH = 4*2048*1024;
     public static final int MAX_MESSAGE_EXTENDED_CONTENT_LENGTH = 50 * 1024;
     public static final int MAX_UPLOAD_MESSAGE_BATCH_SIZE = 50;
+    public static final int MAX_UPLOAD_RETURN_RECEIPT_BATCH_SIZE = 50;
+    public static final int MAX_DELETE_MESSAGE_ON_SERVER_BATCH_SIZE = 50;
 
     public static final UID BROADCAST_UID = new UID(new byte[]{(byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff});
 

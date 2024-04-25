@@ -177,8 +177,10 @@ public class PreviewUtils {
                     if (!imageResolution.equals(fyleMessageJoinWithStatus.imageResolution)) {
                         // we do not update the fyleMessageJoin resolution here, otherwise we won't notice the difference when computing the diffUtil from database
                         // fyleMessageJoinWithStatus.imageResolution = imageResolution;
-                        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateImageResolution(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, imageResolution);
-                        App.runThread(new UpdateMessageImageResolutionsTask(fyleMessageJoinWithStatus.messageId));
+                        App.runThread(() -> {
+                            AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateImageResolution(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, imageResolution);
+                            new UpdateMessageImageResolutionsTask(fyleMessageJoinWithStatus.messageId).run();
+                        });
                     }
                 }
                 return sizeAndBitmap.bitmap;
@@ -289,8 +291,10 @@ public class PreviewUtils {
             if (!imageResolution.equals(fyleMessageJoinWithStatus.imageResolution)) {
                 // we do not update the fyleMessageJoin resolution here, otherwise we won't notice the difference when computing the diffUtil from database
                 // fyleMessageJoinWithStatus.imageResolution = imageResolution;
-                AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateImageResolution(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, imageResolution);
-                App.runThread(new UpdateMessageImageResolutionsTask(fyleMessageJoinWithStatus.messageId));
+                App.runThread(() -> {
+                    AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateImageResolution(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, imageResolution);
+                    new UpdateMessageImageResolutionsTask(fyleMessageJoinWithStatus.messageId).run();
+                });
             }
         } else if (fyleMessageJoinWithStatus.getNonNullMimeType().matches("video/.+")) {
             bitmap = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Images.Thumbnails.MINI_KIND);
@@ -319,8 +323,11 @@ public class PreviewUtils {
                 if (!Objects.equals(fyleMessageJoinWithStatus.imageResolution, imageResolution)) {
                     // we do not update the fyleMessageJoin resolution here, otherwise we won't notice the difference when computing the diffUtil from database
                     // fyleMessageJoinWithStatus.imageResolution = imageResolution;
-                    AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateImageResolution(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, imageResolution);
-                    App.runThread(new UpdateMessageImageResolutionsTask(fyleMessageJoinWithStatus.messageId));
+                    String finalImageResolution = imageResolution;
+                    App.runThread(() -> {
+                        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateImageResolution(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, finalImageResolution);
+                        new UpdateMessageImageResolutionsTask(fyleMessageJoinWithStatus.messageId).run();
+                    });
                 }
             }
         } else if (fyle.isComplete() && fyleMessageJoinWithStatus.getNonNullMimeType().equals("application/pdf")) {

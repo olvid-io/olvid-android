@@ -1,4 +1,15 @@
-# Built 234 (2.0.1)
+# Build 235 (2.1)
+2024-04-25
+
+- Implement global full text search across all discussions
+- Encrypt databases with SQLCipher
+- Updated voice message UI
+- Allow to choose alternate app icons
+- Fix various minor issues with video calls
+- Allow using only the first name when mentioning someone (press backspace after inserting the mention) 
+- Batch operations for return receipts and message deletion from server
+
+# Build 234 (2.0.1)
 2024-03-20
 
 - Several improvements to the video calls UI
@@ -680,7 +691,7 @@
   - Edit your messages after they are sent
   - "Delete everywhere" any message
   - Send a single ephemeral messages
-- [beta] Export your app databases for personnal forensics
+- [beta] Export your app databases for personal forensics
 
 # Build 118 (0.9.4)
 2021-02-13

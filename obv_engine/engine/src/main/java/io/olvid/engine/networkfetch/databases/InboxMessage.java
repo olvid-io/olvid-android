@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
@@ -55,8 +54,6 @@ public class InboxMessage implements ObvDatabase {
     private static final long DELETED_MESSAGE_RETENTION_TIME_MILLIS = 600_000L; // keep deleted messages uids for 10 minutes
     private static long lastExpungeTimestamp = System.currentTimeMillis();
     private static final HashMap<IdentityAndUid, Long> deletedMessageUids = new HashMap<>();
-
-    private boolean messageCanBeMarkedAsListedOnServer = false; // not saved in DB, only used by commit hooks
 
     private Identity ownedIdentity;
     static final String OWNED_IDENTITY = "owned_identity";
@@ -200,7 +197,7 @@ public class InboxMessage implements ObvDatabase {
         }
     }
 
-    public void setPayloadAndFromIdentity(byte[] payload, Identity fromIdentity, AuthEncKey extendedPayloadKey, boolean messageCanBeMarkedAsListedOnServer) {
+    public void setPayloadAndFromIdentity(byte[] payload, Identity fromIdentity, AuthEncKey extendedPayloadKey) {
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + PAYLOAD + " = ?, " +
                 FROM_IDENTITY + " = ?, " +
@@ -216,7 +213,6 @@ public class InboxMessage implements ObvDatabase {
             this.payload = payload;
             this.fromIdentity = fromIdentity;
             this.extendedPayloadKey = extendedPayloadKey;
-            this.messageCanBeMarkedAsListedOnServer = messageCanBeMarkedAsListedOnServer;
             commitHookBits |= HOOK_BIT_PAYLOAD_AND_FROM_IDENTITY_SET;
             fetchManagerSession.session.addSessionCommitListener(this);
         } catch (SQLException e) {
@@ -705,7 +701,8 @@ public class InboxMessage implements ObvDatabase {
                     fetchManagerSession.extendedPayloadListener.messageHasExtendedPayloadToDownload(ownedIdentity, uid);
                 }
             }
-            if (messageCanBeMarkedAsListedOnServer && fetchManagerSession.markAsListedOnServerListener != null) {
+            // for application messages, we always mark as listed on server, even if there are no attachments --> this way we do not rely on the app properly processing the message to avoid relisting
+            if (fetchManagerSession.markAsListedOnServerListener != null) {
                 fetchManagerSession.markAsListedOnServerListener.messageCanBeMarkedAsListedOnServer(ownedIdentity, uid);
             }
         }

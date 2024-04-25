@@ -42,7 +42,6 @@ import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.encoder.Encoded;
-//import io.olvid.engine.protocol.databases.PostponedGroupManagementReceivedMessage;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
 import io.olvid.engine.protocol.datatypes.CoreProtocolMessage;

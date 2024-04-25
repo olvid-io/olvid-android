@@ -109,11 +109,11 @@
     <string name="label_selection_list_ordered">Numbered</string>
     <string name="label_selection_quote">Quote</string>
     <string name="label_selection_heading">Heading</string>
-    <string name="label_selection_heading_1">Heading1</string>
-    <string name="label_selection_heading_2">Heading2</string>
-    <string name="label_selection_heading_3">Heading3</string>
-    <string name="label_selection_heading_4">Heading4</string>
-    <string name="label_selection_heading_5">Heading5</string>
+    <string name="label_selection_heading_1">Heading 1</string>
+    <string name="label_selection_heading_2">Heading 2</string>
+    <string name="label_selection_heading_3">Heading 3</string>
+    <string name="label_selection_heading_4">Heading 4</string>
+    <string name="label_selection_heading_5">Heading 5</string>
     <string name="label_selection_bold">Bold</string>
     <string name="label_selection_italic">Italic</string>
     <string name="label_selection_strikethrough">Strikethrough</string>
@@ -345,7 +345,7 @@
     <string name="pref_text_discussion_read_receipt_on">On, people are notified</string>
     <string name="pref_use_lock_screen_title">Use application lock screen</string>
     <string name="pref_use_lock_screen_summary">Turn this on to protect Olvid with a lock screen at startup.</string>
-    <string name="pref_category_notifications_title">Notifications</string>
+     <string name="pref_category_notifications_title">Notifications</string>
     <string name="pref_category_privacy_title">Privacy</string>
     <string name="pref_category_other_title">Other settings</string>
     <string name="pref_unlock_biometry_title">Unlock with biometry</string>
@@ -374,6 +374,8 @@
     <string name="toast_message_new_password_set">New lock screen password set</string>
     <string name="dialog_title_pin_verification">Enter your current PIN</string>
     <string name="text_pin_verification_explanation">Before you can proceed, you must enter the current PIN.</string>
+    <string name="pref_lock_neutral_title">Neutral lock screen</string>
+    <string name="pref_lock_neutral_summary">Enable this to remove any mention of Olvid and the Olvid logo from the lock screen</string>
     <string name="pref_lock_grace_time_title">Lock screen delay</string>
     <string name="pref_lock_grace_time_dialog_message">Delay before locking Olvid when it goes in the background</string>
     <string name="pref_text_lock_grace_time_instant">Lock Olvid instantly</string>
@@ -870,8 +872,6 @@
     <string name="hint_identity_provider_client_id">Server \"client ID\"</string>
     <string name="hint_identity_provider_client_secret">Server \"client secret\"</string>
     <string name="text_filename_hidden">(Hidden filename)</string>
-    <string name="label_stop_recording_release">Release to stop recording</string>
-    <string name="label_stop_recording_tap">Tap to stop recording</string>
     <string name="label_authenticating">Authenticating…</string>
     <string name="label_retrieving_user_details">Retrieving user details…</string>
     <string name="toast_message_unable_to_retrieve_details">Unable to retrieve identity details from provider. Please try again.</string>
@@ -930,7 +930,7 @@
     <string name="pref_export_app_databases_title">Export app databases</string>
     <string name="pref_export_app_databases_summary">Exporting app databases allows you to inspect exactly what Olvid stores internally.\nWarning: these databases contain all your sensitive information and should be kept in a safe place!</string>
     <string name="dialog_title_export_app_databases">Export app databases</string>
-    <string name="dialog_message_export_app_databases">By clicking export, Olvid will generate a zip file containing the databases of both the engine and the application itself. You will be prompted to select where to save this zip file.\n\nWarning: these databases contain all your sensitive information and should be kept in a safe place!</string>
+    <string name="dialog_message_export_app_databases">By clicking export, Olvid will generate a zip file containing the databases of both the engine and the application itself. You will be prompted to select where to save this zip file.\n\n**Warning: these databases contain all your sensitive information and should be kept in a safe place!**</string>
     <string name="button_label_export">Export</string>
     <string name="toast_message_error_exporting_db">Error exporting app databases. Please try again.</string>
     <string name="toast_message_success_exporting_db">Database export successful</string>
@@ -947,6 +947,7 @@
     <string name="pref_text_display_name_format_last_first">Johnson Jessica</string>
     <string name="pref_text_display_name_format_last_first_company">Johnson Jessica (Omni Tech)</string>
     <string name="pref_text_display_name_format_last_first_position_company">Johnson Jessica (Programmer @ Omni Tech)</string>
+    <string name="text_unanswered_call">Unanswered phone call</string>
     <string name="text_failed_call">Failed phone call</string>
     <string name="text_busy_call">Incoming call while busy</string>
     <string name="text_busy_outgoing_call">Phone call to busy contact</string>
@@ -964,6 +965,7 @@
     <string name="text_missed_incoming_call_with_contacts">Missed call from %1$s</string>
     <string name="text_rejected_incoming_call_with_contacts">Rejected call from %1$s</string>
     <string name="text_busy_incoming_call_with_contacts">Incoming call from %1$s while busy</string>
+    <string name="text_unanswered_outgoing_call_with_contacts">Unanswered phone call with %1$s</string>
     <string name="text_failed_outgoing_call_with_contacts">Failed phone call with %1$s</string>
     <string name="text_outgoing_call_with_contacts">Phone call with %1$s</string>
     <string name="text_busy_outgoing_call_with_contacts">Phone call while %1$s was busy</string>
@@ -1606,9 +1608,9 @@
     <string name="value_group_remote_delete_setting_nobody" translatable="false">nobody</string>
     <string name="value_group_remote_delete_setting_everyone" translatable="false">everyone</string>
     <string name="value_group_remote_delete_setting_admins" translatable="false">admins</string>
-    <string name="text_group_remote_delete_setting_nobody" translatable="false">Nobody</string>
-    <string name="text_group_remote_delete_setting_everyone" translatable="false">Everyone</string>
-    <string name="text_group_remote_delete_setting_admins" translatable="false">Admins only</string>
+    <string name="text_group_remote_delete_setting_nobody">Nobody</string>
+    <string name="text_group_remote_delete_setting_everyone">Everyone</string>
+    <string name="text_group_remote_delete_setting_admins">Admins only</string>
     <string name="text_setting_contacts">contacts</string>
     <string name="text_setting_lock_manually">lock manually</string>
     <string name="text_setting_xx_seconds">%1$ds</string>
@@ -1812,7 +1814,7 @@
     <string name="onboarding_transfer_multidevice_purchase_question">Do you want all your devices to remain active?</string>
     <string name="onboarding_transfer_multidevice_purchase_hyperlink">This way</string>
     <string name="button_label_subscribe_now">Subscribe now</string>
-    <string name="onboarding_transfer_devices_loading_title">Retreiving device list…</string>
+    <string name="onboarding_transfer_devices_loading_title">Retrieving device list…</string>
     <string name="dialog_title_introducing_multi_device">Introducing Olvid Desktop and mutli-device!</string>
     <string name="dialog_message_introducing_multi_device">Olvid is now available for **your computer** (Windows and macOS). You can download the latest version from:\nhttps://olvid.io/download/\n\nWith the **multi-device** support, start a conversation on your phone and continue it on your computer. Sharing files between your devices and with your contacts has never been easier!</string>
     <string name="label_gallery">Gallery</string>
@@ -1890,6 +1892,32 @@
     <string name="text_ongoing_call">Ongoing call: %1$s</string>
     <string name="text_audio_output_no_sound">No output</string>
     <string name="toast_message_video_calls_xxx_participants">Video calls are limited to %1$d participants</string>
+    <string name="explanation_empty_global_search">No result found</string>
+    <string name="global_search_result_groups">Groups</string>
+    <string name="global_search_result_contacts">Contacts</string>
+    <string name="global_search_result_messages">Messages</string>
+    <string name="global_search_result_attachments">Attachments</string>
+    <string name="preference_filename_database" translatable="false">io.olvid.messenger.DATABASE_PREFERENCE_FILE</string>
+    <string name="button_label_send_read_receipts">Notify my contacts</string>
+    <string name="button_label_do_not_send">Do not notify them</string>
+    <string name="button_label_ask_later">Ask me later</string>
+    <string name="dialog_message_prompt_user_for_read_receipts">Would you like your contacts to know when you read their messages?</string>
+    <string name="dialog_title_prompt_user_for_read_receipts">Read receipts</string>
+    <string name="pref_app_icon_title">Application icon</string>
+    <string name="pref_app_icon_summary">Tired of the classic blue Olvid icon? Try something different!</string>
+    <string name="pref_app_icon_fragment_title">Modify the application icon</string>
+    <string name="pref_app_icon_fragment_summary">The name and icon of the application will be modified on your home screen. This does not apply to notifications icon.</string>
+    <string name="pref_app_icon_apply">Apply and close application</string>
+    <string name="pref_app_icon_shortcut_warning_title">Discussion shortcuts</string>
+    <string name="pref_app_icon_shortcut_warning_text">Please note that changing the app icon will delete the discussion shortcuts you have created. You will need to recreate them.</string>
+    <string name="app_name_weather">Weather</string>
+    <string name="app_name_gem">Diamonds</string>
+    <string name="app_name_rosace">Notes</string>
+    <string name="app_name_ghost">Ghost</string>
+    <string name="app_name_bubbles">Messages</string>
+    <string name="hint_search_anything">Search anything…</string>
+    <string name="global_search_result_other_discussions">Other discussions</string>
+    <string name="at_least_xxx">At least %1$d</string>
 
 
     <plurals name="dialog_message_invite_all_group_members">
@@ -1934,6 +1962,10 @@
     <plurals name="text_outgoing_group_call_with_contacts">
         <item quantity="one">Group call with %2$s and one other</item>
         <item quantity="other">Group call with %2$s and %1$d others</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Unanswered group call with %2$s and one other</item>
+        <item quantity="other">Unanswered group call with %2$s and %1$d others</item>
     </plurals>
     <plurals name="text_failed_outgoing_group_call_with_contacts">
         <item quantity="one">Failed group call with %2$s and one other</item>

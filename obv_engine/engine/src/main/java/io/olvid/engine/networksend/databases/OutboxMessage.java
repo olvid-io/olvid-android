@@ -28,9 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
-import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.notifications.UploadNotifications;

@@ -1245,18 +1245,20 @@ class WebrtcCallService : Service() {
             if (this.callIdentifier != callIdentifier) {
                 return@execute
             }
-            hangUpCallInternal()
+            hangUpCallInternal(true)
         }
     }
 
     fun hangUpCall() {
-        executor.execute { hangUpCallInternal() }
+        executor.execute { hangUpCallInternal(true) }
     }
 
-    private fun hangUpCallInternal() {
-        // notify peer that you hung up (it's not just a connection loss)
-        sendHangedUpMessage(callParticipants.values)
-        if (_state != CALL_ENDED && selectedAudioOutput != MUTED) { // do not play if state is already call ended
+    private fun hangUpCallInternal(notifyPeers: Boolean) {
+        if (notifyPeers) {
+            // notify peer that you hung up (it's not just a connection loss)
+            sendHangedUpMessage(callParticipants.values)
+        }
+        if (_state == CALL_IN_PROGRESS && selectedAudioOutput != MUTED) { // do not play if state is already call ended
             soundPool?.play(disconnectSound, 1f, 1f, 0, 0, 1f)
         }
         createLogEntry(CallLogItem.STATUS_MISSED)
@@ -1371,7 +1373,7 @@ class WebrtcCallService : Service() {
                 return@execute
             }
             this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier
-            turnUserName = turnUsername
+            this.turnUserName = turnUsername
             this.turnPassword = turnPassword
             incomingParticipantCount = participantCount
             val discussion: Discussion?
@@ -1518,7 +1520,7 @@ class WebrtcCallService : Service() {
                 setState(FAILED)
 
                 // also send a hang up message to notify peer
-                hangUpCallInternal()
+                hangUpCallInternal(true)
             } else if (isCaller) {
                 val wasConnected =
                     callParticipant.peerState == CONNECTED || callParticipant.peerState == RECONNECTING
@@ -1959,8 +1961,8 @@ class WebrtcCallService : Service() {
             // create the log entry --> this will only create one if one was not already created
             createLogEntry(CallLogItem.STATUS_FAILED)
             stopThisService()
-        } else if (state == State.RINGING && !isCaller) {
-            createRecipientRingingTimeout()
+        } else if (state == State.RINGING) {
+            createRingingTimeout()
         }
     }
 
@@ -2062,8 +2064,12 @@ class WebrtcCallService : Service() {
                 intent?.let {
                     // restart the ongoing foreground service to set the correct foreground service type
                     screenShareActive = true
-                    showOngoingForeground()
-                    createScreenCapturer(it)
+                    executor.execute {
+                        showOngoingForeground()
+                        Handler(Looper.getMainLooper()).post {
+                            createScreenCapturer(it)
+                        }
+                    }
                 } ?: {
                     screenShareActive = false
                 }
@@ -2393,14 +2399,17 @@ class WebrtcCallService : Service() {
         }
     }
 
-    private fun createRecipientRingingTimeout() {
+    private fun createRingingTimeout() {
         if (timeoutTimerTask != null) {
             timeoutTimerTask!!.cancel()
             timeoutTimerTask = null
         }
         timeoutTimerTask = object : TimerTask() {
             override fun run() {
-                executor.execute { hangUpCallInternal() }
+                executor.execute {
+                    // only notify peers if you are the caller
+                    hangUpCallInternal(isCaller)
+                }
             }
         }
         try {
@@ -4025,8 +4034,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         const val VIDEO_SHARING_DATA_MESSAGE_TYPE = 6
         const val SCREEN_SHARING_DATA_MESSAGE_TYPE = 7
         const val CALL_TIMEOUT_MILLIS: Long = 30000
-        const val RINGING_TIMEOUT_MILLIS: Long = 60000
-        const val CALL_CONNECTION_TIMEOUT_MILLIS: Long = 15000
+        const val RINGING_TIMEOUT_MILLIS: Long = 30000
         const val PEER_CALL_ENDED_WAIT_MILLIS: Long = 3000
 
         // HashMap containing ICE candidates received while outside a call: callIdentifier -> (bytesContactIdentity -> candidate)

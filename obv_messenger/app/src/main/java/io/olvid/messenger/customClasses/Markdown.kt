@@ -49,6 +49,7 @@ import io.olvid.messenger.customClasses.spans.ListItemSpan
 import io.olvid.messenger.customClasses.spans.OrderedListItemSpan
 import io.olvid.messenger.settings.SettingsActivity
 import okhttp3.internal.indexOfFirstNonAsciiWhitespace
+import okhttp3.internal.indexOfLastNonAsciiWhitespace
 import org.commonmark.ext.gfm.strikethrough.Strikethrough
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.node.AbstractVisitor
@@ -90,16 +91,20 @@ interface MarkdownSpan {
         get() = false
     val delimiter: String
         get() = ""
+    val inline: Boolean
+        get() = false
 }
 
 class MarkdownDelimiter(color: Int) : ForegroundColorSpan(color), MarkdownSpan
 
 class MarkdownBold : StyleSpan(Typeface.BOLD), MarkdownSpan {
     override val delimiter: String = MarkdownTag.BOLD.delimiter
+    override val inline: Boolean = true
 }
 
 class MarkdownItalic : StyleSpan(Typeface.ITALIC), MarkdownSpan {
     override val delimiter: String = MarkdownTag.ITALIC.delimiter
+    override val inline: Boolean = true
 }
 
 class MarkdownHeading(level: Int) : TextAppearanceSpan(
@@ -118,6 +123,7 @@ class MarkdownHeading(level: Int) : TextAppearanceSpan(
 
 class MarkdownStrikeThrough : StrikethroughSpan(), MarkdownSpan {
     override val delimiter: String = MarkdownTag.STRIKETHROUGH.delimiter
+    override val inline: Boolean = true
 }
 
 class MarkdownListItem(level: Int = 0) : ListItemSpan(level), MarkdownSpan {
@@ -141,6 +147,7 @@ class MarkdownCodeBlock : CodeBlockSpan(), MarkdownSpan {
 
 class MarkdownCode : CodeSpan(), MarkdownSpan {
     override val delimiter: String = MarkdownTag.CODE.delimiter
+    override val inline: Boolean = true
 }
 
 class MarkdownQuote :
@@ -175,6 +182,22 @@ fun EditText.insertMarkdown(markdownSpan: MarkdownSpan?) {
                     )
                 }\n${MarkdownTag.CODE_BLOCK.delimiter}"
             )
+        } else if (markdownSpan.inline) {
+            var index = selectionStart
+            text.subSequence(selectionStart, selectionEnd).lines().forEach() {
+                if (it.indexOfFirstNonAsciiWhitespace() < it.indexOfLastNonAsciiWhitespace()) {
+                    text.insert(index + it.indexOfFirstNonAsciiWhitespace(), markdownSpan.delimiter)
+                    index += markdownSpan.delimiter.length
+                    if (!markdownSpan.singleMarker) {
+                        text.insert(
+                            index + it.indexOfLastNonAsciiWhitespace(),
+                            markdownSpan.delimiter
+                        )
+                        index += markdownSpan.delimiter.length
+                    }
+                }
+                index += it.length + 1
+            }
         } else {
             text.replace(
                 selectionStart,
@@ -603,6 +626,26 @@ fun AnnotatedString.formatMarkdown(): AnnotatedString {
         e.printStackTrace()
         return this
     }
+}
+
+fun String.formatSingleLineMarkdown(): AnnotatedString {
+    return this.lines().formatSingleLineMarkdown()
+}
+
+fun List<String>.formatSingleLineMarkdown(): AnnotatedString {
+    this.filter { it.trim().isNotEmpty() }
+        .take(5) // only keep the first 5 lines
+        .map { line ->
+            return@map AnnotatedString(line.trim()).formatMarkdown()
+        }
+        .let {
+            return if (it.isEmpty())
+                AnnotatedString("")
+            else
+                it.reduce { acc, s ->
+                    acc + AnnotatedString(" ") + s
+                }
+        }
 }
 
 fun Node.listLevel(): Int {

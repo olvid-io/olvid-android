@@ -397,6 +397,14 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                                     db.fyleMessageJoinWithStatusDao().update(otherFyleMessageJoinWithStatus);
                                     otherFyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
                                     AppSingleton.getEngine().markAttachmentForDeletion(otherFyleMessageJoinWithStatus.bytesOwnedIdentity, otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
+                                    Fyle finalFyle1 = fyle;
+                                    App.runThread(() -> {
+                                        try {
+                                            otherFyleMessageJoinWithStatus.computeTextContentForFullTextSearch(db, finalFyle1);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
                                     break;
                             }
                         }

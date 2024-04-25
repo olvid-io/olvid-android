@@ -19,6 +19,7 @@
 
 package io.olvid.messenger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -111,7 +112,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 try {
                     FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(downloadedAttachment.getBytesOwnedIdentity(), downloadedAttachment.getMessageIdentifier(), downloadedAttachment.getNumber());
                     if (fyleMessageJoinWithStatus != null) {
-                        Fyle fyle = db.fyleDao().getById(fyleMessageJoinWithStatus.fyleId);
+                        final Fyle fyle = db.fyleDao().getById(fyleMessageJoinWithStatus.fyleId);
                         final byte[] sha256 = fyle.sha256;
                         if (sha256 == null) {
                             break;
@@ -145,6 +146,13 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                 fyleMessageJoinWithStatus.filePath = fyle.filePath;
                                 db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                                 fyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
+                                App.runThread(() -> {
+                                    try {
+                                        fyleMessageJoinWithStatus.computeTextContentForFullTextSearch(db, fyle);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
 
                                 // check all other FyleMessageJoinWithStatus that are still in STATUS_DOWNLOADABLE or STATUS_DOWNLOADING and "complete" them
                                 List<FyleMessageJoinWithStatus> fyleMessageJoinWithStatusList = db.fyleMessageJoinWithStatusDao().getForFyleId(fyle.id);
@@ -160,6 +168,13 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                             db.fyleMessageJoinWithStatusDao().update(otherFyleMessageJoinWithStatus);
                                             otherFyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
                                             engine.markAttachmentForDeletion(otherFyleMessageJoinWithStatus.bytesOwnedIdentity, otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
+                                            App.runThread(() -> {
+                                                try {
+                                                    otherFyleMessageJoinWithStatus.computeTextContentForFullTextSearch(db, fyle);
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            });
                                             break;
                                     }
                                 }

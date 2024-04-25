@@ -54,8 +54,10 @@ public class NotificationListenerDownloads implements NotificationListener {
                 DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FINISHED,
                 DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_PROGRESS,
                 DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED,
+                DownloadNotifications.NOTIFICATION_SERVER_SESSION_EXISTS,
                 DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED,
 //                DownloadNotifications.NOTIFICATION_API_KEY_REJECTED_BY_SERVER,
+                DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED,
                 DownloadNotifications.NOTIFICATION_SERVER_POLLED,
                 DownloadNotifications.NOTIFICATION_RETURN_RECEIPT_RECEIVED,
                 DownloadNotifications.NOTIFICATION_TURN_CREDENTIALS_RECEIVED,
@@ -162,6 +164,7 @@ public class NotificationListenerDownloads implements NotificationListener {
                 engine.postEngineNotification(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS, engineInfo);
                 break;
             }
+            case DownloadNotifications.NOTIFICATION_SERVER_SESSION_EXISTS:
             case DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED: {
                 Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_IDENTITY_KEY);
                 ServerSession.ApiKeyStatus apiKeyStatus = (ServerSession.ApiKeyStatus) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_API_KEY_STATUS_KEY);
@@ -224,9 +227,23 @@ public class NotificationListenerDownloads implements NotificationListener {
                 engine.postEngineNotification(EngineNotifications.API_KEY_ACCEPTED, engineInfo);
                 break;
             }
+            case DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED: {
+                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED_OWNED_IDENTITY_KEY);
+                boolean user_initiated = (boolean) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_POLL_REQUESTED_USER_INITIATED_KEY);
+                if (ownedIdentity == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.SERVER_POLL_REQUESTED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.SERVER_POLL_REQUESTED_USER_INITIATED_KEY, user_initiated);
+                engine.postEngineNotification(EngineNotifications.SERVER_POLL_REQUESTED, engineInfo);
+                break;
+            }
             case DownloadNotifications.NOTIFICATION_SERVER_POLLED: {
                 Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY);
                 boolean success = (boolean) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_POLLED_SUCCESS_KEY);
+                boolean truncated = (boolean) userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_POLLED_TRUNCATED_KEY);
                 if (ownedIdentity == null) {
                     break;
                 }
@@ -234,6 +251,7 @@ public class NotificationListenerDownloads implements NotificationListener {
                 HashMap<String, Object> engineInfo = new HashMap<>();
                 engineInfo.put(EngineNotifications.SERVER_POLLED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
                 engineInfo.put(EngineNotifications.SERVER_POLLED_SUCCESS_KEY, success);
+                engineInfo.put(EngineNotifications.SERVER_POLLED_TRUNCATED_KEY, truncated);
                 engine.postEngineNotification(EngineNotifications.SERVER_POLLED, engineInfo);
                 break;
             }

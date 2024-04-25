@@ -514,17 +514,21 @@ public class CustomEglRenderer implements VideoSink, ScaleAndOffsetControl.Scale
                 scaleY = Math.min(1f/zoom, 1);
                 gapRatioX = 0;
                 gapRatioY = Math.max(0, .5f-.5f*zoom);
-                float maxOffsetX = (1 - minZoom/zoom)*lastEglWidth/2;
+                float maxOffsetX = (zoom/minZoom - 1)*lastEglWidth/2;
                 if (offsetX > maxOffsetX) { offsetX = maxOffsetX; }
                 if (offsetX < -maxOffsetX) { offsetX = -maxOffsetX; }
-                offsetY = 0;
+                float maxOffsetY = Math.max(0, (zoom -1)*lastEglHeight/2);
+                if (offsetY > maxOffsetY) { offsetY = maxOffsetY; }
+                if (offsetY < -maxOffsetY) { offsetY = -maxOffsetY; }
             } else {
                 scaleX = Math.min(1f/zoom, 1);
                 scaleY = lastFrameRatio / layoutAspectRatio / zoom;
                 gapRatioX = Math.max(0, .5f-.5f*zoom);
                 gapRatioY = 0;
-                offsetX = 0;
-                float maxOffsetY = (1 - minZoom/zoom)*lastEglHeight/2;
+                float maxOffsetX = Math.max(0, (zoom -1)*lastEglWidth/2);
+                if (offsetX > maxOffsetX) { offsetX = maxOffsetX; }
+                if (offsetX < -maxOffsetX) { offsetX = -maxOffsetX; }
+                float maxOffsetY = (zoom/minZoom - 1)*lastEglHeight/2;
                 if (offsetY > maxOffsetY) { offsetY = maxOffsetY; }
                 if (offsetY < -maxOffsetY) { offsetY = -maxOffsetY; }
             }

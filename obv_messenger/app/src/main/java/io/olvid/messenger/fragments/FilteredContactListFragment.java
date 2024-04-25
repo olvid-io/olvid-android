@@ -49,10 +49,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
@@ -63,10 +63,12 @@ import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.LoadAwareAdapter;
 import io.olvid.messenger.customClasses.SearchHighlightSpan;
-import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.customClasses.StringUtils2;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.viewModels.FilteredContactListViewModel;
+import kotlin.Pair;
+import kotlin.text.Regex;
 
 public class FilteredContactListFragment extends Fragment implements TextWatcher {
     private EditText contactFilterEditText;
@@ -369,18 +371,19 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         }
 
         private void matchAndHighlight(String contactName, List<Pattern> patterns, TextView textView) {
-            int i = 0;
-            String unAccented = StringUtils.unAccent(contactName);
-            Spannable highlightedContactName = new SpannableString(contactName);
+            List<Regex> regexes = new ArrayList<>(patterns.size());
             for (Pattern pattern : patterns) {
+                regexes.add(new Regex(pattern.toString()));
+            }
+            List<Pair<Integer, Integer>> ranges = StringUtils2.Companion.computeHighlightRanges(contactName, regexes);
+            int i = 0;
+            Spannable highlightedContactName = new SpannableString(contactName);
+            for (Pair<Integer, Integer> range : ranges) {
                 if (i == highlightedSpans.length) {
                     break;
                 }
-                Matcher matcher = pattern.matcher(unAccented);
-                if (matcher.find()) {
-                    highlightedContactName.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(contactName, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(contactName, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    i++;
-                }
+                highlightedContactName.setSpan(highlightedSpans[i], range.getFirst(), range.getSecond(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                i++;
             }
             textView.setText(highlightedContactName);
         }
@@ -391,7 +394,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         public void onBindViewHolder(@NonNull final ContactViewHolder holder, int position, @NonNull List<Object> payloads) {
             if (filteredContacts != null) {
                 int changesMask = 0;
-                if (payloads.size() == 0) {
+                if (payloads.isEmpty()) {
                     changesMask = -1;
                 } else {
                     for (Object payload : payloads) {
@@ -405,7 +408,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
 
                 List<Pattern> patterns = FilteredContactListFragment.this.filteredContactListViewModel.getFilterPatterns();
                 String filter = FilteredContactListFragment.this.filteredContactListViewModel.getFilter();
-                if (patterns != null && patterns.size() > 0) {
+                if (patterns != null && !patterns.isEmpty()) {
                     if (!filter.equals(holder.currentFilter) || ((changesMask & DISPLAY_NAME_OR_PHOTO_CHANGE_MASK) != 0) || ((changesMask & ACTIVE_CHANGE_MASK) != 0)) {
                         holder.currentFilter = filter;
                         JsonIdentityDetails identityDetails = selectableContact.contact.getIdentityDetails();
@@ -434,7 +437,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
                         }
                     }
                 } else {
-                    if ((changesMask & DISPLAY_NAME_OR_PHOTO_CHANGE_MASK) != 0 || (holder.currentFilter != null && holder.currentFilter.trim().length() > 0)) {
+                    if ((changesMask & DISPLAY_NAME_OR_PHOTO_CHANGE_MASK) != 0 || (holder.currentFilter != null && !holder.currentFilter.trim().isEmpty())) {
                         holder.currentFilter = filter;
                         JsonIdentityDetails identityDetails = selectableContact.contact.getIdentityDetails();
                         if (identityDetails != null) {

@@ -27,12 +27,17 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import io.olvid.engine.encoder.Encoded;
 import io.olvid.messenger.App;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.settings.SettingsActivity;
 
 @SuppressWarnings("CanBeFinal")
@@ -62,12 +67,14 @@ import io.olvid.messenger.settings.SettingsActivity;
 )
 public class FyleMessageJoinWithStatus {
     public static final String TABLE_NAME = "fyle_message_join_with_status";
-
+    public static final String FTS_TABLE_NAME = "fyle_message_join_with_status_fts";
     public static final String FYLE_ID = "fyle_id";
     public static final String MESSAGE_ID = "message_id";
     public static final String BYTES_OWNED_IDENTITY = "bytes_owned_identity";
     public static final String FILE_PATH = "file_path"; // should almost always be a path relative to the getNoBackupFilesDir folder, but may be an absolute path when referring to a file in the cache dir (during a copy typically)
     public static final String FILE_NAME = "file_name";
+    public static final String TEXT_EXTRACTED = "text_extracted";
+    public static final String TEXT_CONTENT = "text_content";
     public static final String MIME_TYPE = "file_type";
     public static final String STATUS = "status";
     public static final String SIZE = "size";
@@ -109,6 +116,12 @@ public class FyleMessageJoinWithStatus {
     @NonNull
     public String fileName;
 
+    @ColumnInfo(name = TEXT_EXTRACTED)
+    public boolean textExtracted;
+
+    @ColumnInfo(name = TEXT_CONTENT)
+    public String textContent;
+
     @ColumnInfo(name = MIME_TYPE)
     public String mimeType;
 
@@ -142,12 +155,14 @@ public class FyleMessageJoinWithStatus {
     public int receptionStatus;
 
     // default constructor required by Room (do not use internally)
-    public FyleMessageJoinWithStatus(long fyleId, long messageId, @NonNull byte[] bytesOwnedIdentity, @NonNull String filePath, @NonNull String fileName, String mimeType, int status, long size, float progress, byte[] engineMessageIdentifier, Integer engineNumber, @Nullable String imageResolution, @Nullable byte[] miniPreview, boolean wasOpened, int receptionStatus) {
+    public FyleMessageJoinWithStatus(long fyleId, long messageId, @NonNull byte[] bytesOwnedIdentity, @NonNull String filePath, @NonNull String fileName, boolean textExtracted, String textContent, String mimeType, int status, long size, float progress, byte[] engineMessageIdentifier, Integer engineNumber, @Nullable String imageResolution, @Nullable byte[] miniPreview, boolean wasOpened, int receptionStatus) {
         this.fyleId = fyleId;
         this.messageId = messageId;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.filePath = filePath;
         this.fileName = fileName;
+        this.textExtracted = textExtracted;
+        this.textContent = textContent;
         this.mimeType = mimeType;
         this.status = status;
         this.size = size;
@@ -186,6 +201,8 @@ public class FyleMessageJoinWithStatus {
                 bytesOwnedIdentity,
                 filePath,
                 fileName,
+                false,
+                null,
                 mimeType,
                 STATUS_DRAFT,
                 size,
@@ -205,6 +222,8 @@ public class FyleMessageJoinWithStatus {
                 bytesOwnedIdentity,
                 filePath,
                 fileName,
+                false,
+                null,
                 mimeType,
                 STATUS_COPYING,
                 size,
@@ -329,6 +348,29 @@ public class FyleMessageJoinWithStatus {
                     }
                 }
             });
+        }
+    }
+
+    // should be run on a background thread (accesses the DB)
+    public void computeTextContentForFullTextSearch(AppDatabase db, Fyle fyle) throws IOException {
+        if (textExtracted) {
+            return;
+        }
+
+        if (OpenGraph.MIME_TYPE.equals(mimeType)) {
+            try (FileInputStream fileInputStream = new FileInputStream(App.absolutePathFromRelative(fyle.filePath));
+                 ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[262_144];
+                int c;
+                while ((c = fileInputStream.read(buffer)) != -1) {
+                    bos.write(buffer, 0, c);
+                }
+                OpenGraph openGraph = OpenGraph.Companion.of(new Encoded(bos.toByteArray()), null);
+                String content = openGraph.getUrl() + " " + (openGraph.getTitle() != null ? openGraph.getTitle() + " " : " ") + (openGraph.getDescription() != null ? openGraph.getDescription() : "").trim();
+                textContent = content;
+                textExtracted = true;
+                db.fyleMessageJoinWithStatusDao().updateTextContent(messageId, fyleId, content);
+            }
         }
     }
 }

@@ -1035,6 +1035,9 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             // update owned identity details to remove signed part
             JsonIdentityDetails jsonIdentityDetails = ownedIdentityObject.getPublishedDetails().getJsonIdentityDetails();
             jsonIdentityDetails.setSignedUserDetails(null);
+            // also remove position and company
+            jsonIdentityDetails.setPosition(null);
+            jsonIdentityDetails.setCompany(null);
 
             ownedIdentityObject.discardLatestDetails();
             ownedIdentityObject.setLatestDetails(jsonIdentityDetails);
@@ -1790,7 +1793,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             if (deviceCapabilities == null) {
                 continue;
             }
-            if (deviceCapabilities.size() == 0) {
+            if (deviceCapabilities.isEmpty()) {
                 return new ArrayList<>();
             }
             if (contactCapabilities == null) {
@@ -1841,7 +1844,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     // skip this device, we do not know its capabilities yet
                     continue;
                 }
-                if (deviceCapabilities.size() == 0) {
+                if (deviceCapabilities.isEmpty()) {
                     return new ArrayList<>();
                 }
                 ownCapabilities.retainAll(deviceCapabilities);

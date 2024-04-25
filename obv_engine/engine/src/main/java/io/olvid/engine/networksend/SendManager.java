@@ -26,13 +26,13 @@ import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.Session;
+import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.MessageToSend;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
 import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.metamanager.MetaManager;
-import io.olvid.engine.datatypes.containers.MessageToSend;
-import io.olvid.engine.datatypes.Session;
-import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.metamanager.NetworkSendDelegate;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;

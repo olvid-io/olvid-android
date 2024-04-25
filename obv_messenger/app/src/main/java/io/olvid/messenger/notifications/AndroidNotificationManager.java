@@ -72,7 +72,6 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ContactDetailsActivity;
-import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -86,6 +85,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.main.MainActivity;
+import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.webrtc.WebrtcCallActivity;
 

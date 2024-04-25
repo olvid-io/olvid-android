@@ -30,6 +30,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -261,7 +262,7 @@ public class SendLocationBasicDialogFragment extends AbstractLocationDialogFragm
             // subscribe to all providers locations updates (to have results as fast as possible)
             for (String provider : locationManager.getProviders(true)) {
                 LocationManagerCompat.requestLocationUpdates(locationManager, provider, locationRequest, executor, locationListenerCompat);
-                LocationManagerCompat.getCurrentLocation(locationManager, provider, null, executor, this::onLocationUpdate);
+                LocationManagerCompat.getCurrentLocation(locationManager, provider, (CancellationSignal) null, executor, this::onLocationUpdate);
             }
 
             // when in share location only we try to use last know locations to be able to start location sharing even if gps is not available

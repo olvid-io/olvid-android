@@ -78,7 +78,7 @@ public abstract class Operation {
     }
 
     public String toString() {
-        return "Operation of type " + this.getClass().getName() + "\n\tStatus: " + this.state;
+        return "Operation of type " + this.getClass().getName() + "(" + System.identityHashCode(this) + ")\n\tStatus: " + this.state;
     }
 
     public UID getUid() {

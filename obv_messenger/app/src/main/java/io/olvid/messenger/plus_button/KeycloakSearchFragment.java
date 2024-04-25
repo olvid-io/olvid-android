@@ -57,7 +57,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
@@ -71,12 +70,14 @@ import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider;
 import io.olvid.messenger.customClasses.SearchHighlightSpan;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.customClasses.StringUtils2;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.settings.SettingsActivity;
+import kotlin.text.Regex;
 
 public class KeycloakSearchFragment extends Fragment implements View.OnClickListener {
     private AppCompatActivity activity;
@@ -357,18 +358,19 @@ public class KeycloakSearchFragment extends Fragment implements View.OnClickList
         }
 
         private void matchAndHighlight(String text, TextView textView) {
-            int i = 0;
-            String unAccented = StringUtils.unAccent(text);
-            Spannable highlightedString = new SpannableString(text);
+            List<Regex> regexes = new ArrayList<>(patterns.size());
             for (Pattern pattern : patterns) {
+                regexes.add(new Regex(pattern.toString()));
+            }
+            List<kotlin.Pair<Integer, Integer>> ranges = StringUtils2.Companion.computeHighlightRanges(text, regexes);
+            int i = 0;
+            Spannable highlightedString = new SpannableString(text);
+            for (kotlin.Pair<Integer, Integer> range : ranges) {
                 if (i == highlightedSpans.length) {
                     break;
                 }
-                Matcher matcher = pattern.matcher(unAccented);
-                if (matcher.find()) {
-                    highlightedString.setSpan(highlightedSpans[i], StringUtils.unaccentedOffsetToActualOffset(text, matcher.start()), StringUtils.unaccentedOffsetToActualOffset(text, matcher.end()), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    i++;
-                }
+                highlightedString.setSpan(highlightedSpans[i], range.getFirst(), range.getSecond(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                i++;
             }
             textView.setText(highlightedString);
         }

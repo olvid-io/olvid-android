@@ -41,6 +41,7 @@ import androidx.preference.SwitchPreference;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.ImageViewPreference;
 
 public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
     FragmentActivity activity;
@@ -52,6 +53,20 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
         PreferenceScreen screen = getPreferenceScreen();
         if (screen == null) {
             return;
+        }
+
+        {
+            final ImageViewPreference appIconPreference = screen.findPreference(SettingsActivity.PREF_KEY_APP_ICON);
+            if (appIconPreference != null) {
+                if (Build.VERSION.SDK_INT >= 26) {
+                    if (App.currentIcon != null) {
+                        appIconPreference.setImageResource(App.currentIcon.getIcon());
+                        appIconPreference.removeElevation();
+                    }
+                } else {
+                    screen.removePreference(appIconPreference);
+                }
+            }
         }
 
         {
