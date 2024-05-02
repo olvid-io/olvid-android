@@ -1,0 +1,70 @@
+name: Rebase and tag
+
+on:
+  workflow_dispatch:
+    # inputs:
+    #   sync_test_mode: # Adds a boolean option that appears during manual workflow run for easy test mode config
+    #     description: 'Test Mode'
+    #     type: boolean
+    #     default: false
+
+jobs:
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream repo and tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+
+      - name: checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: build-apk
+          fetch-depth: 0
+
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
+        with:
+          target_sync_branch: build-apk
+          # REQUIRED 'target_repo_token' exactly like this!
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          target_branch_push_args: '--force'
+          upstream_sync_branch: main
+          upstream_sync_repo: olvid-io/olvid-android
+          upstream_pull_args: '--rebase --tags'
+
+          # Set test_mode true during manual dispatch to run tests instead of the true action!!
+          test_mode: ${{ inputs.sync_test_mode }}
+
+      - name: New commits found
+        if: steps.sync.outputs.has_new_commits == 'true'
+        run: echo "New commits were found to sync."
+
+      - name: No new commits
+        if: steps.sync.outputs.has_new_commits == 'false'
+        run: echo "There were no new commits."
+
+      - name: Show value of 'has_new_commits'
+        run: echo ${{ steps.sync.outputs.has_new_commits }}
+
+      - name: 'Get Previous tag'
+        if: steps.sync.outputs.has_new_commits == 'true'
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
+      - name: Bump version and push tag
+        if: steps.sync.outputs.has_new_commits == 'true'
+        uses: EndBug/latest-tag@latest
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          ref: "${{ steps.previoustag.outputs.tag }}-kumy1"
+
+      - name: Trigger build
+        if: steps.sync.outputs.has_new_commits == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh workflow run android.yml \
+            -R kumy/olvid-android \
+            -F "ref=refs/tags/${{ steps.previoustag.outputs.tag }}-kumy1"
