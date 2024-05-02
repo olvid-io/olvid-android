@@ -140,6 +140,7 @@ public interface IdentityDelegate {
     boolean isIdentityAnActiveContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     boolean isIdentityAContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     boolean isIdentityAOneToOneContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
+    boolean isIdentityANotOneToOneContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     void setContactOneToOne(Session session, Identity ownedIdentity, Identity contactIdentity, boolean oneToOne) throws SQLException;
 //    TrustLevel getContactIdentityTrustLevel(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;

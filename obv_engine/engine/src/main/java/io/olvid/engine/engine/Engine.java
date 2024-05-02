@@ -195,6 +195,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
                 File dbFile = new File(baseDirectory, Constants.ENGINE_DB_FILENAME);
                 File tmpEncryptedDbFile = new File(baseDirectory, Constants.TMP_ENGINE_ENCRYPTED_DB_FILENAME);
+                if (tmpEncryptedDbFile.exists()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    tmpEncryptedDbFile.delete();
+                }
 
                 try (Session session = Session.getUpgradeTablesSession(dbPath, null)) {
                     try (Statement statement = session.createStatement()) {
@@ -217,8 +221,9 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                     throw new RuntimeException("Engine database encryption error: unable to delete unencrypted database!");
                 }
             } catch (Exception fatal) {
-                // database is encrypted but not with the provided dbKey!
-                throw new RuntimeException("Database seems encrypted but cannot be opened with provided dbKey", fatal);
+                // database is encrypted but not with the provided dbKey, or database encryption failed --> try disabling encryption to use a plain database
+                Logger.e("Engine database encryption failed, falling back to un-encrypted database");
+                dbKey = null;
             }
         }
 
@@ -260,7 +265,8 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
 
         MetaManager metaManager = new MetaManager();
-        this.createSessionDelegate = () -> Session.getSession(dbPath, dbKey);
+        String finalDbKey = dbKey;
+        this.createSessionDelegate = () -> Session.getSession(dbPath, finalDbKey);
         metaManager.registerImplementedDelegates(this.createSessionDelegate);
         metaManager.registerImplementedDelegates(this);
 

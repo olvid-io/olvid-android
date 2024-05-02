@@ -642,7 +642,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
                 engine.markMessageForDeletion(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
 
-                if (fyleMessageJoinWithStatusesToDownload.size() > 0) {
+                if (!fyleMessageJoinWithStatusesToDownload.isEmpty()) {
                     AvailableSpaceHelper.refreshAvailableSpace(false);
                 }
 

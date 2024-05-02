@@ -79,10 +79,15 @@ public class ContactIdentity implements ObvDatabase {
     static final String REVOKED_AS_COMPROMISED = "revoked_as_compromised";
     public boolean forcefullyTrustedByUser;
     static final String FORCEFULLY_TRUSTED_BY_USER = "forcefully_trusted_by_user";
-    private boolean oneToOne;
+    private int oneToOne;
     static final String ONE_TO_ONE = "one_to_one";
     private long lastNoDeviceContactDeviceDiscovery;
     static final String LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY = "last_no_device_contact_device_discovery";
+
+
+    public static final int ONE_TO_ONE_STATUS_FALSE = 0;
+    public static final int ONE_TO_ONE_STATUS_TRUE = 1;
+    public static final int ONE_TO_ONE_STATUS_UNKNOWN = 2;
 
     public Identity getContactIdentity() {
         return contactIdentity;
@@ -121,7 +126,10 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public boolean isOneToOne() {
-        return oneToOne;
+        return oneToOne == ONE_TO_ONE_STATUS_TRUE;
+    }
+    public boolean isNotOneToOne() {
+        return oneToOne == ONE_TO_ONE_STATUS_FALSE;
     }
 
     public long getLastNoDeviceContactDeviceDiscovery() {
@@ -338,18 +346,22 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
+    // this method always sets to ONE_TO_ONE_STATUS_TRUE or ONE_TO_ONE_STATUS_FALSE, but never leaves in ONE_TO_ONE_STATUS_UNKNOWN
     public void setOneToOne(boolean oneToOne) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + ONE_TO_ONE + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
-            statement.setBoolean(1, oneToOne);
+            statement.setInt(1, oneToOne ? ONE_TO_ONE_STATUS_TRUE : ONE_TO_ONE_STATUS_FALSE);
             statement.setBytes(2, contactIdentity.getBytes());
             statement.setBytes(3, ownedIdentity.getBytes());
             statement.executeUpdate();
-            this.oneToOne = oneToOne;
-            commitHookBits |= HOOK_BIT_ONE_TO_ONE_CHANGED;
-            identityManagerSession.session.addSessionCommitListener(this);
+            // do not notify when changing from unknown to false (normally this setter is not called in that case, but let's make sure!
+            if (isOneToOne() != oneToOne) {
+                commitHookBits |= HOOK_BIT_ONE_TO_ONE_CHANGED;
+                identityManagerSession.session.addSessionCommitListener(this);
+            }
+            this.oneToOne = oneToOne ? ONE_TO_ONE_STATUS_TRUE : ONE_TO_ONE_STATUS_FALSE;
         }
     }
 
@@ -577,8 +589,8 @@ public class ContactIdentity implements ObvDatabase {
                 throw new SQLException();
             }
 
-
-            ContactIdentity contactIdentityObject = new ContactIdentity(identityManagerSession, contactIdentity, ownedIdentity, contactIdentityDetails.getVersion(), new TrustLevel(0, 0), oneToOne);
+            // when creating a not one-to-one contact, set their one-to-one status as unknown
+            ContactIdentity contactIdentityObject = new ContactIdentity(identityManagerSession, contactIdentity, ownedIdentity, contactIdentityDetails.getVersion(), new TrustLevel(0, 0), oneToOne ? ONE_TO_ONE_STATUS_TRUE : ONE_TO_ONE_STATUS_UNKNOWN);
             contactIdentityObject.revokedAsCompromised = revokedAsCompromised;
             contactIdentityObject.insert();
 
@@ -609,7 +621,7 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
-    public ContactIdentity(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, int version, TrustLevel trustLevel, boolean oneToOne) {
+    public ContactIdentity(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity, int version, TrustLevel trustLevel, int oneToOne) {
         this.identityManagerSession = identityManagerSession;
         this.contactIdentity = contactIdentity;
         this.ownedIdentity = ownedIdentity;
@@ -637,7 +649,7 @@ public class ContactIdentity implements ObvDatabase {
         this.certifiedByOwnKeycloak = res.getBoolean(CERTIFIED_BY_OWN_KEYCLOAK);
         this.revokedAsCompromised = res.getBoolean(REVOKED_AS_COMPROMISED);
         this.forcefullyTrustedByUser = res.getBoolean(FORCEFULLY_TRUSTED_BY_USER);
-        this.oneToOne = res.getBoolean(ONE_TO_ONE);
+        this.oneToOne = res.getInt(ONE_TO_ONE);
         this.lastNoDeviceContactDeviceDiscovery = res.getLong(LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY);
     }
 
@@ -882,7 +894,7 @@ public class ContactIdentity implements ObvDatabase {
             statement.setBoolean(6, certifiedByOwnKeycloak);
             statement.setBoolean(7, revokedAsCompromised);
             statement.setBoolean(8, forcefullyTrustedByUser);
-            statement.setBoolean(9, oneToOne);
+            statement.setInt(9, oneToOne);
             statement.setLong(10, lastNoDeviceContactDeviceDiscovery);
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_INSERTED;
@@ -1179,7 +1191,21 @@ public class ContactIdentity implements ObvDatabase {
         pojo.trust_level = trustLevel.toString();
         pojo.revoked = revokedAsCompromised;
         pojo.forcefully_trusted = forcefullyTrustedByUser;
-        pojo.one_to_one = oneToOne;
+        switch (oneToOne) {
+            case ONE_TO_ONE_STATUS_TRUE: {
+                pojo.one_to_one = true;
+                break;
+            }
+            case ONE_TO_ONE_STATUS_FALSE: {
+                pojo.one_to_one = false;
+                break;
+            }
+            case ONE_TO_ONE_STATUS_UNKNOWN:
+            default: {
+                pojo.one_to_one = null;
+                break;
+            }
+        }
         pojo.trust_origins = ContactTrustOrigin.backupAll(identityManagerSession, ownedIdentity, contactIdentity);
         pojo.contact_groups = ContactGroup.backupAllForOwner(identityManagerSession, ownedIdentity, contactIdentity);
 
@@ -1205,7 +1231,7 @@ public class ContactIdentity implements ObvDatabase {
             published_details = ContactIdentityDetails.restore(identityManagerSession, ownedIdentity, contactIdentity, pojo.published_details);
         }
 
-        ContactIdentity contactIdentityObject = new ContactIdentity(identityManagerSession, contactIdentity, ownedIdentity, trusted_details.getVersion(), TrustLevel.of(pojo.trust_level), (pojo.one_to_one == null || pojo.one_to_one));
+        ContactIdentity contactIdentityObject = new ContactIdentity(identityManagerSession, contactIdentity, ownedIdentity, trusted_details.getVersion(), TrustLevel.of(pojo.trust_level), pojo.one_to_one == null ? ONE_TO_ONE_STATUS_UNKNOWN : (pojo.one_to_one ? ONE_TO_ONE_STATUS_TRUE : ONE_TO_ONE_STATUS_FALSE));
         if (published_details != null) {
             contactIdentityObject.publishedDetailsVersion = published_details.getVersion();
         }

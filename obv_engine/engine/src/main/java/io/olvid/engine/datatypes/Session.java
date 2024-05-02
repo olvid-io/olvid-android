@@ -109,7 +109,7 @@ public class Session implements Connection {
 
         sessionPoolLock.lock();
         List<Session> sessionList = sessionPool.get(dbPath);
-        if ((sessionList == null) || (sessionList.size() == 0)) {
+        if ((sessionList == null) || (sessionList.isEmpty())) {
             sessionPoolLock.unlock();
             session = new Session(dbPath, dbKey, false);
         } else {

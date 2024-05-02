@@ -1654,10 +1654,19 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
+    public boolean isIdentityANotOneToOneContactOfOwnedIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
+        return (contactIdentityObject != null && contactIdentityObject.isNotOneToOne());
+    }
+
+
+    // this method always sets to ONE_TO_ONE_STATUS_TRUE or ONE_TO_ONE_STATUS_FALSE, but never leaves in ONE_TO_ONE_STATUS_UNKNOWN
+    @Override
     public void setContactOneToOne(Session session, Identity ownedIdentity, Identity contactIdentity, boolean oneToOne) throws SQLException {
         ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
-        // only actually call the setter if the oneToOne is changed
-        if (contactIdentityObject != null && contactIdentityObject.isOneToOne() != oneToOne) {
+        // only actually call the setter if the oneToOne is changed (or if contact oneToOne was unknown)
+        if (contactIdentityObject != null
+                && ((oneToOne && !contactIdentityObject.isOneToOne()) || (!oneToOne && !contactIdentityObject.isNotOneToOne()))) {
             contactIdentityObject.setOneToOne(oneToOne);
         }
     }

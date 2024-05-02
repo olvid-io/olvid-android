@@ -65,6 +65,9 @@ public class AsymmetricChannel extends NetworkChannel {
             return null;
         }
         AuthEncKey messageKey = channelManagerSession.encryptionForIdentityDelegate.unwrap(channelManagerSession.session, header.getWrappedKey(), header.getOwnedIdentity());
+        if (messageKey == null) {
+            return null;
+        }
         return new AuthEncKeyAndChannelInfo(messageKey, ReceptionChannelInfo.createAsymmetricChannelInfo());
     }
 

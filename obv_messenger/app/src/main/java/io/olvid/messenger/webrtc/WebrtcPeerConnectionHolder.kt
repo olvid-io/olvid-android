@@ -120,6 +120,8 @@ class WebrtcPeerConnectionHolder(
 
     private var audioReceiver: RtpReceiver? = null
     private var peerAudioLevelListener: Timer? = null
+
+    private var renegociationNeededQueued: Boolean = false
     var peerAudioLevel by mutableDoubleStateOf(0.0)
         private set
 
@@ -508,8 +510,8 @@ class WebrtcPeerConnectionHolder(
         }
     }
 
-    fun createLocalDescription() {
-        Logger.d("☎ createLocalDescription")
+    fun createLocalDescription(reason: String) {
+        Logger.d("☎ createLocalDescription " + reason)
         // only called from onRenegotiationNeeded
         when (peerConnection?.signalingState()) {
             STABLE -> {
@@ -604,8 +606,8 @@ class WebrtcPeerConnectionHolder(
                         )
                     )
 
-                    if (shouldCreateLocalDescription) {
-                        createLocalDescription()
+                    if (shouldCreateLocalDescription && !renegociationNeededQueued) {
+                        createLocalDescription("[set remote offer when stable]")
                     }
                 }
 
@@ -987,8 +989,10 @@ class WebrtcPeerConnectionHolder(
         override fun onRenegotiationNeeded() {
             // called whenever a peerConnection is created, a track is added, or after a restartICE. May not be called if a negotiation is already in progress
             Logger.d("☎ onRenegotiationNeeded")
+            renegociationNeededQueued = true
             webrtcCallService.synchronizeOnExecutor {
-                createLocalDescription()
+                renegociationNeededQueued = false
+                createLocalDescription("[onRenegotiationNeeded]")
             }
         }
 
@@ -1051,7 +1055,7 @@ class WebrtcPeerConnectionHolder(
                 GATHER_CONTINUOUSLY -> peerConnection?.setLocalDescription(object :
                     SdpSetObserver() {
                     override fun onSetSuccess() {
-                        Logger.d("☎ onSetSuccess")
+                        Logger.d("☎ onSetSuccess 1")
                         if (sdp.type == OFFER) {
                             webrtcCallService.sendLocalDescriptionToPeer(
                                 callParticipant,
@@ -1075,7 +1079,7 @@ class WebrtcPeerConnectionHolder(
         }
 
         override fun onSetSuccess() {
-            Logger.d("☎ onSetSuccess")
+            Logger.d("☎ onSetSuccess 2")
             // called when local or remote description are set
             // This automatically triggers ICE gathering or connection establishment --> nothing to do for GATHER_ONCE
         }

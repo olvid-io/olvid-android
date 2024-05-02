@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -204,13 +205,14 @@ fun GlobalSearchScreen(
                                     },
                                 )
                                 Text(
+                                    modifier = Modifier.weight(1f),
                                     text = AppSingleton.getContactCustomDisplayName(fyle.message.senderIdentifier) ?: stringResource(id = string.text_deleted_contact),
                                     fontSize = 14.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     fontWeight = FontWeight.Medium
                                 )
-                                Spacer(modifier = Modifier.weight(1f))
+                                Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = StringUtils.getNiceDateString(
                                         context,

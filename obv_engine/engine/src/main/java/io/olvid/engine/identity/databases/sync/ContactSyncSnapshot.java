@@ -75,7 +75,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
             contactSyncSnapshot.published_details = IdentityDetailsSyncSnapshot.of(identityManagerSession, publishedDetails);
         }
 
-        contactSyncSnapshot.one_to_one = contact.isOneToOne() ? true : null;
+        contactSyncSnapshot.one_to_one = contact.isOneToOne() ? Boolean.TRUE : (contact.isNotOneToOne() ? Boolean.FALSE : null);
 
         contactSyncSnapshot.revoked = contact.isRevokedAsCompromised() ? true : null;
 
@@ -109,7 +109,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
         }
 
         TrustLevel trustLevel = (domain.contains(TRUST_LEVEL) && trust_level != null) ? TrustLevel.of(trust_level) : new TrustLevel(0, 0);
-        boolean oneToOne = (domain.contains(ONE_TO_ONE) && one_to_one != null) ? one_to_one : !domain.contains(ONE_TO_ONE);
+        int oneToOne = (domain.contains(ONE_TO_ONE) && one_to_one != null) ? (one_to_one ? ContactIdentity.ONE_TO_ONE_STATUS_TRUE : ContactIdentity.ONE_TO_ONE_STATUS_FALSE) : ContactIdentity.ONE_TO_ONE_STATUS_UNKNOWN;
 
         ContactIdentity contactIdentityObject = new ContactIdentity(identityManagerSession, contactIdentity, ownedIdentity, trustedDetails.getVersion(), trustLevel, oneToOne);
         if (publishedDetails != null) {

@@ -212,6 +212,10 @@ public abstract class AppDatabase extends RoomDatabase {
                         try {
                             int oldUserVersion = -1;
                             File tmpEncryptedDbFile = new File(App.absolutePathFromRelative(TMP_ENCRYPTED_DB_FILE_NAME));
+                            if (tmpEncryptedDbFile.exists()) {
+                                //noinspection ResultOfMethodCallIgnored
+                                tmpEncryptedDbFile.delete();
+                            }
                             try (SQLiteDatabase db = SQLiteDatabase.openDatabase(dbFile.getPath(), "", null, SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY, null)) {
                                 db.rawExecSQL("ATTACH DATABASE '" + tmpEncryptedDbFile.getPath() + "' AS encrypted KEY \"" + dbKey + "\";");
                                 db.rawExecSQL("SELECT sqlcipher_export('encrypted');");
@@ -243,8 +247,9 @@ public abstract class AppDatabase extends RoomDatabase {
                                 throw new RuntimeException("App database encryption error: unable to delete unencrypted database!");
                             }
                         } catch (Exception fatal) {
-                            // database is encrypted but not with the provided dbKey!
-                            throw new RuntimeException("Database seems encrypted but cannot be opened with provided dbKey", fatal);
+                            // database is encrypted but not with the provided dbKey, or database encryption failed --> try disabling encryption to use a plain database
+                            Logger.e("App database encryption failed, falling back to un-encrypted database");
+                            dbKey = "";
                         }
                     }
 

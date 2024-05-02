@@ -896,11 +896,6 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                     ChannelMessageToSend messageToSend = new AbortMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
-
-                {
-                    // mark Bob as not oneToOne
-                    protocolManagerSession.identityDelegate.setContactOneToOne(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, false);
-                }
             }
 
             {
@@ -945,11 +940,6 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
             if (!startState.contactIdentity.equals(receivedMessage.getReceptionChannelInfo().getRemoteIdentity())) {
                 Logger.e("Contact identity mismatch in BobProcessesAbortStep: ignoring message.");
                 return startState;
-            }
-
-            {
-                // mark Alice as not oneToOne
-                protocolManagerSession.identityDelegate.setContactOneToOne(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, false);
             }
 
             {
@@ -1105,11 +1095,6 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
             {
-                // mark Bob as not oneToOne
-                protocolManagerSession.identityDelegate.setContactOneToOne(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, false);
-            }
-
-            {
                 // remove the dialog
                 CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startState.dialogUuid));
                 ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
@@ -1139,15 +1124,13 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
 
 
             {
-                // check whether the response message received from Bob matches the oneToOne status we have for Bob in db.
-                // if this is the case, do nothing
-                if (protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.getReceptionChannelInfo().getRemoteIdentity()) == receivedMessage.invitationAccepted) {
+                // if Bob accepted the invitation, there is nothing to do: we never upgrade him for now reason, and won't tell him to downgrade.
+                if (receivedMessage.invitationAccepted) {
                     return new FinishedState();
                 }
             }
 
-            // one of Alice or Bob does not want to be oneToOne --> downgrade locally and start a delete protocol to downgrade remotely
-
+            // Bob sent us an invitation rejected response, we downgrade him
             {
                 // mark Bob as not oneToOne
                 protocolManagerSession.identityDelegate.setContactOneToOne(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), false);
@@ -1191,7 +1174,15 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                 // send a sync message to all contacts, within a try as some contacts without channel may fail
                 for (Identity contactIdentity : contactIdentities) {
                     try {
-                        boolean oneToOne = protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), contactIdentity);
+                        final boolean oneToOne;
+                        if (protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), contactIdentity)) {
+                            oneToOne = true;
+                        } else if (protocolManagerSession.identityDelegate.isIdentityANotOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), contactIdentity)) {
+                            oneToOne = false;
+                        } else {
+                            // if oneToOne status is unknown, do nothing
+                            continue;
+                        }
                         CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(contactIdentity, getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new OneToOneStatusSyncRequestMessage(coreProtocolMessage, oneToOne).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
@@ -1226,7 +1217,16 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
 
             {
                 // send a sync message to specific contact. He should have a channel, so fail in case of Exception
-                boolean oneToOne = protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity);
+                final boolean oneToOne;
+                if (protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity)) {
+                    oneToOne = true;
+                } else if (protocolManagerSession.identityDelegate.isIdentityANotOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity)) {
+                    oneToOne = false;
+                } else {
+                    // if oneToOne status is unknown, do nothing
+                    return new FinishedState();
+                }
+
                 CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
                 ChannelMessageToSend messageToSend = new OneToOneStatusSyncRequestMessage(coreProtocolMessage, oneToOne).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
@@ -1252,7 +1252,15 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            boolean aliceIsOneToOne = protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.getReceptionChannelInfo().getRemoteIdentity());
+            final boolean aliceIsOneToOne;
+            if (protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.getReceptionChannelInfo().getRemoteIdentity())) {
+                aliceIsOneToOne = true;
+            } else if (protocolManagerSession.identityDelegate.isIdentityANotOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.getReceptionChannelInfo().getRemoteIdentity())) {
+                aliceIsOneToOne = false;
+            } else {
+                // if oneToOne status is unknown, do nothing
+                return new FinishedState();
+            }
 
             if (aliceIsOneToOne != receivedMessage.aliceConsidersBobAsOneToOne) {
                 if (aliceIsOneToOne) {

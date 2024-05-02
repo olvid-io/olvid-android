@@ -1,3 +1,9 @@
+# Build 236 (2.1.1)
+2024-05-01
+
+- Hotfix: when sqlcipher migration fails, continue using the old un-encrypted database
+- Fix some edge case where one-to-one status could be lost in multi-device
+
 # Build 235 (2.1)
 2024-04-25
 
