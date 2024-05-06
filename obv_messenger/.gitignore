@@ -8,6 +8,7 @@
 /.idea/caches
 /.idea/assetWizardSettings.xml
 /.idea/deploymentTargetDropDown.xml
+/.idea/deploymentTargetSelector.xml
 .DS_Store
 build
 /captures

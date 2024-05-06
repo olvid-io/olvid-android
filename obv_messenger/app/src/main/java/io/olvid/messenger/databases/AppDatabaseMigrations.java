@@ -61,6 +61,66 @@ class AppDatabaseMigrations {
                     database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_fyle_message_join_with_status_fts_BEFORE_DELETE BEFORE DELETE ON `fyle_message_join_with_status` BEGIN DELETE FROM `fyle_message_join_with_status_fts` WHERE `docid`=OLD.`rowid`; END");
                     database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_fyle_message_join_with_status_fts_AFTER_UPDATE AFTER UPDATE ON `fyle_message_join_with_status` BEGIN INSERT INTO `fyle_message_join_with_status_fts`(`docid`, `file_name`, `text_content`) VALUES (NEW.`rowid`, NEW.`file_name`, NEW.`text_content`); END");
                     database.execSQL("CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_fyle_message_join_with_status_fts_AFTER_INSERT AFTER INSERT ON `fyle_message_join_with_status` BEGIN INSERT INTO `fyle_message_join_with_status_fts`(`docid`, `file_name`, `text_content`) VALUES (NEW.`rowid`, NEW.`file_name`, NEW.`text_content`); END");
+
+                    // some users seem to have lost indexes in the SQLcipher migration... attempt to recreate all missing indexes, just in case!
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_contact_table_bytes_owned_identity` ON `contact_table` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_contact_table_display_name` ON `contact_table` (`display_name`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_contact_table_custom_display_name` ON `contact_table` (`custom_display_name`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_contact_table_sort_display_name` ON `contact_table` (`sort_display_name`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_group_table_name` ON `group_table` (`name`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_group_table_bytes_owned_identity` ON `group_table` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_group_table_bytes_group_owner_identity_bytes_owned_identity` ON `group_table` (`bytes_group_owner_identity`, `bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_contact_group_join_bytes_group_owner_and_uid_bytes_owned_identity` ON `contact_group_join` (`bytes_group_owner_and_uid`, `bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_contact_group_join_bytes_contact_identity_bytes_owned_identity` ON `contact_group_join` (`bytes_contact_identity`, `bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_pending_group_member_table_bytes_group_owner_and_uid_bytes_owned_identity` ON `pending_group_member_table` (`bytes_group_owner_and_uid`, `bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_discussion_table_bytes_owned_identity` ON `discussion_table` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_discussion_table_bytes_owned_identity_discussion_type_bytes_discussion_identifier` ON `discussion_table` (`bytes_owned_identity`, `discussion_type`, `bytes_discussion_identifier`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_discussion_table_title` ON `discussion_table` (`title`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_discussion_customization_table_discussion_id` ON `discussion_customization_table` (`discussion_id`)");
+                    database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_fyle_table_sha256` ON `fyle_table` (`sha256`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_fyle_message_join_with_status_fyle_id` ON `fyle_message_join_with_status` (`fyle_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_fyle_message_join_with_status_message_id` ON `fyle_message_join_with_status` (`message_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_fyle_message_join_with_status_engine_message_identifier_engine_number` ON `fyle_message_join_with_status` (`engine_message_identifier`, `engine_number`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_fyle_message_join_with_status_message_id_engine_number` ON `fyle_message_join_with_status` (`message_id`, `engine_number`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_fyle_message_join_with_status_bytes_owned_identity` ON `fyle_message_join_with_status` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_invitation_table_bytes_owned_identity` ON `invitation_table` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_discussion_id` ON `message_table` (`discussion_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_engine_message_identifier` ON `message_table` (`engine_message_identifier`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_sort_index` ON `message_table` (`sort_index`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_timestamp` ON `message_table` (`timestamp`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_message_type_status` ON `message_table` (`message_type`, `status`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_discussion_id_status` ON `message_table` (`discussion_id`, `status`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_sender_sequence_number_sender_thread_identifier_sender_identifier_discussion_id` ON `message_table` (`sender_sequence_number`, `sender_thread_identifier`, `sender_identifier`, `discussion_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_expiration_table_message_id` ON `message_expiration_table` (`message_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_expiration_table_expiration_timestamp` ON `message_expiration_table` (`expiration_timestamp`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_metadata_table_message_id` ON `message_metadata_table` (`message_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_metadata_table_message_id_kind` ON `message_metadata_table` (`message_id`, `kind`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_metadata_table_timestamp` ON `message_metadata_table` (`timestamp`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_recipient_info_table_message_id` ON `message_recipient_info_table` (`message_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_recipient_info_table_bytes_contact_identity` ON `message_recipient_info_table` (`bytes_contact_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_recipient_info_table_return_receipt_nonce` ON `message_recipient_info_table` (`return_receipt_nonce`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_recipient_info_table_engine_message_identifier` ON `message_recipient_info_table` (`engine_message_identifier`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_recipient_info_table_message_id_bytes_contact_identity` ON `message_recipient_info_table` (`message_id`, `bytes_contact_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_table_bytes_owned_identity` ON `call_log_table` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_table_timestamp` ON `call_log_table` (`timestamp`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_table_bytes_group_owner_and_uid_bytes_owned_identity` ON `call_log_table` (`bytes_group_owner_and_uid`, `bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_item_contact_join_call_log_item_id` ON `call_log_item_contact_join` (`call_log_item_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_call_log_item_contact_join_bytes_owned_identity_bytes_contact_identity` ON `call_log_item_contact_join` (`bytes_owned_identity`, `bytes_contact_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_reactions_table_message_id` ON `reactions_table` (`message_id`)");
+                    database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_reactions_table_message_id_bytes_identity` ON `reactions_table` (`message_id`, `bytes_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_remote_delete_and_edit_request_table_discussion_id` ON `remote_delete_and_edit_request_table` (`discussion_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_remote_delete_and_edit_request_table_server_timestamp` ON `remote_delete_and_edit_request_table` (`server_timestamp`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_known_certificate_domain_name` ON `known_certificate` (`domain_name`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_reaction_request_table_discussion_id` ON `reaction_request_table` (`discussion_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_reaction_request_table_server_timestamp` ON `reaction_request_table` (`server_timestamp`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_reaction_request_table_discussion_id_sender_identifier_sender_thread_identifier_sender_sequence_number` ON `reaction_request_table` (`discussion_id`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_action_shortcut_configuration_table_discussion_id` ON `action_shortcut_configuration_table` (`discussion_id`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_group2_table_bytes_owned_identity` ON `group2_table` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_group2_pending_member_table_bytes_owned_identity` ON `group2_pending_member_table` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_group2_pending_member_table_bytes_owned_identity_bytes_group_identifier` ON `group2_pending_member_table` (`bytes_owned_identity`, `bytes_group_identifier`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_group2_member_table_bytes_owned_identity` ON `group2_member_table` (`bytes_owned_identity`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_group2_member_table_bytes_owned_identity_bytes_group_identifier` ON `group2_member_table` (`bytes_owned_identity`, `bytes_group_identifier`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_group2_member_table_bytes_owned_identity_bytes_contact_identity` ON `group2_member_table` (`bytes_owned_identity`, `bytes_contact_identity`)");
                 }
             },
 

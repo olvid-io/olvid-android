@@ -1,3 +1,8 @@
+# Build 237 (2.1.2)
+2024-05-06
+
+- Hotfix: recreate indexes that might have got dropped during the SQLcipher migration
+
 # Build 236 (2.1.1)
 2024-05-01
 

@@ -130,7 +130,7 @@
     <string name="invitation_status_accept_invite">Invitation reçue</string>
     <string name="invitation_status_description_accept_group_invite">Accepter cette invitation de %1$s ?</string>
     <string name="invitation_status_description_contact_or_mediator_deleted">Cette invitation provient d\'un utilisateur inconnu. Il est préférable de l\'ignorer.</string>
-    <string name="invitation_status_description_accept_invite">%1$s aimerait entrer en contact avec vous. Cliquez sur «\u00a0accepter\u00a0» si vous êtes d\'accord. Sinon, vous pouver «\u00a0ignorer\u00a0».</string>
+    <string name="invitation_status_description_accept_invite">%1$s aimerait entrer en contact avec vous. Cliquez sur «\u00a0accepter\u00a0» si vous êtes d\'accord. Sinon, vous pouvez «\u00a0ignorer\u00a0».</string>
     <string name="invitation_status_description_accept_mediator_invite">%1$s souhaite vous mettre en relation avec %2$s. Accepter ?</string>
     <string name="invitation_status_description_accept_mediator_invite_deleted">Un contact inconnu souhaite vous mettre en relation avec %1$s. Il est recommandé de refuser\u00a0?</string>
     <string name="invitation_status_description_enter_their_sas">Pour entrer en contact avec %1$s, vous devez lui communiquer votre code (%2$s) et saisir le sien.\n\nAssurez-vous que c\'est bien %1$s qui vous donne son code\u00a0: privilégiez le face-à-face ou un appel téléphonique (évitez absolument email, SMS ou toute autre messagerie électronique).</string>
