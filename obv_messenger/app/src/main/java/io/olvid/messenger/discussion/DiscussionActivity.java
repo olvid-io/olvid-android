@@ -70,8 +70,6 @@ import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -176,6 +174,7 @@ import io.olvid.messenger.databases.tasks.CreateReadMessageMetadata;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask;
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked;
+import io.olvid.messenger.databases.tasks.PropagateBookmarkedMessageChangeTask;
 import io.olvid.messenger.databases.tasks.ReplaceDiscussionDraftTask;
 import io.olvid.messenger.databases.tasks.SaveDraftTask;
 import io.olvid.messenger.databases.tasks.SaveMultipleAttachmentsTask;
@@ -429,10 +428,11 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 }
             }
 
+            // bookmarked == null means message is not bookmarkable
             @Override
-            public void selectMessage(long messageId, boolean forwardable) {
+            public void selectMessage(long messageId, boolean forwardable, @Nullable Boolean bookmarked) {
                 if (discussionViewModel != null) {
-                    discussionViewModel.selectMessageId(messageId, forwardable);
+                    discussionViewModel.selectMessageId(messageId, forwardable, bookmarked);
                 }
             }
 
@@ -565,7 +565,14 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     return false;
                 }
                 menu.clear();
-                inflater.inflate(R.menu.action_menu_discussion_multiple_selection, menu);
+                inflater.inflate(R.menu.action_menu_delete, menu);
+                if (discussionViewModel.areAllSelectedMessagesBookmarkable()) {
+                    if (discussionViewModel.areAllSelectedMessagesBookmarked()) {
+                        inflater.inflate(R.menu.popup_action_unbookmark, menu);
+                    } else {
+                        inflater.inflate(R.menu.popup_action_bookmark, menu);
+                    }
+                }
                 if (discussionViewModel.areAllSelectedMessagesForwardable()) {
                     inflater.inflate(R.menu.action_menu_discussion_forward, menu);
                 }
@@ -580,56 +587,52 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         Discussion discussion = discussionViewModel.getDiscussion().getValue();
                         if (discussion != null) {
                             App.runThread(() -> {
-                                boolean canRemoteDelete;
-                                boolean canRemoteDeleteOwn;
-                                if (discussion.discussionType == Discussion.TYPE_GROUP_V2) {
-                                    Group2 group2 = AppDatabase.getInstance().group2Dao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
-                                    if (group2 != null) {
-                                        canRemoteDelete = group2.ownPermissionRemoteDeleteAnything;
-                                        canRemoteDeleteOwn = group2.ownPermissionEditOrRemoteDeleteOwnMessages;
-                                    } else {
-                                        canRemoteDelete = false;
-                                        canRemoteDeleteOwn = false;
+                                boolean allMessagesAreOutbound = true;
+                                boolean remoteDeletingMakesSense = true;
+                                for (Long messageId : selectedMessageIds) {
+                                    Message message = AppDatabase.getInstance().messageDao().get(messageId);
+                                    if (message == null) {
+                                        continue;
                                     }
-                                } else {
-                                    canRemoteDelete = discussion.isNormal();
-                                    canRemoteDeleteOwn = discussion.isNormal();
+                                    if (message.wipeStatus != Message.WIPE_STATUS_NONE) {
+                                        remoteDeletingMakesSense = false;
+                                        break;
+                                    }
+                                    if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE) {
+                                        allMessagesAreOutbound = false;
+                                    }
+                                    if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE
+                                            && message.messageType != Message.TYPE_INBOUND_MESSAGE
+                                            && message.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
+                                        remoteDeletingMakesSense = false;
+                                        break;
+                                    }
                                 }
-                                if (!canRemoteDelete && canRemoteDeleteOwn) {
-                                    canRemoteDelete = true;
-                                    // check if messages are all outbound messages (in which case remote delete is allowed)
-                                    for (Long messageId : selectedMessageIds) {
-                                        Message message = AppDatabase.getInstance().messageDao().get(messageId);
-                                        if (message != null && message.messageType != Message.TYPE_OUTBOUND_MESSAGE) {
-                                            canRemoteDelete = false;
-                                            break;
+                                boolean offerToRemoteDeleteEverywhere;
+                                if (remoteDeletingMakesSense) {
+                                    if (discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                                        Group2 group2 = AppDatabase.getInstance().group2Dao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                                        if (group2 != null) {
+                                            offerToRemoteDeleteEverywhere = AppDatabase.getInstance().group2MemberDao().groupHasMembers(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier)
+                                                    && ((allMessagesAreOutbound && group2.ownPermissionEditOrRemoteDeleteOwnMessages)
+                                                    || group2.ownPermissionRemoteDeleteAnything);
+                                        } else {
+                                            offerToRemoteDeleteEverywhere = false;
                                         }
-                                    }
-                                }
-                                final AlertDialog.Builder builder;
-                                if (canRemoteDelete) {
-                                    builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                            .setTitle(R.string.dialog_title_confirm_deletion)
-                                            .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, selectedMessageIds.size(), selectedMessageIds.size()))
-                                            .setDeleteCallback(deleteEverywhere -> {
-                                                App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, selectedMessageIds, deleteEverywhere));
-                                                discussionViewModel.deselectAll();
-                                            });
-                                    if (selectedMessageIds.size() == 1) {
-                                        ((SecureDeleteEverywhereDialogBuilder) builder).setType(SecureDeleteEverywhereDialogBuilder.TYPE.SINGLE_MESSAGE);
+                                    } else if (discussion.discussionType == Discussion.TYPE_GROUP) {
+                                        offerToRemoteDeleteEverywhere = AppDatabase.getInstance().contactGroupJoinDao().groupHasMembers(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier) && (allMessagesAreOutbound && discussion.isNormal());
                                     } else {
-                                        ((SecureDeleteEverywhereDialogBuilder) builder).setType(SecureDeleteEverywhereDialogBuilder.TYPE.MULTIPLE_MESSAGE);
+                                        offerToRemoteDeleteEverywhere = allMessagesAreOutbound && discussion.isNormal();
                                     }
                                 } else {
-                                    builder = new SecureAlertDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                            .setTitle(R.string.dialog_title_confirm_deletion)
-                                            .setMessage(getResources().getQuantityString(R.plurals.dialog_message_delete_messages, selectedMessageIds.size(), selectedMessageIds.size()))
-                                            .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
-                                                App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, selectedMessageIds, false));
-                                                discussionViewModel.deselectAll();
-                                            })
-                                            .setNegativeButton(R.string.button_label_cancel, null);
+                                    offerToRemoteDeleteEverywhere = false;
                                 }
+
+                                final AlertDialog.Builder builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, SecureDeleteEverywhereDialogBuilder.Type.MESSAGE, selectedMessageIds.size(), offerToRemoteDeleteEverywhere, remoteDeletingMakesSense)
+                                        .setDeleteCallback(deletionChoice -> {
+                                            App.runThread(new DeleteMessagesTask(selectedMessageIds, deletionChoice));
+                                            discussionViewModel.deselectAll();
+                                        });
                                 new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
                             });
                         }
@@ -641,6 +644,42 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         discussionViewModel.setMessageIdsToForward(new ArrayList<>(selectedMessageIds));
                         Utils.openForwardMessageDialog(DiscussionActivity.this, selectedMessageIds, discussionViewModel::deselectAll);
                     }
+                } else if (item.getItemId() == R.id.popup_action_bookmark) {
+                    final List<Long> selectedMessageIds = discussionViewModel.getSelectedMessageIds().getValue();
+                    if (selectedMessageIds != null) {
+                        App.runThread(() -> {
+                            for (Long messageId : selectedMessageIds) {
+                                AppDatabase.getInstance().messageDao().updateBookmarked(messageId, true);
+                                Message message = AppDatabase.getInstance().messageDao().get(messageId);
+                                byte[] bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
+                                if (message != null && bytesOwnedIdentity != null) {
+                                    new PropagateBookmarkedMessageChangeTask(bytesOwnedIdentity, message, true).run();
+                                }
+                            }
+                        });
+                    }
+                    if (actionMode != null) {
+                        actionMode.finish();
+                    }
+                    return true;
+                } else if (item.getItemId() == R.id.popup_action_unbookmark) {
+                    final List<Long> selectedMessageIds = discussionViewModel.getSelectedMessageIds().getValue();
+                    if (selectedMessageIds != null) {
+                        App.runThread(() -> {
+                            for (Long messageId : selectedMessageIds) {
+                                AppDatabase.getInstance().messageDao().updateBookmarked(messageId, false);
+                                Message message = AppDatabase.getInstance().messageDao().get(messageId);
+                                byte[] bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
+                                if (message != null && bytesOwnedIdentity != null) {
+                                    new PropagateBookmarkedMessageChangeTask(bytesOwnedIdentity, message, false).run();
+                                }
+                            }
+                        });
+                    }
+                    if (actionMode != null) {
+                        actionMode.finish();
+                    }
+                    return true;
                 }
                 return false;
             }
@@ -922,6 +961,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         return audioAttachmentServiceBinding;
     }
 
+    public DiscussionDelegate getDiscussionDelegate() {
+        return discussionDelegate;
+    }
+
     private void enterEditMode(@NonNull Message message) {
         if (message.jsonLocation != null) {
             // prevent editing location messages
@@ -1051,7 +1094,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
 
     @Override
-    protected void onNewIntent(final Intent intent) {
+    protected void onNewIntent(@NonNull final Intent intent) {
         super.onNewIntent(intent);
         handleIntent(intent);
     }
@@ -1430,43 +1473,20 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             final Discussion discussion = discussionViewModel.getDiscussion().getValue();
             if (discussion != null) {
                 App.runThread(() -> {
-                    final String title;
-                    if (discussion.title.isEmpty()) {
-                        title = getString(R.string.text_unnamed_discussion);
-                    } else {
-                        title = discussion.title;
-                    }
                     boolean canRemoteDelete;
                     if (discussion.discussionType == Discussion.TYPE_GROUP_V2) {
                         Group2 group2 = AppDatabase.getInstance().group2Dao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
-                        if (group2 != null) {
-                            canRemoteDelete = group2.ownPermissionRemoteDeleteAnything;
-                        } else {
-                            canRemoteDelete = false;
-                        }
+                        canRemoteDelete = group2 != null
+                                && group2.ownPermissionRemoteDeleteAnything
+                                && AppDatabase.getInstance().group2MemberDao().groupHasMembers(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
                     } else {
-                        canRemoteDelete = discussion.isNormal();
+                        canRemoteDelete = false;
                     }
-                    final AlertDialog.Builder builder;
-                    if (canRemoteDelete) {
-                        builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, R.style.CustomAlertDialog)
-                                .setTitle(R.string.dialog_title_delete_discussion)
-                                .setMessage(getString(R.string.dialog_message_delete_discussion, title))
-                                .setType(SecureDeleteEverywhereDialogBuilder.TYPE.DISCUSSION)
-                                .setDeleteCallback(deleteEverywhere -> {
-                                    App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, discussion.id, deleteEverywhere, false));
-                                    finishAndClearViewModel();
-                                });
-                    } else {
-                        builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                                .setTitle(R.string.dialog_title_delete_discussion)
-                                .setMessage(getString(R.string.dialog_message_delete_discussion, title))
-                                .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
-                                    App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, discussion.id, false, false));
-                                    finishAndClearViewModel();
-                                })
-                                .setNegativeButton(R.string.button_label_cancel, null);
-                    }
+                    final AlertDialog.Builder builder = new SecureDeleteEverywhereDialogBuilder(DiscussionActivity.this, SecureDeleteEverywhereDialogBuilder.Type.DISCUSSION, 1, canRemoteDelete, true)
+                            .setDeleteCallback(deletionChoice -> {
+                                App.runThread(new DeleteMessagesTask(discussion.id, deletionChoice, false));
+                                finishAndClearViewModel();
+                            });
                     new Handler(Looper.getMainLooper()).post(() -> builder.create().show());
                 });
             }
@@ -1809,9 +1829,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         }, 500);
     }
 
-    private void messageLongClicked(Message message, View messageView) {
+    private void messageLongClicked(@NonNull Message message, View messageView) {
         if (discussionViewModel.isSelectingForDeletion()) {
-            discussionViewModel.selectMessageId(message.id, message.isForwardable());
+            discussionViewModel.selectMessageId(message.id, message.isForwardable(), message.isBookmarkableAndDetailable() ? message.bookmarked : null);
         } else {
             if (discussionDelegate != null) {
                 int[] posRecyclerView = new int[2];
@@ -1824,9 +1844,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         }
     }
 
-    private void messageClicked(Message message) {
+    private void messageClicked(@NonNull Message message) {
         if (discussionViewModel.isSelectingForDeletion()) {
-            discussionViewModel.selectMessageId(message.id, message.isForwardable());
+            discussionViewModel.selectMessageId(message.id, message.isForwardable(), message.isBookmarkableAndDetailable() ? message.bookmarked : null);
         }
     }
 
@@ -1968,7 +1988,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         private boolean cancelScheduledScroll = false;
 
         private final LayoutInflater inflater;
-        private final RotateAnimation rotateAnimation;
         final Observer<List<Long>> selectedMessageIdsObserver;
 
         static final int COMPACT_MESSAGE_LINE_COUNT = 18;
@@ -1986,15 +2005,12 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         static final int FORWARDED_CHANGE_MASK = 1024;
         static final int LOCATION_CHANGE_MASK = 2048;
         static final int LINK_PREVIEW_MASK = 4096;
+        static final int BOOKMARKED_CHANGE_MASK = 8192;
 
         @SuppressLint("NotifyDataSetChanged")
         MessageListAdapter(Context context) {
             this.inflater = LayoutInflater.from(context);
             setHasStableIds(true);
-            rotateAnimation = new RotateAnimation(360f, 0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-            rotateAnimation.setInterpolator(new LinearInterpolator());
-            rotateAnimation.setRepeatCount(Animation.INFINITE);
-            rotateAnimation.setDuration(700);
             selectingForDeletion = false;
             selectedMessageIdsObserver = selectedMessageIds -> {
                 boolean wasSelectingForDeletion = selectingForDeletion;
@@ -2251,6 +2267,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             changesMask |= FORWARDED_CHANGE_MASK;
                         }
 
+                        if (oldItem.bookmarked != newItem.bookmarked) {
+                            changesMask |= BOOKMARKED_CHANGE_MASK;
+                        }
+
                         if (!Objects.equals(oldItem.reactions, newItem.reactions)) {
                             changesMask |= REACTIONS_CHANGE_MASK;
                         }
@@ -2450,9 +2470,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         @Override
         public void onViewAttachedToWindow(@NonNull final MessageViewHolder holder) {
             super.onViewAttachedToWindow(holder);
-            if (holder.shouldAnimateStatusImageView) {
-                holder.messageStatusImageView.startAnimation(rotateAnimation);
-            }
             if (holder.messageId == highlightOnBindMessageId) {
                 final long messageIdToBeHighlighted = highlightOnBindMessageId;
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -2589,33 +2606,35 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
                         switch (message.status) {
                             case Message.STATUS_SENT: {
-                                holder.shouldAnimateStatusImageView = false;
                                 holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_sent));
-                                holder.messageStatusImageView.clearAnimation();
                                 break;
                             }
                             case Message.STATUS_DELIVERED: {
-                                holder.shouldAnimateStatusImageView = false;
-                                holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_delivered));
-                                holder.messageStatusImageView.clearAnimation();
+                                holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_delivered_one));
                                 break;
                             }
                             case Message.STATUS_DELIVERED_AND_READ: {
-                                holder.shouldAnimateStatusImageView = false;
-                                holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_delivered_and_read));
-                                holder.messageStatusImageView.clearAnimation();
+                                holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_delivered_and_read_one));
+                                break;
+                            }
+                            case Message.STATUS_DELIVERED_ALL: {
+                                holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_delivered_all));
+                                break;
+                            }
+                            case Message.STATUS_DELIVERED_ALL_READ_ONE: {
+                                holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_delivered_all_read_one));
+                                break;
+                            }
+                            case Message.STATUS_DELIVERED_ALL_READ_ALL: {
+                                holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_delivered_all_read_all));
                                 break;
                             }
                             case Message.STATUS_UNDELIVERED: {
-                                holder.shouldAnimateStatusImageView = false;
                                 holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_undelivered));
-                                holder.messageStatusImageView.clearAnimation();
                                 break;
                             }
                             case Message.STATUS_SENT_FROM_ANOTHER_DEVICE: {
-                                holder.shouldAnimateStatusImageView = false;
                                 holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_sent_from_other_device));
-                                holder.messageStatusImageView.clearAnimation();
                                 break;
                             }
                             case Message.STATUS_UNPROCESSED:
@@ -2623,15 +2642,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             case Message.STATUS_PROCESSING:
                             default: {
                                 if (message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
-                                    holder.shouldAnimateStatusImageView = false;
                                     holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_sent));
-                                    holder.messageStatusImageView.clearAnimation();
                                 } else {
-                                    holder.shouldAnimateStatusImageView = true;
-                                    holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_sync));
-                                    if (holder.itemView.isAttachedToWindow()) {
-                                        holder.messageStatusImageView.startAnimation(rotateAnimation);
-                                    }
+                                    holder.messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_message_status_processing));
                                 }
                             }
                         }
@@ -2905,6 +2918,19 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     } else {
                         holder.forwardedBadge.setVisibility(View.GONE);
                     }
+                }
+            }
+
+            if ((changesMask & BOOKMARKED_CHANGE_MASK) != 0) {
+                if (message.messageType == Message.TYPE_INBOUND_MESSAGE
+                        || message.messageType == Message.TYPE_OUTBOUND_MESSAGE
+                        || message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE) {
+                    holder.bookmarked = message.bookmarked;
+                    if (!holder.bookmarked) {
+                        // reset the lastRemainingDisplayed timestamp to force recomputing the color and displaying the timer icon
+                        holder.lastRemainingDisplayed = -1;
+                    }
+                    holder.updateTimerTextView(System.currentTimeMillis());
                 }
             }
 
@@ -3197,7 +3223,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         }
                     }
 
-                    if (!message.isLocationMessage()) {
+                    if (!message.isLocationMessage() && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED) {
                         Utils.applyBodyWithSpans(holder.messageContentTextView, discussionViewModel.getDiscussion().getValue() == null ? null : discussionViewModel.getDiscussion().getValue().bytesOwnedIdentity, message, getHighlightPatternsForMessage(message), true, true);
                     }
 
@@ -3582,9 +3608,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                            holder.messageLinkPreviewDescription.setPadding(DipKt.toPx(8, DiscussionActivity.this), 0, DipKt.toPx(4, DiscussionActivity.this), 0);
                            constraintSet.applyTo(holder.messageLinkPreviewGroup);
                        }
-                        holder.messageLinkPreviewGroup.setOnClickListener(v -> {
-                                App.openLink(DiscussionActivity.this, uri);
-                        });
+                        holder.messageLinkPreviewGroup.setOnClickListener(v -> App.openLink(DiscussionActivity.this, uri));
                     } else {
                         holder.messageLinkPreviewGroup.setOnClickListener(null);
                     }
@@ -4126,7 +4150,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             private final TextView messageBottomTimestampTextView;
             private final View timestampSpacer;
             private final ImageView messageStatusImageView;
-            private boolean shouldAnimateStatusImageView;
             private final CheckBox messageSelectionCheckbox;
             private final View messageCheckboxCompensator;
             private final InitialView senderInitialView;
@@ -4191,7 +4214,9 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
             private Long expirationTimestamp;
             private boolean wipeOnly;
             private boolean readOnce;
+            private boolean bookmarked;
             private long lastRemainingDisplayed;
+            private boolean lastBookmarked;
             private Long callLogItemId;
             private String callCachedString;
             private int callCachedDuration;
@@ -4224,7 +4249,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
                                     && message.wipeStatus != Message.WIPE_STATUS_WIPED
                                     && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
-                                    && !message.isLocationMessage()) {
+                                    && !message.isLocationMessage()
+                                    && !locked) {
                                 enterEditMode(messages.get(getBindingAdapterPosition() - 1));
                                 return true;
                             }
@@ -4282,7 +4308,6 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 messageBottomTimestampTextView = itemView.findViewById(R.id.message_timestamp_bottom_text_view);
                 timestampSpacer = itemView.findViewById(R.id.timestamp_spacer);
                 messageStatusImageView = itemView.findViewById(R.id.message_status_image_view);
-                shouldAnimateStatusImageView = false;
 
                 if (messageContentCardView != null && messageContentTextView != null && messageBottomTimestampTextView != null) {
                     messageContentTextView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
@@ -4435,17 +4460,21 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 this.messageId = messageId;
                 App.runThread(() -> {
                     MessageExpiration expiration = AppDatabase.getInstance().messageExpirationDao().get(messageId);
-                    if (expiration != null) {
-                        this.expirationTimestamp = expiration.expirationTimestamp;
-                        this.wipeOnly = expiration.wipeOnly;
-                        this.lastRemainingDisplayed = -1;
-                        messagesWithTimerMap.put(messageId, this);
-                    } else {
-                        this.expirationTimestamp = null;
-                        this.wipeOnly = false;
-                    }
-                    this.readOnce = readOnce;
                     runOnUiThread(() -> {
+                        if (this.messageId != messageId) {
+                            return;
+                        }
+
+                        if (expiration != null) {
+                            this.expirationTimestamp = expiration.expirationTimestamp;
+                            this.wipeOnly = expiration.wipeOnly;
+                            this.lastRemainingDisplayed = -1;
+                            messagesWithTimerMap.put(messageId, this);
+                        } else {
+                            this.expirationTimestamp = null;
+                            this.wipeOnly = false;
+                        }
+                        this.readOnce = readOnce;
                         if (wipeOnly && !screenShotBlockedForEphemeral) {
                             screenShotBlockedForEphemeral = true;
                             Window window = getWindow();
@@ -4481,97 +4510,118 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 if (timerTextView == null) {
                     return;
                 }
-                if (expirationTimestamp != null) {
-                    if (timerTextView.getVisibility() != View.VISIBLE) {
-                        LayoutTransition lt = messageRootView.getLayoutTransition();
-                        messageRootView.setLayoutTransition(null);
-                        timerTextView.setVisibility(View.VISIBLE);
-                        messageRootView.setLayoutTransition(lt);
-                    }
-                    long remaining = (expirationTimestamp - timestamp) / 1000;
-                    int color = 0;
-                    try {
-                        if (remaining < 0) {
-                            remaining = 0;
+                // this try is here only to have a finally for handling bookmarks
+                try {
+                    if (expirationTimestamp != null) {
+                        if (timerTextView.getVisibility() != View.VISIBLE) {
+                            LayoutTransition lt = messageRootView.getLayoutTransition();
+                            messageRootView.setLayoutTransition(null);
+                            timerTextView.setVisibility(View.VISIBLE);
+                            messageRootView.setLayoutTransition(lt);
                         }
-                        if (remaining < 60) {
-                            if (remaining == lastRemainingDisplayed) {
-                                return;
+                        long remaining = (expirationTimestamp - timestamp) / 1000;
+                        int color = 0;
+                        try {
+                            if (remaining < 0) {
+                                remaining = 0;
                             }
-                            timerTextView.setText(getString(R.string.text_timer_s, remaining));
-                            if (lastRemainingDisplayed < 0 || lastRemainingDisplayed >= 60) {
-                                color = ContextCompat.getColor(DiscussionActivity.this, R.color.red);
-                            }
-                        } else if (remaining < 3600) {
-                            if (remaining / 60 == lastRemainingDisplayed / 60) {
-                                return;
-                            }
-                            timerTextView.setText(getString(R.string.text_timer_m, remaining / 60));
-                            if (lastRemainingDisplayed < 0 || lastRemainingDisplayed >= 3600) {
-                                color = ContextCompat.getColor(DiscussionActivity.this, R.color.orange);
-                            }
-                        } else if (remaining < 86400) {
-                            if (remaining / 3600 == lastRemainingDisplayed / 3600) {
-                                return;
-                            }
-                            timerTextView.setText(getString(R.string.text_timer_h, remaining / 3600));
-                            if (lastRemainingDisplayed < 0 || lastRemainingDisplayed >= 86400) {
-                                color = ContextCompat.getColor(DiscussionActivity.this, R.color.greyTint);
-                            }
-                        } else if (remaining < 31536000) {
-                            if (remaining / 86400 == lastRemainingDisplayed / 86400) {
-                                return;
-                            }
-                            timerTextView.setText(getString(R.string.text_timer_d, remaining / 86400));
-                            if (lastRemainingDisplayed < 0 || lastRemainingDisplayed >= 31536000) {
-                                color = ContextCompat.getColor(DiscussionActivity.this, R.color.lightGrey);
-                            }
-                        } else {
-                            if (remaining / 31536000 == lastRemainingDisplayed / 31536000) {
-                                return;
-                            }
-                            timerTextView.setText(getString(R.string.text_timer_y, remaining / 31536000));
-                            if (lastRemainingDisplayed < 0) {
-                                color = ContextCompat.getColor(DiscussionActivity.this, R.color.lightGrey);
-                            }
-                        }
-                    } finally {
-                        lastRemainingDisplayed = remaining;
-                        if (color != 0) {
-                            if (readOnce) {
-                                timerTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.ic_burn_small, 0, 0);
-                                timerTextView.setTextColor(ContextCompat.getColor(DiscussionActivity.this, R.color.red));
+                            if (remaining < 60) {
+                                if (remaining == lastRemainingDisplayed) {
+                                    return;
+                                }
+                                timerTextView.setText(getString(R.string.text_timer_s, remaining));
+                                if (lastRemainingDisplayed < 0 || lastRemainingDisplayed >= 60) {
+                                    color = ContextCompat.getColor(DiscussionActivity.this, R.color.red);
+                                }
+                            } else if (remaining < 3600) {
+                                if (remaining / 60 == lastRemainingDisplayed / 60) {
+                                    return;
+                                }
+                                timerTextView.setText(getString(R.string.text_timer_m, remaining / 60));
+                                if (lastRemainingDisplayed < 0 || lastRemainingDisplayed >= 3600) {
+                                    color = ContextCompat.getColor(DiscussionActivity.this, R.color.orange);
+                                }
+                            } else if (remaining < 86400) {
+                                if (remaining / 3600 == lastRemainingDisplayed / 3600) {
+                                    return;
+                                }
+                                timerTextView.setText(getString(R.string.text_timer_h, remaining / 3600));
+                                if (lastRemainingDisplayed < 0 || lastRemainingDisplayed >= 86400) {
+                                    color = ContextCompat.getColor(DiscussionActivity.this, R.color.greyTint);
+                                }
+                            } else if (remaining < 31536000) {
+                                if (remaining / 86400 == lastRemainingDisplayed / 86400) {
+                                    return;
+                                }
+                                timerTextView.setText(getString(R.string.text_timer_d, remaining / 86400));
+                                if (lastRemainingDisplayed < 0 || lastRemainingDisplayed >= 31536000) {
+                                    color = ContextCompat.getColor(DiscussionActivity.this, R.color.lightGrey);
+                                }
                             } else {
-                                timerTextView.setTextColor(color);
-                                Drawable drawable;
-                                if (wipeOnly) {
-                                    drawable = ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_eye_small);
-                                } else {
-                                    drawable = ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_timer_small);
+                                if (remaining / 31536000 == lastRemainingDisplayed / 31536000) {
+                                    return;
                                 }
-                                if (drawable != null) {
-                                    drawable = drawable.mutate();
-                                    drawable.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
-                                    timerTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(null, drawable, null, null);
+                                timerTextView.setText(getString(R.string.text_timer_y, remaining / 31536000));
+                                if (lastRemainingDisplayed < 0) {
+                                    color = ContextCompat.getColor(DiscussionActivity.this, R.color.lightGrey);
+                                }
+                            }
+                        } finally {
+                            lastRemainingDisplayed = remaining;
+                            if (color != 0) {
+                                if (readOnce) {
+                                    if (!bookmarked) {
+                                        timerTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.ic_burn_small, 0, 0);
+                                    }
+                                    timerTextView.setTextColor(ContextCompat.getColor(DiscussionActivity.this, R.color.red));
+                                } else {
+                                    timerTextView.setTextColor(color);
+                                    if (!bookmarked) { // do not change the bookmark icon color ;)
+                                        Drawable drawable;
+                                        if (wipeOnly) {
+                                            drawable = ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_eye_small);
+                                        } else {
+                                            drawable = ContextCompat.getDrawable(DiscussionActivity.this, R.drawable.ic_timer_small);
+                                        }
+                                        if (drawable != null) {
+                                            drawable = drawable.mutate();
+                                            drawable.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+                                            timerTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(null, drawable, null, null);
+                                        }
+                                    }
                                 }
                             }
                         }
+                    } else if (readOnce) {
+                        if (timerTextView.getVisibility() != View.VISIBLE) {
+                            LayoutTransition lt = messageRootView.getLayoutTransition();
+                            messageRootView.setLayoutTransition(null);
+                            timerTextView.setVisibility(View.VISIBLE);
+                            messageRootView.setLayoutTransition(lt);
+                        }
+                        timerTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.ic_burn_small, 0, 0);
+                        timerTextView.setText(null);
+                    } else if (!bookmarked) {
+                        if (timerTextView.getVisibility() != View.GONE) {
+                            LayoutTransition lt = messageRootView.getLayoutTransition();
+                            messageRootView.setLayoutTransition(null);
+                            timerTextView.setVisibility(View.GONE);
+                            messageRootView.setLayoutTransition(lt);
+                        }
                     }
-                } else if (readOnce) {
-                    if (timerTextView.getVisibility() != View.VISIBLE) {
-                        LayoutTransition lt = messageRootView.getLayoutTransition();
-                        messageRootView.setLayoutTransition(null);
-                        timerTextView.setVisibility(View.VISIBLE);
-                        messageRootView.setLayoutTransition(lt);
-                    }
-                    timerTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.ic_burn_small, 0, 0);
-                    timerTextView.setText(null);
-                } else {
-                    if (timerTextView.getVisibility() != View.GONE) {
-                        LayoutTransition lt = messageRootView.getLayoutTransition();
-                        messageRootView.setLayoutTransition(null);
-                        timerTextView.setVisibility(View.GONE);
-                        messageRootView.setLayoutTransition(lt);
+                } finally {
+                    if (!readOnce && bookmarked != lastBookmarked) {
+                        lastBookmarked = bookmarked;
+                        if (bookmarked) {
+                            if (timerTextView.getVisibility() != View.VISIBLE) {
+                                timerTextView.setText(null);
+                                LayoutTransition lt = messageRootView.getLayoutTransition();
+                                messageRootView.setLayoutTransition(null);
+                                timerTextView.setVisibility(View.VISIBLE);
+                                messageRootView.setLayoutTransition(lt);
+                            }
+                            timerTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.ic_star_small, 0, 0);
+                        }
                     }
                 }
             }
@@ -4677,10 +4727,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     if (selectingForDeletion) {
                         discussionViewModel.unselectMessageId(messageId);
                     }
-                    Discussion discussion = discussionViewModel.getDiscussion().getValue();
-                    if (discussion != null) {
-                        App.runThread(new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(messageId), false));
-                    }
+                    App.runThread(new DeleteMessagesTask(Collections.singletonList(messageId), SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL));
                 } else if (id == R.id.sender_initial_view) {
                     Discussion discussion = discussionViewModel.getDiscussion().getValue();
                     if (discussion != null) {
@@ -4853,7 +4900,8 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
 
         void initiateMessageForward(long messageId, Runnable openDialogCallback);
 
-        void selectMessage(long messageId, boolean forwardable);
+        // bookmarked == null means message is not bookmarkable
+        void selectMessage(long messageId, boolean forwardable, @Nullable Boolean bookmarked);
 
         void setAdditionalBottomPadding(int paddingPx);
     }

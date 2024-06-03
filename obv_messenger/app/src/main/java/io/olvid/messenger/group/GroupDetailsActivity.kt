@@ -77,6 +77,7 @@ import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.ContactGroupJoinDao.ContactAndTimestamp
 import io.olvid.messenger.databases.dao.PendingGroupMemberDao.PendingGroupMemberAndContact
@@ -92,7 +93,6 @@ import io.olvid.messenger.group.EditOwnedGroupDetailsDialogFragment.Companion.ne
 import io.olvid.messenger.group.GroupDetailsActivity.GroupMembersAdapter.GroupMemberViewHolder
 import io.olvid.messenger.group.GroupDetailsActivity.PendingGroupMembersAdapter.PendingGroupMemberViewHolder
 import io.olvid.messenger.main.MainActivity
-import java.util.Arrays
 
 class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotificationListener {
     private val groupDetailsViewModel: GroupDetailsViewModel by viewModels()
@@ -123,6 +123,22 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(layout.activity_group_details)
+        onBackPressed {
+            val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
+                FULL_SCREEN_IMAGE_FRAGMENT_TAG
+            )
+            if (fullScreenImageFragment != null) {
+                supportFragmentManager.beginTransaction()
+                    .setCustomAnimations(0, anim.fade_out)
+                    .remove(fullScreenImageFragment)
+                    .commit()
+            } else {
+                if (isTaskRoot) {
+                    App.showMainActivityTab(this, MainActivity.GROUPS_TAB)
+                }
+                finish()
+            }
+        }
         val actionBar = supportActionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
         mainConstraintLayout = findViewById(id.group_details_main_constraint_layout)
@@ -533,11 +549,10 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 val isTrusted =
                     userInfo[EngineNotifications.NEW_GROUP_PHOTO_IS_TRUSTED_KEY] as Boolean
                 val group = groupDetailsViewModel.group?.value
-                if (!isTrusted && group != null && Arrays.equals(
-                        group.bytesGroupOwnerAndUid,
+                if (!isTrusted && group != null && group.bytesGroupOwnerAndUid.contentEquals(
                         bytesGroupUid
                     )
-                    && Arrays.equals(group.bytesOwnedIdentity, bytesOwnedIdentity)
+                    && group.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)
                 ) {
                     runOnUiThread { displayGroupDetails(group) }
                 }
@@ -549,8 +564,8 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 val bytesGroupUid =
                     userInfo[EngineNotifications.NEW_GROUP_PUBLISHED_DETAILS_BYTES_GROUP_OWNER_AND_UID_KEY] as ByteArray?
                 val group = groupDetailsViewModel.group?.value
-                if (group != null && Arrays.equals(group.bytesGroupOwnerAndUid, bytesGroupUid)
-                    && Arrays.equals(group.bytesOwnedIdentity, bytesOwnedIdentity)
+                if (group != null && group.bytesGroupOwnerAndUid.contentEquals(bytesGroupUid)
+                    && group.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)
                 ) {
                     runOnUiThread { displayGroupDetails(group) }
                 }
@@ -654,23 +669,6 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         return super.dispatchTouchEvent(event)
     }
 
-    override fun onBackPressed() {
-        val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
-            FULL_SCREEN_IMAGE_FRAGMENT_TAG
-        )
-        if (fullScreenImageFragment != null) {
-            supportFragmentManager.beginTransaction()
-                .setCustomAnimations(0, anim.fade_out)
-                .remove(fullScreenImageFragment)
-                .commit()
-        } else {
-            if (isTaskRoot) {
-                App.showMainActivityTab(this, MainActivity.GROUPS_TAB)
-            }
-            finish()
-        }
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (groupIsOwned) {
             menuInflater.inflate(R.menu.menu_group_details_owned, menu)
@@ -713,7 +711,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
                 return true
             }
             id.action_call -> {
@@ -783,7 +781,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                                         group.bytesGroupOwnerAndUid
                                     )
                                     App.toast(string.toast_message_group_disbanded, Toast.LENGTH_SHORT)
-                                    onBackPressed()
+                                    onBackPressedDispatcher.onBackPressed()
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                 }
@@ -813,7 +811,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                                                 string.toast_message_group_disbanded,
                                                 Toast.LENGTH_SHORT
                                             )
-                                            onBackPressed()
+                                            onBackPressedDispatcher.onBackPressed()
                                         } catch (e: Exception) {
                                             e.printStackTrace()
                                         }
@@ -842,7 +840,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                                 AppSingleton.getEngine()
                                     .leaveGroup(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
                                 App.toast(string.toast_message_leaving_group, Toast.LENGTH_SHORT)
-                                onBackPressed()
+                                onBackPressedDispatcher.onBackPressed()
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
@@ -910,7 +908,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                     StringUtils.getNiceDateString(this@GroupDetailsActivity, contact.timestamp)
                 )
                 holder.groupMemberInitialView.setContact(contact.contact)
-                if (Arrays.equals(contact.contact.bytesContactIdentity, byteGroupOwnerIdentity)) {
+                if (contact.contact.bytesContactIdentity.contentEquals(byteGroupOwnerIdentity)) {
                     holder.groupMemberOwnerCrownImageView.visibility = View.VISIBLE
                 } else {
                     holder.groupMemberOwnerCrownImageView.visibility = View.GONE

@@ -28,19 +28,21 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.StringUtils2
-import io.olvid.messenger.customClasses.formatSingleLineMarkdown
 import io.olvid.messenger.customClasses.fullTextSearchEscape
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.GlobalSearchTokenizer
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndOrigin
+import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
-import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class GlobalSearchViewModel : ViewModel() {
     companion object {
@@ -55,13 +57,16 @@ class GlobalSearchViewModel : ViewModel() {
     var contactsFound by mutableStateOf<List<Contact>?>(null)
     var groupsFound by mutableStateOf<List<SearchableDiscussion>?>(null)
     var otherDiscussionsFound by mutableStateOf<List<SearchableDiscussion>?>(null)
-    var messagesFound by mutableStateOf<List<Message>?>(null)
+    var messagesFound by mutableStateOf<List<DiscussionAndMessage>?>(null)
+    var bookmarksFound by mutableStateOf<List<DiscussionAndMessage>?>(null)
     var fylesFound by mutableStateOf<List<FyleAndOrigin>?>(null)
 
-    var searching = derivedStateOf { currentSearchTask != null }
+    val searching by derivedStateOf { currentSearchTask != null }
     var noResults = derivedStateOf {
-        contactsFound.isNullOrEmpty() && otherDiscussionsFound.isNullOrEmpty() && messagesFound.isNullOrEmpty() && groupsFound.isNullOrEmpty() && fylesFound.isNullOrEmpty()
+        contactsFound.isNullOrEmpty() && groupsFound.isNullOrEmpty() && otherDiscussionsFound.isNullOrEmpty() && messagesFound.isNullOrEmpty() && bookmarksFound.isNullOrEmpty() && fylesFound.isNullOrEmpty()
     }
+    var messageLimitReachedCount : String? by mutableStateOf(null)
+    var attachmentLimitReachedCount : String? by mutableStateOf(null)
 
     fun search(bytesOwnedIdentity: ByteArray, text: String) {
         filter = text
@@ -76,9 +81,12 @@ class GlobalSearchViewModel : ViewModel() {
         currentSearchTask = null
 
         messagesFound = null
+        bookmarksFound = null
         contactsFound = null
         groupsFound = null
         otherDiscussionsFound = null
+        messageLimitReachedCount = null
+        attachmentLimitReachedCount = null
     }
 
     @Composable
@@ -105,19 +113,19 @@ class GlobalSearchViewModel : ViewModel() {
     }
 
     @Composable
-    fun truncateMessageBody(body: String): AnnotatedString {
+    fun truncateMessageBody(body: String): String {
          filterRegexes?.let {
             val ranges = StringUtils2.computeHighlightRanges(body, it)
             if (ranges.isNotEmpty()) {
                 val pos = body.lastIndexOf("\n", ranges.first().first)
+                    .coerceAtLeast(ranges.first().first - 16)
                     .coerceAtLeast(body.lastIndexOf("\r", ranges.first().first)) + 1
-
                 if (pos > 0) {
-                    return ("…" + body.substring(pos)).formatSingleLineMarkdown()
+                    return ("…" + body.substring(pos))
                 }
             }
         }
-        return body.formatSingleLineMarkdown()
+        return body
     }
 
     inner class SearchTask(val bytesOwnedIdentity: ByteArray, val text: String) {
@@ -173,12 +181,36 @@ class GlobalSearchViewModel : ViewModel() {
             }
             messagesFound = messages
 
+            messageLimitReachedCount =
+                if (messages.size >= MESSAGE_SEARCH_LIMIT) {
+                    val count = AppDatabase.getInstance().messageDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery)
+                    if (count > MESSAGE_SEARCH_LIMIT) {
+                        count.toString()
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+
             val fyles = AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
                 .globalSearch(bytesOwnedIdentity, tokenizedQuery, ATTACHMENT_SEARCH_LIMIT)
             if (cancelled) {
                 return
             }
             fylesFound = fyles
+
+            attachmentLimitReachedCount =
+                if (fyles.size >= ATTACHMENT_SEARCH_LIMIT) {
+                    val count = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery)
+                    if (count > ATTACHMENT_SEARCH_LIMIT) {
+                        count.toString()
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
 
             if (!cancelled) {
                 currentSearchTask = null

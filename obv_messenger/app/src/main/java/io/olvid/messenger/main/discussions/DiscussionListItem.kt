@@ -21,11 +21,20 @@ package io.olvid.messenger.main.discussions
 
 import androidx.annotation.ColorInt
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,19 +47,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -58,7 +68,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,6 +79,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.main.InitialView
+import sh.calvin.reorderable.ReorderableItemScope
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -89,38 +99,18 @@ fun DiscussionListItem(
     locationsShared: Boolean,
     attachmentCount: Int,
     onClick: () -> Unit,
-    isPreDiscussion :Boolean,
-    onMarkAllDiscussionMessagesRead: () -> Unit,
-    onMarkDiscussionAsUnread: () -> Unit,
-    onPinDiscussion: (Boolean) -> Unit,
-    onMuteDiscussion: (Boolean) -> Unit,
-    onDeleteDiscussion: () -> Unit,
-    renameActionName: String,
-    onRenameDiscussion: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onLongClick: () -> Unit,
+    selected: Boolean = false,
+    reorderableItemScope: ReorderableItemScope? = null,
+    onDragStopped: () -> Unit,
 ) {
-    Box(modifier = Modifier.background(colorResource(id = R.color.almostWhite))) {
-        // menu
-        var menuOpened by remember { mutableStateOf(false) }
-        if (!isPreDiscussion) {
-            DiscussionMenu(
-                menuOpened = menuOpened,
-                onDismissRequest = { menuOpened = false },
-                unread = unread,
-                unreadCount = unreadCount,
-                pinned = pinned,
-                muted = muted,
-                onOpenSettings = onOpenSettings,
-                renameActionName = renameActionName,
-                onRenameDiscussion = onRenameDiscussion,
-                onDeleteDiscussion = onDeleteDiscussion,
-                onMarkAllDiscussionMessagesRead = onMarkAllDiscussionMessagesRead,
-                onMarkDiscussionAsUnread = onMarkDiscussionAsUnread,
-                onPinDiscussion = onPinDiscussion,
-                onMuteDiscussion = onMuteDiscussion,
+    Box(
+        modifier = Modifier.background(
+            if (selected) colorResource(id = R.color.greySubtleOverlay) else colorResource(
+                id = R.color.almostWhite
             )
-        }
-
+        )
+    ) {
         // custom background
         backgroundImageUrl?.let { model ->
             AsyncImage(
@@ -139,7 +129,11 @@ fun DiscussionListItem(
                 .fillMaxWidth()
                 .combinedClickable(
                     onClick = onClick,
-                    onLongClick = { menuOpened = !isPreDiscussion }, // never open the menu for a preDiscussion, otherwise after the invitation is accepted, the menu is shown
+                    onLongClick = onLongClick,
+                    interactionSource = remember {
+                        MutableInteractionSource()
+                    },
+                    indication = rememberRipple().takeIf { selected.not() }
                 ), verticalAlignment = CenterVertically
         ) {
             // custom color
@@ -151,20 +145,47 @@ fun DiscussionListItem(
             )
 
             // InitialView
-            InitialView(
-                modifier = Modifier
-                    .padding(
-                        top = 16.dp,
-                        start = 8.dp,
-                        end = 16.dp,
-                        bottom = 16.dp
+            Box {
+                val alpha: Float by animateFloatAsState(
+                    targetValue = if (selected) 0f else 1f,
+                    animationSpec = tween(), label = "alpha"
+                )
+                InitialView(
+                    modifier = Modifier
+                        .padding(
+                            top = 16.dp,
+                            start = 8.dp,
+                            end = 16.dp,
+                            bottom = 16.dp
+                        )
+                        .alpha(alpha)
+                        .requiredSize(56.dp),
+                    initialViewSetup = initialViewSetup,
+                    unreadMessages = unreadCount > 0 || unread,
+                    muted = muted,
+                    locked = locked,
+                )
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = selected,
+                    enter = fadeIn() + scaleIn(),
+                    exit = fadeOut() + scaleOut()
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .padding(
+                                top = 16.dp,
+                                start = 8.dp,
+                                end = 16.dp,
+                                bottom = 16.dp
+                            )
+                            .background(Color.Gray, CircleShape)
+                            .padding(8.dp)
+                            .requiredSize(40.dp),
+                        painter = painterResource(id = R.drawable.ic_check),
+                        contentDescription = "selected"
                     )
-                    .requiredSize(56.dp),
-                initialViewSetup = initialViewSetup,
-                unreadMessages = unreadCount > 0 || unread,
-                muted = muted,
-                locked = locked,
-            )
+                }
+            }
 
             // content
             Column(
@@ -248,6 +269,23 @@ fun DiscussionListItem(
                             color = colorResource(id = R.color.alwaysWhite)
                         )
                     }
+                    AnimatedVisibility(
+                        visible = reorderableItemScope != null,
+                        enter = slideInHorizontally { it / 2 },
+                        exit = slideOutHorizontally { -it / 2 }) {
+                        reorderableItemScope?.let {
+                            IconButton(
+                                modifier = with(reorderableItemScope) {
+                                    Modifier.draggableHandle(onDragStopped = {
+                                        onDragStopped()
+                                    })
+                                },
+                                onClick = {},
+                            ) {
+                                Icon(modifier = Modifier.requiredSize(24.dp), painter = painterResource(id = R.drawable.ic_drag_handle), contentDescription = "Reorder")
+                            }
+                        }
+                    }
                 }
 
                 AnimatedVisibility(visible = attachmentCount > 0) {
@@ -279,89 +317,6 @@ fun DiscussionListItem(
     }
 }
 
-@Composable
-fun DiscussionMenu(
-    menuOpened: Boolean,
-    onDismissRequest: () -> Unit,
-    pinned: Boolean,
-    muted: Boolean,
-    unread: Boolean,
-    unreadCount: Int,
-    onMarkAllDiscussionMessagesRead: () -> Unit,
-    onMarkDiscussionAsUnread: () -> Unit,
-    onPinDiscussion: (Boolean) -> Unit,
-    onMuteDiscussion: (Boolean) -> Unit,
-    onDeleteDiscussion: () -> Unit,
-    renameActionName: String,
-    onRenameDiscussion: () -> Unit,
-    onOpenSettings: () -> Unit,) {
-    DropdownMenu(expanded = menuOpened, onDismissRequest = onDismissRequest) {
-        // pin
-        DropdownMenuItem(onClick = {
-            onPinDiscussion(
-                pinned.not()
-            )
-            onDismissRequest()
-        }) {
-            Text(text = stringResource(id = if (pinned) R.string.menu_action_discussion_unpin else R.string.menu_action_discussion_pin))
-        }
-        // mute
-        DropdownMenuItem(onClick = {
-            onMuteDiscussion(
-                muted.not()
-            )
-            onDismissRequest()
-        }) {
-            Text(text = stringResource(id = if (muted) R.string.menu_action_unmute_notifications else R.string.menu_action_mute_notifications))
-        }
-        // mark read/unread
-        if (unread || unreadCount > 0) {
-            DropdownMenuItem(onClick = {
-                onMarkAllDiscussionMessagesRead()
-                onDismissRequest()
-            }) {
-                Text(text = stringResource(id = R.string.menu_action_discussion_mark_as_read))
-            }
-        } else {
-            DropdownMenuItem(onClick = {
-                onMarkDiscussionAsUnread()
-                onDismissRequest()
-            }) {
-                Text(text = stringResource(id = R.string.menu_action_discussion_mark_as_unread))
-            }
-        }
-
-        // rename
-        DropdownMenuItem(onClick = {
-            onRenameDiscussion()
-            onDismissRequest()
-        }) {
-            Text(text = renameActionName)
-        }
-
-        // settings
-        DropdownMenuItem(onClick = {
-            onOpenSettings()
-            onDismissRequest()
-        }) {
-            Text(text = stringResource(id = R.string.menu_action_discussion_settings))
-        }
-
-        //delete
-        DropdownMenuItem(onClick = {
-            onDeleteDiscussion()
-            onDismissRequest()
-        }) {
-            Text(
-                text = stringResource(id = R.string.menu_action_delete_discussion),
-                color = colorResource(
-                    id = R.color.red
-                )
-            )
-        }
-    }
-}
-
 @Preview
 @Composable
 private fun DiscussionListItemPreview() {
@@ -378,17 +333,11 @@ private fun DiscussionListItemPreview() {
             locked = false,
             pinned = true,
             locationsShared = true,
-            isPreDiscussion = false,
             attachmentCount = 3,
             onClick = {},
-            onPinDiscussion = {},
-            onMuteDiscussion = {},
-            onMarkDiscussionAsUnread = {},
-            onMarkAllDiscussionMessagesRead = {},
-            onDeleteDiscussion = {},
-            onOpenSettings = {},
-            renameActionName = "Rename",
-            onRenameDiscussion = {},
-        )
+            onLongClick = {},
+            selected = true,
+            onDragStopped = {},
+            )
     }
 }

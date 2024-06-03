@@ -41,6 +41,14 @@ import io.olvid.messenger.customClasses.StringUtils;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[]{
+            new Migration(67, 68) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 67 TO 68");
+
+                    database.execSQL("ALTER TABLE `message_table` ADD COLUMN `bookmarked` INTEGER NOT NULL DEFAULT 0");
+                }
+            },
             new Migration(66, 67) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

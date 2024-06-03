@@ -37,6 +37,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -887,7 +888,7 @@ public class AndroidNotificationManager {
             }
         }
 
-        if (discussionNotification == null || discussionNotification.messageNotifications == null || discussionNotification.messageNotifications.size() == 0) {
+        if (discussionNotification == null || discussionNotification.messageNotifications == null || discussionNotification.messageNotifications.isEmpty()) {
             return;
         }
 
@@ -1197,7 +1198,7 @@ public class AndroidNotificationManager {
                 }
             }
 
-            if (messageContent.length() == 0) {
+            if (messageContent.isEmpty()) {
                 messageContent = App.getContext().getString(R.string.your_message);
             }
             if (jsonMessageReactionsNotification.reactions.size() == 1) {
@@ -1932,9 +1933,10 @@ public class AndroidNotificationManager {
         return (int) (0xffffff & invitationDialogUuid.getLeastSignificantBits()) | 0x1000000;
     }
 
-    private static int getGroupNotificationId(long discussionId) {
-        return (int) (0xffffff & discussionId) | 0x2000000;
-    }
+    // no longer used
+    //    private static int getGroupNotificationId(long discussionId) {
+    //        return (int) (0xffffff & discussionId) | 0x2000000;
+    //    }
 
     private static int getNeutralNotificationId() {
         return 0x3000000;
@@ -2176,6 +2178,7 @@ public class AndroidNotificationManager {
                 this.content = content;
             }
 
+            /** @noinspection ComparatorMethodParameterNotUsed*/
             @Override
             public int compareTo(@NonNull JsonPojoMessageNotification other) {
                 if (timestamp > other.timestamp) {
@@ -2187,6 +2190,7 @@ public class AndroidNotificationManager {
 
             @JsonIgnore
             NotificationCompat.MessagingStyle.Message getMessage() {
+                SpannableStringBuilder text = (content == null) ? new SpannableStringBuilder() : Markdown.formatMarkdown(SpannableString.valueOf(content));
                 if (senderByteIdentity != null && sender != null) {
                     InitialView initialView = new InitialView(App.getContext());
                     if (senderPhotoUrl == null) {
@@ -2204,9 +2208,9 @@ public class AndroidNotificationManager {
                             .setIcon(IconCompat.createWithBitmap(personIcon))
                             .build();
 
-                    return new NotificationCompat.MessagingStyle.Message(Markdown.formatMarkdown(SpannableString.valueOf(content)), timestamp, person);
+                    return new NotificationCompat.MessagingStyle.Message(text, timestamp, person);
                 } else {
-                    return new NotificationCompat.MessagingStyle.Message(Markdown.formatMarkdown(SpannableString.valueOf(content)), timestamp, (Person) null);
+                    return new NotificationCompat.MessagingStyle.Message(text, timestamp, (Person) null);
                 }
             }
         }

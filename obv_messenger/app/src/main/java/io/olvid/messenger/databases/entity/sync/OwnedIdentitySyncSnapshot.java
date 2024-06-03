@@ -122,7 +122,7 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
             }
             ownedIdentitySyncSnapshot.pinned_discussions.add(new ObvBytesKey(discussionIdentifier.encode().getBytes()));
         }
-        ownedIdentitySyncSnapshot.pinned_sorted = false;
+        ownedIdentitySyncSnapshot.pinned_sorted = true;
 
         ownedIdentitySyncSnapshot.domain = DEFAULT_DOMAIN;
         return ownedIdentitySyncSnapshot;
@@ -169,7 +169,7 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
 
         // pinned
         if (domain.contains(PINNED) && pinned_discussions != null) {
-            // pinned sorted is ignored on Android (for now)
+            int pinnedIndex = 1;
             for (ObvBytesKey discussionKey : pinned_discussions) {
                 try {
                     ObvSyncAtom.DiscussionIdentifier discussionIdentifier = ObvSyncAtom.DiscussionIdentifier.of(new Encoded(discussionKey.getBytes()));
@@ -193,7 +193,7 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
                         }
                     }
                     if (discussion != null) {
-                        db.discussionDao().updatePinned(discussion.id, true);
+                        db.discussionDao().updatePinned(discussion.id, pinnedIndex++);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

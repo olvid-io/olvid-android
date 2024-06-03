@@ -41,7 +41,7 @@ class PropagatePinnedDiscussionsChangeTask(private val bytesOwnedIdentity : Byte
                             discussion.bytesDiscussionIdentifier
                         )
                     }
-            AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createPinnedDiscussionsChange(discussionIdentifiers, false))
+            AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createPinnedDiscussionsChange(discussionIdentifiers, true))
         } catch (e : Exception) {
             e.printStackTrace()
         }

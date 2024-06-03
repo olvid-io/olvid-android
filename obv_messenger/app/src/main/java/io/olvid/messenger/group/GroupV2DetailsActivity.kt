@@ -93,6 +93,7 @@ import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.Group2MemberDao.Group2MemberOrPending
 import io.olvid.messenger.databases.entity.Contact
@@ -107,7 +108,6 @@ import io.olvid.messenger.group.GroupTypeModel.GroupType.SIMPLE
 import io.olvid.messenger.group.GroupV2DetailsActivity.GroupMembersAdapter.GroupMemberViewHolder
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.settings.SettingsActivity
-import java.util.Arrays
 
 class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, OnClickListener {
     private val groupDetailsViewModel: GroupV2DetailsViewModel by viewModels()
@@ -145,6 +145,23 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(layout.activity_group_v2_details)
+        onBackPressed {
+            val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
+                FULL_SCREEN_IMAGE_FRAGMENT_TAG
+            )
+            if (fullScreenImageFragment != null) {
+                supportFragmentManager.beginTransaction()
+                    .setCustomAnimations(0, anim.fade_out)
+                    .remove(fullScreenImageFragment)
+                    .commit()
+            } else if (editingMembers) {
+                if (!groupDetailsViewModel.discardGroupEdits()) {
+                    finish()
+                }
+            } else {
+                finish()
+            }
+        }
         val actionBar = supportActionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
         mainConstraintLayout = findViewById(id.group_details_main_constraint_layout)
@@ -598,7 +615,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val itemId = item.itemId
         if (itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
             return true
         } else if (itemId == id.action_call) {
             val group = groupDetailsViewModel.group.value ?: return true
@@ -665,7 +682,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                                     group.bytesGroupIdentifier
                                 )
                                 App.toast(string.toast_message_group_disbanded, Toast.LENGTH_SHORT)
-                                onBackPressed()
+                                onBackPressedDispatcher.onBackPressed()
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
@@ -692,7 +709,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                                                 string.toast_message_group_disbanded,
                                                 Toast.LENGTH_SHORT
                                             )
-                                            onBackPressed()
+                                            onBackPressedDispatcher.onBackPressed()
                                         } catch (e: Exception) {
                                             e.printStackTrace()
                                         }
@@ -759,7 +776,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                             AppSingleton.getEngine()
                                 .leaveGroupV2(group.bytesOwnedIdentity, group.bytesGroupIdentifier)
                             App.toast(string.toast_message_leaving_group_v2, Toast.LENGTH_SHORT)
-                            onBackPressed()
+                            onBackPressedDispatcher.onBackPressed()
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -842,7 +859,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                     .setPositiveButton(string.button_label_ok, null)
                 builder.create().show()
             }
-        } else if (itemId == R.id.action_invite_all_members) {
+        } else if (itemId == id.action_invite_all_members) {
             val group = groupDetailsViewModel.group.value ?: return true
             if (group.updateInProgress == Group2.UPDATE_NONE) {
                 groupDetailsViewModel.groupMembers.value?.mapNotNull { group2MemberOrPending ->
@@ -855,12 +872,12 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                     }
                 } ?. let { contacts ->
                     if (contacts.isEmpty()) {
-                        App.toast(R.string.toast_message_no_member_can_be_invited, Toast.LENGTH_SHORT)
+                        App.toast(string.toast_message_no_member_can_be_invited, Toast.LENGTH_SHORT)
                     } else {
                         val builder = SecureAlertDialogBuilder(this, style.CustomAlertDialog)
                             .setTitle(string.dialog_title_invite_all_group_members)
                             .setMessage(resources.getQuantityString(R.plurals.dialog_message_invite_all_group_members, contacts.size, contacts.size))
-                            .setPositiveButton(R.string.button_label_proceed) { _, _ ->
+                            .setPositiveButton(string.button_label_proceed) { _, _ ->
                                 contacts.forEach { contact ->
                                     if (contact.establishedChannelCount > 0) {
                                         AppSingleton.getEngine().startOneToOneInvitationProtocol(
@@ -884,7 +901,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                                     }
                                 }
                             }
-                            .setNegativeButton(R.string.button_label_cancel, null)
+                            .setNegativeButton(string.button_label_cancel, null)
                         builder.create().show()
                     }
                 }
@@ -958,24 +975,6 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
             }
         }
         return super.dispatchTouchEvent(event)
-    }
-
-    override fun onBackPressed() {
-        val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
-            FULL_SCREEN_IMAGE_FRAGMENT_TAG
-        )
-        if (fullScreenImageFragment != null) {
-            supportFragmentManager.beginTransaction()
-                .setCustomAnimations(0, anim.fade_out)
-                .remove(fullScreenImageFragment)
-                .commit()
-        } else if (editingMembers) {
-            if (!groupDetailsViewModel.discardGroupEdits()) {
-                finish()
-            }
-        } else {
-            finish()
-        }
     }
 
     internal inner class GroupMembersAdapter : Adapter<GroupMemberViewHolder>(),
@@ -1095,7 +1094,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
             if (editingMembers) {
                 holder.deleteButton.visibility = View.VISIBLE
                 holder.adminGroup.visibility = View.VISIBLE
-                if (groupDetailsViewModel.getGroupTypeLiveData().value?.type in listOf(SIMPLE, PRIVATE)) {
+                if (groupDetailsViewModel.getGroupTypeLiveData().value?.type  == SIMPLE) {
                     holder.adminSwitch.visibility = View.GONE
                 } else {
                     holder.adminSwitch.visibility = View.VISIBLE
@@ -1148,14 +1147,14 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
         }
 
         @SuppressLint("NotifyDataSetChanged")
-        override fun onChanged(groupMembers: List<Group2MemberOrPending>?) {
-            if (this.groupMembers == null || groupMembers == null) {
-                this.groupMembers = groupMembers
+        override fun onChanged(value: List<Group2MemberOrPending>?) {
+            if (this.groupMembers == null || value == null) {
+                this.groupMembers = value
                 notifyDataSetChanged()
             } else {
                 val result = DiffUtil.calculateDiff(object : Callback() {
                     private val oldList = this@GroupMembersAdapter.groupMembers!!
-                    private val newList = groupMembers
+                    private val newList = value
                     override fun getOldListSize(): Int {
                         return oldList.size
                     }
@@ -1170,10 +1169,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                     ): Boolean {
                         val oldItem = oldList[oldItemPosition]
                         val newItem = newList?.get(newItemPosition)
-                        return Arrays.equals(
-                            oldItem.bytesContactIdentity,
-                            newItem?.bytesContactIdentity
-                        )
+                        return oldItem.bytesContactIdentity.contentEquals(newItem?.bytesContactIdentity)
                     }
 
                     override fun areContentsTheSame(
@@ -1199,7 +1195,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                         return changesMask
                     }
                 })
-                this.groupMembers = groupMembers
+                this.groupMembers = value
                 result.dispatchUpdatesTo(this)
             }
         }
@@ -1264,8 +1260,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
             }
 
             override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-                if (bytesContactIdentity == null || Arrays.equals(
-                        bytesContactIdentityBeingBound,
+                if (bytesContactIdentity == null || bytesContactIdentityBeingBound.contentEquals(
                         bytesContactIdentity
                     )
                 ) {
@@ -1348,14 +1343,10 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
             EngineNotifications.GROUP_V2_CREATED_OR_UPDATED -> {
                 val groupV2 =
                     userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY] as ObvGroupV2?
-                if (groupV2 != null && Arrays.equals(
-                        groupV2.bytesOwnedIdentity,
+                if (groupV2 != null && groupV2.bytesOwnedIdentity.contentEquals(
                         groupDetailsViewModel.bytesOwnedIdentity
                     )
-                    && Arrays.equals(
-                        groupV2.groupIdentifier.bytes,
-                        groupDetailsViewModel.bytesGroupIdentifier
-                    )
+                    && groupV2.groupIdentifier.bytes.contentEquals(groupDetailsViewModel.bytesGroupIdentifier)
                 ) {
                     runOnUiThread { displayEngineGroupCards(groupV2.detailsAndPhotos) }
                 }
@@ -1366,11 +1357,8 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                     userInfo[EngineNotifications.GROUP_V2_PHOTO_CHANGED_BYTES_OWNED_IDENTITY_KEY] as ByteArray?
                 val bytesGroupIdentifier =
                     userInfo[EngineNotifications.GROUP_V2_PHOTO_CHANGED_BYTES_GROUP_IDENTIFIER_KEY] as ByteArray?
-                if (Arrays.equals(bytesOwnedIdentity, groupDetailsViewModel.bytesOwnedIdentity)
-                    && Arrays.equals(
-                        bytesGroupIdentifier,
-                        groupDetailsViewModel.bytesGroupIdentifier
-                    )
+                if (bytesOwnedIdentity.contentEquals(groupDetailsViewModel.bytesOwnedIdentity)
+                    && bytesGroupIdentifier.contentEquals(groupDetailsViewModel.bytesGroupIdentifier)
                 ) {
                     fetchEngineGroupCards()
                 }
@@ -1383,11 +1371,8 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                     userInfo[EngineNotifications.GROUP_V2_UPDATE_IN_PROGRESS_CHANGED_BYTES_GROUP_IDENTIFIER_KEY] as ByteArray?
                 val updating =
                     userInfo[EngineNotifications.GROUP_V2_UPDATE_IN_PROGRESS_CHANGED_UPDATING_KEY] as Boolean?
-                if (Arrays.equals(bytesOwnedIdentity, groupDetailsViewModel.bytesOwnedIdentity)
-                    && Arrays.equals(
-                        bytesGroupIdentifier,
-                        groupDetailsViewModel.bytesGroupIdentifier
-                    )
+                if (bytesOwnedIdentity.contentEquals(groupDetailsViewModel.bytesOwnedIdentity)
+                    && bytesGroupIdentifier.contentEquals(groupDetailsViewModel.bytesGroupIdentifier)
                 ) {
                     if (updating != null && !updating) {
                         groupDetailsViewModel.publicationFinished()
@@ -1402,11 +1387,8 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                     userInfo[EngineNotifications.GROUP_V2_UPDATE_FAILED_BYTES_GROUP_IDENTIFIER_KEY] as ByteArray?
                 val error =
                     userInfo[EngineNotifications.GROUP_V2_UPDATE_FAILED_ERROR_KEY] as Boolean?
-                if (Arrays.equals(bytesOwnedIdentity, groupDetailsViewModel.bytesOwnedIdentity)
-                    && Arrays.equals(
-                        bytesGroupIdentifier,
-                        groupDetailsViewModel.bytesGroupIdentifier
-                    )
+                if (bytesOwnedIdentity.contentEquals(groupDetailsViewModel.bytesOwnedIdentity)
+                    && bytesGroupIdentifier.contentEquals(groupDetailsViewModel.bytesGroupIdentifier)
                 ) {
                     groupDetailsViewModel.publicationFinished()
                     if (error != null && error) {

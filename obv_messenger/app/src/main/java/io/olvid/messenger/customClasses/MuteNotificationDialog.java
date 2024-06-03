@@ -54,6 +54,7 @@ public class MuteNotificationDialog {
 
     public enum MuteType {
         DISCUSSION,
+        DISCUSSIONS,
         PROFILE,
         DISCUSSION_OR_PROFILE,
     }
@@ -93,6 +94,8 @@ public class MuteNotificationDialog {
 
         if (muteType == MuteType.PROFILE) {
             builder.setTitle(R.string.dialog_title_mute_profile_notification_duration);
+        } else if (muteType == MuteType.DISCUSSIONS) {
+            builder.setTitle(R.string.dialog_title_mute_discussions_notification_duration);
         } else {
             builder.setTitle(R.string.dialog_title_mute_discussion_notification_duration);
         }

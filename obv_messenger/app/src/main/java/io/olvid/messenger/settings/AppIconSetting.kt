@@ -224,7 +224,7 @@ fun getCurrentIcon(): AppIcon? {
             )
         )) {
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED -> true
-            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT -> it.name == ".main.MainActivity"
+            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT -> it.name == ".main.MainActivityDefault"
             else -> false
         }
     } ?: run {

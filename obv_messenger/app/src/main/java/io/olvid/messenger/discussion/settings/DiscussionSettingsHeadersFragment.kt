@@ -52,7 +52,7 @@ class DiscussionSettingsHeadersFragment : PreferenceFragmentCompat(), SettingsCh
         preferenceManager.preferenceDataStore = discussionSettingsDataStore
         discussionSettingsViewModel.discussionLiveData.observe(this) { discussion: Discussion? ->
             if (pinPreference != null && discussion != null) {
-                pinPreference!!.isChecked = discussion.pinned
+                pinPreference!!.isChecked = discussion.pinned != 0
             }
         }
         val screen = preferenceScreen
@@ -65,8 +65,8 @@ class DiscussionSettingsHeadersFragment : PreferenceFragmentCompat(), SettingsCh
                     val discussion = discussionSettingsViewModel.discussionLiveData.value
                     if (discussion != null) {
                         App.runThread {
-                            AppDatabase.getInstance().discussionDao()
-                                .updatePinned(discussion.id, !discussion.pinned)
+                            val pinned = if (discussion.pinned != 0) 0 else AppDatabase.getInstance().discussionDao().getMaxPinnedIndex(discussion.bytesOwnedIdentity) + 1
+                            AppDatabase.getInstance().discussionDao().updatePinned(discussion.id, pinned)
                             PropagatePinnedDiscussionsChangeTask(discussion.bytesOwnedIdentity).run()
                         }
                         return@OnPreferenceClickListener true

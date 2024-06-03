@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme.NoActionBar.AlmostWhiteStatusBar">
+        <item name="android:windowBackground">@color/almostWhite</item>
+        <item name="android:statusBarColor">@color/almostWhite</item>
+        <item name="android:windowLightStatusBar">@bool/dayMode</item>
+    </style>
+</resources>

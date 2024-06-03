@@ -47,9 +47,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -140,7 +137,6 @@ public class MessageDetailsActivity extends LockableActivity {
     TextView messageForwardedTextView;
     View timestampSpacer;
     ImageView messageStatusImageView;
-    RotateAnimation rotateAnimation;
     TextView timerTextView;
     ViewGroup messageReplyGroup;
     TextView messageReplySenderName;
@@ -209,10 +205,6 @@ public class MessageDetailsActivity extends LockableActivity {
         messageForwardedTextView = findViewById(R.id.message_forwarded_badge);
         timestampSpacer = findViewById(R.id.timestamp_spacer);
         messageStatusImageView = findViewById(R.id.message_status_image_view);
-        rotateAnimation = new RotateAnimation(360f, 0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        rotateAnimation.setInterpolator(new LinearInterpolator());
-        rotateAnimation.setRepeatCount(Animation.INFINITE);
-        rotateAnimation.setDuration(700);
         timerTextView = findViewById(R.id.message_timer_textview);
 
         standardHeaderView = findViewById(R.id.standard_header);
@@ -478,32 +470,38 @@ public class MessageDetailsActivity extends LockableActivity {
             switch (message.status) {
                 case Message.STATUS_SENT: {
                     messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_sent));
-                    messageStatusImageView.clearAnimation();
                     break;
                 }
                 case Message.STATUS_DELIVERED: {
-                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_delivered));
-                    messageStatusImageView.clearAnimation();
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_delivered_one));
                     break;
                 }
                 case Message.STATUS_DELIVERED_AND_READ: {
-                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_delivered_and_read));
-                    messageStatusImageView.clearAnimation();
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_delivered_and_read_one));
+                    break;
+                }
+                case Message.STATUS_DELIVERED_ALL: {
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_delivered_all));
+                    break;
+                }
+                case Message.STATUS_DELIVERED_ALL_READ_ONE: {
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_delivered_all_read_one));
+                    break;
+                }
+                case Message.STATUS_DELIVERED_ALL_READ_ALL: {
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_delivered_all_read_all));
                     break;
                 }
                 case Message.STATUS_UNDELIVERED: {
                     messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_undelivered));
-                    messageStatusImageView.clearAnimation();
                     break;
                 }
                 case Message.STATUS_SENT_FROM_ANOTHER_DEVICE: {
                     messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_sent_from_other_device));
-                    messageStatusImageView.clearAnimation();
                     break;
                 }
                 default: {
-                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_sync));
-                    messageStatusImageView.startAnimation(rotateAnimation);
+                    messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_processing));
                 }
             }
             if ((message.status == Message.STATUS_UNDELIVERED) != this.messageIsUndelivered) {
@@ -519,7 +517,7 @@ public class MessageDetailsActivity extends LockableActivity {
             wipedAttachmentCountTextView.setVisibility(View.GONE);
         }
 
-        if (body.length() == 0) {
+        if (body.isEmpty()) {
             messageContentTextView.setVisibility(View.GONE);
         } else if (message.wipeStatus == Message.WIPE_STATUS_WIPED
                 || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
@@ -600,7 +598,7 @@ public class MessageDetailsActivity extends LockableActivity {
                     } else {
                         messageReplyAttachmentCount.setVisibility(View.GONE);
                     }
-                    if (replyMessage.getStringContent(this).length() == 0) {
+                    if (replyMessage.getStringContent(this).isEmpty()) {
                         messageReplyBody.setVisibility(View.GONE);
                     } else {
                         messageReplyBody.setVisibility(View.VISIBLE);
@@ -901,7 +899,7 @@ public class MessageDetailsActivity extends LockableActivity {
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_PROCESSING:
                                 textView.setText(R.string.text_processing);
-                                imageView.setImageResource(R.drawable.ic_sync);
+                                imageView.setImageResource(R.drawable.ic_message_status_processing);
                                 countView.setText(recipientInfosAdapter.counts[status] + "/" + recipientInfosAdapter.messageRecipientInfos.size());
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_SENT:
@@ -911,12 +909,12 @@ public class MessageDetailsActivity extends LockableActivity {
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED:
                                 textView.setText(R.string.text_delivered);
-                                imageView.setImageResource(R.drawable.ic_message_status_delivered);
+                                imageView.setImageResource(R.drawable.ic_message_status_delivered_one);
                                 countView.setText((recipientInfosAdapter.counts[MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED] + recipientInfosAdapter.counts[MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED_AND_READ]) + "/" + recipientInfosAdapter.messageRecipientInfos.size());
                                 break;
                             case MessageRecipientInfo.RECIPIENT_STATUS_DELIVERED_AND_READ:
                                 textView.setText(R.string.text_read);
-                                imageView.setImageResource(R.drawable.ic_message_status_delivered_and_read);
+                                imageView.setImageResource(R.drawable.ic_message_status_delivered_and_read_one);
                                 countView.setText(getString(R.string.at_least_xxx, recipientInfosAdapter.counts[status]));
                                 break;
                             case 5: // 5 is for undelivered message

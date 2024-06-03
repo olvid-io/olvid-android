@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/background_rounded_dialog"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/delete_everywhere_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="4dp"
+        android:layout_marginBottom="8dp"
+        android:textAppearance="@style/RobotoMedium"
+        android:textColor="@color/primary700"
+        android:textSize="22sp"
+        tools:text="Supprimer les discussions sélectionnées ?" />
+
+    <TextView
+        android:id="@+id/delete_everywhere_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="4dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="16sp"
+        tools:text="Do you really want to delete the selected message?" />
+
+    <RadioButton
+        android:id="@+id/radio_button_local"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="48dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="9dp"
+        android:text="@string/label_delete_from_this_device"
+        android:textAllCaps="false"
+        android:textAppearance="@style/RobotoNormal"
+        android:textColor="@color/greyTint"
+        android:textSize="16sp"
+        android:theme="@style/AppTheme.BlueAccent" />
+
+    <RadioButton
+        android:id="@+id/radio_button_owned_devices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="48dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="9dp"
+        android:text="@string/label_delete_from_all_my_devices"
+        android:textAllCaps="false"
+        android:textAppearance="@style/RobotoNormal"
+        android:textColor="@color/greyTint"
+        android:textSize="16sp"
+        android:theme="@style/AppTheme.BlueAccent" />
+
+    <RadioButton
+        android:id="@+id/radio_button_everywhere"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="48dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="9dp"
+        android:text="@string/label_delete_everywhere"
+        android:textAllCaps="false"
+        android:textAppearance="@style/RobotoNormal"
+        android:textColor="@color/greyTint"
+        android:textSize="16sp"
+        android:theme="@style/AppTheme.BlueAccent" />
+
+    <TextView
+        android:id="@+id/delete_everywhere_warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/background_error_message"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:textColor="@color/red"
+        android:textSize="14sp"
+        android:visibility="gone"
+        tools:text="WARNING MESSAGE"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical|end"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cancel_button"
+            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:stateListAnimator="@null"
+            android:text="@string/button_label_cancel"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:theme="@style/AppTheme.BlueAccent" />
+
+        <Button
+            android:id="@+id/delete_button"
+            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:stateListAnimator="@null"
+            android:text="@string/button_label_delete_from_my_devices"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:theme="@style/AppTheme.BlueAccent" />
+    </LinearLayout>
+</LinearLayout>

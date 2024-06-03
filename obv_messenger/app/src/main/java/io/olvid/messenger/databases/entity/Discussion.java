@@ -128,7 +128,7 @@ public class Discussion {
     public boolean unread;
 
     @ColumnInfo(name = PINNED)
-    public boolean pinned;
+    public int pinned;
 
     @ColumnInfo(name = ACTIVE)
     public boolean active;
@@ -141,7 +141,7 @@ public class Discussion {
     public int status;
 
     // default constructor required by Room
-    public Discussion(String title, @NonNull byte[] bytesOwnedIdentity, int discussionType, @NonNull byte[] bytesDiscussionIdentifier, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, boolean pinned, boolean active, @Nullable Integer trustLevel, int status) {
+    public Discussion(String title, @NonNull byte[] bytesOwnedIdentity, int discussionType, @NonNull byte[] bytesDiscussionIdentifier, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, int pinned, boolean active, @Nullable Integer trustLevel, int status) {
         this.title = title;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.discussionType = discussionType;
@@ -182,7 +182,7 @@ public class Discussion {
                     contact.getCustomPhotoUrl(),
                     contact.keycloakManaged,
                     false,
-                    false,
+                    0,
                     contact.active,
                     contact.trustLevel,
                     STATUS_NORMAL
@@ -303,7 +303,7 @@ public class Discussion {
                     group.getCustomPhotoUrl(),
                     false,
                     false,
-                    false,
+                    0,
                     true,
                     null,
                     STATUS_NORMAL
@@ -356,7 +356,7 @@ public class Discussion {
                     group2.getCustomPhotoUrl(),
                     group2.keycloakManaged,
                     false,
-                    false,
+                    0,
                     true,
                     null,
                     group2.ownPermissionSendMessage ? STATUS_NORMAL : STATUS_READ_ONLY

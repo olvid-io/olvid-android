@@ -80,6 +80,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import io.olvid.engine.Logger
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.R.color
@@ -145,8 +146,12 @@ fun ContactListScreen(
                     rememberPagerState { if (contactListViewModel.keycloakManaged.value) 3 else 2 }
                 LaunchedEffect(pagerState) {
                     snapshotFlow { pagerState.currentPage }.collect { page ->
-                        if (contactListViewModel.getFilter() == null && page == 2) {
-                            contactListViewModel.setFilter("")
+                        if (page == 2) {
+                            if (contactListViewModel.getFilter() == null) {
+                                contactListViewModel.setFilter("")
+                            } else if (contactListViewModel.getFilter() == ""){
+                                contactListViewModel.refreshKeycloakSearch()
+                            }
                         }
                     }
                 }

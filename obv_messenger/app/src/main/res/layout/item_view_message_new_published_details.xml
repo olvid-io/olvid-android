@@ -9,7 +9,7 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    android:theme="@style/SubtleGreyRipple">
+    android:theme="@style/BlueOrWhiteRipple">
 
     <View
         android:id="@+id/message_info_background"

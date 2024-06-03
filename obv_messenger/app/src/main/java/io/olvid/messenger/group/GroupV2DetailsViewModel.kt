@@ -167,11 +167,8 @@ class GroupV2DetailsViewModel : ViewModel() {
 
     fun inferGroupType(members: List<Group2MemberOrPending>): GroupTypeModel {
         if (members.all { it.permissionAdmin }) {
-            // probably a SimpleGroup
+            // if all members are admin, probably a SimpleGroup
             return SimpleGroup
-        } else if (members.none { it.permissionAdmin } && members.all { it.permissionSendMessage }) {
-            // probably a private group
-            return PrivateGroup
         }
 
         val readOnly =
@@ -187,6 +184,14 @@ class GroupV2DetailsViewModel : ViewModel() {
                     else -> ADMINS
                 }
             }
+
+        if (remoteDelete == NOBODY) {
+            return if (readOnly) {
+                ReadOnlyGroup
+            } else {
+                PrivateGroup
+            }
+        }
         return CustomGroup(
             readOnlySetting = readOnly,
             remoteDeleteSetting = remoteDelete
@@ -199,19 +204,19 @@ class GroupV2DetailsViewModel : ViewModel() {
     ): java.util.HashSet<Permission> {
         return when (groupType) {
             SimpleGroup -> Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet()
-            ReadOnlyGroup -> if (isAdmin) Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet() else hashSetOf()
+            ReadOnlyGroup -> if (isAdmin) Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet() else hashSetOf(Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES)
             is CustomGroup -> {
                 if (isAdmin) {
                     Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet()
                 } else {
                     if (groupType.readOnlySetting) {
-                        HashSet()
+                        hashSetOf(Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES)
                     } else {
                         Permission.DEFAULT_MEMBER_PERMISSIONS.toHashSet()
                     }
                 }
             }
-
+            // PrivateGroup case
             else -> if (isAdmin) Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet() else Permission.DEFAULT_MEMBER_PERMISSIONS.toHashSet()
         }.apply {
             if (groupType is CustomGroup) {// REMOTE_DELETE_ANYTHING
@@ -222,7 +227,6 @@ class GroupV2DetailsViewModel : ViewModel() {
                         } else {
                             remove(Permission.REMOTE_DELETE_ANYTHING)
                         }
-
                     NOBODY -> remove(Permission.REMOTE_DELETE_ANYTHING)
                     EVERYONE -> add(Permission.REMOTE_DELETE_ANYTHING)
                 }
@@ -374,7 +378,6 @@ class GroupV2DetailsViewModel : ViewModel() {
                 }
 
                 val admin: Boolean = when (groupType) {
-                    PrivateGroup -> false
                     SimpleGroup -> true
                     else -> changeSet.adminChanges[groupMemberEntry.key]
                         ?: groupMemberEntry.value.permissionAdmin
@@ -439,7 +442,6 @@ class GroupV2DetailsViewModel : ViewModel() {
                 }
 
                 val admin: Boolean = when (type) {
-                    PrivateGroup -> false
                     SimpleGroup -> true
                     else -> changeSet.adminChanges[groupMemberEntry.key]
                         ?: groupMemberEntry.value.permissionAdmin

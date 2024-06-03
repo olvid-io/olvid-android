@@ -161,7 +161,7 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
                     public void onChanged(@Nullable Message message) {
                         if (message == null) {
                             messageLiveData.removeObserver(this);
-                        } else if (message.status == Message.STATUS_SENT || message.status == Message.STATUS_DELIVERED || message.status == Message.STATUS_DELIVERED_AND_READ) {
+                        } else if (message.status == Message.STATUS_SENT || message.status == Message.STATUS_DELIVERED || message.status == Message.STATUS_DELIVERED_AND_READ || message.status == Message.STATUS_DELIVERED_ALL || message.status == Message.STATUS_DELIVERED_ALL_READ_ONE || message.status == Message.STATUS_DELIVERED_ALL_READ_ALL) {
                             long[] pattern = new long[]{0, 50, 100, 50};
                             vibrator.vibrate(pattern, -1);
                             messageLiveData.removeObserver(this);

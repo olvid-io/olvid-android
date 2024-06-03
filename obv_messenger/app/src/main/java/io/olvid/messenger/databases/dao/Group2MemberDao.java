@@ -208,6 +208,11 @@ public interface Group2MemberDao {
             " AND " + Group2Member.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
     int countContactGroups(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
 
+    @Query("SELECT EXISTS (SELECT 1 FROM " + Group2Member.TABLE_NAME +
+            " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier )")
+    boolean groupHasMembers(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+
 
     class Group2MemberOrPending {
         @Embedded

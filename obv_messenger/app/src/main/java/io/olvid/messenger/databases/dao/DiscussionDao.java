@@ -88,7 +88,7 @@ public abstract class DiscussionDao {
     @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.PINNED + " = :pinned " +
             " WHERE id = :discussionId ")
-    public abstract void updatePinned(long discussionId, boolean pinned);
+    public abstract void updatePinned(long discussionId, int pinned);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER + " = :lastOutboundMessageSequenceNumber " +
@@ -156,6 +156,7 @@ public abstract class DiscussionDao {
                     "cust." + DiscussionCustomization.SETTING_VISIBILITY_DURATION + " AS cust_" + DiscussionCustomization.SETTING_VISIBILITY_DURATION + ", " +
                     "cust." + DiscussionCustomization.SETTING_READ_ONCE + " AS cust_" + DiscussionCustomization.SETTING_READ_ONCE;
 
+    static final String PINNED_ORDER = "disc." + Discussion.PINNED + " = 0 ASC, disc." + Discussion.PINNED + " ASC";
     @Transaction
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " message.*, unread.count AS unread_count, (unreadMention.count != 0) AS unread_mention, (locations.count != 0) AS locations_shared, " +
@@ -171,7 +172,7 @@ public abstract class DiscussionDao {
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
             Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
-            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " + Message.JSON_MENTIONS + ", " + Message.MENTIONED + ", " +
+            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " + Message.JSON_MENTIONS + ", " + Message.MENTIONED + ", " + Message.BOOKMARKED + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
             " ON message." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unread " +
@@ -185,7 +186,7 @@ public abstract class DiscussionDao {
             " ON cust." + DiscussionCustomization.DISCUSSION_ID + " = disc.id " +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " != 0 " +
-            " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC" )
+            " ORDER BY " + PINNED_ORDER + ", disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC" )
     public abstract LiveData<List<DiscussionAndLastMessage>> getNonDeletedDiscussionAndLastMessages(byte[] bytesOwnedIdentity);
 
     @Transaction
@@ -218,7 +219,7 @@ public abstract class DiscussionDao {
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
             Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
-            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " + Message.JSON_MENTIONS + ", " + Message.MENTIONED + ", " +
+            Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " + Message.JSON_MENTIONS + ", " + Message.MENTIONED + ", " + Message.BOOKMARKED + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " != " + Message.STATUS_DRAFT + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
             " ON message." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unread " +
@@ -229,7 +230,7 @@ public abstract class DiscussionDao {
             " ON cust." + DiscussionCustomization.DISCUSSION_ID + " = disc.id " +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND disc." + Discussion.STATUS + " != " + Discussion.STATUS_PRE_DISCUSSION +
-            " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC" )
+            " ORDER BY " + PINNED_ORDER + ", disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC" )
     public abstract LiveData<List<DiscussionAndLastMessage>> getAllDiscussionsAndLastMessagesForWebClient(byte[] bytesOwnedIdentity);
 
 
@@ -418,7 +419,7 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = grpp." + Group2.BYTES_OWNED_IDENTITY +
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
-            " ORDER BY disc." + Discussion.PINNED + " DESC, status, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
+            " ORDER BY " + PINNED_ORDER + ", status, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllPinnedFirstWithGroupMembersNames(byte[] ownedIdentityBytes);
 
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
@@ -436,7 +437,7 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND disc." + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL +
-            " ORDER BY disc." + Discussion.PINNED + " DESC, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
+            " ORDER BY " + PINNED_ORDER + ", is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNames(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
@@ -452,7 +453,7 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND disc." + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL +
-            " ORDER BY disc." + Discussion.PINNED + " DESC, disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC")
+            " ORDER BY " + PINNED_ORDER + ", disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNamesOrderedByActivity(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
@@ -516,9 +517,15 @@ public abstract class DiscussionDao {
 
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
-            " WHERE " + Discussion.PINNED + " = 1 " +
-            " AND " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
+            " WHERE " + Discussion.PINNED + " != 0 " +
+            " AND " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " ORDER BY " + Discussion.PINNED)
     public abstract List<Discussion> getAllPinned(byte[] bytesOwnedIdentity);
+
+    @Query("SELECT MAX(" + Discussion.PINNED + ") FROM " + Discussion.TABLE_NAME +
+            " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
+    public abstract int getMaxPinnedIndex(byte[] bytesOwnedIdentity);
+
 
     public static class DiscussionAndLastMessage {
         @Embedded(prefix = "disc_")

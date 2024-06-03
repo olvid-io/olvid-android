@@ -436,6 +436,9 @@
             android:name=".activities.MessageDetailsActivity"
             android:label="@string/activity_title_message_details" />
         <activity
+            android:name=".main.bookmarks.BookmarksActivity"
+            android:label="@string/activity_title_bookmarks" />
+        <activity
             android:name=".discussion.settings.DiscussionSettingsActivity"
             android:label="@string/activity_title_discussion_settings"
             android:theme="@style/AppTheme.WhiteBackground" />

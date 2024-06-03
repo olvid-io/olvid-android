@@ -170,7 +170,7 @@ class DiscussionCustomizationPojo_0 {
                 }
             }
         }
-        discussionCustomizationPojo.pinned = discussion.pinned;
+        discussionCustomizationPojo.pinned = discussion.pinned != 0;
 
         if (discussionCustomizationPojo.isEmpty()) {
             return null;
@@ -200,7 +200,7 @@ class DiscussionCustomizationPojo_0 {
             discussionCustomization.settingVisibilityDuration = settings_visibility_duration;
             discussionCustomization.settingReadOnce = settings_read_once;
         }
-        discussion.pinned = pinned;
+        discussion.pinned = pinned ? 1 : 0;
         return sharedSettingsRestored;
     }
 }

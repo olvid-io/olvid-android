@@ -24,6 +24,7 @@ import java.util.Collections;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -91,7 +92,7 @@ public class ExpiringOutboundMessageSent implements Runnable {
                             reMessage.deleteAttachments(db);
                         });
                     } else {
-                        new DeleteMessagesTask(discussion.bytesOwnedIdentity, Collections.singletonList(message.id), false).run();
+                        new DeleteMessagesTask(Collections.singletonList(message.id), SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL).run();
                     }
                 }
             }

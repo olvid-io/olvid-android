@@ -19,6 +19,9 @@
 package io.olvid.messenger.main.discussions
 
 import android.content.Context
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,6 +30,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
+import androidx.lifecycle.viewModelScope
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
@@ -39,10 +43,42 @@ import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
 import io.olvid.messenger.settings.SettingsActivity
-import java.util.Arrays
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class DiscussionListViewModel : ViewModel() {
+
+    private val _selection = mutableSetOf<Long>()
+    var selection by mutableStateOf<List<DiscussionAndLastMessage>>(emptyList())
+        private set
+
+    fun isSelected(discussion: Discussion): Boolean = _selection.contains(discussion.id)
+
+    fun clearSelection() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _selection.clear()
+            selection = emptyList()
+        }
+    }
+
+    fun enableSelection(discussion: Discussion) {
+        _selection.add(discussion.id)
+        refreshSelection()
+    }
+
+    fun toggleSelection(discussion: Discussion) {
+        if (_selection.remove(discussion.id).not()) {
+            _selection.add(discussion.id)
+        }
+        refreshSelection()
+    }
+
+    fun refreshSelection() {
+        selection = discussions.value?.filter { _selection.contains(it.discussion.id) }.orEmpty()
+    }
+
 
     val discussions: LiveData<List<DiscussionAndLastMessage>> =
         AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
@@ -54,37 +90,87 @@ class DiscussionListViewModel : ViewModel() {
             }
         }
 
+    var reorderList by mutableStateOf<List<DiscussionAndLastMessage>?>(null)
+
+    fun pinSelectedDiscussions() {
+        reorderList = reorderList?.toMutableList()?.onEach {
+            if (_selection.contains(it.discussion.id)) {
+                it.apply { discussion.pinned = 1 }
+            }
+        }
+        syncPinnedDiscussions()
+    }
+
+    fun unpinSelectedDiscussions() {
+        reorderList = reorderList?.toMutableList()?.onEach {
+            if (_selection.contains(it.discussion.id)) {
+                it.apply { discussion.pinned = 0 }
+            }
+        }
+        syncPinnedDiscussions()
+    }
+
+    fun syncPinnedDiscussions() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val db = AppDatabase.getInstance()
+            val oldPinnedDiscussions =
+                db.discussionDao().getAllPinned(AppSingleton.getBytesCurrentIdentity())
+            val pinnedDiscussionsMap =
+                HashMap(oldPinnedDiscussions.associateBy { discussion -> discussion.id })
+            val pinnedDiscussions = reorderList?.filter { it.discussion.pinned != 0 }?.map { it.discussion }
+
+            // before actually changing anything in db, check if the order actually changed
+            if (pinnedDiscussions?.map { it.id } == oldPinnedDiscussions.map { it.id }) {
+                return@launch
+            }
+
+            var pinnedIndex = 1
+            pinnedDiscussions?.forEach {
+                // never pin a pre-discussion
+                if (it.status != Discussion.STATUS_PRE_DISCUSSION) {
+                    pinnedDiscussionsMap.remove(it.id)
+                    // update ordered index
+                    db.discussionDao().updatePinned(it.id, pinnedIndex++)
+                }
+            }
+            // unpin any discussion that is not in the old list
+            pinnedDiscussionsMap.values.forEach {
+                db.discussionDao().updatePinned(it.id, 0)
+            }
+            AppSingleton.getBytesCurrentIdentity()?.let { PropagatePinnedDiscussionsChangeTask(it).run() }
+        }
+    }
 }
 
-fun DiscussionAndLastMessage.getAnnotatedTitle(context: Context): AnnotatedString {
+fun Discussion.getAnnotatedTitle(context: Context): AnnotatedString {
     return buildAnnotatedString {
-        if (discussion.title.isNullOrEmpty()) {
+        if (title.isNullOrEmpty()) {
             withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                 append(context.getString(string.text_unnamed_discussion))
             }
         } else {
-            append(discussion.title)
-            if (discussion.isLocked) {
+            append(title)
+            if (isLocked) {
                 addStyle(SpanStyle(fontStyle = FontStyle.Italic), 0, length)
             }
         }
     }
 }
 
-fun DiscussionAndLastMessage.getAnnotatedDate(context: Context): AnnotatedString {
+fun Discussion.getAnnotatedDate(context: Context, message: Message?): AnnotatedString {
     return buildAnnotatedString {
         append(
             message?.timestamp?.let {
                 StringUtils.getLongNiceDateString(context, it) as String
             } ?: ""
         )
-        if (discussion.isLocked) {
+        if (isLocked) {
             addStyle(SpanStyle(fontStyle = FontStyle.Italic), 0, length)
         }
     }
 }
 
-fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString {
+fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedString {
     return buildAnnotatedString {
         message?.let { message ->
             when (message.messageType) {
@@ -93,10 +179,10 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                     if (message.status == Message.STATUS_DRAFT) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                             append(
-                                    context.getString(
-                                        string.text_draft_message_prefix,
-                                        ""
-                                    )
+                                context.getString(
+                                    string.text_draft_message_prefix,
+                                    ""
+                                )
                             )
                             append(body.formatSingleLineMarkdown())
                         }
@@ -120,14 +206,17 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                                 length - body.length
                             )
                         } else {
-                            append(context.getString(
-                                string.text_outbound_message_prefix,
-                                ""
-                            ))
+                            append(
+                                context.getString(
+                                    string.text_outbound_message_prefix,
+                                    ""
+                                )
+                            )
                             append(body.formatSingleLineMarkdown())
                         }
                     }
                 }
+
                 Message.TYPE_GROUP_MEMBER_JOINED -> {
                     val displayName =
                         AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
@@ -140,6 +229,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                         )
                     }
                 }
+
                 Message.TYPE_GROUP_MEMBER_LEFT -> {
                     val displayName =
                         AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
@@ -152,6 +242,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                         )
                     }
                 }
+
                 Message.TYPE_DISCUSSION_REMOTELY_DELETED -> {
                     val displayName =
                         AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
@@ -167,11 +258,13 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                         )
                     }
                 }
+
                 Message.TYPE_LEFT_GROUP -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append((context.getString(string.text_group_left)))
                     }
                 }
+
                 Message.TYPE_CONTACT_INACTIVE_REASON -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
@@ -182,6 +275,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                         )
                     }
                 }
+
                 Message.TYPE_PHONE_CALL -> {
                     var callStatus = CallLogItem.STATUS_MISSED
                     try {
@@ -202,24 +296,31 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                                 -CallLogItem.STATUS_BUSY -> {
                                     context.getString(string.text_busy_outgoing_call)
                                 }
+
                                 -CallLogItem.STATUS_REJECTED, CallLogItem.STATUS_REJECTED, CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE -> {
                                     context.getString(string.text_rejected_call)
                                 }
+
                                 -CallLogItem.STATUS_MISSED -> {
                                     context.getString(string.text_unanswered_call)
                                 }
+
                                 -CallLogItem.STATUS_FAILED, CallLogItem.STATUS_FAILED -> {
                                     context.getString(string.text_failed_call)
                                 }
+
                                 -CallLogItem.STATUS_SUCCESSFUL, CallLogItem.STATUS_SUCCESSFUL, CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE -> {
                                     context.getString(string.text_successful_call)
                                 }
+
                                 CallLogItem.STATUS_BUSY -> {
                                     context.getString(string.text_busy_call)
                                 }
+
                                 CallLogItem.STATUS_MISSED -> {
                                     context.getString(string.text_missed_call)
                                 }
+
                                 else -> {
                                     context.getString(string.text_successful_call)
                                 }
@@ -227,68 +328,76 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                         )
                     }
                 }
+
                 Message.TYPE_NEW_PUBLISHED_DETAILS -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
-                            if (discussion.discussionType == Discussion.TYPE_CONTACT)
+                            if (discussionType == Discussion.TYPE_CONTACT)
                                 context.getString(string.text_contact_details_updated)
                             else
                                 context.getString(string.text_group_details_updated)
                         )
                     }
                 }
+
                 Message.TYPE_CONTACT_DELETED -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_user_removed_from_contacts))
                     }
                 }
+
                 Message.TYPE_DISCUSSION_SETTINGS_UPDATE -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_discussion_shared_settings_updated))
                     }
                 }
+
                 Message.TYPE_CONTACT_RE_ADDED -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_user_added_to_contacts))
                     }
                 }
+
                 Message.TYPE_RE_JOINED_GROUP -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_group_re_joined))
                     }
                 }
+
                 Message.TYPE_JOINED_GROUP -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_group_joined))
                     }
                 }
+
                 Message.TYPE_GAINED_GROUP_ADMIN -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_you_became_admin))
                     }
                 }
+
                 Message.TYPE_LOST_GROUP_ADMIN -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_you_are_no_longer_admin))
                     }
                 }
+
                 Message.TYPE_GAINED_GROUP_SEND_MESSAGE -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_you_became_writer))
                     }
                 }
+
                 Message.TYPE_LOST_GROUP_SEND_MESSAGE -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(context.getString(string.text_you_are_no_longer_writer))
                     }
                 }
+
                 Message.TYPE_SCREEN_SHOT_DETECTED -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
-                            if (Arrays.equals(
-                                    message.senderIdentifier,
-                                    AppSingleton.getBytesCurrentIdentity()
-                                )
+                            if (message.senderIdentifier.contentEquals(AppSingleton.getBytesCurrentIdentity())
                             ) {
                                 context.getString(string.text_you_captured_sensitive_message)
                             } else {
@@ -308,11 +417,13 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                         )
                     }
                 }
+
                 Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(AnnotatedString(message.getStringContent(context)).formatMarkdown())
                     }
                 }
+
                 Message.TYPE_MEDIATOR_INVITATION_SENT -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
@@ -323,6 +434,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                         )
                     }
                 }
+
                 Message.TYPE_MEDIATOR_INVITATION_ACCEPTED -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
@@ -333,6 +445,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                         )
                     }
                 }
+
                 Message.TYPE_MEDIATOR_INVITATION_IGNORED -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
@@ -343,20 +456,26 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                         )
                     }
                 }
+
                 else -> {
-                    if (discussion.discussionType == Discussion.TYPE_GROUP || discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                    if (discussionType == Discussion.TYPE_GROUP || discussionType == Discussion.TYPE_GROUP_V2) {
                         (if (SettingsActivity.getAllowContactFirstName())
                             AppSingleton.getContactFirstName(message.senderIdentifier)
                         else
                             AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
-                        )?.let {
-                            append(context.getString(string.text_inbound_group_message_prefix, it))
-                        }
+                                )?.let {
+                                append(
+                                    context.getString(
+                                        string.text_inbound_group_message_prefix,
+                                        it
+                                    )
+                                )
+                            }
                     }
                     val body = message.getStringContent(context)
                     if (message.wipeStatus == Message.WIPE_STATUS_WIPED || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED || message.isLocationMessage) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                            append(AnnotatedString(body).formatMarkdown())
+                            append(AnnotatedString(body))
                         }
                     } else {
                         append(body.formatSingleLineMarkdown())
@@ -364,7 +483,7 @@ fun DiscussionAndLastMessage.getAnnotatedBody(context: Context): AnnotatedString
                 }
             }
             // locked discussion is in italic
-            if (discussion.isLocked) {
+            if (isLocked) {
                 addStyle(SpanStyle(fontStyle = FontStyle.Italic), 0, length)
             }
         } ifNull {

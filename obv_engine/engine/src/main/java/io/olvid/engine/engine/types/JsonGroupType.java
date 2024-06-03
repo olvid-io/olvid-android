@@ -59,7 +59,7 @@ public class JsonGroupType {
     public static JsonGroupType createCustom(boolean readOnly, String remoteDelete) {
         if (remoteDelete == null ||
                 !(remoteDelete.equals(REMOTE_DELETE_NOBODY) || remoteDelete.equals(REMOTE_DELETE_ADMINS) || remoteDelete.equals(REMOTE_DELETE_EVERYONE))) {
-            remoteDelete = REMOTE_DELETE_EVERYONE;
+            remoteDelete = REMOTE_DELETE_NOBODY;
         }
         return new JsonGroupType(TYPE_CUSTOM, readOnly, remoteDelete);
     }

@@ -39,6 +39,7 @@ import java.util.List;
 public abstract class MapViewAbstractFragment extends Fragment {
     // any early interaction with the map must be in the callback runnable (else map is not ready and it won't work)
     abstract void setOnMapReadyCallback(@Nullable Runnable callback);
+    abstract void setRedrawMarkersCallback(@Nullable Runnable callback);
 
     // interact with user position
     @RequiresPermission(anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"})

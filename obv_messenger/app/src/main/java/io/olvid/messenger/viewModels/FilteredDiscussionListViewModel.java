@@ -192,7 +192,7 @@ public class FilteredDiscussionListViewModel extends ViewModel {
             this.photoUrl = discussionAndGroupMembersNames.discussion.photoUrl;
             this.keycloakManaged = discussionAndGroupMembersNames.discussion.keycloakManaged;
             this.active = discussionAndGroupMembersNames.discussion.active;
-            this.pinned = discussionAndGroupMembersNames.discussion.pinned;
+            this.pinned = discussionAndGroupMembersNames.discussion.pinned != 0;
 
             this.selected = false;
         }

@@ -12,7 +12,7 @@
     android:foreground="?attr/selectableItemBackground"
     android:paddingBottom="2dp"
     android:paddingTop="2dp"
-    android:theme="@style/SubtleGreyRipple">
+    android:theme="@style/BlueOrWhiteRipple">
 
 
     <io.olvid.messenger.customClasses.SizeAwareCardView

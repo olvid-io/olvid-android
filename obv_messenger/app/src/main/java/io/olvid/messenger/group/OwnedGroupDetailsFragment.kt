@@ -379,7 +379,7 @@ fun JsonGroupType.toGroupCreationModel(): GroupTypeModel {
                 JsonGroupType.REMOTE_DELETE_NOBODY -> RemoteDeleteSetting.NOBODY
                 JsonGroupType.REMOTE_DELETE_ADMINS -> RemoteDeleteSetting.ADMINS
                 JsonGroupType.REMOTE_DELETE_EVERYONE -> RemoteDeleteSetting.EVERYONE
-                else -> RemoteDeleteSetting.ADMINS
+                else -> RemoteDeleteSetting.NOBODY
             })
         else -> SimpleGroup
     }

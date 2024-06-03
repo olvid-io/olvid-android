@@ -17,16 +17,15 @@
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.olvid.messenger.main.discussions
+package io.olvid.messenger.customClasses
 
-import io.olvid.messenger.databases.entity.Discussion
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 
-interface DiscussionMenu {
-    fun markAllDiscussionMessagesRead(discussionId: Long)
-    fun markDiscussionAsUnread(discussionId: Long)
-    fun pinDiscussion(discussionId: Long, pinned: Boolean)
-    fun muteDiscussion(discussionId: Long, muted: Boolean)
-    fun deleteDiscussion(discussion: Discussion)
-    fun renameDiscussion(discussion: Discussion)
-    fun openSettings(discussionId: Long)
+fun AppCompatActivity.onBackPressed(callback: () -> Unit) {
+    onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(enabled = true) {
+        override fun handleOnBackPressed() {
+            callback()
+        }
+    })
 }

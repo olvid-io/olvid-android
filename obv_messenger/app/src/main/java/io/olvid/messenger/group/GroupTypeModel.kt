@@ -26,14 +26,14 @@ import io.olvid.messenger.group.GroupTypeModel.GroupType.CUSTOM
 import io.olvid.messenger.group.GroupTypeModel.GroupType.PRIVATE
 import io.olvid.messenger.group.GroupTypeModel.GroupType.READ_ONLY
 import io.olvid.messenger.group.GroupTypeModel.GroupType.SIMPLE
-import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting.ADMINS
+import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting.NOBODY
 
 open class GroupTypeModel(
     val type: GroupType,
     val title: String,
     val subtitle: String,
     var readOnlySetting: Boolean = false,
-    var remoteDeleteSetting: RemoteDeleteSetting = ADMINS
+    var remoteDeleteSetting: RemoteDeleteSetting = NOBODY
 ) {
     enum class GroupType {
         SIMPLE,
@@ -61,7 +61,7 @@ open class GroupTypeModel(
 
         companion object {
             fun byString(value: String): RemoteDeleteSetting {
-                return values().find { it.value == value } ?: ADMINS
+                return entries.find { it.value == value } ?: NOBODY
             }
         }
     }
@@ -86,7 +86,7 @@ open class GroupTypeModel(
 
     class CustomGroup(
         readOnlySetting: Boolean = false,
-        remoteDeleteSetting: RemoteDeleteSetting = ADMINS
+        remoteDeleteSetting: RemoteDeleteSetting = NOBODY
     ) : GroupTypeModel (
         type = CUSTOM,
         title = App.getContext().getString(R.string.label_group_custom_title),
@@ -96,7 +96,7 @@ open class GroupTypeModel(
     )
 
     override fun equals(other: Any?): Boolean {
-        if (!(other is GroupTypeModel)) {
+        if (other !is GroupTypeModel) {
             return false
         }
         return (type == other.type) &&

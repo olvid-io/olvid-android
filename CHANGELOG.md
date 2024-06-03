@@ -1,3 +1,13 @@
+# Build 238 (2.2)
+2024-06-03
+
+- Bookmark messages
+- Change default group permissions and adjust group types (deleting other people's messages is no longer allowed by default)
+- New message status icons to improve the vision you have on messages you send
+- Allow to reorder pinned discussions
+- Select discussions from the discussion list for bulk operations
+- Several improvements to the global search (show the discussion in which messages were posted, better highlight, etc.)
+
 # Build 237 (2.1.2)
 2024-05-06
 

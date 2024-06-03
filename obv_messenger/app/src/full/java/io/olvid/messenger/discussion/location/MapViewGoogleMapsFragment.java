@@ -370,6 +370,11 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
     }
 
     @Override
+    void setRedrawMarkersCallback(@Nullable Runnable callback) {
+        // not required for Google maps
+    }
+
+    @Override
     public void addMarker(long id, Bitmap icon, @NonNull LatLngWrapper latLngWrapper, @Nullable Float precision) {
         if (googleMap == null) {
             Logger.i("GoogleMapMapView: addMarker: googleMap is not ready to use");
@@ -483,8 +488,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bounds.first.toGoogleMaps(), zoom));
             }
         } else {
-            // arbitrary computing InitialView markers heights, and using it to compute padding :S
-            int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, getResources().getDisplayMetrics());
+            int padding = Math.min(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels) * 2 / 7;
             if (animate) {
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds(bounds.first.toGoogleMaps(), bounds.second.toGoogleMaps()), padding), TRANSITION_DURATION_MS, null);
             } else {

@@ -75,6 +75,7 @@ import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes
 import io.olvid.messenger.onboarding.flow.OnboardingScreen
@@ -94,12 +95,12 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
         popExitTransition = { slideOutOfContainer(SlideDirection.End) }
     ) {
         val activity = LocalContext.current as? Activity
-        fun finishAndOpenIdentityDetails() {
+        fun finishAndOpenDiscussionsTab() {
             activity?.finish()
-            App.openCurrentOwnedIdentityDetails(context)
+            App.showMainActivityTab(context, MainActivity.DISCUSSIONS_TAB);
         }
         BackHandler {
-            finishAndOpenIdentityDetails()
+            finishAndOpenDiscussionsTab()
         }
         val photoDir =
             File(context.cacheDir, App.CAMERA_PICTURE_FOLDER)
@@ -175,7 +176,7 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
                         ?: ""),
                 subtitle = stringResource(id = string.onboarding_picture_subtitle),
             ),
-            onClose = { App.openCurrentOwnedIdentityDetails(context) }
+            onClose = { finishAndOpenDiscussionsTab() }
         ) {
             Box(modifier = Modifier
                 .padding(16.dp)
@@ -265,7 +266,7 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
             ) {
                 TextButton(
                     enabled = onboardingFlowViewModel.absolutePhotoUrl == null,
-                    onClick = ::finishAndOpenIdentityDetails,
+                    onClick = ::finishAndOpenDiscussionsTab,
                     colors = ButtonDefaults.textButtonColors(contentColor = colorResource(id = color.olvid_gradient_contrasted), disabledContentColor = Color.Transparent)
                 ) {
                     Text(text = stringResource(id = R.string.button_label_maybe_later))
@@ -284,7 +285,7 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
                                 .publishLatestIdentityDetails(ownedIdentity?.bytesOwnedIdentity)
                         } catch (_: Exception) {
                         } finally {
-                            App.openCurrentOwnedIdentityDetails(context)
+                            finishAndOpenDiscussionsTab()
                         }
                     }
                 ) {

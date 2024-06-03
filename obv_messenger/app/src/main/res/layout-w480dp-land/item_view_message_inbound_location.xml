@@ -11,7 +11,7 @@
     android:foreground="?attr/selectableItemBackground"
     android:paddingBottom="2dp"
     android:paddingTop="2dp"
-    android:theme="@style/SubtleGreyRipple">
+    android:theme="@style/BlueOrWhiteRipple">
 
     <CheckBox
         android:id="@+id/message_selection_checkbox"

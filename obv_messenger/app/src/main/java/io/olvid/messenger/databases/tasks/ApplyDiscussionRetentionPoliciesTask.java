@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.tasks;
 
 import java.util.List;
 
+import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -62,7 +63,7 @@ public class ApplyDiscussionRetentionPoliciesTask implements Runnable {
 
             if (minTimestamp != null) {
                 List<Long> messageIds = db.messageDao().getOldDiscussionMessages(discussionAndCustomization.discussion.id, minTimestamp);
-                new DeleteMessagesTask(discussionAndCustomization.discussion.bytesOwnedIdentity, messageIds, false).run();
+                new DeleteMessagesTask(messageIds, SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL).run();
             }
 
             // count-based retention
@@ -80,7 +81,7 @@ public class ApplyDiscussionRetentionPoliciesTask implements Runnable {
                 if ((long) count > maxMessages) {
                     int toDelete = (int) ((long) count - maxMessages);
                     List<Long> messageIds = db.messageDao().getExcessiveDiscussionMessages(discussionAndCustomization.discussion.id, toDelete);
-                    new DeleteMessagesTask(discussionAndCustomization.discussion.bytesOwnedIdentity, messageIds, false).run();
+                    new DeleteMessagesTask(messageIds, SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL).run();
                 }
             }
         }

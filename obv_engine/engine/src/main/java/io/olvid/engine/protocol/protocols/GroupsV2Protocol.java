@@ -639,6 +639,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 return GroupDisbandInitialMessage.class;
             case PROPAGATED_GROUP_DISBAND_MESSAGE_ID:
                 return PropagatedGroupDisbandMessage.class;
+            case PROPAGATED_KICK_MESSAGE_ID:
+                return PropagatedKickMessage.class;
             case GROUP_RE_DOWNLOAD_INITIAL_MESSAGE_ID:
                 return GroupReDownloadInitialMessage.class;
             case INITIATE_BATCH_KEYS_RESEND_MESSAGE_ID:

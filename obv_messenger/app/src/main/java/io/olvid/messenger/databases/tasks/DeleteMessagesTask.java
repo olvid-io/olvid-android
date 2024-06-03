@@ -34,6 +34,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ShortcutActivity;
+import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -49,28 +50,25 @@ public class DeleteMessagesTask implements Runnable {
     private final boolean wholeDiscussion;
     private final Long discussionId;
     private final List<Long> selectedMessageIds;
-    private final boolean deleteEverywhere;
+    private final SecureDeleteEverywhereDialogBuilder.DeletionChoice deletionChoice;
     private final boolean processingRemoteDeleteRequest;
-    private final byte[] bytesOwnedIdentity;
 
     // Used to delete all messages in a discussion
-    public DeleteMessagesTask(@NonNull byte[] bytesOwnedIdentity, long discussionId, boolean deleteEverywhere, boolean processingRemoteDeleteRequest) {
-        this.bytesOwnedIdentity = bytesOwnedIdentity;
+    public DeleteMessagesTask(long discussionId, SecureDeleteEverywhereDialogBuilder.DeletionChoice deletionChoice, boolean processingRemoteDeleteRequest) {
         this.wholeDiscussion = true;
         this.discussionId = discussionId;
         this.selectedMessageIds = null;
-        this.deleteEverywhere = deleteEverywhere;
+        this.deletionChoice = deletionChoice;
         this.processingRemoteDeleteRequest = processingRemoteDeleteRequest;
     }
 
-    // Used to delete a specific set of messages. If deleteEverywhere is true, all messages have to be in the same discussion
-    // bytesOwnedIdentity should never be null if deleteEverywhere
-    public DeleteMessagesTask(@Nullable byte[] bytesOwnedIdentity, List<Long> selectedMessageIds, boolean deleteEverywhere) {
-        this.bytesOwnedIdentity = bytesOwnedIdentity;
+    // Used to delete a specific set of messages. If deletionChoice is not LOCAL, all messages have to be in the same discussion
+    // bytesOwnedIdentity should never be null if deletionChoice != LOCAL
+    public DeleteMessagesTask(List<Long> selectedMessageIds, SecureDeleteEverywhereDialogBuilder.DeletionChoice deletionChoice) {
         this.wholeDiscussion = false;
         this.discussionId = null;
         this.selectedMessageIds = new ArrayList<>(selectedMessageIds);
-        this.deleteEverywhere = deleteEverywhere;
+        this.deletionChoice = deletionChoice;
         this.processingRemoteDeleteRequest = false;
     }
 
@@ -95,7 +93,7 @@ public class DeleteMessagesTask implements Runnable {
             } else {
                 messages = db.messageDao().getAllDiscussionMessagesSync(discussionId);
             }
-            // if deleting all discussion stop sharing location if currently sharing
+            // if deleting a whole discussion stop sharing location if currently sharing
             if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussionId)) {
                 UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussionId, true);
             }
@@ -122,16 +120,16 @@ public class DeleteMessagesTask implements Runnable {
         }
 
         // before deleting anything, check if deleteEverywhere works
-        if (deleteEverywhere) {
+        if (deletionChoice != SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL) {
             boolean success = false;
             if (wholeDiscussion) {
-                success = Message.postDeleteDiscussionEverywhereMessage(discussionId);
+                success = Message.postDeleteDiscussionEverywhereMessage(discussionId, deletionChoice == SecureDeleteEverywhereDialogBuilder.DeletionChoice.OWNED_DEVICES);
             } else {
                 if (discussionIds.size() != 1) {
                     Logger.e("Delete everywhere from multiple discussions not implemented! Aborting.");
                 } else {
                     long singleDiscussionId = discussionIds.toArray(new Long[0])[0];
-                    success = Message.postDeleteMessagesEverywhereMessage(singleDiscussionId, messages);
+                    success = Message.postDeleteMessagesEverywhereMessage(singleDiscussionId, messages, deletionChoice == SecureDeleteEverywhereDialogBuilder.DeletionChoice.OWNED_DEVICES);
                 }
             }
             if (!success) {

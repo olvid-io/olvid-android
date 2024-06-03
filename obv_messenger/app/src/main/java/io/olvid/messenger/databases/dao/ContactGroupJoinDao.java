@@ -116,6 +116,11 @@ public interface ContactGroupJoinDao {
             " AND " + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid)")
     boolean isGroupMember(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, byte[] bytesGroupOwnerAndUid);
 
+    @Query("SELECT EXISTS (SELECT 1 FROM " + ContactGroupJoin.TABLE_NAME +
+            " WHERE " + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid )")
+    boolean groupHasMembers(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+
     class ContactAndTimestamp {
         @Embedded
         public Contact contact;

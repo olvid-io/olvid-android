@@ -1088,7 +1088,6 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 }
             }
         }
-
     }
 
     private fun editMessage(messageId: Long) {

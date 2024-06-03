@@ -38,6 +38,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -651,6 +652,19 @@ public class App extends Application implements DefaultLifecycleObserver {
                 .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
                     try {
                         context.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+
+                        int unwraps = 0;
+                        Context baseContext = context;
+                        while (!(baseContext instanceof DiscussionActivity) && baseContext instanceof ContextThemeWrapper) {
+                            baseContext = ((ContextThemeWrapper) baseContext).getBaseContext();
+                            unwraps++;
+                            if (unwraps > 10) {
+                                break;
+                            }
+                        }
+                        if (baseContext instanceof DiscussionActivity) {
+                            ((DiscussionActivity) baseContext).getDiscussionDelegate().doNotMarkAsReadOnPause();
+                        }
                     } catch (Exception e) {
                         App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
                     }

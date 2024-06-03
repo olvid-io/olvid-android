@@ -31,6 +31,7 @@ import android.os.storage.StorageManager
 import android.provider.Settings
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
+import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 import android.text.format.Formatter
 import androidx.activity.ComponentActivity
@@ -61,12 +62,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle.State.RESUMED
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
-import io.olvid.messenger.R
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.firebase.ObvFirebaseMessagingService
@@ -74,6 +75,8 @@ import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.services.AvailableSpaceHelper
 import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
+import io.olvid.messenger.troubleshooting.TroubleshootingItemType.LOCATION
+import io.olvid.messenger.troubleshooting.TroubleshootingItemType.LOCATION_PERMISSIONS
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -108,10 +111,14 @@ class TroubleshootingActivity : ComponentActivity() {
             val fullScreenIntentState = remember {
                 CheckState(FULL_SCREEN_CHECK_STATE, troubleshootingDataStore) { getFullScreenIntentState() }
             }
+            val locationState = remember {
+                CheckState(LOCATION_CHECK_STATE, troubleshootingDataStore) { getLocationState() }
+            }
 
             val postNotificationsState = rememberPermissionState( permission.POST_NOTIFICATIONS )
             val cameraState = rememberPermissionState(permission.CAMERA)
             val microphoneState = rememberPermissionState(permission.RECORD_AUDIO)
+            val locationPermissionState = rememberMultiplePermissionsState(listOf(permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION))
 
             LifecycleCheckerEffect(
                 checks = listOf<CheckState<out Any>>(
@@ -121,12 +128,13 @@ class TroubleshootingActivity : ComponentActivity() {
                     storageState,
                     permanentSocketState,
                     backupState,
-                    fullScreenIntentState
+                    fullScreenIntentState,
+                    locationState
                 )
             )
 
             val troubleshootingItems : MutableState<List<TroubleshootingItemType>> = remember {
-                mutableStateOf(mutableListOf<TroubleshootingItemType>())
+                mutableStateOf(mutableListOf())
             }
 
             LaunchedEffect(Unit) {
@@ -143,6 +151,11 @@ class TroubleshootingActivity : ComponentActivity() {
 
                 if (VERSION.SDK_INT >= VERSION_CODES.M) {
                     list.add(Triple(microphoneState.status.isGranted, false, TroubleshootingItemType.MICROPHONE))
+                }
+
+                list.add(Triple(locationState.valid, false, LOCATION))
+                if (VERSION.SDK_INT >= VERSION_CODES.M) {
+                    list.add(Triple(locationPermissionState.allPermissionsGranted, false, LOCATION_PERMISSIONS))
                 }
 
                 if (VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -203,7 +216,7 @@ class TroubleshootingActivity : ComponentActivity() {
                             )
                         },
                         onBack = {
-                            onBackPressed()
+                            onBackPressedDispatcher.onBackPressed()
                         }
                     )
 
@@ -250,7 +263,7 @@ class TroubleshootingActivity : ComponentActivity() {
                                 ) {
                                     TextButton(
                                         onClick = {
-                                            if (VERSION.SDK_INT >= VERSION_CODES.M) {
+                                            if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
                                                 notificationsPermissionLauncher.launch(permission.POST_NOTIFICATIONS)
                                             }
                                         }
@@ -297,6 +310,50 @@ class TroubleshootingActivity : ComponentActivity() {
                                         onClick =
                                         {
                                             microphoneState.launchPermissionRequest()
+                                            coroutineScope.launch {
+                                                delay(100)
+                                                if (lifecycle.currentState == RESUMED) {
+                                                    startSettingsActivity()
+                                                }
+                                            }
+                                        }
+                                    ) {
+                                        Text(text = stringResource(id = string.troubleshooting_request_permission))
+                                    }
+                                }
+                            }
+
+                            LOCATION -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = string.troubleshooting_location_valid_title),
+                                    description = stringResource(id = string.troubleshooting_location_valid_description),
+                                    titleInvalid = stringResource(id = string.troubleshooting_location_invalid_title),
+                                    valid = locationState.valid,
+                                    critical = false,
+                                ) {
+                                    TextButton(
+                                        onClick =
+                                        {
+                                            startActivity(Intent(ACTION_LOCATION_SOURCE_SETTINGS))
+                                        }
+                                    ) {
+                                        Text(text = stringResource(id = string.dialog_title_enable_location))
+                                    }
+                                }
+                            }
+
+                            LOCATION_PERMISSIONS -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = string.troubleshooting_location_permissions_valid_title),
+                                    description = stringResource(id = string.troubleshooting_location_permissions_valid_description),
+                                    titleInvalid = stringResource(id = string.troubleshooting_location_permissions_invalid_title),
+                                    valid = locationPermissionState.allPermissionsGranted,
+                                    critical = false,
+                                ) {
+                                    TextButton(
+                                        onClick =
+                                        {
+                                            locationPermissionState.launchMultiplePermissionRequest()
                                             coroutineScope.launch {
                                                 delay(100)
                                                 if (lifecycle.currentState == RESUMED) {
@@ -371,9 +428,9 @@ class TroubleshootingActivity : ComponentActivity() {
 
                             TroubleshootingItemType.FULL_SCREEN_INTENT -> {
                                 TroubleShootItem(
-                                    title = stringResource(id = R.string.troubleshooting_incoming_call_valid_title),
-                                    description = stringResource(id = R.string.troubleshooting_incoming_call_valid_description),
-                                    descriptionInvalid = stringResource(id = R.string.troubleshooting_incoming_call_invalid_description),
+                                    title = stringResource(id = string.troubleshooting_incoming_call_valid_title),
+                                    description = stringResource(id = string.troubleshooting_incoming_call_valid_description),
+                                    descriptionInvalid = stringResource(id = string.troubleshooting_incoming_call_invalid_description),
                                     valid = fullScreenIntentState.valid,
                                     checkState = fullScreenIntentState
                                 ) {
@@ -419,8 +476,8 @@ class TroubleshootingActivity : ComponentActivity() {
                                     getBackupStateInfo()
                                 }
                                 TroubleShootItem(
-                                    title = stringResource(id = R.string.button_label_backup_settings),
-                                    description = stringResource(id = R.string.troubleshooting_backup_valid_description),
+                                    title = stringResource(id = string.button_label_backup_settings),
+                                    description = stringResource(id = string.troubleshooting_backup_valid_description),
                                     titleInvalid = backupsStateInfo?.title,
                                     descriptionInvalid = backupsStateInfo?.description,
                                     valid = backupState.valid,
@@ -455,7 +512,7 @@ class TroubleshootingActivity : ComponentActivity() {
                                 PingListener(connectivityState == 2) {
                                     ping = when (it) {
                                         -1L -> {
-                                            getString(R.string.label_over_max_ping_delay, 5)
+                                            getString(string.label_over_max_ping_delay, 5)
                                         }
 
                                         0L -> {
@@ -463,15 +520,15 @@ class TroubleshootingActivity : ComponentActivity() {
                                         }
 
                                         else -> {
-                                            getString(R.string.label_ping_delay, it)
+                                            getString(string.label_ping_delay, it)
                                         }
                                     }
                                 }
                                 TroubleShootItem(
                                     title = when (connectivityState) {
-                                        2 -> stringResource(id = R.string.label_ping_connectivity_connected)
-                                        1 -> stringResource(id = R.string.label_ping_connectivity_connecting)
-                                        else -> stringResource(id = R.string.label_ping_connectivity_none)
+                                        2 -> stringResource(id = string.label_ping_connectivity_connected)
+                                        1 -> stringResource(id = string.label_ping_connectivity_connecting)
+                                        else -> stringResource(id = string.label_ping_connectivity_none)
                                     },
                                     description = ping, valid = connectivityState == 2
                                 ) {

@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.ObvBytesKey;
@@ -120,6 +121,7 @@ public class Message {
     public static final String EDITED = "edited";
     public static final String FORWARDED = "forwarded";
     public static final String MENTIONED = "mentioned";
+    public static final String BOOKMARKED = "bookmarked";
     public static final String REACTIONS = "reactions";
     public static final String IMAGE_RESOLUTIONS = "image_resolutions"; // null or "" = no images, "102x234;a340x445" = 2 images, second one is animated
     public static final String MISSED_MESSAGE_COUNT = "missed_message_count"; // only used in inbound messages: the number of missing sequence numbers when this message is received. 0 --> everything is fine
@@ -142,6 +144,10 @@ public class Message {
     public static final int STATUS_COMPUTING_PREVIEW = 8; // computing a preview of the image/video attachments before passing to engine
     public static final int STATUS_UNDELIVERED = 9; // for outbound messages, the message could not be uploaded/delivered and will never be
     public static final int STATUS_SENT_FROM_ANOTHER_DEVICE = 10; // for outbound messages sent from another device. If some day we synchronize outbound status, this should no longer be used.
+    public static final int STATUS_DELIVERED_ALL = 11;
+    public static final int STATUS_DELIVERED_ALL_READ_ONE = 12;
+    public static final int STATUS_DELIVERED_ALL_READ_ALL = 13;
+
 
 
     public static final int WIPE_STATUS_NONE = 0;
@@ -264,6 +270,9 @@ public class Message {
 
     @ColumnInfo(name = MENTIONED)
     public boolean mentioned;
+
+    @ColumnInfo(name = BOOKMARKED)
+    public boolean bookmarked;
 
     @ColumnInfo(name = REACTIONS)
     @Nullable
@@ -593,35 +602,32 @@ public class Message {
         return message;
     }
 
-    public static boolean postDeleteMessagesEverywhereMessage(long discussionId, List<Message> messages) {
+    public static boolean postDeleteMessagesEverywhereMessage(long discussionId, List<Message> messages, boolean onlyDeleteFromOwnedDevices) {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(discussionId);
 
-        if (!discussion.isNormalOrReadOnly()) {
-            Logger.e("Trying to delete everywhere in a locked discussion!!! --> locally deleting instead");
-            return true;
-        }
+        ArrayList<byte[]> byteContactIdentities = new ArrayList<>();
+        if (discussion.isNormalOrReadOnly() && !onlyDeleteFromOwnedDevices) {
+            List<Contact> contacts;
+            switch (discussion.discussionType) {
+                case Discussion.TYPE_CONTACT:
+                    contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier));
+                    break;
+                case Discussion.TYPE_GROUP:
+                    contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    break;
+                case Discussion.TYPE_GROUP_V2:
+                    contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    break;
+                default:
+                    Logger.e("Unknown discussion type!!! --> postDeleteMessagesEverywhereMessage() is not possible");
+                    contacts = Collections.emptyList();
+                    break;
+            }
 
-        List<Contact> contacts;
-        switch (discussion.discussionType) {
-            case Discussion.TYPE_CONTACT:
-                contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier));
-                break;
-            case Discussion.TYPE_GROUP:
-                contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
-                break;
-            case Discussion.TYPE_GROUP_V2:
-                contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
-                break;
-            default:
-                Logger.e("Unknown discussion type!!! --> locally deleting instead");
-                return true;
-        }
-
-
-        ArrayList<byte[]> byteContactIdentities = new ArrayList<>(contacts.size());
-        for (Contact contact : contacts) {
-            byteContactIdentities.add(contact.bytesContactIdentity);
+            for (Contact contact : contacts) {
+                byteContactIdentities.add(contact.bytesContactIdentity);
+            }
         }
 
         // also notify other owned devices
@@ -630,7 +636,7 @@ public class Message {
         }
 
         // for group discussions with no members (or discussion with self)
-        if (byteContactIdentities.size() == 0) {
+        if (byteContactIdentities.isEmpty()) {
             return true;
         }
 
@@ -656,35 +662,33 @@ public class Message {
         }
     }
 
-    public static boolean postDeleteDiscussionEverywhereMessage(long discussionId) {
+    public static boolean postDeleteDiscussionEverywhereMessage(long discussionId, boolean onlyDeleteFromOwnedDevices) {
         AppDatabase db = AppDatabase.getInstance();
         Discussion discussion = db.discussionDao().getById(discussionId);
 
-        if (!discussion.isNormalOrReadOnly()) {
-            Logger.e("Trying to delete everywhere a locked discussion!!! --> locally deleting instead");
-            return true;
-        }
+        ArrayList<byte[]> byteContactIdentities = new ArrayList<>();
+        if (discussion.isNormalOrReadOnly() && !onlyDeleteFromOwnedDevices) {
 
-        List<Contact> contacts;
-        switch (discussion.discussionType) {
-            case Discussion.TYPE_CONTACT:
-                contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier));
-                break;
-            case Discussion.TYPE_GROUP:
-                contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
-                break;
-            case Discussion.TYPE_GROUP_V2:
-                contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
-                break;
-            default:
-                Logger.e("Unknown discussion type!!! --> locally deleting instead");
-                return true;
-        }
+            List<Contact> contacts;
+            switch (discussion.discussionType) {
+                case Discussion.TYPE_CONTACT:
+                    contacts = Collections.singletonList(db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier));
+                    break;
+                case Discussion.TYPE_GROUP:
+                    contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    break;
+                case Discussion.TYPE_GROUP_V2:
+                    contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                    break;
+                default:
+                    Logger.e("Unknown discussion type!!! --> postDeleteDiscussionEverywhereMessage() is not possible");
+                    contacts = Collections.emptyList();
+                    break;
+            }
 
-
-        ArrayList<byte[]> byteContactIdentities = new ArrayList<>(contacts.size());
-        for (Contact contact : contacts) {
-            byteContactIdentities.add(contact.bytesContactIdentity);
+            for (Contact contact : contacts) {
+                byteContactIdentities.add(contact.bytesContactIdentity);
+            }
         }
 
         // also notify other owned devices
@@ -693,7 +697,7 @@ public class Message {
         }
 
         // for group discussions with no members (or discussion with self)
-        if (byteContactIdentities.size() == 0) {
+        if (byteContactIdentities.isEmpty()) {
             return true;
         }
 
@@ -1303,7 +1307,7 @@ public class Message {
             return false;
         }
         List<MessageRecipientInfo> messageRecipientInfos = AppDatabase.getInstance().messageRecipientInfoDao().getAllByMessageId(id);
-        if (messageRecipientInfos.size() == 0) {
+        if (messageRecipientInfos.isEmpty()) {
             return false;
         }
         // we fetch the discussion only to get our ownedIdentity
@@ -1311,41 +1315,60 @@ public class Message {
         if (discussion == null) {
             return false;
         }
+
         // when computing the message status, do not take the recipient info of my other owned devices into account, unless this is the only recipient info (discussion with myself)
         boolean ignoreOwnRecipientInfo = messageRecipientInfos.size() > 1;
-        int newStatus = 100000;
-        boolean passedToEngineForEveryone = true;
+        int recipientsCount = 0;
+        int processingCount = 0;
+        int deliveredCount = 0;
+        int readCount = 0;
+
         for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
             if (ignoreOwnRecipientInfo && Arrays.equals(messageRecipientInfo.bytesContactIdentity, discussion.bytesOwnedIdentity)) {
                 continue;
             }
 
+            recipientsCount++;
+
             if (messageRecipientInfo.engineMessageIdentifier == null) {
-                passedToEngineForEveryone = false;
                 continue;
             }
 
             if (messageRecipientInfo.timestampSent == null) {
-                newStatus = STATUS_PROCESSING;
-                break;
-            } else if (messageRecipientInfo.timestampDelivered == null) {
-                newStatus = STATUS_SENT;
-            } else if (messageRecipientInfo.timestampRead == null) {
-                newStatus = Math.min(newStatus, STATUS_DELIVERED);
-            } else {
-                newStatus = Math.min(newStatus, STATUS_DELIVERED_AND_READ);
+                processingCount++;
+            }
+            if (messageRecipientInfo.timestampDelivered != null) {
+                deliveredCount++;
+            }
+            if (messageRecipientInfo.timestampRead != null) {
+                readCount++;
             }
         }
 
-        // never mark a message as delivered/read if not delivered to all recipients
-        if (!passedToEngineForEveryone && newStatus != 100000 && newStatus > STATUS_SENT) {
+
+        final int newStatus;
+        if (processingCount != 0) {
+            newStatus = STATUS_PROCESSING;
+        } else if (deliveredCount == 0) {
             newStatus = STATUS_SENT;
+        } else if (recipientsCount > 1 && deliveredCount == recipientsCount) {
+            if (readCount == recipientsCount) {
+                newStatus = STATUS_DELIVERED_ALL_READ_ALL;
+            } else if (readCount > 0) {
+                newStatus = STATUS_DELIVERED_ALL_READ_ONE;
+            } else {
+                newStatus = STATUS_DELIVERED_ALL;
+            }
+        } else if (readCount > 0) {
+            newStatus = STATUS_DELIVERED_AND_READ;
+        } else {
+            newStatus = STATUS_DELIVERED;
         }
 
-        if (newStatus != 100000 && newStatus != status) {
+        if (newStatus != status) {
             boolean shouldStartExpiration =
                     (status == STATUS_UNPROCESSED || status == STATUS_PROCESSING || status == STATUS_COMPUTING_PREVIEW)
-                    && (newStatus == STATUS_SENT || newStatus == STATUS_DELIVERED || newStatus == STATUS_DELIVERED_AND_READ);
+                    && (newStatus == STATUS_SENT || newStatus == STATUS_DELIVERED || newStatus == STATUS_DELIVERED_AND_READ || newStatus == STATUS_DELIVERED_ALL || newStatus == STATUS_DELIVERED_ALL_READ_ONE || newStatus == STATUS_DELIVERED_ALL_READ_ALL);
             status = newStatus;
             if (shouldStartExpiration && jsonExpiration != null) {
                 App.runThread(new ExpiringOutboundMessageSent(this));
@@ -1458,6 +1481,12 @@ public class Message {
         return (messageType == Message.TYPE_INBOUND_MESSAGE || messageType == Message.TYPE_OUTBOUND_MESSAGE)
                 && wipeStatus == Message.WIPE_STATUS_NONE
                 && !limitedVisibility;
+    }
+
+    public boolean isBookmarkableAndDetailable() {
+        return (messageType == Message.TYPE_INBOUND_MESSAGE
+                || messageType == Message.TYPE_OUTBOUND_MESSAGE
+                || messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE);
     }
 
     // return true if message expired and update locationType field

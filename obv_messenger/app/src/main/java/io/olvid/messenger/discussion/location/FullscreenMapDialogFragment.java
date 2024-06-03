@@ -160,6 +160,7 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
         getChildFragmentManager().beginTransaction().replace(R.id.fullscreen_map_map_view_container, mapView).commit();
 
         mapView.setOnMapReadyCallback(this::onMapReadyCallback);
+        mapView.setRedrawMarkersCallback(this::redrawMarkersCallback);
 
         ImageView layersButton = rootView.findViewById(R.id.fullscreen_map_layers_button);
         mapView.setLayersButtonVisibilitySetter((Boolean visible) -> layersButton.setVisibility((visible != null && visible) ? View.VISIBLE : View.GONE));
@@ -202,6 +203,22 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
             // observe sharing messages to update map when messages are updated
             centerOnMarkersOnNextLocationMessagesUpdate = true;
             sharingLocationMessageLiveData = AppDatabase.getInstance().messageDao().getCurrentlySharingLocationMessagesInDiscussionLiveData(discussionId);
+            sharingLocationMessageLiveData.observe(this, this::sharingLocationMessagesObserver);
+        }
+    }
+
+    public void redrawMarkersCallback() {
+        if (messageId != null && messageLocationType != Message.LOCATION_TYPE_SHARE) {
+            if (messageJsonLocation != null) {
+                if (messageLocationType == Message.LOCATION_TYPE_SEND) {
+                    mapView.addMarker(messageId, getPinMarkerIcon(), new LatLngWrapper(messageJsonLocation), messageJsonLocation.getPrecision());
+                } else if (messageLocationType == Message.LOCATION_TYPE_SHARE_FINISHED) {
+                    mapView.addMarker(messageId, getInitialViewMarkerIcon(messageSenderIdentifier), new LatLngWrapper(messageJsonLocation), messageJsonLocation.getPrecision());
+                }
+            }
+        } else {
+            sharingLocationMessageLiveData.removeObservers(this);
+            currentlyShownMessagesIdList.clear();
             sharingLocationMessageLiveData.observe(this, this::sharingLocationMessagesObserver);
         }
     }

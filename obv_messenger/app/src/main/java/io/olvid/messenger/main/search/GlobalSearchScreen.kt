@@ -19,12 +19,11 @@
 
 package io.olvid.messenger.main.search
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.view.inputmethod.InputMethodManager
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,13 +40,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.DropdownMenu
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -59,55 +65,58 @@ import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
+import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.databases.tasks.PropagateBookmarkedMessageChangeTask
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.gallery.FyleListItem
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import io.olvid.messenger.main.InitialView
-import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.main.MainScreenEmptyList
+import io.olvid.messenger.main.discussions.getAnnotatedBody
+import io.olvid.messenger.main.discussions.getAnnotatedTitle
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
 
 @Composable
 fun GlobalSearchScreen(
     globalSearchViewModel: GlobalSearchViewModel,
-    linkPreviewViewModel: LinkPreviewViewModel
+    linkPreviewViewModel: LinkPreviewViewModel,
+    bookmarks : List<DiscussionAndMessage>? = null
 ) {
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val scrollState = rememberLazyListState()
     LaunchedEffect(scrollState.isScrollInProgress) {
         if (scrollState.isScrollInProgress) {
-            (context as? Activity)?.window?.decorView?.windowToken?.let { windowToken ->
-                (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(windowToken,0)
-            }
+            keyboardController?.hide()
         }
     }
-    if (globalSearchViewModel.searching.value || globalSearchViewModel.noResults.value.not()) {
+    if (globalSearchViewModel.searching || globalSearchViewModel.noResults.value.not() || bookmarks.isNullOrEmpty().not()) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colorResource(id = color.almostWhite)),
+                .background(colorResource(id = R.color.almostWhite)),
             contentAlignment = Alignment.TopStart
         ) {
-            if (globalSearchViewModel.searching.value) {
+            if (globalSearchViewModel.searching) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
             LazyColumn(
                 state = scrollState,
-                contentPadding = PaddingValues(bottom = 80.dp)) {
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
                 globalSearchViewModel.contactsFound?.takeIf { it.isNotEmpty() }?.let {
                     item {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = string.global_search_result_contacts),
+                            text = stringResource(id = R.string.global_search_result_contacts),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -126,7 +135,7 @@ fun GlobalSearchScreen(
                     item {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = string.global_search_result_groups),
+                            text = stringResource(id = R.string.global_search_result_groups),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -146,7 +155,7 @@ fun GlobalSearchScreen(
                     item {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = string.global_search_result_other_discussions),
+                            text = stringResource(id = R.string.global_search_result_other_discussions),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -162,18 +171,40 @@ fun GlobalSearchScreen(
                     }
                 }
 
+                bookmarks?.takeIf { it.isNotEmpty() }?.let {
+                    items(it) { message ->
+                        SearchResult(
+                            discussionAndMessage = message,
+                            globalSearchViewModel = globalSearchViewModel,
+                            menuItems = listOf(
+                                stringResource(id = R.string.menu_action_unbookmark) to {
+                                    App.runThread {
+                                        AppDatabase.getInstance().messageDao().updateBookmarked(message.message.id, false)
+                                        AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
+                                            PropagateBookmarkedMessageChangeTask(bytesOwnedIdentity, message.message, false).run()
+                                        }
+                                    }
+                                }
+                            )
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+
                 globalSearchViewModel.messagesFound?.takeIf { it.isNotEmpty() }?.let {
                     item {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = string.global_search_result_messages),
+                            text = stringResource(id = R.string.global_search_result_messages) + (globalSearchViewModel.messageLimitReachedCount?.let { count -> " (${it.size}/$count)" } ?: ""),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    items(it) { message ->
+                    items(it) { discussionAndMessage ->
                         SearchResult(
-                            message = message,
+                            discussionAndMessage = discussionAndMessage,
                             globalSearchViewModel = globalSearchViewModel
                         )
                     }
@@ -185,7 +216,7 @@ fun GlobalSearchScreen(
                     item {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = string.global_search_result_attachments),
+                            text = stringResource(id = R.string.global_search_result_attachments) + (globalSearchViewModel.attachmentLimitReachedCount?.let { count -> " (${it.size}/$count)" } ?: ""),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -206,7 +237,8 @@ fun GlobalSearchScreen(
                                 )
                                 Text(
                                     modifier = Modifier.weight(1f),
-                                    text = AppSingleton.getContactCustomDisplayName(fyle.message.senderIdentifier) ?: stringResource(id = string.text_deleted_contact),
+                                    text = AppSingleton.getContactCustomDisplayName(fyle.message.senderIdentifier)
+                                        ?: stringResource(id = R.string.text_deleted_contact),
                                     fontSize = 14.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -253,13 +285,13 @@ fun GlobalSearchScreen(
                                                     context,
                                                     fyle.fyleAndStatus.fyleMessageJoinWithStatus.messageId,
                                                     fyle.fyleAndStatus.fyleMessageJoinWithStatus.fyleId
-                                                );
+                                                )
                                             } else {
                                                 App.openFyleInExternalViewer(
                                                     context,
                                                     fyle.fyleAndStatus,
                                                     null
-                                                );
+                                                )
                                             }
                                         }
                                     )
@@ -272,18 +304,23 @@ fun GlobalSearchScreen(
         }
     } else {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            MainScreenEmptyList(icon = R.drawable.ic_search_anything, title = R.string.explanation_empty_global_search)
+            if (bookmarks != null) {
+                MainScreenEmptyList(
+                    icon = R.drawable.ic_star,
+                    title = R.string.explanation_empty_bookmarks
+                )
+            } else {
+                MainScreenEmptyList(
+                    icon = R.drawable.ic_search_anything,
+                    title = R.string.explanation_empty_global_search
+                )
+            }
         }
     }
 }
 
 fun Message.goto(context: Context) {
-    context.startActivity(Intent(context, MainActivity::class.java).apply {
-        action = MainActivity.FORWARD_ACTION
-        putExtra(
-            MainActivity.FORWARD_TO_INTENT_EXTRA,
-            DiscussionActivity::class.java.name
-        )
+    context.startActivity(Intent(context, DiscussionActivity::class.java).apply {
         putExtra(
             DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA,
             discussionId
@@ -295,19 +332,23 @@ fun Message.goto(context: Context) {
     })
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SearchResult(
+    modifier: Modifier = Modifier,
     searchableDiscussion: SearchableDiscussion? = null,
-    message: Message? = null,
+    discussionAndMessage: DiscussionAndMessage? = null,
     contact: Contact? = null,
+    menuItems: List<Pair<String, () -> Unit>>? = null,
     globalSearchViewModel: GlobalSearchViewModel
 ) {
     val context = LocalContext.current
+    var menuExpanded by remember { mutableStateOf(false) }
     Row(
-        modifier = Modifier
+        modifier = modifier
             .height(Min)
             .fillMaxWidth()
-            .clickable {
+            .combinedClickable(onClick = {
                 searchableDiscussion?.let {
                     App.openDiscussionActivity(context, it.discussionId)
                 } ifNull {
@@ -327,13 +368,35 @@ private fun SearchResult(
                             )
                         }
                     } ifNull {
-                        message?.goto(context)
+                        discussionAndMessage?.message?.goto(context)
                     }
                 }
-            }
+            },
+                onLongClick = {
+                    if (menuItems
+                            .isNullOrEmpty()
+                            .not()
+                    ) {
+                        menuExpanded = true
+                    }
+                }
+            )
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // contextual menu
+        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+            menuItems?.forEach {
+                DropdownMenuItem(
+                    text = { Text(text = it.first) },
+                    onClick = {
+                        it.second()
+                        menuExpanded = false
+                    }
+                )
+            }
+        }
+
         // InitialView
         InitialView(
             modifier = Modifier
@@ -350,8 +413,12 @@ private fun SearchResult(
                 contact?.let {
                     view.setContact(contact)
                 }
-                message?.senderIdentifier?.let {
-                    view.setFromCache(message.senderIdentifier)
+                discussionAndMessage?.discussion?.let {
+                    view.setDiscussion(it)
+                } ifNull {
+                    discussionAndMessage?.message?.senderIdentifier?.let {
+                        view.setFromCache(it)
+                    }
                 }
             },
         )
@@ -368,9 +435,9 @@ private fun SearchResult(
                             SettingsActivity.getContactDisplayNameFormat(),
                             SettingsActivity.getUppercaseLastName()
                         ) ?: contact.getCustomDisplayName()) }?.let { globalSearchViewModel.highlight(it) }
-                    ?: AnnotatedString(message?.let { AppSingleton.getContactCustomDisplayName(message.senderIdentifier) }
-                        ?: stringResource(id = string.text_deleted_contact)),
-                color = colorResource(id = color.primary700),
+                    ?: discussionAndMessage?.discussion?.getAnnotatedTitle(context)
+                    ?: AnnotatedString(stringResource(id = R.string.text_deleted_contact)),
+                color = colorResource(id = R.color.primary700),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
@@ -381,40 +448,37 @@ private fun SearchResult(
                 AnnotatedString(it)
             }
                 ?: contact?.let {
-                    contact.getIdentityDetails()?.let {
+                    contact.getIdentityDetails()?.let { identityDetails ->
                         if (contact.customDisplayName != null)
                             AnnotatedString(
-                                it.formatDisplayName(
+                                identityDetails.formatDisplayName(
                                     JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
                                     SettingsActivity.getUppercaseLastName()
                                 )
                             )
                         else
-                            it.formatPositionAndCompany(
+                            identityDetails.formatPositionAndCompany(
                                 SettingsActivity.getContactDisplayNameFormat()
                             )?.let { AnnotatedString(it) }
                     }
                 }
-                ?: message?.getStringContent(context)?.let {
-                    globalSearchViewModel.truncateMessageBody(body = it)
-                })?.let {
+                ?: discussionAndMessage?.discussion?.getAnnotatedBody(context, discussionAndMessage.message.apply {
+                    contentBody = globalSearchViewModel.truncateMessageBody(body = discussionAndMessage.message.getStringContent(context))
+                }))?.let {
                 Text(
-                    text = if (message?.status == Message.STATUS_DRAFT)
-                        AnnotatedString(stringResource(id = string.text_draft_message_prefix, "")) + globalSearchViewModel.highlight(it)
-                    else
-                        globalSearchViewModel.highlight(it),
-                    color = colorResource(id = color.greyTint),
+                    text = globalSearchViewModel.highlight(it),
+                    color = colorResource(id = R.color.greyTint),
                     fontSize = 14.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
 
-            message?.timestamp?.let {
+            discussionAndMessage?.message?.timestamp?.let {
                 // Date
                 Text(
                     text = StringUtils.getLongNiceDateString(context, it) as String,
-                    color = colorResource(id = color.grey),
+                    color = colorResource(id = R.color.grey),
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

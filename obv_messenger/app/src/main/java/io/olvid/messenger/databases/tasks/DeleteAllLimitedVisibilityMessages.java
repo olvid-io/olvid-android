@@ -21,6 +21,7 @@ package io.olvid.messenger.databases.tasks;
 
 import java.util.List;
 
+import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 
 public class DeleteAllLimitedVisibilityMessages implements Runnable {
@@ -30,6 +31,6 @@ public class DeleteAllLimitedVisibilityMessages implements Runnable {
         AppDatabase db = AppDatabase.getInstance();
 
         List<Long> messageIds = db.messageDao().getAllLimitedVisibilityMessageIds();
-        new DeleteMessagesTask(null, messageIds, false).run();
+        new DeleteMessagesTask(messageIds, SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL).run();
     }
 }

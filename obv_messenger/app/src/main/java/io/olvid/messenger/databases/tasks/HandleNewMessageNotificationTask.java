@@ -42,6 +42,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
+import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -261,10 +262,10 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
             boolean messageShouldBeRemoteDeleted = false;
             if (remoteDeleteAndEditRequest != null && remoteDeleteAndEditRequest.requestType == RemoteDeleteAndEditRequest.TYPE_DELETE) {
-                // check whether the remote delete request comes from the message sender or an authorized group member
-                if (remoteDeleteAndEditRequest.remoteDeleter == messageSender.bytesOwnedIdentity || discussion.discussionType != Discussion.TYPE_GROUP_V2) {
+                // check whether the remote delete request comes from another owned device or the message sender or an authorized group member
+                if (remoteDeleteAndEditRequest.remoteDeleter == messageSender.bytesOwnedIdentity) {
                     messageShouldBeRemoteDeleted = true;
-                } else {
+                } else if (discussion.discussionType == Discussion.TYPE_GROUP_V2){
                     Group2Member group2Member = db.group2MemberDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier, remoteDeleteAndEditRequest.remoteDeleter);
                     if (group2Member != null) {
                         messageShouldBeRemoteDeleted = group2Member.permissionRemoteDeleteAnything || (group2Member.permissionEditOrRemoteDeleteOwnMessages && Arrays.equals(remoteDeleteAndEditRequest.remoteDeleter, messageSender.getSenderIdentity()));
@@ -850,9 +851,10 @@ public class HandleNewMessageNotificationTask implements Runnable {
         if (discussion == null) {
             return;
         }
+
         int messagesToDelete = db.messageDao().countMessagesInDiscussion(discussion.id);
 
-        new DeleteMessagesTask(discussion.bytesOwnedIdentity, discussion.id, false, true).run();
+        new DeleteMessagesTask(discussion.id, SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL, true).run();
         // stop sharing location if needed
         if (UnifiedForegroundService.LocationSharingSubService.isDiscussionSharingLocation(discussion.id)) {
             UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussion.id, true);
@@ -871,7 +873,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
     }
 
     private void handleDeleteMessages(JsonDeleteMessages jsonDeleteMessages, @NonNull MessageSender messageSender, long serverTimestamp) {
-        if (jsonDeleteMessages.getMessageReferences() == null || jsonDeleteMessages.getMessageReferences().size() == 0) {
+        if (jsonDeleteMessages.getMessageReferences() == null || jsonDeleteMessages.getMessageReferences().isEmpty()) {
             return;
         }
 
@@ -1173,7 +1175,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
 
     private Discussion getDiscussion(byte[] bytesGroupUid, byte[] bytesGroupOwner, byte[] bytesGroupIdentifier, JsonOneToOneMessageIdentifier oneToOneMessageIdentifier, MessageSender messageSender, @Nullable GroupV2.Permission requiredPermission) {
-        // handle the special case of messages from another device differently: the message shoud also be accepted for locked/pre discussions
+        // handle the special case of messages from another device differently: the message should also be accepted for locked/pre discussions
         if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
             if (bytesGroupIdentifier != null) {
                 return db.discussionDao().getByGroupIdentifierWithAnyStatus(messageSender.bytesOwnedIdentity, bytesGroupIdentifier);
@@ -1191,6 +1193,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
         // we keep this test for now to maintain backward compatibility, but oneToOneMessageIdentifier should always be non-null in this case
         if (bytesGroupUid == null && bytesGroupOwner == null && bytesGroupIdentifier == null) {
+            if (requiredPermission == GroupV2.Permission.REMOTE_DELETE_ANYTHING) {
+                return null;
+            }
             if (oneToOneMessageIdentifier != null) {
                 byte[] bytesContactIdentity = oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity);
                 if (bytesContactIdentity == null) {
@@ -1262,6 +1267,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
         } else {
             if (bytesGroupUid == null || bytesGroupOwner == null) {
                 Logger.i("Received a message with one of groupOwner or groupUid null, IGNORING IT!");
+                return null;
+            }
+            if (requiredPermission == GroupV2.Permission.REMOTE_DELETE_ANYTHING) {
                 return null;
             }
             byte[] bytesGroupOwnerAndUid = new byte[bytesGroupUid.length + bytesGroupOwner.length];

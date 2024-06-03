@@ -1522,7 +1522,9 @@ fun CallParticipant(
                         },
                     initialViewSetup = { view ->
                         if (bytesOwnedIdentity != null) {
-                            view.setFromCache(bytesOwnedIdentity)
+                            App.runThread {
+                                view.setOwnedIdentity(AppDatabase.getInstance().ownedIdentityDao().get(bytesOwnedIdentity))
+                            }
                         } else {
                             callParticipant?.initialViewSetup()?.invoke(view)
                         }

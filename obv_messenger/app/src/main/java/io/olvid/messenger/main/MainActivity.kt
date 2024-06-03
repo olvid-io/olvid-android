@@ -82,9 +82,6 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.dimen
-import io.olvid.messenger.R.id
 import io.olvid.messenger.activities.ContactDetailsActivity
 import io.olvid.messenger.activities.ObvLinkActivity
 import io.olvid.messenger.activities.storage_manager.StorageManagerActivity
@@ -99,6 +96,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment.OnOwnedIdentitySelectedListener
+import io.olvid.messenger.main.bookmarks.BookmarksActivity
 import io.olvid.messenger.main.calls.CallLogFragment
 import io.olvid.messenger.main.contacts.ContactListFragment
 import io.olvid.messenger.main.discussions.DiscussionListFragment
@@ -141,6 +139,7 @@ class MainActivity : LockableActivity(), OnClickListener {
     private var pingGreen = 0
     internal var contactListFragment: ContactListFragment? = null
     private lateinit var tabImageViews: Array<ImageView?>
+    private var showBookmarks: Boolean = false
 
     @JvmField
     var requestNotificationPermission = registerForActivityResult(
@@ -248,44 +247,45 @@ class MainActivity : LockableActivity(), OnClickListener {
                 event!!
             )
         }
-        pingConnectivityDot = findViewById(id.ping_indicator_dot)
-        pingConnectivityLine = findViewById(id.ping_indicator_line)
-        pingConnectivityFull = findViewById(id.ping_indicator_full)
-        pingConnectivityFullTextView = findViewById(id.ping_indicator_full_text_view)
-        pingConnectivityFullPingTextView = findViewById(id.ping_indicator_full_ping_text_view)
-        pingRed = ContextCompat.getColor(this, color.red)
-        pingGolden = ContextCompat.getColor(this, color.golden)
-        pingGreen = ContextCompat.getColor(this, color.green)
+        pingConnectivityDot = findViewById(R.id.ping_indicator_dot)
+        pingConnectivityLine = findViewById(R.id.ping_indicator_line)
+        pingConnectivityFull = findViewById(R.id.ping_indicator_full)
+        pingConnectivityFullTextView = findViewById(R.id.ping_indicator_full_text_view)
+        pingConnectivityFullPingTextView = findViewById(R.id.ping_indicator_full_ping_text_view)
+        pingRed = ContextCompat.getColor(this, R.color.red)
+        pingGolden = ContextCompat.getColor(this, R.color.golden)
+        pingGreen = ContextCompat.getColor(this, R.color.green)
         AppSingleton.getWebsocketConnectivityStateLiveData().observe(this, pingListener)
         tabsPagerAdapter = TabsPagerAdapter(
             this,
-            findViewById(id.tab_discussions_notification_dot),
-            findViewById(id.tab_contacts_notification_dot),
-            findViewById(id.tab_groups_notification_dot),
-            findViewById(id.tab_calls_notification_dot)
+            findViewById(R.id.tab_discussions_notification_dot),
+            findViewById(R.id.tab_contacts_notification_dot),
+            findViewById(R.id.tab_groups_notification_dot),
+            findViewById(R.id.tab_calls_notification_dot)
         )
         tabImageViews = arrayOfNulls(4)
-        tabImageViews[0] = findViewById(id.tab_discussions_button)
-        tabImageViews[1] = findViewById(id.tab_contacts_button)
-        tabImageViews[2] = findViewById(id.tab_groups_button)
-        tabImageViews[3] = findViewById(id.tab_calls_button)
+        tabImageViews[0] = findViewById(R.id.tab_discussions_button)
+        tabImageViews[1] = findViewById(R.id.tab_contacts_button)
+        tabImageViews[2] = findViewById(R.id.tab_groups_button)
+        tabImageViews[3] = findViewById(R.id.tab_calls_button)
         for (imageView in tabImageViews) {
             imageView?.setOnClickListener(this)
         }
         mainActivityPageChangeListener = MainActivityPageChangeListener(tabImageViews)
         viewPager.adapter = tabsPagerAdapter
-        viewPager.isUserInputEnabled= false
+        viewPager.isUserInputEnabled = false
         viewPager.registerOnPageChangeCallback(mainActivityPageChangeListener!!)
-        viewPager.setPageTransformer(MarginPageTransformer(resources.getDimensionPixelSize(dimen.main_activity_page_margin)))
+        viewPager.setPageTransformer(MarginPageTransformer(resources.getDimensionPixelSize(R.dimen.main_activity_page_margin)))
         viewPager.offscreenPageLimit = 3
-        val addContactButton = findViewById<ImageView>(id.tab_plus_button)
+        val addContactButton = findViewById<ImageView>(R.id.tab_plus_button)
         addContactButton.setOnClickListener(this)
-        val focusHugger = findViewById<View>(id.focus_hugger)
+        val focusHugger = findViewById<View>(R.id.focus_hugger)
         focusHugger.requestFocus()
+
 
         // observe owned Identity (for initial view)
         val ownedIdentityMutedImageView =
-            findViewById<ImageView>(id.owned_identity_muted_marker_image_view)
+            findViewById<ImageView>(R.id.owned_identity_muted_marker_image_view)
         AppSingleton.getCurrentIdentityLiveData().observe(this) { ownedIdentity: OwnedIdentity? ->
             if (ownedIdentity == null) {
                 App.runThread {
@@ -312,6 +312,23 @@ class MainActivity : LockableActivity(), OnClickListener {
             BillingUtils.initializeBillingClient(baseContext)
         }
 
+        // observe bookmarked messages
+        AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
+            if (ownedIdentity == null) {
+                return@switchMap null
+            }
+            AppDatabase.getInstance().messageDao()
+                .hasBookmarkedMessages(ownedIdentity.bytesOwnedIdentity)
+        }.observe(this) { bookmarkedMessages: Boolean? ->
+            if (showBookmarks != (bookmarkedMessages == true)) {
+                showBookmarks = bookmarkedMessages == true
+                if (viewPager.currentItem == DISCUSSIONS_TAB && globalSearchViewModel.filter.isNullOrEmpty()) {
+                    invalidateOptionsMenu()
+                }
+            }
+        }
+
+
         // observe unread messages
         AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
             if (ownedIdentity == null) {
@@ -326,7 +343,7 @@ class MainActivity : LockableActivity(), OnClickListener {
                 tabsPagerAdapter!!.hideNotificationDot(DISCUSSIONS_TAB)
             }
         }
-        val unreadMarker = findViewById<ImageView>(id.owned_identity_unread_marker_image_view)
+        val unreadMarker = findViewById<ImageView>(R.id.owned_identity_unread_marker_image_view)
         AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
             if (ownedIdentity == null) {
                 return@switchMap null
@@ -783,6 +800,10 @@ class MainActivity : LockableActivity(), OnClickListener {
 
             DISCUSSIONS_TAB -> {
                 menuInflater.inflate(R.menu.menu_main_discussion_list, menu)
+                if (showBookmarks) {
+                    menuInflater.inflate(R.menu.menu_main_bookmarks, menu)
+                }
+                val bookmarkAction = menu.findItem(R.id.menu_action_bookmarks)
                 val searchView = menu.findItem(R.id.action_search).actionView as SearchView?
                 if (searchView != null) {
                     searchView.queryHint = getString(R.string.hint_search_anything)
@@ -800,7 +821,10 @@ class MainActivity : LockableActivity(), OnClickListener {
 
                             override fun onQueryTextChange(newText: String): Boolean {
                                 AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
-                                    globalSearchViewModel.search(bytesOwnedIdentity = bytesOwnedIdentity, text = newText)
+                                    globalSearchViewModel.search(
+                                        bytesOwnedIdentity = bytesOwnedIdentity,
+                                        text = newText
+                                    )
                                 }
                                 return true
                             }
@@ -811,16 +835,19 @@ class MainActivity : LockableActivity(), OnClickListener {
                         })
                     })
                 }
-                menu.findItem(R.id.action_search)?.setOnActionExpandListener(object : OnActionExpandListener {
-                    override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                        return true
-                    }
+                menu.findItem(R.id.action_search)
+                    ?.setOnActionExpandListener(object : OnActionExpandListener {
+                        override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                            bookmarkAction?.isVisible = false
+                            return true
+                        }
 
-                    override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                        globalSearchViewModel.clear()
-                        return true
-                    }
-                })
+                        override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                            bookmarkAction?.isVisible = true
+                            globalSearchViewModel.clear()
+                            return true
+                        }
+                    })
             }
 
             CALLS_TAB -> {
@@ -850,17 +877,20 @@ class MainActivity : LockableActivity(), OnClickListener {
             )
             startActivity(intent)
             return true
+        } else if (itemId == R.id.menu_action_bookmarks) {
+            if (viewPager.currentItem == DISCUSSIONS_TAB) {
+                startActivity(Intent(this, BookmarksActivity::class.java))
+            }
         } else if (itemId == R.id.action_clear_log) {
             if (viewPager.currentItem == CALLS_TAB) {
-                val bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity()
-                if (bytesOwnedIdentity != null) {
+                AppSingleton.getBytesCurrentIdentity()?.let {
                     val builder = SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_clear_call_log)
                         .setMessage(R.string.dialog_message_clear_call_log)
                         .setPositiveButton(R.string.button_label_ok) { _: DialogInterface?, _: Int ->
                             App.runThread {
                                 AppDatabase.getInstance().callLogItemDao()
-                                    .deleteAll(bytesOwnedIdentity)
+                                    .deleteAll(it)
                             }
                         }
                         .setNegativeButton(R.string.button_label_cancel, null)

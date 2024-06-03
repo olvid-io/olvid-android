@@ -37,6 +37,7 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.StringUtils2
 import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
@@ -74,6 +75,25 @@ class ContactListViewModel : ViewModel() {
         setFilter(_filter)
     }
 
+    private fun performKeycloakSearch(ownedIdentity: OwnedIdentity, filter: String) {
+        keycloakSearchInProgress = true
+        Handler(Looper.getMainLooper()).postDelayed({
+            searchKeycloak(
+                ownedIdentity.bytesOwnedIdentity,
+                filter
+            )
+        }, KEYCLOAK_SEARCH_DELAY_MILLIS)
+    }
+
+    fun refreshKeycloakSearch() {
+        val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
+        if (ownedIdentity != null && !keycloakSearchInProgress && ownedIdentity.bytesOwnedIdentity.contentEquals(keycloakSearchBytesOwnedIdentity)) {
+            _filter?.let {
+                performKeycloakSearch(ownedIdentity, it)
+            }
+        }
+    }
+
     fun setFilter(filter: String?) {
         this._filter = filter
         if (filter == null) {
@@ -89,20 +109,9 @@ class ContactListViewModel : ViewModel() {
                 }
             }
             val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
-            if (filterPatterns != null && ownedIdentity != null && keycloakManaged.value
-            ) {
-                if (filter != keycloakSearchResultsFilter || !Arrays.equals(
-                        ownedIdentity.bytesOwnedIdentity,
-                        keycloakSearchBytesOwnedIdentity
-                    )
-                ) {
-                    keycloakSearchInProgress = true
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        searchKeycloak(
-                            ownedIdentity.bytesOwnedIdentity,
-                            filter
-                        )
-                    }, KEYCLOAK_SEARCH_DELAY_MILLIS)
+            if (filterPatterns != null && ownedIdentity != null && keycloakManaged.value) {
+                if (filter != keycloakSearchResultsFilter || !ownedIdentity.bytesOwnedIdentity.contentEquals(keycloakSearchBytesOwnedIdentity)) {
+                    performKeycloakSearch(ownedIdentity, filter)
                 }
             }
         }

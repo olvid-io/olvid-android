@@ -170,8 +170,7 @@ public class Utils {
                         result.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), context.getResources().getColor(R.color.darkGrey), null), mention.getRangeStart(), mention.getRangeEnd(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     } else {
                         int color = InitialView.getTextColor(context, mention.getUserIdentifier(), AppSingleton.getContactCustomHue(mention.getUserIdentifier()));
-                        final String name = result.subSequence(mention.getRangeStart(), mention.getRangeEnd()).toString();
-                        result.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), color, () -> {
+                         result.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), color, () -> {
                             if (Arrays.equals(bytesOwnedIdentity, mention.getUserIdentifier())) {
                                 context.startActivity(new Intent(context, OwnedIdentityDetailsActivity.class));
                             } else {
@@ -245,6 +244,6 @@ public class Utils {
             end--;
         }
         sb.append(protectedMessageBody.subSequence(offset, end));
-        return new Pair<>(sb.length() == 0 ? null : sb.toString(), correctedMentions.size() > 0 ? correctedMentions : null);
+        return new Pair<>(sb.length() == 0 ? null : sb.toString(), !correctedMentions.isEmpty() ? correctedMentions : null);
     }
 }

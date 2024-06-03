@@ -2408,7 +2408,7 @@ class WebrtcCallService : Service() {
             override fun run() {
                 executor.execute {
                     // only notify peers if you are the caller
-                    hangUpCallInternal(isCaller)
+                    hangUpCallInternal(!isCaller)
                 }
             }
         }

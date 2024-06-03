@@ -2568,6 +2568,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         try (EngineSession engineSession = getSession()) {
             try (Statement statement = engineSession.session.createStatement()) {
                 statement.execute("VACUUM");
+                statement.execute("PRAGMA wal_checkpoint(TRUNCATE)");
                 engineSession.session.commit();
             }
         }

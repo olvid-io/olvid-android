@@ -55,7 +55,6 @@
     <string name="dialog_message_contact_introduction_multiple">Do you want to introduce %1$s to the %2$d following contacts?\n\n%3$s</string>
     <string name="dialog_message_delete_attachment">Do you really want to delete attachment %1$s from this message?\nThis action cannot be undone.</string>
     <string name="dialog_message_delete_attachment_gallery">Do you really want to delete attachment %1$s?\nThis action cannot be undone.</string>
-    <string name="dialog_message_delete_discussion">Do you really want to delete discussion %1$s and all the messages it contains?\nThis action cannot be undone.</string>
     <string name="dialog_message_disband_group">Do you wish to disband the group %1$s?\nIt will no longer be possible to send messages to this group. Existing group messages will not be affected.</string>
     <string name="dialog_message_disband_non_empty_group_confirmation">You are about to disband the group %1$s.\nThis will remove all members and pending members from the group. There are currently:\n- %2$d members\n- %3$d pending members\n\nProceed with disbanding this group?</string>
     <string name="dialog_message_exchange_digits">Do you want to exchange codes with %1$s to re-validate their identity?</string>
@@ -67,7 +66,6 @@
     <string name="dialog_title_about_olvid">About Olvid</string>
     <string name="dialog_title_contact_introduction">Contact Introduction</string>
     <string name="dialog_title_delete_attachment">Delete Attachment</string>
-    <string name="dialog_title_delete_discussion">Delete Discussion</string>
     <string name="dialog_title_confirm_deletion">Confirm Deletion</string>
     <string name="dialog_title_disband_group">Disband group?</string>
     <string name="dialog_title_discussion_search">Search for a discussion…</string>
@@ -193,6 +191,9 @@
     <string name="menu_action_save">Save</string>
     <string name="menu_action_settings">Settings</string>
     <string name="menu_action_share">Share</string>
+    <string name="menu_action_bookmark">Bookmark</string>
+    <string name="menu_action_unbookmark">Unbookmark</string>
+    <string name="menu_action_bookmarks">Bookmarks</string>
     <string name="menu_check_update">Check Google Play for update</string>
     <string name="message_discussion_locked">This discussion is locked</string>
     <string name="message_discussion_readonly">This discussion is read-only</string>
@@ -319,6 +320,7 @@
     <string name="hint_alpha">Alpha</string>
     <string name="label_no_longer_available">No longer available</string>
     <string name="activity_title_message_details">Message Details</string>
+    <string name="activity_title_bookmarks">Bookmarked messages</string>
     <string name="text_processing">Processing</string>
     <string name="text_sent">Sent</string>
     <string name="text_delivered">Delivered</string>
@@ -728,6 +730,7 @@
     <string name="text_visible_timer_y_once_compact">Visible once, for %1$dy</string>
     <string name="text_no_messages">No messages yet</string>
     <string name="dialog_title_mute_discussion_notification_duration">Mute notifications for this discussion…</string>
+    <string name="dialog_title_mute_discussions_notification_duration">Mute notifications for these discussions…</string>
     <string name="dialog_title_mute_profile_notification_duration">Mute notifications for this profile…</string>
     <string name="pref_mute_notifications_one_hour">For one hour</string>
     <string name="pref_mute_notifications_eight_hours">For eight hours</string>
@@ -816,10 +819,6 @@
     <string name="toast_message_unable_to_play_audio">Unable to play %1$s</string>
     <string name="button_label_delete">Delete</string>
     <string name="button_label_delete_everywhere">Delete everywhere</string>
-    <string name="dialog_text_delete_everywhere">Delete everywhere</string>
-    <string name="dialog_text_delete_everywhere_explanation">If you select the \"delete everywhere\" option below, the message will be deleted for all participants in the discussion. Otherwise, it will be deleted only on your device.</string>
-    <string name="dialog_text_delete_everywhere_explanation_multiple">If you select the \"delete everywhere\" option below, these messages will be deleted for all participants in the discussion. Otherwise, they will be deleted only on your device.</string>
-    <string name="dialog_text_delete_everywhere_explanation_discussion">If you select the \"delete everywhere\" option below, this discussion will be deleted for all its participants. Otherwise, it will be deleted only on your device.</string>
     <string name="toast_message_unable_to_delete_everywhere">Unable to delete everywhere. Please try again.</string>
     <string name="label_swipe_edit">Edit</string>
     <string name="text_message_content_remote_deleted">(message deleted everywhere)</string>
@@ -1538,15 +1537,15 @@
     <string name="message_discussion_group_v2_creating">Group is being created</string>
     <string name="button_label_new_group">New group</string>
     <string name="label_group_type">Group Type</string>
-    <string name="label_group_simple_title">Simple</string>
-    <string name="label_group_simple_subtitle">All members are admin and can invite other members</string>
-    <string name="label_group_private_title">Private</string>
-    <string name="label_group_private_subtitle">Only you can invite members to this group</string>
+    <string name="label_group_simple_title">Standard</string>
+    <string name="label_group_simple_subtitle">All group members can invite new members</string>
+    <string name="label_group_private_title">Controlled</string>
+    <string name="label_group_private_subtitle">Only administrators can invite new members</string>
     <string name="label_group_read_only_title">Read only</string>
-    <string name="label_group_read_only_subtitle">Only the group admins can post messages</string>
-    <string name="label_group_custom_title">Custom</string>
-    <string name="label_group_custom_subtitle">Choose discussions parameters that suit you best (admins, read only etc.)</string>
-    <string name="label_group_custom_settings">Custom settings</string>
+    <string name="label_group_read_only_subtitle">Only administrators can post messages</string>
+    <string name="label_group_custom_title">Advanced</string>
+    <string name="label_group_custom_subtitle">Unleash the full power of Olvid groups!</string>
+    <string name="label_group_custom_settings">Advanced settings</string>
     <string name="label_group_choose_admins">Group admins</string>
     <string name="text_you_became_admin">You are now a group administrator</string>
     <string name="text_you_are_no_longer_admin">You are no longer a group administrator</string>
@@ -1763,7 +1762,7 @@
     <string name="label_write_only_webdav_explanation">This is a write-only WebDAV. Listing is not possible.</string>
     <string name="label_write_only_webdav">Write-only WebDAV server</string>
     <string name="dialog_title_mdm_backup_failure">Automatic backup failure</string>
-    <string name="dialog_message_mdm_backup_failure">Automatic backups are currently configured by your device administrator. An error occured while uploading your latest backup, which could mean this configuration is no longer valid.\n\nIf this problem persists, please contact your administrator.</string>
+    <string name="dialog_message_mdm_backup_failure">Automatic backups are currently configured by your device administrator. An error occurred while uploading your latest backup, which could mean this configuration is no longer valid.\n\nIf this problem persists, please contact your administrator.</string>
     <string name="dialog_title_backup_configured_by_mdm">Backups configured by your device administrator</string>
     <string name="dialog_message_backup_configured_by_mdm">Automatic backups are currently configured by your device administrator and cannot be disabled. If you believe this is an error, please contact your administrator.</string>
     <string name="dialog_title_mdm_key_escrow_required">Your backup key is not safely stored in escrow</string>
@@ -1783,6 +1782,12 @@
     <string name="troubleshooting_audio_recording_valid_title">Audio recording</string>
     <string name="troubleshooting_audio_recording_valid_description">Granting Olvid access to the microphone allows you to record voice messages and is required to start or receive secure calls.</string>
     <string name="troubleshooting_audio_recording_invalid_title">Audio recording disabled</string>
+    <string name="troubleshooting_location_valid_title">Location enabled</string>
+    <string name="troubleshooting_location_valid_description">Enabling your location allows you to use the \"share your location\" feature.</string>
+    <string name="troubleshooting_location_invalid_title">Location disabled</string>
+    <string name="troubleshooting_location_permissions_valid_title">Location permission granted</string>
+    <string name="troubleshooting_location_permissions_valid_description">Granting Olvid access to your location allows you to use the \"share your location\" feature.</string>
+    <string name="troubleshooting_location_permissions_invalid_title">Location permission denied</string>
     <string name="troubleshooting_battery_optimization_valid_title">Battery optimization</string>
     <string name="troubleshooting_battery_optimization_valid_description">Battery optimization on Android works by delaying certain background events to run them in a batch. This may delay the reception of inbound Olvid messages and calls.\n\nOlvid is currently allowed to \"always run in background\".</string>
     <string name="troubleshooting_battery_optimization_invalid_description">Battery optimization on Android works by delaying certain background events to run them in a batch. This may delay the reception of inbound Olvid messages and calls.\n\nTo ensure that your messages are received promptly, you should allow Olvid to \"always run in background\".</string>
@@ -1918,8 +1923,48 @@
     <string name="hint_search_anything">Search anything…</string>
     <string name="global_search_result_other_discussions">Other discussions</string>
     <string name="at_least_xxx">At least %1$d</string>
+    <string name="label_discussion_list_pin_divider">Pinned discussions</string>
+    <string name="explanation_empty_bookmarks">No bookmarked message</string>
+    <string name="button_label_delete_from_my_devices">Delete from my devices</string>
+    <string name="label_delete_from_this_device">Delete from this device only</string>
+    <string name="label_delete_from_all_my_devices">Delete from all my devices</string>
+    <string name="label_delete_everywhere">Delete from the devices of all participants</string>
 
 
+
+
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Delete selected discussion?</item>
+        <item quantity="other">Delete selected discussions?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Delete selected message?</item>
+        <item quantity="other">Delete selected messages?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Do you really want to delete the selected discussion and all the messages it contains?\nThis action cannot be undone.</item>
+        <item quantity="other">Do you really want to delete the %1$d selected discussions and all the messages they contain?\nThis action cannot be undone.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">How do you want to delete the selected discussion and all the messages it contains?\nThis action cannot be undone.</item>
+        <item quantity="other">How do you want to delete the %1$d selected discussions and all the messages they contain?\nThis action cannot be undone.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Do you really want to delete the selected message?\nThis action cannot be undone.</item>
+        <item quantity="other">Do you really want to delete the %1$d selected messages?\nThis action cannot be undone.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">How do you want to delete the selected message?\nThis action cannot be undone.</item>
+        <item quantity="other">How do you want to delete the %1$d selected messages?\nThis action cannot be undone.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">You are about to **permanently** delete a message for **everyone** in this discussion. Please make sure this is indeed what you want to do.</item>
+        <item quantity="other">You are about to **permanently** delete %1$d messages for **everyone** in this discussion. Please make sure this is indeed what you want to do.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">You are about to **permanently** delete a discussion and the messages it contains for **everyone** in this discussion. Please make sure this is indeed what you want to do.</item>
+        <item quantity="other">You are about to **permanently** delete %1$d discussions and the messages they contain for **everyone** in these discussions. Please make sure this is indeed what you want to do.</item>
+    </plurals>
     <plurals name="dialog_message_invite_all_group_members">
         <item quantity="one">You are about to invite each group member with whom you have a channel (currently 1 member) to a private discussion.\nDo you want to proceed?</item>
         <item quantity="other">You are about to invite each group member with whom you have a channel (currently %1$d members) to a private discussion.\nDo you want to proceed?</item>
@@ -1945,7 +1990,7 @@
         <item quantity="other">When prompted, please select the folder in which to save the %1$d selected attachments.\nNote that access to some folders may be restricted.</item>
     </plurals>
     <plurals name="action_mode_title_storage">
-        <item quantity="other">%1$d Selected</item>
+        <item quantity="other">%1$d selected</item>
     </plurals>
     <plurals name="dialog_message_delete_attachments">
         <item quantity="one">Do you really want to delete the selected attachment?</item>
@@ -1984,11 +2029,10 @@
         <item quantity="other">Group call from %2$s and %1$d others</item>
     </plurals>
     <plurals name="action_mode_title_discussion">
-        <item quantity="other">%1$d Selected</item>
+        <item quantity="other">%1$d selected</item>
     </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">Do you really want to delete the selected message?</item>
-        <item quantity="other">Do you really want to delete the %1$d selected messages?</item>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="other">%1$d selected</item>
     </plurals>
     <plurals name="notification_public_title_new_messages">
         <item quantity="one">%1$d new message</item>

@@ -115,11 +115,9 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                     }
                     ObvSyncAtom.TYPE_PINNED_DISCUSSIONS_CHANGE -> {
                         val pinnedDiscussions = db.discussionDao().getAllPinned(bytesOwnedIdentity)
-                        val pinnedDiscussionsMap : HashMap<Long, Discussion> = HashMap()
-                        pinnedDiscussions.forEach { discussion ->
-                            pinnedDiscussionsMap[discussion.id] = discussion
-                        }
-
+                        val pinnedDiscussionsMap = HashMap(pinnedDiscussions.associateBy { discussion -> discussion.id })
+                        val ordered = obvSyncAtom.booleanValue
+                        var pinnedIndex = if (ordered) 1 else (pinnedDiscussions.maxOf { it.pinned } + 1)
                         obvSyncAtom.discussionIdentifiers.forEach { discussionIdentifier ->
                             val discussion = when(discussionIdentifier.type) {
                                 DiscussionIdentifier.CONTACT -> {
@@ -136,9 +134,21 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                             discussion?.let {
                                 // never pin a pre-discussion
                                 if (it.status != Discussion.STATUS_PRE_DISCUSSION) {
-                                    // if the received discussion was not in the pinned map, pin it
-                                    pinnedDiscussionsMap.remove(it.id) ifNull {
-                                        db.discussionDao().updatePinned(it.id, true)
+                                    pinnedDiscussionsMap.remove(it.id)
+
+                                    if (ordered) {
+                                        if (it.pinned != pinnedIndex) {
+                                            // update ordered index
+                                            db.discussionDao().updatePinned(it.id, pinnedIndex)
+                                        }
+                                        pinnedIndex++
+                                    } else {
+                                        // when not order, only change pinned for discussions that were not already pinned
+                                        // set there pin index to one more than the max pinned
+                                        if (it.pinned == 0) {
+                                            db.discussionDao().updatePinned(it.id, pinnedIndex)
+                                            pinnedIndex++
+                                        }
                                     }
                                 }
                             }
@@ -146,7 +156,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
 
                         // unpin any discussion that is not in the received list
                         pinnedDiscussionsMap.values.forEach {
-                            db.discussionDao().updatePinned(it.id, false)
+                            db.discussionDao().updatePinned(it.id, 0)
                         }
                     }
                     ObvSyncAtom.TYPE_SETTING_DEFAULT_SEND_READ_RECEIPTS -> {
@@ -154,6 +164,28 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                     }
                     ObvSyncAtom.TYPE_SETTING_AUTO_JOIN_GROUPS -> {
                         SettingsActivity.setAutoJoinGroups(SettingsActivity.getAutoJoinGroupsFromString(obvSyncAtom.stringValue))
+                    }
+                    ObvSyncAtom.TYPE_BOOKMARKED_MESSAGE_CHANGE -> {
+                        obvSyncAtom.messageIdentifier.discussionIdentifier?.let { discussionIdentifier ->
+                            val discussion = when(discussionIdentifier.type) {
+                                DiscussionIdentifier.CONTACT -> {
+                                    db.discussionDao().getByContactWithAnyStatus(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier)
+                                }
+                                DiscussionIdentifier.GROUP_V1 -> {
+                                    db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier)
+                                }
+                                DiscussionIdentifier.GROUP_V2 -> {
+                                    db.discussionDao().getByGroupIdentifierWithAnyStatus(bytesOwnedIdentity, discussionIdentifier.bytesDiscussionIdentifier)
+                                }
+                                else -> null
+                            }
+                            discussion?.let {
+                                val message = db.messageDao().getBySenderSequenceNumber(obvSyncAtom.messageIdentifier.senderSequenceNumber, obvSyncAtom.messageIdentifier.senderThreadIdentifier, obvSyncAtom.messageIdentifier.senderIdentifier, discussion.id)
+                                message?.let {
+                                    db.messageDao().updateBookmarked(message.id, obvSyncAtom.booleanValue)
+                                }
+                            }
+                        }
                     }
                     else -> {
                         throw Exception("Unknown App sync atom type")

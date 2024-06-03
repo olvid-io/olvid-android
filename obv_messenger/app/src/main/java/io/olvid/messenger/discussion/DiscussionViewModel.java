@@ -20,6 +20,7 @@
 package io.olvid.messenger.discussion;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -59,6 +60,10 @@ public class DiscussionViewModel extends ViewModel {
     @NonNull
     private final HashSet<Long> nonForwardableSelectedMessageIds;
     @NonNull
+    private final HashSet<Long> nonBookmarkableSelectedMessageIds;
+    @NonNull
+    private final HashSet<Long> nonBookmarkedSelectedMessageIds;
+    @NonNull
     private final MutableLiveData<byte[]> forwardMessageBytesOwnedIdentityLiveData;
 
 
@@ -91,6 +96,8 @@ public class DiscussionViewModel extends ViewModel {
         discussionIdLiveData = new MutableLiveData<>();
         selectedMessageIds = new MutableLiveData<>();
         nonForwardableSelectedMessageIds = new HashSet<>();
+        nonBookmarkedSelectedMessageIds = new HashSet<>();
+        nonBookmarkableSelectedMessageIds = new HashSet<>();
         forwardMessageBytesOwnedIdentityLiveData = new MutableLiveData<>();
 
 
@@ -366,7 +373,9 @@ public class DiscussionViewModel extends ViewModel {
         return selectingForDeletion;
     }
 
-    public void selectMessageId(long messageId, boolean forwardable) {
+    /////
+    // bookmarked == null means the message is not bookmarkable
+    public void selectMessageId(long messageId, boolean forwardable, @Nullable Boolean bookmarked) {
         List<Long> ids;
         if (selectedMessageIds.getValue() == null) {
             ids = new ArrayList<>();
@@ -376,13 +385,20 @@ public class DiscussionViewModel extends ViewModel {
         }
         if (ids.remove(messageId)) {
             nonForwardableSelectedMessageIds.remove(messageId);
-            if (ids.size() == 0) {
+            nonBookmarkedSelectedMessageIds.remove(messageId);
+            nonBookmarkableSelectedMessageIds.remove(messageId);
+            if (ids.isEmpty()) {
                 selectingForDeletion = false;
             }
         } else {
             ids.add(messageId);
             if (!forwardable) {
                 nonForwardableSelectedMessageIds.add(messageId);
+            }
+            if (bookmarked == null) {
+                nonBookmarkableSelectedMessageIds.add(messageId);
+            } else if (!bookmarked) {
+                nonBookmarkedSelectedMessageIds.add(messageId);
             }
             selectingForDeletion = true;
         }
@@ -394,6 +410,8 @@ public class DiscussionViewModel extends ViewModel {
         if (ids != null) {
             ids.remove(messageId);
             nonForwardableSelectedMessageIds.remove(messageId);
+            nonBookmarkableSelectedMessageIds.remove(messageId);
+            nonBookmarkedSelectedMessageIds.remove(messageId);
             selectedMessageIds.postValue(ids);
         }
     }
@@ -407,9 +425,19 @@ public class DiscussionViewModel extends ViewModel {
         return nonForwardableSelectedMessageIds.isEmpty();
     }
 
+    public boolean areAllSelectedMessagesBookmarked() {
+        return nonBookmarkedSelectedMessageIds.isEmpty();
+    }
+
+    public boolean areAllSelectedMessagesBookmarkable() {
+        return nonBookmarkableSelectedMessageIds.isEmpty();
+    }
+
     public void deselectAll() {
         selectingForDeletion = false;
         nonForwardableSelectedMessageIds.clear();
+        nonBookmarkedSelectedMessageIds.clear();
+        nonBookmarkableSelectedMessageIds.clear();
         selectedMessageIds.postValue(new ArrayList<>());
     }
 

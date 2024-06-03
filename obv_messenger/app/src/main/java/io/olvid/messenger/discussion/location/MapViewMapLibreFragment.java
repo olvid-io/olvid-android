@@ -35,7 +35,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Looper;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -102,6 +101,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     private static final int TRANSITION_DURATION_MS = 500;
 
     @Nullable private Runnable onMapReadyCallback = null;
+    @Nullable private Runnable redrawMarkersCallback = null;
     @Nullable private Consumer<Boolean> layersButtonVisibilitySetter = null;
     private FragmentActivity activity;
 
@@ -311,6 +311,8 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         if (onMapReadyCallback != null) {
             onMapReadyCallback.run();
             onMapReadyCallback = null;
+        } else if (redrawMarkersCallback != null) {
+            redrawMarkersCallback.run();
         }
     }
 
@@ -578,6 +580,12 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     }
 
     @Override
+    void setRedrawMarkersCallback(@Nullable Runnable callback) {
+        this.redrawMarkersCallback = callback;
+
+    }
+
+    @Override
     public void addMarker(long id, Bitmap icon, @NonNull LatLngWrapper latLngWrapper, @Nullable Float precision) {
         if (mapboxMap == null || mapboxMap.getStyle() == null || symbolManager == null) {
             Logger.i("MapLibreMapView: addMarker: mapboxMap is not ready to use");
@@ -689,8 +697,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                 mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bounds.first.toMapLibre(), zoom));
             }
         } else {
-            // arbitrary computing InitialView markers heights, and using it to compute padding :S
-            int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, getResources().getDisplayMetrics());
+            int padding = Math.min(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels) * 2 / 7;
             if (animate) {
                 mapboxMap.getUiSettings().setAllGesturesEnabled(false);
                 mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(bounds.second.getLatitude(), bounds.second.getLongitude(), bounds.first.getLatitude(), bounds.first.getLongitude()), padding), TRANSITION_DURATION_MS, cancelableCallback);

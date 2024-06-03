@@ -52,6 +52,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
+import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsFragment;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsViewModel;
@@ -288,7 +289,7 @@ public class IdentityCreationFragment extends Fragment {
                             if (detailsViewModel.getPassword() != null && !SettingsActivity.isHiddenProfileClosePolicyDefined()) {
                                 App.openAppDialogConfigureHiddenProfileClosePolicy();
                             }
-                            App.openCurrentOwnedIdentityDetails(activity);
+                            App.showMainActivityTab(activity, MainActivity.DISCUSSIONS_TAB);
                             activity.finish();
                         }
 
@@ -300,7 +301,7 @@ public class IdentityCreationFragment extends Fragment {
                                         .setMessage(R.string.dialog_message_failed_to_upload_identity_to_keycloak)
                                         .setPositiveButton(R.string.button_label_ok, null)
                                         .setOnDismissListener(dialog -> {
-                                            App.openCurrentOwnedIdentityDetails(activity);
+                                            App.showMainActivityTab(activity, MainActivity.DISCUSSIONS_TAB);
                                             activity.finish();
                                         });
                                 builder.create().show();
@@ -312,7 +313,7 @@ public class IdentityCreationFragment extends Fragment {
             if (detailsViewModel.getPassword() != null && !SettingsActivity.isHiddenProfileClosePolicyDefined()) {
                 App.openAppDialogConfigureHiddenProfileClosePolicy();
             }
-            App.openCurrentOwnedIdentityDetails(activity);
+            App.showMainActivityTab(activity, MainActivity.DISCUSSIONS_TAB);
             activity.finish();
         }
     }

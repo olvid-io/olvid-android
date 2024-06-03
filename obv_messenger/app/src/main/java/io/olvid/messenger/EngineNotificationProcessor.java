@@ -239,7 +239,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                 null,
                                 false,
                                 false,
-                                false,
+                                0,
                                 true,
                                 -1,
                                 Discussion.STATUS_PRE_DISCUSSION
@@ -270,7 +270,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                 null,
                                 false,
                                 false,
-                                false,
+                                0,
                                 true,
                                 -1,
                                 Discussion.STATUS_PRE_DISCUSSION
@@ -317,7 +317,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                 null,
                                 false,
                                 false,
-                                false,
+                                0,
                                 true,
                                 -1,
                                 Discussion.STATUS_PRE_DISCUSSION

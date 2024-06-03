@@ -8,6 +8,8 @@
         <item name="android:navigationBarColor">@color/navigationBar</item>
         <item name="android:windowBackground">@color/lightGrey</item>
         <item name="android:textColorHint">@color/grey</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeBackground">@color/olvid_gradient_dark</item>
     </style>
 
     <style name="CustomAlertDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
@@ -40,7 +42,6 @@
     <style name="AppTheme.NoActionBar.AlmostWhiteStatusBar">
         <item name="android:windowBackground">@color/almostWhite</item>
         <item name="android:statusBarColor">@color/almostWhite</item>
-        <item name="android:windowLightStatusBar">@bool/dayMode</item>
     </style>
 
     <!-- Discussion/Storage activity -->
@@ -185,6 +186,10 @@
 
     <style name="RobotoMedium">
         <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="RobotoNormal">
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="AppTheme.OrangeAccent">

@@ -425,7 +425,6 @@ private fun Editable.setMarkdownSpanFromNode(
         is FencedCodeBlock -> {
             node.sourceSpans.first().let { sourceSpan ->
                 val start = sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex]
-                if (node.sourceSpans.size < 2 || (getOrElse(start + MarkdownTag.CODE_BLOCK.delimiter.length) { ' ' } in lineSeparators).not()) return
                 val blockStart = node.sourceSpans[1].columnIndex + lineOffsets[node.sourceSpans[1].lineIndex]
                 val blockEnd = (blockStart + node.literal.length).coerceAtMost(length)
                 val end = (node.sourceSpans.last().columnIndex + lineOffsets[node.sourceSpans.last().lineIndex] + node.sourceSpans.last().length).coerceAtLeast(

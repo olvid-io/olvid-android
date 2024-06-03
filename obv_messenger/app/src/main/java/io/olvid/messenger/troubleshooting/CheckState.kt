@@ -25,6 +25,7 @@ import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.PowerManager
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
+import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import io.olvid.engine.Logger
@@ -58,6 +60,7 @@ const val STORAGE_CHECK_STATE = "storage"
 const val SOCKET_CHECK_STATE = "socket"
 const val FULL_SCREEN_CHECK_STATE = "full_screen"
 const val BACKUP_CHECK_STATE = "backup"
+const val LOCATION_CHECK_STATE = "location"
 
 const val MUTE_KEY_PREFIX = "mute_"
 
@@ -133,7 +136,11 @@ fun Context.getPermanentSocketState() =
         true
     }
 
-fun Context.getFullScreenIntentState() : Boolean {
+fun Context.getLocationState() : Boolean {
+    return (getSystemService(Context.LOCATION_SERVICE) as? LocationManager)?.let { LocationManagerCompat.isLocationEnabled(it) } ?: false
+}
+
+ fun Context.getFullScreenIntentState() : Boolean {
     if (VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
         return  getSystemService(
             NotificationManager::class.java

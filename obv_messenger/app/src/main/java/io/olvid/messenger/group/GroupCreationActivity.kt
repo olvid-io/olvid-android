@@ -59,6 +59,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
+import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.OwnedIdentity
@@ -165,13 +166,20 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
             }
         }
         setContentView(R.layout.activity_group_creation)
+        onBackPressed {
+            val position = viewPager.currentItem
+            if (position > 0) {
+                viewPager.currentItem = position - 1
+            } else {
+                finish()
+            }
+        }
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         subtitleTextView = toolbar.findViewById(R.id.subtitle)
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true)
-            actionBar.setDisplayShowTitleEnabled(false)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowTitleEnabled(false)
         }
         groupCreationViewModel.subtitleLiveData.observe(this) { tabAndSelectedContactCount: Pair<Int?, Int?>? ->
             if (subtitleTextView == null || tabAndSelectedContactCount == null || tabAndSelectedContactCount.first == null || tabAndSelectedContactCount.second == null) {
@@ -320,16 +328,6 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
         return true
     }
 
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
-        val position = viewPager.currentItem
-        if (position > 0) {
-            viewPager.currentItem = position - 1
-        } else {
-            finish()
-        }
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             onBackPressed()
@@ -383,10 +381,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
             for (contact in selectedContacts) {
                 val permissions = groupV2DetailsViewModel.getPermissions(
                     groupType,
-                    if (groupType is PrivateGroup)
-                        false
-                    else
-                        groupCreationViewModel.admins.value?.find { it == contact } != null)
+                    groupCreationViewModel.admins.value?.contains(contact) == true)
                 otherGroupMembers[ObvBytesKey(contact.bytesContactIdentity)] = permissions
             }
             try {
@@ -403,10 +398,10 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                             existenceDuration = ephemeralViewModel.getExistence()
                         }
                 )
+
                 val ownPermissions = Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet().apply {
-                    if (groupType is CustomGroup && groupType.remoteDeleteSetting == GroupTypeModel.RemoteDeleteSetting.NOBODY) this.remove(
-                        Permission.REMOTE_DELETE_ANYTHING
-                    )
+                    if (groupType is CustomGroup && groupType.remoteDeleteSetting != GroupTypeModel.RemoteDeleteSetting.NOBODY)
+                        this.add(Permission.REMOTE_DELETE_ANYTHING)
                 }
                 AppSingleton.getEngine().startGroupV2CreationProtocol(
                     serializedGroupDetails,
