@@ -209,13 +209,15 @@ abstract class SignatureECSdsa extends Signature {
             System.arraycopy(Encoded.bytesFromBigUInt(publicKey.getAy(), l), 0, hashInput, l, l);
             System.arraycopy(message, 0, hashInput, 2*l, message.length);
 
+            // TODO: switch to SHA512 once all clients support signature with SHA512 hash
+//            byte[] hash = new HashSHA512().digest(hashInput);
             byte[] hash = new HashSHA256().digest(hashInput);
             BigInteger e = Encoded.bigUIntFromBytes(hash);
             BigInteger y = aAndaG.getScalar().subtract(privateKey.getA().multiply(e)).mod(curve.q);
 
-            byte[] signature = new byte[HashSHA256.OUTPUT_LENGTH + l];
-            System.arraycopy(hash, 0, signature, 0, HashSHA256.OUTPUT_LENGTH);
-            System.arraycopy(Encoded.bytesFromBigUInt(y, l), 0, signature, HashSHA256.OUTPUT_LENGTH, l);
+            byte[] signature = new byte[hash.length + l];
+            System.arraycopy(hash, 0, signature, 0, hash.length);
+            System.arraycopy(Encoded.bytesFromBigUInt(y, l), 0, signature, hash.length, l);
             return signature;
         } catch (EncodingException ignored) {}
         return null;
@@ -224,24 +226,38 @@ abstract class SignatureECSdsa extends Signature {
     public boolean internalVerify(SignatureECSdsaPublicKey publicKey, byte[] message, byte[] signature) {
         try {
             int l = curve.byteLength;
-            if (signature.length != HashSHA256.OUTPUT_LENGTH + l) {
+            // Our verification supports both hash with SHA256 (legacy) and SHA512
+            boolean isSha512;
+            if (signature.length == HashSHA256.OUTPUT_LENGTH + l) {
+                isSha512 = false;
+            } else if (signature.length == HashSHA512.OUTPUT_LENGTH + l) {
+                isSha512 = true;
+            } else {
                 return false;
             }
             EdwardCurvePoint A = EdwardCurvePoint.noCheckFactory(publicKey.getAx(), publicKey.getAy(), curve);
 
-            byte[] hash = Arrays.copyOfRange(signature, 0, HashSHA256.OUTPUT_LENGTH);
+            // check that the public key A is not a low order point
+            if (A.isLowOrderPoint()) {
+                return false;
+            }
+
+            byte[] hash = Arrays.copyOfRange(signature, 0, signature.length  - l);
             BigInteger e = Encoded.bigUIntFromBytes(hash);
-            BigInteger y = Encoded.bigUIntFromBytes(Arrays.copyOfRange(signature, HashSHA256.OUTPUT_LENGTH, HashSHA256.OUTPUT_LENGTH + l));
+            BigInteger y = Encoded.bigUIntFromBytes(Arrays.copyOfRange(signature, signature.length - l, signature.length));
+            // check that the signature y is indeed smaller than q (to prevent undetected signature reuse)
+            if (y.compareTo(curve.q) >= 0) {
+                return false;
+            }
             EdwardCurvePoint[] points = curve.mulAdd(y, curve.G, e, A);
 
             byte[] hashInput = new byte[message.length + 2*l];
             System.arraycopy(Encoded.bytesFromBigUInt(publicKey.getAy(), l), 0, hashInput, l, l);
             System.arraycopy(message, 0, hashInput, 2*l, message.length);
 
-
             for (EdwardCurvePoint point: points) {
                 System.arraycopy(Encoded.bytesFromBigUInt(point.getY(), l), 0, hashInput, 0, l);
-                byte[] recomputedHash = new HashSHA256().digest(hashInput);
+                byte[] recomputedHash = isSha512 ? new HashSHA512().digest(hashInput) : new HashSHA256().digest(hashInput);;
                 if (Arrays.equals(hash, recomputedHash)) {
                     return true;
                 }

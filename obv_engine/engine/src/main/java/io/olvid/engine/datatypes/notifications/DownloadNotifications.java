@@ -165,4 +165,9 @@ public abstract class DownloadNotifications {
 
     public static final String NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE = "network_fetch_notification_push_register_failed_bad_device_uid_to_replace";
     public static final String NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+
+    public static final String NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER = "network_fetch_notification_owned_identity_synchronizing_with_server";
+    public static final String NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY = "in_progress"; // boolean
+
 }

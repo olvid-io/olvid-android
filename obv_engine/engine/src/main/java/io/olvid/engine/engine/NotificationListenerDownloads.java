@@ -79,6 +79,7 @@ public class NotificationListenerDownloads implements NotificationListener {
                 DownloadNotifications.NOTIFICATION_PUSH_TOPIC_NOTIFIED,
                 DownloadNotifications.NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED,
                 DownloadNotifications.NOTIFICATION_PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE,
+                DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER,
         }) {
             notificationManager.addListener(notificationName, this);
         }
@@ -557,6 +558,20 @@ public class NotificationListenerDownloads implements NotificationListener {
                 engineInfo.put(EngineNotifications.PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
 
                 engine.postEngineNotification(EngineNotifications.PUSH_REGISTER_FAILED_BAD_DEVICE_UID_TO_REPLACE, engineInfo);
+                break;
+            }
+            case DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER: {
+                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_OWNED_IDENTITY_KEY);
+                boolean inProgress = (boolean) userInfo.get(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY);
+                if (ownedIdentity == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY, inProgress);
+
+                engine.postEngineNotification(EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER, engineInfo);
                 break;
             }
             default:

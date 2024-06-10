@@ -1,3 +1,21 @@
+# Build 242 (2.2.1)
+2024-06-10
+
+- Fix a multi-profile issue with bookmarked messages
+
+# ~~Build 241 (2.2.1)~~
+2024-06-06
+
+- Display an explanation of the message status in message details
+- Fix message count taking too long in global search
+
+# ~~Build 239 (2.2.1)~~
+2024-06-04
+
+- Better handling of messages received out-of-order (typically via WebSocket while a listing is in progress)
+- Implement a few tweaks in cryptographic engine 
+- Some engine db optimizations
+
 # Build 238 (2.2)
 2024-06-03
 

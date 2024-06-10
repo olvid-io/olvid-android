@@ -108,7 +108,7 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
 
             notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WELL_KNOWN_CACHE_INITIALIZED, new HashMap<>());
 
-            wellKnownDownloadTimer.scheduleAtFixedRate(new TimerTask() {
+            wellKnownDownloadTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {

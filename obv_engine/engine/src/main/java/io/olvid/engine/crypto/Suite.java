@@ -55,6 +55,8 @@ public class Suite {
 
     public static Hash getHash(String hashName) {
         switch (hashName) {
+            case Hash.SHA512:
+                return new HashSHA512();
             case Hash.SHA256:
             default:
                 return new HashSHA256();

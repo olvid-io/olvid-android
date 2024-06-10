@@ -64,6 +64,14 @@ public class EdwardCurvePoint {
         return new EdwardCurvePoint(X, Y, curve, true);
     }
 
+    public boolean isLowOrderPoint() {
+        if (X != null) {
+            return curve.scalarMultiplicationWithX(curve.nu, this).getY().equals(BigInteger.ONE);
+        } else {
+            return curve.scalarMultiplication(curve.nu, Y).equals(BigInteger.ONE);
+        }
+    }
+
     public boolean equals(Object o) {
         if (o instanceof EdwardCurvePoint) {
             EdwardCurvePoint Q = (EdwardCurvePoint) o;

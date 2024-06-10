@@ -411,7 +411,7 @@ public interface FyleMessageJoinWithStatusDao {
     List<FyleAndOrigin> globalSearch(byte[] bytesOwnedIdentity, String filter, int limit);
 
     @Query("SELECT COUNT(*) " +
-            " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " FROM (SELECT " + FyleMessageJoinWithStatus.FYLE_ID + " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
             " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
@@ -421,9 +421,9 @@ public interface FyleMessageJoinWithStatusDao {
             " ON disc.id = mess." + Message.DISCUSSION_ID +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " JOIN " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " ON FMJoin.rowid = " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + ".rowid " +
-            " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :filter"
+            " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :filter LIMIT :limit)"
     )
-    int globalSearchCount(byte[] bytesOwnedIdentity, String filter);
+    int globalSearchCount(byte[] bytesOwnedIdentity, String filter, int limit);
 
     @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC ")
     LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginSizeAsc(byte[] bytesOwnedIdentity);

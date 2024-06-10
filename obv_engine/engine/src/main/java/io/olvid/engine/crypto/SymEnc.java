@@ -28,6 +28,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.key.symmetric.SymEncCTRAES256Key;
+import io.olvid.engine.datatypes.key.symmetric.SymmetricKey;
 
 interface SymEnc {
     String CTR_AES256 = "ctr-aes-256";
@@ -38,6 +39,20 @@ interface SymEnc {
     int plaintextLengthFromCiphertextLength(int ciphertextLength);
     void encrypt(byte[] iv, byte[] plaintext, byte[] ciphertext) throws InvalidKeyException;
     byte[] decrypt(EncryptedBytes ciphertext);
+}
+
+class KDFDelegateForSymEncCtrAES256 implements KDF.Delegate {
+    @Override
+    public int getKeyLength() {
+        return SymEncCTRAES256Key.KEY_BYTE_LENGTH;
+    }
+
+    @Override
+    public SymmetricKey[] processBytes(byte[] bytes) {
+        return new SymmetricKey[]{
+                SymEncCTRAES256Key.of(bytes)
+        };
+    }
 }
 
 class SymEncCtrAES256 implements SymEnc {

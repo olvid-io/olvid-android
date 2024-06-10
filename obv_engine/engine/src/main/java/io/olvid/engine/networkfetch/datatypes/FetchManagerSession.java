@@ -27,7 +27,6 @@ import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.networkfetch.databases.InboxAttachment;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
-import io.olvid.engine.networkfetch.databases.PendingDeleteFromServer;
 import io.olvid.engine.networkfetch.databases.PendingServerQuery;
 import io.olvid.engine.networkfetch.databases.PushNotificationConfiguration;
 
@@ -36,9 +35,8 @@ public class FetchManagerSession implements AutoCloseable {
     public final Session session;
     public final InboxMessage.InboxMessageListener inboxMessageListener;
     public final InboxMessage.ExtendedPayloadListener extendedPayloadListener;
-    public final InboxMessage.MarkAsListedOnServerListener markAsListedOnServerListener;
+    public final InboxMessage.MarkAsListedAndDeleteOnServerListener markAsListedAndDeleteOnServerListener;
     public final InboxAttachment.InboxAttachmentListener inboxAttachmentListener;
-    public final PendingDeleteFromServer.PendingDeleteFromServerListener pendingDeleteFromServerListener;
     public final PushNotificationConfiguration.NewPushNotificationConfigurationListener newPushNotificationConfigurationListener;
     public final PendingServerQuery.PendingServerQueryListener pendingServerQueryListener;
     public final IdentityDelegate identityDelegate;
@@ -49,9 +47,8 @@ public class FetchManagerSession implements AutoCloseable {
     public FetchManagerSession(Session session,
                                InboxMessage.InboxMessageListener inboxMessageListener,
                                InboxMessage.ExtendedPayloadListener extendedPayloadListener,
-                               InboxMessage.MarkAsListedOnServerListener markAsListedOnServerListener,
+                               InboxMessage.MarkAsListedAndDeleteOnServerListener markAsListedAndDeleteOnServerListener,
                                InboxAttachment.InboxAttachmentListener inboxAttachmentListener,
-                               PendingDeleteFromServer.PendingDeleteFromServerListener pendingDeleteFromServerListener,
                                PushNotificationConfiguration.NewPushNotificationConfigurationListener newPushNotificationConfigurationListener,
                                PendingServerQuery.PendingServerQueryListener pendingServerQueryListener,
                                IdentityDelegate identityDelegate,
@@ -61,9 +58,8 @@ public class FetchManagerSession implements AutoCloseable {
         this.session = session;
         this.inboxMessageListener = inboxMessageListener;
         this.extendedPayloadListener = extendedPayloadListener;
-        this.markAsListedOnServerListener = markAsListedOnServerListener;
+        this.markAsListedAndDeleteOnServerListener = markAsListedAndDeleteOnServerListener;
         this.inboxAttachmentListener = inboxAttachmentListener;
-        this.pendingDeleteFromServerListener = pendingDeleteFromServerListener;
         this.newPushNotificationConfigurationListener = newPushNotificationConfigurationListener;
         this.pendingServerQueryListener = pendingServerQueryListener;
         this.identityDelegate = identityDelegate;

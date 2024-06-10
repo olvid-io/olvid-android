@@ -120,6 +120,10 @@ abstract class KemEcies256Kem512 implements KEM {
 
     CiphertextAndKey internalEncrypt(EncryptionPublicKey publicKey, PRNGService prng) {
         BigInteger Ay = ((EncryptionEciesPublicKey) publicKey).getAy();
+        // check that the Ay public key is not a low order point
+        if (curve.isLowOrderPoint(Ay)) {
+            return null;
+        }
         int l = curve.byteLength;
         BigInteger r;
         do {
@@ -151,7 +155,7 @@ abstract class KemEcies256Kem512 implements KEM {
         if (By.equals(BigInteger.ONE)) {
             return null;
         }
-        a = a.multiply(curve.nu.modInverse(curve.q)).mod(curve.q);
+        a = a.multiply(curve.nuInv).mod(curve.q);
         BigInteger Dy = curve.scalarMultiplication(a, By);
         try {
             byte[] seedBytes = new byte[2 * l];

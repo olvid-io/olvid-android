@@ -69,7 +69,7 @@ public class ChannelCoordinator {
             // we were not able to decrypt the message -> we delete it
             if (channelManagerSession.networkFetchDelegate != null) {
                 Logger.d("The message cannot be decrypted.");
-                channelManagerSession.networkFetchDelegate.deleteMessageAndAttachments(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid());
+                channelManagerSession.networkFetchDelegate.messageCannotBeDecrypted(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid());
                 channelManagerSession.session.commit();
             } else {
                 Logger.w("Unable to delete a networkReceivedMessage because the NetworkFetchDelegate is not set yet.");
@@ -87,7 +87,7 @@ public class ChannelCoordinator {
         }
         ChannelReceivedMessage channelReceivedMessage;
         try {
-            channelReceivedMessage = new ChannelReceivedMessage(networkReceivedMessage, authEncKeyAndChannelInfo.getAuthEncKey(), authEncKeyAndChannelInfo.getReceptionChannelInfo());
+            channelReceivedMessage = new ChannelReceivedMessage(channelManagerSession, networkReceivedMessage, authEncKeyAndChannelInfo.getAuthEncKey(), authEncKeyAndChannelInfo.getReceptionChannelInfo());
         } catch (Exception e) {
             channelManagerSession.networkFetchDelegate.deleteMessageAndAttachments(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid());
             return;

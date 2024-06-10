@@ -485,6 +485,7 @@ class MessageLongPressPopUp(
                 && message?.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
                 && message?.isLocationMessage == false
             ) {
+                // TODO: check EDIT_OR_DELETE_OWNED_MESSAGES permission for group V2
                 add(EDIT)
             }
             if (discussion?.isNormal == true

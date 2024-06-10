@@ -79,22 +79,6 @@ public abstract class NetworkChannel extends Channel {
         }
 
         AuthEnc authEnc = Suite.getDefaultAuthEnc(suiteVersion);
-        AuthEncKey messageKey = authEnc.generateKey(prng);
-
-        MessageToSend.Header[] headers = new MessageToSend.Header[networkChannels.length];
-        boolean partOfFullRatchetProtocol = (message instanceof ChannelProtocolMessageToSend) && ((ChannelProtocolMessageToSend) message).isPartOfFullRatchetProtocolOfTheSendSeed();
-        for (int i=0; i<networkChannels.length; i++) {
-            headers[i] = networkChannels[i].wrapMessageKey(messageKey, prng, partOfFullRatchetProtocol);
-        }
-
-        // check that all headers are for the same server
-        String server = headers[0].getToIdentity().getServer();
-        for (int i=1; i<headers.length; i++) {
-            if (! server.equals(headers[i].getToIdentity().getServer())) {
-                Logger.w("Server mismatch in the headers of a ChannelMessageToSend");
-                throw new Exception();
-            }
-        }
 
         MessageToSend messageToSend;
         UID messageUid = new UID(prng);
@@ -124,13 +108,21 @@ public abstract class NetworkChannel extends Channel {
                         Encoded.of(MessageType.APPLICATION_MESSAGE_TYPE),
                         Encoded.of(listOfEncodedAttachments)
                 });
+
                 ////////
                 // Add a padding to message to obfuscate content length. Commented out for now
-                // TODO: uncomment once all clients can handle padded messages
-//                byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
-//                System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
-//                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);
-                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, plaintextContent.getBytes(), prng);
+                byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
+                System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
+
+                AuthEncKey messageKey = authEnc.generateMessageKey(prng, paddedPlaintext);
+
+                MessageToSend.Header[] headers = generateHeaders(networkChannels, false, messageKey, prng);
+
+                // check that all headers are for the same server
+                String server = getServer(headers);
+
+
+                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);
 
                 final EncryptedBytes encryptedExtendedContent;
                 if (channelApplicationMessageToSend.getExtendedMessagePayload() != null) {
@@ -153,13 +145,21 @@ public abstract class NetworkChannel extends Channel {
                         Encoded.of(MessageType.PROTOCOL_MESSAGE_TYPE),
                         channelProtocolMessageToSend.getEncodedElements()
                 });
+
                 ////////
                 // Add a padding to message to obfuscate content length. Commented out for now
-                // TODO: uncomment once all clients can handle padded messages
-//                byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
-//                System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
-//                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);
-                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, plaintextContent.getBytes(), prng);
+                byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
+                System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
+
+                AuthEncKey messageKey = authEnc.generateMessageKey(prng, paddedPlaintext);
+
+                MessageToSend.Header[] headers = generateHeaders(networkChannels, channelProtocolMessageToSend.isPartOfFullRatchetProtocolOfTheSendSeed(), messageKey, prng);
+
+                // check that all headers are for the same server
+                String server = getServer(headers);
+
+
+                EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);
                 messageToSend = new MessageToSend(message.getSendChannelInfo().getFromIdentity(), messageUid, server, encryptedContent, headers);
                 break;
             }
@@ -169,5 +169,26 @@ public abstract class NetworkChannel extends Channel {
         }
         channelManagerSession.networkSendDelegate.post(channelManagerSession.session, messageToSend);
         return messageUid;
+    }
+
+    private static MessageToSend.Header[] generateHeaders(NetworkChannel[] networkChannels, boolean partOfFullRatchetProtocol, AuthEncKey messageKey, PRNGService prng) {
+        MessageToSend.Header[] headers = new MessageToSend.Header[networkChannels.length];
+        for (int i=0; i<networkChannels.length; i++) {
+            headers[i] = networkChannels[i].wrapMessageKey(messageKey, prng, partOfFullRatchetProtocol);
+        }
+
+        return headers;
+    }
+
+    private static String getServer(MessageToSend.Header[] headers) throws Exception {
+        // check that all headers are for the same server
+        String server = headers[0].getToIdentity().getServer();
+        for (int i=1; i<headers.length; i++) {
+            if (!server.equals(headers[i].getToIdentity().getServer())) {
+                Logger.w("Server mismatch in the headers of a ChannelMessageToSend");
+                throw new Exception();
+            }
+        }
+        return server;
     }
 }

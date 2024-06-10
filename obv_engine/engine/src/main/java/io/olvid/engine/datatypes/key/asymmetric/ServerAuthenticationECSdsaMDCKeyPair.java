@@ -49,10 +49,14 @@ public class ServerAuthenticationECSdsaMDCKeyPair extends KeyPair {
     public static ServerAuthenticationECSdsaMDCKeyPair generate(PRNGService prng) {
         EdwardCurve mdc = Suite.getCurve(EdwardCurve.MDC);
         BigInteger a;
+        EdwardCurvePoint A;
+        // check we do not generate a low order public key
         do {
-            a = prng.bigInt(mdc.q);
-        } while (a.equals(BigInteger.ONE) || a.equals(BigInteger.ZERO));
-        EdwardCurvePoint A = mdc.scalarMultiplicationWithX(a, mdc.G);
+            do {
+                a = prng.bigInt(mdc.q);
+            } while (a.equals(BigInteger.ZERO) || a.equals(BigInteger.ONE));
+            A = mdc.scalarMultiplicationWithX(a, mdc.G);
+        } while (A.isLowOrderPoint());
         HashMap<DictionaryKey, Encoded> publicKeyDictionary = new HashMap<>();
         HashMap<DictionaryKey, Encoded> privateKeyDictionary = new HashMap<>();
         try {

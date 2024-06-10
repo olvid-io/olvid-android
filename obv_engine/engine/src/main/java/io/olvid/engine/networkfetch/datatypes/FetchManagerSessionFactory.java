@@ -22,6 +22,11 @@ package io.olvid.engine.networkfetch.datatypes;
 
 import java.sql.SQLException;
 
+import io.olvid.engine.datatypes.Identity;
+
 public interface FetchManagerSessionFactory {
         FetchManagerSession getSession() throws SQLException;
+        void markOwnedIdentityAsUpToDate(Identity ownedIdentity);
+        void markOwnedIdentityAsNotUpToDate(Identity ownedIdentity);
+
 }

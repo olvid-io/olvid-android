@@ -22,6 +22,8 @@ package io.olvid.engine.datatypes.key.asymmetric;
 import java.security.InvalidParameterException;
 import java.util.HashMap;
 
+import io.olvid.engine.crypto.EdwardCurve;
+import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.key.CryptographicKey;
 import io.olvid.engine.encoder.DecodingException;
@@ -70,6 +72,17 @@ public abstract class EncryptionPublicKey extends PublicKey {
         throw new DecodingException();
     }
 
-    public abstract byte[] getCompactKey();
+    protected EdwardCurve getCurve() {
+        switch (algorithmImplementation) {
+            case ALGO_IMPL_KEM_ECIES_MDC_AND_DEM_CTR_AES256_THEN_HMAC_SHA256: {
+                return Suite.getCurve(EdwardCurve.MDC);
+            }
+            case ALGO_IMPL_KEM_ECIES_CURVE25519_AND_DEM_CTR_AES256_THEN_HMAC_SHA256: {
+                return Suite.getCurve(EdwardCurve.CURVE_25519);
+            }
+        }
+        return null;
+    }
 
+    public abstract byte[] getCompactKey();
 }

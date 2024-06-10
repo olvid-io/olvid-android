@@ -30,15 +30,18 @@ public interface PRNGService extends PRNG {
 }
 
 class PRNGServiceHmacSHA256 implements PRNGService {
-    PRNG prng;
-
+    public static final int RESEED_FREQUENCY = 100;
+    private final SecureRandom rand;
+    PRNGHmacSHA256 prng;
+    int reseedCounter;
     private static final PRNGServiceHmacSHA256 instance = new PRNGServiceHmacSHA256();
 
     private PRNGServiceHmacSHA256() {
-        SecureRandom rand = new SecureRandom();
+        rand = new SecureRandom();
         byte[] seedBytes = new byte[Seed.MIN_SEED_LENGTH];
         rand.nextBytes(seedBytes);
         prng = new PRNGHmacSHA256(new Seed(seedBytes));
+        reseedCounter = 1;
     }
 
     public static PRNGServiceHmacSHA256 getInstance() {
@@ -53,7 +56,16 @@ class PRNGServiceHmacSHA256 implements PRNGService {
 
     @Override
     public synchronized byte[] bytes(int n) {
-        return prng.bytes(n);
+        byte[] output = prng.bytes(n);
+        if (reseedCounter == RESEED_FREQUENCY) {
+            byte[] seedBytes = new byte[Seed.MIN_SEED_LENGTH];
+            rand.nextBytes(seedBytes);
+            prng.reseed(new Seed(seedBytes));
+            reseedCounter = 1;
+        } else {
+            reseedCounter++;
+        }
+        return output;
     }
 
     @Override

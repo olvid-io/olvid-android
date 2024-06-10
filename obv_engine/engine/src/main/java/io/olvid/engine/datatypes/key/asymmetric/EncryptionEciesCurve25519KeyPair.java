@@ -48,10 +48,14 @@ public class EncryptionEciesCurve25519KeyPair extends KeyPair {
     public static EncryptionEciesCurve25519KeyPair generate(PRNG prng) {
         EdwardCurve curve25519 = Suite.getCurve(EdwardCurve.CURVE_25519);
         BigInteger a;
+        EdwardCurvePoint A;
+        // check we do not generate a low order public key
         do {
-            a = prng.bigInt(curve25519.q);
-        } while (a.equals(BigInteger.ONE) || a.equals(BigInteger.ZERO));
-        EdwardCurvePoint A = curve25519.scalarMultiplicationWithX(a, curve25519.G);
+            do {
+                a = prng.bigInt(curve25519.q);
+            } while (a.equals(BigInteger.ZERO) || a.equals(BigInteger.ONE));
+            A = curve25519.scalarMultiplicationWithX(a, curve25519.G);
+        } while (A.isLowOrderPoint());
         HashMap<DictionaryKey, Encoded> publicKeyDictionary = new HashMap<>();
         HashMap<DictionaryKey, Encoded> privateKeyDictionary = new HashMap<>();
         try {

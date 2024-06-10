@@ -45,6 +45,7 @@
     <string name="button_label_validate">Valider</string>
     <string name="button_restart_channel_establishment">Redémarrer la création de canal</string>
     <string name="content_description_code_valid">Code valide</string>
+    <string name="label_message_status">Statut du message</string>
     <string name="content_description_message_status">Statut du message</string>
     <string name="content_description_send_message">Envoyer le message</string>
     <string name="dialog_message_abort_invitation">Vous êtes sur le point d\'abandonner une invitation. Abandonner l\'invitation en cours\u00a0?</string>
@@ -1894,7 +1895,18 @@
     <string name="label_delete_from_this_device">Supprimer de cet appareil uniquement</string>
     <string name="label_delete_from_all_my_devices">Supprimer de tous mes appareils</string>
     <string name="label_delete_everywhere">Supprimer des appareils de tous les participants</string>
-
+    <string name="explanation_message_status_sent">Déposé sur le serveur</string>
+    <string name="explanation_message_status_delivered">Reçu par un destinataire</string>
+    <string name="explanation_message_status_delivered_and_read">Lu par un destinataire</string>
+    <string name="explanation_message_status_delivered_all">Reçu par tous les destinataires (uniquement s\'il y en a plusieurs)</string>
+    <string name="explanation_message_status_delivered_all_read_one">Reçu par tous les destinataires et lu par au moins un</string>
+    <string name="explanation_message_status_delivered_all_read_all">Lu par tous les destinataires</string>
+    <string name="explanation_message_status_undelivered">N\'a pas pu être envoyé à certains destinataires</string>
+    <string name="explanation_message_status_sent_from_another_device">Envoyé depuis un autre de vos appareils</string>
+    <string name="explanation_message_status_processing">En cours d\'envoi</string>
+    <string name="dialog_title_message_status_explanations">Différents statuts de message</string>
+    <string name="label_for_group_messages">Pour les messages de groupe</string>
+    <string name="label_other_statuses">Autres statuts</string>
 
 
     <plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity">

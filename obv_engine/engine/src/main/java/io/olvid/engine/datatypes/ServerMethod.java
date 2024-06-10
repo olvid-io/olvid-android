@@ -61,6 +61,7 @@ public abstract class ServerMethod {
     public static final byte GROUP_NOT_LOCKED = 0x15;
     public static final byte INVALID_API_KEY = 0x16;
     public static final byte LISTING_TRUNCATED = 0x17;
+    public static final byte PAYLOAD_TOO_LARGE = (byte) 0x18;
 
     public static final byte GENERAL_ERROR = (byte) 0xff;
 
@@ -68,7 +69,6 @@ public abstract class ServerMethod {
     public static final byte SERVER_CONNECTION_ERROR = (byte) 0x81;
     public static final byte MALFORMED_SERVER_RESPONSE = (byte) 0x82;
     public static final byte OK_WITH_MALFORMED_SERVER_RESPONSE = (byte) 0x83;
-    public static final byte PAYLOAD_TOO_LARGE = (byte) 0x84;
     public static final byte IDENTITY_IS_NOT_ACTIVE = (byte) 0x8e;
 
 

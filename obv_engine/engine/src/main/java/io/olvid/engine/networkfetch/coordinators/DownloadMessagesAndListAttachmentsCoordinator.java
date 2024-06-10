@@ -41,7 +41,6 @@ import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.metamanager.ProcessDownloadedMessageDelegate;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
-import io.olvid.engine.networkfetch.databases.PendingDeleteFromServer;
 import io.olvid.engine.networkfetch.datatypes.CreateServerSessionDelegate;
 import io.olvid.engine.networkfetch.datatypes.DownloadMessagesAndListAttachmentsDelegate;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
@@ -123,17 +122,9 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
             InboxMessage[] markedForDeletionMessages = InboxMessage.getMarkedForDeletionMessages(fetchManagerSession);
             for (InboxMessage inboxMessage: markedForDeletionMessages) {
                 if (inboxMessage.canBeDeleted()) {
-                    PendingDeleteFromServer.create(fetchManagerSession, inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
+                    fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
                 }
             }
-            fetchManagerSession.session.commit();
-
-            // check all decrypted messages, with attachments, that are not yet marked as listed on the server
-            InboxMessage[] messagesToMarkAsListedOnServer = InboxMessage.getMessagesThatCanBeMarkedAsListedOnServer(fetchManagerSession);
-            for (InboxMessage inboxMessage : messagesToMarkAsListedOnServer) {
-                fetchManagerSession.markAsListedOnServerListener.messageCanBeMarkedAsListedOnServer(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
-            }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -205,18 +196,20 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
 
     @Override
     public void onFinishCallback(Operation operation) {
-        Identity identity = ((DownloadMessagesAndListAttachmentsOperation) operation).getOwnedIdentity();
+        Identity ownedIdentity = ((DownloadMessagesAndListAttachmentsOperation) operation).getOwnedIdentity();
         UID deviceUid = ((DownloadMessagesAndListAttachmentsOperation) operation).getDeviceUid();
         boolean listingTruncated = ((DownloadMessagesAndListAttachmentsOperation) operation).getListingTruncated();
-        scheduler.clearFailedCount(identity);
+        scheduler.clearFailedCount(ownedIdentity);
 
         if (listingTruncated) {
             // if listing was truncated --> trigger a new list in 10 seconds, once messages are processed and deleted from server
-            scheduler.schedule(identity, () -> queueNewDownloadMessagesAndListAttachmentsOperation(identity, deviceUid), "DownloadMessagesAndListAttachmentsOperation [relist]", Constants.RELIST_DELAY);
+            scheduler.schedule(ownedIdentity, () -> queueNewDownloadMessagesAndListAttachmentsOperation(ownedIdentity, deviceUid), "DownloadMessagesAndListAttachmentsOperation [relist]", Constants.RELIST_DELAY);
+        } else {
+            fetchManagerSessionFactory.markOwnedIdentityAsUpToDate(ownedIdentity);
         }
 
         HashMap<String, Object> userInfo = new HashMap<>();
-        userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY, identity);
+        userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY, ownedIdentity);
         userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_SUCCESS_KEY, true);
         userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_TRUNCATED_KEY, listingTruncated);
         notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_SERVER_POLLED, userInfo);

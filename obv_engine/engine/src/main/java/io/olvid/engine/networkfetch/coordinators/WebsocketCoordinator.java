@@ -630,9 +630,12 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
 
         private static final int INTERNAL_CLOSING_CODE = 4547;
 
+        private int currentConnectionState;
+
         WebSocketClient(String server, String wsUrl) {
             this.wsUrl = wsUrl;
             this.server = server;
+            this.currentConnectionState = 0;
             synchronized (existingWebsockets) {
                 existingWebsockets.put(server, this);
             }
@@ -650,9 +653,12 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             websocketConnected = true;
             Logger.d("Websocket connected to " + wsUrl);
             if (notificationPostingDelegate != null) {
-                HashMap<String, Object> userInfo = new HashMap<>();
-                userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 1);
-                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
+                if (currentConnectionState != 1) {
+                    currentConnectionState = 1;
+                    HashMap<String, Object> userInfo = new HashMap<>();
+                    userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 1);
+                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
+                }
                 if (relyOnWebsocketForNetworkDetection) {
                     notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_DETECTED_SOME_NETWORK, new HashMap<>());
                 }
@@ -673,7 +679,8 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             // we received a message, so the connection is functioning properly, we can reset the connection failed count
             scheduler.clearFailedCount(server);
 
-            if (notificationPostingDelegate != null) {
+            if (notificationPostingDelegate != null && currentConnectionState != 2) {
+                currentConnectionState = 2;
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 2);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
@@ -757,11 +764,14 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                                 try {
                                     byte[] messagePayload = Base64.decode((String) messageObject);
                                     downloadMessagesAndListAttachmentsDelegate.processWebsocketDownloadedMessage(identity, deviceUid, messagePayload);
+                                    // we break, no listing required
                                     break;
                                 } catch (Exception e) {
                                     // if base64 decoding fails, revert to usual list
                                 }
                             }
+                            // uf we receive this notification, we might have many pending messages on the server --> mark own identity as not up to date
+                            fetchManagerSessionFactory.markOwnedIdentityAsNotUpToDate(identity);
                             downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(identity, deviceUid);
                         } catch (IOException | DecodingException e) {
                             Logger.d("Error decoding identity");
@@ -847,9 +857,6 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                                     userInfo.put(DownloadNotifications.NOTIFICATION_PING_RECEIVED_DELAY_KEY, delay);
                                     notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PING_RECEIVED, userInfo);
                                 }
-                                HashMap<String, Object> userInfo = new HashMap<>();
-                                userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 2);
-                                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
                             }
                         }
                         break;
@@ -963,7 +970,8 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         }
 
         void close() {
-            if (notificationPostingDelegate != null) {
+            if (notificationPostingDelegate != null && currentConnectionState != 0) {
+                currentConnectionState = 0;
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 0);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);

@@ -33,7 +33,6 @@ import io.olvid.engine.datatypes.containers.UidAndBoolean;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.networkfetch.coordinators.DeleteMessageAndAttachmentsCoordinator;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
-import io.olvid.engine.networkfetch.databases.PendingDeleteFromServer;
 import io.olvid.engine.networkfetch.databases.ServerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
@@ -79,29 +78,22 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
             try {
                 this.messageUidsAndMarkAsListed = messageBatchProvider.getBatchOFMessageUids();
 
-
-                List<MessageAndPendingDeleteAndMarkAsListed> messageAndPendingDeletes = new ArrayList<>();
+                List<MessageAndMarkAsListed> messageAndPendingDeletes = new ArrayList<>();
                 for (UidAndBoolean messageUidAndMarkAsListed : messageUidsAndMarkAsListed) {
                     // message may be null in case of re-list of an already deleted message
                     InboxMessage message = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUidAndMarkAsListed.uid);
-                    PendingDeleteFromServer pendingDeleteFromServer = null;
 
                     if (messageUidAndMarkAsListed.bool) {
-                        if (message == null || message.isMarkedAsListedOnServer()) {
+                        if (message == null) {
                             continue;
                         }
                     } else {
                         if (message != null && !message.canBeDeleted()) {
                             continue;
                         }
-
-                        pendingDeleteFromServer = PendingDeleteFromServer.get(fetchManagerSession, ownedIdentity, messageUidAndMarkAsListed.uid);
-                        if (pendingDeleteFromServer == null) {
-                            continue;
-                        }
                     }
 
-                    messageAndPendingDeletes.add(new MessageAndPendingDeleteAndMarkAsListed(message, pendingDeleteFromServer, messageUidAndMarkAsListed));
+                    messageAndPendingDeletes.add(new MessageAndMarkAsListed(message, messageUidAndMarkAsListed));
                 }
 
                 if (messageAndPendingDeletes.isEmpty()) {
@@ -142,14 +134,9 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                 fetchManagerSession.session.startTransaction();
                 switch (returnStatus) {
                     case ServerMethod.OK:
-                        for (MessageAndPendingDeleteAndMarkAsListed messageAndPendingDeleteAndMarkAsListed : messageAndPendingDeletes) {
-                            if (messageAndPendingDeleteAndMarkAsListed.messageUidAndMarkAsListed.bool) {
-                                messageAndPendingDeleteAndMarkAsListed.message.markAsListedOnServer();
-                            } else {
-                                messageAndPendingDeleteAndMarkAsListed.pendingDeleteFromServer.delete();
-                                if (messageAndPendingDeleteAndMarkAsListed.message != null) {
-                                    messageAndPendingDeleteAndMarkAsListed.message.delete();
-                                }
+                        for (MessageAndMarkAsListed messageAndMarkAsListed : messageAndPendingDeletes) {
+                            if (!messageAndMarkAsListed.messageUidAndMarkAsListed.bool && messageAndMarkAsListed.message != null) {
+                                messageAndMarkAsListed.message.delete();
                             }
                         }
                         finished = true;
@@ -237,14 +224,12 @@ class DeleteMessageAndAttachmentServerMethod extends ServerMethod {
     }
 }
 
-class MessageAndPendingDeleteAndMarkAsListed {
+class MessageAndMarkAsListed {
     final InboxMessage message;
-    final PendingDeleteFromServer pendingDeleteFromServer;
     final UidAndBoolean messageUidAndMarkAsListed;
 
-    public MessageAndPendingDeleteAndMarkAsListed(InboxMessage message, PendingDeleteFromServer pendingDeleteFromServer, UidAndBoolean messageUidAndMarkAsListed) {
+    public MessageAndMarkAsListed(InboxMessage message, UidAndBoolean messageUidAndMarkAsListed) {
         this.message = message;
-        this.pendingDeleteFromServer = pendingDeleteFromServer;
         this.messageUidAndMarkAsListed = messageUidAndMarkAsListed;
     }
 }

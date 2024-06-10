@@ -877,6 +877,8 @@ public class HandleNewMessageNotificationTask implements Runnable {
             return;
         }
 
+        // TODO: handle the case where discussion is locked and request comes from myself
+
         Discussion discussion = getDiscussion(jsonDeleteMessages.getGroupUid(), jsonDeleteMessages.getGroupOwner(), jsonDeleteMessages.getGroupV2Identifier(), jsonDeleteMessages.getOneToOneIdentifier(), messageSender, null);
         if (discussion == null) {
             return;

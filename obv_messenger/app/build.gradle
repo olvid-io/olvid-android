@@ -16,8 +16,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdk 34
-        versionCode 238
-        versionName "2.2"
+        versionCode 242
+        versionName "2.2.1"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr']
@@ -226,7 +226,7 @@ dependencies {
 
     // google map integration
     fullImplementation 'com.google.android.gms:play-services-maps:18.2.0'
-    fullImplementation 'com.google.android.gms:play-services-location:21.2.0'
+    fullImplementation 'com.google.android.gms:play-services-location:21.3.0'
 
     // Google Drive
     fullImplementation 'com.google.android.gms:play-services-auth:21.2.0'
@@ -241,7 +241,7 @@ dependencies {
     }
 
     // opensource license page
-    fullImplementation 'com.google.android.gms:play-services-oss-licenses:17.0.1'
+    fullImplementation 'com.google.android.gms:play-services-oss-licenses:17.1.0'
 
     // ML kit QR-code scanning
     fullImplementation 'com.google.mlkit:barcode-scanning:17.2.0'

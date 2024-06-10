@@ -183,8 +183,10 @@ class GlobalSearchViewModel : ViewModel() {
 
             messageLimitReachedCount =
                 if (messages.size >= MESSAGE_SEARCH_LIMIT) {
-                    val count = AppDatabase.getInstance().messageDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery)
-                    if (count > MESSAGE_SEARCH_LIMIT) {
+                    val count = AppDatabase.getInstance().messageDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery, 5 * MESSAGE_SEARCH_LIMIT + 1)
+                    if (count > 5 * MESSAGE_SEARCH_LIMIT) {
+                        "${5 * MESSAGE_SEARCH_LIMIT}+"
+                    } else if (count > MESSAGE_SEARCH_LIMIT) {
                         count.toString()
                     } else {
                         null
@@ -202,8 +204,10 @@ class GlobalSearchViewModel : ViewModel() {
 
             attachmentLimitReachedCount =
                 if (fyles.size >= ATTACHMENT_SEARCH_LIMIT) {
-                    val count = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery)
-                    if (count > ATTACHMENT_SEARCH_LIMIT) {
+                    val count = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery, 5 * ATTACHMENT_SEARCH_LIMIT + 1)
+                    if (count > 5 * ATTACHMENT_SEARCH_LIMIT) {
+                        "${5 * ATTACHMENT_SEARCH_LIMIT}+"
+                    } else if (count > ATTACHMENT_SEARCH_LIMIT) {
                         count.toString()
                     } else {
                         null

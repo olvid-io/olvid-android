@@ -61,6 +61,10 @@ class PRNGHmacSHA256 implements PRNG {
         } catch (Exception ignored) {}
     }
 
+    void reseed(Seed seed) {
+        update(seed.getBytes());
+    }
+
     @Override
     public byte[] bytes(int l) {
         byte[] output = new byte[l];

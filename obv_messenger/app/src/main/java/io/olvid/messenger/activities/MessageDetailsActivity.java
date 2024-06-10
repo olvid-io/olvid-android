@@ -146,6 +146,7 @@ public class MessageDetailsActivity extends LockableActivity {
     RecyclerView attachmentsRecyclerView;
     MessageAttachmentAdapter attachmentAdapter;
     LiveData<Message> repliedToMessage;
+    TextView messageStatusTextView;
 
     private Timer updateTimer;
     private Long expirationTimestamp;
@@ -241,6 +242,7 @@ public class MessageDetailsActivity extends LockableActivity {
         messageCardView.setSizeChangeListener(this::recomputeMessageLayout);
 
 
+
         // metadata
         metadataRecyclerView = findViewById(R.id.message_metadata_recycler_view);
         if (isInbound || sendFromOtherDevice) {
@@ -275,6 +277,13 @@ public class MessageDetailsActivity extends LockableActivity {
                 recipientInfosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
                 recipientInfosRecyclerView.addItemDecoration(recipientInfoHeaderAndSeparatorDecoration);
                 messageDetailsViewModel.getMessageRecipientInfos().observe(this, recipientInfosAdapter);
+            }
+
+            // outbound status
+            messageStatusTextView = findViewById(R.id.message_status);
+            View statusIndicator = findViewById(R.id.message_details_status_indicator);
+            if (statusIndicator != null) {
+                statusIndicator.setOnClickListener(this::statusClicked);
             }
         }
 
@@ -360,6 +369,22 @@ public class MessageDetailsActivity extends LockableActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void statusClicked(View view) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_view_message_status_explanation, null);
+        final AlertDialog alertDialog = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                .setView(dialogView)
+                .create();
+        dialogView.findViewById(R.id.ok_button).setOnClickListener(v -> {
+            alertDialog.dismiss();
+        });
+        Window window = alertDialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+        }
+        alertDialog.show();
+    }
+
 
     boolean messageWasNonNull = false;
 
@@ -504,6 +529,55 @@ public class MessageDetailsActivity extends LockableActivity {
                     messageStatusImageView.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_message_status_processing));
                 }
             }
+            if (messageStatusTextView != null) {
+                switch (message.status) {
+                    case Message.STATUS_SENT: {
+                        messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_sent, 0, R.drawable.ic_info, 0);
+                        messageStatusTextView.setText(R.string.explanation_message_status_sent);
+                        break;
+                    }
+                    case Message.STATUS_DELIVERED: {
+                        messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_one, 0, R.drawable.ic_info, 0);
+                        messageStatusTextView.setText(R.string.explanation_message_status_delivered);
+                        break;
+                    }
+                    case Message.STATUS_DELIVERED_AND_READ: {
+                        messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_and_read_one, 0, R.drawable.ic_info, 0);
+                        messageStatusTextView.setText(R.string.explanation_message_status_delivered_and_read);
+                        break;
+                    }
+                    case Message.STATUS_DELIVERED_ALL: {
+                        messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_all, 0, R.drawable.ic_info, 0);
+                        messageStatusTextView.setText(R.string.explanation_message_status_delivered_all);
+                        break;
+                    }
+                    case Message.STATUS_DELIVERED_ALL_READ_ONE: {
+                        messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_all_read_one, 0, R.drawable.ic_info, 0);
+                        messageStatusTextView.setText(R.string.explanation_message_status_delivered_all_read_one);
+                        break;
+                    }
+                    case Message.STATUS_DELIVERED_ALL_READ_ALL: {
+                        messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_all_read_all, 0, R.drawable.ic_info, 0);
+                        messageStatusTextView.setText(R.string.explanation_message_status_delivered_all_read_all);
+                        break;
+                    }
+                    case Message.STATUS_UNDELIVERED: {
+                        messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_undelivered, 0, R.drawable.ic_info, 0);
+                        messageStatusTextView.setText(R.string.explanation_message_status_undelivered);
+                        break;
+                    }
+                    case Message.STATUS_SENT_FROM_ANOTHER_DEVICE: {
+                        messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_sent_from_other_device, 0, R.drawable.ic_info, 0);
+                        messageStatusTextView.setText(R.string.explanation_message_status_sent_from_another_device);
+                        break;
+                    }
+                    default: {
+                        messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_processing, 0, R.drawable.ic_info, 0);
+                        messageStatusTextView.setText(R.string.explanation_message_status_processing);
+                    }
+                }
+            }
+
             if ((message.status == Message.STATUS_UNDELIVERED) != this.messageIsUndelivered) {
                 this.messageIsUndelivered = message.status == Message.STATUS_UNDELIVERED;
                 recipientInfosRecyclerView.invalidate();

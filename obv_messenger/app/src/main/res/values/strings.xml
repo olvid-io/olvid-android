@@ -46,6 +46,7 @@
     <string name="button_label_validate">Validate</string>
     <string name="button_restart_channel_establishment">Restart Channel Establishment</string>
     <string name="content_description_code_valid">Code valid</string>
+    <string name="label_message_status">Message status</string>
     <string name="content_description_message_status">Message status</string>
     <string name="content_description_send_message">Send message</string>
     <string name="dialog_message_abort_invitation">You are about to discard an invitation. Proceed?</string>
@@ -1929,8 +1930,18 @@
     <string name="label_delete_from_this_device">Delete from this device only</string>
     <string name="label_delete_from_all_my_devices">Delete from all my devices</string>
     <string name="label_delete_everywhere">Delete from the devices of all participants</string>
-
-
+    <string name="explanation_message_status_sent">Uploaded on the server</string>
+    <string name="explanation_message_status_delivered">Delivered to one recipient</string>
+    <string name="explanation_message_status_delivered_and_read">Read by one recipient</string>
+    <string name="explanation_message_status_delivered_all">Delivered to all message recipients (only if there are multiple recipients)</string>
+    <string name="explanation_message_status_delivered_all_read_one">Delivered to all recipients and read by at least one</string>
+    <string name="explanation_message_status_delivered_all_read_all">Read by all recipients</string>
+    <string name="explanation_message_status_undelivered">Could not be sent to some recipients</string>
+    <string name="explanation_message_status_sent_from_another_device">Sent from another of your devices</string>
+    <string name="explanation_message_status_processing">Upload in progress</string>
+    <string name="dialog_title_message_status_explanations">Possible message statuses</string>
+    <string name="label_for_group_messages">For group messages</string>
+    <string name="label_other_statuses">Other statuses</string>
 
 
     <plurals name="dialog_title_delete_discussions">

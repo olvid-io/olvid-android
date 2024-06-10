@@ -42,7 +42,6 @@ import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.networkfetch.databases.InboxAttachment;
-import io.olvid.engine.networkfetch.databases.PendingDeleteFromServer;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
 import io.olvid.engine.networkfetch.datatypes.RefreshInboxAttachmentSignedUrlDelegate;
@@ -149,7 +148,7 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
                         fetchManagerSession.session.startTransaction();
                         attachment.markForDeletion();
                         if (attachment.getMessage().canBeDeleted()) {
-                            PendingDeleteFromServer.create(fetchManagerSession, ownedIdentity, messageUid);
+                            fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid);
                         }
                         fetchManagerSession.session.commit();
                     }

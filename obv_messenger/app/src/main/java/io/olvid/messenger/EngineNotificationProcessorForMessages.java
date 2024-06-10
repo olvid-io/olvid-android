@@ -194,8 +194,8 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 byte[] messageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY);
                 Integer attachmentNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY);
                 Float progress = (Float) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY);
-                Float speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_SPEED_BPS_KEY);
-                Integer eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ETA_SECONDS_KEY);
+//                Float speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_SPEED_BPS_KEY);
+//                Integer eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ETA_SECONDS_KEY);
                 if (attachmentNumber == null || progress == null) {
                     break;
                 }
@@ -231,14 +231,14 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                         }
 
                         List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);
-                        if (messageRecipientInfos.size() > 0) {
+                        if (!messageRecipientInfos.isEmpty()) {
                             long timestamp = System.currentTimeMillis();
                             long messageId = messageRecipientInfos.get(0).messageId;
                             List<MessageRecipientInfo> updatedMessageRecipientInfos = new ArrayList<>(messageRecipientInfos.size());
                             boolean complete = false;
                             for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
                                 if (messageRecipientInfo.markAttachmentSent(engineNumber)) {
-                                    if (messageRecipientInfo.unsentAttachmentNumbers == null) {
+                                    if (messageRecipientInfo.unsentAttachmentNumbers == null && messageRecipientInfo.timestampSent == null) {
                                         messageRecipientInfo.timestampSent = timestamp;
                                         complete = true;
                                     }
@@ -246,7 +246,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                 }
                             }
 
-                            if (updatedMessageRecipientInfos.size() > 0) {
+                            if (!updatedMessageRecipientInfos.isEmpty()) {
                                 db.messageRecipientInfoDao().update(updatedMessageRecipientInfos.toArray(new MessageRecipientInfo[0]));
 
                                 Message message = db.messageDao().get(messageId);
@@ -271,8 +271,8 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 byte[] messageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY);
                 Integer attachmentNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY);
                 Float progress = (Float) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_PROGRESS_KEY);
-                Float speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_SPEED_BPS_KEY);
-                Integer eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ETA_SECONDS_KEY);
+//                Float speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_SPEED_BPS_KEY);
+//                Integer eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ETA_SECONDS_KEY);
                 if (attachmentNumber == null || progress == null) {
                     break;
                 }
@@ -283,6 +283,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 break;
             }
             case EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED: {
+                // TODO: handle this differently than ATTACHMENT_UPLOADED to show users that the attachment was never actually sent.
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] engineMessageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_MESSAGE_IDENTIFIER_KEY);
                 Integer engineNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_ATTACHMENT_NUMBER_KEY);
@@ -295,7 +296,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                         }
 
                         List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);
-                        if (messageRecipientInfos.size() > 0) {
+                        if (!messageRecipientInfos.isEmpty()) {
                             long timestamp = System.currentTimeMillis();
                             long messageId = messageRecipientInfos.get(0).messageId;
                             List<MessageRecipientInfo> updatedMessageRecipientInfos = new ArrayList<>(messageRecipientInfos.size());
@@ -310,7 +311,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                 }
                             }
 
-                            if (updatedMessageRecipientInfos.size() > 0) {
+                            if (!updatedMessageRecipientInfos.isEmpty()) {
                                 db.messageRecipientInfoDao().update(updatedMessageRecipientInfos.toArray(new MessageRecipientInfo[0]));
 
                                 Message message = db.messageDao().get(messageId);
@@ -336,7 +337,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 Long timestampFromServer = (Long) userInfo.get(EngineNotifications.MESSAGE_UPLOADED_TIMESTAMP_FROM_SERVER);
 
                 List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);
-                if (messageRecipientInfos.size() > 0) {
+                if (!messageRecipientInfos.isEmpty()) {
                     long messageId = messageRecipientInfos.get(0).messageId;
                     List<MessageRecipientInfo> updatedMessageRecipientInfos = new ArrayList<>(messageRecipientInfos.size());
                     for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
@@ -346,7 +347,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                         }
                     }
 
-                    if (updatedMessageRecipientInfos.size() > 0) {
+                    if (!updatedMessageRecipientInfos.isEmpty()) {
                         db.messageRecipientInfoDao().update(updatedMessageRecipientInfos.toArray(new MessageRecipientInfo[0]));
 
                         Message message = db.messageDao().get(messageId);
@@ -370,7 +371,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 byte[] engineMessageIdentifier = (byte[]) userInfo.get(EngineNotifications.MESSAGE_UPLOAD_FAILED_IDENTIFIER_KEY);
 
                 List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);
-                if (messageRecipientInfos.size() > 0) {
+                if (!messageRecipientInfos.isEmpty()) {
                     long messageId = messageRecipientInfos.get(0).messageId;
                     boolean hasUnsentMessageRecipientInfo = false;
 

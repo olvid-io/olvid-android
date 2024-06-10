@@ -20,6 +20,8 @@
 package io.olvid.engine.channel.datatypes;
 
 
+import io.olvid.engine.Logger;
+import io.olvid.engine.channel.databases.ObliviousChannel;
 import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.Suite;
@@ -39,11 +41,29 @@ public class ChannelReceivedMessage {
     private final ReceptionChannelInfo receptionChannelInfo;
     private final NetworkReceivedMessage message;
 
-    public ChannelReceivedMessage(NetworkReceivedMessage message, AuthEncKey messageKey, ReceptionChannelInfo receptionChannelInfo) throws Exception {
+    public ChannelReceivedMessage(ChannelManagerSession channelManagerSession, NetworkReceivedMessage message, AuthEncKey messageKey, ReceptionChannelInfo receptionChannelInfo) throws Exception {
         try {
             // decrypt
             AuthEnc authEnc = Suite.getAuthEnc(messageKey);
             Encoded decryptedMessage = new Encoded(authEnc.decrypt(messageKey, message.getEncryptedContent()));
+
+            // verify the messageKey is properly formatted
+            boolean messageKeyCheckPassed = authEnc.verifyMessageKey(messageKey, decryptedMessage.getBytes());
+            Logger.d("MessageKey check: " + (messageKeyCheckPassed ? "PASSED" : "FAILED"));
+            if (receptionChannelInfo.getChannelType() == ReceptionChannelInfo.OBLIVIOUS_CHANNEL_TYPE) {
+                // check the GKMV2 info in receptionChannelInfo
+                if (receptionChannelInfo.obliviousChannelsSupportsGKMV2() && !messageKeyCheckPassed) {
+                    Logger.e("Received a message not passing the messageKey check on an oblivious channel that supports GKMV2. Discarding it!!!!");
+                    throw new Exception();
+                } else if (messageKeyCheckPassed && !receptionChannelInfo.obliviousChannelsSupportsGKMV2()) {
+                    // received a message that passes the GKMV2 messageKey check --> tag the ObliviousChannel
+                    UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getHeader().getOwnedIdentity());
+                    if (currentDeviceUid != null) {
+                        Logger.i("Tagging an oblivious channel as supporting GKMV2");
+                        ObliviousChannel.setSupportsGKMV2(channelManagerSession, currentDeviceUid, receptionChannelInfo.getRemoteDeviceUid(), receptionChannelInfo.getRemoteIdentity(), receptionChannelInfo.getFullRatchetCount(), receptionChannelInfo.getSelfRatchetCount());
+                    }
+                }
+            }
 
             // if needed, compute the extended payload key
             if (message.hasExtendedPayload()) {

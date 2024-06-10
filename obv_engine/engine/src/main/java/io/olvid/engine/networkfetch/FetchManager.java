@@ -23,7 +23,9 @@ package io.olvid.engine.networkfetch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -73,7 +75,6 @@ import io.olvid.engine.networkfetch.coordinators.WellKnownCoordinator;
 import io.olvid.engine.networkfetch.databases.CachedWellKnown;
 import io.olvid.engine.networkfetch.databases.InboxAttachment;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
-import io.olvid.engine.networkfetch.databases.PendingDeleteFromServer;
 import io.olvid.engine.networkfetch.databases.PendingServerQuery;
 import io.olvid.engine.networkfetch.databases.PushNotificationConfiguration;
 import io.olvid.engine.networkfetch.databases.ServerSession;
@@ -100,8 +101,10 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     private final WellKnownCoordinator wellKnownCoordinator;
     private NotificationPostingDelegate notificationPostingDelegate;
     private IdentityDelegate identityDelegate;
-
+    private ProcessDownloadedMessageDelegate processDownloadedMessageDelegate;
     private CreateSessionDelegate createSessionDelegate;
+
+    private final HashSet<Identity> ownedIdentitiesUpToDateRegardingServerListing;
 
     public FetchManager(MetaManager metaManager, SSLSocketFactory sslSocketFactory, String engineBaseDirectory, PRNGService prng, ObjectMapper jsonObjectMapper) {
         this.engineBaseDirectory = engineBaseDirectory;
@@ -122,6 +125,8 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         this.websocketCoordinator = new WebsocketCoordinator(this, sslSocketFactory, createServerSessionCoordinator, downloadMessagesAndListAttachmentsCoordinator, wellKnownCoordinator, jsonObjectMapper);
         this.getTurnCredentialsCoordinator = new GetTurnCredentialsCoordinator(this, sslSocketFactory, createServerSessionCoordinator, wellKnownCoordinator);
 
+        ownedIdentitiesUpToDateRegardingServerListing = new HashSet<>();
+
         metaManager.requestDelegate(this, CreateSessionDelegate.class);
         metaManager.requestDelegate(this, SolveChallengeDelegate.class);
         metaManager.requestDelegate(this, ProcessDownloadedMessageDelegate.class);
@@ -138,7 +143,6 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @Override
     public void initialisationComplete() {
         wellKnownCoordinator.initialQueueing();
-        deleteMessageAndAttachmentsCoordinator.initialQueueing();
         serverPushNotificationsCoordinator.initialQueueing();
         downloadAttachmentCoordinator.initialQueueing();
         serverQueryCoordinator.initialQueueing();
@@ -149,6 +153,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         createServerSessionCoordinator.initialQueueing();
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(CreateSessionDelegate createSessionDelegate) {
         this.createSessionDelegate = createSessionDelegate;
 
@@ -156,7 +161,6 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
             CachedWellKnown.createTable(fetchManagerSession.session);
             ServerSession.createTable(fetchManagerSession.session);
             PushNotificationConfiguration.createTable(fetchManagerSession.session);
-            PendingDeleteFromServer.createTable(fetchManagerSession.session);
             InboxMessage.createTable(fetchManagerSession.session);
             InboxAttachment.createTable(fetchManagerSession.session);
             PendingServerQuery.createTable(fetchManagerSession.session);
@@ -171,21 +175,30 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         CachedWellKnown.upgradeTable(session, oldVersion, newVersion);
         ServerSession.upgradeTable(session, oldVersion, newVersion);
         PushNotificationConfiguration.upgradeTable(session, oldVersion, newVersion);
-        PendingDeleteFromServer.upgradeTable(session, oldVersion, newVersion);
         InboxMessage.upgradeTable(session, oldVersion, newVersion);
         InboxAttachment.upgradeTable(session, oldVersion, newVersion);
         PendingServerQuery.upgradeTable(session, oldVersion, newVersion);
+        if (oldVersion < 40 && newVersion >= 40) {
+            Logger.d("DROPPING `pending_delete_from_server` DATABASE FOR VERSION 40");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("DROP TABLE `pending_delete_from_server`");
+            }
+        }
     }
 
 
+    @SuppressWarnings("unused")
     public void setDelegate(SolveChallengeDelegate solveChallengeDelegate) {
         this.createServerSessionCoordinator.setSolveChallengeDelegate(solveChallengeDelegate);
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(ProcessDownloadedMessageDelegate processDownloadedMessageDelegate) {
+        this.processDownloadedMessageDelegate = processDownloadedMessageDelegate;
         this.downloadMessagesAndListAttachmentsCoordinator.setProcessDownloadedMessageDelegate(processDownloadedMessageDelegate);
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(NotificationListeningDelegate notificationListeningDelegate) {
         this.serverPushNotificationsCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
         this.websocketCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
@@ -199,6 +212,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         this.verifyReceiptCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(NotificationPostingDelegate notificationPostingDelegate) {
         this.notificationPostingDelegate = notificationPostingDelegate;
         this.serverPushNotificationsCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
@@ -212,14 +226,17 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         this.getTurnCredentialsCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(ChannelDelegate channelDelegate) {
         this.serverQueryCoordinator.setChannelDelegate(channelDelegate);
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(IdentityDelegate identityDelegate) {
         this.identityDelegate = identityDelegate;
     }
 
+    @SuppressWarnings("unused")
     public void setDelegate(ProtocolStarterDelegate protocolStarterDelegate) {
         this.websocketCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
     }
@@ -232,7 +249,6 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         for (InboxMessage inboxMessage: inboxMessages) {
             inboxMessage.delete();
         }
-        PendingDeleteFromServer.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         for (PendingServerQuery pendingServerQuery: PendingServerQuery.getAll(wrapSession(session))) {
             try {
                 ServerQuery serverQuery = ServerQuery.of(pendingServerQuery.getEncodedQuery());
@@ -262,7 +278,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                 downloadMessageExtendedPayloadCoordinator,
                 deleteMessageAndAttachmentsCoordinator,
                 downloadAttachmentCoordinator,
-                deleteMessageAndAttachmentsCoordinator,
+//                deleteMessageAndAttachmentsCoordinator,
                 serverPushNotificationsCoordinator,
                 serverQueryCoordinator,
                 identityDelegate,
@@ -277,7 +293,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                 downloadMessageExtendedPayloadCoordinator,
                 deleteMessageAndAttachmentsCoordinator,
                 downloadAttachmentCoordinator,
-                deleteMessageAndAttachmentsCoordinator,
+//                deleteMessageAndAttachmentsCoordinator,
                 serverPushNotificationsCoordinator,
                 serverQueryCoordinator,
                 identityDelegate,
@@ -452,6 +468,58 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         return (inboxAttachment == null) || (inboxAttachment.getExpectedLength() == inboxAttachment.getReceivedLength());
     }
 
+
+    // this method is called when a received message cannot be decrypted.
+    // If we are still listing messages on the server, we may be late on self-ratchet so we simply postpone the processing of this message by doing nothing :)
+    @Override
+    public void messageCannotBeDecrypted(Session session, Identity ownedIdentity, UID messageUid) {
+        synchronized (ownedIdentitiesUpToDateRegardingServerListing) {
+            if (ownedIdentitiesUpToDateRegardingServerListing.contains(ownedIdentity)) {
+                deleteMessageAndAttachments(session, ownedIdentity, messageUid);
+            }
+        }
+    }
+
+    @Override
+    public void markOwnedIdentityAsUpToDate(Identity ownedIdentity) {
+        synchronized (ownedIdentitiesUpToDateRegardingServerListing) {
+            // mark the identity as up to date
+            ownedIdentitiesUpToDateRegardingServerListing.add(ownedIdentity);
+
+            // notify app that syncing is finished
+            if (notificationPostingDelegate != null) {
+                HashMap<String, Object> userInfo = new HashMap<>();
+                userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_OWNED_IDENTITY_KEY, ownedIdentity);
+                userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY, false);
+                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER, userInfo);
+            }
+
+            // reprocess all unprocessed messages
+            try (FetchManagerSession fetchManagerSession = getSession()) {
+                // retry processing messages that were downloaded but never decrypted nor marked for deletion
+                InboxMessage[] unprocessedMessages = InboxMessage.getUnprocessedMessagesForOwnedIdentity(fetchManagerSession, ownedIdentity);
+                for (InboxMessage inboxMessage : unprocessedMessages) {
+                    processDownloadedMessageDelegate.processDownloadedMessage(inboxMessage.getNetworkReceivedMessage());
+                }
+            } catch (SQLException ignored) { }
+        }
+    }
+
+    @Override
+    public void markOwnedIdentityAsNotUpToDate(Identity ownedIdentity) {
+        synchronized (ownedIdentitiesUpToDateRegardingServerListing) {
+            ownedIdentitiesUpToDateRegardingServerListing.remove(ownedIdentity);
+
+            // notify app that syncing is in progress
+            if (notificationPostingDelegate != null) {
+                HashMap<String, Object> userInfo = new HashMap<>();
+                userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_OWNED_IDENTITY_KEY, ownedIdentity);
+                userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY, true);
+                notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER, userInfo);
+            }
+        }
+    }
+
     // This method marks a message and all its attachments for deletion
     @Override
     public void deleteMessageAndAttachments(Session session, Identity ownedIdentity, UID messageUid) {
@@ -464,10 +532,10 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         for (InboxAttachment inboxAttachment: inboxMessage.getAttachments()) {
             inboxAttachment.markForDeletion();
         }
-        PendingDeleteFromServer.create(fetchManagerSession, ownedIdentity, messageUid);
+        fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid);
     }
 
-    // This method marks a message for deletion and creates a PendingDeleteFromServer if needed
+    // This method marks a message for deletion and queues the operation to delete it from server
     @Override
     public void deleteMessage(Session session, Identity ownedIdentity, UID messageUid) {
         FetchManagerSession fetchManagerSession = wrapSession(session);
@@ -477,11 +545,11 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         }
         inboxMessage.markForDeletion();
         if (inboxMessage.canBeDeleted()) {
-            PendingDeleteFromServer.create(fetchManagerSession, ownedIdentity, messageUid);
+            fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid);
         }
     }
 
-    // This method marks an attachment for deletion and creates a PendingDeleteFromServer if needed
+    // This method marks an attachment for deletion and queues the operation to delete it from server
     @Override
     public void deleteAttachment(Session session, Identity ownedIdentity, UID messageUid, int attachmentNumber) throws SQLException {
         FetchManagerSession fetchManagerSession = wrapSession(session);
@@ -491,7 +559,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         }
         inboxAttachment.markForDeletion();
         if (inboxAttachment.getMessage().canBeDeleted()) {
-            PendingDeleteFromServer.create(fetchManagerSession, ownedIdentity, messageUid);
+            fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid);
         }
     }
 

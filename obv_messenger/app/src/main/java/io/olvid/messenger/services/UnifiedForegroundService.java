@@ -804,7 +804,9 @@ public class UnifiedForegroundService extends Service {
                         noExactAlarmTimer.schedule(new TimerTask() {
                             @Override
                             public void run() {
-                                App.getContext().startService(lockIntent);
+                                try {
+                                    App.getContext().startService(lockIntent);
+                                } catch (Exception ignored) {}
                             }
                         }, 1000L * timeout);
                     }

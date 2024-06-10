@@ -20,6 +20,7 @@
 package io.olvid.engine.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -36,9 +37,12 @@ import java.util.Arrays;
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Seed;
+import io.olvid.engine.datatypes.containers.CiphertextAndKey;
+import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesMDCKeyPair;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaPrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaPublicKey;
 import io.olvid.engine.datatypes.key.asymmetric.SignaturePublicKey;
+import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.encoder.Encoded;
 
 public class AsymmetricCryptoUnitTest {
@@ -171,6 +175,20 @@ public class AsymmetricCryptoUnitTest {
                 SignaturePublicKey signaturePublicKey = pk.getSignaturePublicKey();
                 Signature signatureImplem = Suite.getSignature(signaturePublicKey);
                 assertTrue(signatureImplem.verify(signaturePublicKey, formattedChallenge, signature));
+            }
+        }
+    }
+
+    @Test
+    public void test_kemDecrypt() throws Exception {
+        PRNGService prng = Suite.getDefaultPRNGService(0);
+        for (int i=0; i<10; i++) {
+            EncryptionEciesMDCKeyPair pair = EncryptionEciesMDCKeyPair.generate(prng);
+            KemEcies256Kem512MDC kem = new KemEcies256Kem512MDC();
+            for (int j = 0; j<100; j++) {
+                CiphertextAndKey ciphertextAndKey = kem.encrypt(pair.getPublicKey(), prng);
+                AuthEncKey dec = kem.decrypt(pair.getPrivateKey(), ciphertextAndKey.getCiphertext().getBytes());
+                assertEquals(ciphertextAndKey.getKey(), dec);
             }
         }
     }

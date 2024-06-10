@@ -164,6 +164,9 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                                         );
                                     }
                                 }
+                            } else {
+                                // we relisted a message --> mark it as listed
+                                fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeMarkedAsListedOnServer(ownedIdentity, messageAndAttachmentLengths.messageUid);
                             }
                         }
                         Logger.d("DownloadMessagesAndListAttachmentsOperation found " + messageAndAttachmentLengthsArray.length + " messages (" + count + " new) on the server.");

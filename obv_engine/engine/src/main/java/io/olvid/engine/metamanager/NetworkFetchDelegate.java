@@ -45,9 +45,9 @@ public interface NetworkFetchDelegate {
     ReceivedAttachment[] getMessageAttachments(Identity ownedIdentity, UID messageUid);
     boolean isInboxAttachmentReceived(Session session, Identity ownedIdentity, UID uid, int engineNumber) throws Exception;
 
+    void messageCannotBeDecrypted(Session session, Identity ownedIdentity, UID messageUid);
     void deleteMessageAndAttachments(Session session, Identity ownedIdentity, UID messageUid);
     void deleteMessage(Session session, Identity ownedIdentity, UID messageUid);
-
     void deleteAttachment(Session session, Identity ownedIdentity, UID messageUid, int attachmentNumber) throws SQLException;
 
     void resendAllDownloadedAttachmentNotifications() throws Exception;
@@ -69,4 +69,5 @@ public interface NetworkFetchDelegate {
     void queryServerWellKnown(String server);
     List<JsonOsmStyle> getOsmStyles(String server);
     String getAddressServerUrl(String server);
+
 }

@@ -41,6 +41,8 @@ public interface AuthEnc {
     byte[] decrypt(AuthEncKey key, EncryptedBytes ciphertext) throws DecryptionException, InvalidKeyException;
     KDF.Delegate getKDFDelegate();
     AuthEncKey generateKey(PRNG prng);
+    AuthEncKey generateMessageKey(PRNG prng, byte[] message);
+    boolean verifyMessageKey(AuthEncKey authEncKey, byte[] message);
 }
 
 
@@ -128,6 +130,39 @@ class AuthEncAES256ThenSHA256 implements AuthEnc {
             return (AuthEncKey) kdf.gen(kdfSeed, getKDFDelegate())[0];
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    @Override
+    public AuthEncKey generateMessageKey(PRNG prng, byte[] message) {
+        KDF kdf = Suite.getKDF(KDF.KDF_SHA256);
+
+        Seed encryptionKdfSeed = new Seed(prng);
+        SymEncCTRAES256Key symEncCTRAES256Key = (SymEncCTRAES256Key) kdf.gen(encryptionKdfSeed, new KDFDelegateForSymEncCtrAES256())[0];
+
+        byte[] concatenation = new byte[symEncCTRAES256Key.getKeyLength() + message.length];
+        System.arraycopy(symEncCTRAES256Key.getKeyBytes(), 0, concatenation, 0, symEncCTRAES256Key.getKeyLength());
+        System.arraycopy(message, 0, concatenation, symEncCTRAES256Key.getKeyLength(), message.length);
+        MACHmacSha256Key hmacSha256Key = (MACHmacSha256Key) kdf.gen(new Seed(concatenation), new KDFDelegateForHmacSHA256())[0];
+
+        return AuthEncAES256ThenSHA256Key.of(hmacSha256Key.getKeyBytes(), symEncCTRAES256Key.getKeyBytes());
+    }
+
+    @Override
+    public boolean verifyMessageKey(AuthEncKey authEncKey, byte[] message) {
+        KDF kdf = Suite.getKDF(KDF.KDF_SHA256);
+
+        if (authEncKey instanceof AuthEncAES256ThenSHA256Key) {
+            SymEncCTRAES256Key symEncCTRAES256Key = ((AuthEncAES256ThenSHA256Key) authEncKey).getEncKey();
+
+            byte[] concatenation = new byte[symEncCTRAES256Key.getKeyLength() + message.length];
+            System.arraycopy(symEncCTRAES256Key.getKeyBytes(), 0, concatenation, 0, symEncCTRAES256Key.getKeyLength());
+            System.arraycopy(message, 0, concatenation, symEncCTRAES256Key.getKeyLength(), message.length);
+            MACHmacSha256Key hmacSha256Key = (MACHmacSha256Key) kdf.gen(new Seed(concatenation), new KDFDelegateForHmacSHA256())[0];
+
+            return Arrays.equals(hmacSha256Key.getKeyBytes(), ((AuthEncAES256ThenSHA256Key) authEncKey).getMacKey().getKeyBytes());
+        } else {
+            return false;
         }
     }
 }

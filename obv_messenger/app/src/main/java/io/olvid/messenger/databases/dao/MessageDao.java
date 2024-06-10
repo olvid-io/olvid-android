@@ -94,13 +94,13 @@ public interface MessageDao {
             " AND " + Message.FTS_TABLE_NAME + " MATCH :query ORDER BY m." + Message.TIMESTAMP + " DESC LIMIT :limit ")
     List<DiscussionAndMessage> globalSearch(byte[] bytesOwnedIdentity, String query, int limit);
 
-    @Query("SELECT COUNT(*) FROM " + Message.TABLE_NAME + " AS m " +
+    @Query("SELECT COUNT(*) FROM (SELECT m.id FROM " + Message.TABLE_NAME + " AS m " +
             " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
             " WHERE m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
-            " AND " + Message.FTS_TABLE_NAME + " MATCH :query")
-    int globalSearchCount(byte[] bytesOwnedIdentity, String query);
+            " AND " + Message.FTS_TABLE_NAME + " MATCH :query LIMIT :limit)")
+    int globalSearchCount(byte[] bytesOwnedIdentity, String query, int limit);
 
     class DiscussionAndMessage {
         @Embedded(prefix = "disc_")
@@ -299,18 +299,18 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE id IN (:selectedMessageIds)")
     List<Message> getMany(List<Long> selectedMessageIds);
 
-    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ",m.* FROM " + Message.TABLE_NAME + " AS m " +
-            " LEFT JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
+    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", m.* FROM " + Message.TABLE_NAME + " AS m " +
+            " JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " WHERE m." + Message.BOOKMARKED + " = 1 " +
-            "ORDER BY m." + Message.SORT_INDEX + " ASC")
+            " ORDER BY m." + Message.SORT_INDEX + " ASC")
     List<DiscussionAndMessage> getAllBookmarked(byte[] bytesOwnedIdentity);
 
-    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ",m.* FROM " + Message.TABLE_NAME + " AS m " +
-            " LEFT JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
+    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", m.* FROM " + Message.TABLE_NAME + " AS m " +
+            " JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " WHERE m." + Message.BOOKMARKED + " = 1 " +
-            "ORDER BY m." + Message.SORT_INDEX + " ASC")
+            " ORDER BY m." + Message.SORT_INDEX + " ASC")
     LiveData<List<DiscussionAndMessage>> getAllBookmarkedLiveData(byte[] bytesOwnedIdentity);
 
 

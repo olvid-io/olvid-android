@@ -44,13 +44,11 @@ import io.olvid.engine.datatypes.containers.UidAndBoolean;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
-import io.olvid.engine.networkfetch.databases.PendingDeleteFromServer;
 import io.olvid.engine.networkfetch.datatypes.CreateServerSessionDelegate;
-import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
 import io.olvid.engine.networkfetch.operations.DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation;
 
-public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCancelCallback, PendingDeleteFromServer.PendingDeleteFromServerListener, InboxMessage.MarkAsListedOnServerListener, Operation.OnFinishCallback {
+public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCancelCallback, InboxMessage.MarkAsListedAndDeleteOnServerListener, Operation.OnFinishCallback {
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
     private final CreateServerSessionDelegate createServerSessionDelegate;
@@ -65,8 +63,6 @@ public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCance
     private final Lock awaitingServerSessionOperationsLock;
     private final ServerSessionCreatedNotificationListener serverSessionCreatedNotificationListener;
 
-    private boolean initialQueueingPerformed = false;
-    private final Object lock = new Object();
 
     public DeleteMessageAndAttachmentsCoordinator(FetchManagerSessionFactory fetchManagerSessionFactory,
                                                   SSLSocketFactory sslSocketFactory,
@@ -93,23 +89,6 @@ public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCance
         this.notificationListeningDelegate.addListener(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED, serverSessionCreatedNotificationListener);
     }
 
-    public void initialQueueing() {
-        synchronized (lock) {
-            if (initialQueueingPerformed) {
-                return;
-            }
-            try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
-                PendingDeleteFromServer[] pendingDeletes = PendingDeleteFromServer.getAll(fetchManagerSession);
-                for (PendingDeleteFromServer pendingDelete: pendingDeletes) {
-                    queueNewDeleteMessageAndAttachmentsFromServerOperation(pendingDelete.getOwnedIdentity(), pendingDelete.getMessageUid(), false);
-                }
-                initialQueueingPerformed = true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                // Fail silently: an exception is supposed to occur if the CreateSessionDelegate of the sendManagerSessionFactory is not set yet.
-            }
-        }
-    }
 
     private void queueNewDeleteMessageAndAttachmentsFromServerOperation(Identity ownedIdentity, UID messageUid, boolean markAsListed) {
         if (messageUid != null) {
@@ -232,12 +211,11 @@ public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCance
     }
 
 
-    // Notifications received from PendingDeleteFromServer database
+    // Notifications received from MessageInbox when the message and its attachments can be deleted
     @Override
-    public void newPendingDeleteFromServer(Identity ownedIdentity, UID messageUid) {
+    public void messageCanBeDeletedFromServer(Identity ownedIdentity, UID messageUid) {
         queueNewDeleteMessageAndAttachmentsFromServerOperation(ownedIdentity, messageUid, false);
     }
-
 
     // Notifications received from MessageInbox when the payload is set and there are some attachments
     @Override

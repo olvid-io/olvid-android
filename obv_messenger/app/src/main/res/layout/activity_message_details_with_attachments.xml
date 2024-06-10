@@ -64,6 +64,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <include
+                android:id="@+id/message_details_status_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                layout="@layout/view_message_details_status"/>
+
             <io.olvid.messenger.customClasses.EmptyRecyclerView
                 android:id="@+id/message_metadata_recycler_view"
                 android:layout_width="match_parent"
