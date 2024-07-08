@@ -30,6 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.ExponentialBackoffRepeatingScheduler;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
@@ -59,11 +60,12 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
     private final Lock awaitingIdentityReactivationOperationsLock;
     private final AwaitingIdentityReactivationNotificationListener awaitingIdentityReactivationNotificationListener;
 
-    private NotificationListeningDelegate notificationListeningDelegate;
+    private final HashMap<IdentityAndUidAndNumber, Long> lastUrlRefreshTimestamps;
 
     public RefreshInboxAttachmentSignedUrlCoordinator(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory) {
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
+        this.lastUrlRefreshTimestamps = new HashMap<>();
 
         refreshInboxAttachmentSignedUrlOperationQueue = new NoDuplicateOperationQueue();
         refreshInboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshInboxAttachmentSignedUrlCoordinator");
@@ -80,12 +82,14 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
-        this.notificationListeningDelegate = notificationListeningDelegate;
-        // register to NotificationCenter for NOTIFICATION_PUSH_NOTIFICATION_REGISTERED
-        this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS, awaitingIdentityReactivationNotificationListener);
+        // register to NotificationCenter for NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS
+        notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS, awaitingIdentityReactivationNotificationListener);
     }
 
     private void queueNewRefreshInboxAttachmentSignedUrlOperation(Identity ownedIdentity, UID messageUid, int attachmentNumber) {
+        synchronized (lastUrlRefreshTimestamps) {
+            lastUrlRefreshTimestamps.put(new IdentityAndUidAndNumber(ownedIdentity, messageUid, attachmentNumber), System.currentTimeMillis());
+        }
         RefreshInboxAttachmentSignedUrlOperation op = new RefreshInboxAttachmentSignedUrlOperation(fetchManagerSessionFactory, sslSocketFactory, ownedIdentity, messageUid, attachmentNumber, this, this);
         refreshInboxAttachmentSignedUrlOperationQueue.queue(op);
     }
@@ -169,33 +173,39 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
 
     @Override
     public void refreshInboxAttachmentSignedUrl(Identity ownedIdentity, UID messageUid, int attachmentNumber) {
-        queueNewRefreshInboxAttachmentSignedUrlOperation(ownedIdentity, messageUid, attachmentNumber);
+        synchronized (lastUrlRefreshTimestamps) {
+            Long timestamp = lastUrlRefreshTimestamps.get(new IdentityAndUidAndNumber(ownedIdentity, messageUid, attachmentNumber));
+            if (timestamp != null &&  System.currentTimeMillis() - timestamp < Constants.MINIMUM_URL_REFRESH_INTERVAL) {
+                long delay = Constants.MINIMUM_URL_REFRESH_INTERVAL - (System.currentTimeMillis() - timestamp);
+                scheduler.schedule(new IdentityAndUidAndNumber(ownedIdentity, messageUid, attachmentNumber), () -> queueNewRefreshInboxAttachmentSignedUrlOperation(ownedIdentity, messageUid, attachmentNumber), "too frequent RefreshInboxAttachmentSignedUrlOperation", delay);
+            } else {
+                queueNewRefreshInboxAttachmentSignedUrlOperation(ownedIdentity, messageUid, attachmentNumber);
+            }
+        }
     }
 
     class AwaitingIdentityReactivationNotificationListener implements NotificationListener {
         @Override
         public void callback(String notificationName, HashMap<String, Object> userInfo) {
-            switch (notificationName) {
-                case IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS: {
-                    try {
-                        boolean active = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_ACTIVE_KEY);
-                        Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_OWNED_IDENTITY_KEY);
-                        if (!active) {
-                            return;
-                        }
-
-                        awaitingIdentityReactivationOperationsLock.lock();
-                        List<IdentityAndUidAndNumber> list = awaitingIdentityReactivationOperations.get(ownedIdentity);
-                        if (list != null) {
-                            awaitingIdentityReactivationOperations.remove(ownedIdentity);
-                            for (IdentityAndUidAndNumber params : list) {
-                                queueNewRefreshInboxAttachmentSignedUrlOperation(params.ownedIdentity, params.uid, params.attachmentNumber);
-                            }
-                        }
-                        awaitingIdentityReactivationOperationsLock.unlock();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            if (notificationName.equals(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS)) {
+                try {
+                    boolean active = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_ACTIVE_KEY);
+                    Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_OWNED_IDENTITY_KEY);
+                    if (!active) {
+                        return;
                     }
+
+                    awaitingIdentityReactivationOperationsLock.lock();
+                    List<IdentityAndUidAndNumber> list = awaitingIdentityReactivationOperations.get(ownedIdentity);
+                    if (list != null) {
+                        awaitingIdentityReactivationOperations.remove(ownedIdentity);
+                        for (IdentityAndUidAndNumber params : list) {
+                            queueNewRefreshInboxAttachmentSignedUrlOperation(params.ownedIdentity, params.uid, params.attachmentNumber);
+                        }
+                    }
+                    awaitingIdentityReactivationOperationsLock.unlock();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }

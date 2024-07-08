@@ -437,7 +437,7 @@ public class KeycloakSelectionFragment extends Fragment implements View.OnClickL
                                         if (keycloakAuthenticationStartFragment.authenticationSpinnerGroup != null) {
                                             keycloakAuthenticationStartFragment.authenticationSpinnerGroup.setVisibility(View.GONE);
                                         }
-                                        Navigation.findNavController(v).navigate(KeycloakSelectionFragmentDirections.actionIdentityCreation());
+                                        Navigation.findNavController(v).navigate(R.id.action_keycloak_identity_creation);
                                     }
                                 });
                             }
@@ -503,7 +503,7 @@ public class KeycloakSelectionFragment extends Fragment implements View.OnClickL
                         if (keycloakAuthenticationStartFragment.authenticationSpinnerGroup != null) {
                             keycloakAuthenticationStartFragment.authenticationSpinnerGroup.setVisibility(View.GONE);
                         }
-                        Navigation.findNavController(authenticateButton).navigate(KeycloakSelectionFragmentDirections.actionIdentityCreation());
+                        Navigation.findNavController(authenticateButton).navigate(R.id.action_keycloak_identity_creation);
                     });
                 }
                 break;

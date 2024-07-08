@@ -129,6 +129,8 @@ public class RefreshInboxAttachmentSignedUrlOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 }

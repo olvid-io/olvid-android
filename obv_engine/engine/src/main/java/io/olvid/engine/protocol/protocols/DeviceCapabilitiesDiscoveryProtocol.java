@@ -404,7 +404,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
             Identity[] contactIdentities = protocolManagerSession.identityDelegate.getContactsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
 
             if (contactIdentities.length > 0) {
-               SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(contactIdentities, getOwnedIdentity());
+               SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(contactIdentities, getOwnedIdentity());
                for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
                   try {
                      CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(sendChannelInfo);
@@ -423,7 +423,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
             int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
             if (numberOfOtherDevices > 0) {
                try {
-                  CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                  CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                   ChannelMessageToSend messageToSend = new OwnCapabilitiesToSelfMessage(coreProtocolMessage, ObvCapability.capabilityListToStringArray(receivedMessage.newOwnCapabilities), false).generateChannelProtocolMessageToSend();
                   protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                } catch (NoAcceptableChannelException ignored) { }
@@ -454,7 +454,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
          List<ObvCapability> currentCapabilities = protocolManagerSession.identityDelegate.getCurrentDevicePublishedCapabilities(protocolManagerSession.session, getOwnedIdentity());
 
 
-         CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true));
+         CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelOrPreKeyInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true));
          ChannelMessageToSend messageToSend = new OwnCapabilitiesToContactMessage(coreProtocolMessage, ObvCapability.capabilityListToStringArray(currentCapabilities), receivedMessage.isResponse).generateChannelProtocolMessageToSend();
          protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -482,7 +482,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
          List<ObvCapability> currentCapabilities = protocolManagerSession.identityDelegate.getCurrentDevicePublishedCapabilities(protocolManagerSession.session, getOwnedIdentity());
 
 
-         CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(getOwnedIdentity(), getOwnedIdentity(), new UID[]{receivedMessage.otherOwnedDeviceUid}, true));
+         CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelOrPreKeyInfo(getOwnedIdentity(), getOwnedIdentity(), new UID[]{receivedMessage.otherOwnedDeviceUid}, true));
          ChannelMessageToSend messageToSend = new OwnCapabilitiesToSelfMessage(coreProtocolMessage, ObvCapability.capabilityListToStringArray(currentCapabilities), receivedMessage.isResponse).generateChannelProtocolMessageToSend();
          protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -498,7 +498,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
       private final OwnCapabilitiesToContactMessage receivedMessage;
 
       public ProcessReceivedContactDeviceCapabilitiesStep(InitialProtocolState startState, OwnCapabilitiesToContactMessage receivedMessage, DeviceCapabilitiesDiscoveryProtocol protocol) throws Exception {
-         super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+         super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
          this.startState = startState;
          this.receivedMessage = receivedMessage;
       }
@@ -538,7 +538,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
       private final OwnCapabilitiesToSelfMessage receivedMessage;
 
       public ProcessReceivedOwnedDeviceCapabilitiesStep(InitialProtocolState startState, OwnCapabilitiesToSelfMessage receivedMessage, DeviceCapabilitiesDiscoveryProtocol protocol) throws Exception {
-         super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+         super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
          this.startState = startState;
          this.receivedMessage = receivedMessage;
       }

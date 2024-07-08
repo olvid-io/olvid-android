@@ -31,6 +31,7 @@ import java.util.UUID;
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.ObvContactInfo;
 import io.olvid.engine.engine.types.identities.ObvGroup;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
@@ -368,29 +369,25 @@ public class AppDatabaseOpenCallback implements Runnable {
                 // synchronize Contacts for this OwnedIdentity
                 {
                     HashMap<BytesKey, Contact> subMap = contactsHashMap.get(new BytesKey(ownedIdentity.getBytesIdentity()));
-                    ObvIdentity[] contactIdentities = engine.getContactsOfOwnedIdentity(ownedIdentity.getBytesIdentity());
-                    for (final ObvIdentity contactIdentity : contactIdentities) {
+                    List<ObvContactInfo> contactIdentities = engine.getContactsInfoOfOwnedIdentity(ownedIdentity.getBytesIdentity());
+                    for (final ObvContactInfo contactInfo : contactIdentities) {
                         Contact contact = null;
                         if (subMap != null) {
-                            contact = subMap.get(new BytesKey(contactIdentity.getBytesIdentity()));
-                            subMap.remove(new BytesKey(contactIdentity.getBytesIdentity()));
+                            contact = subMap.remove(new BytesKey(contactInfo.bytesContactIdentity));
                         }
-                        String photoUrl = engine.getContactTrustedDetailsPhotoUrl(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
-                        boolean oneToOne = engine.isContactOneToOne(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
-                        int trustLevel = engine.getContactTrustLevel(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
                         if (contact == null) {
                             Logger.i("Engine -> App sync: Found unknown Contact");
                             try {
                                 db.runInTransaction(() -> {
                                     Contact newContact;
                                     try {
-                                        newContact = new Contact(contactIdentity.getBytesIdentity(), ownedIdentity.getBytesIdentity(), contactIdentity.getIdentityDetails(), false, photoUrl, contactIdentity.isKeycloakManaged(), contactIdentity.isActive(), oneToOne, trustLevel);
+                                        newContact = new Contact(contactInfo.bytesContactIdentity, contactInfo.bytesContactIdentity, contactInfo.identityDetails, false, contactInfo.photoUrl, contactInfo.keycloakManaged, contactInfo.active, contactInfo.oneToOne, contactInfo.trustLevel, contactInfo.recentlyOnline);
                                         db.contactDao().insert(newContact);
                                     } catch (Exception e) {
                                         throw new RuntimeException(e);
                                     }
 
-                                    if (oneToOne) {
+                                    if (contactInfo.oneToOne) {
                                         Discussion discussion = Discussion.createOrReuseOneToOneDiscussion(db, newContact);
 
                                         if (discussion == null) {
@@ -401,25 +398,28 @@ public class AppDatabaseOpenCallback implements Runnable {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            contact = db.contactDao().get(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
+                            contact = db.contactDao().get(ownedIdentity.getBytesIdentity(), contactInfo.bytesContactIdentity);
                             if (contact == null) {
                                 continue;
                             }
                         }
-                        int deviceCount = engine.getContactDeviceCount(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
-                        int establishedChannelCount = engine.getContactEstablishedChannelsCount(ownedIdentity.getBytesIdentity(), contactIdentity.getBytesIdentity());
-                        if ((contact.deviceCount != deviceCount) || (contact.establishedChannelCount != establishedChannelCount)) {
+
+                        if ((contact.deviceCount != contactInfo.contactDeviceCount.deviceCount)
+                                || (contact.establishedChannelCount != contactInfo.contactDeviceCount.establishedChannelCount
+                                || contact.preKeyCount != contactInfo.contactDeviceCount.preKeyCount)) {
                             Logger.i("Engine -> App sync: Update contact devices/channel count");
-                            contact.deviceCount = deviceCount;
-                            contact.establishedChannelCount = establishedChannelCount;
-                            db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount);
+                            contact.deviceCount = contactInfo.contactDeviceCount.deviceCount;
+                            contact.establishedChannelCount = contactInfo.contactDeviceCount.establishedChannelCount;
+                            contact.preKeyCount = contactInfo.contactDeviceCount.preKeyCount;
+                            db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount, contact.preKeyCount);
                         }
-                        if (contact.oneToOne != oneToOne) {
+
+                        if (contact.oneToOne != contactInfo.oneToOne) {
                             Logger.i("Engine -> App sync: Update contact oneToOne status");
-                            contact.oneToOne = oneToOne;
+                            contact.oneToOne = contactInfo.oneToOne;
                             db.contactDao().updateOneToOne(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.oneToOne);
                             Contact finalContact = contact;
-                            if (oneToOne) {
+                            if (contactInfo.oneToOne) {
                                 try {
                                     db.runInTransaction(() -> {
                                         Discussion discussion = Discussion.createOrReuseOneToOneDiscussion(db, finalContact);
@@ -440,32 +440,37 @@ public class AppDatabaseOpenCallback implements Runnable {
                                 });
                             }
                         }
-                        if (contact.keycloakManaged != contactIdentity.isKeycloakManaged()) {
+                        if (contact.keycloakManaged != contactInfo.keycloakManaged) {
                             Logger.i("Engine -> App sync: Update contact keycloakManaged");
-                            contact.keycloakManaged = contactIdentity.isKeycloakManaged();
+                            contact.keycloakManaged = contactInfo.keycloakManaged;
                             db.contactDao().updateKeycloakManaged(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.keycloakManaged);
                             db.discussionDao().updateKeycloakManaged(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.keycloakManaged);
                         }
-                        if (contact.active != contactIdentity.isActive()) {
+                        if (contact.active != contactInfo.active) {
                             Logger.i("Engine -> App sync: Update contact active");
-                            contact.active = contactIdentity.isActive();
+                            contact.active = contactInfo.active;
                             db.contactDao().updateActive(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.active);
                             db.discussionDao().updateActive(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.active);
                         }
-                        if (contact.trustLevel != trustLevel) {
+                        if (contact.trustLevel != contactInfo.trustLevel) {
                             Logger.i("Engine -> App sync: Update contact trustLevel");
-                            contact.trustLevel = trustLevel;
+                            contact.trustLevel = contactInfo.trustLevel;
                             db.contactDao().updateTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.trustLevel);
                             db.discussionDao().updateTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.trustLevel);
                         }
-                        if (!Objects.equals(contactIdentity.getIdentityDetails(), contact.getIdentityDetails())
-                                || !Objects.equals(contact.photoUrl, photoUrl)) {
+                        if (contact.recentlyOnline != contactInfo.recentlyOnline) {
+                            Logger.i("Engine -> App sync: Update contact recentlyOnline");
+                            contact.recentlyOnline = contactInfo.recentlyOnline;
+                            db.contactDao().updateRecentlyOnline(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.recentlyOnline);
+                        }
+                        if (!Objects.equals(contactInfo.identityDetails, contact.getIdentityDetails())
+                                || !Objects.equals(contact.photoUrl, contactInfo.photoUrl)) {
                             Logger.i("Engine -> App sync: Update contact details/photoUrl");
                             try {
-                                contact.setIdentityDetailsAndDisplayName(contactIdentity.getIdentityDetails());
-                                contact.photoUrl = photoUrl;
+                                contact.setIdentityDetailsAndDisplayName(contactInfo.identityDetails);
+                                contact.photoUrl = contactInfo.photoUrl;
                                 db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.firstName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
-                                db.contactDao().updatePhotoUrl(contact.bytesOwnedIdentity, contact.bytesContactIdentity, photoUrl);
+                                db.contactDao().updatePhotoUrl(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.photoUrl);
 
                                 Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                 if (discussion != null) {
@@ -511,7 +516,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                             }
                         }
                     }
-                    if (subMap != null && subMap.size() == 0) {
+                    if (subMap != null && subMap.isEmpty()) {
                         contactsHashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
                     }
                 }
@@ -700,7 +705,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                             }
                         }
                     }
-                    if (subMap != null && subMap.size() == 0) {
+                    if (subMap != null && subMap.isEmpty()) {
                         groupsHashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
                     }
                 }
@@ -720,7 +725,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                         new CreateOrUpdateGroupV2Task(obvGroupV2, false, false, false,true, null).run();
                     }
 
-                    if (subMap != null && subMap.size() == 0) {
+                    if (subMap != null && subMap.isEmpty()) {
                         groups2HashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
                     }
                 }
@@ -734,42 +739,62 @@ public class AppDatabaseOpenCallback implements Runnable {
             // groupsV2 first
             for (HashMap<BytesKey, Group2> subMap: groups2HashMap.values()) {
                 for (Group2 group2: subMap.values()) {
-                    Logger.i("Engine -> App sync: Deleting app-side-only Group2");
-                    db.runInTransaction(() -> {
-                        Discussion discussion = db.discussionDao().getByGroupIdentifier(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
-                        if (discussion != null) {
-                            discussion.lockWithMessage(db);
-                        }
-                        db.group2Dao().delete(group2);
-                        // Group2Member and Group2PendingMember are cascade deleted
-                    });
+                    // safe-check before deletion
+                    if (engine.getGroupV2Version(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier) != null) {
+                        Logger.e("Engine -> App sync: Would have deleted a Group2 that still exists in engine!");
+                    } else {
+                        Logger.i("Engine -> App sync: Deleting app-side-only Group2");
+                        db.runInTransaction(() -> {
+                            Discussion discussion = db.discussionDao().getByGroupIdentifier(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
+                            if (discussion != null) {
+                                discussion.lockWithMessage(db);
+                            }
+                            db.group2Dao().delete(group2);
+                            // Group2Member and Group2PendingMember are cascade deleted
+                        });
+                    }
                 }
             }
             // then groups
             for (HashMap<BytesKey, Group> subMap: groupsHashMap.values()) {
                 for (Group group: subMap.values()) {
-                    Logger.i("Engine -> App sync: Deleting app-side-only Group");
-                    db.runInTransaction(() -> {
-                        Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
-                        if (discussion != null) {
-                            discussion.lockWithMessage(db);
-                        }
-                        db.groupDao().delete(group);
-                        // ContactGroupJoin elements are automatically cascade deleted
-                    });
+                    // safe-check before deletion
+                    if (engine.getGroupPublishedAndLatestOrTrustedDetails(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid) != null) {
+                        Logger.e("Engine -> App sync: Would have deleted a Group that still exists in engine!");
+                    } else {
+                        Logger.i("Engine -> App sync: Deleting app-side-only Group");
+                        db.runInTransaction(() -> {
+                            Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
+                            if (discussion != null) {
+                                discussion.lockWithMessage(db);
+                            }
+                            db.groupDao().delete(group);
+                            // ContactGroupJoin elements are automatically cascade deleted
+                        });
+                    }
                 }
             }
             // then contacts
             for (HashMap<BytesKey, Contact> subMap: contactsHashMap.values()) {
                 for(Contact contact: subMap.values()) {
-                    Logger.i("Engine -> App sync: Deleting app-side-only Contact");
-                    contact.delete();
+                    // safe-check before deletion
+                    if (engine.getContactTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity) != 0) {
+                        Logger.e("Engine -> App sync: Would have deleted a Contact that still exists in engine!");
+                    } else {
+                        Logger.i("Engine -> App sync: Deleting app-side-only Contact");
+                        contact.delete();
+                    }
                 }
             }
             // and finally owned identities
             for (OwnedIdentity ownedIdentity: identitiesHashMap.values()) {
-                Logger.i("Engine -> App sync: Deleting app-side-only OwnedIdentity");
-                db.ownedIdentityDao().delete(ownedIdentity);
+                // safe-check before deletion
+                if (engine.getOwnedIdentity(ownedIdentity.bytesOwnedIdentity) != null) {
+                    Logger.e("Engine -> App sync: Would have deleted an OwnedIdentity that still exists in engine!");
+                } else {
+                    Logger.i("Engine -> App sync: Deleting app-side-only OwnedIdentity");
+                    db.ownedIdentityDao().delete(ownedIdentity);
+                }
             }
 
            AppSingleton.reloadCachedDisplayNamesAndHues();

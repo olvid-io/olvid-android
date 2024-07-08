@@ -20,6 +20,7 @@
 package io.olvid.messenger.openid;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -31,13 +32,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import net.openid.appauth.AuthState;
+import net.openid.appauth.browser.BrowserSelector;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.Markdown;
+import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 
 public class KeycloakAuthenticationStartFragment extends Fragment {
     private FragmentActivity activity;
@@ -88,6 +93,27 @@ public class KeycloakAuthenticationStartFragment extends Fragment {
                 activity.runOnUiThread(() -> {
                     authenticationSpinnerGroup.setVisibility(View.GONE);
                     App.toast(R.string.toast_message_authentication_failed, Toast.LENGTH_SHORT, Gravity.CENTER);
+                    try {
+                        if (rfc == KeycloakTasks.RFC_AUTHENTICATION_ERROR_TIME_OFFSET) {
+                            AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                                    .setTitle(R.string.dialog_title_authentication_failed_time_offset)
+                                    .setMessage(Markdown.formatMarkdown(activity.getString(R.string.dialog_message_authentication_failed_time_offset)))
+                                    .setNegativeButton(R.string.button_label_ok, null)
+                                    .setNeutralButton(R.string.button_label_clock_settings, (DialogInterface dialog, int which) -> {
+                                        try {
+                                            Intent intent = new Intent(android.provider.Settings.ACTION_DATE_SETTINGS);
+                                            startActivity(intent);
+                                        } catch (Exception ignored) { }
+                                    });
+                            builder.create().show();
+                        } else if (BrowserSelector.getAllBrowsers(activity).isEmpty()) {
+                            AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                                    .setTitle(R.string.dialog_title_no_browser_found)
+                                    .setMessage(Markdown.formatMarkdown(activity.getString(R.string.dialog_message_no_browser_found)))
+                                    .setNegativeButton(R.string.button_label_ok, null);
+                            builder.create().show();
+                        }
+                    } catch (Exception ignored) { }
                 });
                 authenticateCallback.failed(rfc);
             }

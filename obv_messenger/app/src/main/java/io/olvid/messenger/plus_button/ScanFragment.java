@@ -110,28 +110,28 @@ public class ScanFragment extends Fragment implements View.OnClickListener, QRCo
         Matcher matcher = ObvLinkActivity.INVITATION_PATTERN.matcher(text);
         if (matcher.find()) {
             viewModel.setScannedUri(matcher.group(0));
-            new Handler(Looper.getMainLooper()).post(() -> Navigation.findNavController(rootView).navigate(ScanFragmentDirections.actionScannedInvitation()));
+            new Handler(Looper.getMainLooper()).post(() -> Navigation.findNavController(rootView).navigate(R.id.action_scanned_invitation));
             return true;
         }
 
         matcher = ObvLinkActivity.CONFIGURATION_PATTERN.matcher(text);
         if (matcher.find()) {
             viewModel.setScannedUri(matcher.group(0));
-            new Handler(Looper.getMainLooper()).post(() -> Navigation.findNavController(rootView).navigate(ScanFragmentDirections.actionScannedConfiguration()));
+            new Handler(Looper.getMainLooper()).post(() -> Navigation.findNavController(rootView).navigate(R.id.action_scanned_configuration));
             return true;
         }
 
         matcher = ObvLinkActivity.WEB_CLIENT_PATTERN.matcher(text);
         if (matcher.find()) {
             viewModel.setScannedUri(matcher.group(0));
-            new Handler(Looper.getMainLooper()).post(() -> Navigation.findNavController(rootView).navigate(ScanFragmentDirections.actionScannedWebclient()));
+            new Handler(Looper.getMainLooper()).post(() -> Navigation.findNavController(rootView).navigate(R.id.action_scanned_webclient));
             return true;
         }
 
         matcher = ObvMutualScanUrl.MUTUAL_SCAN_PATTERN.matcher(text);
         if (matcher.find()) {
             viewModel.setScannedUri(matcher.group(0));
-            new Handler(Looper.getMainLooper()).post(() -> Navigation.findNavController(rootView).navigate(ScanFragmentDirections.actionScannedMutualScanInvitation()));
+            new Handler(Looper.getMainLooper()).post(() -> Navigation.findNavController(rootView).navigate(R.id.action_scanned_mutual_scan_invitation));
             return true;
         }
 

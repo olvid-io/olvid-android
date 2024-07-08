@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
@@ -63,6 +65,12 @@ import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.GroupMembersChangedCallback;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.KeyId;
+import io.olvid.engine.datatypes.PreKeyBlobOnServer;
+import io.olvid.engine.datatypes.containers.AuthEncKeyAndChannelInfo;
+import io.olvid.engine.datatypes.containers.EncodedOwnedPreKey;
+import io.olvid.engine.datatypes.containers.OwnedDeviceAndPreKey;
+import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.PrivateIdentity;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.Session;
@@ -75,7 +83,9 @@ import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.KeycloakGroupV2UpdateOutput;
+import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
+import io.olvid.engine.datatypes.containers.UidAndPreKey;
 import io.olvid.engine.datatypes.containers.UserData;
 import io.olvid.engine.datatypes.key.asymmetric.SignaturePrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.SignaturePublicKey;
@@ -90,6 +100,8 @@ import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakRevocation;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.ObvContactDeviceCount;
+import io.olvid.engine.engine.types.ObvContactInfo;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
@@ -114,6 +126,7 @@ import io.olvid.engine.identity.databases.KeycloakServer;
 import io.olvid.engine.identity.databases.OwnedDevice;
 import io.olvid.engine.identity.databases.OwnedIdentity;
 import io.olvid.engine.identity.databases.OwnedIdentityDetails;
+import io.olvid.engine.identity.databases.OwnedPreKey;
 import io.olvid.engine.identity.databases.PendingGroupMember;
 import io.olvid.engine.identity.databases.ServerUserData;
 import io.olvid.engine.identity.databases.sync.IdentityManagerSyncSnapshot;
@@ -131,10 +144,11 @@ import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.metamanager.MetaManager;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.metamanager.ObvManager;
+import io.olvid.engine.metamanager.PreKeyEncryptionDelegate;
 import io.olvid.engine.metamanager.SolveChallengeDelegate;
 import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 
-public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate, EncryptionForIdentityDelegate, ObvBackupAndSyncDelegate, IdentityManagerSessionFactory, ObvManager {
+public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate, EncryptionForIdentityDelegate, PreKeyEncryptionDelegate, ObvBackupAndSyncDelegate, IdentityManagerSessionFactory, ObvManager {
     private final String engineBaseDirectory;
     private final ObjectMapper jsonObjectMapper;
     private final PRNGService prng;
@@ -144,6 +158,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     private NotificationPostingDelegate notificationPostingDelegate;
     private ProtocolStarterDelegate protocolStarterDelegate;
     private ChannelDelegate channelDelegate;
+    private final Timer deviceDiscoveryTimer;
 
     public IdentityManager(MetaManager metaManager, String engineBaseDirectory, ObjectMapper jsonObjectMapper, PRNGService prng) {
         this.engineBaseDirectory = engineBaseDirectory;
@@ -154,6 +169,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_DATABASE_CONTENT_CHANGED, new HashMap<>());
             }
         };
+        this.deviceDiscoveryTimer = new Timer("Engine-DeviceDiscoveryTimer");
 
         metaManager.requestDelegate(this, CreateSessionDelegate.class);
         metaManager.requestDelegate(this, NotificationPostingDelegate.class);
@@ -173,31 +189,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     userInfo.put(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_OWNED_IDENTITY_KEY, ownedIdentity.getOwnedIdentity());
                     userInfo.put(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_ACTIVE_KEY, false);
                     identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS, userInfo);
-                } else {
-                    try {
-                        // do an OwnedDeviceDiscoveryProtocol at every startup
-                        protocolStarterDelegate.startOwnedDeviceDiscoveryProtocol(ownedIdentity.getOwnedIdentity());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                 }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        // search for all contact identities with no deviceUids and run a deviceDiscovery
-        try (IdentityManagerSession identityManagerSession = getSession()) {
-            ContactIdentity[] contactIdentities = ContactIdentity.getAllActiveWithoutDevices(identityManagerSession);
-            if (contactIdentities.length > 0) {
-                Logger.i("Found " + contactIdentities.length + " contacts with no device. Starting corresponding deviceDiscoveryProtocols.");
-                for (ContactIdentity contactIdentity : contactIdentities) {
-                    if (contactIdentity.getLastNoDeviceContactDeviceDiscovery() < System.currentTimeMillis() - Constants.NO_DEVICE_CONTACT_DEVICE_DISCOVERY_INTERVAL) {
-                        contactIdentity.setLastNoDeviceContactDeviceDiscovery(System.currentTimeMillis());
-                        protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(identityManagerSession.session, contactIdentity.getOwnedIdentity(), contactIdentity.getContactIdentity());
-                    }
-                }
-                identityManagerSession.session.commit();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -337,6 +329,53 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        deviceDiscoveryTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                // do an OwnedDeviceDiscoveryProtocol at every startup
+                try (IdentityManagerSession identityManagerSession = getSession()) {
+                    for (OwnedIdentity ownedIdentity : OwnedIdentity.getAll(identityManagerSession)) {
+                        if (ownedIdentity.isActive()) {
+                            protocolStarterDelegate.startOwnedDeviceDiscoveryProtocolWithinTransaction(identityManagerSession.session, ownedIdentity.getOwnedIdentity());
+                        }
+                    }
+                    identityManagerSession.session.commit();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                // search for all contact identities with no deviceUids and run a deviceDiscovery
+                try (IdentityManagerSession identityManagerSession = getSession()) {
+                    ContactIdentity[] contactIdentities = ContactIdentity.getAllActiveWithoutDevices(identityManagerSession, System.currentTimeMillis() - Constants.NO_DEVICE_CONTACT_DEVICE_DISCOVERY_INTERVAL);
+                    if (contactIdentities.length > 0) {
+                        Logger.i("Found " + contactIdentities.length + " contacts with no device. Starting corresponding deviceDiscoveryProtocols.");
+                        for (ContactIdentity contactIdentity : contactIdentities) {
+                            protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(identityManagerSession.session, contactIdentity.getOwnedIdentity(), contactIdentity.getContactIdentity());
+                            contactIdentity.setLastContactDeviceDiscoveryTimestamp(System.currentTimeMillis());
+                        }
+                        identityManagerSession.session.commit();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                // search all active contact identities with devices without a recent device discovery
+                try (IdentityManagerSession identityManagerSession = getSession()) {
+                    ContactIdentity[] contactIdentities = ContactIdentity.getAllActiveWithDevicesAndOldDiscovery(identityManagerSession, System.currentTimeMillis() - Constants.CONTACT_DEVICE_DISCOVERY_INTERVAL);
+                    if (contactIdentities.length > 0) {
+                        Logger.i("Found " + contactIdentities.length + " contacts with outdated device discovery. Starting corresponding deviceDiscoveryProtocols.");
+                        for (ContactIdentity contactIdentity : contactIdentities) {
+                            protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(identityManagerSession.session, contactIdentity.getOwnedIdentity(), contactIdentity.getContactIdentity());
+                            contactIdentity.setLastContactDeviceDiscoveryTimestamp(System.currentTimeMillis());
+                        }
+                        identityManagerSession.session.commit();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, Constants.OWNED_DEVICE_DISCOVERY_INTERVAL);
     }
 
     @SuppressWarnings("unused")
@@ -349,6 +388,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             KeycloakRevokedIdentity.createTable(identityManagerSession.session);
             OwnedIdentity.createTable(identityManagerSession.session);
             OwnedDevice.createTable(identityManagerSession.session);
+            OwnedPreKey.createTable(identityManagerSession.session);
             ContactIdentityDetails.createTable(identityManagerSession.session);
             ContactIdentity.createTable(identityManagerSession.session);
             ContactTrustOrigin.createTable(identityManagerSession.session);
@@ -381,6 +421,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 statement.execute("DROP TABLE IF EXISTS owned_ephemeral_identity");
             }
         }
+        OwnedPreKey.upgradeTable(session, oldVersion, newVersion);
         ContactIdentityDetails.upgradeTable(session, oldVersion, newVersion);
         ContactIdentity.upgradeTable(session, oldVersion, newVersion);
         ContactTrustOrigin.upgradeTable(session, oldVersion, newVersion);
@@ -467,20 +508,6 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             return null;
         }
     }
-
-//    public UUID getApiKey(Identity identity) {
-//        try (IdentityManagerSession identityManagerSession = getSession()) {
-//            OwnedIdentity ownedIdentity = OwnedIdentity.get(identityManagerSession, identity);
-//            if (ownedIdentity != null) {
-//                return ownedIdentity.getApiKey();
-//            } else {
-//                return null;
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
 
     // endregion
 
@@ -1329,7 +1356,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public void addDeviceForOwnedIdentity(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, boolean channelCreationAlreadyInProgress) throws SQLException {
+    public void addDeviceForOwnedIdentity(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, PreKeyBlobOnServer preKeyBlob, boolean channelCreationAlreadyInProgress) throws SQLException {
         // check if the device already exists first
         OwnedDevice ownedDevice = OwnedDevice.get(wrapSession(session), deviceUid);
         if (ownedDevice != null && !Objects.equals(ownedDevice.getOwnedIdentity(), ownedIdentity)) {
@@ -1338,7 +1365,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
         // only create the device if it does not already exist
         if (ownedDevice == null) {
-            ownedDevice = OwnedDevice.createOtherDevice(wrapSession(session), deviceUid, ownedIdentity, displayName, expirationTimestamp, lastRegistrationTimestamp, channelCreationAlreadyInProgress);
+            ownedDevice = OwnedDevice.createOtherDevice(wrapSession(session), deviceUid, ownedIdentity, displayName, expirationTimestamp, lastRegistrationTimestamp, preKeyBlob, channelCreationAlreadyInProgress);
             if (ownedDevice == null) {
                 throw new SQLException();
             }
@@ -1346,7 +1373,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public void updateOwnedDevice(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp) throws SQLException {
+    public void updateOwnedDevice(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, PreKeyBlobOnServer preKeyBlob) throws SQLException {
         // check that the device exists and is for the right ownedIdentity
         OwnedDevice ownedDevice = OwnedDevice.get(wrapSession(session), deviceUid);
         if (ownedDevice != null && Objects.equals(ownedDevice.getOwnedIdentity(), ownedIdentity)) {
@@ -1356,6 +1383,18 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             if (!Objects.equals(expirationTimestamp, ownedDevice.getExpirationTimestamp())
                     || !Objects.equals(lastRegistrationTimestamp, ownedDevice.getLastRegistrationTimestamp())) {
                 ownedDevice.setTimestamps(expirationTimestamp, lastRegistrationTimestamp);
+            }
+            if (preKeyBlob == null) {
+                if (ownedDevice.getPreKey() != null) {
+                    ownedDevice.setPreKey(null);
+                }
+            } else {
+                if (!ownedDevice.hasPreKey() || !Objects.equals(ownedDevice.getPreKey().keyId, preKeyBlob.preKey.keyId)) {
+                    ownedDevice.setPreKey(preKeyBlob.preKey);
+                }
+                if (ownedDevice.getDeviceCapabilities() == null) {
+                    ownedDevice.setRawDeviceCapabilities(preKeyBlob.rawDeviceCapabilities);
+                }
             }
         }
     }
@@ -1378,10 +1417,26 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     ownedDevice.getUid().getBytes(),
                     new ObvOwnedDevice.ServerDeviceInfo(ownedDevice.getDisplayName(), ownedDevice.getExpirationTimestamp(), ownedDevice.getLastRegistrationTimestamp()),
                     ownedDevice.isCurrentDevice(),
-                    channelDelegate.checkIfObliviousChannelIsConfirmed(session, ownedIdentity, ownedDevice.getUid(), ownedIdentity)
+                    channelDelegate.checkIfObliviousChannelIsConfirmed(session, ownedIdentity, ownedDevice.getUid(), ownedIdentity),
+                    ownedDevice.hasPreKey()
             ));
         }
         return obvOwnedDevices;
+    }
+
+    @Override
+    public List<OwnedDeviceAndPreKey> getDevicesAndPreKeysOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+        List<OwnedDevice> ownedDevices = OwnedDevice.getAllDevicesOfIdentity(wrapSession(session), ownedIdentity);
+        List<OwnedDeviceAndPreKey> ownedDeviceAndPreKeys = new ArrayList<>();
+        for (OwnedDevice ownedDevice : ownedDevices) {
+            ownedDeviceAndPreKeys.add(new OwnedDeviceAndPreKey(ownedDevice.getOwnedIdentity(),
+                    ownedDevice.getUid(),
+                    ownedDevice.isCurrentDevice(),
+                    ownedDevice.getPreKey(),
+                    new ObvOwnedDevice.ServerDeviceInfo(ownedDevice.getDisplayName(), ownedDevice.getExpirationTimestamp(), ownedDevice.getLastRegistrationTimestamp())
+            ));
+        }
+        return ownedDeviceAndPreKeys;
     }
 
     @Override
@@ -1392,6 +1447,69 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
         return null;
     }
+
+    @Override
+    public EncodedOwnedPreKey getLatestPreKeyForOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+        OwnedPreKey ownedPreKey = OwnedPreKey.getLatest(wrapSession(session), ownedIdentity);
+        if (ownedPreKey != null) {
+            return new EncodedOwnedPreKey(ownedPreKey.getKeyId(), ownedPreKey.getExpirationTimestamp(), ownedPreKey.getEncodedSignedPreKey());
+        }
+        return null;
+    }
+
+    @Override
+    public Encoded generateNewPreKey(Session session, Identity ownedIdentity, long expirationTimestamp) throws SQLException {
+        OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
+        OwnedDevice device = OwnedDevice.getCurrentDeviceOfOwnedIdentity(wrapSession(session), ownedIdentity);
+        if (ownedIdentityObject != null && device != null) {
+            OwnedPreKey ownedPreKey = OwnedPreKey.create(wrapSession(session), ownedIdentity, ownedIdentityObject.getPrivateIdentity(), device.getUid(), expirationTimestamp, prng);
+            if (ownedPreKey != null) {
+                return ownedPreKey.getEncodedSignedPreKey();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void expireContactAndOwnedPreKeys(Session session, Identity ownedIdentity, String server, long serverTimestamp) throws SQLException {
+        if (ownedIdentity.getServer().equals(server)) {
+            // expire own pre-keys
+            List<OwnedDevice> ownedDevices = OwnedDevice.getAllWithExpiredPreKey(wrapSession(session), ownedIdentity, serverTimestamp);
+            for (OwnedDevice ownedDevice : ownedDevices) {
+                ownedDevice.setPreKey(null);
+            }
+        }
+
+        List<ContactDevice> contactDevices = ContactDevice.getAllWithExpiredPreKey(wrapSession(session), ownedIdentity, serverTimestamp);
+        for (ContactDevice contactDevice : contactDevices) {
+            if (contactDevice.getContactIdentity().getServer().equals(server)) {
+                contactDevice.setPreKey(null);
+            }
+        }
+    }
+
+    @Override
+    public void expireCurrentDeviceOwnedPreKeys(Session session, Identity ownedIdentity, long currentServerTimestamp) throws SQLException {
+        OwnedPreKey.deleteExpired(wrapSession(session), ownedIdentity, currentServerTimestamp - Constants.PRE_KEY_CONSERVATION_DURATION);
+    }
+
+    @Override
+    public long getLatestChannelCreationPingTimestampForOwnedDevice(Session session, Identity ownedIdentity, UID ownedDeviceUid) throws SQLException {
+        OwnedDevice ownedDevice = OwnedDevice.get(wrapSession(session), ownedDeviceUid);
+        if (ownedDevice != null && ownedDevice.getOwnedIdentity().equals(ownedIdentity)) {
+            return ownedDevice.getLatestChannelCreationPingTimestamp();
+        }
+        return -1;
+    }
+
+    @Override
+    public void setLatestChannelCreationPingTimestampForOwnedDevice(Session session, Identity ownedIdentity, UID ownedDeviceUid, long timestamp) throws Exception {
+        OwnedDevice ownedDevice = OwnedDevice.get(wrapSession(session), ownedDeviceUid);
+        if (ownedDevice != null && ownedDevice.getOwnedIdentity().equals(ownedIdentity)) {
+            ownedDevice.setLatestChannelCreationPingTimestamp(timestamp);
+        }
+    }
+
 
     // endregion
 
@@ -1463,6 +1581,43 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return null;
     }
 
+    public ObvContactDeviceCount getContactDeviceCounts(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
+        int count = 0;
+        int establihed = 0;
+        int preKey = 0;
+        HashSet<UID> confirmedChannelUids = new HashSet<>(Arrays.asList(channelDelegate.getConfirmedObliviousChannelDeviceUids(session, ownedIdentity, contactIdentity)));
+        for (UidAndPreKey uidAndPreKey : getDeviceUidsAndPreKeysOfContactIdentity(session, ownedIdentity, contactIdentity)) {
+            count++;
+            if (confirmedChannelUids.contains(uidAndPreKey.uid)) {
+                establihed++;
+            } else if (uidAndPreKey.preKey != null) {
+                preKey++;
+            }
+        }
+        return new ObvContactDeviceCount(count, establihed, preKey);
+    }
+
+    public List<ObvContactInfo> getContactsInfoOfOwnedIdentity(Session session, Identity ownedIdentity) throws Exception {
+        ContactIdentity[] contactIdentities = ContactIdentity.getAll(wrapSession(session), ownedIdentity);
+        List<ObvContactInfo> contactInfos = new ArrayList<>();
+        for (ContactIdentity contactIdentity : contactIdentities) {
+
+            ContactIdentityDetails trustedDetails = contactIdentity.getTrustedDetails();
+            contactInfos.add(new ObvContactInfo(
+                    contactIdentity.getOwnedIdentity().getBytes(),
+                    contactIdentity.getContactIdentity().getBytes(),
+                    trustedDetails.getJsonIdentityDetails(),
+                    contactIdentity.isCertifiedByOwnKeycloak(),
+                    contactIdentity.isOneToOne(),
+                    trustedDetails.getPhotoUrl(),
+                    contactIdentity.isActive(),
+                    contactIdentity.isRecentlyOnline(),
+                    contactIdentity.getTrustLevel().major,
+                    getContactDeviceCounts(session, ownedIdentity, contactIdentity.getContactIdentity())
+            ));
+        }
+        return contactInfos;
+    }
 
     @Override
     public JsonIdentityDetailsWithVersionAndPhoto trustPublishedContactDetails(Session session, Identity contactIdentity, Identity ownedIdentity) throws SQLException {
@@ -1716,16 +1871,22 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
     }
 
-
+    @Override
+    public void setContactRecentlyOnline(Session session, Identity ownedIdentity, Identity contactIdentity, boolean recentlyOnline) throws SQLException {
+        ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
+        if (contactIdentityObject != null) {
+            contactIdentityObject.setRecentlyOnline(recentlyOnline);
+        }
+    }
 
     @Override
-    public boolean addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid, boolean channelCreationAlreadyInProgress) throws SQLException {
+    public boolean addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid, PreKeyBlobOnServer preKeyBlob, boolean channelCreationAlreadyInProgress) throws SQLException {
         ContactIdentity contact = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
         if (contact != null && contact.isActive()) {
             ContactDevice contactDevice = ContactDevice.get(wrapSession(session), deviceUid, contactIdentity, ownedIdentity);
             // only create the contact device if it does not already exist
             if (contactDevice == null) {
-                contactDevice = ContactDevice.create(wrapSession(session), deviceUid, contactIdentity, ownedIdentity, channelCreationAlreadyInProgress);
+                contactDevice = ContactDevice.create(wrapSession(session), deviceUid, contactIdentity, ownedIdentity, preKeyBlob, channelCreationAlreadyInProgress);
                 if (contactDevice == null) {
                     throw new SQLException();
                 }
@@ -1733,6 +1894,19 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isContactDeviceKnown(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws SQLException {
+        return ContactDevice.exists(wrapSession(session), contactDeviceUid, contactIdentity, ownedIdentity);
+    }
+
+    @Override
+    public void updateContactDevicePreKey(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid, PreKeyBlobOnServer preKeyBlob) throws SQLException {
+        ContactDevice contactDevice = ContactDevice.get(wrapSession(session), deviceUid, contactIdentity, ownedIdentity);
+        if (contactDevice != null) {
+            contactDevice.setPreKey(preKeyBlob);
+        }
     }
 
     @Override
@@ -1754,14 +1928,31 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     @Override
     public UID[] getDeviceUidsOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) {
         try {
-            ContactIdentity contactIdentityObject = ContactIdentity.get(wrapSession(session), ownedIdentity, contactIdentity);
-            if (contactIdentityObject != null) {
-                return contactIdentityObject.getDeviceUids();
+            ContactDevice[] contactDevices = ContactDevice.getAll(wrapSession(session), contactIdentity, ownedIdentity);
+            UID[] uids = new UID[contactDevices.length];
+            for (int i = 0; i < contactDevices.length; i++) {
+                uids[i] = contactDevices[i].getUid();
             }
+            return uids;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return new UID[0];
+    }
+
+    @Override
+    public List<UidAndPreKey> getDeviceUidsAndPreKeysOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) {
+        try {
+            List<UidAndPreKey> uids = new ArrayList<>();
+            ContactDevice[] contactDevices = ContactDevice.getAll(wrapSession(session), contactIdentity, ownedIdentity);
+            for (ContactDevice contactDevice : contactDevices) {
+                uids.add(new UidAndPreKey(contactDevice.getUid(), contactDevice.getPreKey()));
+            }
+            return uids;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -1784,6 +1975,23 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             contactDeviceUids.add(contactDevice.getUid());
         }
         return output;
+    }
+
+    @Override
+    public long getLatestChannelCreationPingTimestampForContactDevice(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws SQLException {
+        ContactDevice contactDevice = ContactDevice.get(wrapSession(session), contactDeviceUid, contactIdentity, ownedIdentity);
+        if (contactDevice != null) {
+            return contactDevice.getLatestChannelCreationPingTimestamp();
+        }
+        return -1;
+    }
+
+    @Override
+    public void setLatestChannelCreationPingTimestampForContactDevice(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid, long timestamp) throws Exception {
+        ContactDevice contactDevice = ContactDevice.get(wrapSession(session), contactDeviceUid, contactIdentity, ownedIdentity);
+        if (contactDevice != null) {
+            contactDevice.setLatestChannelCreationPingTimestamp(timestamp);
+        }
     }
 
     @Override
@@ -3780,6 +3988,135 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     // endregion
+
+
+
+
+    // region implement PreKeyEncryptionDelegate
+
+    @Override
+    public EncryptedBytes wrapWithPreKey(Session session, AuthEncKey messageKey, Identity ownedIdentity, Identity remoteIdentity, UID remoteDeviceUid, PRNGService prng) {
+        try {
+            OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
+            if (ownedIdentityObject == null) {
+                Logger.w("In wrapWithPreKey(), unknown OwnedIdentity");
+                return null;
+            }
+
+            // find the PreKey to use for encryption
+            final PreKey preKey;
+            if (ownedIdentity.equals(remoteIdentity)) {
+                OwnedDevice ownedDevice = OwnedDevice.get(wrapSession(session), remoteDeviceUid);
+                if (ownedDevice == null || !Objects.equals(ownedDevice.getOwnedIdentity(), ownedIdentity)) {
+                    Logger.w("In wrapWithPreKey(), unable to find the correct ownedDevice");
+                    return null;
+                }
+                preKey = ownedDevice.getPreKey();
+            } else {
+                ContactDevice contactDevice = ContactDevice.get(wrapSession(session), remoteDeviceUid, remoteIdentity, ownedIdentity);
+                if (contactDevice == null) {
+                    Logger.w("In wrapWithPreKey(), unable to find the correct contactDevice");
+                    return null;
+                }
+                preKey = contactDevice.getPreKey();
+            }
+
+            if (preKey == null) {
+                Logger.w("In wrapWithPreKey(), remote device does not have a preKey");
+                return null;
+            }
+
+            // build the message payload
+            UID currentDeviceUid = getCurrentDeviceUidOfOwnedIdentity(session, ownedIdentity);
+            Encoded encodedPayload = Encoded.of(new Encoded[]{
+                    Encoded.of(messageKey),
+                    Encoded.of(currentDeviceUid),
+                    Encoded.of(ownedIdentity),
+            });
+
+
+            // compute the signature
+            Encoded signaturePayload = Encoded.of(new Encoded[]{
+                    encodedPayload,
+                    Encoded.of(remoteIdentity),
+                    Encoded.of(remoteDeviceUid),
+                    Encoded.of(preKey.keyId.getBytes()),
+            });
+
+
+            byte[] signature = Signature.sign(Constants.SignatureContext.ENCRYPTION_WITH_PRE_KEY, signaturePayload.getBytes(), ownedIdentityObject.getPrivateIdentity().getServerAuthenticationPrivateKey().getSignaturePrivateKey(), prng);
+            if (signature == null) {
+                Logger.w("In wrapWithPreKey(), unable to compute signature?!");
+                return null;
+            }
+
+            // encrypt the signed payload
+            Encoded encodedPlaintext = Encoded.of(new Encoded[]{
+                    encodedPayload,
+                    Encoded.of(signature),
+            });
+            EncryptedBytes encryptedBytes = Suite.getPublicKeyEncryption(preKey.encryptionPublicKey).encrypt(preKey.encryptionPublicKey, encodedPlaintext.getBytes(), prng);
+            byte[] outputBytes = new byte[KeyId.KEYID_LENGTH + encryptedBytes.length];
+            System.arraycopy(preKey.keyId.getBytes(), 0, outputBytes, 0, KeyId.KEYID_LENGTH);
+            System.arraycopy(encryptedBytes.getBytes(), 0, outputBytes, KeyId.KEYID_LENGTH, encryptedBytes.length);
+
+            return new EncryptedBytes(outputBytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public AuthEncKeyAndChannelInfo unwrapWithPreKey(Session session, EncryptedBytes wrappedKey, Identity ownedIdentity) throws SQLException {
+        try {
+            if (wrappedKey.length < KeyId.KEYID_LENGTH) {
+                return null;
+            }
+            KeyId keyId = new KeyId(Arrays.copyOfRange(wrappedKey.getBytes(), 0, KeyId.KEYID_LENGTH));
+            OwnedPreKey ownedPreKey = OwnedPreKey.get(wrapSession(session), ownedIdentity, keyId);
+            if (ownedPreKey == null) {
+                return null;
+            }
+
+            byte[] plaintextBytes;
+            try {
+                plaintextBytes = Suite.getPublicKeyEncryption(ownedPreKey.getEncryptionPrivateKey()).decrypt(ownedPreKey.getEncryptionPrivateKey(), new EncryptedBytes(Arrays.copyOfRange(wrappedKey.getBytes(), KeyId.KEYID_LENGTH, wrappedKey.length)));
+            } catch (InvalidKeyException | DecryptionException ignored) {
+                return null;
+            }
+            Encoded[] encodeds = new Encoded(plaintextBytes).decodeList();
+
+            Encoded[] payloadEncodeds = encodeds[0].decodeList();
+            byte[] signature = encodeds[1].decodeBytes();
+
+            AuthEncKey messageKey = (AuthEncKey) payloadEncodeds[0].decodeSymmetricKey();
+            UID remoteDeviceUid = payloadEncodeds[1].decodeUid();
+            Identity remoteIdentity = payloadEncodeds[2].decodeIdentity();
+
+            UID currentDeviceUid = getCurrentDeviceUidOfOwnedIdentity(session, ownedIdentity);
+            Encoded signatureEncoded = Encoded.of(new Encoded[]{
+                    encodeds[0],
+                    Encoded.of(ownedIdentity),
+                    Encoded.of(currentDeviceUid),
+                    Encoded.of(keyId.getBytes()),
+            });
+
+            if (!Signature.verify(Constants.SignatureContext.ENCRYPTION_WITH_PRE_KEY, signatureEncoded.getBytes(), remoteIdentity, signature)) {
+                Logger.w("PreKey wrapped messageKey signature verification failed!");
+                return null;
+            }
+            return new AuthEncKeyAndChannelInfo(messageKey, ReceptionChannelInfo.createPreKeyChannelInfo(remoteDeviceUid, remoteIdentity));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // endregion
+
+
+
 
     // region implement ObvBackupAndSyncDelegate
 

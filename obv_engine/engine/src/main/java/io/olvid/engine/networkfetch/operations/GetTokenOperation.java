@@ -144,6 +144,8 @@ class GetTokenOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 }

@@ -21,18 +21,20 @@ package io.olvid.engine.protocol.protocols;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
-import io.olvid.engine.datatypes.Constants;
+import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.PreKeyBlobOnServer;
+import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
+import io.olvid.engine.datatypes.containers.UidAndPreKey;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.protocol.databases.LinkBetweenProtocolInstances;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
@@ -85,6 +87,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
     public static class WaitingForChildProtocolState extends ConcreteProtocolState {
         private final Identity contactIdentity;
 
+        @SuppressWarnings("unused")
         public WaitingForChildProtocolState(Encoded encodedState) throws Exception {
             super(WAITING_FOR_CHILD_PROTOCOL_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -108,6 +111,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
     }
 
     public static class ChildProtocolStateProcessedState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public ChildProtocolStateProcessedState(Encoded encodedState) throws Exception {
             super(CANCELLED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -127,6 +131,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
     }
 
     public static class CancelledState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public CancelledState(Encoded encodedState) throws Exception {
             super(CANCELLED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -252,6 +257,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
     }
 
     public static class StartChildProtocolStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final InitialMessage receivedMessage;
 
@@ -315,26 +321,78 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
                 return new CancelledState();
             }
 
-            if (deviceUidsReceivedState.getDeviceUids().length == 1
-                    && Objects.equals(deviceUidsReceivedState.getDeviceUids()[0], Constants.BROADCAST_UID)) {
+            if (deviceUidsReceivedState.getDeviceUidsAndPreKeys().length == 0 && deviceUidsReceivedState.getServerTimestamp() == 0) {
                 Logger.w("Device discovery query expired.");
                 return new CancelledState();
             }
 
-            HashSet<UID> newContactDeviceUids = new HashSet<>(Arrays.asList(deviceUidsReceivedState.getDeviceUids()));
-            HashSet<UID> oldContactDeviceUids = new HashSet<>(Arrays.asList(protocolManagerSession.identityDelegate.getDeviceUidsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity)));
-            for (UID contactDeviceUid: oldContactDeviceUids) {
-                if (!newContactDeviceUids.contains(contactDeviceUid)) {
-                    // a deviceUid was removed --> delete the channel and the deviceUid
-                    protocolManagerSession.channelDelegate.deleteObliviousChannelIfItExists(protocolManagerSession.session, getOwnedIdentity(), contactDeviceUid, receivedContactIdentity);
-                    protocolManagerSession.identityDelegate.removeDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity, contactDeviceUid);
+            HashMap<UID, Encoded> newContactDevicesAndPreKeys = new HashMap<>();
+            for (HashMap<DictionaryKey, Encoded> deviceUidAndPreKey : deviceUidsReceivedState.getDeviceUidsAndPreKeys()) {
+                try {
+                    Encoded encodedDeviceUid = deviceUidAndPreKey.get(new DictionaryKey("uid"));
+                    Encoded encodedSignedPreKey = deviceUidAndPreKey.get(new DictionaryKey("prk"));
+                    if (encodedDeviceUid != null) {
+                        UID deviceUid = encodedDeviceUid.decodeUid();
+                        newContactDevicesAndPreKeys.put(deviceUid, encodedSignedPreKey);
+                    }
+                } catch (Exception e) {
+                    Logger.i("Malformed server response id device discovery");
+                    e.printStackTrace();
                 }
             }
-            for (UID contactDeviceUid: newContactDeviceUids) {
-                if (!oldContactDeviceUids.contains(contactDeviceUid)) {
-                    // a new deviceUid was found --> add it, this will trigger the channel creation
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity, contactDeviceUid, false);
+
+            for (UidAndPreKey oldUidAndPreKey: protocolManagerSession.identityDelegate.getDeviceUidsAndPreKeysOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity)) {
+                boolean stillExists = newContactDevicesAndPreKeys.containsKey(oldUidAndPreKey.uid);
+                Encoded encodedSignedPreKey = newContactDevicesAndPreKeys.remove(oldUidAndPreKey.uid);
+                if (stillExists) {
+                    // check if the preKey should be updated
+
+                    final PreKeyBlobOnServer newPreKey;
+                    final boolean preKeyChanged;
+
+                    if (encodedSignedPreKey != null) {
+                        // there is a preKey on the server, check if it changed and has a valid signature
+                        PreKeyBlobOnServer preKeyBlob = PreKeyBlobOnServer.verifySignatureAndDecode(encodedSignedPreKey, receivedContactIdentity, oldUidAndPreKey.uid, deviceUidsReceivedState.getServerTimestamp());
+                        if (preKeyBlob != null &&
+                                (oldUidAndPreKey.preKey == null || (!preKeyBlob.preKey.keyId.equals(oldUidAndPreKey.preKey.keyId) && oldUidAndPreKey.preKey.expirationTimestamp < preKeyBlob.preKey.expirationTimestamp))) {
+                            newPreKey = preKeyBlob;
+                            preKeyChanged = true;
+                        } else {
+                            newPreKey = null;
+                            preKeyChanged = false;
+                        }
+                    } else if (oldUidAndPreKey.preKey != null) {
+                        // the preKey was removed!
+                        Logger.w("A contact preKey was removed from the server, this should never happen...");
+                        newPreKey = null;
+                        preKeyChanged = true;
+                    } else {
+                        newPreKey = null;
+                        preKeyChanged = false;
+                    }
+
+                    if (preKeyChanged) {
+                        protocolManagerSession.identityDelegate.updateContactDevicePreKey(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity, oldUidAndPreKey.uid, newPreKey);
+                    }
+                } else {
+                    // a deviceUid was removed --> delete the channel and the deviceUid
+                    protocolManagerSession.channelDelegate.deleteObliviousChannelIfItExists(protocolManagerSession.session, getOwnedIdentity(), oldUidAndPreKey.uid, receivedContactIdentity);
+                    protocolManagerSession.identityDelegate.removeDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity, oldUidAndPreKey.uid);
                 }
+            }
+
+            for (Map.Entry<UID, Encoded> entry: newContactDevicesAndPreKeys.entrySet()) {
+                // a new deviceUid was found --> add it, this will trigger the channel creation
+                PreKeyBlobOnServer preKeyBlob = entry.getValue() == null ? null : PreKeyBlobOnServer.verifySignatureAndDecode(entry.getValue(), receivedContactIdentity, entry.getKey(), deviceUidsReceivedState.getServerTimestamp());
+                protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity, entry.getKey(), preKeyBlob,  false);
+            }
+
+            // update the recently online status of the contact
+            protocolManagerSession.identityDelegate.setContactRecentlyOnline(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity, deviceUidsReceivedState.isRecentlyOnline());
+
+            if (deviceUidsReceivedState.getServerTimestamp() != 0) {
+                // delete expired pre keys (for the contact's server)
+                protocolManagerSession.identityDelegate.expireContactAndOwnedPreKeys(protocolManagerSession.session, getOwnedIdentity(), receivedContactIdentity.getServer(), deviceUidsReceivedState.getServerTimestamp());
             }
 
             return new ChildProtocolStateProcessedState();

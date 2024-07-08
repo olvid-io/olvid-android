@@ -1,0 +1,1073 @@
+diff --git a/api/BUILD.gn b/api/BUILD.gn
+index b71430956e..42feae39bf 100644
+--- a/api/BUILD.gn
++++ b/api/BUILD.gn
+@@ -429,6 +429,7 @@ rtc_source_set("packet_socket_factory") {
+   deps = [
+     ":async_dns_resolver",
+     "../rtc_base:async_packet_socket",
++    "../rtc_base:proxy_info",
+     "../rtc_base:socket_address",
+     "../rtc_base/system:rtc_export",
+   ]
+diff --git a/api/DEPS b/api/DEPS
+index eecde25718..0e8866425f 100644
+--- a/api/DEPS
++++ b/api/DEPS
+@@ -101,6 +101,7 @@ specific_include_rules = {
+   ],
+ 
+   "packet_socket_factory\.h": [
++    "+rtc_base/proxy_info.h",
+     "+rtc_base/async_packet_socket.h",
+   ],
+ 
+diff --git a/api/packet_socket_factory.h b/api/packet_socket_factory.h
+index 0785888a81..78b93b539c 100644
+--- a/api/packet_socket_factory.h
++++ b/api/packet_socket_factory.h
+@@ -17,6 +17,7 @@
+ 
+ #include "api/async_dns_resolver.h"
+ #include "rtc_base/async_packet_socket.h"
++#include "rtc_base/proxy_info.h"
+ #include "rtc_base/system/rtc_export.h"
+ 
+ namespace rtc {
+@@ -66,6 +67,8 @@ class RTC_EXPORT PacketSocketFactory {
+   virtual AsyncPacketSocket* CreateClientTcpSocket(
+       const SocketAddress& local_address,
+       const SocketAddress& remote_address,
++      const ProxyInfo& proxy_info,
++      const std::string& user_agent,
+       const PacketSocketTcpOptions& tcp_options) = 0;
+ 
+   virtual std::unique_ptr<webrtc::AsyncDnsResolverInterface>
+diff --git a/api/test/mock_packet_socket_factory.h b/api/test/mock_packet_socket_factory.h
+index 82f7676285..7e59556385 100644
+--- a/api/test/mock_packet_socket_factory.h
++++ b/api/test/mock_packet_socket_factory.h
+@@ -32,6 +32,8 @@ class MockPacketSocketFactory : public PacketSocketFactory {
+               CreateClientTcpSocket,
+               (const SocketAddress& local_address,
+                const SocketAddress&,
++               const ProxyInfo&,
++               const std::string&,
+                const PacketSocketTcpOptions&),
+               (override));
+   MOCK_METHOD(std::unique_ptr<webrtc::AsyncDnsResolverInterface>,
+diff --git a/p2p/BUILD.gn b/p2p/BUILD.gn
+index 8a3c8eb14d..8bb71acaed 100644
+--- a/p2p/BUILD.gn
++++ b/p2p/BUILD.gn
+@@ -127,6 +127,7 @@ rtc_library("rtc_p2p") {
+     "../rtc_base:network",
+     "../rtc_base:network_constants",
+     "../rtc_base:network_route",
++    "../rtc_base:proxy_info",
+     "../rtc_base:rate_tracker",
+     "../rtc_base:refcount",
+     "../rtc_base:rtc_numerics",
+@@ -245,6 +246,7 @@ rtc_library("basic_packet_socket_factory") {
+     "../rtc_base:async_udp_socket",
+     "../rtc_base:checks",
+     "../rtc_base:logging",
++    "../rtc_base:proxy_info",
+     "../rtc_base:socket",
+     "../rtc_base:socket_adapters",
+     "../rtc_base:socket_address",
+@@ -343,6 +345,7 @@ rtc_library("connection") {
+     "../rtc_base:net_helper",
+     "../rtc_base:network",
+     "../rtc_base:network_constants",
++    "../rtc_base:proxy_info",
+     "../rtc_base:rate_tracker",
+     "../rtc_base:rtc_numerics",
+     "../rtc_base:safe_minmax",
+@@ -679,6 +682,7 @@ rtc_library("port") {
+     "../rtc_base:mdns_responder_interface",
+     "../rtc_base:net_helper",
+     "../rtc_base:network",
++    "../rtc_base:proxy_info",
+     "../rtc_base:rate_tracker",
+     "../rtc_base:socket_address",
+     "../rtc_base:ssl",
+@@ -716,6 +720,7 @@ rtc_library("port_allocator") {
+     "../api/transport:enums",
+     "../rtc_base:checks",
+     "../rtc_base:network",
++    "../rtc_base:proxy_info",
+     "../rtc_base:socket_address",
+     "../rtc_base:ssl",
+     "../rtc_base:threading",
+@@ -739,6 +744,7 @@ rtc_library("port_interface") {
+     "../api:packet_socket_factory",
+     "../rtc_base:async_packet_socket",
+     "../rtc_base:callback_list",
++    "../rtc_base:proxy_info",
+     "../rtc_base:socket_address",
+   ]
+   absl_deps = [
+@@ -1192,6 +1198,7 @@ if (rtc_include_tests) {
+       "../rtc_base:net_test_helpers",
+       "../rtc_base:network",
+       "../rtc_base:network_constants",
++      "../rtc_base:proxy_info",
+       "../rtc_base:rtc_base_tests_utils",
+       "../rtc_base:socket",
+       "../rtc_base:socket_adapters",
+diff --git a/p2p/base/basic_packet_socket_factory.cc b/p2p/base/basic_packet_socket_factory.cc
+index 294dbddbd1..bb11f914b1 100644
+--- a/p2p/base/basic_packet_socket_factory.cc
++++ b/p2p/base/basic_packet_socket_factory.cc
+@@ -86,6 +86,8 @@ AsyncListenSocket* BasicPacketSocketFactory::CreateServerTcpSocket(
+ AsyncPacketSocket* BasicPacketSocketFactory::CreateClientTcpSocket(
+     const SocketAddress& local_address,
+     const SocketAddress& remote_address,
++    const ProxyInfo& proxy_info,
++    const std::string& user_agent,
+     const PacketSocketTcpOptions& tcp_options) {
+   Socket* socket =
+       socket_factory_->CreateSocket(local_address.family(), SOCK_STREAM);
+@@ -117,6 +119,12 @@ AsyncPacketSocket* BasicPacketSocketFactory::CreateClientTcpSocket(
+                       << socket->GetError();
+   }
+ 
++  if (proxy_info.type == PROXY_HTTPS) {
++    socket =
++        new AsyncHttpsProxySocket(socket, user_agent, proxy_info.address,
++                                  proxy_info.username, proxy_info.password);
++  }
++
+   // Assert that at most one TLS option is used.
+   int tlsOpts = tcp_options.opts & (PacketSocketFactory::OPT_TLS |
+                                     PacketSocketFactory::OPT_TLS_FAKE |
+@@ -190,4 +198,54 @@ int BasicPacketSocketFactory::BindSocket(Socket* socket,
+   return ret;
+ }
+ 
++
++
++
++// Proxy support
++ProxyPacketSocketFactory::ProxyPacketSocketFactory(SocketFactory* socket_factory, SocketAddress proxy_socket_address, std::string& user_agent) :
++  basic_packet_socket_factory_(new BasicPacketSocketFactory(socket_factory))
++{
++  if (proxy_socket_address.IsComplete()) {
++    proxy_info_.type = PROXY_HTTPS;
++    proxy_info_.address = proxy_socket_address;
++  } else {
++    proxy_info_.type = PROXY_NONE;
++  }
++  user_agent_ = user_agent;
++}
++
++ProxyPacketSocketFactory::~ProxyPacketSocketFactory() {}
++
++AsyncPacketSocket* ProxyPacketSocketFactory::CreateUdpSocket(
++    const SocketAddress& address,
++    uint16_t min_port,
++    uint16_t max_port) {
++  return basic_packet_socket_factory_->CreateUdpSocket(address, min_port, max_port);
++}
++
++AsyncListenSocket* ProxyPacketSocketFactory::CreateServerTcpSocket(const SocketAddress& local_address,
++                                        uint16_t min_port,
++                                        uint16_t max_port,
++                                        int opts) {
++  return basic_packet_socket_factory_->CreateServerTcpSocket(local_address, min_port, max_port, opts);
++}
++
++AsyncPacketSocket* ProxyPacketSocketFactory::CreateClientTcpSocket(
++    const SocketAddress& local_address,
++    const SocketAddress& remote_address,
++    const ProxyInfo& proxy_info,
++    const std::string& user_agent,
++    const PacketSocketTcpOptions& tcp_options) {
++  if (user_agent_.empty()) {
++    return basic_packet_socket_factory_->CreateClientTcpSocket(local_address, remote_address, proxy_info_, user_agent, tcp_options);
++  } else {
++    return basic_packet_socket_factory_->CreateClientTcpSocket(local_address, remote_address, proxy_info_, user_agent_, tcp_options);
++  }
++}
++
++std::unique_ptr<webrtc::AsyncDnsResolverInterface> ProxyPacketSocketFactory::CreateAsyncDnsResolver() {
++  return basic_packet_socket_factory_->CreateAsyncDnsResolver();
++}
++
++
+ }  // namespace rtc
+diff --git a/p2p/base/basic_packet_socket_factory.h b/p2p/base/basic_packet_socket_factory.h
+index b172d34db6..bdeaffff59 100644
+--- a/p2p/base/basic_packet_socket_factory.h
++++ b/p2p/base/basic_packet_socket_factory.h
+@@ -19,6 +19,7 @@
+ #include "api/async_dns_resolver.h"
+ #include "api/packet_socket_factory.h"
+ #include "rtc_base/async_packet_socket.h"
++#include "rtc_base/proxy_info.h"
+ #include "rtc_base/socket.h"
+ #include "rtc_base/socket_address.h"
+ #include "rtc_base/socket_factory.h"
+@@ -43,6 +44,8 @@ class RTC_EXPORT BasicPacketSocketFactory : public PacketSocketFactory {
+   AsyncPacketSocket* CreateClientTcpSocket(
+       const SocketAddress& local_address,
+       const SocketAddress& remote_address,
++      const ProxyInfo& proxy_info,
++      const std::string& user_agent,
+       const PacketSocketTcpOptions& tcp_options) override;
+ 
+   std::unique_ptr<webrtc::AsyncDnsResolverInterface> CreateAsyncDnsResolver()
+@@ -57,6 +60,36 @@ class RTC_EXPORT BasicPacketSocketFactory : public PacketSocketFactory {
+   SocketFactory* socket_factory_;
+ };
+ 
++
++// Proxy support
++class RTC_EXPORT ProxyPacketSocketFactory : public PacketSocketFactory {
++ public:
++  explicit ProxyPacketSocketFactory(SocketFactory* socket_factory, SocketAddress proxy_socket_address, std::string& user_agent);
++  ~ProxyPacketSocketFactory() override;
++
++  AsyncPacketSocket* CreateUdpSocket(const SocketAddress& local_address,
++                                     uint16_t min_port,
++                                     uint16_t max_port) override;
++  AsyncListenSocket* CreateServerTcpSocket(const SocketAddress& local_address,
++                                           uint16_t min_port,
++                                           uint16_t max_port,
++                                           int opts) override;
++  AsyncPacketSocket* CreateClientTcpSocket(
++      const SocketAddress& local_address,
++      const SocketAddress& remote_address,
++      const ProxyInfo& proxy_info,
++      const std::string& user_agent,
++      const PacketSocketTcpOptions& tcp_options) override;
++
++  std::unique_ptr<webrtc::AsyncDnsResolverInterface> CreateAsyncDnsResolver()
++      override;
++
++ private:
++  BasicPacketSocketFactory* basic_packet_socket_factory_;
++  ProxyInfo proxy_info_;
++  std::string user_agent_;
++};
++
+ }  // namespace rtc
+ 
+ #endif  // P2P_BASE_BASIC_PACKET_SOCKET_FACTORY_H_
+diff --git a/p2p/base/p2p_transport_channel_unittest.cc b/p2p/base/p2p_transport_channel_unittest.cc
+index 79ca2a5f26..261c5821e5 100644
+--- a/p2p/base/p2p_transport_channel_unittest.cc
++++ b/p2p/base/p2p_transport_channel_unittest.cc
+@@ -100,6 +100,12 @@ static const SocketAddress kAlternateAddrs[2] = {
+ static const SocketAddress kIPv6AlternateAddrs[2] = {
+     SocketAddress("2401:4030:1:2c00:be30:abcd:efab:cdef", 0),
+     SocketAddress("2601:0:1000:1b03:2e41:38ff:fea6:f2a4", 0)};
++// Addresses for HTTP proxy servers.
++static const SocketAddress kHttpsProxyAddrs[2] = {
++    SocketAddress("11.11.11.1", 443), SocketAddress("22.22.22.1", 443)};
++// Addresses for SOCKS proxy servers.
++static const SocketAddress kSocksProxyAddrs[2] = {
++    SocketAddress("11.11.11.1", 1080), SocketAddress("22.22.22.1", 1080)};
+ // Internal addresses for NAT boxes.
+ static const SocketAddress kNatAddrs[2] = {SocketAddress("192.168.1.1", 0),
+                                            SocketAddress("192.168.2.1", 0)};
+@@ -311,6 +317,7 @@ class P2PTransportChannelTestBase : public ::testing::Test,
+     BLOCK_UDP,                    // Firewall, UDP in/out blocked
+     BLOCK_UDP_AND_INCOMING_TCP,   // Firewall, UDP in/out and TCP in blocked
+     BLOCK_ALL_BUT_OUTGOING_HTTP,  // Firewall, only TCP out on 80/443
++    PROXY_HTTPS,                  // All traffic through HTTPS proxy
+     NUM_CONFIGS
+   };
+ 
+@@ -556,6 +563,13 @@ class P2PTransportChannelTestBase : public ::testing::Test,
+     GetEndpoint(endpoint)->network_manager_.RemoveInterface(addr);
+     fw()->AddRule(false, rtc::FP_ANY, rtc::FD_ANY, addr);
+   }
++  void SetProxy(int endpoint, rtc::ProxyType type) {
++    rtc::ProxyInfo info;
++    info.type = type;
++    info.address = (type == rtc::PROXY_HTTPS) ? kHttpsProxyAddrs[endpoint]
++                                              : kSocksProxyAddrs[endpoint];
++    GetAllocator(endpoint)->set_proxy("unittest/1.0", info);
++  }
+   void SetAllocatorFlags(int endpoint, int flags) {
+     GetAllocator(endpoint)->set_flags(flags);
+   }
+@@ -1151,6 +1165,7 @@ class P2PTransportChannelTest : public P2PTransportChannelTestBase {
+       case BLOCK_UDP:
+       case BLOCK_UDP_AND_INCOMING_TCP:
+       case BLOCK_ALL_BUT_OUTGOING_HTTP:
++      case PROXY_HTTPS:
+         AddAddress(endpoint, kPublicAddrs[endpoint]);
+         // Block all UDP
+         fw()->AddRule(false, rtc::FP_UDP, rtc::FD_ANY, kPublicAddrs[endpoint]);
+@@ -1166,6 +1181,13 @@ class P2PTransportChannelTest : public P2PTransportChannelTestBase {
+                         SocketAddress(rtc::IPAddress(INADDR_ANY), 443));
+           fw()->AddRule(false, rtc::FP_TCP, rtc::FD_ANY,
+                         kPublicAddrs[endpoint]);
++        } else if (config == PROXY_HTTPS) {
++          // Block all TCP to/from the endpoint except to the proxy server
++          fw()->AddRule(true, rtc::FP_TCP, kPublicAddrs[endpoint],
++                        kHttpsProxyAddrs[endpoint]);
++          fw()->AddRule(false, rtc::FP_TCP, rtc::FD_ANY,
++                        kPublicAddrs[endpoint]);
++          SetProxy(endpoint, rtc::PROXY_HTTPS);
+         }
+         break;
+       default:
+@@ -1205,30 +1227,33 @@ class P2PTransportChannelMatrixTest : public P2PTransportChannelTest,
+ // Test matrix. Originator behavior defined by rows, receiever by columns.
+ 
+ // TODO(?): Fix NULLs caused by lack of TCP support in NATSocket.
++// TODO(?): Fix NULLs caused by no HTTP proxy support.
+ // TODO(?): Rearrange rows/columns from best to worst.
+ const P2PTransportChannelMatrixTest::Result*
+     P2PTransportChannelMatrixTest::kMatrix[NUM_CONFIGS][NUM_CONFIGS] = {
+-        // OPEN  CONE  ADDR  PORT  SYMM  2CON  SCON  !UDP  !TCP  HTTP
++        //      OPEN  CONE  ADDR  PORT  SYMM  2CON  SCON  !UDP  !TCP  HTTP  PRXH
+         /*OP*/
+-        {LULU, LUSU, LUSU, LUSU, LUPU, LUSU, LUPU, LTPT, LTPT, LSRS},
++        {LULU, LUSU, LUSU, LUSU, LUPU, LUSU, LUPU, LTPT, LTPT, LSRS, NULL},
+         /*CO*/
+-        {SULU, SUSU, SUSU, SUSU, SUPU, SUSU, SUPU, NULL, NULL, LSRS},
++        {SULU, SUSU, SUSU, SUSU, SUPU, SUSU, SUPU, NULL, NULL, LSRS, NULL},
+         /*AD*/
+-        {SULU, SUSU, SUSU, SUSU, SUPU, SUSU, SUPU, NULL, NULL, LSRS},
++        {SULU, SUSU, SUSU, SUSU, SUPU, SUSU, SUPU, NULL, NULL, LSRS, NULL},
+         /*PO*/
+-        {SULU, SUSU, SUSU, SUSU, RUPU, SUSU, RUPU, NULL, NULL, LSRS},
++        {SULU, SUSU, SUSU, SUSU, RUPU, SUSU, RUPU, NULL, NULL, LSRS, NULL},
+         /*SY*/
+-        {PULU, PUSU, PUSU, PURU, PURU, PUSU, PURU, NULL, NULL, LSRS},
++        {PULU, PUSU, PUSU, PURU, PURU, PUSU, PURU, NULL, NULL, LSRS, NULL},
+         /*2C*/
+-        {SULU, SUSU, SUSU, SUSU, SUPU, SUSU, SUPU, NULL, NULL, LSRS},
++        {SULU, SUSU, SUSU, SUSU, SUPU, SUSU, SUPU, NULL, NULL, LSRS, NULL},
+         /*SC*/
+-        {PULU, PUSU, PUSU, PURU, PURU, PUSU, PURU, NULL, NULL, LSRS},
++        {PULU, PUSU, PUSU, PURU, PURU, PUSU, PURU, NULL, NULL, LSRS, NULL},
+         /*!U*/
+-        {LTPT, NULL, NULL, NULL, NULL, NULL, NULL, LTPT, LTPT, LSRS},
++        {LTPT, NULL, NULL, NULL, NULL, NULL, NULL, LTPT, LTPT, LSRS, NULL},
+         /*!T*/
+-        {PTLT, NULL, NULL, NULL, NULL, NULL, NULL, PTLT, LTRT, LSRS},
++        {PTLT, NULL, NULL, NULL, NULL, NULL, NULL, PTLT, LTRT, LSRS, NULL},
+         /*HT*/
+-        {LSRS, LSRS, LSRS, LSRS, LSRS, LSRS, LSRS, LSRS, LSRS, LSRS},
++        {LSRS, LSRS, LSRS, LSRS, LSRS, LSRS, LSRS, LSRS, LSRS, LSRS, NULL},
++        /*PR*/
++        {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+ };
+ 
+ // The actual tests that exercise all the various configurations.
+@@ -1256,6 +1281,7 @@ const P2PTransportChannelMatrixTest::Result*
+   P2P_TEST(x, BLOCK_UDP)                   \
+   P2P_TEST(x, BLOCK_UDP_AND_INCOMING_TCP)  \
+   P2P_TEST(x, BLOCK_ALL_BUT_OUTGOING_HTTP) \
++  P2P_TEST(x, PROXY_HTTPS)
+ 
+ P2P_TEST_SET(OPEN)
+ P2P_TEST_SET(NAT_FULL_CONE)
+@@ -1267,6 +1293,7 @@ P2P_TEST_SET(NAT_SYMMETRIC_THEN_CONE)
+ P2P_TEST_SET(BLOCK_UDP)
+ P2P_TEST_SET(BLOCK_UDP_AND_INCOMING_TCP)
+ P2P_TEST_SET(BLOCK_ALL_BUT_OUTGOING_HTTP)
++P2P_TEST_SET(PROXY_HTTPS)
+ 
+ INSTANTIATE_TEST_SUITE_P(
+     All,
+diff --git a/p2p/base/port.h b/p2p/base/port.h
+index 6cf71f4f82..40dc34443b 100644
+--- a/p2p/base/port.h
++++ b/p2p/base/port.h
+@@ -53,6 +53,7 @@
+ #include "rtc_base/network.h"
+ #include "rtc_base/network/received_packet.h"
+ #include "rtc_base/network/sent_packet.h"
++#include "rtc_base/proxy_info.h"
+ #include "rtc_base/rate_tracker.h"
+ #include "rtc_base/socket_address.h"
+ #include "rtc_base/system/rtc_export.h"
+@@ -322,6 +323,13 @@ class RTC_EXPORT Port : public PortInterface, public sigslot::has_slots<> {
+       const rtc::SocketAddress& addr,
+       const std::vector<uint16_t>& unknown_types);
+ 
++  void set_proxy(absl::string_view user_agent, const rtc::ProxyInfo& proxy) {
++    user_agent_ = std::string(user_agent);
++    proxy_ = proxy;
++  }
++  const std::string& user_agent() override { return user_agent_; }
++  const rtc::ProxyInfo& proxy() override { return proxy_; }
++
+   void EnablePortPackets() override;
+ 
+   // Called if the port has no connections and is no longer useful.
+@@ -491,6 +499,9 @@ class RTC_EXPORT Port : public PortInterface, public sigslot::has_slots<> {
+   IceRole ice_role_;
+   uint64_t tiebreaker_;
+   bool shared_socket_;
++  // Information to use when going through a proxy.
++  std::string user_agent_;
++  rtc::ProxyInfo proxy_;
+ 
+   // A virtual cost perceived by the user, usually based on the network type
+   // (WiFi. vs. Cellular). It takes precedence over the priority when
+diff --git a/p2p/base/port_allocator.h b/p2p/base/port_allocator.h
+index 7958538e1c..63ecfc6904 100644
+--- a/p2p/base/port_allocator.h
++++ b/p2p/base/port_allocator.h
+@@ -29,6 +29,7 @@
+ #include "rtc_base/checks.h"
+ #include "rtc_base/helpers.h"
+ #include "rtc_base/network.h"
++#include "rtc_base/proxy_info.h"
+ #include "rtc_base/socket_address.h"
+ #include "rtc_base/ssl_certificate.h"
+ #include "rtc_base/system/rtc_export.h"
+@@ -462,6 +463,25 @@ class RTC_EXPORT PortAllocator : public sigslot::has_slots<> {
+     flags_ = flags;
+   }
+ 
++  // These three methods are deprecated. If connections need to go through a
++  // proxy, the application should create a BasicPortAllocator given a custom
++  // PacketSocketFactory that creates proxy sockets.
++  const std::string& user_agent() const {
++    CheckRunOnValidThreadIfInitialized();
++    return agent_;
++  }
++
++  const rtc::ProxyInfo& proxy() const {
++    CheckRunOnValidThreadIfInitialized();
++    return proxy_;
++  }
++
++  void set_proxy(absl::string_view agent, const rtc::ProxyInfo& proxy) {
++    CheckRunOnValidThreadIfInitialized();
++    agent_ = std::string(agent);
++    proxy_ = proxy;
++  }
++
+   // Gets/Sets the port range to use when choosing client ports.
+   int min_port() const {
+     CheckRunOnValidThreadIfInitialized();
+@@ -609,6 +629,8 @@ class RTC_EXPORT PortAllocator : public sigslot::has_slots<> {
+ 
+   bool initialized_ = false;
+   uint32_t flags_;
++  std::string agent_;
++  rtc::ProxyInfo proxy_;
+   int min_port_;
+   int max_port_;
+   int max_ipv6_networks_;
+diff --git a/p2p/base/port_interface.h b/p2p/base/port_interface.h
+index 48189823f1..70b2085155 100644
+--- a/p2p/base/port_interface.h
++++ b/p2p/base/port_interface.h
+@@ -23,6 +23,7 @@
+ #include "p2p/base/transport_description.h"
+ #include "rtc_base/async_packet_socket.h"
+ #include "rtc_base/callback_list.h"
++#include "rtc_base/proxy_info.h"
+ #include "rtc_base/socket_address.h"
+ 
+ namespace rtc {
+@@ -153,6 +154,8 @@ class PortInterface {
+ 
+   // The factory used to create the sockets of this port.
+   virtual rtc::PacketSocketFactory* socket_factory() const = 0;
++  virtual const std::string& user_agent() = 0;
++  virtual const rtc::ProxyInfo& proxy() = 0;
+ 
+   // Identifies the generation that this port was created in.
+   virtual uint32_t generation() const = 0;
+diff --git a/p2p/base/port_unittest.cc b/p2p/base/port_unittest.cc
+index 81066cf68b..8e049b7145 100644
+--- a/p2p/base/port_unittest.cc
++++ b/p2p/base/port_unittest.cc
+@@ -59,6 +59,7 @@
+ #include "rtc_base/network/received_packet.h"
+ #include "rtc_base/network/sent_packet.h"
+ #include "rtc_base/network_constants.h"
++#include "rtc_base/proxy_info.h"
+ #include "rtc_base/socket.h"
+ #include "rtc_base/socket_adapters.h"
+ #include "rtc_base/socket_address.h"
+@@ -1061,6 +1062,8 @@ class FakePacketSocketFactory : public rtc::PacketSocketFactory {
+   AsyncPacketSocket* CreateClientTcpSocket(
+       const SocketAddress& local_address,
+       const SocketAddress& remote_address,
++      const rtc::ProxyInfo& proxy_info,
++      const std::string& user_agent,
+       const rtc::PacketSocketTcpOptions& opts) override {
+     EXPECT_TRUE(next_client_tcp_socket_.has_value());
+     AsyncPacketSocket* result = *next_client_tcp_socket_;
+diff --git a/p2p/base/tcp_port.cc b/p2p/base/tcp_port.cc
+index 4d4373f6ee..b1c94a6be7 100644
+--- a/p2p/base/tcp_port.cc
++++ b/p2p/base/tcp_port.cc
+@@ -596,7 +596,8 @@ void TCPConnection::CreateOutgoingTcpSocket() {
+   tcp_opts.opts = opts;
+   socket_.reset(port()->socket_factory()->CreateClientTcpSocket(
+       rtc::SocketAddress(port()->Network()->GetBestIP(), 0),
+-      remote_candidate().address(), tcp_opts));
++      remote_candidate().address(), port()->proxy(), port()->user_agent(),
++      tcp_opts));
+   if (socket_) {
+     RTC_LOG(LS_VERBOSE) << ToString() << ": Connecting from "
+                         << socket_->GetLocalAddress().ToSensitiveString()
+diff --git a/p2p/base/turn_port.cc b/p2p/base/turn_port.cc
+index 3e29dedc5b..8f8a64f6e7 100644
+--- a/p2p/base/turn_port.cc
++++ b/p2p/base/turn_port.cc
+@@ -439,7 +439,7 @@ bool TurnPort::CreateTurnClientSocket() {
+     tcp_options.tls_cert_verifier = tls_cert_verifier_;
+     socket_ = socket_factory()->CreateClientTcpSocket(
+         rtc::SocketAddress(Network()->GetBestIP(), 0), server_address_.address,
+-        tcp_options);
++        proxy(), user_agent(), tcp_options);
+   }
+ 
+   if (!socket_) {
+diff --git a/p2p/client/basic_port_allocator.cc b/p2p/client/basic_port_allocator.cc
+index 832d6da27a..a0b93be23f 100644
+--- a/p2p/client/basic_port_allocator.cc
++++ b/p2p/client/basic_port_allocator.cc
+@@ -937,6 +937,8 @@ void BasicPortAllocatorSession::AddAllocatedPort(Port* port,
+   port->set_content_name(content_name());
+   port->set_component(component());
+   port->set_generation(generation());
++  if (allocator_->proxy().type != rtc::PROXY_NONE)
++    port->set_proxy(allocator_->user_agent(), allocator_->proxy());
+   port->set_send_retransmit_count_attribute(
+       (flags() & PORTALLOCATOR_ENABLE_STUN_RETRANSMIT_ATTRIBUTE) != 0);
+ 
+diff --git a/rtc_base/BUILD.gn b/rtc_base/BUILD.gn
+index b6e1697682..09e9aa5fe9 100644
+--- a/rtc_base/BUILD.gn
++++ b/rtc_base/BUILD.gn
+@@ -1285,6 +1285,7 @@ rtc_library("socket_adapters") {
+     ":byte_buffer",
+     ":checks",
+     ":crypt_string",
++    ":http_common",
+     ":logging",
+     ":stringutils",
+     ":zero_memory",
+@@ -1396,6 +1397,18 @@ rtc_library("dscp") {
+   sources = [ "dscp.h" ]
+ }
+ 
++rtc_library("proxy_info") {
++  visibility = [ "*" ]
++  sources = [
++    "proxy_info.cc",
++    "proxy_info.h",
++  ]
++  deps = [
++    ":crypt_string",
++    ":socket_address",
++  ]
++}
++
+ rtc_library("file_rotating_stream") {
+   sources = [
+     "file_rotating_stream.cc",
+@@ -1596,6 +1609,24 @@ rtc_library("crypt_string") {
+   ]
+ }
+ 
++rtc_library("http_common") {
++  sources = [
++    "http_common.cc",
++    "http_common.h",
++  ]
++  deps = [
++    ":crypt_string",
++    ":logging",
++    ":socket_address",
++    ":ssl",
++    ":stringutils",
++    ":zero_memory",
++    "third_party/base64",
++  ]
++
++  absl_deps = [ "//third_party/abseil-cpp/absl/strings" ]
++}
++
+ rtc_source_set("gtest_prod") {
+   sources = [ "gtest_prod_util.h" ]
+ }
+diff --git a/rtc_base/socket_adapters.cc b/rtc_base/socket_adapters.cc
+index 2a157bfc49..f6fa182f5d 100644
+--- a/rtc_base/socket_adapters.cc
++++ b/rtc_base/socket_adapters.cc
+@@ -21,6 +21,7 @@
+ #include "rtc_base/buffer.h"
+ #include "rtc_base/byte_buffer.h"
+ #include "rtc_base/checks.h"
++#include "rtc_base/http_common.h"
+ #include "rtc_base/logging.h"
+ #include "rtc_base/strings/string_builder.h"
+ #include "rtc_base/zero_memory.h"
+@@ -215,4 +216,257 @@ void AsyncSSLSocket::ProcessInput(char* data, size_t* len) {
+     SignalReadEvent(this);
+ }
+ 
++///////////////////////////////////////////////////////////////////////////////
++
++AsyncHttpsProxySocket::AsyncHttpsProxySocket(Socket* socket,
++                                             absl::string_view user_agent,
++                                             const SocketAddress& proxy,
++                                             absl::string_view username,
++                                             const CryptString& password)
++    : BufferedReadAdapter(socket, 1024),
++      proxy_(proxy),
++      agent_(user_agent),
++      user_(username),
++      pass_(password),
++      force_connect_(false),
++      state_(PS_ERROR),
++      context_(0) {}
++
++AsyncHttpsProxySocket::~AsyncHttpsProxySocket() {
++  delete context_;
++}
++
++int AsyncHttpsProxySocket::Connect(const SocketAddress& addr) {
++  int ret;
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket::Connect("
++                      << proxy_.ToSensitiveString() << ")";
++  dest_ = addr;
++  state_ = PS_INIT;
++  if (ShouldIssueConnect()) {
++    BufferInput(true);
++  }
++  ret = BufferedReadAdapter::Connect(proxy_);
++  // TODO: Set state_ appropriately if Connect fails.
++  return ret;
++}
++
++SocketAddress AsyncHttpsProxySocket::GetRemoteAddress() const {
++  return dest_;
++}
++
++int AsyncHttpsProxySocket::Close() {
++  headers_.clear();
++  state_ = PS_ERROR;
++  dest_.Clear();
++  delete context_;
++  context_ = nullptr;
++  return BufferedReadAdapter::Close();
++}
++
++Socket::ConnState AsyncHttpsProxySocket::GetState() const {
++  if (state_ < PS_TUNNEL) {
++    return CS_CONNECTING;
++  } else if (state_ == PS_TUNNEL) {
++    return CS_CONNECTED;
++  } else {
++    return CS_CLOSED;
++  }
++}
++
++void AsyncHttpsProxySocket::OnConnectEvent(Socket* socket) {
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket::OnConnectEvent";
++  if (!ShouldIssueConnect()) {
++    state_ = PS_TUNNEL;
++    BufferedReadAdapter::OnConnectEvent(socket);
++    return;
++  }
++  SendRequest();
++}
++
++void AsyncHttpsProxySocket::OnCloseEvent(Socket* socket, int err) {
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket::OnCloseEvent(" << err << ")";
++  if ((state_ == PS_WAIT_CLOSE) && (err == 0)) {
++    state_ = PS_ERROR;
++    Connect(dest_);
++  } else {
++    BufferedReadAdapter::OnCloseEvent(socket, err);
++  }
++}
++
++void AsyncHttpsProxySocket::ProcessInput(char* data, size_t* len) {
++  size_t start = 0;
++  for (size_t pos = start; state_ < PS_TUNNEL && pos < *len;) {
++    if (state_ == PS_SKIP_BODY) {
++      size_t consume = std::min(*len - pos, content_length_);
++      pos += consume;
++      start = pos;
++      content_length_ -= consume;
++      if (content_length_ == 0) {
++        EndResponse();
++      }
++      continue;
++    }
++
++    if (data[pos++] != '\n')
++      continue;
++
++    size_t length = pos - start - 1;
++    if ((length > 0) && (data[start + length - 1] == '\r'))
++      --length;
++
++    data[start + length] = 0;
++    ProcessLine(data + start, length);
++    start = pos;
++  }
++
++  *len -= start;
++  if (*len > 0) {
++    memmove(data, data + start, *len);
++  }
++
++  if (state_ != PS_TUNNEL)
++    return;
++
++  bool remainder = (*len > 0);
++  BufferInput(false);
++  SignalConnectEvent(this);
++
++  // FIX: if SignalConnect causes the socket to be destroyed, we are in trouble
++  if (remainder)
++    SignalReadEvent(this);  // TODO: signal this??
++}
++
++bool AsyncHttpsProxySocket::ShouldIssueConnect() const {
++  // TODO: Think about whether a more sophisticated test
++  // than dest port == 80 is needed.
++  return force_connect_ || (dest_.port() != 80);
++}
++
++void AsyncHttpsProxySocket::SendRequest() {
++  rtc::StringBuilder ss;
++  ss << "CONNECT " << dest_.ToString() << " HTTP/1.0\r\n";
++  ss << "User-Agent: " << agent_ << "\r\n";
++  ss << "Host: " << dest_.HostAsURIString() << "\r\n";
++  ss << "Content-Length: 0\r\n";
++  ss << "Proxy-Connection: Keep-Alive\r\n";
++  ss << headers_;
++  ss << "\r\n";
++  std::string str = ss.str();
++  DirectSend(str.c_str(), str.size());
++  state_ = PS_LEADER;
++  expect_close_ = true;
++  content_length_ = 0;
++  headers_.clear();
++
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket >> " << str;
++}
++
++void AsyncHttpsProxySocket::ProcessLine(char* data, size_t len) {
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket << " << data;
++
++  if (len == 0) {
++    if (state_ == PS_TUNNEL_HEADERS) {
++      state_ = PS_TUNNEL;
++    } else if (state_ == PS_ERROR_HEADERS) {
++      Error(defer_error_);
++      return;
++    } else if (state_ == PS_SKIP_HEADERS) {
++      if (content_length_) {
++        state_ = PS_SKIP_BODY;
++      } else {
++        EndResponse();
++        return;
++      }
++    } else {
++      if (!unknown_mechanisms_.empty()) {
++        RTC_LOG(LS_ERROR) << "Unsupported authentication methods: "
++                          << unknown_mechanisms_;
++      }
++      // Unexpected end of headers
++      Error(0);
++      return;
++    }
++  } else if (state_ == PS_LEADER) {
++    unsigned int code;
++    if (sscanf(data, "HTTP/%*u.%*u %u", &code) != 1) {
++      Error(0);
++      return;
++    }
++    switch (code) {
++      case 200:
++        // connection good!
++        state_ = PS_TUNNEL_HEADERS;
++        return;
++#if defined(HTTP_STATUS_PROXY_AUTH_REQ) && (HTTP_STATUS_PROXY_AUTH_REQ != 407)
++#error Wrong code for HTTP_STATUS_PROXY_AUTH_REQ
++#endif
++      case 407:  // HTTP_STATUS_PROXY_AUTH_REQ
++        state_ = PS_AUTHENTICATE;
++        return;
++      default:
++        defer_error_ = 0;
++        state_ = PS_ERROR_HEADERS;
++        return;
++    }
++  } else if ((state_ == PS_AUTHENTICATE) &&
++             absl::StartsWithIgnoreCase(data, "Proxy-Authenticate:")) {
++    std::string response, auth_method;
++    switch (HttpAuthenticate(absl::string_view(data + 19, len - 19), proxy_,
++                             "CONNECT", "/", user_, pass_, context_, response,
++                             auth_method)) {
++      case HAR_IGNORE:
++        RTC_LOG(LS_VERBOSE) << "Ignoring Proxy-Authenticate: " << auth_method;
++        if (!unknown_mechanisms_.empty())
++          unknown_mechanisms_.append(", ");
++        unknown_mechanisms_.append(auth_method);
++        break;
++      case HAR_RESPONSE:
++        headers_ = "Proxy-Authorization: ";
++        headers_.append(response);
++        headers_.append("\r\n");
++        state_ = PS_SKIP_HEADERS;
++        unknown_mechanisms_.clear();
++        break;
++      case HAR_CREDENTIALS:
++        defer_error_ = SOCKET_EACCES;
++        state_ = PS_ERROR_HEADERS;
++        unknown_mechanisms_.clear();
++        break;
++      case HAR_ERROR:
++        defer_error_ = 0;
++        state_ = PS_ERROR_HEADERS;
++        unknown_mechanisms_.clear();
++        break;
++    }
++  } else if (absl::StartsWithIgnoreCase(data, "Content-Length:")) {
++    content_length_ = strtoul(data + 15, 0, 0);
++  } else if (absl::StartsWithIgnoreCase(data, "Proxy-Connection: Keep-Alive")) {
++    expect_close_ = false;
++    /*
++  } else if (absl::StartsWithIgnoreCase(data, "Connection: close") {
++    expect_close_ = true;
++    */
++  }
++}
++
++void AsyncHttpsProxySocket::EndResponse() {
++  if (!expect_close_) {
++    SendRequest();
++    return;
++  }
++
++  // No point in waiting for the server to close... let's close now
++  // TODO: Refactor out PS_WAIT_CLOSE
++  state_ = PS_WAIT_CLOSE;
++  BufferedReadAdapter::Close();
++  OnCloseEvent(this, 0);
++}
++
++void AsyncHttpsProxySocket::Error(int error) {
++  BufferInput(false);
++  Close();
++  SetError(error);
++  SignalCloseEvent(this, error);
++}
++
+ }  // namespace rtc
+diff --git a/rtc_base/socket_adapters.h b/rtc_base/socket_adapters.h
+index 33ae94ebe8..e67c8d4db9 100644
+--- a/rtc_base/socket_adapters.h
++++ b/rtc_base/socket_adapters.h
+@@ -77,6 +77,66 @@ class AsyncSSLSocket : public BufferedReadAdapter {
+   void ProcessInput(char* data, size_t* len) override;
+ };
+ 
++///////////////////////////////////////////////////////////////////////////////
++
++// Implements a socket adapter that speaks the HTTP/S proxy protocol.
++class AsyncHttpsProxySocket : public BufferedReadAdapter {
++ public:
++  AsyncHttpsProxySocket(Socket* socket,
++                        absl::string_view user_agent,
++                        const SocketAddress& proxy,
++                        absl::string_view username,
++                        const CryptString& password);
++  ~AsyncHttpsProxySocket() override;
++
++  AsyncHttpsProxySocket(const AsyncHttpsProxySocket&) = delete;
++  AsyncHttpsProxySocket& operator=(const AsyncHttpsProxySocket&) = delete;
++
++  // If connect is forced, the adapter will always issue an HTTP CONNECT to the
++  // target address.  Otherwise, it will connect only if the destination port
++  // is not port 80.
++  void SetForceConnect(bool force) { force_connect_ = force; }
++
++  int Connect(const SocketAddress& addr) override;
++  SocketAddress GetRemoteAddress() const override;
++  int Close() override;
++  ConnState GetState() const override;
++
++ protected:
++  void OnConnectEvent(Socket* socket) override;
++  void OnCloseEvent(Socket* socket, int err) override;
++  void ProcessInput(char* data, size_t* len) override;
++
++  bool ShouldIssueConnect() const;
++  void SendRequest();
++  void ProcessLine(char* data, size_t len);
++  void EndResponse();
++  void Error(int error);
++
++ private:
++  SocketAddress proxy_, dest_;
++  std::string agent_, user_, headers_;
++  CryptString pass_;
++  bool force_connect_;
++  size_t content_length_;
++  int defer_error_;
++  bool expect_close_;
++  enum ProxyState {
++    PS_INIT,
++    PS_LEADER,
++    PS_AUTHENTICATE,
++    PS_SKIP_HEADERS,
++    PS_ERROR_HEADERS,
++    PS_TUNNEL_HEADERS,
++    PS_SKIP_BODY,
++    PS_TUNNEL,
++    PS_WAIT_CLOSE,
++    PS_ERROR
++  } state_;
++  HttpAuthContext* context_;
++  std::string unknown_mechanisms_;
++};
++
+ }  // namespace rtc
+ 
+ #endif  // RTC_BASE_SOCKET_ADAPTERS_H_
+diff --git a/sdk/android/api/org/webrtc/PeerConnectionFactory.java b/sdk/android/api/org/webrtc/PeerConnectionFactory.java
+index c46718fdd6..905b30521e 100644
+--- a/sdk/android/api/org/webrtc/PeerConnectionFactory.java
++++ b/sdk/android/api/org/webrtc/PeerConnectionFactory.java
+@@ -178,6 +178,10 @@ public class PeerConnectionFactory {
+     @Nullable private NetworkControllerFactoryFactory networkControllerFactoryFactory;
+     @Nullable private NetworkStatePredictorFactoryFactory networkStatePredictorFactoryFactory;
+     @Nullable private NetEqFactoryFactory neteqFactoryFactory;
++    // Proxy support
++    @Nullable private String proxyAddress;
++    private int proxyPort;
++    @Nullable private String userAgent;
+ 
+     private Builder() {}
+ 
+@@ -259,6 +263,18 @@ public class PeerConnectionFactory {
+       return this;
+     }
+ 
++    // Proxy support
++    public Builder setHttpsProxy(String proxyAddress, int proxyPort) {
++      this.proxyAddress = proxyAddress;
++      this.proxyPort = proxyPort;
++      return this;
++    }
++
++    public Builder setUserAgent(String userAgent) {
++      this.userAgent = userAgent;
++      return this;
++    }
++
+     public PeerConnectionFactory createPeerConnectionFactory() {
+       checkInitializeHasBeenCalled();
+       if (audioDeviceModule == null) {
+@@ -278,7 +294,9 @@ public class PeerConnectionFactory {
+           networkStatePredictorFactoryFactory == null
+               ? 0
+               : networkStatePredictorFactoryFactory.createNativeNetworkStatePredictorFactory(),
+-          neteqFactoryFactory == null ? 0 : neteqFactoryFactory.createNativeNetEqFactory());
++          neteqFactoryFactory == null ? 0 : neteqFactoryFactory.createNativeNetEqFactory(),
++          // Proxy support
++          proxyAddress, proxyPort, userAgent);
+     }
+   }
+ 
+@@ -607,7 +625,8 @@ public class PeerConnectionFactory {
+       long audioDecoderFactory, VideoEncoderFactory encoderFactory,
+       VideoDecoderFactory decoderFactory, long nativeAudioProcessor,
+       long nativeFecControllerFactory, long nativeNetworkControllerFactory,
+-      long nativeNetworkStatePredictorFactory, long neteqFactory);
++      long nativeNetworkStatePredictorFactory, long neteqFactory,
++      String proxyAddress, int proxyPort, String userAgent); // Proxy support
+ 
+   private static native long nativeCreatePeerConnection(long factory,
+       PeerConnection.RTCConfiguration rtcConfig, MediaConstraints constraints, long nativeObserver,
+diff --git a/sdk/android/src/jni/pc/peer_connection_factory.cc b/sdk/android/src/jni/pc/peer_connection_factory.cc
+index 9d4f94f16c..2e25eff797 100644
+--- a/sdk/android/src/jni/pc/peer_connection_factory.cc
++++ b/sdk/android/src/jni/pc/peer_connection_factory.cc
+@@ -25,6 +25,10 @@
+ #include "rtc_base/event_tracer.h"
+ #include "rtc_base/physical_socket_server.h"
+ #include "rtc_base/thread.h"
++// Proxy support
++#include "rtc_base/socket_address.h"
++#include "p2p/base/basic_packet_socket_factory.h"
++
+ #include "sdk/android/generated_peerconnection_jni/PeerConnectionFactory_jni.h"
+ #include "sdk/android/native_api/jni/java_types.h"
+ #include "sdk/android/native_api/stacktrace/stacktrace.h"
+@@ -238,7 +242,11 @@ ScopedJavaLocalRef<jobject> CreatePeerConnectionFactoryForJava(
+         network_controller_factory,
+     std::unique_ptr<NetworkStatePredictorFactoryInterface>
+         network_state_predictor_factory,
+-    std::unique_ptr<NetEqFactory> neteq_factory) {
++    std::unique_ptr<NetEqFactory> neteq_factory,
++    // Proxy support
++    std::string proxyAddress,
++    jint proxyPort,
++    std::string userAgent) {
+   // talk/ assumes pretty widely that the current Thread is ThreadManager'd, but
+   // ThreadManager only WrapCurrentThread()s the thread where it is first
+   // created.  Since the semantics around when auto-wrapping happens in
+@@ -280,6 +288,10 @@ ScopedJavaLocalRef<jobject> CreatePeerConnectionFactoryForJava(
+     dependencies.network_monitor_factory =
+         std::make_unique<AndroidNetworkMonitorFactory>();
+   }
++  // Proxy support
++  if ((!proxyAddress.empty() && proxyPort != 0) || !userAgent.empty()) {
++    dependencies.packet_socket_factory = std::make_unique<rtc::ProxyPacketSocketFactory>(socket_server.get(), rtc::SocketAddress(proxyAddress, proxyPort), userAgent);
++  }
+ 
+   dependencies.adm = std::move(audio_device_module);
+   dependencies.audio_encoder_factory = std::move(audio_encoder_factory);
+@@ -320,7 +332,10 @@ JNI_PeerConnectionFactory_CreatePeerConnectionFactory(
+     jlong native_fec_controller_factory,
+     jlong native_network_controller_factory,
+     jlong native_network_state_predictor_factory,
+-    jlong native_neteq_factory) {
++    jlong native_neteq_factory,
++    const JavaParamRef<jstring>& proxyAddress, // Proxy support
++    jint proxyPort,
++    const JavaParamRef<jstring>& userAgent) {
+   rtc::scoped_refptr<AudioProcessing> audio_processor(
+       reinterpret_cast<AudioProcessing*>(native_audio_processor));
+   return CreatePeerConnectionFactoryForJava(
+@@ -337,7 +352,11 @@ JNI_PeerConnectionFactory_CreatePeerConnectionFactory(
+           native_network_controller_factory),
+       TakeOwnershipOfUniquePtr<NetworkStatePredictorFactoryInterface>(
+           native_network_state_predictor_factory),
+-      TakeOwnershipOfUniquePtr<NetEqFactory>(native_neteq_factory));
++      TakeOwnershipOfUniquePtr<NetEqFactory>(native_neteq_factory),
++      // Proxy support
++      proxyAddress.is_null() ? "" : JavaToStdString(jni, proxyAddress),
++      proxyPort,
++      userAgent.is_null() ? "" : JavaToStdString(jni, userAgent));
+ }
+ 
+ static void JNI_PeerConnectionFactory_FreeFactory(JNIEnv*, jlong j_p) {
+diff --git a/test/network/emulated_turn_server.cc b/test/network/emulated_turn_server.cc
+index c82e3bcaab..93724ca8a3 100644
+--- a/test/network/emulated_turn_server.cc
++++ b/test/network/emulated_turn_server.cc
+@@ -49,6 +49,8 @@ class PacketSocketFactoryWrapper : public rtc::PacketSocketFactory {
+   rtc::AsyncPacketSocket* CreateClientTcpSocket(
+       const rtc::SocketAddress& local_address,
+       const rtc::SocketAddress& remote_address,
++      const rtc::ProxyInfo& proxy_info,
++      const std::string& user_agent,
+       const rtc::PacketSocketTcpOptions& tcp_options) override {
+     return nullptr;
+   }

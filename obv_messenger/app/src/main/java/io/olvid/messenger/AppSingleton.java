@@ -70,6 +70,7 @@ import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.messenger.billing.BillingUtils;
 import io.olvid.messenger.customClasses.BytesKey;
+import io.olvid.messenger.customClasses.ContactCacheInfo;
 import io.olvid.messenger.customClasses.CustomSSLSocketFactory;
 import io.olvid.messenger.customClasses.DatabaseKey;
 import io.olvid.messenger.databases.AppDatabase;
@@ -324,10 +325,7 @@ public class AppSingleton {
         this.contactNamesCache = new MutableLiveData<>();
         this.contactHuesCache = new MutableLiveData<>();
         this.contactPhotoUrlsCache = new MutableLiveData<>();
-        this.contactKeycloakManagedCache = new MutableLiveData<>();
-        this.contactInactiveCache = new MutableLiveData<>();
-        this.contactOneToOneCache = new MutableLiveData<>();
-        this.contactTrustLevelCache = new MutableLiveData<>();
+        this.contactInfoCache = new MutableLiveData<>();
 
         Observer<OwnedIdentity> currentIdentityObserverForNameCache = new Observer<>() {
             byte[] bytesPreviousOwnedIdentity = null;
@@ -943,10 +941,13 @@ public class AppSingleton {
     @NonNull private final MutableLiveData<HashMap<BytesKey, Pair<String, String>>> contactNamesCache; // the first element of the pair is the full display name, the second the first name (or custom name for both, if set)
     @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactHuesCache;
     @NonNull private final MutableLiveData<HashMap<BytesKey, String>> contactPhotoUrlsCache;
-    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactKeycloakManagedCache;
-    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactInactiveCache;
-    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactOneToOneCache;
-    @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactTrustLevelCache;
+//    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactKeycloakManagedCache;
+//    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactInactiveCache;
+//    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactOneToOneCache;
+//    @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactTrustLevelCache;
+    @NonNull private final MutableLiveData<HashMap<BytesKey, ContactCacheInfo>> contactInfoCache;
+
+
 
     @NonNull
     public static LiveData<HashMap<BytesKey, Pair<String, String>>> getContactNamesCache() {
@@ -964,23 +965,8 @@ public class AppSingleton {
     }
 
     @NonNull
-    public static LiveData<HashSet<BytesKey>> getContactKeycloakManagedCache() {
-        return getInstance().contactKeycloakManagedCache;
-    }
-
-    @NonNull
-    public static LiveData<HashSet<BytesKey>> getContactInactiveCache() {
-        return getInstance().contactInactiveCache;
-    }
-
-    @NonNull
-    public static LiveData<HashSet<BytesKey>> getContactOneToOneCache() {
-        return getInstance().contactOneToOneCache;
-    }
-
-    @NonNull
-    public static LiveData<HashMap<BytesKey, Integer>> getContactTrustLevelCache() {
-        return getInstance().contactTrustLevelCache;
+    public static LiveData<HashMap<BytesKey, ContactCacheInfo>> getContactInfoCache() {
+        return getInstance().contactInfoCache;
     }
 
     public static void reloadCachedDisplayNamesAndHues() {
@@ -992,20 +978,14 @@ public class AppSingleton {
             getInstance().contactNamesCache.postValue(new HashMap<>());
             getInstance().contactHuesCache.postValue(new HashMap<>());
             getInstance().contactPhotoUrlsCache.postValue(new HashMap<>());
-            getInstance().contactKeycloakManagedCache.postValue(new HashSet<>());
-            getInstance().contactInactiveCache.postValue(new HashSet<>());
-            getInstance().contactOneToOneCache.postValue(new HashSet<>());
-            getInstance().contactTrustLevelCache.postValue(new HashMap<>());
+            getInstance().contactInfoCache.postValue(new HashMap<>());
             return;
         }
         List<Contact> contacts = AppDatabase.getInstance().contactDao().getAllForOwnedIdentitySync(ownedIdentity.bytesOwnedIdentity);
         HashMap<BytesKey, Pair<String, String>> contactNamesHashMap = new HashMap<>();
         HashMap<BytesKey, Integer> contactHuesHashMap = new HashMap<>();
         HashMap<BytesKey, String> contactPhotoUrlsHashMap = new HashMap<>();
-        HashSet<BytesKey> contactKeycloakManagedHashSet = new HashSet<>();
-        HashSet<BytesKey> contactInactiveHashSet = new HashSet<>();
-        HashSet<BytesKey> contactOneToOneHashSet = new HashSet<>();
-        HashMap<BytesKey, Integer> contactTrustLevelHashMap = new HashMap<>();
+        HashMap<BytesKey, ContactCacheInfo> contactCacheInfoHashMap = new HashMap<>();
         for (Contact contact : contacts) {
             BytesKey key = new BytesKey(contact.bytesContactIdentity);
             contactNamesHashMap.put(key, new Pair<>(contact.getCustomDisplayName(), contact.getFirstNameOrCustom()));
@@ -1015,16 +995,7 @@ public class AppSingleton {
             if (contact.getCustomPhotoUrl() != null) {
                 contactPhotoUrlsHashMap.put(key, contact.getCustomPhotoUrl());
             }
-            if (contact.keycloakManaged) {
-                contactKeycloakManagedHashSet.add(key);
-            }
-            if (!contact.active) {
-                contactInactiveHashSet.add(key);
-            }
-            if (contact.oneToOne) {
-                contactOneToOneHashSet.add(key);
-            }
-            contactTrustLevelHashMap.put(key, contact.trustLevel);
+            contactCacheInfoHashMap.put(key, new ContactCacheInfo(contact.keycloakManaged, contact.active, contact.oneToOne, contact.recentlyOnline, contact.trustLevel));
         }
 
         BytesKey ownKey = new BytesKey(ownedIdentity.bytesOwnedIdentity);
@@ -1032,12 +1003,7 @@ public class AppSingleton {
         if (ownedIdentity.photoUrl != null) {
             contactPhotoUrlsHashMap.put(ownKey, ownedIdentity.photoUrl);
         }
-        if (ownedIdentity.keycloakManaged) {
-            contactKeycloakManagedHashSet.add(ownKey);
-        }
-        if (!ownedIdentity.active) {
-            contactInactiveHashSet.add(ownKey);
-        }
+        contactCacheInfoHashMap.put(ownKey, new ContactCacheInfo(ownedIdentity.keycloakManaged, ownedIdentity.active, true, true, 0));
 
         List<Group2PendingMember> pendingMembers = AppDatabase.getInstance().group2PendingMemberDao().getAll(ownedIdentity.bytesOwnedIdentity);
         for (Group2PendingMember pendingMember : pendingMembers) {
@@ -1050,10 +1016,7 @@ public class AppSingleton {
         getInstance().contactNamesCache.postValue(contactNamesHashMap);
         getInstance().contactHuesCache.postValue(contactHuesHashMap);
         getInstance().contactPhotoUrlsCache.postValue(contactPhotoUrlsHashMap);
-        getInstance().contactKeycloakManagedCache.postValue(contactKeycloakManagedHashSet);
-        getInstance().contactInactiveCache.postValue(contactInactiveHashSet);
-        getInstance().contactOneToOneCache.postValue(contactOneToOneHashSet);
-        getInstance().contactTrustLevelCache.postValue(contactTrustLevelHashMap);
+        getInstance().contactInfoCache.postValue(contactCacheInfoHashMap);
     }
 
     @Nullable
@@ -1096,33 +1059,13 @@ public class AppSingleton {
         return getContactPhotoUrlsCache().getValue().get(new BytesKey(bytesContactIdentity));
     }
 
-    public static boolean getContactKeycloakManaged(byte[] bytesContactIdentity) {
-        if (getContactKeycloakManagedCache().getValue() == null) {
-            return false;
-        }
-        return getContactKeycloakManagedCache().getValue().contains(new BytesKey(bytesContactIdentity));
-    }
-
-    public static boolean getContactInactive(byte[] bytesContactIdentity) {
-        if (getContactInactiveCache().getValue() == null) {
-            return false;
-        }
-        return getContactInactiveCache().getValue().contains(new BytesKey(bytesContactIdentity));
-    }
-
-    public static boolean getContactOneToOne(byte[] bytesContactIdentity) {
-        if (getContactOneToOneCache().getValue() == null) {
-            return false;
-        }
-        return getContactOneToOneCache().getValue().contains(new BytesKey(bytesContactIdentity));
-    }
-
     @Nullable
-    public static Integer getContactTrustLevel(byte[] bytesContactIdentity) {
-        if (getContactTrustLevelCache().getValue() == null) {
+    public static ContactCacheInfo getContactCacheInfo(byte[] bytesContactIdentity) {
+        HashMap<BytesKey, ContactCacheInfo> cacheInfoHashMap = getContactInfoCache().getValue();
+        if (cacheInfoHashMap == null) {
             return null;
         }
-        return getContactTrustLevelCache().getValue().get(new BytesKey(bytesContactIdentity));
+        return cacheInfoHashMap.get(new BytesKey(bytesContactIdentity));
     }
 
     public static void updateCachedCustomDisplayName(@NonNull byte[] bytesContactIdentity, @NonNull String customDisplayName, @NonNull String firstNameOrCustom) {
@@ -1160,54 +1103,24 @@ public class AppSingleton {
         getInstance().contactPhotoUrlsCache.postValue(hashMap);
     }
 
-    public static void updateCachedKeycloakManaged(byte[] bytesContactIdentity, boolean managed) {
-        if (getContactKeycloakManagedCache().getValue() == null) {
+    public static void updateContactCachedInfo(Contact contact) {
+        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
+        if (contactInfoHashMap == null) {
             return;
         }
-        HashSet<BytesKey> hashSet = getContactKeycloakManagedCache().getValue();
-        if (managed) {
-            hashSet.add(new BytesKey(bytesContactIdentity));
-        } else {
-            hashSet.remove(new BytesKey(bytesContactIdentity));
-        }
-        getInstance().contactKeycloakManagedCache.postValue(hashSet);
+        contactInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new ContactCacheInfo(contact.keycloakManaged, contact.active, contact.oneToOne, contact.recentlyOnline, contact.trustLevel));
+        getInstance().contactInfoCache.postValue(contactInfoHashMap);
     }
 
-    public static void updateCachedActive(byte[] bytesContactIdentity, boolean active) {
-        if (getContactInactiveCache().getValue() == null) {
+    public static void updateContactCachedInfo(OwnedIdentity ownedIdentity) {
+        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
+        if (contactInfoHashMap == null) {
             return;
         }
-        HashSet<BytesKey> hashSet = getContactInactiveCache().getValue();
-        if (active) {
-            hashSet.remove(new BytesKey(bytesContactIdentity));
-        } else {
-            hashSet.add(new BytesKey(bytesContactIdentity));
-        }
-        getInstance().contactInactiveCache.postValue(hashSet);
+        contactInfoHashMap.put(new BytesKey(ownedIdentity.bytesOwnedIdentity), new ContactCacheInfo(ownedIdentity.keycloakManaged, ownedIdentity.active, true, true, 0));
+        getInstance().contactInfoCache.postValue(contactInfoHashMap);
     }
 
-    public static void updateCachedOneToOne(byte[] bytesContactIdentity, boolean oneToOne) {
-        if (getContactOneToOneCache().getValue() == null) {
-            return;
-        }
-        HashSet<BytesKey> hashSet = getContactOneToOneCache().getValue();
-        if (oneToOne) {
-            hashSet.add(new BytesKey(bytesContactIdentity));
-        } else {
-            hashSet.remove(new BytesKey(bytesContactIdentity));
-        }
-        getInstance().contactOneToOneCache.postValue(hashSet);
-    }
-
-
-    public static void updateCachedTrustLevel(byte[] bytesContactIdentity, int trustLevel) {
-        if (getContactTrustLevelCache().getValue() == null) {
-            return;
-        }
-        HashMap<BytesKey, Integer> hashMap = getContactTrustLevelCache().getValue();
-        hashMap.put(new BytesKey(bytesContactIdentity), trustLevel);
-        getInstance().contactTrustLevelCache.postValue(hashMap);
-    }
 
 
     public static void updateCacheContactDeleted(byte[] bytesContactIdentity) {
@@ -1224,21 +1137,9 @@ public class AppSingleton {
         if (photosHashMap != null && photosHashMap.remove(key) != null) {
             getInstance().contactPhotoUrlsCache.postValue(photosHashMap);
         }
-        HashSet<BytesKey> keycloakHashSet = getContactKeycloakManagedCache().getValue();
-        if (keycloakHashSet != null && keycloakHashSet.remove(key)) {
-            getInstance().contactKeycloakManagedCache.postValue(keycloakHashSet);
-        }
-        HashSet<BytesKey> inactiveHashSet = getContactInactiveCache().getValue();
-        if (inactiveHashSet != null && inactiveHashSet.remove(key)) {
-            getInstance().contactInactiveCache.postValue(inactiveHashSet);
-        }
-        HashSet<BytesKey> oneToOneHashSet = getContactOneToOneCache().getValue();
-        if (oneToOneHashSet != null && oneToOneHashSet.remove(key)) {
-            getInstance().contactOneToOneCache.postValue(oneToOneHashSet);
-        }
-        HashMap<BytesKey, Integer> trustLevelHashMap = getContactTrustLevelCache().getValue();
-        if (trustLevelHashMap != null && trustLevelHashMap.remove(key) != null) {
-            getInstance().contactTrustLevelCache.postValue(trustLevelHashMap);
+        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
+        if (contactInfoHashMap != null && contactInfoHashMap.remove(key) != null) {
+            getInstance().contactInfoCache.postValue(contactInfoHashMap);
         }
     }
 

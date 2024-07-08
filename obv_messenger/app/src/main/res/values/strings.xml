@@ -1942,6 +1942,16 @@
     <string name="dialog_title_message_status_explanations">Possible message statuses</string>
     <string name="label_for_group_messages">For group messages</string>
     <string name="label_other_statuses">Other statuses</string>
+    <string name="label_contact_offline_extended_period">Contact offline for an extended period of time</string>
+    <string name="explanation_contact_offline_extended_period">It seems this contact has not used Olvid for an extended period of time. We cannot guarantee messages will be properly delivered to them.</string>
+    <string name="dialog_title_no_browser_found">No browser detected</string>
+    <string name="dialog_message_no_browser_found">Olvid was not able to detect any browser on your device.\n\nIf **no browser is currently installed** you must install one before you can authenticate.\n\nIf you have a browser installed, Android may not have properly granted Olvid the permission to list browsers. **Restarting your device** may solve the issue.</string>
+    <string name="pref_no_truncate_trailing_link_title">Display all links in message body</string>
+    <string name="pref_no_truncate_trailing_link">Unless activated, messages containing a single link and a link preview will only display the preview, not the link text.</string>
+    <string name="menu_action_location">Location</string>
+    <string name="dialog_title_authentication_failed_time_offset">Possible clock skew?</string>
+    <string name="dialog_message_authentication_failed_time_offset">Unfortunately, your authentication failed.\n\nA possible reason could be an offset of **more than 10 minutes** between your device\'s clock and the server\'s clock.\n\nPlease check that your device\'s time, date, and time zone are accurate and try authenticating again.\n\n*If the problem persists, please contact your administrator.*</string>
+    <string name="button_label_clock_settings">Clock settings</string>
 
 
     <plurals name="dialog_title_delete_discussions">

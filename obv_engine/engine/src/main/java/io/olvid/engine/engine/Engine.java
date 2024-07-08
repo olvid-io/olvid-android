@@ -19,6 +19,10 @@
 
 package io.olvid.engine.engine;
 
+import static io.olvid.engine.engine.types.EngineAPI.ListenerPriority.HIGH;
+import static io.olvid.engine.engine.types.EngineAPI.ListenerPriority.LOW;
+import static io.olvid.engine.engine.types.EngineAPI.ListenerPriority.NORMAL;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -70,6 +74,7 @@ import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
+import io.olvid.engine.datatypes.containers.UidAndPreKey;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesMDCKeyPair;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaMDCKeyPair;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
@@ -93,6 +98,8 @@ import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvBackupKeyVerificationOutput;
 import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.ObvContactDeviceCount;
+import io.olvid.engine.engine.types.ObvContactInfo;
 import io.olvid.engine.engine.types.ObvDeviceList;
 import io.olvid.engine.engine.types.ObvDeviceManagementRequest;
 import io.olvid.engine.engine.types.ObvDialog;
@@ -126,7 +133,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     // region fields
 
     private long instanceCounter;
-    private final HashMap<String, HashMap<Long, WeakReference<EngineNotificationListener>>> listeners;
+    private final HashMap<String, HashMap<Long, ListenerAndPriority>> listeners;
     private final ReentrantLock listenersLock;
     private final BlockingQueue<EngineNotification> notificationQueue;
 
@@ -154,7 +161,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         instanceCounter = 0;
         listeners = new HashMap<>();
         listenersLock = new ReentrantLock();
-        notificationQueue = new ArrayBlockingQueue<>(1_000);
+        notificationQueue = new ArrayBlockingQueue<>(5_000);
         notificationWorker = new NotificationWorker();
 
         Logger.setOutputter(logOutputter);
@@ -335,7 +342,13 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
     // region External Notifications
 
+
+    @Override
     public void addNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener) {
+        addNotificationListener(notificationName, engineNotificationListener, NORMAL);
+    }
+
+    public void addNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener, ListenerPriority priority) {
         listenersLock.lock();
         long listenerNumber;
         if (engineNotificationListener.hasEngineNotificationListenerRegistrationNumber()) {
@@ -345,13 +358,13 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             instanceCounter++;
             engineNotificationListener.setEngineNotificationListenerRegistrationNumber(listenerNumber);
         }
-        HashMap<Long, WeakReference<EngineNotificationListener>> notificationObservers = listeners.get(notificationName);
+        HashMap<Long, ListenerAndPriority> notificationObservers = listeners.get(notificationName);
         if (notificationObservers == null) {
             notificationObservers = new HashMap<>();
             listeners.put(notificationName, notificationObservers);
         }
         WeakReference<EngineNotificationListener> weakReference = new WeakReference<>(engineNotificationListener);
-        notificationObservers.put(listenerNumber, weakReference);
+        notificationObservers.put(listenerNumber, new ListenerAndPriority(weakReference, priority));
         listenersLock.unlock();
     }
 
@@ -372,7 +385,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
     private void removeNotificationListener(String notificationName, long notificationListenerRegistrationNumber) {
         listenersLock.lock();
-        HashMap<Long, WeakReference<EngineNotificationListener>> notificationObservers = listeners.get(notificationName);
+        HashMap<Long, ListenerAndPriority> notificationObservers = listeners.get(notificationName);
         if (notificationObservers != null) {
             notificationObservers.remove(notificationListenerRegistrationNumber);
         }
@@ -411,19 +424,41 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                     }
 
                     listenersLock.lock();
-                    HashMap<Long, WeakReference<EngineNotificationListener>> notificationObservers = listeners.get(engineNotification.notificationName);
+                    HashMap<Long, ListenerAndPriority> notificationObservers = listeners.get(engineNotification.notificationName);
                     if (notificationObservers != null) {
                         notificationObservers = new HashMap<>(notificationObservers); // we clone the HashMap to make sure that, even outside the lock, we can iterate on the HashMap
                         listenersLock.unlock();
-                        for (HashMap.Entry<Long, WeakReference<EngineNotificationListener>> entry : notificationObservers.entrySet()) {
-                            EngineNotificationListener listener = entry.getValue().get();
-                            if (listener == null) { // remove the listener
-                                removeNotificationListener(engineNotification.notificationName, entry.getKey());
-                            } else { // call callback method
-                                try {
-                                    listener.callback(engineNotification.notificationName, engineNotification.userInfo);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+
+                        if (notificationObservers.size() < 2) {
+                            // if there is only one listener, do not bother with priorities!
+                            for (HashMap.Entry<Long, ListenerAndPriority> entry : notificationObservers.entrySet()) {
+                                EngineNotificationListener listener = entry.getValue().listener.get();
+                                if (listener == null) { // remove the listener
+                                    removeNotificationListener(engineNotification.notificationName, entry.getKey());
+                                } else { // call callback method
+                                    try {
+                                        listener.callback(engineNotification.notificationName, engineNotification.userInfo);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        } else {
+                            // first notify high priority listeners
+                            for (ListenerPriority priority : new ListenerPriority[]{HIGH, NORMAL, LOW}) {
+                                for (HashMap.Entry<Long, ListenerAndPriority> entry : notificationObservers.entrySet()) {
+                                    if (entry.getValue().priority == priority) {
+                                        EngineNotificationListener listener = entry.getValue().listener.get();
+                                        if (listener == null) { // remove the listener
+                                            removeNotificationListener(engineNotification.notificationName, entry.getKey());
+                                        } else { // call callback method
+                                            try {
+                                                listener.callback(engineNotification.notificationName, engineNotification.userInfo);
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -455,6 +490,17 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         EngineNotification(String notificationName, HashMap<String, Object> userInfo) {
             this.notificationName = notificationName;
             this.userInfo = userInfo;
+        }
+    }
+
+
+    private static class ListenerAndPriority {
+        public final WeakReference<EngineNotificationListener> listener;
+        public final ListenerPriority priority;
+
+        public ListenerAndPriority(WeakReference<EngineNotificationListener> listener, ListenerPriority priority) {
+            this.listener = listener;
+            this.priority = priority;
         }
     }
 
@@ -684,7 +730,11 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     public ObvIdentity getOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception {
         try (EngineSession engineSession = getSession()) {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            return new ObvIdentity(engineSession.session, identityManager, ownedIdentity);
+            ObvIdentity obvOwnedIdentity =  new ObvIdentity(engineSession.session, identityManager, ownedIdentity);
+            if (obvOwnedIdentity.getIdentityDetails() != null) {
+                return obvOwnedIdentity;
+            }
+            return null;
         }
     }
 
@@ -761,7 +811,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             engineSession.session.commit();
 
             if (updated) {
-                fetchManager.forceRegisterPushNotification(ownedIdentity);
+                fetchManager.forceRegisterPushNotification(ownedIdentity, false);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1235,6 +1285,14 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
     }
 
+    @Override
+    public List<ObvContactInfo> getContactsInfoOfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception {
+        try (EngineSession engineSession = getSession()) {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            return identityManager.getContactsInfoOfOwnedIdentity(engineSession.session, ownedIdentity);
+        }
+    }
+
 
     @Override
     public EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) {
@@ -1286,20 +1344,9 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
-    public int getContactDeviceCount(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
+    public ObvContactDeviceCount getContactDeviceCounts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
         try (EngineSession engineSession = getSession()) {
-            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            Identity contactIdentity = Identity.of(bytesContactIdentity);
-            return identityManager.getDeviceUidsOfContactIdentity(engineSession.session, ownedIdentity, contactIdentity).length;
-        }
-    }
-
-    @Override
-    public int getContactEstablishedChannelsCount(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
-        try (EngineSession engineSession = getSession()) {
-            Identity contactIdentity = Identity.of(bytesContactIdentity);
-            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
-            return channelManager.getConfirmedObliviousChannelDeviceUids(engineSession.session, ownedIdentity, contactIdentity).length;
+            return identityManager.getContactDeviceCounts(engineSession.session, Identity.of(bytesOwnedIdentity), Identity.of(bytesContactIdentity));
         }
     }
 

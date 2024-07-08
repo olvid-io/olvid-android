@@ -338,6 +338,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     class ContactDeletedListener implements NotificationListener {
         @Override
         public void callback(String notificationName, HashMap<String, Object> userInfo) {
+            //noinspection SwitchStatementWithTooFewBranches
             switch (notificationName) {
                 case IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED:
                     try {
@@ -365,6 +366,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     class ContactTrustLevelListener implements NotificationListener {
         @Override
         public void callback(String notificationName, HashMap<String, Object> userInfo) {
+            //noinspection SwitchStatementWithTooFewBranches
             switch (notificationName) {
                 case IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED:
                     try {
@@ -587,6 +589,22 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                 protocolInstanceUid,
                 false);
         ChannelMessageToSend message = new ChannelCreationWithOwnedDeviceProtocol.InitialMessage(coreProtocolMessage, ownedDeviceUid).generateChannelProtocolMessageToSend();
+        protocolManagerSession.channelDelegate.post(session, message, prng);
+    }
+
+    @Override
+    public void startChannelCreationProtocolWithContactDevice(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception {
+        if (contactIdentity.equals(ownedIdentity)) {
+            Logger.w("Cannot start a ChannelCreationWithContactDeviceProtocol with contactIdentity == ownedIdentity");
+            return;
+        }
+        ProtocolManagerSession protocolManagerSession = wrapSession(session);
+        UID protocolInstanceUid = new UID(prng);
+        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                ConcreteProtocol.CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID,
+                protocolInstanceUid,
+                false);
+        ChannelMessageToSend message = new ChannelCreationWithContactDeviceProtocol.InitialMessage(coreProtocolMessage, contactIdentity, contactDeviceUid).generateChannelProtocolMessageToSend();
         protocolManagerSession.channelDelegate.post(session, message, prng);
     }
 
@@ -1026,7 +1044,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void inviteContactsToGroup(byte[] groupOwnerAndUid, Identity ownedIdentity, HashSet<Identity> newMembersIdentity) throws Exception {
-        if (groupOwnerAndUid == null || ownedIdentity == null || newMembersIdentity == null || newMembersIdentity.size() == 0) {
+        if (groupOwnerAndUid == null || ownedIdentity == null || newMembersIdentity == null || newMembersIdentity.isEmpty()) {
             throw new Exception();
         }
 
@@ -1107,7 +1125,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void removeContactsFromGroup(byte[] groupOwnerAndUid, Identity ownedIdentity, HashSet<Identity> removedMemberIdentities) throws Exception {
-        if (groupOwnerAndUid == null || ownedIdentity == null || removedMemberIdentities == null || removedMemberIdentities.size() == 0) {
+        if (groupOwnerAndUid == null || ownedIdentity == null || removedMemberIdentities == null || removedMemberIdentities.isEmpty()) {
             throw new Exception();
         }
 

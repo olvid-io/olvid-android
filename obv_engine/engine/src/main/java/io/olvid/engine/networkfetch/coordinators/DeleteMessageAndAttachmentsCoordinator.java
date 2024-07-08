@@ -46,14 +46,14 @@ import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
 import io.olvid.engine.networkfetch.datatypes.CreateServerSessionDelegate;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
+import io.olvid.engine.networkfetch.datatypes.MessageBatchProvider;
 import io.olvid.engine.networkfetch.operations.DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation;
 
-public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCancelCallback, InboxMessage.MarkAsListedAndDeleteOnServerListener, Operation.OnFinishCallback {
+public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCancelCallback, InboxMessage.MarkAsListedAndDeleteOnServerListener, MessageBatchProvider, Operation.OnFinishCallback {
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
     private final CreateServerSessionDelegate createServerSessionDelegate;
 
-    private NotificationListeningDelegate notificationListeningDelegate;
 
     private final ExponentialBackoffRepeatingScheduler<Identity> scheduler;
     private final HashMap<Identity, Queue<UidAndBoolean>> messageUidsToDeleteByOwnedIdentity;
@@ -84,9 +84,8 @@ public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCance
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
-        this.notificationListeningDelegate = notificationListeningDelegate;
         // register to NotificationCenter for NOTIFICATION_SERVER_SESSION_CREATED
-        this.notificationListeningDelegate.addListener(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED, serverSessionCreatedNotificationListener);
+        notificationListeningDelegate.addListener(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED, serverSessionCreatedNotificationListener);
     }
 
 
@@ -101,22 +100,25 @@ public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCance
                 queue.add(new UidAndBoolean(messageUid, markAsListed));
             }
         }
-        DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation op = new DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation(fetchManagerSessionFactory, sslSocketFactory, ownedIdentity, () -> {
-            List<UidAndBoolean> messageUidsAndMarkAsListed = new ArrayList<>();
-            synchronized (messageUidsToDeleteByOwnedIdentity) {
-                Queue<UidAndBoolean> queue = messageUidsToDeleteByOwnedIdentity.get(ownedIdentity);
-                if (queue != null && !queue.isEmpty()) {
-                    do {
-                        messageUidsAndMarkAsListed.add(queue.remove());
-                        if (messageUidsAndMarkAsListed.size() == Constants.MAX_DELETE_MESSAGE_ON_SERVER_BATCH_SIZE) {
-                            break;
-                        }
-                    } while (!queue.isEmpty());
-                }
-            }
-            return messageUidsAndMarkAsListed.toArray(new UidAndBoolean[0]);
-        }, this, this);
+        DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation op = new DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation(fetchManagerSessionFactory, sslSocketFactory, ownedIdentity, this, this, this);
         deleteMessageAndAttachmentsFromServerOperationQueue.queue(op);
+    }
+
+    @Override
+    public UidAndBoolean[] getBatchOFMessageUids(Identity ownedIdentity) {
+        List<UidAndBoolean> messageUidsAndMarkAsListed = new ArrayList<>();
+        synchronized (messageUidsToDeleteByOwnedIdentity) {
+            Queue<UidAndBoolean> queue = messageUidsToDeleteByOwnedIdentity.get(ownedIdentity);
+            if (queue != null && !queue.isEmpty()) {
+                do {
+                    messageUidsAndMarkAsListed.add(queue.remove());
+                    if (messageUidsAndMarkAsListed.size() == Constants.MAX_DELETE_MESSAGE_ON_SERVER_BATCH_SIZE) {
+                        break;
+                    }
+                } while (!queue.isEmpty());
+            }
+        }
+        return messageUidsAndMarkAsListed.toArray(new UidAndBoolean[0]);
     }
 
     private void scheduleNewDeleteMessageAndAttachmentsFromServerOperationQueueing(final Identity ownedIdentity) {
@@ -162,6 +164,7 @@ public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCance
         if (rfc == null) {
             rfc = Operation.RFC_NULL;
         }
+        //noinspection SwitchStatementWithTooFewBranches
         switch (rfc) {
             case DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation.RFC_INVALID_SERVER_SESSION:
                 if (messageUidsAndMarkAsListed != null) {
@@ -223,7 +226,4 @@ public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCance
         queueNewDeleteMessageAndAttachmentsFromServerOperation(ownedIdentity, messageUid, true);
     }
 
-    public interface MessageBatchProvider {
-        UidAndBoolean[] getBatchOFMessageUids();
-    }
 }

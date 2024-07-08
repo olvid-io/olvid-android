@@ -22,6 +22,7 @@ package io.olvid.engine.networkfetch.coordinators;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -37,9 +38,11 @@ import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
+import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.metamanager.ProcessDownloadedMessageDelegate;
+import io.olvid.engine.networkfetch.databases.InboxAttachment;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
 import io.olvid.engine.networkfetch.datatypes.CreateServerSessionDelegate;
 import io.olvid.engine.networkfetch.datatypes.DownloadMessagesAndListAttachmentsDelegate;
@@ -47,9 +50,10 @@ import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
 import io.olvid.engine.networkfetch.datatypes.RegisterServerPushNotificationDelegate;
 import io.olvid.engine.networkfetch.operations.DownloadMessagesAndListAttachmentsOperation;
+import io.olvid.engine.networkfetch.operations.ProcessPreKeyMessagesForNewContactOperation;
 import io.olvid.engine.networkfetch.operations.ProcessWebsocketReceivedMessageOperation;
 
-public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.OnCancelCallback, DownloadMessagesAndListAttachmentsDelegate, InboxMessage.InboxMessageListener, Operation.OnFinishCallback {
+public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.OnCancelCallback, DownloadMessagesAndListAttachmentsDelegate, InboxMessage.InboxMessageListener, Operation.OnFinishCallback, NotificationListener {
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
     private final CreateServerSessionDelegate createServerSessionDelegate;
@@ -92,6 +96,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
         this.notificationListeningDelegate = notificationListeningDelegate;
         // register to NotificationCenter for NOTIFICATION_SERVER_SESSION_CREATED
         this.notificationListeningDelegate.addListener(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED, awaitingNotificationListener);
+        this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY, this);
     }
 
     public void setNotificationPostingDelegate(NotificationPostingDelegate notificationPostingDelegate) {
@@ -125,7 +130,20 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                     fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
                 }
             }
-        } catch (SQLException e) {
+
+            //delete pre key messages without contact that are more than 2 weeks old
+            List<InboxMessage> expiredMessages = InboxMessage.getExpiredPendingPreKeyMessages(fetchManagerSession, System.currentTimeMillis() - Constants.PRE_KEY_INBOX_NO_CONTACT_DURATION);
+            if (!expiredMessages.isEmpty()) {
+                for (InboxMessage inboxMessage : expiredMessages) {
+                    inboxMessage.markForDeletion();
+                    for (InboxAttachment inboxAttachment: inboxMessage.getAttachments()) {
+                        inboxAttachment.markForDeletion();
+                    }
+                    fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
+                }
+                fetchManagerSession.session.commit();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -233,7 +251,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                 }
                 case DownloadMessagesAndListAttachmentsOperation.RFC_DEVICE_NOT_REGISTERED: {
                     if (registerServerPushNotificationDelegate != null) {
-                        registerServerPushNotificationDelegate.registerServerPushNotification(identity);
+                        registerServerPushNotificationDelegate.registerServerPushNotification(identity, false);
                     } else {
                         Logger.e("Recieved a DEVICE_NOT_REGISTERED error from the server and registerServerPushNotificationDelegate was not initialized");
                     }
@@ -274,5 +292,24 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
     public void processWebsocketDownloadedMessage(Identity identity, UID deviceUid, byte[] messagePayload) {
         ProcessWebsocketReceivedMessageOperation op = new ProcessWebsocketReceivedMessageOperation(fetchManagerSessionFactory, identity, deviceUid, messagePayload, null, this);
         downloadMessagesAndListAttachmentsOperationQueue.queue(op);
+    }
+
+
+    @Override
+    public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        if (IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY.equals(notificationName)) {
+            try {
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_OWNED_IDENTITY_KEY);
+                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_CONTACT_IDENTITY_KEY);
+                boolean active = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_ACTIVE_KEY);
+
+                if (active) {
+                    ProcessPreKeyMessagesForNewContactOperation op = new ProcessPreKeyMessagesForNewContactOperation(fetchManagerSessionFactory, ownedIdentity, contactIdentity, null, null);
+                    downloadMessagesAndListAttachmentsOperationQueue.queue(op);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

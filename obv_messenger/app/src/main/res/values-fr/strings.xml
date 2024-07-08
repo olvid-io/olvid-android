@@ -1907,6 +1907,16 @@
     <string name="dialog_title_message_status_explanations">Différents statuts de message</string>
     <string name="label_for_group_messages">Pour les messages de groupe</string>
     <string name="label_other_statuses">Autres statuts</string>
+    <string name="label_contact_offline_extended_period">Contact hors-ligne depuis longtemps</string>
+    <string name="explanation_contact_offline_extended_period">Il semble que ce contact n\'a pas utilisé Olvid depuis un certain temps. Nous ne pouvons pas garantir que vos messages lui parviendront normalement.</string>
+    <string name="dialog_title_no_browser_found">Aucun navigateur détecté</string>
+    <string name="dialog_message_no_browser_found">Olvid n\'a pas pu détecter de navigateur sur votre appareil.\n\nSi **aucun navigateur n\'est installé**, vous devez en installer un avant de pouvoir vous authentifier.\n\nSi un navigateur est installé, Android peut ne pas avoir accordé à Olvid le droit de lister les navigateurs. **Redémarrer votre appareil** peut résoudre le problème.</string>
+    <string name="pref_no_truncate_trailing_link_title">Afficher tous les liens dans le corps des messages</string>
+    <string name="pref_no_truncate_trailing_link">Si cette option n\'est pas activée, le corps des messages ne contenant qu\'un lien ne sera pas affiché si un aperçu de ce lien est disponible</string>
+    <string name="menu_action_location">Position</string>
+    <string name="dialog_title_authentication_failed_time_offset">Décalage d\'horloge possible ?</string>
+    <string name="dialog_message_authentication_failed_time_offset">Malheureusement, l\'authentification a échoué.\n\nUne cause possible pourrait être un décalage de **plus de 10 minutes** entre l\'horloge de votre appareil et celle du serveur.\n\nVeuillez vérifier que l\'heure, la date et le fuseau horaire de votre appareils sont corrects et essayer de vous authentifier à nouveau.\n\n*Si le problème persiste, veuillez contacter votre administateur.*</string>
+    <string name="button_label_clock_settings">Paramètres d\'horloge</string>
 
 
     <plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity">

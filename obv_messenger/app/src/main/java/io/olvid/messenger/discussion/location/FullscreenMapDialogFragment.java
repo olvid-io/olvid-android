@@ -60,22 +60,29 @@ import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment {
-    public static final String DISCUSSION_ID_KEY = "discussion_id";
     public static final String INTEGRATION_KEY = "integration";
-    public static final String MESSAGE_LOCATION_TYPE_KEY = "message_location_type";
-    public static final String MESSAGE_JSON_LOCATION_KEY = "message_json_location";
+    public static final String TYPE_KEY = "type";
     public static final String MESSAGE_ID_KEY = "message_id";
     public static final String MESSAGE_SENDER_IDENTIFIER_KEY = "message_sender_identifier";
+    public static final String MESSAGE_LOCATION_TYPE_KEY = "message_location_type";
+    public static final String MESSAGE_JSON_LOCATION_KEY = "message_json_location";
     public static final String MESSAGE_CONTENT_BODY_KEY = "message_content_body";
+    public static final String DISCUSSION_ID_KEY = "discussion_id";
+    public static final String OWNED_IDENTITY_KEY = "owned_identity";
 
-//    private final Message message;
+    public static final int TYPE_MESSAGE = 1;
+    public static final int TYPE_DISCUSSION = 2;
+    public static final int TYPE_OWNED_IDENTITY = 3;
+
+    private SettingsActivity.LocationIntegrationEnum integration;
+    private int type;
     private Long messageId;
     private byte[] messageSenderIdentifier;
     private int messageLocationType;
     private JsonLocation messageJsonLocation;
     private String messageContentBody;
-    private long discussionId;
-    private SettingsActivity.LocationIntegrationEnum integration;
+    private Long discussionId;
+    private byte[] bytesOwnedIdentity;
 
     private FragmentActivity activity;
 
@@ -88,17 +95,28 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
     // need to center on marker on first call of sharingLocationMessageLiveData observer
     private boolean centerOnMarkersOnNextLocationMessagesUpdate;
 
-    public static FullscreenMapDialogFragment newInstance(@Nullable Message message, long discussionId, SettingsActivity.LocationIntegrationEnum integration) {
+
+    // discussionId may only be null if ownedIdentity is not null
+    public static FullscreenMapDialogFragment newInstance(@Nullable Message message, @Nullable Long discussionId, @Nullable byte[] ownedIdentity, SettingsActivity.LocationIntegrationEnum integration) {
         FullscreenMapDialogFragment fragment = new FullscreenMapDialogFragment();
         Bundle args = new Bundle();
-        if (message != null) {
+        if (ownedIdentity != null) {
+            args.putInt(TYPE_KEY, TYPE_OWNED_IDENTITY);
+            args.putByteArray(OWNED_IDENTITY_KEY, ownedIdentity);
+        } else if (message != null && discussionId != null) {
+            args.putInt(TYPE_KEY, TYPE_MESSAGE);
             args.putLong(MESSAGE_ID_KEY, message.id);
             args.putByteArray(MESSAGE_SENDER_IDENTIFIER_KEY, message.senderIdentifier);
             args.putInt(MESSAGE_LOCATION_TYPE_KEY, message.locationType);
             args.putString(MESSAGE_JSON_LOCATION_KEY, message.jsonLocation);
             args.putString(MESSAGE_CONTENT_BODY_KEY, message.contentBody);
+            args.putLong(DISCUSSION_ID_KEY, discussionId);
+        } else if (discussionId != null) {
+            args.putInt(TYPE_KEY, TYPE_DISCUSSION);
+            args.putLong(DISCUSSION_ID_KEY, discussionId);
+        } else {
+            return null;
         }
-        args.putLong(DISCUSSION_ID_KEY, discussionId);
         args.putInt(INTEGRATION_KEY, integration.ordinal());
         fragment.setArguments(args);
         return fragment;
@@ -117,18 +135,33 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
 
         Bundle arguments = getArguments();
         if (arguments != null) {
-            if (arguments.containsKey(MESSAGE_ID_KEY)) {
-                messageId = arguments.getLong(MESSAGE_ID_KEY);
-                messageSenderIdentifier = arguments.getByteArray(MESSAGE_SENDER_IDENTIFIER_KEY);
-                messageLocationType = arguments.getInt(MESSAGE_LOCATION_TYPE_KEY);
-                String serializedJsonLocation = arguments.getString(MESSAGE_JSON_LOCATION_KEY);
-                try {
-                    messageJsonLocation = AppSingleton.getJsonObjectMapper().readValue(serializedJsonLocation, JsonLocation.class);
-                } catch (Exception ignored) { }
-                messageContentBody = arguments.getString(MESSAGE_CONTENT_BODY_KEY);
-            }
-            discussionId = arguments.getLong(DISCUSSION_ID_KEY);
             integration = SettingsActivity.LocationIntegrationEnum.values()[arguments.getInt(INTEGRATION_KEY)];
+            type = arguments.getInt(TYPE_KEY);
+            switch (type) {
+                case TYPE_MESSAGE: {
+                    messageId = arguments.getLong(MESSAGE_ID_KEY);
+                    messageSenderIdentifier = arguments.getByteArray(MESSAGE_SENDER_IDENTIFIER_KEY);
+                    messageLocationType = arguments.getInt(MESSAGE_LOCATION_TYPE_KEY);
+                    String serializedJsonLocation = arguments.getString(MESSAGE_JSON_LOCATION_KEY);
+                    try {
+                        messageJsonLocation = AppSingleton.getJsonObjectMapper().readValue(serializedJsonLocation, JsonLocation.class);
+                    } catch (Exception ignored) { }
+                    messageContentBody = arguments.getString(MESSAGE_CONTENT_BODY_KEY);
+                    discussionId = arguments.getLong(DISCUSSION_ID_KEY);
+                    break;
+                }
+                case TYPE_DISCUSSION: {
+                    discussionId = arguments.getLong(DISCUSSION_ID_KEY);
+                    break;
+                }
+                case TYPE_OWNED_IDENTITY: {
+                    bytesOwnedIdentity = arguments.getByteArray(OWNED_IDENTITY_KEY);
+                    break;
+                }
+                default: {
+                    dismiss();
+                }
+            }
         } else {
             dismiss();
         }
@@ -189,7 +222,7 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
         mapView.setEnableCurrentLocation(isLocationPermissionGranted(this.activity) && isLocationEnabled());
 
         // if showing a location or a finished sharing: zoom on location, center camera and add a pointer on it
-        if (messageId != null && messageLocationType != Message.LOCATION_TYPE_SHARE) {
+        if (type == TYPE_MESSAGE && messageLocationType != Message.LOCATION_TYPE_SHARE) {
             if (messageJsonLocation != null) {
                 if (messageLocationType == Message.LOCATION_TYPE_SEND) {
                     mapView.addMarker(messageId, getPinMarkerIcon(), new LatLngWrapper(messageJsonLocation), messageJsonLocation.getPrecision());
@@ -202,13 +235,17 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
             // if showing sharing locations: retrieve every sharing location messages, add marker for all of them, center on it
             // observe sharing messages to update map when messages are updated
             centerOnMarkersOnNextLocationMessagesUpdate = true;
-            sharingLocationMessageLiveData = AppDatabase.getInstance().messageDao().getCurrentlySharingLocationMessagesInDiscussionLiveData(discussionId);
+            if (type == TYPE_OWNED_IDENTITY) {
+                sharingLocationMessageLiveData = AppDatabase.getInstance().messageDao().getCurrentlySharingLocationMessagesForOwnedIdentityLiveData(bytesOwnedIdentity);
+            } else {
+                sharingLocationMessageLiveData = AppDatabase.getInstance().messageDao().getCurrentlySharingLocationMessagesInDiscussionLiveData(discussionId);
+            }
             sharingLocationMessageLiveData.observe(this, this::sharingLocationMessagesObserver);
         }
     }
 
     public void redrawMarkersCallback() {
-        if (messageId != null && messageLocationType != Message.LOCATION_TYPE_SHARE) {
+        if (type == TYPE_MESSAGE && messageLocationType != Message.LOCATION_TYPE_SHARE) {
             if (messageJsonLocation != null) {
                 if (messageLocationType == Message.LOCATION_TYPE_SEND) {
                     mapView.addMarker(messageId, getPinMarkerIcon(), new LatLngWrapper(messageJsonLocation), messageJsonLocation.getPrecision());
@@ -271,7 +308,15 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
     private void handleOpenInThirdPartyAppFabClick(View view) {
         // if live sharing, open bottom sheet, otherwise open third party app on fab click
         if (sharingLocationMessageLiveData != null && sharingLocationMessageLiveData.getValue() != null) {
-            FullscreenMapBottomSheetDialog.newInstance(discussionId, this).show(activity.getSupportFragmentManager(), "fullscreen-map-bottom-sheet");
+            FullscreenMapBottomSheetDialog bottomFragment;
+            if (type == TYPE_OWNED_IDENTITY) {
+                bottomFragment = FullscreenMapBottomSheetDialog.newInstance(null, bytesOwnedIdentity, this);
+            } else {
+                bottomFragment = FullscreenMapBottomSheetDialog.newInstance(discussionId, null, this);
+            }
+            if (bottomFragment != null) {
+                bottomFragment.show(activity.getSupportFragmentManager(), "fullscreen-map-bottom-sheet");
+            }
         } else if (messageId != null) {
             App.openLocationInMapApplication(activity, messageJsonLocation.getTruncatedLatitudeString(), messageJsonLocation.getTruncatedLongitudeString(), messageContentBody, null);
         }

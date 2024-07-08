@@ -139,6 +139,8 @@ public class RefreshUserDataOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 }

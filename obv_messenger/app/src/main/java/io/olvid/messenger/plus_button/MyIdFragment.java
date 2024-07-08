@@ -157,14 +157,14 @@ public class MyIdFragment extends Fragment implements View.OnClickListener {
             if (urlIdentity != null) {
                 viewModel.setFullScreenQrCodeUrl(urlIdentity.getUrlRepresentation());
                 try {
-                    Navigation.findNavController(v).navigate(MyIdFragmentDirections.actionOpenFullScreenQrCode());
+                    Navigation.findNavController(v).navigate(R.id.action_open_full_screen_qr_code);
                 } catch (Exception e) {
                     // do nothing
                 }
             }
         } else if (id == R.id.scan_button) {
             try {
-                Navigation.findNavController(v).navigate(MyIdFragmentDirections.actionScan());
+                Navigation.findNavController(v).navigate(R.id.action_scan);
             } catch (Exception e) {
                 // do nothing
             }
@@ -228,7 +228,7 @@ public class MyIdFragment extends Fragment implements View.OnClickListener {
             popup.show();
         } else if (id == R.id.button_keycloak_search) {
             try {
-                Navigation.findNavController(v).navigate(MyIdFragmentDirections.actionKeycloakSearch());
+                Navigation.findNavController(v).navigate(R.id.action_keycloak_search);
             } catch (Exception e) {
                 // do nothing
             }

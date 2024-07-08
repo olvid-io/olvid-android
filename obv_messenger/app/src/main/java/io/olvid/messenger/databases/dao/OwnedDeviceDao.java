@@ -49,6 +49,12 @@ public interface OwnedDeviceDao {
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
     void updateChannelConfirmed(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, boolean channelConfirmed);
 
+    @Query("UPDATE " + OwnedDevice.TABLE_NAME +
+            " SET " + OwnedDevice.HAS_PRE_KEY + " = :hasPreKey " +
+            " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
+    void updateHasPreKey(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, boolean hasPreKey);
+
    @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.TRUSTED + " = :trusted " +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
@@ -86,7 +92,8 @@ public interface OwnedDeviceDao {
     @Query("SELECT EXISTS (SELECT 1 FROM " + OwnedDevice.TABLE_NAME +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.CURRENT_DEVICE + " = 0 " +
-            " AND " + OwnedDevice.CHANNEL_CONFIRMED + " = 1)")
+            " AND (" + OwnedDevice.CHANNEL_CONFIRMED + " = 1 " +
+            " OR " + OwnedDevice.HAS_PRE_KEY + " = 1))")
     boolean doesOwnedIdentityHaveAnotherDeviceWithChannel(byte[] bytesOwnedIdentity);
 
 }

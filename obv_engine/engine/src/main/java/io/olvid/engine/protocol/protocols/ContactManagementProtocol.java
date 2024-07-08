@@ -357,7 +357,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateContactDeletionMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -366,7 +366,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
 
             // notify contact (we need the oblivious channel --> before deleting the contact)
             try {
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
                 ChannelMessageToSend messageToSend = new ContactDeletionNotificationMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             } catch (Exception e) {
@@ -409,7 +409,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final PropagateContactDeletionMessage receivedMessage;
 
         public ProcessPropagatedContactDeletionStep(InitialProtocolState startState, PropagateContactDeletionMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -437,7 +437,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final ContactDeletionNotificationMessage receivedMessage;
 
         public ProcessContactDeletionNotificationStep(InitialProtocolState startState, ContactDeletionNotificationMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -508,7 +508,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
             {
                 try {
                     // notify the contact he has been downgraded
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
                     ChannelMessageToSend messageToSend = new ContactDowngradeNotificationMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 } catch (Exception ignored) { }
@@ -519,7 +519,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateContactDowngradeMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -537,7 +537,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final ContactDowngradeNotificationMessage receivedMessage;
 
         public ProcessContactDowngradeNotificationStep(InitialProtocolState startState, ContactDowngradeNotificationMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -562,7 +562,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final PropagateContactDowngradeMessage receivedMessage;
 
         public ProcessPropagatedContactDowngradeStep(InitialProtocolState startState, PropagateContactDowngradeMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -586,7 +586,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
         private final PerformContactDeviceDiscoveryMessage receivedMessage;
 
         public ProcessPerformContactDeviceDiscoveryMessageStep(InitialProtocolState startState, PerformContactDeviceDiscoveryMessage receivedMessage, ContactManagementProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

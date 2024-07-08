@@ -42,9 +42,11 @@ public interface ChannelDelegate {
 
 
     UID[] getConfirmedObliviousChannelDeviceUids(Session session, Identity ownedIdentity, Identity remoteIdentity) throws Exception;
+    UID[] getConfirmedObliviousChannelOrPreKeyDeviceUids(Session session, Identity ownedIdentity, Identity remoteIdentity) throws Exception;
     void deleteObliviousChannelsWithContact(Session session, Identity ownedIdentity, Identity remoteIdentity) throws Exception;
     void deleteObliviousChannelIfItExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws Exception;
     void deleteAllChannelsForOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
     boolean checkIfObliviousChannelExists(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws SQLException;
     boolean checkIfObliviousChannelIsConfirmed(Session session, Identity ownedIdentity, UID remoteDeviceUid, Identity remoteIdentity) throws SQLException;
+
 }

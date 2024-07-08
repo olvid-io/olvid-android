@@ -906,7 +906,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateInvitationToAliceDevicesMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.contactDisplayName, commitmentOutput.decommitment, seedAliceForSas).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -935,7 +935,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
         private final PropagateInvitationToAliceDevicesMessage receivedMessage;
 
         public StoreDecommitmentStep(InitialProtocolState startState, PropagateInvitationToAliceDevicesMessage receivedMessage, TrustEstablishmentWithSasProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -999,7 +999,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateCommitmentToBobDevicesMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.contactSerializedDetails, receivedMessage.contactDeviceUids, receivedMessage.commitment).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -1022,7 +1022,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
         private final PropagateCommitmentToBobDevicesMessage receivedMessage;
 
         public StoreCommitmentAndAskForConfirmationStep(InitialProtocolState startState, PropagateCommitmentToBobDevicesMessage receivedMessage, TrustEstablishmentWithSasProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1074,7 +1074,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateConfirmationToBobDevicesMessage(coreProtocolMessage, receivedMessage.invitationAccepted).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -1124,7 +1124,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
         private final PropagateConfirmationToBobDevicesMessage receivedMessage;
 
         public ReceivedConfirmationFromOtherDeviceStep(WaitingForConfirmationState startState, PropagateConfirmationToBobDevicesMessage receivedMessage, TrustEstablishmentWithSasProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1297,7 +1297,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateEnteredSasToOtherDevicesMessage(coreProtocolMessage, receivedMessage.sasEnteredByUser).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -1328,7 +1328,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
         private final PropagateEnteredSasToOtherDevicesMessage receivedMessage;
 
         public CheckPropagatedSasStep(WaitingForUserSasState startState, PropagateEnteredSasToOtherDevicesMessage receivedMessage, TrustEstablishmentWithSasProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1422,8 +1422,18 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
             }  else {
                 protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
             }
+
+            boolean triggerDeviceDiscovery = false;
             for (UID contactDeviceUid: startState.contactDeviceUids) {
-                protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, false);
+                triggerDeviceDiscovery |= protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, null, false);
+            }
+            if (triggerDeviceDiscovery) {
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                        new UID(getPrng()),
+                        false);
+                ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
 

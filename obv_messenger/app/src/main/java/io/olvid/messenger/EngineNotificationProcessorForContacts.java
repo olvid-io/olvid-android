@@ -29,6 +29,7 @@ import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.ObvContactDeviceCount;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.MessageRecipientInfoDao;
@@ -37,6 +38,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
+import io.olvid.messenger.databases.tasks.HandleNewMessageNotificationTask;
 import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.UpdateContactActiveTask;
@@ -57,7 +59,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                 EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED,
                 EngineNotifications.NEW_CONTACT,
                 EngineNotifications.CONTACT_DELETED,
-                EngineNotifications.NEW_CONTACT_DEVICE,
+                EngineNotifications.CONTACT_DEVICES_UPDATED,
                 EngineNotifications.CONTACT_PUBLISHED_DETAILS_TRUSTED,
                 EngineNotifications.CONTACT_KEYCLOAK_MANAGED_CHANGED,
                 EngineNotifications.CONTACT_ACTIVE_CHANGED,
@@ -66,6 +68,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                 EngineNotifications.NEW_CONTACT_PHOTO,
                 EngineNotifications.CONTACT_CAPABILITIES_UPDATED,
                 EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED,
+                EngineNotifications.CONTACT_RECENTLY_ONLINE_CHANGED,
                 EngineNotifications.CONTACT_TRUST_LEVEL_INCREASED,
         }) {
             engine.addNotificationListener(notificationName, this);
@@ -84,11 +87,13 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                     Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
                     if (contact != null) {
                         try {
-                            contact.establishedChannelCount = engine.getContactEstablishedChannelsCount(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                            contact.deviceCount = engine.getContactDeviceCount(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                            db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount);
+                            ObvContactDeviceCount contactDeviceCount = engine.getContactDeviceCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                            contact.deviceCount = contactDeviceCount.deviceCount;
+                            contact.establishedChannelCount = contactDeviceCount.establishedChannelCount;
+                            contact.preKeyCount = contactDeviceCount.preKeyCount;
+                            db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount, contact.preKeyCount);
 
-                            if (contact.establishedChannelCount > 0) {
+                            if (contact.hasChannelOrPreKey()) {
                                 // Search for MessageRecipientInfo indicating a message was not sent to this user
                                 List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoAndMessages = db.messageRecipientInfoDao().getAllUnsentForContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                 App.runThread(() -> db.runInTransaction(() -> {
@@ -150,13 +155,10 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                         db.runInTransaction(() -> {
                             Contact createdContact;
                             try {
-                                createdContact = new Contact(contactIdentity.getBytesIdentity(), bytesOwnedIdentity, contactIdentity.getIdentityDetails(), hasUntrustedPublishedDetails, null, contactIdentity.isKeycloakManaged(), contactIdentity.isActive(), oneToOne, trustLevel);
+                                createdContact = new Contact(contactIdentity.getBytesIdentity(), bytesOwnedIdentity, contactIdentity.getIdentityDetails(), hasUntrustedPublishedDetails, null, contactIdentity.isKeycloakManaged(), contactIdentity.isActive(), oneToOne, trustLevel, true);
                                 if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
                                     AppSingleton.updateCachedCustomDisplayName(createdContact.bytesContactIdentity, createdContact.getCustomDisplayName(), createdContact.getFirstNameOrCustom());
-                                    AppSingleton.updateCachedKeycloakManaged(createdContact.bytesContactIdentity, createdContact.keycloakManaged);
-                                    AppSingleton.updateCachedActive(createdContact.bytesContactIdentity, createdContact.active);
-                                    AppSingleton.updateCachedOneToOne(createdContact.bytesContactIdentity, createdContact.oneToOne);
-                                    AppSingleton.updateCachedTrustLevel(createdContact.bytesContactIdentity, createdContact.trustLevel);
+                                    AppSingleton.updateContactCachedInfo(createdContact);
                                 }
                                 db.contactDao().insert(createdContact);
                             } catch (Exception e) {
@@ -176,12 +178,14 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                     }
                     contact = db.contactDao().get(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
                     try {
-                        contact.deviceCount = engine.getContactDeviceCount(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
-                        contact.establishedChannelCount = engine.getContactEstablishedChannelsCount(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
+                        ObvContactDeviceCount contactDeviceCount = engine.getContactDeviceCounts(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
+                        contact.deviceCount = contactDeviceCount.deviceCount;
+                        contact.establishedChannelCount = contactDeviceCount.establishedChannelCount;
+                        contact.preKeyCount = contactDeviceCount.preKeyCount;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount);
+                    db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount, contact.preKeyCount);
                 }
                 break;
             }
@@ -197,14 +201,17 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                 }
                 break;
             }
-            case EngineNotifications.NEW_CONTACT_DEVICE: {
-                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY);
-                byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_DEVICE_CONTACT_IDENTITY_KEY);
+            case EngineNotifications.CONTACT_DEVICES_UPDATED: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_DEVICES_UPDATED_OWNED_IDENTITY_KEY);
+                byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_DEVICES_UPDATED_CONTACT_IDENTITY_KEY);
                 Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
                 if (contact != null) {
                     try {
-                        contact.deviceCount = engine.getContactDeviceCount(bytesOwnedIdentity, bytesContactIdentity);
-                        db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount);
+                        ObvContactDeviceCount contactDeviceCount = engine.getContactDeviceCounts(bytesOwnedIdentity, bytesContactIdentity);
+                        contact.deviceCount = contactDeviceCount.deviceCount;
+                        contact.establishedChannelCount = contactDeviceCount.establishedChannelCount;
+                        contact.preKeyCount = contactDeviceCount.preKeyCount;
+                        db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount, contact.preKeyCount);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -347,7 +354,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                     contact.oneToOne = oneToOne;
                     db.contactDao().updateOneToOne(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.oneToOne);
                     if (Arrays.equals(contact.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                        AppSingleton.updateCachedOneToOne(contact.bytesContactIdentity, contact.oneToOne);
+                        AppSingleton.updateContactCachedInfo(contact);
                     }
                     if (oneToOne) {
                         try {
@@ -360,6 +367,8 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        // reprocess any one-to-one message that was put on hold
+                        HandleNewMessageNotificationTask.processAllOneToOneMessagesOnHold(engine, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                     } else {
                         db.runInTransaction(() -> {
                             Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
@@ -368,6 +377,22 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                             }
                         });
                     }
+                }
+                break;
+            }
+            case EngineNotifications.CONTACT_RECENTLY_ONLINE_CHANGED: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_RECENTLY_ONLINE_CHANGED_BYTES_OWNED_IDENTITY_KEY);
+                byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_RECENTLY_ONLINE_CHANGED_BYTES_CONTACT_IDENTITY_KEY);
+                Boolean recentlyOnline = (Boolean) userInfo.get(EngineNotifications.CONTACT_RECENTLY_ONLINE_CHANGED_RECENTLY_ONLINE_KEY);
+
+                if (bytesOwnedIdentity == null || bytesContactIdentity == null || recentlyOnline == null) {
+                    break;
+                }
+
+                Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                if (contact != null && contact.recentlyOnline != recentlyOnline) {
+                    contact.recentlyOnline = recentlyOnline;
+                    db.contactDao().updateRecentlyOnline(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.recentlyOnline);
                 }
                 break;
             }
@@ -385,7 +410,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                     contact.trustLevel = trustLevel;
                     db.contactDao().updateTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.trustLevel);
                     if (Arrays.equals(contact.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                        AppSingleton.updateCachedTrustLevel(contact.bytesContactIdentity, contact.trustLevel);
+                        AppSingleton.updateContactCachedInfo(contact);
                     }
 
                     if (contact.oneToOne) {

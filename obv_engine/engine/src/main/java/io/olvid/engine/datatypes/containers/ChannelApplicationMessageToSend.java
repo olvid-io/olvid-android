@@ -32,7 +32,7 @@ public class ChannelApplicationMessageToSend implements ChannelMessageToSend {
     private final boolean isVoipMessage;
 
     public ChannelApplicationMessageToSend(Identity[] toIdentities, Identity fromIdentity, byte[] messagePayload, byte[] extendedMessagePayload, Attachment[] attachments, boolean hasUserContent, boolean isVoipMessage) throws Exception {
-        SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(toIdentities, fromIdentity);
+        SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(toIdentities, fromIdentity);
         if (sendChannelInfos.length != 1) {
             Logger.e("Error: trying to create a ChannelApplicationMessageToSend for identities on different servers");
             throw new Exception();

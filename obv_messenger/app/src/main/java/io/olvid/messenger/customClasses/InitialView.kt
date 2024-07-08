@@ -72,6 +72,7 @@ class InitialView : View {
     private var locked = false
     private var inactive = false
     private var notOneToOne = false
+    private var recentlyOnline = true
     private var contactTrustLevel: Int? = null
     private var backgroundPaint: Paint? = null
     private var insidePaint: Paint? = null
@@ -138,6 +139,10 @@ class InitialView : View {
             notOneToOne = !contact.oneToOne
             changed = true
         }
+        if (recentlyOnline != contact.recentlyOnline) {
+            recentlyOnline = contact.recentlyOnline
+            changed = true
+        }
         if (contactTrustLevel == null || contactTrustLevel != contact.trustLevel) {
             contactTrustLevel = contact.trustLevel
             changed = true
@@ -176,8 +181,12 @@ class InitialView : View {
             locked = false
             changed = true
         }
-        if (notOneToOne) { // We are indeed checking that the value changed ;)
+        if (notOneToOne) {
             notOneToOne = false
+            changed = true
+        }
+        if (!recentlyOnline) {
+            recentlyOnline = true
             changed = true
         }
         if (contactTrustLevel != null) {
@@ -221,6 +230,10 @@ class InitialView : View {
             notOneToOne = false
             changed = true
         }
+        if (!recentlyOnline) {
+            recentlyOnline = true
+            changed = true
+        }
         if (contactTrustLevel != null) {
             contactTrustLevel = null
             changed = true
@@ -262,6 +275,10 @@ class InitialView : View {
             notOneToOne = false
             changed = true
         }
+        if (!recentlyOnline) {
+            recentlyOnline = true
+            changed = true
+        }
         if (contactTrustLevel != null) {
             contactTrustLevel = null
             changed = true
@@ -288,33 +305,8 @@ class InitialView : View {
                     initial = ""
                     changed = true
                 }
-            }
-            Discussion.STATUS_NORMAL -> {
-                if (locked) {
-                    locked = false
-                    changed = true
-                }
-                when (discussion.discussionType) {
-                    Discussion.TYPE_CONTACT -> {
-                        val discussionInitial = StringUtils.getInitial(discussion.title)
-                        if (initial != discussionInitial) {
-                            initial = discussionInitial
-                            changed = true
-                        }
-                    }
-                    Discussion.TYPE_GROUP, Discussion.TYPE_GROUP_V2 -> {
-                        if (initial != null) {
-                            initial = null
-                            changed = true
-                        }
-                    }
-                    else -> {
-                        Logger.e("Unknown discussion type")
-                        return
-                    }
-                }
-                if (!Arrays.equals(bytes, discussion.bytesDiscussionIdentifier)) {
-                    bytes = discussion.bytesDiscussionIdentifier
+                if (!recentlyOnline) {
+                    recentlyOnline = true
                     changed = true
                 }
             }
@@ -330,10 +322,19 @@ class InitialView : View {
                             initial = discussionInitial
                             changed = true
                         }
+                        val contactRecentlyOnline = AppSingleton.getContactCacheInfo(discussion.bytesDiscussionIdentifier)?.recentlyOnline ?: true
+                        if (recentlyOnline != contactRecentlyOnline) {
+                            recentlyOnline = contactRecentlyOnline
+                            changed = true
+                        }
                     }
                     Discussion.TYPE_GROUP, Discussion.TYPE_GROUP_V2 -> {
                         if (initial != null) {
                             initial = null
+                            changed = true
+                        }
+                        if (!recentlyOnline) {
+                            recentlyOnline = true
                             changed = true
                         }
                     }
@@ -427,6 +428,10 @@ class InitialView : View {
             notOneToOne = false
             changed = true
         }
+        if (!recentlyOnline) {
+            recentlyOnline = true
+            changed = true
+        }
         if (contactTrustLevel != null) {
             // we could properly set this for ontToOne discussions, but this is not worth the added work!
             contactTrustLevel = null
@@ -473,28 +478,29 @@ class InitialView : View {
             photoUrl = contactPhotoUrl
             changed = true
         }
-        val keycloak = AppSingleton.getContactKeycloakManaged(bytesIdentifier)
-        if (keycloakCertified != keycloak) {
-            keycloakCertified = keycloak
+        val contactCacheInfo = AppSingleton.getContactCacheInfo(bytesIdentifier) ?: ContactCacheInfo(false, true, true, true, 0)
+        if (keycloakCertified != contactCacheInfo.keycloakManaged) {
+            keycloakCertified = contactCacheInfo.keycloakManaged
             changed = true
         }
-        val inact = AppSingleton.getContactInactive(bytesIdentifier)
-        if (inactive != inact) {
-            inactive = inact
+        if (inactive == contactCacheInfo.active) { // We are indeed checking that the value changed ;)
+            inactive = !contactCacheInfo.active
             changed = true
         }
         if (locked) {
             locked = false
             changed = true
         }
-        val oneToOne = AppSingleton.getContactOneToOne(bytesIdentifier)
-        if (notOneToOne == oneToOne) { // We are indeed checking that the value changed ;)
-            notOneToOne = !oneToOne
+        if (notOneToOne == contactCacheInfo.oneToOne) { // We are indeed checking that the value changed ;)
+            notOneToOne = !contactCacheInfo.oneToOne
             changed = true
         }
-        val trustLevel = AppSingleton.getContactTrustLevel(bytesIdentifier)
-        if (contactTrustLevel != trustLevel) {
-            contactTrustLevel = trustLevel
+        if (recentlyOnline != contactCacheInfo.recentlyOnline) {
+            recentlyOnline = contactCacheInfo.recentlyOnline
+            changed = true
+        }
+        if (contactTrustLevel != contactCacheInfo.trustLevel) {
+            contactTrustLevel = contactCacheInfo.trustLevel
             changed = true
         }
         if (changed) {
@@ -531,6 +537,10 @@ class InitialView : View {
         }
         if (notOneToOne) {
             notOneToOne = false
+            changed = true
+        }
+        if (!recentlyOnline) {
+            recentlyOnline = true
             changed = true
         }
         if (contactTrustLevel != null) {
@@ -599,6 +609,13 @@ class InitialView : View {
     fun setNotOneToOne() {
         if (notOneToOne) {
             notOneToOne = false
+            init()
+        }
+    }
+
+    fun setRecentlyOnline(recentlyOnline: Boolean) {
+        if (this.recentlyOnline != recentlyOnline) {
+            this.recentlyOnline = recentlyOnline
             init()
         }
     }
@@ -728,6 +745,21 @@ class InitialView : View {
                                 keycloakDrawable.draw(keycloakCanvas)
                             }
                             canvas.drawBitmap(keycloakBitmap, (size - keycloakSize).toFloat(), 0f, null)
+                        } else if (!recentlyOnline) {
+                            val asleepSize = (.3f * size).toInt()
+                            val asleepBitmap =
+                                Bitmap.createBitmap(asleepSize, asleepSize, ARGB_8888)
+                            val asleepCanvas = Canvas(asleepBitmap)
+                            val asleepDrawable = ResourcesCompat.getDrawable(
+                                resources,
+                                drawable.ic_snooze,
+                                null
+                            )
+                            if (asleepDrawable != null) {
+                                asleepDrawable.setBounds(0, 0, asleepSize, asleepSize)
+                                asleepDrawable.draw(asleepCanvas)
+                            }
+                            canvas.drawBitmap(asleepBitmap, (size - asleepSize).toFloat(), 0f, null)
                         }
                     }
                     return
@@ -918,6 +950,16 @@ class InitialView : View {
                         0f,
                         null
                     )
+                } else if (!recentlyOnline) {
+                    val asleepSize = (.3f * size).toInt()
+                    val asleepBitmap = Bitmap.createBitmap(asleepSize, asleepSize, ARGB_8888)
+                    val asleepCanvas = Canvas(asleepBitmap)
+                    val asleepDrawable = ResourcesCompat.getDrawable(resources, drawable.ic_snooze, null)
+                    if (asleepDrawable != null) {
+                        asleepDrawable.setBounds(0, 0, asleepSize, asleepSize)
+                        asleepDrawable.draw(asleepCanvas)
+                    }
+                    bitmapCanvas.drawBitmap(asleepBitmap, (size - asleepSize).toFloat(), 0f, null)
                 }
                 bitmap = localBitmap
             }

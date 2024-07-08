@@ -110,9 +110,9 @@ public class ScanFragment extends Fragment implements View.OnClickListener, QRCo
                                 if (matcher.find() && viewModel.parseScannedConfigurationUri(matcher.group(2))) {
                                     viewModel.setDeepLinked(true);
                                     if (viewModel.getKeycloakServer() != null) {
-                                        Navigation.findNavController(v).navigate(ScanFragmentDirections.actionKeycloakScanned());
+                                        Navigation.findNavController(v).navigate(R.id.action_keycloak_scanned);
                                     } else {
-                                        Navigation.findNavController(v).navigate(ScanFragmentDirections.actionConfigurationScanned());
+                                        Navigation.findNavController(v).navigate(R.id.action_configuration_scanned);
                                     }
                                     return true;
                                 }
@@ -122,9 +122,9 @@ public class ScanFragment extends Fragment implements View.OnClickListener, QRCo
                     App.toast(R.string.toast_message_invalid_clipboard_data, Toast.LENGTH_SHORT);
                     return true;
                 } else if (menuItem.getItemId() == R.id.popup_action_manual_configuration) {
-                    Navigation.findNavController(v).navigate(ScanFragmentDirections.actionConfigurationScanned());
+                    Navigation.findNavController(v).navigate(R.id.action_configuration_scanned);
                 } else if (menuItem.getItemId() == R.id.popup_action_use_keycloak) {
-                    Navigation.findNavController(v).navigate(ScanFragmentDirections.actionKeycloakScanned());
+                    Navigation.findNavController(v).navigate(R.id.action_keycloak_scanned);
                 }
                 return false;
             });
@@ -142,9 +142,9 @@ public class ScanFragment extends Fragment implements View.OnClickListener, QRCo
         if (matcher.find() && viewModel.parseScannedConfigurationUri(matcher.group(2))) {
             viewModel.setDeepLinked(true);
             if (viewModel.getKeycloakServer() != null) {
-                activity.runOnUiThread(() -> Navigation.findNavController(rootView).navigate(ScanFragmentDirections.actionKeycloakScanned()));
+                activity.runOnUiThread(() -> Navigation.findNavController(rootView).navigate(R.id.action_keycloak_scanned));
             } else {
-                activity.runOnUiThread(() -> Navigation.findNavController(rootView).navigate(ScanFragmentDirections.actionConfigurationScanned()));
+                activity.runOnUiThread(() -> Navigation.findNavController(rootView).navigate(R.id.action_configuration_scanned));
             }
             return true;
         }

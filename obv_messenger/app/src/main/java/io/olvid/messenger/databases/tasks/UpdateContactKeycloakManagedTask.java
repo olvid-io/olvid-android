@@ -46,7 +46,7 @@ public class UpdateContactKeycloakManagedTask implements Runnable {
             db.discussionDao().updateKeycloakManaged(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.keycloakManaged);
 
             if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                AppSingleton.updateCachedKeycloakManaged(contact.bytesContactIdentity, contact.keycloakManaged);
+                AppSingleton.updateContactCachedInfo(contact);
             }
         }
     }

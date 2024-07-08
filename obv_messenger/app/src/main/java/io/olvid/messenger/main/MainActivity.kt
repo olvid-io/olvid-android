@@ -88,12 +88,16 @@ import io.olvid.messenger.activities.storage_manager.StorageManagerActivity
 import io.olvid.messenger.billing.BillingUtils
 import io.olvid.messenger.customClasses.ConfigurationPojo
 import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog
+import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog.OnIntegrationSelectedListener
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.OpenHiddenProfileDialog
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.discussion.DiscussionActivity
+import io.olvid.messenger.discussion.DiscussionActivity.FULL_SCREEN_MAP_FRAGMENT_TAG
+import io.olvid.messenger.discussion.location.FullscreenMapDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment.OnOwnedIdentitySelectedListener
 import io.olvid.messenger.main.bookmarks.BookmarksActivity
@@ -110,6 +114,7 @@ import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity
 import io.olvid.messenger.plus_button.PlusButtonActivity
 import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
+import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum
 import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator
 import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.DOT
 import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.FULL
@@ -120,6 +125,7 @@ import io.olvid.messenger.troubleshooting.TroubleshootingDataStore
 import io.olvid.messenger.troubleshooting.shouldShowTroubleshootingSnackbar
 import kotlinx.coroutines.launch
 import java.util.Arrays
+
 
 class MainActivity : LockableActivity(), OnClickListener {
     private val globalSearchViewModel by viewModels<GlobalSearchViewModel>()
@@ -140,6 +146,7 @@ class MainActivity : LockableActivity(), OnClickListener {
     internal var contactListFragment: ContactListFragment? = null
     private lateinit var tabImageViews: Array<ImageView?>
     private var showBookmarks: Boolean = false
+    private var showLocationSharing: Boolean = false
 
     @JvmField
     var requestNotificationPermission = registerForActivityResult(
@@ -322,6 +329,21 @@ class MainActivity : LockableActivity(), OnClickListener {
         }.observe(this) { bookmarkedMessages: Boolean? ->
             if (showBookmarks != (bookmarkedMessages == true)) {
                 showBookmarks = bookmarkedMessages == true
+                if (viewPager.currentItem == DISCUSSIONS_TAB && globalSearchViewModel.filter.isNullOrEmpty()) {
+                    invalidateOptionsMenu()
+                }
+            }
+        }
+
+        // observe location sharing
+        AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
+            if (ownedIdentity == null) {
+                return@switchMap null
+            }
+            AppDatabase.getInstance().messageDao().hasLocationSharing(ownedIdentity.bytesOwnedIdentity)
+        }.observe(this) { locationShared: Boolean? ->
+            if (showLocationSharing != (locationShared == true)) {
+                showLocationSharing = locationShared == true
                 if (viewPager.currentItem == DISCUSSIONS_TAB && globalSearchViewModel.filter.isNullOrEmpty()) {
                     invalidateOptionsMenu()
                 }
@@ -803,6 +825,9 @@ class MainActivity : LockableActivity(), OnClickListener {
                 if (showBookmarks) {
                     menuInflater.inflate(R.menu.menu_main_bookmarks, menu)
                 }
+                if (showLocationSharing && SettingsActivity.getLocationIntegration() != LocationIntegrationEnum.BASIC) {
+                    menuInflater.inflate(R.menu.menu_main_location, menu)
+                }
                 val bookmarkAction = menu.findItem(R.id.menu_action_bookmarks)
                 val searchView = menu.findItem(R.id.action_search).actionView as SearchView?
                 if (searchView != null) {
@@ -880,6 +905,26 @@ class MainActivity : LockableActivity(), OnClickListener {
         } else if (itemId == R.id.menu_action_bookmarks) {
             if (viewPager.currentItem == DISCUSSIONS_TAB) {
                 startActivity(Intent(this, BookmarksActivity::class.java))
+            }
+        } else if (itemId == R.id.menu_action_location) {
+            if (viewPager.currentItem == DISCUSSIONS_TAB) {
+                when (SettingsActivity.getLocationIntegration()) {
+                    LocationIntegrationEnum.NONE -> LocationIntegrationSelectorDialog(this, false, object : OnIntegrationSelectedListener {
+                        override fun onIntegrationSelected(integration: LocationIntegrationEnum, customOsmServerUrl: String?) {
+                            SettingsActivity.setLocationIntegration(integration.string, customOsmServerUrl)
+                            if (integration == LocationIntegrationEnum.OSM || integration == LocationIntegrationEnum.MAPS || integration == LocationIntegrationEnum.BASIC || integration == LocationIntegrationEnum.CUSTOM_OSM) {
+                                FullscreenMapDialogFragment.newInstance(null, null, AppSingleton.getBytesCurrentIdentity(), SettingsActivity.getLocationIntegration())?.show(supportFragmentManager, FULL_SCREEN_MAP_FRAGMENT_TAG)
+                            } else {
+                                invalidateOptionsMenu();
+                            }
+                        }
+                    }).show()
+
+                    LocationIntegrationEnum.OSM,
+                    LocationIntegrationEnum.MAPS,
+                    LocationIntegrationEnum.CUSTOM_OSM -> FullscreenMapDialogFragment.newInstance(null, null, AppSingleton.getBytesCurrentIdentity(), SettingsActivity.getLocationIntegration())?.show(supportFragmentManager, FULL_SCREEN_MAP_FRAGMENT_TAG)
+                    else -> Unit
+                }
             }
         } else if (itemId == R.id.action_clear_log) {
             if (viewPager.currentItem == CALLS_TAB) {

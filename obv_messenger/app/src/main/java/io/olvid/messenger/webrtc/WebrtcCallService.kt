@@ -131,6 +131,7 @@ import io.olvid.messenger.webrtc.WebrtcCallService.Role.RECIPIENT
 import io.olvid.messenger.webrtc.WebrtcCallService.State.BUSY
 import io.olvid.messenger.webrtc.WebrtcCallService.State.CALL_ENDED
 import io.olvid.messenger.webrtc.WebrtcCallService.State.CALL_IN_PROGRESS
+import io.olvid.messenger.webrtc.WebrtcCallService.State.CONNECTING
 import io.olvid.messenger.webrtc.WebrtcCallService.State.FAILED
 import io.olvid.messenger.webrtc.WebrtcCallService.State.GETTING_TURN_CREDENTIALS
 import io.olvid.messenger.webrtc.WebrtcCallService.State.INITIAL
@@ -205,6 +206,7 @@ class WebrtcCallService : Service() {
         GETTING_TURN_CREDENTIALS,
         INITIALIZING_CALL,
         RINGING,
+        CONNECTING,
         BUSY,
         CALL_IN_PROGRESS,
         CALL_ENDED,
@@ -1196,7 +1198,7 @@ class WebrtcCallService : Service() {
             )
             callParticipant.setPeerState(CONNECTING_TO_PEER)
             if (_state == State.RINGING) {
-                setState(INITIALIZING_CALL)
+                setState(CONNECTING)
             }
         }
     }
@@ -1457,7 +1459,7 @@ class WebrtcCallService : Service() {
             peerConnectionHolderFailed(callerCallParticipant, PEER_CONNECTION_CREATION_ERROR)
             return
         }
-        setState(INITIALIZING_CALL)
+        setState(CONNECTING)
     }
 
     private fun recipientRejectCall(callIdentifier: UUID) {
@@ -2364,11 +2366,15 @@ class WebrtcCallService : Service() {
 
             val frontCameraId = cameras.firstOrNull { cameraEnumerator.isFrontFacing(it) }
             val backCameraId = cameras.firstOrNull { cameraEnumerator.isBackFacing(it) }
-
-            availableCameras = listOfNotNull(
-                frontCameraId?.let { CameraAndFormat(it, true, getFormatForResolution(cameraEnumerator, it, targetResolution)) },
-                backCameraId?.let { CameraAndFormat(it, false, getFormatForResolution(cameraEnumerator, it, targetResolution)) },
-            )
+            try {
+                availableCameras = listOfNotNull(
+                    frontCameraId?.let { CameraAndFormat(it, true, getFormatForResolution(cameraEnumerator, it, targetResolution)) },
+                    backCameraId?.let { CameraAndFormat(it, false, getFormatForResolution(cameraEnumerator, it, targetResolution)) },
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                availableCameras = emptyList()
+            }
             availableCamerasLiveData.postValue(availableCameras)
             selectedCamera = availableCameras.firstOrNull()
             selectedCameraLiveData.postValue(selectedCamera)
@@ -2407,8 +2413,8 @@ class WebrtcCallService : Service() {
         timeoutTimerTask = object : TimerTask() {
             override fun run() {
                 executor.execute {
-                    // only notify peers if you are the caller
-                    hangUpCallInternal(!isCaller)
+                    // do not send a hang up message when a call timeouts while ringing
+                    hangUpCallInternal(false)
                 }
             }
         }
@@ -2595,6 +2601,7 @@ class WebrtcCallService : Service() {
         audioManager!!.mode = AudioManager.MODE_IN_COMMUNICATION
     }
 
+    @SuppressLint("ForegroundServiceType")
     private fun showOngoingForeground() {
         if (callParticipants.isEmpty()) {
             stopForeground(true)
@@ -2734,6 +2741,7 @@ class WebrtcCallService : Service() {
         }
     }
 
+    @SuppressLint("ForegroundServiceType", "MissingPermission")
     private fun showIncomingCallForeground(contact: Contact?, participantCount: Int) {
         val rejectCallIntent = Intent(this, WebrtcCallService::class.java)
         rejectCallIntent.setAction(ACTION_REJECT_CALL)
@@ -3293,7 +3301,7 @@ class WebrtcCallService : Service() {
                     }
 ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
                 )
-                if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
+                if (callParticipant.contact != null && callParticipant.contact.hasChannelOrPreKey()) {
                     postMessage(listOf(callParticipant), jsonNewIceCandidateMessage)
                 } else {
                     val caller = callerCallParticipant
@@ -3325,7 +3333,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
             try {
                 val jsonRemoveIceCandidatesMessage =
                     JsonRemoveIceCandidatesMessage(jsonIceCandidates)
-                if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
+                if (callParticipant.contact != null && callParticipant.contact.hasChannelOrPreKey()) {
                     postMessage(listOf(callParticipant), jsonRemoveIceCandidatesMessage)
                 } else {
                     val caller = callerCallParticipant
@@ -3451,7 +3459,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
             reconnectCounter,
             peerReconnectCounterToOverride
         )
-        if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
+        if (callParticipant.contact != null && callParticipant.contact.hasChannelOrPreKey()) {
             postMessage(listOf(callParticipant), reconnectCallMessage)
         } else {
             val caller = callerCallParticipant
@@ -3474,7 +3482,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         val jsonHangedUpMessage = JsonHangedUpMessage()
         for (callParticipant in callParticipants) {
             sendDataChannelMessage(callParticipant, JsonHangedUpInnerMessage())
-            if (callParticipant.contact == null || callParticipant.contact.establishedChannelCount == 0) {
+            if (callParticipant.contact == null || !callParticipant.contact.hasChannelOrPreKey()) {
                 try {
                     val caller = callerCallParticipant
                     if (caller != null) {
@@ -3515,7 +3523,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
             gzip(sessionDescription),
             callParticipant.gatheringPolicy
         )
-        if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
+        if (callParticipant.contact != null && callParticipant.contact.hasChannelOrPreKey()) {
             postMessage(listOf(callParticipant), newParticipantOfferMessage)
         } else {
             val caller = callerCallParticipant
@@ -3540,7 +3548,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
     ) {
         val newParticipantAnswerMessage =
             JsonNewParticipantAnswerMessage(sessionDescriptionType, gzip(sessionDescription))
-        if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
+        if (callParticipant.contact != null && callParticipant.contact.hasChannelOrPreKey()) {
             postMessage(listOf(callParticipant), newParticipantAnswerMessage)
         } else {
             val caller = callerCallParticipant
@@ -3563,7 +3571,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
     ): Boolean {
         val bytesContactIdentities: MutableList<ByteArray?> = ArrayList(callParticipants.size)
         for (callParticipant in callParticipants) {
-            if (callParticipant.contact != null && callParticipant.contact.establishedChannelCount > 0) {
+            if (callParticipant.contact != null && callParticipant.contact.hasChannelOrPreKey()) {
                 bytesContactIdentities.add(callParticipant.bytesContactIdentity)
             }
         }
@@ -4033,9 +4041,9 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         const val VIDEO_SUPPORTED_DATA_MESSAGE_TYPE = 5
         const val VIDEO_SHARING_DATA_MESSAGE_TYPE = 6
         const val SCREEN_SHARING_DATA_MESSAGE_TYPE = 7
-        const val CALL_TIMEOUT_MILLIS: Long = 30000
-        const val RINGING_TIMEOUT_MILLIS: Long = 30000
-        const val PEER_CALL_ENDED_WAIT_MILLIS: Long = 3000
+        const val CALL_TIMEOUT_MILLIS: Long = 30_000
+        const val RINGING_TIMEOUT_MILLIS: Long = 50_000
+        const val PEER_CALL_ENDED_WAIT_MILLIS: Long = 3_000
 
         // HashMap containing ICE candidates received while outside a call: callIdentifier -> (bytesContactIdentity -> candidate)
         // with continuous gathering, we may send/receive candidates before actually sending/receiving the startCall message

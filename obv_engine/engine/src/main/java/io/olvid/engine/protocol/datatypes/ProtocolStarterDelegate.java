@@ -42,6 +42,7 @@ public interface ProtocolStarterDelegate {
     void startOwnedDeviceDiscoveryProtocol(Identity ownedIdentity) throws Exception;
     void startOwnedDeviceDiscoveryProtocolWithinTransaction(Session session, Identity ownedIdentity) throws Exception;
     void startChannelCreationProtocolWithOwnedDevice(Session session, Identity ownedIdentity, UID ownedDeviceUid) throws Exception;
+    void startChannelCreationProtocolWithContactDevice(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws Exception;
     void startTrustEstablishmentProtocol(Identity ownedIdentity, Identity contactIdentity, String contactDisplayName) throws Exception;
     void startMutualScanTrustEstablishmentProtocol(Identity ownedIdentity, Identity contactIdentity, byte[] signature) throws Exception;
     void startContactMutualIntroductionProtocol(Identity ownedIdentity, Identity contactIdentityA, Identity[] contactIdentities) throws Exception;

@@ -22,11 +22,17 @@ package io.olvid.engine.protocol.protocols;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoAcceptableChannelException;
+import io.olvid.engine.datatypes.PreKeyBlobOnServer;
+import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
@@ -333,6 +339,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         private final UID[] contactDeviceUids;
         private final long trustTimestamp;
 
+        @SuppressWarnings("unused")
         public PropagateContactAdditionToOtherDevicesMessage(CoreProtocolMessage coreProtocolMessage, Identity contactIdentity, String keycloakServerUrl, String contactSerializedDetails, UID[] contactDeviceUids, long trustTimestamp) {
             super(coreProtocolMessage);
             this.contactIdentity = contactIdentity;
@@ -584,14 +591,18 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
-            UID[] contactDeviceUids = receivedMessage.getDeviceUidsReceivedState().getDeviceUids();
+            DeviceDiscoveryChildProtocol.DeviceUidsReceivedState deviceUidsReceivedState = receivedMessage.getDeviceUidsReceivedState();
+
 
             //////////
             // Abort protocol if deviceDiscovery failed...
             //////////
-            if (contactDeviceUids == null || contactDeviceUids.length == 0) {
+            if (deviceUidsReceivedState.getDeviceUidsAndPreKeys().length == 0 && deviceUidsReceivedState.getServerTimestamp() == 0) {
                 return new FinishedProtocolState();
             }
+
+            List<UID> contactDeviceUidList = new ArrayList<>();
+
 
             //////////
             // actually create the contact
@@ -600,17 +611,40 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             final long trustTimestamp = System.currentTimeMillis();
             if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
                 contactCreated = true;
+                // create contact
                 protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(trustTimestamp, startState.keycloakServerUrl), true);
 
-                for (UID contactDeviceUid : contactDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, false);
+                // set recently online
+                protocolManagerSession.identityDelegate.setContactRecentlyOnline(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), deviceUidsReceivedState.isRecentlyOnline());
+
+                // handle devices and preKeys
+                for (HashMap<DictionaryKey, Encoded> deviceUidAndPreKey : deviceUidsReceivedState.getDeviceUidsAndPreKeys()) {
+                    Encoded encodedDeviceUid = deviceUidAndPreKey.get(new DictionaryKey("uid"));
+                    Encoded encodedSignedPreKey = deviceUidAndPreKey.get(new DictionaryKey("prk"));
+                    if (encodedDeviceUid != null) {
+                        UID deviceUid = encodedDeviceUid.decodeUid();
+                        contactDeviceUidList.add(deviceUid);
+                        PreKeyBlobOnServer preKeyBlob = PreKeyBlobOnServer.verifySignatureAndDecode(encodedSignedPreKey, startState.contactIdentity, deviceUid, deviceUidsReceivedState.getServerTimestamp());
+                        protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, deviceUid, preKeyBlob, false);
+                    }
                 }
             } else {
                 contactCreated = false;
                 protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(trustTimestamp, startState.keycloakServerUrl), true);
-                // no need to add devices, they should be in sync already
+
+                // set recently online
+                protocolManagerSession.identityDelegate.setContactRecentlyOnline(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), deviceUidsReceivedState.isRecentlyOnline());
+
+                // no need to add devices, they should be in sync already, but still build the list of contact deviceUid
+                for (HashMap<DictionaryKey, Encoded> deviceUidAndPreKey : deviceUidsReceivedState.getDeviceUidsAndPreKeys()) {
+                    Encoded encodedDeviceUid = deviceUidAndPreKey.get(new DictionaryKey("uid"));
+                    if (encodedDeviceUid != null) {
+                        contactDeviceUidList.add(encodedDeviceUid.decodeUid());
+                    }
+                }
             }
 
+            UID[] contactDeviceUids = contactDeviceUidList.toArray(new UID[0]);
 
             /////////
             // propagate the message to other known devices
@@ -619,7 +653,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateContactAdditionToOtherDevicesMessage(coreProtocolMessage, startState.contactIdentity, startState.keycloakServerUrl, startState.contactSerializedDetails, contactDeviceUids, trustTimestamp).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -655,7 +689,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
         private final PropagateContactAdditionToOtherDevicesMessage receivedMessage;
 
         public ProcessPropagatedContactAdditionStep(InitialProtocolState startState, PropagateContactAdditionToOtherDevicesMessage receivedMessage, KeycloakContactAdditionProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -666,13 +700,21 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
 
             if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity)) {
                 protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, receivedMessage.contactIdentity, receivedMessage.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(receivedMessage.trustTimestamp, receivedMessage.keycloakServerUrl), true);
-
-                for (UID contactDeviceUid : receivedMessage.contactDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity, contactDeviceUid, false);
-                }
             } else {
                 protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(receivedMessage.trustTimestamp, receivedMessage.keycloakServerUrl), true);
-                // no need to add devices, they should be in sync already
+            }
+
+            boolean triggerDeviceDiscovery = false;
+            for (UID contactDeviceUid : receivedMessage.contactDeviceUids) {
+                triggerDeviceDiscovery |= protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity, contactDeviceUid, null, false);
+            }
+            if (triggerDeviceDiscovery) {
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                        new UID(getPrng()),
+                        false);
+                ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
             return new FinishedProtocolState();
@@ -767,13 +809,21 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             //////////
             if (!protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
                 protocolManagerSession.identityDelegate.addContactIdentity(protocolManagerSession.session, startState.contactIdentity, startState.contactSerializedDetails, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), startState.keycloakServerUrl), true);
-
-                for (UID contactDeviceUid : startState.contactDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, false);
-                }
             } else {
                 protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createKeycloakTrustOrigin(System.currentTimeMillis(), startState.keycloakServerUrl), true);
-                // no need to add devices, they should be in sync already
+            }
+
+            boolean triggerDeviceDiscovery = false;
+            for (UID contactDeviceUid : startState.contactDeviceUids) {
+                triggerDeviceDiscovery |= protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, null, false);
+            }
+            if (triggerDeviceDiscovery) {
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                        new UID(getPrng()),
+                        false);
+                ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
 

@@ -547,7 +547,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
         AppSingleton.getContactNamesCache().observe(this, cache -> messageListAdapter.notifyDataSetChanged());
         AppSingleton.getContactHuesCache().observe(this, cache -> messageListAdapter.notifyDataSetChanged());
         AppSingleton.getContactPhotoUrlsCache().observe(this, cache -> messageListAdapter.notifyDataSetChanged());
-        AppSingleton.getContactKeycloakManagedCache().observe(this, cache -> messageListAdapter.notifyDataSetChanged());
+        AppSingleton.getContactInfoCache().observe(this, cache -> messageListAdapter.notifyDataSetChanged());
 
         actionModeCallback = new ActionMode.Callback() {
             private MenuInflater inflater;
@@ -1397,7 +1397,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 switch (discussion.discussionType) {
                     case Discussion.TYPE_CONTACT: {
                         List<Contact> contacts = discussionViewModel.getDiscussionContacts().getValue();
-                        if (contacts != null && !contacts.isEmpty() && contacts.get(0).establishedChannelCount > 0) {
+                        if (contacts != null && !contacts.isEmpty() && contacts.get(0).hasChannelOrPreKey()) {
                             App.startWebrtcCall(this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
                         }
                         break;
@@ -1603,8 +1603,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                 case OSM:
                 case CUSTOM_OSM:
                 case MAPS: {
-                    FullscreenMapDialogFragment.newInstance(null, discussionViewModel.getDiscussionId(), SettingsActivity.getLocationIntegration())
-                            .show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
+                    FullscreenMapDialogFragment fragment = FullscreenMapDialogFragment.newInstance(null, discussionViewModel.getDiscussionId(), null, SettingsActivity.getLocationIntegration());
+                    if (fragment != null) {
+                        fragment.show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
+                    }
                     break;
                 }
                 // if basic integration click will center on currently sharing message, or show a pop up with a list of currently sharing people
@@ -1641,8 +1643,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         break;
                     }
                     case 3: {
-                        FullscreenMapDialogFragment.newInstance(null, discussionViewModel.getDiscussionId(), locationIntegration)
-                                .show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
+                        FullscreenMapDialogFragment fragment = FullscreenMapDialogFragment.newInstance(null, discussionViewModel.getDiscussionId(), null, locationIntegration);
+                        if (fragment != null) {
+                            fragment.show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
+                        }
                         break;
                     }
                 }
@@ -2758,12 +2762,15 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         && !message.isLocationMessage()) {
                     String body = message.getStringContent(DiscussionActivity.this);
 
+                    // if body ends with the link preview url, truncate it
+                    String linkPreviewUrl = discussionViewModel.getMessageLinkPreviewUrlCache().get(message.id);
+
                     if (holder.wipedAttachmentCountTextView != null) {
                         holder.wipedAttachmentCountTextView.setVisibility(View.GONE);
                         holder.directDeleteImageView.setVisibility(View.GONE);
                     }
 
-                    if (body.isEmpty()) {
+                    if (body.isEmpty() || (body.equalsIgnoreCase(linkPreviewUrl) && SettingsActivity.truncateMessageBodyTrailingLinks())) {
                         holder.messageContentTextView.setVisibility(View.GONE);
                     } else if (message.wipeStatus == Message.WIPE_STATUS_WIPED
                             || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
@@ -2837,7 +2844,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             }
                         }
                     } else {
-                        Utils.applyBodyWithSpans(holder.messageContentTextView, discussionViewModel.getDiscussion().getValue() != null ? discussionViewModel.getDiscussion().getValue().bytesOwnedIdentity : null, message, getHighlightPatternsForMessage(message), true, true);
+                        Utils.applyBodyWithSpans(holder.messageContentTextView, discussionViewModel.getDiscussion().getValue() != null ? discussionViewModel.getDiscussion().getValue().bytesOwnedIdentity : null, message, getHighlightPatternsForMessage(message), true, true, discussionViewModel.getMessageLinkPreviewUrlCache().get(message.id));
                         if (StringUtils.isShortEmojiString(body, 5)) {
                             holder.messageContentTextView.setVisibility(View.VISIBLE);
                             holder.messageContentTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.single_line_emoji_size));
@@ -3190,7 +3197,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                                         holder.messageReplyBody.setVisibility(View.GONE);
                                     } else {
                                         holder.messageReplyBody.setVisibility(View.VISIBLE);
-                                        Utils.applyBodyWithSpans(holder.messageReplyBody, discussionViewModel.getDiscussion().getValue() != null ? discussionViewModel.getDiscussion().getValue().bytesOwnedIdentity : null, replyMessage, getHighlightPatternsForMessage(message), true, true);
+                                        Utils.applyBodyWithSpans(holder.messageReplyBody, discussionViewModel.getDiscussion().getValue() != null ? discussionViewModel.getDiscussion().getValue().bytesOwnedIdentity : null, replyMessage, getHighlightPatternsForMessage(message), true, true, null);
                                         if (StringUtils.isShortEmojiString(replyMessage.getStringContent(DiscussionActivity.this), 5)) {
                                             holder.messageReplyBody.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.single_line_emoji_reply_size));
                                             holder.messageReplyBody.setMinWidth((int) (getResources().getDimensionPixelSize(R.dimen.single_line_emoji_reply_size) * 1.25));
@@ -3224,7 +3231,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     }
 
                     if (!message.isLocationMessage() && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED) {
-                        Utils.applyBodyWithSpans(holder.messageContentTextView, discussionViewModel.getDiscussion().getValue() == null ? null : discussionViewModel.getDiscussion().getValue().bytesOwnedIdentity, message, getHighlightPatternsForMessage(message), true, true);
+                        // if body ends with the link preview url, truncate it
+                        String linkPreviewUrl = discussionViewModel.getMessageLinkPreviewUrlCache().get(message.id);
+
+                        Utils.applyBodyWithSpans(holder.messageContentTextView, discussionViewModel.getDiscussion().getValue() == null ? null : discussionViewModel.getDiscussion().getValue().bytesOwnedIdentity, message, getHighlightPatternsForMessage(message), true, true, linkPreviewUrl);
                     }
 
                     if (message.hasAttachments()) {
@@ -3584,6 +3594,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                     holder.messageLinkPreviewGroup.setVisibility(View.VISIBLE);
                     final Uri uri = openGraph.getSafeUri();
                     if (uri != null) {
+                        if (!discussionViewModel.getMessageLinkPreviewUrlCache().containsKey(targetMessageId)) {
+                            discussionViewModel.getMessageLinkPreviewUrlCache().put(targetMessageId, uri.toString());
+                            messageListAdapter.notifyItemChanged(holder.getLayoutPosition(), BODY_OR_HIGHLIGHT_CHANGE_MASK);
+                        }
                         if (openGraph.shouldShowCompleteDescription()) {
                             holder.messageLinkPreviewTitle.setMaxLines(2);
                             holder.messageLinkPreviewDescription.setMaxLines(100);
@@ -3833,8 +3847,10 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         case CUSTOM_OSM:
                         case MAPS: {
                             // if a map integration is configured: open fullscreen map (behaviour will change depending on message.locationType)
-                            FullscreenMapDialogFragment.newInstance(message, discussionViewModel.getDiscussionId(), SettingsActivity.getLocationIntegration())
-                                    .show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
+                            FullscreenMapDialogFragment fragment = FullscreenMapDialogFragment.newInstance(message, discussionViewModel.getDiscussionId(), null, SettingsActivity.getLocationIntegration());
+                            if (fragment != null) {
+                                fragment.show(getSupportFragmentManager(), FULL_SCREEN_MAP_FRAGMENT_TAG);
+                            }
                             break;
                         }
                         case BASIC: {
@@ -4749,7 +4765,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                             CallLogItemDao.CallLogItemAndContacts callLogItem = AppDatabase.getInstance().callLogItemDao().get(callLogItemId);
                             if (callLogItem != null) {
                                 if (callLogItem.contacts.size() == 1 && callLogItem.callLogItem.bytesGroupOwnerAndUidOrIdentifier == null) {
-                                    if (callLogItem.oneContact != null && callLogItem.oneContact.establishedChannelCount > 0) {
+                                    if (callLogItem.oneContact != null && callLogItem.oneContact.hasChannelOrPreKey()) {
                                         App.startWebrtcCall(DiscussionActivity.this, callLogItem.oneContact.bytesOwnedIdentity, callLogItem.oneContact.bytesContactIdentity);
                                     }
                                 } else {
@@ -4766,7 +4782,7 @@ public class DiscussionActivity extends LockableActivity implements View.OnClick
                         Discussion discussion = discussionViewModel.getDiscussion().getValue();
                         if (discussion != null && discussion.isNormalOrReadOnly() && discussion.discussionType == Discussion.TYPE_CONTACT) {
                             List<Contact> contacts = discussionViewModel.getDiscussionContacts().getValue();
-                            if (contacts != null && !contacts.isEmpty() && contacts.get(0).establishedChannelCount > 0) {
+                            if (contacts != null && !contacts.isEmpty() && contacts.get(0).hasChannelOrPreKey()) {
                                 App.startWebrtcCall(DiscussionActivity.this, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
                             }
                         }

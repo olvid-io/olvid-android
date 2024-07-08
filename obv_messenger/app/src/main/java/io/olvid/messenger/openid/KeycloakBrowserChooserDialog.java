@@ -45,6 +45,7 @@ import java.util.Set;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -73,20 +74,26 @@ public class KeycloakBrowserChooserDialog {
                 insertedPackageNames.add(browserDescriptor.packageName);
             }
 
-
-            AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
-                    .setTitle(R.string.dialog_title_choose_browser_for_authentication)
-                    .setAdapter(new BrowserAdapter(context, browsers), (dialog, which) -> {
-                        Browser browser = browsers.get(which);
-                        if (browser.defaultBrowser) {
-                            SettingsActivity.setPreferredKeycloakBrowser(null);
-                        } else {
-                            SettingsActivity.setPreferredKeycloakBrowser(browser.packageName);
-                        }
-                    })
-                    .setNegativeButton(R.string.button_label_cancel, null);
-            builder.create().show();
-
+            if (browsers.isEmpty()) {
+                AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_no_browser_found)
+                        .setMessage(Markdown.formatMarkdown(context.getString(R.string.dialog_message_no_browser_found)))
+                        .setNegativeButton(R.string.button_label_ok, null);
+                builder.create().show();
+            } else {
+                AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_choose_browser_for_authentication)
+                        .setAdapter(new BrowserAdapter(context, browsers), (dialog, which) -> {
+                            Browser browser = browsers.get(which);
+                            if (browser.defaultBrowser) {
+                                SettingsActivity.setPreferredKeycloakBrowser(null);
+                            } else {
+                                SettingsActivity.setPreferredKeycloakBrowser(browser.packageName);
+                            }
+                        })
+                        .setNegativeButton(R.string.button_label_cancel, null);
+                builder.create().show();
+            }
         } catch (Exception e) {
             App.toast(R.string.toast_message_error_querying_for_available_browsers, Toast.LENGTH_SHORT);
         }

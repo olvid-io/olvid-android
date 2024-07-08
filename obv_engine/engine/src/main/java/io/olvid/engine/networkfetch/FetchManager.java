@@ -239,6 +239,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @SuppressWarnings("unused")
     public void setDelegate(ProtocolStarterDelegate protocolStarterDelegate) {
         this.websocketCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
+        this.serverPushNotificationsCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
     }
 
     // endregion
@@ -365,9 +366,20 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                     attachmentKeyAndMetadata[i].getMetadata());
         }
         inboxMessage.setPayloadAndFromIdentity(messagePayload, remoteIdentity, extendedPayloadKey);
+        // just in case, also mark recentlyOnline as true (otherwise, a contact could remain not recently online until a contact discovery)
+        identityDelegate.setContactRecentlyOnline(session, ownedIdentity, remoteIdentity, true);
     }
 
-
+    @Override
+    public void setInboxMessageFromIdentityForMissingPreKeyContact(Session session, Identity ownedIdentity, UID messageUid, Identity contactIdentity) throws Exception {
+        FetchManagerSession fetchManagerSession = wrapSession(session);
+        InboxMessage inboxMessage = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUid);
+        if (inboxMessage == null) {
+            Logger.e("FetchManager is trying to setInboxMessageFromIdentityForMissingPreKeyContact for an non-existing messageUid.");
+            throw new Exception();
+        }
+        inboxMessage.setFromIdentityForMissingPreKeyContact(contactIdentity);
+    }
 
     @Override
     public void downloadAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber, int priorityCategory) {
@@ -720,8 +732,8 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     }
 
     @Override
-    public void forceRegisterPushNotification(Identity ownedIdentity) {
-        serverPushNotificationsCoordinator.registerServerPushNotification(ownedIdentity);
+    public void forceRegisterPushNotification(Identity ownedIdentity, boolean triggerAnOwnedDeviceDiscoveryWhenFinished) {
+        serverPushNotificationsCoordinator.registerServerPushNotification(ownedIdentity, triggerAnOwnedDeviceDiscoveryWhenFinished);
     }
 
     @Override

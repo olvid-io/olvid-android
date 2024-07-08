@@ -177,6 +177,8 @@ public class WellKnownDownloadOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 }

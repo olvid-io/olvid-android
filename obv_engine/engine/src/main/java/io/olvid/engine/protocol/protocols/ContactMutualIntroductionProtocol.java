@@ -661,7 +661,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             {
                 // post an invitation message to contact A
                 String serializedDetailsB = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityB);
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.contactIdentityA, getOwnedIdentity()));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityA, getOwnedIdentity()));
                 ChannelMessageToSend messageToSend = new MediatorInvitationMessage(coreProtocolMessage, receivedMessage.contactIdentityB, serializedDetailsB).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -669,7 +669,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             {
                 // post an invitation message to contact B
                 String serializedDetailsA = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityA);
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.contactIdentityB, getOwnedIdentity()));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityB, getOwnedIdentity()));
                 ChannelMessageToSend messageToSend = new MediatorInvitationMessage(coreProtocolMessage, receivedMessage.contactIdentityA, serializedDetailsA).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -679,7 +679,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagatedInitialMessage(coreProtocolMessage, receivedMessage.contactIdentityA, receivedMessage.contactIdentityB).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -706,7 +706,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final PropagatedInitialMessage receivedMessage;
 
         public ProcessPropagatedInitialMessageStep(InitialProtocolState startState, PropagatedInitialMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -734,7 +734,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final MediatorInvitationMessage receivedMessage;
 
         public CheckTrustLevelsAndShowDialogStep(InitialProtocolState startState, MediatorInvitationMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -898,7 +898,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateConfirmationMessage(coreProtocolMessage, receivedMessage.invitationAccepted, startState.contactIdentity, startState.contactSerializedDetails, startState.mediatorIdentity).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -961,7 +961,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final PropagateConfirmationMessage receivedMessage;
 
         public ProcessPropagatedInviteResponseStep(InvitationReceivedState startState, PropagateConfirmationMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1035,8 +1035,18 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             } else {
                 protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity), true);
             }
+
+            boolean triggerDeviceDiscovery = false;
             for (UID contactDeviceUid: receivedMessage.contactDeviceUids) {
-                protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, false);
+                triggerDeviceDiscovery |= protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, null, false);
+            }
+            if (triggerDeviceDiscovery) {
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                        new UID(getPrng()),
+                        false);
+                ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
 
@@ -1045,7 +1055,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateNotificationMessage(coreProtocolMessage, receivedMessage.contactDeviceUids).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -1069,7 +1079,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
         private final PropagateNotificationMessage receivedMessage;
 
         public ProcessPropagatedNotificationAndAddTrustStep(InvitationAcceptedState startState, PropagateNotificationMessage receivedMessage, ContactMutualIntroductionProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1084,8 +1094,18 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             } else {
                 protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.contactIdentity, getOwnedIdentity(), TrustOrigin.createIntroductionTrustOrigin(System.currentTimeMillis(), startState.mediatorIdentity), true);
             }
+
+            boolean triggerDeviceDiscovery = false;
             for (UID contactDeviceUid: receivedMessage.contactDeviceUids) {
-                protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, false);
+                triggerDeviceDiscovery |= protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, contactDeviceUid, null, false);
+            }
+            if (triggerDeviceDiscovery) {
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                        ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                        new UID(getPrng()),
+                        false);
+                ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
             return new WaitingForAckState(startState.contactIdentity, startState.contactSerializedDetails, startState.mediatorIdentity, startState.dialogUuid, startState.acceptType);

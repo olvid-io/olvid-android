@@ -672,6 +672,9 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
             ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, getOwnedIdentity(), currentDeviceUid, signature).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
+
+            protocolManagerSession.identityDelegate.setLatestChannelCreationPingTimestampForContactDevice(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity, receivedMessage.contactDeviceUid, System.currentTimeMillis());
+
             return new PingSentState();
         }
     }
@@ -779,6 +782,8 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}));
                 ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, getOwnedIdentity(), currentDeviceUid, signature).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
+                protocolManagerSession.identityDelegate.setLatestChannelCreationPingTimestampForContactDevice(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentity, receivedMessage.contactDeviceUid, System.currentTimeMillis());
 
                 return new PingSentState();
             } else {
@@ -963,7 +968,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
 
             // Add the contactDeviceUid to the contactIdentity if needed --> If the device was indeed added, trigger a device discovery
             try {
-                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid, true)) {
+                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid, null, true)) {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
                             new UID(getPrng()),
@@ -1038,7 +1043,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
 
             // Add the contactDeviceUid to the contactIdentity if needed --> If the device was indeed added, trigger a device discovery
             try {
-                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid, true)) {
+                if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid, null, true)) {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
                             new UID(getPrng()),

@@ -63,6 +63,10 @@ public class ChannelReceivedMessage {
                         ObliviousChannel.setSupportsGKMV2(channelManagerSession, currentDeviceUid, receptionChannelInfo.getRemoteDeviceUid(), receptionChannelInfo.getRemoteIdentity(), receptionChannelInfo.getFullRatchetCount(), receptionChannelInfo.getSelfRatchetCount());
                     }
                 }
+            } else if (receptionChannelInfo.getChannelType() == ReceptionChannelInfo.PRE_KEY_CHANNEL_TYPE
+                    && !messageKeyCheckPassed) {
+                Logger.e("Received a message not passing the messageKey check encrypted with a pre key. Discarding it!!!!");
+                throw new Exception();
             }
 
             // if needed, compute the extended payload key

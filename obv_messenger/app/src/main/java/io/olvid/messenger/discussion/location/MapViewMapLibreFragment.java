@@ -118,6 +118,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
     // determine if we need to use fallback style or not (when using localized styles)
     private boolean triedStyleFallbackUrl = false;
+    private boolean firstStyleLoaded = false;
 
     // store previously centered marker to unset Zindex
     private Symbol currentlyCenteredSymbol = null;
@@ -226,31 +227,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         }
 
         // set style, with a callback for the loading of the first style
-        mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onFirstStyleLoaded);
-    }
-
-    public void onFirstStyleLoaded(Style style) {
-        if (style == null || mapboxMap == null) {
-            Logger.i("MapLibre.onStyleLoaded: map not initialized or style is null");
-            return;
-        }
-
-        // first run the normal callback
-        onStyleLoaded(style);
-
-        // then run thing that need to be run only once
-        // setup listeners for map gestures
-        mapboxMap.addOnCameraMoveStartedListener((reason) -> {
-            currentCameraCenterLiveData.postValue(null);
-
-            if (reason == MapboxMap.OnCameraMoveStartedListener.REASON_API_GESTURE) {
-                setCurrentlyCenteredSymbol(null);
-            }
-        });
-        //noinspection DataFlowIssue
-        mapboxMap.addOnCameraIdleListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
-        //noinspection DataFlowIssue
-        mapboxMap.addOnCameraMoveCancelListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
+        mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
     }
 
     public void onStyleLoaded(Style style) {
@@ -313,6 +290,23 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             onMapReadyCallback = null;
         } else if (redrawMarkersCallback != null) {
             redrawMarkersCallback.run();
+        }
+
+        if (!firstStyleLoaded) {
+            firstStyleLoaded = true;
+
+            // setup listeners for map gestures
+            mapboxMap.addOnCameraMoveStartedListener((reason) -> {
+                currentCameraCenterLiveData.postValue(null);
+
+                if (reason == MapboxMap.OnCameraMoveStartedListener.REASON_API_GESTURE) {
+                    setCurrentlyCenteredSymbol(null);
+                }
+            });
+            //noinspection DataFlowIssue
+            mapboxMap.addOnCameraIdleListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
+            //noinspection DataFlowIssue
+            mapboxMap.addOnCameraMoveCancelListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
         }
     }
 

@@ -52,9 +52,10 @@ public class GenericProtocolMessageToSend {
             case SendChannelInfo.LOCAL_TYPE:
             case SendChannelInfo.OBLIVIOUS_CHANNEL_TYPE:
             case SendChannelInfo.ASYMMETRIC_CHANNEL_TYPE:
-            case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_ON_SAME_SERVER_TYPE:
+            case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE:
             case SendChannelInfo.ASYMMETRIC_BROADCAST_CHANNEL_TYPE:
-            case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_TYPE:
+            case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_TYPE:
+            case SendChannelInfo.OBLIVIOUS_CHANNEL_OR_PRE_KEY_TYPE:
                 return new ChannelProtocolMessageToSend(sendChannelInfo, encodedElements, partOfFullRatchetProtocolOfTheSendSeed);
             default:
                 return null;
@@ -62,6 +63,7 @@ public class GenericProtocolMessageToSend {
     }
 
     public ChannelDialogMessageToSend generateChannelDialogMessageToSend() {
+        //noinspection SwitchStatementWithTooFewBranches
         switch (sendChannelInfo.getChannelType()) {
             case SendChannelInfo.USER_INTERFACE_TYPE:
                 return new ChannelDialogMessageToSend(sendChannelInfo.getDialogUuid(), sendChannelInfo.getToIdentity(), sendChannelInfo.getDialogType(), encodedElements);
@@ -71,6 +73,7 @@ public class GenericProtocolMessageToSend {
     }
 
     public ChannelServerQueryMessageToSend generateChannelServerQueryMessageToSend() {
+        //noinspection SwitchStatementWithTooFewBranches
         switch (sendChannelInfo.getChannelType()) {
             case SendChannelInfo.SERVER_QUERY_TYPE:
                 return new ChannelServerQueryMessageToSend(sendChannelInfo.getToIdentity(), sendChannelInfo.getServerQueryType(), encodedElements);

@@ -67,9 +67,6 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
     private final NoDuplicateOperationQueue batchSendProtocolMessageOperationQueue;
     private final ExponentialBackoffRepeatingScheduler<StringAndBoolean> batchScheduler;
 
-    private boolean initialQueueingPerformed = false;
-    private final Object lock = new Object();
-
     private final HashMap<Identity, List<UID>> awaitingIdentityReactivationOperations;
     private final Lock awaitingIdentityReactivationOperationsLock;
 
@@ -109,19 +106,13 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
     }
 
     public void initialQueueing() {
-        synchronized (lock) {
-            if (initialQueueingPerformed) {
-                return;
+        try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
+            OutboxMessage[] outboxMessages = OutboxMessage.getAll(sendManagerSession);
+            for (OutboxMessage outboxMessage : outboxMessages) {
+                queueNewSendMessageCompositeOperation(outboxMessage.getServer(), outboxMessage.getOwnedIdentity(), outboxMessage.getUid(), outboxMessage.getAttachments().length != 0, outboxMessage.isApplicationMessage());
             }
-            try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
-                OutboxMessage[] outboxMessages = OutboxMessage.getAll(sendManagerSession);
-                for (OutboxMessage outboxMessage: outboxMessages) {
-                    queueNewSendMessageCompositeOperation(outboxMessage.getServer(), outboxMessage.getOwnedIdentity(), outboxMessage.getUid(), outboxMessage.getAttachments().length != 0, outboxMessage.isApplicationMessage());
-                }
-                initialQueueingPerformed = true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

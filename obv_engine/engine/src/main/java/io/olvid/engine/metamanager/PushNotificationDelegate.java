@@ -30,6 +30,6 @@ import io.olvid.engine.datatypes.UID;
 public interface PushNotificationDelegate {
     void registerPushNotificationIfConfigurationChanged(Session session, Identity ownedIdentity, UID currentDeviceUid, PushNotificationTypeAndParameters pushNotificationTypeAndParameters) throws SQLException;
     void processAndroidPushNotification(String maskingUidString);
-    void forceRegisterPushNotification(Identity ownedIdentity);
+    void forceRegisterPushNotification(Identity ownedIdentity, boolean triggerAnOwnedDeviceDiscoveryWhenFinished);
     Identity getOwnedIdentityFromMaskingUid(String maskingUidString);
 }

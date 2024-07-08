@@ -25,6 +25,7 @@ import java.util.Objects;
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Constants;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelServerQueryMessageToSend;
@@ -55,7 +56,7 @@ public class ServerQueryChannel extends Channel {
         ServerQueryChannel[] serverQueryChannels = acceptableChannelsForPosting(channelManagerSession, message);
         if (serverQueryChannels.length == 0) {
             Logger.i("No acceptable channels were found for posting");
-            throw new Exception();
+            throw new NoAcceptableChannelException();
         }
         for (ServerQueryChannel serverQueryChannel: serverQueryChannels) {
             serverQueryChannel.doPost(channelManagerSession, message, prng);
@@ -64,6 +65,7 @@ public class ServerQueryChannel extends Channel {
     }
 
     private static ServerQueryChannel[] acceptableChannelsForPosting(ChannelManagerSession channelManagerSession, ChannelMessageToSend message) throws SQLException {
+        //noinspection SwitchStatementWithTooFewBranches
         switch (message.getSendChannelInfo().getChannelType()) {
             case SendChannelInfo.SERVER_QUERY_TYPE:
                 // Check that the toIdentity is an OwnedIdentity

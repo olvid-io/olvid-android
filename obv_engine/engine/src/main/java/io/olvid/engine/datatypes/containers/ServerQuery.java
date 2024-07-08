@@ -104,6 +104,7 @@ public class ServerQuery {
         DEVICE_MANAGEMENT_DEACTIVATE_DEVICE_QUERY_ID(13),
         DEVICE_MANAGEMENT_SET_UNEXPIRING_DEVICE_QUERY_ID(14),
         REGISTER_API_KEY_QUERY_ID(15),
+        UPLOAD_PRE_KEY_QUERY_ID(16),
         TRANSFER_SOURCE_QUERY_ID(1000),
         TRANSFER_TARGET_QUERY_ID(1001),
         TRANSFER_RELAY_QUERY_ID(1002),
@@ -182,6 +183,8 @@ public class ServerQuery {
                     return new DeviceManagementSetUnexpiringDeviceQuery(server, encodedParts);
                 case REGISTER_API_KEY_QUERY_ID:
                     return new RegisterApiKeyQuery(server, encodedParts);
+                case UPLOAD_PRE_KEY_QUERY_ID:
+                    return new UploadPreKeyQuery(server, encodedParts);
                 case TRANSFER_SOURCE_QUERY_ID:
                     return new TransferSourceQuery(encodedParts);
                 case TRANSFER_TARGET_QUERY_ID:
@@ -960,6 +963,51 @@ public class ServerQuery {
             return new Encoded[]{
                     Encoded.of(apiKeyString),
                     Encoded.of(serverSessionToken),
+            };
+        }
+
+        @Override
+        boolean isWebSocket() {
+            return false;
+        }
+    }
+
+    public static class UploadPreKeyQuery extends Type {
+        public final String server;
+
+        public final UID deviceUid;
+        public final byte[] preKeyBytes;
+
+        public UploadPreKeyQuery(Identity ownedIdentity, UID deviceUid, byte[] preKeyBytes) {
+            this.server = ownedIdentity.getServer();
+            this.deviceUid = deviceUid;
+            this.preKeyBytes = preKeyBytes;
+        }
+
+        public UploadPreKeyQuery(String server, Encoded[] encodedParts) throws DecodingException {
+            this.server = server;
+            if (encodedParts.length != 2) {
+                throw new DecodingException();
+            }
+            this.deviceUid = encodedParts[0].decodeUid();
+            this.preKeyBytes = encodedParts[1].decodeBytes();
+        }
+
+        @Override
+        public TypeId getId() {
+            return TypeId.UPLOAD_PRE_KEY_QUERY_ID;
+        }
+
+        @Override
+        String getServer() {
+            return server;
+        }
+
+        @Override
+        Encoded[] getEncodedParts() {
+            return new Encoded[]{
+                    Encoded.of(deviceUid),
+                    Encoded.of(preKeyBytes),
             };
         }
 

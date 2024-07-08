@@ -304,13 +304,6 @@ public interface MessageDao {
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " WHERE m." + Message.BOOKMARKED + " = 1 " +
             " ORDER BY m." + Message.SORT_INDEX + " ASC")
-    List<DiscussionAndMessage> getAllBookmarked(byte[] bytesOwnedIdentity);
-
-    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", m.* FROM " + Message.TABLE_NAME + " AS m " +
-            " JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
-            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " WHERE m." + Message.BOOKMARKED + " = 1 " +
-            " ORDER BY m." + Message.SORT_INDEX + " ASC")
     LiveData<List<DiscussionAndMessage>> getAllBookmarkedLiveData(byte[] bytesOwnedIdentity);
 
 
@@ -435,7 +428,7 @@ public interface MessageDao {
     @Query("SELECT EXISTS " +
             " ( SELECT 1 FROM " + Message.TABLE_NAME + " AS message " +
             " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
-            " ON discussion.id = " + Message.DISCUSSION_ID +
+            " ON discussion.id = message." + Message.DISCUSSION_ID +
             " WHERE discussion." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND message." + Message.BOOKMARKED + " = 1 " +
             ")")
@@ -543,6 +536,26 @@ public interface MessageDao {
             " AND " + Message.DISCUSSION_ID + " = :discussionId " +
             " ORDER BY " + Message.SORT_INDEX + " ASC ")
     LiveData<List<Message>> getCurrentlySharingLocationMessagesInDiscussionLiveData(long discussionId);
+
+    @Query("SELECT m.* FROM " + Message.TABLE_NAME + " AS m " +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
+            " ON m." + Message.DISCUSSION_ID + " = disc.id " +
+            " WHERE m." + Message.JSON_LOCATION + " NOT NULL " +
+            " AND m." + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " ORDER BY " + Message.TIMESTAMP + " ASC ")
+    LiveData<List<Message>> getCurrentlySharingLocationMessagesForOwnedIdentityLiveData(byte[] bytesOwnedIdentity);
+
+
+    @Query("SELECT EXISTS " +
+            "(SELECT 1 FROM " + Message.TABLE_NAME + " AS m " +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
+            " ON m." + Message.DISCUSSION_ID + " = disc.id " +
+            " WHERE m." + Message.JSON_LOCATION + " NOT NULL " +
+            " AND m." + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity)")
+    LiveData<Boolean> hasLocationSharing(byte[] bytesOwnedIdentity);
+
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +

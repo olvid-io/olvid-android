@@ -32,11 +32,12 @@ public class SendChannelInfo {
     public static final int LOCAL_TYPE = 0;
     public static final int OBLIVIOUS_CHANNEL_TYPE = 1;
     public static final int ASYMMETRIC_CHANNEL_TYPE = 2;
-    public static final int ALL_CONFIRMED_OBLIVIOUS_CHANNELS_ON_SAME_SERVER_TYPE = 3;
+    public static final int ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE = 3;
     public static final int ASYMMETRIC_BROADCAST_CHANNEL_TYPE = 4;
     public static final int USER_INTERFACE_TYPE = 5;
     public static final int SERVER_QUERY_TYPE = 6;
-    public static final int ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_TYPE = 7;
+    public static final int ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_TYPE = 7;
+    public static final int OBLIVIOUS_CHANNEL_OR_PRE_KEY_TYPE = 8;
 
     private final int channelType;
     private final Identity toIdentity; // only null if toIdentities is non null
@@ -80,6 +81,13 @@ public class SendChannelInfo {
         return new SendChannelInfo(OBLIVIOUS_CHANNEL_TYPE, toIdentity, fromIdentity, remoteDeviceUids, necessarilyConfirmed, null, null, null, null);
     }
 
+    public static SendChannelInfo createObliviousChannelOrPreKeyInfo(Identity toIdentity, Identity fromIdentity, UID[] remoteDeviceUids, Boolean necessarilyConfirmed) {
+        if (toIdentity == null || fromIdentity == null || remoteDeviceUids == null || necessarilyConfirmed == null) {
+            return null;
+        }
+        return new SendChannelInfo(OBLIVIOUS_CHANNEL_OR_PRE_KEY_TYPE, toIdentity, fromIdentity, remoteDeviceUids, necessarilyConfirmed, null, null, null, null);
+    }
+
     public static SendChannelInfo createAsymmetricChannelInfo(Identity toIdentity, Identity fromIdentity, UID[] remoteDeviceUids) {
         if (toIdentity == null || fromIdentity == null || remoteDeviceUids == null) {
             return null;
@@ -87,15 +95,15 @@ public class SendChannelInfo {
         return new SendChannelInfo(ASYMMETRIC_CHANNEL_TYPE, toIdentity, fromIdentity, remoteDeviceUids, null, null, null, null, null);
     }
 
-    public static SendChannelInfo createAllConfirmedObliviousChannelsInfo(Identity toIdentity, Identity fromIdentity) {
+    public static SendChannelInfo createAllConfirmedObliviousChannelsOrPreKeysInfo(Identity toIdentity, Identity fromIdentity) {
         if (toIdentity == null || fromIdentity == null) {
             return null;
         }
-        return new SendChannelInfo(ALL_CONFIRMED_OBLIVIOUS_CHANNELS_ON_SAME_SERVER_TYPE, null, fromIdentity, null, null, null, null, null, new Identity[]{toIdentity});
+        return new SendChannelInfo(ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE, null, fromIdentity, null, null, null, null, null, new Identity[]{toIdentity});
     }
 
 
-    public static SendChannelInfo[] createAllConfirmedObliviousChannelsInfosForMultipleIdentities(Identity[] toIdentities, Identity fromIdentity) {
+    public static SendChannelInfo[] createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(Identity[] toIdentities, Identity fromIdentity) {
         if (toIdentities == null || toIdentities.length == 0 || fromIdentity == null) {
             return null;
         }
@@ -113,8 +121,8 @@ public class SendChannelInfo {
         int i=0;
         for (String server: map.keySet()) {
             List<Identity> serverIdentityList = map.get(server);
-            if (serverIdentityList != null && serverIdentityList.size() > 0) {
-                sendChannelInfos[i] = new SendChannelInfo(ALL_CONFIRMED_OBLIVIOUS_CHANNELS_ON_SAME_SERVER_TYPE, null, fromIdentity, null, null, null, null, null, serverIdentityList.toArray(new Identity[0]));
+            if (serverIdentityList != null && !serverIdentityList.isEmpty()) {
+                sendChannelInfos[i] = new SendChannelInfo(ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE, null, fromIdentity, null, null, null, null, null, serverIdentityList.toArray(new Identity[0]));
             } else {
                 sendChannelInfos[i] = null;
             }
@@ -123,11 +131,11 @@ public class SendChannelInfo {
         return sendChannelInfos;
     }
 
-    public static SendChannelInfo createAllOwnedConfirmedObliviousChannelsInfo(Identity ownedIdentity) {
+    public static SendChannelInfo createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(Identity ownedIdentity) {
         if (ownedIdentity == null) {
             return null;
         }
-        return new SendChannelInfo(ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_TYPE, ownedIdentity, ownedIdentity, null, null, null, null, null, null);
+        return new SendChannelInfo(ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_TYPE, ownedIdentity, ownedIdentity, null, null, null, null, null, null);
     }
 
     public static SendChannelInfo createAsymmetricBroadcastChannelInfo(Identity toIdentity, Identity fromIdentity) {

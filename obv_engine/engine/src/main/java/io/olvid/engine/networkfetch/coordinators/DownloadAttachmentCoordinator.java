@@ -110,7 +110,7 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                 queueNewDownloadAttachmentOperation(inboxAttachment.getOwnedIdentity(), inboxAttachment.getMessageUid(), inboxAttachment.getAttachmentNumber(), inboxAttachment.getPriorityCategory(), inboxAttachment.getPriority());
             }
             fetchManagerSession.session.commit();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -230,6 +230,7 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                 break;
             }
             case DownloadAttachmentOperation.RFC_INVALID_SIGNED_URL: {
+                // TODO: refresh urls once per hour, at most
                 waitForRefreshedUrls(ownedIdentity, messageUid, attachmentNumber, priorityCategory, initialPriority);
                 refreshInboxAttachmentSignedUrlDelegate.refreshInboxAttachmentSignedUrl(ownedIdentity, messageUid, attachmentNumber);
                 break;

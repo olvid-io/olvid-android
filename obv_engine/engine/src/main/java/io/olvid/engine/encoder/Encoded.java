@@ -285,6 +285,14 @@ public class Encoded {
         return new Encoded(data);
     }
 
+    public static Encoded of(HashMap<DictionaryKey, Encoded>[] dictionaryArray) {
+        Encoded[] encodeds = new Encoded[dictionaryArray.length];
+        for (int i=0; i<dictionaryArray.length; i++) {
+            encodeds[i] = Encoded.of(dictionaryArray[i]);
+        }
+        return Encoded.of(encodeds);
+    }
+
     public boolean isEncodedValue() {
         int len = uint32FromBytes(data, 1);
         if (len+5 != data.length) {
@@ -543,6 +551,16 @@ public class Encoded {
             res += bytes[i+offset] & 0xff;
         }
         return res;
+    }
+
+    public HashMap<DictionaryKey, Encoded>[] decodeDictionaryArray() throws DecodingException {
+        Encoded[] encodeds = decodeList();
+        //noinspection unchecked
+        HashMap<DictionaryKey, Encoded>[] dictionaries = new HashMap[encodeds.length];
+        for (int i = 0; i< encodeds.length; i++) {
+            dictionaries[i] = encodeds[i].decodeDictionary();
+        }
+        return dictionaries;
     }
 
     // endregion

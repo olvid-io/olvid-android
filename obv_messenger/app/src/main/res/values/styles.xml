@@ -39,6 +39,10 @@
         <item name="android:statusBarColor">@color/olvid_gradient_light</item>
     </style>
 
+    <style name="AppTheme.NoActionBar.BlackStatusBar">
+        <item name="android:statusBarColor">@color/black</item>
+    </style>
+
     <style name="AppTheme.NoActionBar.AlmostWhiteStatusBar">
         <item name="android:windowBackground">@color/almostWhite</item>
         <item name="android:statusBarColor">@color/almostWhite</item>

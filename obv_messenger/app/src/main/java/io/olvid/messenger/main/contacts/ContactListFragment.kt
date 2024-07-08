@@ -120,10 +120,8 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                     )
                 }
 
-                KEYCLOAK -> if (contactOrKeycloakDetails.keycloakUserDetails != null && AppSingleton.getContactTrustLevel(
-                        contactOrKeycloakDetails.keycloakUserDetails.identity
-                    ) == null
-                ) {
+                KEYCLOAK -> if (contactOrKeycloakDetails.keycloakUserDetails != null
+                    && AppSingleton.getContactCacheInfo(contactOrKeycloakDetails.keycloakUserDetails.identity) == null) {
                     try {
                         val name = contactOrKeycloakDetails.getAnnotatedName()
                         val builder: Builder = SecureAlertDialogBuilder(
@@ -183,7 +181,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
             .setNegativeButton(R.string.button_label_cancel, null)
             .setPositiveButton(R.string.button_label_invite) { _, _ ->
                 try {
-                    if (contact.establishedChannelCount > 0) {
+                    if (contact.hasChannelOrPreKey()) {
                         AppSingleton.getEngine().startOneToOneInvitationProtocol(
                             contact.bytesOwnedIdentity,
                             contact.bytesContactIdentity

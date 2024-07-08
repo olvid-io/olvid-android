@@ -660,7 +660,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
 
             {
                 // send invitation to all of Bob's devices
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
                 ChannelMessageToSend messageToSend = new OneToOneInvitationMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -681,7 +681,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateOneToOneInvitationMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -700,7 +700,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final OneToOneInvitationMessage receivedMessage;
 
         public BobProcessesAlicesInvitationStep(InitialProtocolState startState, OneToOneInvitationMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -714,7 +714,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                 // first check whether the remote identity is already a oneToOne contact
                 if (protocolManagerSession.identityDelegate.isIdentityAOneToOneContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.getReceptionChannelInfo().getRemoteIdentity())) {
                     // directly confirm to Alice that we accepted the invitation
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), getOwnedIdentity()));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), getOwnedIdentity()));
                     ChannelMessageToSend messageToSend = new OneToOneResponseMessage(coreProtocolMessage, true).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -735,7 +735,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                         if (protocolInstance != null && protocolInstance.getCurrentStateId() == INVITATION_SENT_STATE_ID) {
                             // we indeed already invited Alice --> accept the invite and mark her as oneToOne
 
-                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), getOwnedIdentity()));
+                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), getOwnedIdentity()));
                             ChannelMessageToSend messageToSend = new OneToOneResponseMessage(coreProtocolMessage, true).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -796,7 +796,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
             if (protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
                 {
                     // send response to Alice
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(startState.contactIdentity, getOwnedIdentity()));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(startState.contactIdentity, getOwnedIdentity()));
                     ChannelMessageToSend messageToSend = new OneToOneResponseMessage(coreProtocolMessage, receivedMessage.invitationAccepted).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -819,7 +819,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateOneToOneResponseMessage(coreProtocolMessage, receivedMessage.invitationAccepted).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -836,7 +836,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final OneToOneResponseMessage receivedMessage;
 
         public AliceReceivesBobsResponseStep(InvitationSentState startState, OneToOneResponseMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -892,7 +892,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
             if (protocolManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity)) {
                 {
                     // send an abort message to Bob
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(startState.contactIdentity, getOwnedIdentity()));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(startState.contactIdentity, getOwnedIdentity()));
                     ChannelMessageToSend messageToSend = new AbortMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -910,7 +910,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateAbortMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -927,7 +927,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final AbortMessage receivedMessage;
 
         public BobProcessesAbortStep(InvitationReceivedState startState, AbortMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1010,7 +1010,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final PropagateOneToOneInvitationMessage receivedMessage;
 
         public AliceProcessesPropagatedInvitationStep(InitialProtocolState startState, PropagateOneToOneInvitationMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1051,7 +1051,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final PropagateOneToOneResponseMessage receivedMessage;
 
         public BobProcessesPropagatedResponseStep(InvitationReceivedState startState, PropagateOneToOneResponseMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1084,7 +1084,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final PropagateAbortMessage receivedMessage;
 
         public AliceProcessesPropagatedAbortStep(InvitationSentState startState, PropagateAbortMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1112,7 +1112,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final OneToOneResponseMessage receivedMessage;
 
         public AliceProcessesUnexpectedBobResponseStep(InitialProtocolState startState, OneToOneResponseMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1183,7 +1183,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                             // if oneToOne status is unknown, do nothing
                             continue;
                         }
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(contactIdentity, getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(contactIdentity, getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new OneToOneStatusSyncRequestMessage(coreProtocolMessage, oneToOne).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (SQLException e) {
@@ -1227,7 +1227,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                     return new FinishedState();
                 }
 
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
                 ChannelMessageToSend messageToSend = new OneToOneStatusSyncRequestMessage(coreProtocolMessage, oneToOne).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1242,7 +1242,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
         private final OneToOneStatusSyncRequestMessage receivedMessage;
 
         public BobProcessesSyncRequestStep(InitialProtocolState startState, OneToOneStatusSyncRequestMessage receivedMessage, OneToOneContactInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -1286,7 +1286,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
 
                     // we did not find an invitation, so we tell Alice to downgrade us with an unexpected response
                     // we generate a new random UID as her protocol instance already reached a final state (and she may receive other responses for the same protocol Uid)
-                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), getOwnedIdentity()),
+                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), getOwnedIdentity()),
                             getProtocolId(),
                             new UID(getPrng()),
                             false);

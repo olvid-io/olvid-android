@@ -34,6 +34,10 @@ import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.GroupMembersChangedCallback;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.PreKeyBlobOnServer;
+import io.olvid.engine.datatypes.containers.EncodedOwnedPreKey;
+import io.olvid.engine.datatypes.containers.OwnedDeviceAndPreKey;
+import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.TrustLevel;
@@ -45,8 +49,10 @@ import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.KeycloakGroupV2UpdateOutput;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
+import io.olvid.engine.datatypes.containers.UidAndPreKey;
 import io.olvid.engine.datatypes.containers.UserData;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
+import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
@@ -112,11 +118,18 @@ public interface IdentityDelegate {
     UID[] getOtherDeviceUidsOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
     UID getCurrentDeviceUidOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
     Identity getOwnedIdentityForCurrentDeviceUid(Session session, UID currentDeviceUid) throws SQLException;
-    void addDeviceForOwnedIdentity(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, boolean channelCreationAlreadyInProgress) throws SQLException;
-    void updateOwnedDevice(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp) throws SQLException;
+    void addDeviceForOwnedIdentity(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, PreKeyBlobOnServer preKeyBlob, boolean channelCreationAlreadyInProgress) throws SQLException;
+    void updateOwnedDevice(Session session, Identity ownedIdentity, UID deviceUid, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, PreKeyBlobOnServer preKeyBlob) throws SQLException;
     void removeDeviceForOwnedIdentity(Session session, Identity ownedIdentity, UID deviceUid) throws SQLException;
     List<ObvOwnedDevice> getDevicesOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
+    List<OwnedDeviceAndPreKey> getDevicesAndPreKeysOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
     String getCurrentDeviceDisplayName(Session session, Identity ownedIdentity) throws SQLException;
+    EncodedOwnedPreKey getLatestPreKeyForOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
+    Encoded generateNewPreKey(Session session, Identity ownedIdentity, long expirationTimestamp) throws SQLException;
+    void expireContactAndOwnedPreKeys(Session session, Identity ownedIdentity, String server, long serverTimestamp) throws SQLException;
+    void expireCurrentDeviceOwnedPreKeys(Session session, Identity ownedIdentity, long currentServerTimestamp) throws SQLException;
+    long getLatestChannelCreationPingTimestampForOwnedDevice(Session session, Identity ownedIdentity, UID ownedDeviceUid) throws SQLException;
+    void setLatestChannelCreationPingTimestampForOwnedDevice(Session session, Identity ownedIdentity, UID ownedDeviceUid, long timestamp) throws Exception;
 
 
     void addContactIdentity(Session session, Identity contactIdentity, String serializedDetails, Identity ownedIdentity, TrustOrigin trustOrigin, boolean oneToOne) throws Exception;
@@ -146,13 +159,20 @@ public interface IdentityDelegate {
     EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     boolean forcefullyUnblockContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     boolean reBlockForcefullyUnblockedContact(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
+    void setContactRecentlyOnline(Session session, Identity ownedIdentity, Identity contactIdentity, boolean recentlyOnline) throws SQLException;
 
     // return true if a device was indeed added, false if the device already existed, and throws an exception if adding the device failed
-    boolean addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid, boolean channelCreationAlreadyInProgress) throws SQLException;
+    boolean addDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid, PreKeyBlobOnServer preKeyBlob, boolean channelCreationAlreadyInProgress) throws SQLException;
+    boolean isContactDeviceKnown(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws SQLException;
+    void updateContactDevicePreKey(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid, PreKeyBlobOnServer preKeyBlob) throws SQLException;
     void removeDeviceForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity, UID deviceUid) throws SQLException;
     void removeAllDevicesForContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     UID[] getDeviceUidsOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
+    List<UidAndPreKey> getDeviceUidsAndPreKeysOfContactIdentity(Session session, Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     Map<Identity, Map<Identity, Set<UID>>> getAllDeviceUidsOfAllContactsOfAllOwnedIdentities(Session session) throws SQLException;
+    long getLatestChannelCreationPingTimestampForContactDevice(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws SQLException;
+    void setLatestChannelCreationPingTimestampForContactDevice(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid, long timestamp) throws Exception;
+
     List<ObvCapability> getContactCapabilities(Identity ownedIdentity, Identity contactIdentity) throws SQLException;
     String[] getContactDeviceCapabilities(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid) throws SQLException;
     void setContactDeviceCapabilities(Session session, Identity ownedIdentity, Identity contactIdentity, UID contactDeviceUid, String[] rawDeviceCapabilities) throws Exception;

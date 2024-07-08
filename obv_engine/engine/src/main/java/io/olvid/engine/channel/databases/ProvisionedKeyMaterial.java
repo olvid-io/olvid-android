@@ -300,30 +300,6 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
         }
     }
 
-    static int countProvisionedReceiveKey(ChannelManagerSession channelManagerSession, Provision provision) {
-        final String COUNT = "count";
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT COUNT(*) AS " + COUNT + " FROM " + TABLE_NAME + " WHERE " +
-                PROVISION_FULL_RATCHETING_COUNT + " = ? AND " +
-                PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " +
-                PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = ? AND " +
-                PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " = ?;")) {
-            statement.setInt(1, provision.getFullRatchetingCount());
-            statement.setBytes(2, provision.getObliviousChannelCurrentDeviceUid().getBytes());
-            statement.setBytes(3, provision.getObliviousChannelRemoteDeviceUid().getBytes());
-            statement.setBytes(4, provision.getObliviousChannelRemoteIdentity().getBytes());
-            try (ResultSet res = statement.executeQuery()) {
-                if (res.next()) {
-                    return res.getInt(COUNT);
-                } else {
-                    return 0;
-                }
-            }
-        } catch (SQLException e) {
-            return 0;
-        }
-    }
-
-
 
     @Override
     public void wasCommitted() {

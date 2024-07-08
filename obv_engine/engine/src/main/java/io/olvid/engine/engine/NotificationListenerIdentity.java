@@ -50,6 +50,7 @@ public class NotificationListenerIdentity implements NotificationListener {
                 IdentityNotifications.NOTIFICATION_CONTACT_TRUST_LEVEL_INCREASED,
                 IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED,
                 IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE,
+                IdentityNotifications.NOTIFICATION_CONTACT_DEVICES_CHANGED,
                 IdentityNotifications.NOTIFICATION_NEW_CONTACT_PUBLISHED_DETAILS,
                 IdentityNotifications.NOTIFICATION_CONTACT_PHOTO_SET,
                 IdentityNotifications.NOTIFICATION_CONTACT_PUBLISHED_DETAILS_TRUSTED,
@@ -61,6 +62,7 @@ public class NotificationListenerIdentity implements NotificationListener {
                 IdentityNotifications.NOTIFICATION_CONTACT_CAPABILITIES_UPDATED,
                 IdentityNotifications.NOTIFICATION_OWN_CAPABILITIES_UPDATED,
                 IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED,
+                IdentityNotifications.NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED,
                 IdentityNotifications.NOTIFICATION_OWNED_DEVICE_LIST_CHANGED,
         }) {
             notificationManager.addListener(notificationName, this);
@@ -136,14 +138,28 @@ public class NotificationListenerIdentity implements NotificationListener {
                 }
 
                 HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.NEW_CONTACT_DEVICE_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_DEVICES_UPDATED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_DEVICES_UPDATED_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
 
-                engine.postEngineNotification(EngineNotifications.NEW_CONTACT_DEVICE, engineInfo);
+                engine.postEngineNotification(EngineNotifications.CONTACT_DEVICES_UPDATED, engineInfo);
+                break;
+            }
+            case IdentityNotifications.NOTIFICATION_CONTACT_DEVICES_CHANGED: {
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_DEVICES_CHANGED_OWNED_IDENTITY_KEY);
+                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_DEVICES_CHANGED_CONTACT_IDENTITY_KEY);
+                if (contactIdentity == null || ownedIdentity == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.CONTACT_DEVICES_UPDATED_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_DEVICES_UPDATED_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
+
+                engine.postEngineNotification(EngineNotifications.CONTACT_DEVICES_UPDATED, engineInfo);
                 break;
             }
             case IdentityNotifications.NOTIFICATION_NEW_CONTACT_PUBLISHED_DETAILS: {
-                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY);
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_PUBLISHED_DETAILS_OWNED_IDENTITY_KEY);
                 Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_PUBLISHED_DETAILS_CONTACT_IDENTITY_KEY);
                 if (ownedIdentity == null || contactIdentity == null) {
                     break;
@@ -338,6 +354,22 @@ public class NotificationListenerIdentity implements NotificationListener {
                 engineInfo.put(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY, oneToOne);
 
                 engine.postEngineNotification(EngineNotifications.CONTACT_ONE_TO_ONE_CHANGED, engineInfo);
+                break;
+            }
+            case IdentityNotifications.NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED: {
+                Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED_OWNED_IDENTITY_KEY);
+                Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED_CONTACT_IDENTITY_KEY);
+                boolean recentlyOnline = (boolean) userInfo.get(IdentityNotifications.NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED_RECENTLY_ONLINE_KEY);
+
+                if (ownedIdentity == null || contactIdentity == null) {
+                    break;
+                }
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.CONTACT_RECENTLY_ONLINE_CHANGED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_RECENTLY_ONLINE_CHANGED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_RECENTLY_ONLINE_CHANGED_RECENTLY_ONLINE_KEY, recentlyOnline);
+
+                engine.postEngineNotification(EngineNotifications.CONTACT_RECENTLY_ONLINE_CHANGED, engineInfo);
                 break;
             }
             case IdentityNotifications.NOTIFICATION_OWNED_DEVICE_LIST_CHANGED: {

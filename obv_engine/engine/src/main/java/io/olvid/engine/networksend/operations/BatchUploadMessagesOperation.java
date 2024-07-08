@@ -152,6 +152,8 @@ public class BatchUploadMessagesOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 }

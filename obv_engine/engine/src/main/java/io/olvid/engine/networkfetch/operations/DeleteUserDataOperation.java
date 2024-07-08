@@ -132,6 +132,8 @@ public class DeleteUserDataOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 }

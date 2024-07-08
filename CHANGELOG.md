@@ -1,3 +1,33 @@
+# Build 248 (3.0)
+2024-07-05
+
+- Remove Android Auto support because app was rejected from the store...
+- Update WebRTC
+
+# ~~Build 247 (3.0)~~
+2024-06-26
+
+- Change the way phone call ringing timeouts are handled
+- Truncate messages ending with a link for which a preview is available
+- Add a global location sharing map, with all locations currently shared with you (in all discussions)
+
+# ~~Build 246 (2.3)~~
+2024-06-22
+
+- Multiple small bugs fixed
+
+# ~~Build 245 (2.3)~~
+2024-06-19
+
+- Make some engine operations more "bulletproof"
+
+# ~~Build 243 (2.3)~~
+2024-06-18
+
+- Support for pre-keys allowing to receive messages before the end of the channel creation
+- Optimize device discovery and channel creation attempts
+- Detect contact that have been offline for an extended period of time
+
 # Build 242 (2.2.1)
 2024-06-10
 

@@ -65,11 +65,13 @@ public interface ContactGroupJoinDao {
             " AND contact." + Contact.BYTES_OWNED_IDENTITY + " = CGjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
             " WHERE CGjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND CGjoin." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :groupOwnerAndUid " +
-            " AND contact." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " AND (contact." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR contact." + Contact.PRE_KEY_COUNT + " > 0) " +
             " UNION SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
             " WHERE contact." + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND contact." + Contact.BYTES_CONTACT_IDENTITY + " IN ( :bytesContactIdentities )" +
-            " AND contact." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0) " +
+            " AND (contact." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR contact." + Contact.PRE_KEY_COUNT + " > 0)) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
     LiveData<List<Contact>> getGroupContactsAndMore(final byte[] bytesOwnedIdentity, final byte[] groupOwnerAndUid, final List<byte[]> bytesContactIdentities);
 

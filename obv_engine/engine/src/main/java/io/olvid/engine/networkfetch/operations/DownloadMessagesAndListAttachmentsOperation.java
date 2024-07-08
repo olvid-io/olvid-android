@@ -58,6 +58,7 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
     private final Identity ownedIdentity;
     private final UID deviceUid;
     private boolean listingTruncated = false;
+    private long downloadTimestamp = 0;
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
@@ -69,6 +70,10 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
 
     public UID getDeviceUid() {
         return deviceUid;
+    }
+
+    public long getDownloadTimestamp() {
+        return downloadTimestamp;
     }
 
     public DownloadMessagesAndListAttachmentsOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, UID deviceUid, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
@@ -124,16 +129,15 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                 switch (returnStatus) {
                     case ServerMethod.OK:
                     case ServerMethod.LISTING_TRUNCATED: {
-                        long downloadTimestamp = serverMethod.getDownloadTimestamp();
+                        downloadTimestamp = serverMethod.getDownloadTimestamp();
                         DownloadMessagesAndListAttachmentsServerMethod.MessageAndAttachmentLengths[] messageAndAttachmentLengthsArray = serverMethod.getMessageAndAttachmentLengthsArray();
                         int count = 0;
 
                         fetchManagerSession.session.startTransaction();
 
                         for (DownloadMessagesAndListAttachmentsServerMethod.MessageAndAttachmentLengths messageAndAttachmentLengths : messageAndAttachmentLengthsArray) {
-                            InboxMessage message = InboxMessage.get(fetchManagerSession, ownedIdentity, messageAndAttachmentLengths.messageUid);
-                            if (message == null) {
-                                message = InboxMessage.create(fetchManagerSession,
+                            if (!InboxMessage.exists(fetchManagerSession, ownedIdentity, messageAndAttachmentLengths.messageUid)) {
+                                InboxMessage message = InboxMessage.create(fetchManagerSession,
                                         ownedIdentity,
                                         messageAndAttachmentLengths.messageUid,
                                         messageAndAttachmentLengths.messageContent,
@@ -170,7 +174,12 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                             }
                         }
                         Logger.d("DownloadMessagesAndListAttachmentsOperation found " + messageAndAttachmentLengthsArray.length + " messages (" + count + " new) on the server.");
-                        this.listingTruncated = (returnStatus == ServerMethod.LISTING_TRUNCATED);
+                        listingTruncated = (returnStatus == ServerMethod.LISTING_TRUNCATED);
+                        if (!listingTruncated) {
+                            // if the listing was not truncated, we can delete expired PreKeys
+                            fetchManagerSession.identityDelegate.expireCurrentDeviceOwnedPreKeys(fetchManagerSession.session, ownedIdentity, downloadTimestamp);
+                        }
+
                         finished = true;
                         return;
                     }

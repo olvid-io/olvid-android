@@ -382,6 +382,9 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static final boolean PREF_KEY_LINK_PREVIEW_OUTBOUND_DEFAULT = true;
     static final String PREF_KEY_LINK_PREVIEW_INBOUND = "pref_key_link_preview_inbound";
     public static final boolean PREF_KEY_LINK_PREVIEW_INBOUND_DEFAULT = false;
+    static final String PREF_KEY_NO_TRUNCATE_TRAILING_LINK = "pref_key_no_truncate_trailing_link";
+    public static final boolean PREF_KEY_NO_TRUNCATE_TRAILING_LINK_DEFAULT = false;
+
 
     static final String PREF_KEY_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND = "pref_key_auto_open_limited_visibility_inbound";
     static final boolean PREF_KEY_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND_DEFAULT = false;
@@ -908,6 +911,12 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
     public static boolean isLinkPreviewOutbound() {
         return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(SettingsActivity.PREF_KEY_LINK_PREVIEW_OUTBOUND, SettingsActivity.PREF_KEY_LINK_PREVIEW_OUTBOUND_DEFAULT);
     }
+
+    public static boolean truncateMessageBodyTrailingLinks() {
+        // careful, there is a negation here!
+        return !PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(SettingsActivity.PREF_KEY_NO_TRUNCATE_TRAILING_LINK, SettingsActivity.PREF_KEY_NO_TRUNCATE_TRAILING_LINK_DEFAULT);
+    }
+
 
     public static void setLinkPreviewInbound(boolean defaultLinkPreviewInbound) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();

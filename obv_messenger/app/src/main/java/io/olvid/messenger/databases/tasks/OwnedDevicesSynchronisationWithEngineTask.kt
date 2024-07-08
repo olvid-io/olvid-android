@@ -57,7 +57,7 @@ class OwnedDevicesSynchronisationWithEngineTask(
             val dbOwnedDevice = dbDeviceMap.remove(BytesKey(it.bytesDeviceUid))
             if (dbOwnedDevice == null) {
                 // device not found in app --> insert it as untrusted
-                val newOwnedDevice = OwnedDevice(it.bytesOwnedIdentity, it.bytesDeviceUid, it.serverDeviceInfo.displayName, it.currentDevice, it.currentDevice || shouldTrustNewDevices, it.channelConfirmed, it.serverDeviceInfo.lastRegistrationTimestamp, it.serverDeviceInfo.expirationTimestamp)
+                val newOwnedDevice = OwnedDevice(it.bytesOwnedIdentity, it.bytesDeviceUid, it.serverDeviceInfo.displayName, it.currentDevice, it.currentDevice || shouldTrustNewDevices, it.channelConfirmed, it.hasPreKey, it.serverDeviceInfo.lastRegistrationTimestamp, it.serverDeviceInfo.expirationTimestamp)
                 deviceDao.insert(newOwnedDevice)
                 if (it.currentDevice.not()) {
                     if (shouldTrustNewDevices) {
@@ -80,6 +80,10 @@ class OwnedDevicesSynchronisationWithEngineTask(
                 if (it.channelConfirmed != dbOwnedDevice.channelConfirmed) {
                     dbOwnedDevice.channelConfirmed = it.channelConfirmed
                     deviceDao.updateChannelConfirmed(dbOwnedDevice.bytesOwnedIdentity, dbOwnedDevice.bytesDeviceUid, dbOwnedDevice.channelConfirmed)
+                }
+                if (it.hasPreKey != dbOwnedDevice.hasPreKey) {
+                    dbOwnedDevice.hasPreKey = it.hasPreKey
+                    deviceDao.updateHasPreKey(dbOwnedDevice.bytesOwnedIdentity, dbOwnedDevice.bytesDeviceUid, dbOwnedDevice.hasPreKey)
                 }
                 if (it.currentDevice != dbOwnedDevice.currentDevice) {
                     dbOwnedDevice.currentDevice = it.currentDevice

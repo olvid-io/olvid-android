@@ -27,6 +27,7 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelDialogResponseMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -74,7 +75,7 @@ public class LocalChannel extends Channel {
         LocalChannel[] localChannels = LocalChannel.acceptableChannelsForPosting(channelManagerSession, message);
         if (localChannels.length == 0) {
             Logger.i("No acceptable channels were found for posting");
-            throw new Exception();
+            throw new NoAcceptableChannelException();
         }
         for (LocalChannel localChannel: localChannels) {
             localChannel.doPost(channelManagerSession, message, prng);
@@ -84,6 +85,7 @@ public class LocalChannel extends Channel {
 
 
     private static LocalChannel[] acceptableChannelsForPosting(ChannelManagerSession channelManagerSession, ChannelMessageToSend message) throws SQLException {
+        //noinspection SwitchStatementWithTooFewBranches
         switch (message.getSendChannelInfo().getChannelType()) {
             case SendChannelInfo.LOCAL_TYPE:
                 // Check that the toIdentity is an OwnedIdentity

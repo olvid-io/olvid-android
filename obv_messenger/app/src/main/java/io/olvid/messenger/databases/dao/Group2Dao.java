@@ -236,7 +236,8 @@ public interface Group2Dao {
             " WHERE c." + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND c." + Contact.ACTIVE + " = 1 " +
             " AND c." + Contact.CAPABILITY_GROUPS_V2 + " = 1 " +
-            " AND c." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " AND (c." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR c." + Contact.PRE_KEY_COUNT + " > 0) " +
             " AND ( c." + Contact.BYTES_CONTACT_IDENTITY + " IN (:bytesRemovedMemberIdentities) " +
             " OR ( gm." + Group2Member.BYTES_CONTACT_IDENTITY + " IS NULL " +
             " AND gpm." + Group2PendingMember.BYTES_CONTACT_IDENTITY + " IS NULL ) ) " +

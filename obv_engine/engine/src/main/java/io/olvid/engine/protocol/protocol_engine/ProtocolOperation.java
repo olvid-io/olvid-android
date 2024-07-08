@@ -111,6 +111,11 @@ public final class ProtocolOperation extends Operation {
                         }
                     } else {
                         protocol = ConcreteProtocol.getConcreteProtocol(protocolInstance, prng, jsonObjectMapper);
+                        if (protocol == null) {
+                            // we have a protocolInstance in db but cannot reconstruct it --> delete it!
+                            protocolInstance.delete();
+                            protocolManagerSession.session.commit();
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -204,7 +209,8 @@ public final class ProtocolOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            Logger.e("SQLException in getSession.");
+            cancel(null);
+            processCancel();
         }
     }
 }

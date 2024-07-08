@@ -38,6 +38,15 @@
         android:order="8" />
 
     <SwitchPreference
+        android:order="9"
+        android:key="pref_key_no_truncate_trailing_link"
+        android:defaultValue="false"
+        android:summary="@string/pref_no_truncate_trailing_link"
+        android:title="@string/pref_no_truncate_trailing_link_title"
+        android:icon="@drawable/ic_pref_truncate_trailing_link" />
+
+
+    <SwitchPreference
         android:order="10"
         android:key="pref_key_auto_open_limited_visibility_inbound"
         android:title="@string/pref_auto_open_limited_visibility_inbound_title"

@@ -191,6 +191,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             public boolean areContentsTheSame(@NonNull OwnedDevice oldItem, @NonNull OwnedDevice newItem) {
                 return Objects.equals(oldItem.displayName, newItem.displayName)
                         && (oldItem.channelConfirmed == newItem.channelConfirmed)
+                        && (oldItem.hasPreKey == newItem.hasPreKey)
                         && (oldItem.currentDevice == newItem.currentDevice)
                         && (oldItem.trusted == newItem.trusted)
                         && Objects.equals(oldItem.lastRegistrationTimestamp, newItem.lastRegistrationTimestamp)

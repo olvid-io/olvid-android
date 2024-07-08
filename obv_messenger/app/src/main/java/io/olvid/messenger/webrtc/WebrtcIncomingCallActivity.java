@@ -171,6 +171,7 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
                 case CALL_ENDED:
                 case FAILED:
                 case INITIALIZING_CALL:
+                case CONNECTING:
                 case CALL_IN_PROGRESS: {
                     closeActivity();
                     break;

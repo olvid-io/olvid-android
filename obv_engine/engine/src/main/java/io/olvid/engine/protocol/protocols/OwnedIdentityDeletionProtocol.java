@@ -332,7 +332,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public StartDeletionStep(InitialProtocolState startState, PropagateOwnedIdentityDeletedMessage receivedMessage, OwnedIdentityDeletionProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.deleteEverywhere = true;
             this.propagated = true;
@@ -379,7 +379,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                         if (numberOfOtherDevices > 0) {
                             try {
                                 // send an owned identity deletion propagation message
-                                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                                 ChannelMessageToSend messageToSend = new PropagateOwnedIdentityDeletedMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                             } catch (NoAcceptableChannelException ignored) {
@@ -427,7 +427,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                 if (numberOfOtherDevices > 0) {
                     try {
                         // trigger a device discovery on other devices
-                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()),
+                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()),
                                 OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
                                 new UID(getPrng()),
                                 false);
@@ -459,7 +459,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                         // We no longer send the "legacy" delete contact message as it may mess up the treatment of our new ContactOwnedIdentityWasDeletedMessage
                     } else {
                         // if not a global deletion, simply trigger a device discovery on contact side
-                        SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(contactIdentities, getOwnedIdentity());
+                        SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(contactIdentities, getOwnedIdentity());
                         for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
                             try {
                                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(sendChannelInfo,
@@ -494,7 +494,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                             ////////////
                             // owned group -> kick all members and pending members
                             if (group.getGroupMembers().length > 0) {
-                                SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(group.getGroupMembers(), getOwnedIdentity());
+                                SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(group.getGroupMembers(), getOwnedIdentity());
                                 for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
                                     try {
                                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(sendChannelInfo,
@@ -514,7 +514,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                                     pendingMemberIdentities[i] = group.getPendingGroupMembers()[i].identity;
                                 }
 
-                                SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(pendingMemberIdentities, getOwnedIdentity());
+                                SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(pendingMemberIdentities, getOwnedIdentity());
                                 for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
                                     try {
                                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(sendChannelInfo,
@@ -532,7 +532,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                             ////////////
                             // joined group -> notify group owner
                             try {
-                                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(group.getGroupOwner(), getOwnedIdentity()),
+                                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(group.getGroupOwner(), getOwnedIdentity()),
                                         GROUP_MANAGEMENT_PROTOCOL_ID,
                                         protocolInstanceUid,
                                         false);
@@ -651,7 +651,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
         boolean propagated;
 
         public ProcessContactOwnedIdentityWasDeletedMessageStep(InitialProtocolState startState, ContactOwnedIdentityWasDeletedMessage receivedMessage, OwnedIdentityDeletionProtocol protocol) throws Exception {
-            super((receivedMessage.getReceptionChannelInfo().getChannelType() == ReceptionChannelInfo.ASYMMETRIC_CHANNEL_TYPE) ? ReceptionChannelInfo.createAsymmetricChannelInfo() : ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super((receivedMessage.getReceptionChannelInfo().getChannelType() == ReceptionChannelInfo.ASYMMETRIC_CHANNEL_TYPE) ? ReceptionChannelInfo.createAsymmetricChannelInfo() : ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
             propagated = receivedMessage.getReceptionChannelInfo().getChannelType() != ReceptionChannelInfo.ASYMMETRIC_CHANNEL_TYPE;
@@ -687,7 +687,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new ContactOwnedIdentityWasDeletedMessage(coreProtocolMessage, receivedMessage.deletedContactOwnedIdentity, receivedMessage.signature).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }

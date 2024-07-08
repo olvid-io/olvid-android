@@ -370,7 +370,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
                 Identity[] contactIdentities = protocolManagerSession.identityDelegate.getContactsOfOwnedIdentity(protocolManagerSession.session, ownedIdentity);
                 if (contactIdentities.length > 0) {
 
-                    SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(contactIdentities, ownedIdentity);
+                    SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(contactIdentities, ownedIdentity);
                     for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
                         try {
                             CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(sendChannelInfo);
@@ -387,7 +387,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
                     int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                     if (numberOfOtherDevices > 0) {
                         try {
-                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                             ChannelMessageToSend messageToSend = new PropagateOwnDetailsMessage(coreProtocolMessage, jsonPublishedDetails).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         } catch (NoAcceptableChannelException ignored) { }
@@ -416,7 +416,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
             {
                 Identity[] contactIdentities = protocolManagerSession.identityDelegate.getContactsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
                 if (contactIdentities.length > 0) {
-                    SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(contactIdentities, getOwnedIdentity());
+                    SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(contactIdentities, getOwnedIdentity());
                     for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
                         try {
                             CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(sendChannelInfo);
@@ -434,7 +434,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateOwnDetailsMessage(coreProtocolMessage, startState.jsonIdentityDetailsWithVersionAndPhoto).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -450,7 +450,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
         private final SendDetailsMessage receivedMessage;
 
         public ReceiveDetailsStep(InitialProtocolState startState, SendDetailsMessage receivedMessage, IdentityDetailsPublicationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -496,7 +496,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
         private final PropagateOwnDetailsMessage receivedMessage;
 
         public ReceiveOwnDetailsStep(InitialProtocolState startState, PropagateOwnDetailsMessage receivedMessage, IdentityDetailsPublicationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

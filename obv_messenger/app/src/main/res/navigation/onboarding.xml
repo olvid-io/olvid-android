@@ -51,7 +51,7 @@
         android:name="io.olvid.messenger.onboarding.KeycloakSelectionFragment"
         tools:layout="@layout/fragment_onboarding_keycloak_selection">
         <action
-            android:id="@+id/action_identity_creation"
+            android:id="@+id/action_keycloak_identity_creation"
             app:destination="@id/identity_creation"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"

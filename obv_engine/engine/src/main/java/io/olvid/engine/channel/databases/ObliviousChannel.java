@@ -26,13 +26,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
 import io.olvid.engine.Logger;
-import io.olvid.engine.channel.datatypes.AuthEncKeyAndChannelInfo;
+import io.olvid.engine.channel.datatypes.PreKeyChannel;
+import io.olvid.engine.datatypes.containers.AuthEncKeyAndChannelInfo;
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;
 import io.olvid.engine.channel.datatypes.NetworkChannel;
 import io.olvid.engine.channel.datatypes.RatchetingOutput;
@@ -55,8 +58,10 @@ import io.olvid.engine.datatypes.containers.ChannelProtocolMessageToSend;
 import io.olvid.engine.datatypes.containers.MessageToSend;
 import io.olvid.engine.datatypes.containers.MessageType;
 import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
+import io.olvid.engine.datatypes.containers.OwnedDeviceAndPreKey;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
+import io.olvid.engine.datatypes.containers.UidAndPreKey;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.datatypes.notifications.ChannelNotifications;
 import io.olvid.engine.encoder.DecodingException;
@@ -700,7 +705,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
 
 
-    public static ObliviousChannel[] acceptableChannelsForPosting(ChannelManagerSession channelManagerSession, ChannelMessageToSend message) throws SQLException {
+    public static NetworkChannel[] acceptableChannelsForPosting(ChannelManagerSession channelManagerSession, ChannelMessageToSend message) throws SQLException {
         if (channelManagerSession.identityDelegate == null) {
             Logger.w("Calling acceptableChannelsForPosting with no IdentityDelegate set.");
             return new ObliviousChannel[0];
@@ -723,7 +728,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 remoteDeviceUidSet.retainAll(Arrays.asList(message.getSendChannelInfo().getRemoteDeviceUids()));
                 UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
 
-                ObliviousChannel[] channels = ObliviousChannel.getAcceptableObliviousChannels(channelManagerSession, currentDeviceUid, remoteDeviceUidSet.toArray(new UID[0]), message.getSendChannelInfo().getToIdentity(), message.getSendChannelInfo().getNecessarilyConfirmed());
+                ObliviousChannel[] channels = ObliviousChannel.getAcceptableObliviousChannels(channelManagerSession, currentDeviceUid, remoteDeviceUidSet.toArray(new UID[0]), message.getSendChannelInfo().getToIdentity(), message.getSendChannelInfo().getNecessarilyConfirmed()).toArray(new ObliviousChannel[0]);
 
                 if (message.getMessageType() == MessageType.PROTOCOL_MESSAGE_TYPE) {
                     if (((ChannelProtocolMessageToSend) message).isPartOfFullRatchetProtocolOfTheSendSeed()) {
@@ -734,34 +739,93 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 }
                 return channels;
             }
-            case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_ON_SAME_SERVER_TYPE: {
-                List<ObliviousChannel> acceptableChannels = new ArrayList<>();
+            case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE: {
+                List<NetworkChannel> acceptableChannels = new ArrayList<>();
                 UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
                 for (Identity toIdentity: message.getSendChannelInfo().getToIdentities()) {
-                    final UID[] remoteDeviceUids;
+                    List<UidAndPreKey> uidsAndPreKeys = new ArrayList<>();
                     if (Objects.equals(message.getSendChannelInfo().getFromIdentity(), toIdentity)) {
-                        remoteDeviceUids = channelManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
+                        List<OwnedDeviceAndPreKey> ownedDeviceAndPreKeys = channelManagerSession.identityDelegate.getDevicesAndPreKeysOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
+                        for (OwnedDeviceAndPreKey ownedDeviceAndPreKey : ownedDeviceAndPreKeys) {
+                            if (!ownedDeviceAndPreKey.currentDevice) {
+                                uidsAndPreKeys.add(new UidAndPreKey(ownedDeviceAndPreKey.deviceUid, ownedDeviceAndPreKey.preKey));
+                            }
+                        }
                     } else {
-                        remoteDeviceUids = channelManagerSession.identityDelegate.getDeviceUidsOfContactIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity(), toIdentity);
+                        uidsAndPreKeys = channelManagerSession.identityDelegate.getDeviceUidsAndPreKeysOfContactIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity(), toIdentity);
                     }
-                    acceptableChannels.addAll(Arrays.asList(ObliviousChannel.getAcceptableObliviousChannels(channelManagerSession, currentDeviceUid, remoteDeviceUids, toIdentity, true)));
+                    acceptableChannels.addAll(ObliviousChannel.getAcceptableObliviousOrPreKeyChannels(channelManagerSession, message.getSendChannelInfo().getFromIdentity(), currentDeviceUid, uidsAndPreKeys.toArray(new UidAndPreKey[0]), toIdentity));
                 }
-                return acceptableChannels.toArray(new ObliviousChannel[0]);
+                return acceptableChannels.toArray(new NetworkChannel[0]);
             }
-            case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_TYPE: {
-                UID[] otherDeviceUids = channelManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
+            case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_TYPE: {
+                List<UidAndPreKey> uidsAndPreKeys = new ArrayList<>();
+                List<OwnedDeviceAndPreKey> ownedDeviceAndPreKeys = channelManagerSession.identityDelegate.getDevicesAndPreKeysOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
+                for (OwnedDeviceAndPreKey ownedDeviceAndPreKey : ownedDeviceAndPreKeys) {
+                    if (!ownedDeviceAndPreKey.currentDevice) {
+                        uidsAndPreKeys.add(new UidAndPreKey(ownedDeviceAndPreKey.deviceUid, ownedDeviceAndPreKey.preKey));
+                    }
+                }
+
                 UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
-                return ObliviousChannel.getAcceptableObliviousChannels(channelManagerSession, currentDeviceUid, otherDeviceUids, message.getSendChannelInfo().getToIdentity(), true);
+                return ObliviousChannel.getAcceptableObliviousOrPreKeyChannels(channelManagerSession, message.getSendChannelInfo().getFromIdentity(), currentDeviceUid, uidsAndPreKeys.toArray(new UidAndPreKey[0]), message.getSendChannelInfo().getToIdentity()).toArray(new NetworkChannel[0]);
+            }
+            case SendChannelInfo.OBLIVIOUS_CHANNEL_OR_PRE_KEY_TYPE: {
+                List<UidAndPreKey> uidsAndPreKeys = new ArrayList<>();
+                if (Objects.equals(message.getSendChannelInfo().getFromIdentity(), message.getSendChannelInfo().getToIdentity())) {
+                    List<OwnedDeviceAndPreKey> ownedDeviceAndPreKeys = channelManagerSession.identityDelegate.getDevicesAndPreKeysOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
+                    for (OwnedDeviceAndPreKey ownedDeviceAndPreKey : ownedDeviceAndPreKeys) {
+                        if (!ownedDeviceAndPreKey.currentDevice) {
+                            uidsAndPreKeys.add(new UidAndPreKey(ownedDeviceAndPreKey.deviceUid, ownedDeviceAndPreKey.preKey));
+                        }
+                    }
+                } else {
+                    uidsAndPreKeys = channelManagerSession.identityDelegate.getDeviceUidsAndPreKeysOfContactIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity(), message.getSendChannelInfo().getToIdentity());
+                }
+
+                HashSet<UID> remoteUids = new HashSet<>(Arrays.asList(message.getSendChannelInfo().getRemoteDeviceUids()));
+                List<UidAndPreKey> remoteUidsAndPreKeys = new ArrayList<>();
+                for (UidAndPreKey uidAndPreKey : uidsAndPreKeys) {
+                    if (remoteUids.contains(uidAndPreKey.uid)) {
+                        remoteUidsAndPreKeys.add(uidAndPreKey);
+                    }
+                }
+
+                UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
+                return ObliviousChannel.getAcceptableObliviousOrPreKeyChannels(channelManagerSession, message.getSendChannelInfo().getFromIdentity(), currentDeviceUid, remoteUidsAndPreKeys.toArray(new UidAndPreKey[0]), message.getSendChannelInfo().getToIdentity()).toArray(new NetworkChannel[0]);
             }
             default:
                 return new ObliviousChannel[0];
         }
     }
 
-    private static ObliviousChannel[] getAcceptableObliviousChannels(ChannelManagerSession channelManagerSession, UID currentDeviceUid, UID[] remoteDeviceUids, Identity remoteIdentity, boolean necessarilyConfirmed) {
+    private static List<NetworkChannel> getAcceptableObliviousOrPreKeyChannels(ChannelManagerSession channelManagerSession, Identity ownedIdentity, UID currentDeviceUid, UidAndPreKey[] remoteDeviceUidsAndPreKeys, Identity remoteIdentity) {
+        // first get all oblivious channels
+        UID[] uids = new UID[remoteDeviceUidsAndPreKeys.length];
+        for (int i=0; i<remoteDeviceUidsAndPreKeys.length; i++) {
+            uids[i] = remoteDeviceUidsAndPreKeys[i].uid;
+        }
+        List<ObliviousChannel> obliviousChannels = getAcceptableObliviousChannels(channelManagerSession, currentDeviceUid, uids, remoteIdentity, true);
+        HashSet<UID> obliviousChannelUids = new HashSet<>();
+        for (ObliviousChannel obliviousChannel : obliviousChannels) {
+            obliviousChannelUids.add(obliviousChannel.remoteDeviceUid);
+        }
+
+        List<NetworkChannel> acceptableChannels = new ArrayList<>();
+        for (UidAndPreKey uidAndPreKey : remoteDeviceUidsAndPreKeys) {
+            if (!obliviousChannelUids.contains(uidAndPreKey.uid) && uidAndPreKey.preKey != null) {
+                acceptableChannels.add(new PreKeyChannel(channelManagerSession.session, ownedIdentity, remoteIdentity, uidAndPreKey.uid, channelManagerSession.preKeyEncryptionDelegate));
+            }
+        }
+
+        acceptableChannels.addAll(obliviousChannels);
+        return acceptableChannels;
+    }
+
+    private static List<ObliviousChannel> getAcceptableObliviousChannels(ChannelManagerSession channelManagerSession, UID currentDeviceUid, UID[] remoteDeviceUids, Identity remoteIdentity, boolean necessarilyConfirmed) {
         ObliviousChannel[] channels = getMany(channelManagerSession, currentDeviceUid, remoteDeviceUids, remoteIdentity, necessarilyConfirmed);
         if (channels == null) {
-            return new ObliviousChannel[0];
+            return Collections.emptyList();
         }
         List<ObliviousChannel> channelList = new ArrayList<>();
         for (ObliviousChannel channel: channels) {
@@ -769,7 +833,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 channelList.add(channel);
             }
         }
-        return channelList.toArray(new ObliviousChannel[0]);
+        return channelList;
     }
 
     @Override

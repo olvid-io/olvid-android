@@ -18,7 +18,6 @@
  */
 package io.olvid.messenger.group
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.InputType
 import android.util.Pair
@@ -67,7 +66,6 @@ import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.discussion.compose.EphemeralViewModel
 import io.olvid.messenger.fragments.FilteredContactListFragment
 import io.olvid.messenger.group.GroupTypeModel.CustomGroup
-import io.olvid.messenger.group.GroupTypeModel.PrivateGroup
 import io.olvid.messenger.group.GroupTypeModel.SimpleGroup
 import io.olvid.messenger.settings.SettingsActivity
 

@@ -51,8 +51,6 @@ public class CancelAttachmentUploadCoordinator implements OutboxAttachment.Outbo
 
     private final NoDuplicateOperationQueue cancelAttachmentUploadOperationQueue;
     private final ExponentialBackoffRepeatingScheduler<IdentityAndUidAndNumber> scheduler;
-    private boolean initialQueueingPerformed = false;
-    private final Object lock = new Object();
 
     private final HashMap<Identity, List<IdentityAndUidAndNumber>> awaitingIdentityReactivationOperations;
     private final Lock awaitingIdentityReactivationOperationsLock;
@@ -81,19 +79,13 @@ public class CancelAttachmentUploadCoordinator implements OutboxAttachment.Outbo
     }
 
     public void initialQueueing() {
-        synchronized (lock) {
-            if (initialQueueingPerformed) {
-                return;
+        try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
+            OutboxAttachment[] outboxAttachments = OutboxAttachment.getAllToCancel(sendManagerSession);
+            for (OutboxAttachment attachment : outboxAttachments) {
+                queueNewCancelAttachmentUploadCompositeOperation(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getAttachmentNumber());
             }
-            try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
-                OutboxAttachment[] outboxAttachments = OutboxAttachment.getAllToCancel(sendManagerSession);
-                for (OutboxAttachment attachment: outboxAttachments) {
-                    queueNewCancelAttachmentUploadCompositeOperation(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getAttachmentNumber());
-                }
-                initialQueueingPerformed = true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

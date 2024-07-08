@@ -251,14 +251,16 @@ public class GalleryActivity extends LockableActivity {
                             PlayerView.switchTargetView(mediaPlayer, oldPlayerView, newVideoViewHolder.playerView);
                         }
                         FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = galleryAdapter.getItemAt(position);
-                        String filePath = App.absolutePathFromRelative(fyleAndStatus.fyle.filePath);
-                        if (filePath == null) {
-                            filePath = fyleAndStatus.fyleMessageJoinWithStatus.getAbsoluteFilePath();
+                        if (fyleAndStatus != null) {
+                            String filePath = App.absolutePathFromRelative(fyleAndStatus.fyle.filePath);
+                            if (filePath == null) {
+                                filePath = fyleAndStatus.fyleMessageJoinWithStatus.getAbsoluteFilePath();
+                            }
+                            MediaItem mediaItem = new MediaItem.Builder().setUri(filePath).setMediaMetadata(new MediaMetadata.Builder().setTitle("").build()).build();
+                            mediaPlayer.setMediaItem(mediaItem);
+                            mediaPlayer.setPlayWhenReady(true);
+                            mediaPlayer.prepare();
                         }
-                        MediaItem mediaItem = new MediaItem.Builder().setUri(filePath).setMediaMetadata(new MediaMetadata.Builder().setTitle("").build()).build();
-                        mediaPlayer.setMediaItem(mediaItem);
-                        mediaPlayer.setPlayWhenReady(true);
-                        mediaPlayer.prepare();
                     }
                 }
 
@@ -270,7 +272,7 @@ public class GalleryActivity extends LockableActivity {
 
         viewModel.getImageAndVideoFyleAndStatusList().observe(this, galleryAdapter);
         viewModel.getImageAndVideoFyleAndStatusList().observe(this, (List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses) -> {
-            if (fyleAndStatuses != null && fyleAndStatuses.size() == 0) {
+            if (fyleAndStatuses != null && fyleAndStatuses.isEmpty()) {
                 emptyView.setVisibility(View.VISIBLE);
             } else {
                 emptyView.setVisibility(View.GONE);
@@ -322,6 +324,7 @@ public class GalleryActivity extends LockableActivity {
             window.getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
         if (window != null) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             // wait 1s before adding the handler, so that systemUiVisibility stabilizes
             new Handler(Looper.getMainLooper()).postDelayed(() -> window.getDecorView().setOnSystemUiVisibilityChangeListener(visibility -> {
                 if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
@@ -337,7 +340,7 @@ public class GalleryActivity extends LockableActivity {
 
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public boolean onSingleTapConfirmed(MotionEvent e) {
+            public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
                 if (isShowingVideo && controlsShown && e.getY() > topBar.getBottom()) {
                     hideControlsAndUi();
                     return true;
@@ -346,7 +349,7 @@ public class GalleryActivity extends LockableActivity {
             }
 
             @Override
-            public boolean onDoubleTap(MotionEvent e) {
+            public boolean onDoubleTap(@NonNull MotionEvent e) {
                 if (isShowingVideo) {
                     toggleControlsAndUi();
                 }
@@ -354,7 +357,7 @@ public class GalleryActivity extends LockableActivity {
             }
 
             @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            public boolean onFling(MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
                 if (4 * Math.abs(velocityX) < Math.abs(velocityY)
                         && (velocityY > SWIPE_THRESHOLD_VELOCITY || velocityY < -SWIPE_THRESHOLD_VELOCITY)
                         && viewPager.isUserInputEnabled()
@@ -712,7 +715,7 @@ public class GalleryActivity extends LockableActivity {
             viewPager.registerOnPageChangeCallback(onPageChangeCallback);
         }
         expirationTimer = new Timer("DiscussionActivity-expirationTimers");
-        expirationTimer.scheduleAtFixedRate(new TimerTask() {
+        expirationTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 runOnUiThread(() -> updateExpirationTimer(false));

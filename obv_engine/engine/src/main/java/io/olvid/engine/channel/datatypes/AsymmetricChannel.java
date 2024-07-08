@@ -29,6 +29,7 @@ import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.AuthEncKeyAndChannelInfo;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.MessageToSend;
 import io.olvid.engine.datatypes.containers.MessageType;

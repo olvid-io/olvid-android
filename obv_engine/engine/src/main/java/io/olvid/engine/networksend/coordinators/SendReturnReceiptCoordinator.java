@@ -57,8 +57,6 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
     private final HashMap<String, Queue<IdentityAndLong>> returnReceiptOwnedIdentityAndIdByServer;
     private final NoDuplicateOperationQueue sendReturnReceiptOperationQueue;
     private final ExponentialBackoffRepeatingScheduler<String> scheduler;
-    private boolean initialQueueingPerformed = false;
-    private final Object lock = new Object();
 
     private final HashMap<Identity, List<StringAndLong>> awaitingIdentityReactivationOperations;
     private final Lock awaitingIdentityReactivationOperationsLock;
@@ -88,19 +86,13 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
     }
 
     public void initialQueueing() {
-        synchronized (lock) {
-            if (initialQueueingPerformed) {
-                return;
+        try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
+            ReturnReceipt[] returnReceipts = ReturnReceipt.getAll(sendManagerSession);
+            for (ReturnReceipt returnReceipt : returnReceipts) {
+                queueNewSendReturnReceiptOperation(returnReceipt.getContactIdentity().getServer(), returnReceipt.getOwnedIdentity(), returnReceipt.getId());
             }
-            try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
-                ReturnReceipt[] returnReceipts = ReturnReceipt.getAll(sendManagerSession);
-                for (ReturnReceipt returnReceipt: returnReceipts) {
-                    queueNewSendReturnReceiptOperation(returnReceipt.getContactIdentity().getServer(), returnReceipt.getOwnedIdentity(), returnReceipt.getId());
-                }
-                initialQueueingPerformed = true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

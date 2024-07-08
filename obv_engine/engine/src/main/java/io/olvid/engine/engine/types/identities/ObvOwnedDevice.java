@@ -27,13 +27,15 @@ public class ObvOwnedDevice {
     public final ServerDeviceInfo serverDeviceInfo;
     public final boolean currentDevice;
     public final boolean channelConfirmed;
+    public final boolean hasPreKey;
 
-    public ObvOwnedDevice(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, ServerDeviceInfo serverDeviceInfo, boolean currentDevice, boolean channelConfirmed) {
+    public ObvOwnedDevice(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, ServerDeviceInfo serverDeviceInfo, boolean currentDevice, boolean channelConfirmed, boolean hasPreKey) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.bytesDeviceUid = bytesDeviceUid;
         this.serverDeviceInfo = serverDeviceInfo;
         this.currentDevice = currentDevice;
         this.channelConfirmed = channelConfirmed;
+        this.hasPreKey = hasPreKey;
     }
 
     public static class ServerDeviceInfo {

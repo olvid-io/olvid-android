@@ -27,9 +27,12 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.thegrizzlylabs.sardineandroid.Sardine;
+
 import java.text.CollationKey;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -53,6 +56,9 @@ public class DiscussionViewModel extends ViewModel {
     private final AppDatabase db;
     private boolean selectingForDeletion;
     private List<Long> messageIdsToForward;
+    @NonNull
+    private final HashMap<Long, String> messageLinkPreviewUrlCache;
+
     @NonNull
     private final MutableLiveData<Long> discussionIdLiveData;
     @NonNull
@@ -93,6 +99,7 @@ public class DiscussionViewModel extends ViewModel {
     public DiscussionViewModel() {
         db = AppDatabase.getInstance();
         selectingForDeletion = false;
+        messageLinkPreviewUrlCache = new HashMap<>();
         discussionIdLiveData = new MutableLiveData<>();
         selectedMessageIds = new MutableLiveData<>();
         nonForwardableSelectedMessageIds = new HashSet<>();
@@ -217,6 +224,11 @@ public class DiscussionViewModel extends ViewModel {
 
     public Long getDiscussionId() {
         return discussionIdLiveData.getValue();
+    }
+
+    @NonNull
+    public HashMap<Long, String> getMessageLinkPreviewUrlCache() {
+        return messageLinkPreviewUrlCache;
     }
 
     @NonNull

@@ -2025,7 +2025,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                 // here we loop on OTHER group members, not ourself
                 for (GroupV2.IdentityAndPermissions groupMembersAndPermission : groupMembersAndPermissions) {
-                    UID[] contactDeviceUidsWithChannel = protocolManagerSession.channelDelegate.getConfirmedObliviousChannelDeviceUids(protocolManagerSession.session, getOwnedIdentity(), groupMembersAndPermission.identity);
+                    UID[] contactDeviceUidsWithChannel = protocolManagerSession.channelDelegate.getConfirmedObliviousChannelOrPreKeyDeviceUids(protocolManagerSession.session, getOwnedIdentity(), groupMembersAndPermission.identity);
                     if (contactDeviceUidsWithChannel.length > 0) {
                         GroupV2.BlobKeys keysToSend = new GroupV2.BlobKeys(
                                 blobKeys.blobMainSeed,
@@ -2034,7 +2034,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         );
 
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
-                                SendChannelInfo.createAllConfirmedObliviousChannelsInfo(groupMembersAndPermission.identity, getOwnedIdentity()),
+                                SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(groupMembersAndPermission.identity, getOwnedIdentity()),
                                 getProtocolId(),
                                 invitationProtocolInstanceUid,
                                 false);
@@ -2068,7 +2068,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         );
 
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
-                                SendChannelInfo.createAllConfirmedObliviousChannelsInfo(getOwnedIdentity(), getOwnedIdentity()),
+                                SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity(), getOwnedIdentity()),
                                 getProtocolId(),
                                 invitationProtocolInstanceUid,
                                 false);
@@ -2109,7 +2109,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationOrMembersUpdateStep(InitialProtocolState startState, InvitationOrMembersUpdateMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.obliviousChannelContactIdentity = receivedMessage.getReceptionChannelInfo().getRemoteIdentity();
             this.startState = null;
             this.invitationCollectedData = new GroupV2.InvitationCollectedData();
@@ -2144,7 +2144,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationOrMembersUpdateStep(InitialProtocolState startState, InvitationOrMembersUpdatePropagatedMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.obliviousChannelContactIdentity = receivedMessage.inviterIdentity;
             this.startState = null;
             this.invitationCollectedData = new GroupV2.InvitationCollectedData();
@@ -2179,7 +2179,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationOrMembersUpdateStep(INeedMoreSeedsState startState, InvitationOrMembersUpdateMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.obliviousChannelContactIdentity = receivedMessage.getReceptionChannelInfo().getRemoteIdentity();
             this.startState = startState;
             this.invitationCollectedData = startState.invitationCollectedData;
@@ -2214,7 +2214,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationOrMembersUpdateStep(INeedMoreSeedsState startState, InvitationOrMembersUpdatePropagatedMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.obliviousChannelContactIdentity = receivedMessage.inviterIdentity;
             this.startState = startState;
             this.invitationCollectedData = startState.invitationCollectedData;
@@ -2249,7 +2249,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationOrMembersUpdateStep(InvitationReceivedState startState, InvitationOrMembersUpdateMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.obliviousChannelContactIdentity = receivedMessage.getReceptionChannelInfo().getRemoteIdentity();
             this.startState = startState;
 
@@ -2308,7 +2308,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationOrMembersUpdateStep(InvitationReceivedState startState, InvitationOrMembersUpdatePropagatedMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.obliviousChannelContactIdentity = receivedMessage.inviterIdentity;
             this.startState = startState;
 
@@ -2390,9 +2390,9 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         notNotifiedUids.remove(deviceUid);
                     }
 
-                    if (notNotifiedUids.size() > 0) {
+                    if (!notNotifiedUids.isEmpty()) {
                         try {
-                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(getOwnedIdentity(), getOwnedIdentity(), notNotifiedUids.toArray(new UID[0]), true));
+                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelOrPreKeyInfo(getOwnedIdentity(), getOwnedIdentity(), notNotifiedUids.toArray(new UID[0]), true));
                             ChannelMessageToSend messageToSend = new InvitationOrMembersUpdatePropagatedMessage(coreProtocolMessage, groupIdentifier, groupVersion, blobKeys, obliviousChannelContactIdentity).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         } catch (NoAcceptableChannelException ignored) { }
@@ -2858,7 +2858,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessPingStep(InitialProtocolState startState, PropagatedPingMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
             this.propagationNeeded = false;
@@ -2892,7 +2892,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagatedPingMessage(coreProtocolMessage, receivedMessage.groupIdentifier, receivedMessage.groupMemberInvitationNonce, receivedMessage.signature, receivedMessage.isResponse).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -2990,7 +2990,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationDialogResponseStep(InvitationReceivedState startState, PropagateInvitationDialogResponseMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.startDialogUuid = startState.dialogUuid;
             this.groupIdentifier = startState.groupIdentifier;
@@ -3051,7 +3051,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationDialogResponseStep(DownloadingGroupBlobState startState, PropagateInvitationDialogResponseMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.startDialogUuid = startState.dialogUuid;
             this.groupIdentifier = startState.groupIdentifier;
@@ -3081,7 +3081,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public ProcessInvitationDialogResponseStep(INeedMoreSeedsState startState, PropagateInvitationDialogResponseMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.startDialogUuid = startState.dialogUuid;
             this.groupIdentifier = startState.groupIdentifier;
@@ -3173,7 +3173,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateInvitationDialogResponseMessage(coreProtocolMessage, this.invitationAccepted, ownGroupInvitationNonce).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -3328,7 +3328,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public InitiateBlobReDownloadStep(InitialProtocolState startState, PropagateInvitationRejectedMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = null;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.dialogUuid = UUID.randomUUID();
@@ -3351,7 +3351,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public InitiateBlobReDownloadStep(InvitationReceivedState startState, PropagateInvitationRejectedMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.dialogUuid = startState.dialogUuid;
@@ -3382,7 +3382,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateInvitationRejectedMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -3806,7 +3806,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
             // check that we indeed have an oblivious channel with all membersToInvite
             for (Identity identity : membersToInvite) {
-                if (protocolManagerSession.channelDelegate.getConfirmedObliviousChannelDeviceUids(protocolManagerSession.session, getOwnedIdentity(), identity).length == 0) {
+                if (protocolManagerSession.channelDelegate.getConfirmedObliviousChannelOrPreKeyDeviceUids(protocolManagerSession.session, getOwnedIdentity(), identity).length == 0) {
                     // a new member does not have a channel --> discard the changeSet and notify (for app)
                     unfreezeAndNotifyUpdateFailed(protocolManagerSession, true);
                     return new FinalState();
@@ -4120,7 +4120,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                 // here we loop on ALL group members, including ourself
                 for (GroupV2.IdentityAndPermissionsAndDetails groupMember : startState.updatedBlob.groupMemberIdentityAndPermissionsAndDetailsList) {
-                    UID[] contactOrOwnedDeviceUidsWithChannel = protocolManagerSession.channelDelegate.getConfirmedObliviousChannelDeviceUids(protocolManagerSession.session, getOwnedIdentity(), groupMember.identity);
+                    UID[] contactOrOwnedDeviceUidsWithChannel = protocolManagerSession.channelDelegate.getConfirmedObliviousChannelOrPreKeyDeviceUids(protocolManagerSession.session, getOwnedIdentity(), groupMember.identity);
                     boolean isAdmin = groupMember.permissionStrings.contains(GroupV2.Permission.GROUP_ADMIN.getString());
 
                     if (contactOrOwnedDeviceUidsWithChannel.length > 0) {
@@ -4136,7 +4136,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                             );
                         }
 
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(groupMember.identity, getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(groupMember.identity, getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new InvitationOrMembersUpdateMessage(coreProtocolMessage, startState.groupIdentifier, startState.updatedBlob.version, keysToSend, contactOrOwnedDeviceUidsWithChannel).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } else if (!Objects.equals(groupMember.identity, getOwnedIdentity())) { // never send a broadcast message to our own devices
@@ -4232,7 +4232,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public GetKickedStep(InitialProtocolState startState, PropagatedKickMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
             this.propagated = true;
@@ -4240,7 +4240,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public GetKickedStep(InvitationReceivedState startState, PropagatedKickMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
             this.propagated = true;
@@ -4248,7 +4248,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public GetKickedStep(DownloadingGroupBlobState startState, PropagatedKickMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
             this.propagated = true;
@@ -4256,7 +4256,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public GetKickedStep(INeedMoreSeedsState startState, PropagatedKickMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
             this.propagated = true;
@@ -4264,7 +4264,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public GetKickedStep(WaitingForLockState startState, PropagatedKickMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
             this.propagated = true;
@@ -4286,7 +4286,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagatedKickMessage(coreProtocolMessage, receivedMessage.groupIdentifier, receivedMessage.encryptedAdministratorsChain, receivedMessage.signature).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -4413,7 +4413,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public LeaveGroupStep(InitialProtocolState startState, PropagatedGroupLeaveMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.propagated = true;
@@ -4422,7 +4422,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public LeaveGroupStep(DownloadingGroupBlobState startState, PropagatedGroupLeaveMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.propagated = true;
@@ -4431,7 +4431,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public LeaveGroupStep(INeedMoreSeedsState startState, PropagatedGroupLeaveMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.propagated = true;
@@ -4440,7 +4440,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public LeaveGroupStep(WaitingForLockState startState, PropagatedGroupLeaveMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.propagated = true;
@@ -4487,7 +4487,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagatedGroupLeaveMessage(coreProtocolMessage, this.groupIdentifier, ownGroupInvitationNonce).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -4565,7 +4565,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public DisbandGroupStep(InitialProtocolState startState, PropagatedGroupDisbandMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.propagated = true;
@@ -4573,7 +4573,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public DisbandGroupStep(DownloadingGroupBlobState startState, PropagatedGroupDisbandMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.propagated = true;
@@ -4581,7 +4581,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public DisbandGroupStep(INeedMoreSeedsState startState, PropagatedGroupDisbandMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.propagated = true;
@@ -4589,7 +4589,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
         @SuppressWarnings("unused")
         public DisbandGroupStep(InvitationReceivedState startState, PropagatedGroupDisbandMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.groupIdentifier = receivedMessage.groupIdentifier;
             this.propagated = true;
@@ -4682,7 +4682,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagatedGroupDisbandMessage(coreProtocolMessage, startState.groupIdentifier).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -4747,7 +4747,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             }
 
             if (identifierVersionAndKeys.length > 0) {
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, false));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelOrPreKeyInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, false));
                 ChannelMessageToSend messageToSend = new BlobKeysBatchAfterChannelCreationMessage(coreProtocolMessage, identifierVersionAndKeys).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -4763,7 +4763,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         private final BlobKeysBatchAfterChannelCreationMessage receivedMessage;
 
         public ProcessBatchKeysMessageStep(InitialProtocolState startState, BlobKeysBatchAfterChannelCreationMessage receivedMessage, GroupsV2Protocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

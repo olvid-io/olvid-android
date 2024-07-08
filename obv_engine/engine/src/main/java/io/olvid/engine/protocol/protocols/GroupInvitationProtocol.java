@@ -470,7 +470,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
 
             {
                 // post an invitation to contactIdentity
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentity, getOwnedIdentity()));
                 ChannelMessageToSend messageToSend = new GroupInvitationMessage(coreProtocolMessage, receivedMessage.groupInformation, receivedMessage.groupMemberIdentitiesAndSerializedDetails).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -486,7 +486,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         private final GroupInvitationMessage receivedMessage;
 
         public ProcessInvitationStep(InitialProtocolState startState, GroupInvitationMessage receivedMessage, GroupInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -516,7 +516,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                 Logger.w("Received an invitation to a group you already belong to: accepting it :)");
                 {
                     // notify groupOwner that you accepted the groupInvitation
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(groupOwnerIdentity, getOwnedIdentity()));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(groupOwnerIdentity, getOwnedIdentity()));
                     ChannelMessageToSend messageToSend = new InvitationResponseMessage(coreProtocolMessage, receivedMessage.groupInformation.groupUid, true).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -525,7 +525,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                     int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                     if (numberOfOtherDevices > 0) {
                         try {
-                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                             ChannelMessageToSend messageToSend = new PropagateInvitationResponseMessage(coreProtocolMessage, true).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         } catch (NoAcceptableChannelException ignored) { }
@@ -600,7 +600,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new PropagateInvitationResponseMessage(coreProtocolMessage, invitationAccepted).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -619,7 +619,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
 
             {
                 // notify groupOwner that you accepted the groupInvitation
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsInfo(groupOwnerIdentity, getOwnedIdentity()));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(groupOwnerIdentity, getOwnedIdentity()));
                 ChannelMessageToSend messageToSend = new InvitationResponseMessage(coreProtocolMessage, startState.groupInformation.groupUid, invitationAccepted).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -666,7 +666,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         private final PropagateInvitationResponseMessage receivedMessage;
 
         public ProcessPropagatedInvitationResponseStep(InvitationReceivedState startState, PropagateInvitationResponseMessage receivedMessage, GroupInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -723,7 +723,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
         private final InvitationResponseMessage receivedMessage;
 
         public ProcessResponseStep(InitialProtocolState startState, InvitationResponseMessage receivedMessage, GroupInvitationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -764,7 +764,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                     // the guy accepted, but he is neither pending, nor member --> send a KickFromGroupMessage message
                     UID groupManagementProtocolUid = GroupInformation.computeProtocolUid(getOwnedIdentity().getBytes(), receivedMessage.groupUid.getBytes());
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
-                            SendChannelInfo.createAllConfirmedObliviousChannelsInfo(contactIdentity, getOwnedIdentity()),
+                            SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(contactIdentity, getOwnedIdentity()),
                             GROUP_MANAGEMENT_PROTOCOL_ID,
                             groupManagementProtocolUid,
                             false
@@ -782,7 +782,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
 
                     UID groupManagementProtocolUid = GroupInformation.computeProtocolUid(getOwnedIdentity().getBytes(), receivedMessage.groupUid.getBytes());
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
-                            SendChannelInfo.createAllConfirmedObliviousChannelsInfo(contactIdentity, getOwnedIdentity()),
+                            SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(contactIdentity, getOwnedIdentity()),
                             GROUP_MANAGEMENT_PROTOCOL_ID,
                             groupManagementProtocolUid,
                             false

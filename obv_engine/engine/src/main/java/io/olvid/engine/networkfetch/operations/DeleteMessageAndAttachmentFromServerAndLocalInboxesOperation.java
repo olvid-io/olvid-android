@@ -31,11 +31,11 @@ import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.UidAndBoolean;
 import io.olvid.engine.encoder.Encoded;
-import io.olvid.engine.networkfetch.coordinators.DeleteMessageAndAttachmentsCoordinator;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
 import io.olvid.engine.networkfetch.databases.ServerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
+import io.olvid.engine.networkfetch.datatypes.MessageBatchProvider;
 
 
 public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extends Operation {
@@ -46,10 +46,10 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
     private final Identity ownedIdentity;
-    private final DeleteMessageAndAttachmentsCoordinator.MessageBatchProvider messageBatchProvider;
+    private final MessageBatchProvider messageBatchProvider;
     private UidAndBoolean[] messageUidsAndMarkAsListed;
 
-    public DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, DeleteMessageAndAttachmentsCoordinator.MessageBatchProvider messageBatchProvider, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
+    public DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, MessageBatchProvider messageBatchProvider, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
         super(ownedIdentity.computeUniqueUid(), onFinishCallback, onCancelCallback);
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
@@ -76,7 +76,7 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
         boolean finished = false;
         try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
             try {
-                this.messageUidsAndMarkAsListed = messageBatchProvider.getBatchOFMessageUids();
+                this.messageUidsAndMarkAsListed = messageBatchProvider.getBatchOFMessageUids(ownedIdentity);
 
                 List<MessageAndMarkAsListed> messageAndPendingDeletes = new ArrayList<>();
                 for (UidAndBoolean messageUidAndMarkAsListed : messageUidsAndMarkAsListed) {
@@ -166,6 +166,8 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 }

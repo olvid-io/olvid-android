@@ -45,7 +45,8 @@ public class ChannelReceivedApplicationMessage {
             return null;
         }
         ReceptionChannelInfo channelInfo = channelReceivedMessage.getReceptionChannelInfo();
-        if (channelInfo.getChannelType() != ReceptionChannelInfo.OBLIVIOUS_CHANNEL_TYPE) {
+        if (channelInfo.getChannelType() != ReceptionChannelInfo.OBLIVIOUS_CHANNEL_TYPE
+                && channelInfo.getChannelType() != ReceptionChannelInfo.PRE_KEY_CHANNEL_TYPE) {
             return null;
         }
 

@@ -231,7 +231,7 @@ public class Discussion {
         }
 
         // if we have a channel with the contact, post a shared settings message
-        if (contact.establishedChannelCount > 0) {
+        if (contact.hasChannelOrPreKey()) {
             try {
                 DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
                 if (discussionCustomization != null) {

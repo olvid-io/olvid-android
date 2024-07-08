@@ -22,7 +22,10 @@ package io.olvid.engine.protocol.protocols;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.HashMap;
+
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -81,35 +84,65 @@ public class DeviceDiscoveryChildProtocol extends ConcreteProtocol {
 
     public static class DeviceUidsReceivedState extends ConcreteProtocolState {
         private final Identity remoteIdentity;
-        private final UID[] deviceUids;
+        private final boolean recentlyOnline;
+        private final long serverTimestamp;
+        private final HashMap<DictionaryKey, Encoded>[] deviceUidsAndPreKeys;
 
         public DeviceUidsReceivedState(Encoded encodedState) throws Exception{
             super(DEVICE_UIDS_RECEIVED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
-            if (list.length != 2) {
+            if (list.length == 2) {
+                // backward compatibility with previous encoding
+                this.remoteIdentity = list[0].decodeIdentity();
+                this.recentlyOnline = true;
+                this.serverTimestamp = 0;
+                UID[] deviceUids = list[1].decodeUidArray();
+                //noinspection unchecked
+                this.deviceUidsAndPreKeys = new HashMap[deviceUids.length];
+                for (int i = 0; i<deviceUids.length; i++) {
+                    deviceUidsAndPreKeys[i] = new HashMap<DictionaryKey, Encoded>();
+                    deviceUidsAndPreKeys[i].put(new DictionaryKey("uid"), Encoded.of(deviceUids[i]));
+                }
+            } else if (list.length == 4) {
+                this.remoteIdentity = list[0].decodeIdentity();
+                this.recentlyOnline = list[1].decodeBoolean();
+                this.serverTimestamp = list[2].decodeLong();
+                this.deviceUidsAndPreKeys = list[3].decodeDictionaryArray();
+            } else {
                 throw new Exception();
             }
-            this.remoteIdentity = list[0].decodeIdentity();
-            this.deviceUids = list[1].decodeUidArray();
         }
 
-        public DeviceUidsReceivedState(Identity remoteIdentity, UID[] deviceUids) {
+        public DeviceUidsReceivedState(Identity remoteIdentity, boolean recentlyOnline, long serverTimestamp, HashMap<DictionaryKey, Encoded>[] deviceUidsAndPreKeys) {
             super(DEVICE_UIDS_RECEIVED_STATE_ID);
             this.remoteIdentity = remoteIdentity;
-            this.deviceUids = deviceUids;
+            this.recentlyOnline = recentlyOnline;
+            this.serverTimestamp = serverTimestamp;
+            this.deviceUidsAndPreKeys = deviceUidsAndPreKeys;
         }
 
         @Override
         public Encoded encode() {
             return Encoded.of(new Encoded[]{
                     Encoded.of(remoteIdentity),
-                    Encoded.of(deviceUids)
+                    Encoded.of(recentlyOnline),
+                    Encoded.of(serverTimestamp),
+                    Encoded.of(deviceUidsAndPreKeys),
             });
         }
 
-        public UID[] getDeviceUids() {
-            return deviceUids;
+        public boolean isRecentlyOnline() {
+            return recentlyOnline;
         }
+
+        public long getServerTimestamp() {
+            return serverTimestamp;
+        }
+
+        public HashMap<DictionaryKey, Encoded>[] getDeviceUidsAndPreKeys() {
+            return deviceUidsAndPreKeys;
+        }
+
         public Identity getRemoteIdentity() {
             return remoteIdentity;
         }
@@ -196,11 +229,15 @@ public class DeviceDiscoveryChildProtocol extends ConcreteProtocol {
     }
 
     public static class ServerQueryMessage extends ConcreteProtocolMessage {
-        private final UID[] deviceUids;
+        private final boolean recentlyOnline;
+        private final long serverTimestamp;
+        private final HashMap<DictionaryKey, Encoded>[] deviceUidsAndPreKeys;
 
         public ServerQueryMessage(CoreProtocolMessage coreProtocolMessage) {
             super(coreProtocolMessage);
-            deviceUids = null;
+            recentlyOnline = false;
+            serverTimestamp = 0;
+            deviceUidsAndPreKeys = null;
         }
 
         @SuppressWarnings("unused")
@@ -209,7 +246,26 @@ public class DeviceDiscoveryChildProtocol extends ConcreteProtocol {
             if (receivedMessage.getEncodedResponse() == null) {
                 throw new Exception();
             }
-            deviceUids = receivedMessage.getEncodedResponse().decodeUidArray();
+            HashMap<DictionaryKey, Encoded> dict = receivedMessage.getEncodedResponse().decodeDictionary();
+            if (dict.isEmpty()) {
+                // request has expired
+                recentlyOnline = false;
+                serverTimestamp = 0;
+                //noinspection unchecked
+                deviceUidsAndPreKeys = new HashMap[0];
+            } else {
+                Encoded encodedRecentlyOnline = dict.get(new DictionaryKey("ro"));
+                recentlyOnline = encodedRecentlyOnline == null || encodedRecentlyOnline.decodeBoolean();
+                Encoded encodedServerTimestamp = dict.get(new DictionaryKey("st"));
+                serverTimestamp = encodedServerTimestamp == null ? 0 : encodedServerTimestamp.decodeLong();
+                Encoded encodedDeviceUidsAndPreKeys = dict.get(new DictionaryKey("dev"));
+                if (encodedDeviceUidsAndPreKeys == null) {
+                    //noinspection unchecked
+                    deviceUidsAndPreKeys = new HashMap[0];
+                } else {
+                    deviceUidsAndPreKeys = encodedDeviceUidsAndPreKeys.decodeDictionaryArray();
+                }
+            }
         }
 
         @Override
@@ -279,7 +335,7 @@ public class DeviceDiscoveryChildProtocol extends ConcreteProtocol {
 
         @Override
         public ConcreteProtocolState executeStep() throws Exception {
-            return new DeviceUidsReceivedState(startState.remoteIdentity, receivedMessage.deviceUids);
+            return new DeviceUidsReceivedState(startState.remoteIdentity, receivedMessage.recentlyOnline, receivedMessage.serverTimestamp, receivedMessage.deviceUidsAndPreKeys);
         }
     }
 

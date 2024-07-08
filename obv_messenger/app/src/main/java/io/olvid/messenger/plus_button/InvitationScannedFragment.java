@@ -263,7 +263,7 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
             if (viewModel.getMutualScanUrl() != null) {
                 viewModel.setFullScreenQrCodeUrl(viewModel.getMutualScanUrl().getUrlRepresentation());
                 try {
-                    Navigation.findNavController(v).navigate(MyIdFragmentDirections.actionOpenFullScreenQrCode());
+                    Navigation.findNavController(v).navigate(R.id.action_open_full_screen_qr_code);
                 } catch (Exception e) {
                     // do nothing
                 }

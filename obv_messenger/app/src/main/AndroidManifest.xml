@@ -85,9 +85,10 @@
         <meta-data
             android:name="firebase_analytics_collection_deactivated"
             android:value="true" />
-        <meta-data
-            android:name="com.google.android.gms.car.application"
-            android:resource="@xml/automotive_app_desc" />
+<!--        TODO: we disable android auto support for now... -->
+<!--        <meta-data-->
+<!--            android:name="com.google.android.gms.car.application"-->
+<!--            android:resource="@xml/automotive_app_desc" />-->
 
 
         <activity
@@ -454,7 +455,7 @@
         <activity
             android:name=".onboarding.flow.OnboardingFlowActivity"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar" />
+            android:theme="@style/AppTheme.NoActionBar.AlmostWhiteStatusBar" />
         <activity
             android:name=".troubleshooting.TroubleshootingActivity"
             android:theme="@style/AppTheme.NoActionBar.AlmostWhiteStatusBar" />
@@ -479,7 +480,7 @@
             tools:targetApi="o_mr1" />
         <activity
             android:name=".webrtc.WebrtcIncomingCallActivity"
-            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar"
+            android:theme="@style/AppTheme.NoActionBar.BlackStatusBar"
             android:label="@string/activity_title_webrtc_incoming_call"
             android:excludeFromRecents="true"
             android:showWhenLocked="true"

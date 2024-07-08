@@ -23,5 +23,5 @@ package io.olvid.engine.networkfetch.datatypes;
 import io.olvid.engine.datatypes.Identity;
 
 public interface RegisterServerPushNotificationDelegate {
-    void registerServerPushNotification(Identity identity);
+    void registerServerPushNotification(Identity identity, boolean triggerAnOwnedDeviceDiscoveryWhenFinished);
 }

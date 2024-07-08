@@ -137,6 +137,8 @@ public class CancelAttachmentUploadOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 }

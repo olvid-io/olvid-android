@@ -50,6 +50,10 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_NEW_CONTACT_DEVICE_CHANNEL_CREATION_ALREADY_IN_PROGRESS_KEY = "channel_creation_already_in_progress";
     public static final String NOTIFICATION_NEW_CONTACT_DEVICE_OWNED_IDENTITY_KEY = "owned_identity";
 
+    public static final String NOTIFICATION_CONTACT_DEVICES_CHANGED = "identity_manager_notification_contact_devices_changed";
+    public static final String NOTIFICATION_CONTACT_DEVICES_CHANGED_OWNED_IDENTITY_KEY = "owned_identity";  // Identity
+    public static final String NOTIFICATION_CONTACT_DEVICES_CHANGED_CONTACT_IDENTITY_KEY = "contact_identity"; // Identity
+
     public static final String NOTIFICATION_NEW_OWNED_DEVICE = "identity_manager_notification_new_owned_device";
     public static final String NOTIFICATION_NEW_OWNED_DEVICE_DEVICE_UID_KEY = "device_uid";
     public static final String NOTIFICATION_NEW_OWNED_DEVICE_CHANNEL_CREATION_ALREADY_IN_PROGRESS_KEY = "channel_creation_already_in_progress";
@@ -166,6 +170,11 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_CONTACT_IDENTITY_KEY = "contact_identity"; // Identity
     public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
     public static final String NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY = "one_to_one"; // boolean
+
+    public static final String NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED = "identity_manager_notification_contact_recently_online_changed";
+    public static final String NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED_CONTACT_IDENTITY_KEY = "contact_identity"; // Identity
+    public static final String NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED_RECENTLY_ONLINE_KEY = "recently_online"; // boolean
 
     public static final String NOTIFICATION_GROUP_V2_CREATED = "identity_manager_notification_group_v2_created";
     public static final String NOTIFICATION_GROUP_V2_CREATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity

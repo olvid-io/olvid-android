@@ -69,6 +69,7 @@ public class Contact {
     public static final String NEW_PUBLISHED_DETAILS = "new_published_details";
     public static final String DEVICE_COUNT = "device_count";
     public static final String ESTABLISHED_CHANNEL_COUNT = "established_channel_count";
+    public static final String PRE_KEY_COUNT = "pre_key_count";
     public static final String PHOTO_URL = "photo_url";
     public static final String CUSTOM_PHOTO_URL = "custom_photo_url"; // set to "" to remove the default photo_url, null to use the default
     public static final String KEYCLOAK_MANAGED = "keycloak_managed";
@@ -76,6 +77,7 @@ public class Contact {
     public static final String PERSONAL_NOTE = "personal_note";
     public static final String ACTIVE = "active";
     public static final String ONE_TO_ONE = "one_to_one";
+    public static final String RECENTLY_ONLINE = "recently_online";
     public static final String TRUST_LEVEL = "trust_level";
     public static final String CAPABILITY_WEBRTC_CONTINUOUS_ICE = "capability_webrtc_continuous_ice";
     public static final String CAPABILITY_GROUPS_V2 = "capability_groups_v2";
@@ -131,6 +133,9 @@ public class Contact {
     @ColumnInfo(name = ESTABLISHED_CHANNEL_COUNT)
     public int establishedChannelCount;
 
+    @ColumnInfo(name = PRE_KEY_COUNT)
+    public int preKeyCount;
+
     @ColumnInfo(name = PHOTO_URL)
     @Nullable
     public String photoUrl;
@@ -156,6 +161,9 @@ public class Contact {
     @ColumnInfo(name = ONE_TO_ONE)
     public boolean oneToOne;
 
+    @ColumnInfo(name = RECENTLY_ONLINE)
+    public boolean recentlyOnline;
+
     @ColumnInfo(name = TRUST_LEVEL)
     public int trustLevel;
 
@@ -171,7 +179,7 @@ public class Contact {
 
 
     // Constructor required by Room
-    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @Nullable String customDisplayName, @NonNull String displayName, @Nullable String firstName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, int newPublishedDetails, int deviceCount, int establishedChannelCount, @Nullable String photoUrl, @Nullable String customPhotoUrl, boolean keycloakManaged, @Nullable Integer customNameHue, @Nullable String personalNote, boolean active, boolean oneToOne, int trustLevel, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
+    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @Nullable String customDisplayName, @NonNull String displayName, @Nullable String firstName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName, @Nullable String identityDetails, int newPublishedDetails, int deviceCount, int establishedChannelCount, int preKeyCount, @Nullable String photoUrl, @Nullable String customPhotoUrl, boolean keycloakManaged, @Nullable Integer customNameHue, @Nullable String personalNote, boolean active, boolean oneToOne, boolean recentlyOnline, int trustLevel, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
         this.bytesContactIdentity = bytesContactIdentity;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customDisplayName = customDisplayName;
@@ -183,6 +191,7 @@ public class Contact {
         this.newPublishedDetails = newPublishedDetails;
         this.deviceCount = deviceCount;
         this.establishedChannelCount = establishedChannelCount;
+        this.preKeyCount = preKeyCount;
         this.photoUrl = photoUrl;
         this.customPhotoUrl = customPhotoUrl;
         this.keycloakManaged = keycloakManaged;
@@ -190,6 +199,7 @@ public class Contact {
         this.personalNote = personalNote;
         this.active = active;
         this.oneToOne = oneToOne;
+        this.recentlyOnline = recentlyOnline;
         this.trustLevel = trustLevel;
         this.capabilityWebrtcContinuousIce = capabilityWebrtcContinuousIce;
         this.capabilityGroupsV2 = capabilityGroupsV2;
@@ -198,7 +208,7 @@ public class Contact {
 
     // Constructor used when inserting a new contact
     @Ignore
-    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @NonNull JsonIdentityDetails identityDetails, boolean hasUntrustedPublishedDetails, @Nullable String photoUrl, boolean keycloakManaged, boolean active, boolean oneToOne, int trustLevel) throws Exception {
+    public Contact(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity, @NonNull JsonIdentityDetails identityDetails, boolean hasUntrustedPublishedDetails, @Nullable String photoUrl, boolean keycloakManaged, boolean active, boolean oneToOne, int trustLevel, boolean recentlyOnline) throws Exception {
         this.bytesContactIdentity = bytesContactIdentity;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customDisplayName = null;
@@ -210,6 +220,7 @@ public class Contact {
         }
         this.deviceCount = 0;
         this.establishedChannelCount = 0;
+        this.preKeyCount = 0;
         this.photoUrl = photoUrl;
         this.customPhotoUrl = null;
         this.keycloakManaged = keycloakManaged;
@@ -217,6 +228,7 @@ public class Contact {
         this.personalNote = null;
         this.active = active;
         this.oneToOne = oneToOne;
+        this.recentlyOnline = recentlyOnline;
         this.trustLevel = trustLevel;
         this.capabilityWebrtcContinuousIce = false;
         this.capabilityGroupsV2 = false;
@@ -275,6 +287,10 @@ public class Contact {
         }
     }
 
+    public boolean hasChannelOrPreKey() {
+        return establishedChannelCount > 0 || preKeyCount > 0;
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -314,14 +330,14 @@ public class Contact {
     public String getCustomPhotoUrl() {
         if (customPhotoUrl == null) {
             return photoUrl;
-        } else if (customPhotoUrl.length() == 0) {
+        } else if (customPhotoUrl.isEmpty()) {
             return null;
         }
         return customPhotoUrl;
     }
 
     public boolean shouldShowChannelCreationSpinner() {
-        return establishedChannelCount == 0 && deviceCount != 0;
+        return deviceCount != 0 && !hasChannelOrPreKey();
     }
 
     public void delete() {
@@ -370,6 +386,7 @@ public class Contact {
                     0,
                     1,
                     1,
+                    0,
                     null,
                     null,
                     false,
@@ -377,6 +394,7 @@ public class Contact {
                     null,
                     true,
                     false,
+                    true,
                     -1,
                     false,
                     false,
@@ -409,11 +427,13 @@ public class Contact {
                         0,
                         1,
                         1,
+                        0,
                         ownedIdentity.photoUrl,
                         null,
                         ownedIdentity.keycloakManaged,
                         null,
                         null,
+                        true,
                         true,
                         true,
                         -1,

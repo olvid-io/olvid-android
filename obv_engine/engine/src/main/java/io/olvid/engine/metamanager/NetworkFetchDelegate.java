@@ -39,6 +39,7 @@ public interface NetworkFetchDelegate {
     DecryptedApplicationMessage getMessage(Identity ownedIdentity, UID messageUid);
     boolean canAllAttachmentsBeDownloaded(Identity ownedIdentity, UID messageUid) throws SQLException;
     void setAttachmentKeyAndMetadataAndMessagePayload(Session session, Identity ownedIdentity, UID messageUid, Identity remoteIdentity, AttachmentKeyAndMetadata[] attachmentKeyAndMetadata, byte[] messagePayload, AuthEncKey extendedPayloadKey) throws Exception;
+    void setInboxMessageFromIdentityForMissingPreKeyContact(Session session, Identity ownedIdentity, UID messageUid, Identity contactIdentity) throws Exception;
     void downloadAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber, int priorityCategory);
     void pauseDownloadAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber);
     ReceivedAttachment getAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber);

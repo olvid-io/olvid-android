@@ -21,6 +21,7 @@ package io.olvid.engine.networkfetch.coordinators;
 
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -43,6 +44,7 @@ import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
 import io.olvid.engine.networkfetch.datatypes.RegisterServerPushNotificationDelegate;
 import io.olvid.engine.networkfetch.operations.RegisterPushNotificationOperation;
+import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 
 public class RegisterServerPushNotificationsCoordinator implements RegisterServerPushNotificationDelegate, PushNotificationConfiguration.NewPushNotificationConfigurationListener, Operation.OnCancelCallback, Operation.OnFinishCallback {
 
@@ -57,12 +59,11 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
     private final ServerSessionCreatedNotificationListener serverSessionCreatedNotificationListener;
 
     private final HashMap<UID, IdentityAndUid> androidIdentityMaskingUids;
+    private final HashSet<Identity> ownedIdentitiesThatNeedAnOwnedDeviceDiscovery;
 
     private NotificationListeningDelegate notificationListeningDelegate;
     private NotificationPostingDelegate notificationPostingDelegate;
-
-    private boolean initialQueueingPerformed = false;
-    private final Object lock = new Object();
+    private ProtocolStarterDelegate protocolStarterDelegate;
 
     public RegisterServerPushNotificationsCoordinator(FetchManagerSessionFactory fetchManagerSessionFactory,
                                                       SSLSocketFactory sslSocketFactory,
@@ -79,6 +80,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
         androidIdentityMaskingUids = new HashMap<>();
+        ownedIdentitiesThatNeedAnOwnedDeviceDiscovery = new HashSet<>();
 
         serverSessionCreatedNotificationListener = new ServerSessionCreatedNotificationListener();
     }
@@ -93,39 +95,38 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         this.notificationPostingDelegate = notificationPostingDelegate;
     }
 
+    public void setProtocolStarterDelegate(ProtocolStarterDelegate protocolStarterDelegate) {
+        this.protocolStarterDelegate = protocolStarterDelegate;
+    }
+
+
 
     public void initialQueueing() {
-        synchronized (lock) {
-            if (initialQueueingPerformed) {
-                return;
-            }
-            try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
-                PushNotificationConfiguration[] pushNotificationConfigurations = PushNotificationConfiguration.getAll(fetchManagerSession);
-                for (PushNotificationConfiguration pushNotificationConfiguration : pushNotificationConfigurations) {
-                    // check that the corresponding owned Identity still exists --> delete otherwise
-                    if (!fetchManagerSession.identityDelegate.isOwnedIdentity(fetchManagerSession.session, pushNotificationConfiguration.getOwnedIdentity())) {
-                        PushNotificationConfiguration.deleteForOwnedIdentity(fetchManagerSession, pushNotificationConfiguration.getOwnedIdentity());
-                        fetchManagerSession.session.commit();
-                        continue;
-                    }
-
-                    switch (pushNotificationConfiguration.getPushNotificationType()) {
-                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_ANDROID:
-                            storeAndroidIdentityMaskingUid(pushNotificationConfiguration.getOwnedIdentity(), pushNotificationConfiguration.getDeviceUid(), pushNotificationConfiguration.getIdentityMaskingUid());
-                            registerServerPushNotification(pushNotificationConfiguration.getOwnedIdentity());
-                            break;
-                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_ANDROID:
-                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_WINDOWS:
-                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX:
-                        case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON:
-                            registerServerPushNotification(pushNotificationConfiguration.getOwnedIdentity());
-                            break;
-                    }
+        try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
+            PushNotificationConfiguration[] pushNotificationConfigurations = PushNotificationConfiguration.getAll(fetchManagerSession);
+            for (PushNotificationConfiguration pushNotificationConfiguration : pushNotificationConfigurations) {
+                // check that the corresponding owned Identity still exists --> delete otherwise
+                if (!fetchManagerSession.identityDelegate.isOwnedIdentity(fetchManagerSession.session, pushNotificationConfiguration.getOwnedIdentity())) {
+                    PushNotificationConfiguration.deleteForOwnedIdentity(fetchManagerSession, pushNotificationConfiguration.getOwnedIdentity());
+                    fetchManagerSession.session.commit();
+                    continue;
                 }
-                initialQueueingPerformed = true;
-            } catch (Exception e) {
-                e.printStackTrace();
+
+                switch (pushNotificationConfiguration.getPushNotificationType()) {
+                    case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_ANDROID:
+                        storeAndroidIdentityMaskingUid(pushNotificationConfiguration.getOwnedIdentity(), pushNotificationConfiguration.getDeviceUid(), pushNotificationConfiguration.getIdentityMaskingUid());
+                        registerServerPushNotification(pushNotificationConfiguration.getOwnedIdentity(), false);
+                        break;
+                    case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_ANDROID:
+                    case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_WINDOWS:
+                    case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX:
+                    case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON:
+                        registerServerPushNotification(pushNotificationConfiguration.getOwnedIdentity(), false);
+                        break;
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -156,6 +157,13 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
             notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PUSH_NOTIFICATION_REGISTERED, userInfo);
         } else {
             Logger.e("NotificationPostingDelegate not set in RegisterServerPushNotificationsCoordinator");
+        }
+        synchronized (ownedIdentitiesThatNeedAnOwnedDeviceDiscovery) {
+            if (protocolStarterDelegate != null && ownedIdentitiesThatNeedAnOwnedDeviceDiscovery.remove(ownedIdentity)) {
+                try {
+                    protocolStarterDelegate.startOwnedDeviceDiscoveryProtocol(ownedIdentity);
+                } catch (Exception ignored) { }
+            }
         }
     }
 
@@ -189,7 +197,12 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
     }
 
     @Override
-    public void registerServerPushNotification(Identity identity) {
+    public void registerServerPushNotification(Identity identity, boolean triggerAnOwnedDeviceDiscoveryWhenFinished) {
+        if (triggerAnOwnedDeviceDiscoveryWhenFinished) {
+            synchronized (ownedIdentitiesThatNeedAnOwnedDeviceDiscovery) {
+                ownedIdentitiesThatNeedAnOwnedDeviceDiscovery.add(identity);
+            }
+        }
         queueNewRegisterPushNotificationOperation(identity);
     }
 
@@ -198,13 +211,13 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         switch (pushNotificationTypeAndParameters.pushNotificationType) {
             case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_ANDROID:
                 storeAndroidIdentityMaskingUid(identity, deviceUid, pushNotificationTypeAndParameters.identityMaskingUid);
-                registerServerPushNotification(identity);
+                registerServerPushNotification(identity, false);
                 break;
             case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_ANDROID:
             case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_WINDOWS:
             case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_LINUX:
             case PushNotificationTypeAndParameters.PUSH_NOTIFICATION_TYPE_WEBSOCKET_DAEMON:
-                registerServerPushNotification(identity);
+                registerServerPushNotification(identity, false);
                 break;
         }
     }

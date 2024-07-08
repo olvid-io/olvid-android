@@ -89,7 +89,7 @@ public class GroupCloningTasks {
         List<PendingGroupMemberDao.PendingGroupMemberAndContact> pendingGroupMembers = db.pendingGroupMemberDao().getGroupPendingMemberAndContacts(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
 
         for (Contact groupMember : groupMembers) {
-            if (groupMember.establishedChannelCount == 0) {
+            if (!groupMember.hasChannelOrPreKey()) {
                 if (groupMember.identityDetails != null) {
                     nonContactOrNonChanelSerializedDetails.add(groupMember.identityDetails);
                 }
@@ -105,7 +105,7 @@ public class GroupCloningTasks {
                 // As a group owner, we do not re-invite people who declined the group invitation
                 continue;
             }
-            if (pendingGroupMember.contact == null || pendingGroupMember.contact.establishedChannelCount == 0) {
+            if (pendingGroupMember.contact == null || !pendingGroupMember.contact.hasChannelOrPreKey()) {
                 JsonIdentityDetails jsonIdentityDetails = new JsonIdentityDetails(pendingGroupMember.pendingGroupMember.displayName, null, null, null);
                 try {
                     nonContactOrNonChanelSerializedDetails.add(AppSingleton.getJsonObjectMapper().writeValueAsString(jsonIdentityDetails));
@@ -154,7 +154,7 @@ public class GroupCloningTasks {
         List<Group2MemberDao.Group2MemberOrPending> groupMembers = db.group2MemberDao().getGroupMembersAndPendingSync(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
 
         for (Group2MemberDao.Group2MemberOrPending group2Member : groupMembers) {
-            if (group2Member.contact == null || !group2Member.contact.capabilityGroupsV2 || group2Member.contact.establishedChannelCount == 0) {
+            if (group2Member.contact == null || !group2Member.contact.capabilityGroupsV2 || !group2Member.contact.hasChannelOrPreKey()) {
                 nonContactOrNonChanelSerializedDetails.add(group2Member.identityDetails);
             } else {
                 if (group2Member.permissionAdmin) {

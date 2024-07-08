@@ -124,17 +124,16 @@ public class Provision implements ObvDatabase {
     }
 
     public static void deleteAllEmpty(ChannelManagerSession channelManagerSession) {
-        // loop over all Provision, and count the number of ProvisionedKeyMaterial for each of them:
-        // delete those with 0 ProvisionedKeyMaterial.
-        try (Statement statement = channelManagerSession.session.createStatement()) {
-            try (ResultSet res = statement.executeQuery("SELECT * FROM " + TABLE_NAME)) {
-                while (res.next()) {
-                    Provision provision = new Provision(channelManagerSession, res);
-                    if (ProvisionedKeyMaterial.countProvisionedReceiveKey(channelManagerSession, provision) == 0) {
-                        provision.delete();
-                    }
-                }
-            }
+        // delete all Provision, with no ProvisionedKeyMaterial.
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " AS p " +
+                    " WHERE NOT EXISTS (" +
+                    " SELECT 1 FROM " + ProvisionedKeyMaterial.TABLE_NAME +
+                    " WHERE " + ProvisionedKeyMaterial.PROVISION_FULL_RATCHETING_COUNT + " = p." + FULL_RATCHETING_COUNT +
+                    " AND " + ProvisionedKeyMaterial.PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = p." + OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID +
+                    " AND " + ProvisionedKeyMaterial.PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = p." + OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID +
+                    " AND " + ProvisionedKeyMaterial.PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " = p." + OBLIVIOUS_CHANNEL_REMOTE_IDENTITY +
+                    ")")) {
+            statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

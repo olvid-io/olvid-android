@@ -21,11 +21,15 @@ package io.olvid.engine.channel.coordinators;
 
 
 import java.sql.SQLException;
+import java.util.EnumSet;
+import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.channel.databases.ObliviousChannel;
 import io.olvid.engine.channel.datatypes.AsymmetricChannel;
-import io.olvid.engine.channel.datatypes.AuthEncKeyAndChannelInfo;
+import io.olvid.engine.channel.datatypes.PreKeyChannel;
+import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.containers.AuthEncKeyAndChannelInfo;
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;
 import io.olvid.engine.channel.datatypes.ChannelManagerSessionFactory;
 import io.olvid.engine.channel.datatypes.ChannelReceivedApplicationMessage;
@@ -33,6 +37,8 @@ import io.olvid.engine.channel.datatypes.ChannelReceivedMessage;
 import io.olvid.engine.datatypes.containers.MessageType;
 import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
 import io.olvid.engine.datatypes.containers.ProtocolReceivedMessage;
+import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
+import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 
 public class ChannelCoordinator {
     private final ChannelManagerSessionFactory channelManagerSessionFactory;
@@ -52,6 +58,15 @@ public class ChannelCoordinator {
             if (authEncKeyAndChannelInfo != null) {
                 Logger.d("The message can be decrypted through an ObliviousChannel.");
                 // the message was encrypted using an ObliviousChannel -> we do the processing ourselves
+                decryptAndProcess(channelManagerSession, networkReceivedMessage, authEncKeyAndChannelInfo);
+                channelManagerSession.session.commit();
+                return;
+            }
+
+            // try to decrypt with a PreKey
+            authEncKeyAndChannelInfo = PreKeyChannel.unwrapMessageKey(channelManagerSession, networkReceivedMessage.getHeader());
+            if (authEncKeyAndChannelInfo != null) {
+                Logger.d("The message can be decrypted with a PreKey. ");
                 decryptAndProcess(channelManagerSession, networkReceivedMessage, authEncKeyAndChannelInfo);
                 channelManagerSession.session.commit();
                 return;
@@ -91,6 +106,35 @@ public class ChannelCoordinator {
         } catch (Exception e) {
             channelManagerSession.networkFetchDelegate.deleteMessageAndAttachments(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid());
             return;
+        }
+
+        // for preKey encrypted messages, check that the contact exists, otherwise, put the message on hold until the contact is added
+        if (channelReceivedMessage.getReceptionChannelInfo().getChannelType() == ReceptionChannelInfo.PRE_KEY_CHANNEL_TYPE) {
+            Identity ownedIdentity = networkReceivedMessage.getOwnedIdentity();
+            Identity contactIdentity = channelReceivedMessage.getReceptionChannelInfo().getRemoteIdentity();
+            if (!Objects.equals(ownedIdentity, contactIdentity)) {
+                try {
+                    // the message is from a contact
+                    if (!channelManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(channelManagerSession.session, ownedIdentity, contactIdentity)) {
+                        // contact unknown, set the from identity of the inbox message to reprocess it once the contact is created
+                        Logger.i("Received a PreKey encrypted message from an unknown contact, putting it on hold...");
+                        channelManagerSession.networkFetchDelegate.setInboxMessageFromIdentityForMissingPreKeyContact(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid(), contactIdentity);
+                        return;
+                    } else {
+                        EnumSet<ObvContactActiveOrInactiveReason> reasons = channelManagerSession.identityDelegate.getContactActiveOrInactiveReasons(channelManagerSession.session, ownedIdentity, contactIdentity);
+                        if (reasons != null && reasons.contains(ObvContactActiveOrInactiveReason.REVOKED) && !reasons.contains(ObvContactActiveOrInactiveReason.FORCEFULLY_UNBLOCKED)) {
+                            // the contact is blocked, discard the message
+                            Logger.w("Received a PreKey encrypted message from a blocked contact, discarding it!");
+                            channelManagerSession.networkFetchDelegate.deleteMessageAndAttachments(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid());
+                            return;
+                        } else if (!channelManagerSession.identityDelegate.isContactDeviceKnown(channelManagerSession.session, ownedIdentity, contactIdentity, channelReceivedMessage.getReceptionChannelInfo().getRemoteDeviceUid())) {
+                            channelManagerSession.protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(channelManagerSession.session, ownedIdentity, contactIdentity);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         switch (channelReceivedMessage.getMessageType()) {

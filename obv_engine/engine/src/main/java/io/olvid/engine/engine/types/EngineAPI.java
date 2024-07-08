@@ -61,9 +61,16 @@ public interface EngineAPI {
 
     // Engine notifications
     void addNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener);
+    void addNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener, ListenerPriority priority);
     void removeNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener);
     void startSendingNotifications();
     void stopSendingNotifications();
+
+    enum ListenerPriority {
+        LOW,
+        NORMAL,
+        HIGH,
+    }
 
 
     // ObvOwnedIdentity
@@ -114,13 +121,13 @@ public interface EngineAPI {
 
     // ObvContactIdentity
     ObvIdentity[] getContactsOfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception;
+    List<ObvContactInfo> getContactsInfoOfOwnedIdentity(byte[] bytesOwnedIdentity) throws Exception;
     EnumSet<ObvContactActiveOrInactiveReason> getContactActiveOrInactiveReasons(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
     boolean forcefullyUnblockContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
     boolean reBlockForcefullyUnblockedContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
     boolean isContactOneToOne(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
-    
-    int getContactDeviceCount(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
-    int getContactEstablishedChannelsCount(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
+
+    ObvContactDeviceCount getContactDeviceCounts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     String getContactTrustedDetailsPhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     JsonIdentityDetailsWithVersionAndPhoto[] getContactPublishedAndTrustedDetails(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void trustPublishedContactDetails(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
@@ -247,4 +254,5 @@ public interface EngineAPI {
     void setAllOwnedDeviceNames(String deviceName);
 
     void vacuumDatabase() throws Exception;
+
 }

@@ -32,11 +32,16 @@ import java.util.List;
 import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.KeyId;
 import io.olvid.engine.datatypes.ObvDatabase;
+import io.olvid.engine.datatypes.PreKeyBlobOnServer;
+import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.key.asymmetric.EncryptionPublicKey;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
+import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
 
@@ -62,6 +67,16 @@ public class OwnedDevice implements ObvDatabase {
     static final String EXPIRATION_TIMESTAMP = "expiration_timestamp";
     private Long lastRegistrationTimestamp;
     static final String LAST_REGISTRATION_TIMESTAMP = "last_registration_timestamp";
+    private long latestChannelCreationPingTimestamp;
+    static final String LATEST_CHANNEL_CREATION_PING_TIMESTAMP = "latest_channel_creation_ping_timestamp";
+    private KeyId preKeyId;
+    static final String PRE_KEY_ID = "pre_key_id";
+    private EncryptionPublicKey preKeyEncryptionPublicKey;
+    static final String PRE_KEY_ENCRYPTION_PUBLIC_KEY = "pre_key_encryption_public_key";
+    private Long preKeyExpirationTimestamp;
+    static final String PRE_KEY_EXPIRATION_TIMESTAMP = "pre_key_expiration_timestamp";
+
+
 
     public UID getUid() {
         return uid;
@@ -74,6 +89,20 @@ public class OwnedDevice implements ObvDatabase {
     public boolean isCurrentDevice() {
         return isCurrentDevice;
     }
+
+    public boolean hasPreKey() {
+        return preKeyId != null;
+    }
+
+
+    public PreKey getPreKey() {
+        if (hasPreKey()) {
+            return new PreKey(uid, preKeyId, preKeyEncryptionPublicKey, preKeyExpirationTimestamp);
+        } else {
+            return null;
+        }
+    }
+
 
     public String getDisplayName() {
         return displayName;
@@ -95,12 +124,16 @@ public class OwnedDevice implements ObvDatabase {
         return ObvCapability.deserializeRawDeviceCapabilities(serializedDeviceCapabilities);
     }
 
-    public static OwnedDevice createOtherDevice(IdentityManagerSession identityManagerSession, UID uid, Identity identity, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, boolean channelCreationAlreadyInProgress) {
+    public long getLatestChannelCreationPingTimestamp() {
+        return latestChannelCreationPingTimestamp;
+    }
+
+    public static OwnedDevice createOtherDevice(IdentityManagerSession identityManagerSession, UID uid, Identity identity, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, PreKeyBlobOnServer preKeyBlob, boolean channelCreationAlreadyInProgress) {
         if (identity == null) {
             return null;
         }
         try {
-            OwnedDevice ownedDevice = new OwnedDevice(identityManagerSession, uid, identity, false, null, displayName, expirationTimestamp, lastRegistrationTimestamp);
+            OwnedDevice ownedDevice = new OwnedDevice(identityManagerSession, uid, identity, false, preKeyBlob == null ? null : ObvCapability.serializeRawDeviceCapabilities(preKeyBlob.rawDeviceCapabilities), displayName, expirationTimestamp, lastRegistrationTimestamp, preKeyBlob == null ? null : preKeyBlob.preKey);
             ownedDevice.insert();
             ownedDevice.channelCreationAlreadyInProgress = channelCreationAlreadyInProgress;
             return ownedDevice;
@@ -115,7 +148,7 @@ public class OwnedDevice implements ObvDatabase {
         }
         UID uid = new UID(prng);
         try {
-            OwnedDevice ownedDevice = new OwnedDevice(identityManagerSession, uid, identity, true, null, displayName, null, null);
+            OwnedDevice ownedDevice = new OwnedDevice(identityManagerSession, uid, identity, true, null, displayName, null, null, null);
             ownedDevice.insert();
             return ownedDevice;
         } catch (SQLException e) {
@@ -123,7 +156,7 @@ public class OwnedDevice implements ObvDatabase {
         }
     }
 
-    private OwnedDevice(IdentityManagerSession identityManagerSession, UID uid, Identity ownedIdentity, boolean isCurrentDevice, byte[] serializedDeviceCapabilities, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp) {
+    private OwnedDevice(IdentityManagerSession identityManagerSession, UID uid, Identity ownedIdentity, boolean isCurrentDevice, byte[] serializedDeviceCapabilities, String displayName, Long expirationTimestamp, Long lastRegistrationTimestamp, PreKey preKey) {
         this.identityManagerSession = identityManagerSession;
         this.uid = uid;
         this.ownedIdentity = ownedIdentity;
@@ -132,6 +165,12 @@ public class OwnedDevice implements ObvDatabase {
         this.displayName = displayName;
         this.expirationTimestamp = expirationTimestamp;
         this.lastRegistrationTimestamp = lastRegistrationTimestamp;
+        this.latestChannelCreationPingTimestamp = 0;
+        if (preKey != null) {
+            this.preKeyId = preKey.keyId;
+            this.preKeyEncryptionPublicKey = preKey.encryptionPublicKey;
+            this.preKeyExpirationTimestamp = preKey.expirationTimestamp;
+        }
     }
 
     private OwnedDevice(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -153,6 +192,19 @@ public class OwnedDevice implements ObvDatabase {
         if (res.wasNull()) {
             this.lastRegistrationTimestamp = null;
         }
+        this.latestChannelCreationPingTimestamp = res.getByte(LATEST_CHANNEL_CREATION_PING_TIMESTAMP);
+        byte[] preKeyIdBytes = res.getBytes(PRE_KEY_ID);
+        this.preKeyId = (preKeyIdBytes == null) ? null : new KeyId(preKeyIdBytes);
+        byte[] preKeyEncodedPublicKeyBytes = res.getBytes(PRE_KEY_ENCRYPTION_PUBLIC_KEY);
+        if (preKeyEncodedPublicKeyBytes != null) {
+            try {
+                this.preKeyEncryptionPublicKey = (EncryptionPublicKey) new Encoded(preKeyEncodedPublicKeyBytes).decodePublicKey();
+            } catch (DecodingException ignored) {}
+        }
+        this.preKeyExpirationTimestamp = res.getLong(PRE_KEY_EXPIRATION_TIMESTAMP);
+        if (res.wasNull()) {
+            this.preKeyExpirationTimestamp = null;
+        }
     }
 
 
@@ -168,6 +220,10 @@ public class OwnedDevice implements ObvDatabase {
                     DISPLAY_NAME + " TEXT DEFAULT NULL, " +
                     EXPIRATION_TIMESTAMP + " INTEGER DEFAULT NULL, " +
                     LAST_REGISTRATION_TIMESTAMP + " INTEGER DEFAULT NULL, " +
+                    LATEST_CHANNEL_CREATION_PING_TIMESTAMP + " BIGINT NOT NULL DEFAULT 0, " +
+                    PRE_KEY_ID + " BLOB DEFAULT NULL, " +
+                    PRE_KEY_ENCRYPTION_PUBLIC_KEY + " BLOB DEFAULT NULL, " +
+                    PRE_KEY_EXPIRATION_TIMESTAMP + " BIGINT DEFAULT NULL, " +
                     "FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + " (" + OwnedIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE);");
         }
     }
@@ -188,16 +244,27 @@ public class OwnedDevice implements ObvDatabase {
             }
             oldVersion = 35;
         }
+        if (oldVersion < 41 && newVersion >= 41) {
+            Logger.d("MIGRATING `owned_device` DATABASE FROM VERSION " + oldVersion + " TO 41");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE owned_device ADD COLUMN `latest_channel_creation_ping_timestamp` BIGINT NOT NULL DEFAULT 0");
+                statement.execute("ALTER TABLE owned_device ADD COLUMN `pre_key_id` BLOB DEFAULT NULL");
+                statement.execute("ALTER TABLE owned_device ADD COLUMN `pre_key_encryption_public_key` BLOB DEFAULT NULL");
+                statement.execute("ALTER TABLE owned_device ADD COLUMN `pre_key_expiration_timestamp` BIGINT DEFAULT NULL");
+            }
+            oldVersion = 41;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBoolean(3, isCurrentDevice);
             statement.setBytes(4, serializedDeviceCapabilities);
             statement.setString(5, displayName);
+
             if (expirationTimestamp == null) {
                 statement.setNull(6, Types.INTEGER);
             } else {
@@ -208,6 +275,19 @@ public class OwnedDevice implements ObvDatabase {
             } else {
                 statement.setLong(7, lastRegistrationTimestamp);
             }
+            statement.setLong(8, latestChannelCreationPingTimestamp);
+
+
+            if (preKeyId != null && preKeyEncryptionPublicKey != null && preKeyExpirationTimestamp != null) {
+                statement.setBytes(9, preKeyId.getBytes());
+                statement.setBytes(10, Encoded.of(preKeyEncryptionPublicKey).getBytes());
+                statement.setLong(11, preKeyExpirationTimestamp);
+            } else {
+                statement.setBytes(9, null);
+                statement.setBytes(10, null);
+                statement.setNull(11, Types.BIGINT);
+            }
+
             statement.executeUpdate();
             if (!isCurrentDevice) {
                 commitHookBits |= HOOK_BIT_INSERTED_OTHER_DEVICE | HOOK_BIT_DEVICES_CHANGED;
@@ -290,6 +370,22 @@ public class OwnedDevice implements ObvDatabase {
         }
     }
 
+    public static List<OwnedDevice> getAllWithExpiredPreKey(IdentityManagerSession identityManagerSession, Identity ownedIdentity, long expirationTimestamp) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + OWNED_IDENTITY + " = ? " +
+                " AND " + PRE_KEY_EXPIRATION_TIMESTAMP + " < ?;")) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            statement.setLong(2, expirationTimestamp);
+            try (ResultSet res = statement.executeQuery()) {
+                List<OwnedDevice> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new OwnedDevice(identityManagerSession, res));
+                }
+                return list;
+            }
+        }
+    }
+
     public static UID[] getAllDeviceUidsOfIdentity(IdentityManagerSession identityManagerSession, Identity identity) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT "  + UID_ + " FROM " + TABLE_NAME + " WHERE " +
                 OWNED_IDENTITY + " = ?;")) {
@@ -340,6 +436,19 @@ public class OwnedDevice implements ObvDatabase {
         }
     }
 
+    public void setLatestChannelCreationPingTimestamp(long timestamp) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + LATEST_CHANNEL_CREATION_PING_TIMESTAMP + " = ? " +
+                " WHERE " + UID_ + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            statement.setLong(1, timestamp);
+            statement.setBytes(2, this.uid.getBytes());
+            statement.setBytes(3, this.ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.lastRegistrationTimestamp = timestamp;
+        }
+    }
+
     public void setTimestamps(Long expirationTimestamp, Long lastRegistrationTimestamp) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + EXPIRATION_TIMESTAMP + " = ?, " +
@@ -366,11 +475,48 @@ public class OwnedDevice implements ObvDatabase {
         }
     }
 
+    public void setPreKey(PreKey preKey) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + PRE_KEY_ID + " = ?, " +
+                PRE_KEY_ENCRYPTION_PUBLIC_KEY + " = ?, " +
+                PRE_KEY_EXPIRATION_TIMESTAMP + " = ? " +
+                " WHERE " + UID_ + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            boolean preKeyAddedOrRemoved;
+            if (preKey == null) {
+                statement.setNull(1, Types.BLOB);
+                statement.setNull(2, Types.BLOB);
+                statement.setNull(3, Types.BIGINT);
+                preKeyAddedOrRemoved = this.preKeyId != null;
+                this.preKeyId = null;
+                this.preKeyEncryptionPublicKey = null;
+                this.preKeyExpirationTimestamp = null;
+            } else {
+                statement.setBytes(1, preKey.keyId.getBytes());
+                statement.setBytes(2, Encoded.of(preKey.encryptionPublicKey).getBytes());
+                statement.setLong(3, preKey.expirationTimestamp);
+                preKeyAddedOrRemoved = this.preKeyId == null;
+                this.preKeyId = preKey.keyId;
+                this.preKeyEncryptionPublicKey = preKey.encryptionPublicKey;
+                this.preKeyExpirationTimestamp = preKey.expirationTimestamp;
+            }
+            statement.setBytes(4, uid.getBytes());
+            statement.setBytes(5, ownedIdentity.getBytes());
+            statement.executeUpdate();
+            if (preKeyAddedOrRemoved) {
+                commitHookBits |= HOOK_BIT_DEVICES_CHANGED;
+                identityManagerSession.session.addSessionCommitListener(this);
+            }
+        }
+    }
+
+
     boolean channelCreationAlreadyInProgress = false;
     private long commitHookBits = 0;
     private static final long HOOK_BIT_INSERTED_OTHER_DEVICE = 0x1;
     private static final long HOOK_BIT_CAPABILITIES_UPDATED = 0x2;
     private static final long HOOK_BIT_DEVICES_CHANGED = 0x4;
+    private static final long HOOK_BIT_DEVICE_PRE_KEY_ADDED_OR_REMOVED = 0x8;
 
     @Override
     public void wasCommitted() {

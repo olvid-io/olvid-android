@@ -81,6 +81,12 @@ public interface ContactDao {
     void updateOneToOne(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean oneToOne);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
+            " SET " + Contact.RECENTLY_ONLINE + " = :recentlyOnline " +
+            " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
+    void updateRecentlyOnline(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean recentlyOnline);
+
+    @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.NEW_PUBLISHED_DETAILS + " = :newPublishedDetails " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
@@ -112,10 +118,11 @@ public interface ContactDao {
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.DEVICE_COUNT + " = :deviceCount, " +
-            Contact.ESTABLISHED_CHANNEL_COUNT + " = :establishedChannelCount " +
+            Contact.ESTABLISHED_CHANNEL_COUNT + " = :establishedChannelCount, " +
+            Contact.PRE_KEY_COUNT + " = :preKeyCount " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateCounts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, int deviceCount, int establishedChannelCount);
+    void updateCounts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, int deviceCount, int establishedChannelCount, int preKeyCount);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.CAPABILITY_WEBRTC_CONTINUOUS_ICE + " = :capable " +
@@ -159,7 +166,8 @@ public interface ContactDao {
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND " + Contact.ACTIVE + " = 1 " +
-            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR " + Contact.PRE_KEY_COUNT + " > 0) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
     LiveData<List<Contact>> getAllForOwnedIdentityWithChannel(byte[] ownedIdentityBytes);
 
@@ -167,7 +175,8 @@ public interface ContactDao {
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND " + Contact.ACTIVE + " = 1 " +
             " AND " + Contact.CAPABILITY_GROUPS_V2 + " = 1 " +
-            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR " + Contact.PRE_KEY_COUNT + " > 0) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
     LiveData<List<Contact>> getAllForOwnedIdentityWithChannelAndGroupV2Capability(byte[] ownedIdentityBytes);
 
@@ -176,7 +185,8 @@ public interface ContactDao {
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " != :bytesExcludedContactIdentity " +
             " AND " + Contact.ACTIVE + " = 1 " +
             " AND " + Contact.ONE_TO_ONE + " = 1 " +
-            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR " + Contact.PRE_KEY_COUNT + " > 0) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
     LiveData<List<Contact>> getAllOneToOneForOwnedIdentityWithChannelExcludingOne(byte[] bytesOwnedIdentity, byte[] bytesExcludedContactIdentity);
 
@@ -184,7 +194,8 @@ public interface ContactDao {
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " NOT IN (:excludedContacts) " +
             " AND " + Contact.ACTIVE + " = 1 " +
-            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR " + Contact.PRE_KEY_COUNT + " > 0) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
     LiveData<List<Contact>> getAllForOwnedIdentityWithChannelExcludingSome(byte[] bytesOwnedIdentity, List<byte[]> excludedContacts);
 
@@ -193,7 +204,8 @@ public interface ContactDao {
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.ACTIVE + " = 1 " +
-            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 ")
+            " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR " + Contact.PRE_KEY_COUNT + " > 0) ")
     List<Contact> getAllWithChannel();
 
 
@@ -212,12 +224,14 @@ public interface ContactDao {
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_CONTACT_IDENTITY + " IN ( :bytesContactIdentities )" +
             " AND " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity" +
-            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0")
+            " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR " + Contact.PRE_KEY_COUNT + " > 0) ")
     LiveData<List<Contact>> getWithChannelAsList(byte[] bytesOwnedIdentity, List<byte[]> bytesContactIdentities);
 
     @Query( "SELECT * FROM ( SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND " + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR " + Contact.PRE_KEY_COUNT + " > 0) " +
             " EXCEPT SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
             " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS membersjoin " +
             " ON membersjoin." + ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = contact." + Contact.BYTES_CONTACT_IDENTITY +

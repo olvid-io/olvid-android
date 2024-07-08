@@ -20,6 +20,8 @@
 package io.olvid.engine.channel.datatypes;
 
 
+import java.sql.SQLException;
+
 import io.olvid.engine.Logger;
 import io.olvid.engine.channel.databases.ObliviousChannel;
 import io.olvid.engine.crypto.AuthEnc;
@@ -35,6 +37,7 @@ import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelProtocolMessageToSend;
 import io.olvid.engine.datatypes.containers.MessageToSend;
 import io.olvid.engine.datatypes.containers.MessageType;
+import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.encoder.Encoded;
@@ -45,8 +48,9 @@ public abstract class NetworkChannel extends Channel {
     public static NetworkChannel[] acceptableChannelsForPosting(ChannelManagerSession channelManagerSession, ChannelMessageToSend message) throws Exception {
         switch (message.getSendChannelInfo().getChannelType()) {
             case SendChannelInfo.OBLIVIOUS_CHANNEL_TYPE:
-            case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_ON_SAME_SERVER_TYPE:
-            case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_TYPE:
+            case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE:
+            case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_TYPE:
+            case SendChannelInfo.OBLIVIOUS_CHANNEL_OR_PRE_KEY_TYPE:
                 return ObliviousChannel.acceptableChannelsForPosting(channelManagerSession, message);
             case SendChannelInfo.ASYMMETRIC_CHANNEL_TYPE:
             case SendChannelInfo.ASYMMETRIC_BROADCAST_CHANNEL_TYPE:

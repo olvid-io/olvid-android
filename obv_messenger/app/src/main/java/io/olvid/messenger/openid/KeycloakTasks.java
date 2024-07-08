@@ -105,7 +105,7 @@ public class KeycloakTasks {
     public static final int RFC_USER_NOT_AUTHENTICATED = 9;
     public static final int RFC_IDENTITY_ALREADY_UPLOADED = 10;
     public static final int RFC_IDENTITY_REVOKED = 11;
-
+    public static final int RFC_AUTHENTICATION_ERROR_TIME_OFFSET = 12;
 
 
     public static final int ERROR_CODE_INTERNAL_ERROR = 1;
@@ -653,6 +653,12 @@ public class KeycloakTasks {
                             }
                             return;
                         }
+                    }
+                } else if (result.getResultCode() == KeycloakAuthenticationActivity.RESULT_CODE_TIME_OFFSET) {
+                    Logger.w("Keycloak authentication failed because of a phone time offset");
+                    if (callback != null) {
+                        callback.failed(RFC_AUTHENTICATION_ERROR_TIME_OFFSET);
+                        return;
                     }
                 }
                 Logger.d("Keycloak authentication cancelled by user");

@@ -917,7 +917,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                         editMessage,
                         null,
                         false,
-                        true
+                        true,
+                        null
                     )
                     newMessageEditText?.setHint(R.string.label_edit_your_message)
                     composeMessageEditGroup!!.setOnClickListener {
@@ -938,7 +939,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                             editMessage,
                             null,
                             false,
-                            false
+                            false,
+                            null
                         )
                         newMessageEditText?.setSelection(newMessageEditText?.text?.length ?: 0)
                     }
@@ -1007,7 +1009,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                                 draftReplyMessage,
                                 null,
                                 true,
-                                true
+                                true,
+                                null
                             )
                         }
                     }

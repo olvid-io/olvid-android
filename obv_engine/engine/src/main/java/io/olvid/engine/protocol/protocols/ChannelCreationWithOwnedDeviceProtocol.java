@@ -109,6 +109,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
     }
 
     public static class CancelledState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public CancelledState(Encoded encodedState) throws Exception {
             super(CANCELLED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -127,6 +128,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
 
 
     public static class PingSentState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public PingSentState(Encoded encodedState) throws Exception {
             super(PING_SENT_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -148,6 +150,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
         private final UID remoteDeviceUid;
         private final EncryptionPrivateKey ephemeralPrivateKey;
 
+        @SuppressWarnings("unused")
         public WaitingForK1State(Encoded encodedState) throws Exception {
             super(WAITING_FOR_K1_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -179,6 +182,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
         private final EncryptionPrivateKey ephemeralPrivateKey;
         private final AuthEncKey k1;
 
+        @SuppressWarnings("unused")
         public WaitingForK2State(Encoded encodedState) throws Exception {
             super(WAITING_FOR_K2_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -211,6 +215,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
     public static class WaitForFirstAckState extends ConcreteProtocolState {
         private final UID remoteDeviceUid;
 
+        @SuppressWarnings("unused")
         public WaitForFirstAckState(Encoded encodedState) throws Exception {
             super(WAIT_FOR_FIRST_ACK_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -235,6 +240,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
     public static class WaitForSecondAckState extends ConcreteProtocolState {
         private final UID remoteDeviceUid;
 
+        @SuppressWarnings("unused")
         public WaitForSecondAckState(Encoded encodedState) throws Exception {
             super(WAIT_FOR_SECOND_ACK_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -259,6 +265,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
 
 
     public static class ChannelConfirmedState extends ConcreteProtocolState {
+        @SuppressWarnings("unused")
         public ChannelConfirmedState(Encoded encodedState) throws Exception {
             super(CHANNEL_CONFIRMED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
@@ -361,6 +368,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
             this.signature = signature;
         }
 
+        @SuppressWarnings("unused")
         public PingMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -397,6 +405,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
             this.remoteEphemeralPublicKey = remoteEphemeralPublicKey;
         }
 
+        @SuppressWarnings("unused")
         public AliceIdentityAndEphemeralKeyMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 3) {
@@ -433,6 +442,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
             this.c1 = c1;
         }
 
+        @SuppressWarnings("unused")
         public BobEphemeralKeyAndK1Message(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 2) {
@@ -465,6 +475,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
             this.c2 = c2;
         }
 
+        @SuppressWarnings("unused")
         public K2Message(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 1) {
@@ -495,6 +506,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
             this.remoteSerializedIdentityWithVersionAndPhoto = remoteSerializedIdentityWithVersionAndPhoto;
         }
 
+        @SuppressWarnings("unused")
         public FirstAckMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 1) {
@@ -525,6 +537,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
             this.remoteSerializedIdentityWithVersionAndPhoto = remoteSerializedIdentityWithVersionAndPhoto;
         }
 
+        @SuppressWarnings("unused")
         public SecondAckMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getInputs().length != 1) {
@@ -580,6 +593,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
     }
 
     public static class SendPingStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final InitialMessage receivedMessage;
 
@@ -636,10 +650,13 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                     getPrng()
             );
 
+
             // send the ping containing the signature
             CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricChannelInfo(getOwnedIdentity(), getOwnedIdentity(), new UID[]{receivedMessage.remoteDeviceUid}));
             ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, currentDeviceUid, signature).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
+            protocolManagerSession.identityDelegate.setLatestChannelCreationPingTimestampForOwnedDevice(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.remoteDeviceUid, System.currentTimeMillis());
 
             return new PingSentState();
         }
@@ -648,6 +665,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
 
 
     public static class SendPingOrEphemeralKeyStep extends ProtocolStep {
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final InitialProtocolState startState;
         private final PingMessage receivedMessage;
 
@@ -744,6 +762,8 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAsymmetricChannelInfo(getOwnedIdentity(), getOwnedIdentity(), new UID[]{receivedMessage.remoteDeviceUid}));
                 ChannelMessageToSend messageToSend = new PingMessage(coreProtocolMessage, currentDeviceUid, signature).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
+                protocolManagerSession.identityDelegate.setLatestChannelCreationPingTimestampForOwnedDevice(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.remoteDeviceUid, System.currentTimeMillis());
 
                 return new PingSentState();
             } else {
@@ -919,7 +939,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
 
             // add the contact deviceUid if not already there
             try {
-                protocolManagerSession.identityDelegate.addDeviceForOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.remoteDeviceUid, null, null, null, true);
+                protocolManagerSession.identityDelegate.addDeviceForOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.remoteDeviceUid, null, null, null, null, true);
 
                 // trigger an owned device discovery
                 UID protocolInstanceUid = new UID(getPrng());
@@ -990,7 +1010,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
 
             // Add the otherDeviceUid to the contactIdentity if needed --> we no longer trigger a device discovery
             try {
-                protocolManagerSession.identityDelegate.addDeviceForOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.remoteDeviceUid, null, null, null, true);
+                protocolManagerSession.identityDelegate.addDeviceForOwnedIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.remoteDeviceUid, null, null, null, null, true);
 
                 // trigger an owned device discovery
                 UID protocolInstanceUid = new UID(getPrng());

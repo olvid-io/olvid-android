@@ -134,8 +134,12 @@ public class Utils {
             });
         });
     }
-    public static void applyBodyWithSpans(@NonNull TextView textView, @Nullable byte[] bytesOwnedIdentity, @NonNull Message message, @Nullable List<Pattern> searchPatterns, boolean linkifyLinks, boolean markdown) {
-        SpannableString result = new SpannableString(message.getStringContent(textView.getContext()));
+    public static void applyBodyWithSpans(@NonNull TextView textView, @Nullable byte[] bytesOwnedIdentity, @NonNull Message message, @Nullable List<Pattern> searchPatterns, boolean linkifyLinks, boolean markdown, String finalUrlToTruncate) {
+        String body = message.getStringContent(textView.getContext());
+        if (finalUrlToTruncate != null && endsWithIgnoreCase(body, finalUrlToTruncate) && SettingsActivity.truncateMessageBodyTrailingLinks()) {
+            body = body.substring(0, body.length() - finalUrlToTruncate.length()).trim();
+        }
+        SpannableString result = new SpannableString(body);
         try {
             // call linkify first as it removes existing spans
             if (linkifyLinks) {
@@ -157,6 +161,10 @@ public class Utils {
         } else {
             textView.setText(result);
         }
+    }
+
+    private static boolean endsWithIgnoreCase(@NonNull String source, @NonNull String suffix) {
+        return source.substring(source.length() - suffix.length()).equalsIgnoreCase(suffix);
     }
 
     private static void applyMentionSpans(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull Message message, SpannableString result) {

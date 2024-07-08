@@ -89,7 +89,8 @@ public class Session implements Connection {
         Properties properties = new Properties();
         properties.setProperty("secure_delete", "on");
         properties.setProperty("temp_store", "2");
-//            properties.setProperty("journal_mode", "WAL"); // we comment for now. There Was a bug on API 28 during 15 -> 16 migration
+        properties.setProperty("journal_mode", "WAL");
+        properties.setProperty("busy_timeout", "10000"); // increase the db locked timeout as some queries may take more than 3s!
         if (dbKey != null) {
             properties.setProperty("password", dbKey);
         }
@@ -196,19 +197,20 @@ public class Session implements Connection {
         if (!sessionCommitListeners.isEmpty() ) {
             Logger.e("This Session was not properly closed: some modifications were committed and the corresponding hooks have not been called.");
             for (SessionCommitListener sessionCommitListener: sessionCommitListeners) {
-                Logger.e("Not committed entity: " + sessionCommitListener.getClass());
+                Logger.e("  - Un-committed entity: " + sessionCommitListener.getClass());
             }
-            try { throw new Exception("Trace"); } catch (Exception e) {
-                e.printStackTrace();
-            }
+            sessionCommitListeners.clear();
+            new Exception("Trace").printStackTrace();
         }
         if (!getAutoCommit()) {
             rollback();
         }
-        if (!sessionIsForUpgradeTable) {
+        if (sessionIsForUpgradeTable) {
+            connection.close();
+        } else {
             sessionPoolLock.lock();
             List<Session> sessionList = sessionPool.get(dbPath);
-            if ((sessionList == null) || (sessionList.size() == 0)) {
+            if ((sessionList == null) || (sessionList.isEmpty())) {
                 sessionList = new ArrayList<>();
                 sessionPool.put(dbPath, sessionList);
             }

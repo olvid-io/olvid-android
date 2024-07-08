@@ -142,6 +142,8 @@ public class RefreshOutboxAttachmentSignedUrlOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 }

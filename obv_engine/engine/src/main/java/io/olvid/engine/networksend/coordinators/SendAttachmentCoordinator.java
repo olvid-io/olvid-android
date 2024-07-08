@@ -54,8 +54,6 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
 
     private final PriorityOperationQueue sendAttachmentOperationQueue;
     private final ExponentialBackoffRepeatingScheduler<IdentityAndUidAndNumber> scheduler;
-    private boolean initialQueueingPerformed = false;
-    private final Object lock = new Object();
 
     private NotificationListeningDelegate notificationListeningDelegate;
 
@@ -98,25 +96,19 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
     }
 
     public void initialQueueing() {
-        synchronized (lock) {
-            if (initialQueueingPerformed) {
-                return;
-            }
-            try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
-                OutboxMessage[] messages = OutboxMessage.getAll(sendManagerSession);
-                for (OutboxMessage message: messages) {
-                    if (message.getUidFromServer() != null) {
-                        for (OutboxAttachment attachment: message.getAttachments()) {
-                            if (!attachment.isAcknowledged()) {
-                                queueNewSendAttachmentCompositeOperation(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getAttachmentNumber(), attachment.getPriority());
-                            }
+        try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
+            OutboxMessage[] messages = OutboxMessage.getAll(sendManagerSession);
+            for (OutboxMessage message : messages) {
+                if (message.getUidFromServer() != null) {
+                    for (OutboxAttachment attachment : message.getAttachments()) {
+                        if (!attachment.isAcknowledged()) {
+                            queueNewSendAttachmentCompositeOperation(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getAttachmentNumber(), attachment.getPriority());
                         }
                     }
                 }
-                initialQueueingPerformed = true;
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

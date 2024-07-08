@@ -23,8 +23,8 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 40;
-    public static final int SERVER_API_VERSION = 17;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 41;
+    public static final int SERVER_API_VERSION = 18;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
     // files / folders
@@ -72,11 +72,25 @@ public abstract class Constants {
 
     // download message
     public static final long RELIST_DELAY = 10_000; // 10 seconds
+    public static final long MINIMUM_URL_REFRESH_INTERVAL = 3_600_000L; // 1 hour
 
     // backups
     public static final long AUTOBACKUP_MAX_INTERVAL = 86_400_000L; // 1 day
     public static final long AUTOBACKUP_START_DELAY = 60_000L * 2; // 2 minutes
-    public static final long PERIODIC_OWNED_DEVICE_SYNC_INTERVAL = 86_400_000L; // 1 day
+    // not used for now
+//    public static final long PERIODIC_OWNED_DEVICE_SYNC_INTERVAL = 86_400_000L; // 1 day
+
+    // pre keys
+    public static final long PRE_KEY_VALIDITY_DURATION = 60 * 86_400_000L; // validity duration of newly generated pre-keys: 60 days
+    public static final long PRE_KEY_RENEWAL_INTERVAL = 7 * 86_400_000L; // how frequently to refresh pre-keys on the server: 7 days
+    public static final long PRE_KEY_CONSERVATION_DURATION = 60 * 86_400_000L; // how long to keep a pre-key after it expires: 60 days
+    public static final long PRE_KEY_INBOX_NO_CONTACT_DURATION = 15 * 86_400_000L; // how long to keep a message in the inbox if it can be decrypted with a pre-key, but the sender is not a contact: 15 days
+
+    // device discovery
+    public static final long NO_DEVICE_CONTACT_DEVICE_DISCOVERY_INTERVAL = 3 * 86_400_000L;
+    public static final long CONTACT_DEVICE_DISCOVERY_INTERVAL = 7 * 86_400_000L;
+    public static final long OWNED_DEVICE_DISCOVERY_INTERVAL = 86_400_000L;
+    public static final long CHANNEL_CREATION_PING_INTERVAL = 3 * 86_400_000L;
 
     public static final int SERVER_SESSION_NONCE_LENGTH = 32;
     public static final int SERVER_SESSION_CHALLENGE_LENGTH = 32;
@@ -105,7 +119,7 @@ public abstract class Constants {
 
     public static final long BASE_RESCHEDULING_TIME = 250L;
     public static final long WEBSOCKET_PING_INTERVAL_MILLIS = 20_000L;
-    public static final long NO_DEVICE_CONTACT_DEVICE_DISCOVERY_INTERVAL = 3 * 86_400_000;
+
 
     // Keycloak
     public static final long KEYCLOAK_SIGNATURE_VALIDITY_MILLIS = 60 * 86_400_000L;
@@ -129,6 +143,8 @@ public abstract class Constants {
         GROUP_UPDATE_ON_SERVER,
         GROUP_KICK,
         OWNED_IDENTITY_DELETION,
+        DEVICE_PRE_KEY,
+        ENCRYPTION_WITH_PRE_KEY,
     }
 
     public static final byte[] SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX = "authentChallenge".getBytes(StandardCharsets.UTF_8);
@@ -144,6 +160,8 @@ public abstract class Constants {
     public static final byte[] GROUP_UPDATE_ON_SERVER_SIGNATURE_CHALLENGE_PREFIX = "updateGroup".getBytes(StandardCharsets.UTF_8);
     public static final byte[] GROUP_KICK_SIGNATURE_CHALLENGE_PREFIX = "groupKick".getBytes(StandardCharsets.UTF_8);
     public static final byte[] OWNED_IDENTITY_DELETION_SIGNATURE_CHALLENGE_PREFIX = "ownedIdentityDeletion".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] DEVICE_PRE_KEY_SIGNATURE_CHALLENGE_PREFIX = "devicePreKey".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] ENCRYPTION_WITH_PRE_KEY_SIGNATURE_CHALLENGE_PREFIX = "encryptionWithPreKey".getBytes(StandardCharsets.UTF_8);
 
     public static byte[] getSignatureChallengePrefix(SignatureContext signatureContext) {
         switch (signatureContext) {
@@ -173,6 +191,10 @@ public abstract class Constants {
                 return GROUP_KICK_SIGNATURE_CHALLENGE_PREFIX;
             case OWNED_IDENTITY_DELETION:
                 return OWNED_IDENTITY_DELETION_SIGNATURE_CHALLENGE_PREFIX;
+            case DEVICE_PRE_KEY:
+                return DEVICE_PRE_KEY_SIGNATURE_CHALLENGE_PREFIX;
+            case ENCRYPTION_WITH_PRE_KEY:
+                return ENCRYPTION_WITH_PRE_KEY_SIGNATURE_CHALLENGE_PREFIX;
             default:
                 return null;
         }

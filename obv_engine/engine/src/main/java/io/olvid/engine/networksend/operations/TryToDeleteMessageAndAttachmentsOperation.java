@@ -113,6 +113,8 @@ public class TryToDeleteMessageAndAttachmentsOperation extends Operation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 

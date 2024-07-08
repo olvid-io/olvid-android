@@ -295,7 +295,7 @@ public class OwnedDeviceManagementProtocol extends ConcreteProtocol {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
             {
-                // after a the query is processed by the server, start an OwnedDeviceDiscoveryProtocol
+                // after a query is processed by the server, start an OwnedDeviceDiscoveryProtocol
                 UID protocolInstanceUid = new UID(getPrng());
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
@@ -307,7 +307,7 @@ public class OwnedDeviceManagementProtocol extends ConcreteProtocol {
 
             // if the user deactivated a device --> notify all contacts that a device discovery is needed
             if (startState.deviceManagementRequest.action == ObvDeviceManagementRequest.ACTION_DEACTIVATE_DEVICE) {
-                SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsInfosForMultipleIdentities(protocolManagerSession.identityDelegate.getContactsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()), getOwnedIdentity());
+                SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(protocolManagerSession.identityDelegate.getContactsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()), getOwnedIdentity());
                 for (SendChannelInfo sendChannelInfo : sendChannelInfos) {
                     try {
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(sendChannelInfo,

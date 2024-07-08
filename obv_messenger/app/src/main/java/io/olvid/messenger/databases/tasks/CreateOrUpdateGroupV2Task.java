@@ -290,7 +290,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     // check if we have at least one group member with channels (to post an ephemeral settings message)
                     if (groupWasJustCreatedByMe && !createdOnOtherDevice && !needToPostSettingsUpdateMessage) {
                         Contact contact = db.contactDao().get(group.bytesOwnedIdentity, obvGroupV2Member.bytesIdentity);
-                        if (contact != null && contact.establishedChannelCount > 0) {
+                        if (contact != null && contact.hasChannelOrPreKey()) {
                             needToPostSettingsUpdateMessage = true;
                         }
                     }
@@ -454,7 +454,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                             }
                         }
 
-                        if (contact.establishedChannelCount != 0) {
+                        if (contact.hasChannelOrPreKey()) {
                             List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoAndMessages = db.messageRecipientInfoDao().getUnsentForContactInDiscussion(discussion.id, contact.bytesContactIdentity);
                             long discussionId = discussion.id;
                             runAfterTransaction.add(() -> {

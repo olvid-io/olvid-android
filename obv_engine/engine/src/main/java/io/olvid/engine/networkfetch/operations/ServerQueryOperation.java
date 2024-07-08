@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.UUID;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -34,6 +35,7 @@ import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Constants;
+import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
@@ -224,6 +226,16 @@ public class ServerQueryOperation extends Operation {
                         serverMethod = new DeviceManagementServerMethod(serverQuery.getOwnedIdentity(), serverSessionToken, serverQuery.getType());
                         break;
                     }
+                    case UPLOAD_PRE_KEY_QUERY_ID: {
+                        ServerQuery.UploadPreKeyQuery uploadPreKeyQuery = (ServerQuery.UploadPreKeyQuery) queryType;
+                        byte[] serverSessionToken = ServerSession.getToken(fetchManagerSession, serverQuery.getOwnedIdentity());
+                        if (serverSessionToken == null) {
+                            cancel(RFC_INVALID_SERVER_SESSION);
+                            return;
+                        }
+                        serverMethod = new UploadPreKeyServerMethod(serverQuery.getOwnedIdentity(), serverSessionToken, uploadPreKeyQuery.deviceUid, uploadPreKeyQuery.preKeyBytes);
+                        break;
+                    }
                     case REGISTER_API_KEY_QUERY_ID:
                     case TRANSFER_SOURCE_QUERY_ID:
                     case TRANSFER_TARGET_QUERY_ID:
@@ -273,9 +285,7 @@ public class ServerQueryOperation extends Operation {
                         if (System.currentTimeMillis() > pendingServerQuery.getCreationTimestamp() + Constants.SERVER_QUERY_EXPIRATION_DELAY) {
                             switch (serverQuery.getType().getId()) {
                                 case DEVICE_DISCOVERY_QUERY_ID:
-                                    serverResponse = Encoded.of(new Encoded[]{
-                                            Encoded.of(Constants.BROADCAST_UID),
-                                    }); // return the broadcast deviceUid so we know it's not a real output
+                                    serverResponse = Encoded.of(new HashMap<DictionaryKey, Encoded>()); // return an empty dictionary so we know it's not a real output
                                     finished = true;
                                     return;
                                 case OWNED_DEVICE_DISCOVERY_QUERY_ID:
@@ -286,6 +296,7 @@ public class ServerQueryOperation extends Operation {
                                 case GET_GROUP_BLOB_QUERY_ID:
                                 case PUT_GROUP_LOG_QUERY_ID:
                                 case LOCK_GROUP_BLOB_QUERY_ID:
+                                case UPLOAD_PRE_KEY_QUERY_ID:
                                     serverResponse = null;
                                     finished = true;
                                     return;
@@ -399,7 +410,7 @@ class DeviceDiscoveryServerMethod extends ServerQueryServerMethod {
         if (returnStatus == ServerMethod.OK) {
             try {
                 // check that decoding works properly
-                receivedData[0].decodeUidArray();
+                receivedData[0].decodeDictionary();
                 serverResponse = receivedData[0];
             } catch (DecodingException e) {
                 e.printStackTrace();
@@ -1158,7 +1169,7 @@ class RegisterApiKeyServerMethod extends ServerQueryServerMethod {
     private final String server;
     private final Identity ownedIdentity;
     private final byte[] token;
-    private  final String apiKeyString;
+    private final String apiKeyString;
 
     public RegisterApiKeyServerMethod(Identity ownedIdentity, byte[] token, String apiKeyString) {
         this.server = ownedIdentity.getServer();
@@ -1189,6 +1200,60 @@ class RegisterApiKeyServerMethod extends ServerQueryServerMethod {
     @Override
     protected void parseReceivedData(Encoded[] receivedData) {
         super.parseReceivedData(receivedData);
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return null;
+    }
+}
+
+
+class UploadPreKeyServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "/uploadPreKey";
+
+    private final String server;
+    private final Identity ownedIdentity;
+    private final byte[] token;
+    private final UID deviceUid;
+    private final byte[] preKeyBytes;
+
+    public UploadPreKeyServerMethod(Identity ownedIdentity, byte[] token, UID deviceUid, byte[] preKeyBytes) {
+        this.server = ownedIdentity.getServer();
+        this.ownedIdentity = ownedIdentity;
+        this.token = token;
+        this.deviceUid = deviceUid;
+        this.preKeyBytes = preKeyBytes;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(ownedIdentity),
+                Encoded.of(token),
+                Encoded.of(deviceUid),
+                new Encoded(preKeyBytes),
+        }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        // if the server rejects our pre key there is not much we can do, so no retry
+        if (returnStatus == ServerMethod.INVALID_SIGNATURE
+                || returnStatus == ServerMethod.DEVICE_IS_NOT_REGISTERED) {
+            returnStatus = ServerMethod.OK;
+        }
     }
 
     @Override

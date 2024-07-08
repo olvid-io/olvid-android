@@ -29,7 +29,9 @@ import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.metamanager.NetworkFetchDelegate;
 import io.olvid.engine.metamanager.NetworkSendDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
+import io.olvid.engine.metamanager.PreKeyEncryptionDelegate;
 import io.olvid.engine.metamanager.ProtocolDelegate;
+import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 
 
 public class ChannelManagerSession implements AutoCloseable {
@@ -39,18 +41,22 @@ public class ChannelManagerSession implements AutoCloseable {
     public final NetworkSendDelegate networkSendDelegate;
     public final ProtocolDelegate protocolDelegate;
     public final EncryptionForIdentityDelegate encryptionForIdentityDelegate;
+    public final PreKeyEncryptionDelegate preKeyEncryptionDelegate;
     public final IdentityDelegate identityDelegate;
     public final NotificationPostingDelegate notificationPostingDelegate;
+    public final ProtocolStarterDelegate protocolStarterDelegate;
 
-    public ChannelManagerSession(Session session, FullRatchetProtocolStarterDelegate fullRatchetProtocolStarterDelegate, NetworkFetchDelegate networkFetchDelegate, NetworkSendDelegate networkSendDelegate, ProtocolDelegate protocolDelegate, EncryptionForIdentityDelegate encryptionForIdentityDelegate, IdentityDelegate identityDelegate, NotificationPostingDelegate notificationPostingDelegate) {
+    public ChannelManagerSession(Session session, FullRatchetProtocolStarterDelegate fullRatchetProtocolStarterDelegate, NetworkFetchDelegate networkFetchDelegate, NetworkSendDelegate networkSendDelegate, ProtocolDelegate protocolDelegate, EncryptionForIdentityDelegate encryptionForIdentityDelegate, PreKeyEncryptionDelegate preKeyEncryptionDelegate, IdentityDelegate identityDelegate, NotificationPostingDelegate notificationPostingDelegate, ProtocolStarterDelegate protocolStarterDelegate) {
         this.session = session;
         this.fullRatchetProtocolStarterDelegate = fullRatchetProtocolStarterDelegate;
         this.networkFetchDelegate = networkFetchDelegate;
         this.networkSendDelegate = networkSendDelegate;
         this.protocolDelegate = protocolDelegate;
         this.encryptionForIdentityDelegate = encryptionForIdentityDelegate;
+        this.preKeyEncryptionDelegate = preKeyEncryptionDelegate;
         this.identityDelegate = identityDelegate;
         this.notificationPostingDelegate = notificationPostingDelegate;
+        this.protocolStarterDelegate = protocolStarterDelegate;
     }
 
     @Override

@@ -62,6 +62,8 @@ public class KeycloakAuthenticationActivity extends AppCompatActivity {
     public static final String CODE_VERIFIER_INTENT_EXTRA = "code_verifier";
     public static final String NONCE_INTENT_EXTRA = "nonce";
 
+    public static final int RESULT_CODE_TIME_OFFSET = 187;
+
     private AuthorizationService authorizationService;
 
     @Override
@@ -201,6 +203,10 @@ public class KeycloakAuthenticationActivity extends AppCompatActivity {
                                     setResult(RESULT_OK, resultIntent);
                                 } else if (ex != null) {
                                     ex.printStackTrace();
+                                    if (ex.code == AuthorizationException.GeneralErrors.ID_TOKEN_VALIDATION_ERROR.code) {
+                                        // an error occurred while validating the received ID token, this is probably the phone's clock that is off
+                                        setResult(RESULT_CODE_TIME_OFFSET);
+                                    }
                                 }
                                 finish();
                             });

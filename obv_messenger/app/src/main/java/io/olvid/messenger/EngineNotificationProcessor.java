@@ -483,7 +483,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                     }
 
                                     if (Arrays.equals(appOwnedIdentity.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                                        AppSingleton.updateCachedKeycloakManaged(appOwnedIdentity.bytesOwnedIdentity, appOwnedIdentity.keycloakManaged);
+                                        AppSingleton.updateContactCachedInfo(appOwnedIdentity);
                                     }
                                 }
                             }

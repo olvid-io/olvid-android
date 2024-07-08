@@ -63,7 +63,12 @@ public class MetaManager {
                 // do nothing
             }
             for (ObvManager manager: registeredManagers) {
-                manager.initialisationComplete();
+                try {
+                    manager.initialisationComplete();
+                } catch (Exception e) {
+                    Logger.e("Exception in initialisationComplete() for " + manager.getClass());
+                    e.printStackTrace();
+                }
             }
         }).start();
     }

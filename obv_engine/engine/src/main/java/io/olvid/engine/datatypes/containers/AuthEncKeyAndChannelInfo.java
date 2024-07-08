@@ -17,7 +17,7 @@
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.olvid.engine.channel.datatypes;
+package io.olvid.engine.datatypes.containers;
 
 
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;

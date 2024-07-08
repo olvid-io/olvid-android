@@ -46,7 +46,7 @@ public class UpdateContactActiveTask implements Runnable {
             db.discussionDao().updateActive(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.active);
             
             if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                AppSingleton.updateCachedActive(contact.bytesContactIdentity, contact.active);
+                AppSingleton.updateContactCachedInfo(contact);
             }
         }
     }

@@ -99,7 +99,7 @@ class ObvLinkActivity : AppCompatActivity() {
         val MUTUAL_SCAN_PATTERN: Pattern = Pattern.compile(
             "(" + ObvUrlIdentity.URL_PROTOCOL + "|" + ObvUrlIdentity.URL_PROTOCOL_OLVID + ")" + Pattern.quote(
                 "://$URL_INVITATION_HOST"
-            ) + "/#([-_a-zA-Z\\d]+)"
+            ) + "/2#([-_a-zA-Z\\d]+)"
         )
 
         @JvmField

@@ -32,10 +32,11 @@ public abstract class Channel {
     public static UID post(ChannelManagerSession channelManagerSession, ChannelMessageToSend message, PRNGService prng) throws Exception {
         switch (message.getSendChannelInfo().getChannelType()) {
             case SendChannelInfo.OBLIVIOUS_CHANNEL_TYPE:
-            case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_ON_SAME_SERVER_TYPE:
+            case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE:
             case SendChannelInfo.ASYMMETRIC_CHANNEL_TYPE:
             case SendChannelInfo.ASYMMETRIC_BROADCAST_CHANNEL_TYPE:
-            case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_TYPE:
+            case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_TYPE:
+            case SendChannelInfo.OBLIVIOUS_CHANNEL_OR_PRE_KEY_TYPE:
                 return NetworkChannel.post(channelManagerSession, message, prng);
             case SendChannelInfo.LOCAL_TYPE:
                 return LocalChannel.post(channelManagerSession, message, prng);

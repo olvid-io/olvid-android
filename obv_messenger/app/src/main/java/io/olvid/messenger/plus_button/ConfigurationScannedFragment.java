@@ -472,7 +472,7 @@ public class ConfigurationScannedFragment extends Fragment implements View.OnCli
                             if (keycloakAuthenticationStartFragment.authenticationSpinnerGroup != null) {
                                 keycloakAuthenticationStartFragment.authenticationSpinnerGroup.setVisibility(View.GONE);
                             }
-                            Navigation.findNavController(keycloakAuthenticateButton).navigate(ConfigurationScannedFragmentDirections.actionKeycloakBind());
+                            Navigation.findNavController(keycloakAuthenticateButton).navigate(R.id.action_keycloak_bind);
                         });
                     }
 

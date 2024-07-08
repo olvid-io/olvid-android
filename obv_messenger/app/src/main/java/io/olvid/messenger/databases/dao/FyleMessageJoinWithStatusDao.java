@@ -383,7 +383,8 @@ public interface FyleMessageJoinWithStatusDao {
             " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
             " ON disc.id = mess." + Message.DISCUSSION_ID +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE;
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL ";
 
     String MEDIA_FYLE_AND_ORIGIN_QUERY = FYLE_AND_ORIGIN_QUERY +
             " AND (FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'video/%' " +

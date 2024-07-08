@@ -43,9 +43,14 @@ public abstract class ProtocolStep extends Operation {
     }
 
     public ProtocolStep(ReceptionChannelInfo expectedReceptionChannelInfo, ConcreteProtocolMessage receivedMessage, ConcreteProtocol protocol) throws Exception {
-        if (expectedReceptionChannelInfo.getChannelType() == ReceptionChannelInfo.ANY_OBLIVIOUS_CHANNEL_WITH_OWNED_DEVICE_TYPE) {
-            if ((receivedMessage.getReceptionChannelInfo().getChannelType() != ReceptionChannelInfo.OBLIVIOUS_CHANNEL_TYPE) ||
+        if (expectedReceptionChannelInfo.getChannelType() == ReceptionChannelInfo.ANY_OBLIVIOUS_CHANNEL_OR_PRE_KEY_WITH_OWNED_DEVICE_TYPE) {
+            if ((receivedMessage.getReceptionChannelInfo().getChannelType() != ReceptionChannelInfo.OBLIVIOUS_CHANNEL_TYPE && receivedMessage.getReceptionChannelInfo().getChannelType() != ReceptionChannelInfo.PRE_KEY_CHANNEL_TYPE) ||
                     (!Objects.equals(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), protocol.getOwnedIdentity()))) {
+                Logger.d("Protocol expected ReceptionChannelInfo mismatch.");
+                throw new Exception();
+            }
+        } else if (expectedReceptionChannelInfo.getChannelType() == ReceptionChannelInfo.ANY_OBLIVIOUS_OR_PRE_KEY_CHANNEL_TYPE) {
+            if (receivedMessage.getReceptionChannelInfo().getChannelType() != ReceptionChannelInfo.OBLIVIOUS_CHANNEL_TYPE && receivedMessage.getReceptionChannelInfo().getChannelType() != ReceptionChannelInfo.PRE_KEY_CHANNEL_TYPE) {
                 Logger.d("Protocol expected ReceptionChannelInfo mismatch.");
                 throw new Exception();
             }
@@ -55,8 +60,8 @@ public abstract class ProtocolStep extends Operation {
                 throw new Exception();
             }
         } else if (!receivedMessage.getReceptionChannelInfo().equals(expectedReceptionChannelInfo)) {
-                Logger.d("Protocol expected ReceptionChannelInfo mismatch.");
-                throw new Exception();
+            Logger.d("Protocol expected ReceptionChannelInfo mismatch.");
+            throw new Exception();
         }
         this.protocol = protocol;
     }

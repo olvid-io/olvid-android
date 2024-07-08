@@ -423,7 +423,7 @@ public class SynchronizationProtocol extends ConcreteProtocol {
             UID[] otherDeviceUids = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
             if (otherDeviceUids.length > 0) {
                 try {
-                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                    CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                     ChannelMessageToSend messageToSend = new SingleItemSyncMessage(coreProtocolMessage, receivedMessage.obvSyncAtom).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 } catch (NoAcceptableChannelException ignored) { }
@@ -451,7 +451,7 @@ public class SynchronizationProtocol extends ConcreteProtocol {
         private final SingleItemSyncMessage receivedMessage;
 
         public ProcessSingleItemSyncMessageStep(InitialProtocolState startState, SingleItemSyncMessage receivedMessage, SynchronizationProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }

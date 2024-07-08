@@ -215,7 +215,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                     }
 
                                     // resend all unsent messages for this contact
-                                    if (contact.establishedChannelCount > 0) {
+                                    if (contact.hasChannelOrPreKey()) {
                                         List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoAndMessages = db.messageRecipientInfoDao().getUnsentForContactInDiscussion(discussion.id, contact.bytesContactIdentity);
                                         App.runThread(() -> db.runInTransaction(() -> {
                                             for (MessageRecipientInfoDao.MessageRecipientInfoAndMessage messageRecipientInfoAndMessage : messageRecipientInfoAndMessages) {

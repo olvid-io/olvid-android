@@ -232,6 +232,7 @@ public class ServerQueryCoordinatorWebSocketModule {
                     case DEVICE_MANAGEMENT_DEACTIVATE_DEVICE_QUERY_ID:
                     case DEVICE_MANAGEMENT_SET_UNEXPIRING_DEVICE_QUERY_ID:
                     case REGISTER_API_KEY_QUERY_ID:
+                    case UPLOAD_PRE_KEY_QUERY_ID:
                     default: {
                         Logger.e("ServerQueryCoordinatorWebSocketModule.handlePendingServerQuery() received serverQuery with type " + serverQuery.getType().getId());
                         failProtocol(protocolInstanceUid);

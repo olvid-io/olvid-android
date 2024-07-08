@@ -44,7 +44,7 @@ public class NoDuplicateOperationQueue {
     }
 
     public void queue(Operation op) {
-        if (op.getDependencies().size() > 0) {
+        if (!op.getDependencies().isEmpty()) {
             Logger.e("Cannot queue an operation with dependencies into a NoDuplicateOperationQueue.");
             return;
         }
@@ -52,7 +52,7 @@ public class NoDuplicateOperationQueue {
         if (uid != null) {
             lockOnQueuedOperationUids.lock();
             if (queuedOperationUids.contains(uid)) {
-                Logger.d("NoDuplicateOperationQueue already contains an operation of type " + op.getClass().toString() + " with UID " + uid);
+                Logger.d("NoDuplicateOperationQueue already contains an operation of type " + op.getClass() + " with UID " + uid);
                 Logger.d("queue size: " + operations.size() + "  set size: " + queuedOperationUids.size());
                 lockOnQueuedOperationUids.unlock();
                 return;

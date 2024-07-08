@@ -82,12 +82,15 @@ public class ContactIdentity implements ObvDatabase {
     private int oneToOne;
     static final String ONE_TO_ONE = "one_to_one";
     private long lastNoDeviceContactDeviceDiscovery;
-    static final String LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY = "last_no_device_contact_device_discovery";
+    static final String LAST_CONTACT_DEVICE_DISCOVERY = "last_no_device_contact_device_discovery";
+    private boolean recentlyOnline;
+    static final String RECENTLY_ONLINE = "recently_online";
 
 
     public static final int ONE_TO_ONE_STATUS_FALSE = 0;
     public static final int ONE_TO_ONE_STATUS_TRUE = 1;
     public static final int ONE_TO_ONE_STATUS_UNKNOWN = 2;
+
 
     public Identity getContactIdentity() {
         return contactIdentity;
@@ -132,19 +135,14 @@ public class ContactIdentity implements ObvDatabase {
         return oneToOne == ONE_TO_ONE_STATUS_FALSE;
     }
 
-    public long getLastNoDeviceContactDeviceDiscovery() {
+    public long getLastContactDeviceDiscoveryTimestamp() {
         return lastNoDeviceContactDeviceDiscovery;
     }
-    // region computed properties
 
-    public UID[] getDeviceUids() throws SQLException {
-        ContactDevice[] contactDevices = ContactDevice.getAll(identityManagerSession, contactIdentity, ownedIdentity);
-        UID[] uids = new UID[contactDevices.length];
-        for (int i=0; i<contactDevices.length; i++) {
-            uids[i] = contactDevices[i].getUid();
-        }
-        return uids;
+    public boolean isRecentlyOnline() {
+        return recentlyOnline;
     }
+    // region computed properties
 
     public ContactIdentityDetails getPublishedDetails() throws SQLException {
         return ContactIdentityDetails.get(identityManagerSession, contactIdentity, ownedIdentity, publishedDetailsVersion);
@@ -365,6 +363,23 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
+    public void setRecentlyOnline(boolean recentlyOnline) throws SQLException {
+        if (this.recentlyOnline != recentlyOnline) {
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                    " SET " + RECENTLY_ONLINE + " = ? " +
+                    " WHERE " + CONTACT_IDENTITY + " = ? " +
+                    " AND " + OWNED_IDENTITY + " = ?;")) {
+                statement.setBoolean(1, recentlyOnline);
+                statement.setBytes(2, contactIdentity.getBytes());
+                statement.setBytes(3, ownedIdentity.getBytes());
+                statement.executeUpdate();
+                this.recentlyOnline = recentlyOnline;
+                commitHookBits |= HOOK_BIT_RECENTLY_ONLINE_CHANGED;
+                identityManagerSession.session.addSessionCommitListener(this);
+            }
+        }
+    }
+
     public void setRevokedAsCompromised(boolean revokedAsCompromised) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + REVOKED_AS_COMPROMISED + " = ? " +
@@ -557,9 +572,9 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
-    public void setLastNoDeviceContactDeviceDiscovery(long lastNoDeviceContactDeviceDiscovery) throws SQLException {
+    public void setLastContactDeviceDiscoveryTimestamp(long lastNoDeviceContactDeviceDiscovery) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
-                " SET " + LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY + " = ? " +
+                " SET " + LAST_CONTACT_DEVICE_DISCOVERY + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setLong(1, lastNoDeviceContactDeviceDiscovery);
@@ -633,6 +648,7 @@ public class ContactIdentity implements ObvDatabase {
         this.forcefullyTrustedByUser = false;
         this.oneToOne = oneToOne;
         this.lastNoDeviceContactDeviceDiscovery = 0;
+        this.recentlyOnline = true;
     }
 
     private ContactIdentity(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -650,7 +666,8 @@ public class ContactIdentity implements ObvDatabase {
         this.revokedAsCompromised = res.getBoolean(REVOKED_AS_COMPROMISED);
         this.forcefullyTrustedByUser = res.getBoolean(FORCEFULLY_TRUSTED_BY_USER);
         this.oneToOne = res.getInt(ONE_TO_ONE);
-        this.lastNoDeviceContactDeviceDiscovery = res.getLong(LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY);
+        this.lastNoDeviceContactDeviceDiscovery = res.getLong(LAST_CONTACT_DEVICE_DISCOVERY);
+        this.recentlyOnline = res.getBoolean(RECENTLY_ONLINE);
     }
 
     // endregion
@@ -670,7 +687,8 @@ public class ContactIdentity implements ObvDatabase {
                     REVOKED_AS_COMPROMISED + " BIT NOT NULL, " +
                     FORCEFULLY_TRUSTED_BY_USER + " BIT NOT NULL, " +
                     ONE_TO_ONE + " BIT NOT NULL, " +
-                    LAST_NO_DEVICE_CONTACT_DEVICE_DISCOVERY + " INTEGER NOT NULL, " +
+                    LAST_CONTACT_DEVICE_DISCOVERY + " INTEGER NOT NULL, " +
+                    RECENTLY_ONLINE + " BIT NOT NULL DEFAULT 1, " +
                     " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + CONTACT_IDENTITY + ", " + OWNED_IDENTITY + "), " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + "(" + OwnedIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE, " +
                     " FOREIGN KEY (" + CONTACT_IDENTITY + ", " + OWNED_IDENTITY + ", " + TRUSTED_DETAILS_VERSION + ") REFERENCES " + ContactIdentityDetails.TABLE_NAME + "(" + ContactIdentityDetails.CONTACT_IDENTITY + ", " + ContactIdentityDetails.OWNED_IDENTITY + ", " + ContactIdentityDetails.VERSION + "), " +
@@ -880,11 +898,18 @@ public class ContactIdentity implements ObvDatabase {
             }
             oldVersion = 35;
         }
+        if (oldVersion < 41 && newVersion >= 41) {
+            Logger.d("MIGRATING `contact_identity` DATABASE FROM VERSION " + oldVersion + " TO 41");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE contact_identity ADD COLUMN `recently_online` BIT NOT NULL DEFAULT 1");
+            }
+            oldVersion = 41;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, trustedDetailsVersion);
@@ -896,6 +921,8 @@ public class ContactIdentity implements ObvDatabase {
             statement.setBoolean(8, forcefullyTrustedByUser);
             statement.setInt(9, oneToOne);
             statement.setLong(10, lastNoDeviceContactDeviceDiscovery);
+
+            statement.setBoolean(11, recentlyOnline);
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_INSERTED;
             identityManagerSession.session.addSessionCommitListener(this);
@@ -948,7 +975,8 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public static ContactIdentity[] getAll(IdentityManagerSession identityManagerSession, Identity ownedIdentity) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 List<ContactIdentity> list = new ArrayList<>();
@@ -993,14 +1021,16 @@ public class ContactIdentity implements ObvDatabase {
         }
     }
 
-    public static ContactIdentity[] getAllActiveWithoutDevices(IdentityManagerSession identityManagerSession) {
+    public static ContactIdentity[] getAllActiveWithoutDevices(IdentityManagerSession identityManagerSession,  long timestamp) {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
                 "SELECT * FROM " + TABLE_NAME + " AS c WHERE " +
-                        " (" + REVOKED_AS_COMPROMISED + " = 0 OR " + FORCEFULLY_TRUSTED_BY_USER + " = 1) " +
+                        " (c." + REVOKED_AS_COMPROMISED + " = 0 OR c." + FORCEFULLY_TRUSTED_BY_USER + " = 1) " +
+                        " AND c." + LAST_CONTACT_DEVICE_DISCOVERY + " < ? " +
                         " AND NOT EXISTS (" +
                         " SELECT 1 FROM " + ContactDevice.TABLE_NAME +
                         " WHERE " + ContactDevice.CONTACT_IDENTITY + " = c." + CONTACT_IDENTITY +
                         " AND " + ContactDevice.OWNED_IDENTITY + " = c." + OWNED_IDENTITY + ")")) {
+            statement.setLong(1, timestamp);
             try (ResultSet res = statement.executeQuery()) {
                 List<ContactIdentity> list = new ArrayList<>();
                 while (res.next()) {
@@ -1016,11 +1046,34 @@ public class ContactIdentity implements ObvDatabase {
     public static ContactIdentity[] getAllInactiveWithDevices(IdentityManagerSession identityManagerSession) {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
                 "SELECT * FROM " + TABLE_NAME + " AS c WHERE " +
-                        " (" + REVOKED_AS_COMPROMISED + " = 1 AND " + FORCEFULLY_TRUSTED_BY_USER + " = 0) " +
+                        " (c." + REVOKED_AS_COMPROMISED + " = 1 AND c." + FORCEFULLY_TRUSTED_BY_USER + " = 0) " +
                         " AND EXISTS (" +
                         " SELECT 1 FROM " + ContactDevice.TABLE_NAME +
                         " WHERE " + ContactDevice.CONTACT_IDENTITY + " = c." + CONTACT_IDENTITY +
                         " AND " + ContactDevice.OWNED_IDENTITY + " = c." + OWNED_IDENTITY + ")")) {
+            try (ResultSet res = statement.executeQuery()) {
+                List<ContactIdentity> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new ContactIdentity(identityManagerSession, res));
+                }
+                return list.toArray(new ContactIdentity[0]);
+            }
+        } catch (SQLException e) {
+            return new ContactIdentity[0];
+        }
+    }
+
+
+    public static ContactIdentity[] getAllActiveWithDevicesAndOldDiscovery(IdentityManagerSession identityManagerSession, long timestamp) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+                "SELECT * FROM " + TABLE_NAME + " AS c WHERE " +
+                        " (c." + REVOKED_AS_COMPROMISED + " = 0 OR c." + FORCEFULLY_TRUSTED_BY_USER + " = 1) " +
+                        " AND c." + LAST_CONTACT_DEVICE_DISCOVERY + " < ? " +
+                        " AND EXISTS (" +
+                        " SELECT 1 FROM " + ContactDevice.TABLE_NAME +
+                        " WHERE " + ContactDevice.CONTACT_IDENTITY + " = c." + CONTACT_IDENTITY +
+                        " AND " + ContactDevice.OWNED_IDENTITY + " = c." + OWNED_IDENTITY + ")")) {
+            statement.setLong(1, timestamp);
             try (ResultSet res = statement.executeQuery()) {
                 List<ContactIdentity> list = new ArrayList<>();
                 while (res.next()) {
@@ -1074,6 +1127,7 @@ public class ContactIdentity implements ObvDatabase {
     private static final long HOOK_BIT_ACTIVE_CHANGED = 0x80;
     private static final long HOOK_BIT_REVOKED = 0x100;
     private static final long HOOK_BIT_ONE_TO_ONE_CHANGED = 0x200;
+    private static final long HOOK_BIT_RECENTLY_ONLINE_CHANGED = 0x400;
 
     @Override
     public void wasCommitted() {
@@ -1147,6 +1201,13 @@ public class ContactIdentity implements ObvDatabase {
             userInfo.put(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_OWNED_IDENTITY_KEY, ownedIdentity);
             userInfo.put(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED_ONE_TO_ONE_KEY, isOneToOne());
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED, userInfo);
+        }
+        if ((commitHookBits & HOOK_BIT_RECENTLY_ONLINE_CHANGED) != 0) {
+            HashMap<String, Object> userInfo = new HashMap<>();
+            userInfo.put(IdentityNotifications.NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED_CONTACT_IDENTITY_KEY, contactIdentity);
+            userInfo.put(IdentityNotifications.NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED_OWNED_IDENTITY_KEY, ownedIdentity);
+            userInfo.put(IdentityNotifications.NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED_RECENTLY_ONLINE_KEY, recentlyOnline);
+            identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_CONTACT_RECENTLY_ONLINE_CHANGED, userInfo);
         }
         commitHookBits = 0;
    }

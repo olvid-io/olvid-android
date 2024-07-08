@@ -34,6 +34,7 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.ExponentialBackoffRepeatingScheduler;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.UID;
@@ -66,9 +67,6 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
     private final NotificationListener notificationListener;
     private final ServerUserDataCoordinator serverUserDataCoordinator;
 
-    private boolean initialQueueingPerformed = false;
-    private final Object lock = new Object();
-
     private final HashMap<Identity, List<UID>> awaitingIdentityReactivationOperations;
     private final Lock awaitingIdentityReactivationOperationsLock;
 
@@ -99,26 +97,21 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
     }
 
     public void initialQueueing() {
-        synchronized (lock) {
-            if (initialQueueingPerformed) {
-                return;
-            }
-            try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
-                PendingServerQuery[] pendingServerQueries = PendingServerQuery.getAll(fetchManagerSession);
-                for (PendingServerQuery pendingServerQuery: pendingServerQueries) {
-                    if (pendingServerQuery.isWebSocket()) {
-                        pendingServerQuery.delete();
-                    } else {
-                        queueNewServerQueryOperation(pendingServerQuery.getUid());
-                    }
+        try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
+            PendingServerQuery[] pendingServerQueries = PendingServerQuery.getAll(fetchManagerSession);
+            for (PendingServerQuery pendingServerQuery : pendingServerQueries) {
+                if (pendingServerQuery.isWebSocket()) {
+                    pendingServerQuery.delete();
+                } else {
+                    queueNewServerQueryOperation(pendingServerQuery.getUid());
                 }
-                // commit, in case a WebSocket query was deleted
-                fetchManagerSession.session.commit();
-                initialQueueingPerformed = true;
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+            // commit, in case a WebSocket query was deleted
+            fetchManagerSession.session.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         // only start processing queries after the initial queueing is performed (otherwise a query could be queued while its already being executed)
         serverQueriesOperationQueue.execute(1, "Engine-ServerQueryCoordinator");
     }
@@ -291,7 +284,10 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
                 }
                 try {
                     fetchManagerSession.session.startTransaction();
-                    channelDelegate.post(fetchManagerSession.session, channelServerResponseMessageToSend, prng);
+                    try {
+                        // NoAcceptableChannelException happen if owned identity was deleted
+                        channelDelegate.post(fetchManagerSession.session, channelServerResponseMessageToSend, prng);
+                    } catch (NoAcceptableChannelException ignored) { }
                     pendingServerQuery.delete();
                     fetchManagerSession.session.commit();
                 } catch (Exception e) {

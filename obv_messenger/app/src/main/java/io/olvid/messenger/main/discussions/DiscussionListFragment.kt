@@ -314,7 +314,7 @@ class DiscussionListFragment : RefreshingFragment() {
                 } else {
                     inflater.inflate(R.menu.popup_discussion_unpin, menu)
                 }
-                if (discussionListViewModel.selection.any { it.discussion.unread }) {
+                if (discussionListViewModel.selection.any { it.discussion.unread || it.unreadCount > 0}) {
                     inflater.inflate(R.menu.popup_discussion_mark_as_read, menu)
                 } else {
                     inflater.inflate(R.menu.popup_discussion_mark_as_unread, menu)

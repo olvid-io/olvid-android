@@ -30,6 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.ExponentialBackoffRepeatingScheduler;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
@@ -53,10 +54,11 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
     private final SendManagerSessionFactory sendManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
     private NotificationPostingDelegate notificationPostingDelegate;
-    private NotificationListeningDelegate notificationListeningDelegate;
 
     private final HashMap<Identity, List<IdentityAndUidAndNumber>> awaitingIdentityReactivationOperations;
     private final Lock awaitingIdentityReactivationOperationsLock;
+
+    private final HashMap<IdentityAndUidAndNumber, Long> lastUrlRefreshTimestamps;
 
     private final NotificationListener notificationListener;
 
@@ -64,6 +66,7 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
     public RefreshOutboxAttachmentSignedUrlCoordinator(SendManagerSessionFactory sendManagerSessionFactory, SSLSocketFactory sslSocketFactory) {
         this.sendManagerSessionFactory = sendManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
+        this.lastUrlRefreshTimestamps = new HashMap<>();
 
         refreshOutboxAttachmentSignedUrlOperationQueue = new NoDuplicateOperationQueue();
         refreshOutboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshOutboxAttachmentSignedUrlCoordinator");
@@ -81,11 +84,14 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
-        this.notificationListeningDelegate = notificationListeningDelegate;
-        this.notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS, notificationListener);
+        // register to NotificationCenter for NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS
+        notificationListeningDelegate.addListener(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS, notificationListener);
     }
 
     private void queueNewRefreshOutboxAttachmentSignedUrlOperation(Identity ownedIdentity, UID messageUid, int attachmentNumber) {
+        synchronized (lastUrlRefreshTimestamps) {
+            lastUrlRefreshTimestamps.put(new IdentityAndUidAndNumber(ownedIdentity, messageUid, attachmentNumber), System.currentTimeMillis());
+        }
         RefreshOutboxAttachmentSignedUrlOperation op = new RefreshOutboxAttachmentSignedUrlOperation(sendManagerSessionFactory, sslSocketFactory, ownedIdentity, messageUid, attachmentNumber, this, this);
         refreshOutboxAttachmentSignedUrlOperationQueue.queue(op);
     }
@@ -166,7 +172,15 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
 
     @Override
     public void refreshOutboxAttachmentSignedUrl(Identity ownedIdentity, UID messageUid, int attachmentNumber) {
-        queueNewRefreshOutboxAttachmentSignedUrlOperation(ownedIdentity, messageUid, attachmentNumber);
+        synchronized (lastUrlRefreshTimestamps) {
+            Long timestamp = lastUrlRefreshTimestamps.get(new IdentityAndUidAndNumber(ownedIdentity, messageUid, attachmentNumber));
+            if (timestamp != null && System.currentTimeMillis() - timestamp < Constants.MINIMUM_URL_REFRESH_INTERVAL) {
+                long delay = Constants.MINIMUM_URL_REFRESH_INTERVAL - (System.currentTimeMillis() - timestamp);
+                scheduler.schedule(new IdentityAndUidAndNumber(ownedIdentity, messageUid, attachmentNumber), () -> queueNewRefreshOutboxAttachmentSignedUrlOperation(ownedIdentity, messageUid, attachmentNumber), "too frequent RefreshOutboxAttachmentSignedUrlOperation", delay);
+            } else {
+                queueNewRefreshOutboxAttachmentSignedUrlOperation(ownedIdentity, messageUid, attachmentNumber);
+            }
+        }
     }
 
     class NotificationListener implements io.olvid.engine.datatypes.NotificationListener {

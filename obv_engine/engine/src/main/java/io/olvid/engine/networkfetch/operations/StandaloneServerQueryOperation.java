@@ -71,6 +71,7 @@ public class StandaloneServerQueryOperation extends Operation {
                 case DEVICE_MANAGEMENT_SET_NICKNAME_QUERY_ID:
                 case DEVICE_MANAGEMENT_DEACTIVATE_DEVICE_QUERY_ID:
                 case DEVICE_MANAGEMENT_SET_UNEXPIRING_DEVICE_QUERY_ID:
+                case UPLOAD_PRE_KEY_QUERY_ID:
                 case TRANSFER_SOURCE_QUERY_ID:
                 case TRANSFER_TARGET_QUERY_ID:
                 case TRANSFER_RELAY_QUERY_ID:

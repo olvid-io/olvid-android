@@ -179,6 +179,7 @@ import io.olvid.messenger.webrtc.WebrtcCallService.State.FAILED
 import io.olvid.messenger.webrtc.WebrtcCallService.State.GETTING_TURN_CREDENTIALS
 import io.olvid.messenger.webrtc.WebrtcCallService.State.INITIAL
 import io.olvid.messenger.webrtc.WebrtcCallService.State.INITIALIZING_CALL
+import io.olvid.messenger.webrtc.WebrtcCallService.State.CONNECTING
 import io.olvid.messenger.webrtc.WebrtcCallService.State.RINGING
 import io.olvid.messenger.webrtc.WebrtcCallService.State.WAITING_FOR_AUDIO_PERMISSION
 import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder.Companion.localScreenTrack
@@ -197,6 +198,7 @@ fun WebrtcCallService.State.humanReadable(failReason: FailReason): String {
         WAITING_FOR_AUDIO_PERMISSION -> stringResource(id = R.string.webrtc_status_waiting_for_permission)
         GETTING_TURN_CREDENTIALS -> stringResource(id = R.string.webrtc_status_verifying_credentials)
         RINGING -> stringResource(id = R.string.webrtc_status_ringing)
+        CONNECTING -> stringResource(id = R.string.webrtc_status_connecting_to_peer)
         BUSY -> stringResource(id = R.string.webrtc_status_contact_busy)
         CALL_IN_PROGRESS -> ""
         CALL_ENDED -> stringResource(id = R.string.webrtc_status_ending_call)
@@ -220,7 +222,8 @@ fun WebrtcCallService.State.humanReadable(failReason: FailReason): String {
 @Composable
 fun PeerState.humanReadable(): String {
     return when (this) {
-        PeerState.INITIAL, START_CALL_MESSAGE_SENT, CONNECTING_TO_PEER -> stringResource(id = R.string.webrtc_status_connecting_to_peer)
+        PeerState.INITIAL, START_CALL_MESSAGE_SENT -> stringResource(id = R.string.webrtc_status_initializing_call)
+        CONNECTING_TO_PEER -> stringResource(id = R.string.webrtc_status_connecting_to_peer)
         PeerState.RINGING -> stringResource(id = R.string.webrtc_status_ringing)
         PeerState.BUSY -> stringResource(id = R.string.webrtc_status_contact_busy)
         CALL_REJECTED -> stringResource(id = R.string.webrtc_status_call_rejected)
@@ -329,7 +332,9 @@ private fun BoxScope.PreCall(
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
-                .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             InitialView(
@@ -339,6 +344,7 @@ private fun BoxScope.PreCall(
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = name,
+                textAlign = TextAlign.Center,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color.White
@@ -348,13 +354,15 @@ private fun BoxScope.PreCall(
                 text = status,
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
-                color = Color(0xFF8B8D97)
+                color = Color(0xFF8B8D97),
             )
             Spacer(Modifier.height(100.dp))
         }
     } else {
         Column(
-            modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             EncryptedCallNotice(
                 modifier = Modifier
@@ -370,6 +378,7 @@ private fun BoxScope.PreCall(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = name,
+                textAlign = TextAlign.Center,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color.White

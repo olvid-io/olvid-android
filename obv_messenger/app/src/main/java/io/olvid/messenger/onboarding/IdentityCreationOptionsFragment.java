@@ -243,7 +243,7 @@ public class IdentityCreationOptionsFragment extends Fragment implements View.On
         if (v.getId() == R.id.back_button) {
             activity.onBackPressed();
         } else if (v.getId() == R.id.button_continue) {
-            Navigation.findNavController(v).navigate(IdentityCreationOptionsFragmentDirections.actionIdentityCreation());
+            Navigation.findNavController(v).navigate(R.id.action_identity_creation);
         } else if (v.getId() == R.id.button_validate_configuration) {
             // first hide the keyboard
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);

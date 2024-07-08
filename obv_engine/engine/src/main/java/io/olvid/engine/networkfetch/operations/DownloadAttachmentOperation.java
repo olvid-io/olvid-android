@@ -236,6 +236,8 @@ public class DownloadAttachmentOperation extends PriorityOperation {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            cancel(null);
+            processCancel();
         }
     }
 

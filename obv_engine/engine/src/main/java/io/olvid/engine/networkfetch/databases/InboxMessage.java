@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,6 +203,21 @@ public class InboxMessage implements ObvDatabase {
         }
     }
 
+    public void setFromIdentityForMissingPreKeyContact(Identity fromIdentity) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + FROM_IDENTITY + " = ? " +
+                "WHERE " + OWNED_IDENTITY + " = ? " +
+                " AND " + UID_ + " = ?;")) {
+            statement.setBytes(1, fromIdentity.getBytes());
+            statement.setBytes(2, ownedIdentity.getBytes());
+            statement.setBytes(3, uid.getBytes());
+            statement.executeUpdate();
+            this.fromIdentity = fromIdentity;
+        } catch (SQLException e) {
+            // nothing
+        }
+    }
+
     public void setExtendedPayload(byte[] extendedPayload) throws SQLException {
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + EXTENDED_PAYLOAD + " = ? " +
@@ -333,6 +349,24 @@ public class InboxMessage implements ObvDatabase {
         }
     }
 
+    public static boolean exists(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID uid) {
+        if (uid == null) {
+            return false;
+        }
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + OWNED_IDENTITY + " = ? " +
+                " AND " + UID_ + " = ?;")) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            statement.setBytes(2, uid.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                return res.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static InboxMessage[] getAllForOwnedIdentity(FetchManagerSession fetchManagerSession, Identity ownedIdentity) throws SQLException {
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -346,10 +380,13 @@ public class InboxMessage implements ObvDatabase {
         }
     }
 
+
+    // this method only returns truly unprocessed messages, not PreKey messages without a contact
     public static InboxMessage[] getUnprocessedMessagesForOwnedIdentity(FetchManagerSession fetchManagerSession, Identity ownedIdentity) throws SQLException {
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ?" +
                 " AND " + PAYLOAD + " IS NULL " +
+                " AND " + FROM_IDENTITY + " IS NULL " +
                 " AND " + MARKED_FOR_DELETION + " = 0" +
                 " ORDER BY " + SERVER_TIMESTAMP + " ASC;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -363,6 +400,7 @@ public class InboxMessage implements ObvDatabase {
         }
     }
 
+    // this method return unprocessed messages, but also PreKey messages where the contact was not yet a contact
     public static InboxMessage[] getUnprocessedMessages(FetchManagerSession fetchManagerSession) {
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
                 "SELECT * FROM " + TABLE_NAME +
@@ -378,6 +416,47 @@ public class InboxMessage implements ObvDatabase {
             }
         } catch (SQLException e) {
             return new InboxMessage[0];
+        }
+    }
+
+    public static List<InboxMessage> getPendingPreKeyMessages(FetchManagerSession fetchManagerSession, Identity ownedIdentity, Identity contactIdentity) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+                "SELECT * FROM " + TABLE_NAME +
+                        " WHERE " + PAYLOAD + " IS NULL " +
+                        " AND " + OWNED_IDENTITY + " = ? " +
+                        " AND " + FROM_IDENTITY + " = ? " +
+                        " AND " + MARKED_FOR_DELETION + " = 0 " +
+                        " ORDER BY " + SERVER_TIMESTAMP + " ASC;")) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            statement.setBytes(2, contactIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                List<InboxMessage> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new InboxMessage(fetchManagerSession, res));
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    public static List<InboxMessage> getExpiredPendingPreKeyMessages(FetchManagerSession fetchManagerSession, long timestamp) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+                "SELECT * FROM " + TABLE_NAME +
+                        " WHERE " + PAYLOAD + " IS NULL " +
+                        " AND " + FROM_IDENTITY + " IS NOT NULL " +
+                        " AND " + LOCAL_DOWNLOAD_TIMESTAMP + " < ?;")) {
+            statement.setLong(1, timestamp);
+            try (ResultSet res = statement.executeQuery()) {
+                List<InboxMessage> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new InboxMessage(fetchManagerSession, res));
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            return Collections.emptyList();
         }
     }
 

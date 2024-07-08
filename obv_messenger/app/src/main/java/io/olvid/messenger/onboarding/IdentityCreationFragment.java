@@ -243,7 +243,7 @@ public class IdentityCreationFragment extends Fragment {
 
     private void createIdentity() {
         String server = viewModel.getServer();
-        if (server == null || server.length() == 0) {
+        if (server == null || server.isEmpty()) {
             return;
         }
         UUID apiKey = viewModel.getApiKey();

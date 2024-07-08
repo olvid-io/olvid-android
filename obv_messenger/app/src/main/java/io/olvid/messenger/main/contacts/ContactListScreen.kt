@@ -269,9 +269,8 @@ fun ContactListScreen(
                                                                     }
                                                                 }
 
-                                                                contactOrKeycloakDetails.contactType == KEYCLOAK && AppSingleton.getContactTrustLevel(
-                                                                    contactOrKeycloakDetails.keycloakUserDetails?.identity
-                                                                ) == null -> {
+                                                                contactOrKeycloakDetails.contactType == KEYCLOAK
+                                                                        && AppSingleton.getContactCacheInfo(contactOrKeycloakDetails.keycloakUserDetails?.identity) == null -> {
                                                                     {
                                                                         TextButton(onClick = {
                                                                             onClick.invoke(

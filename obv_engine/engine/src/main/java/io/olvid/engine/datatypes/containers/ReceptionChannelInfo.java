@@ -29,8 +29,10 @@ public class ReceptionChannelInfo {
     public static final int LOCAL_TYPE = 0;
     public static final int OBLIVIOUS_CHANNEL_TYPE = 1;
     public static final int ASYMMETRIC_CHANNEL_TYPE = 2;
-    public static final int ANY_OBLIVIOUS_CHANNEL_WITH_OWNED_DEVICE_TYPE = 3;
-    public static final int ANY_OBLIVIOUS_CHANNEL_TYPE = 4;
+    public static final int PRE_KEY_CHANNEL_TYPE = 5;
+    public static final int ANY_OBLIVIOUS_CHANNEL_OR_PRE_KEY_WITH_OWNED_DEVICE_TYPE = 3; // dummy type, never serialized
+    public static final int ANY_OBLIVIOUS_OR_PRE_KEY_CHANNEL_TYPE = 4; // dummy type, never serialized
+    public static final int ANY_OBLIVIOUS_CHANNEL_TYPE = 6; // dummy type, never serialized
 
     private final int channelType;
     private final UID remoteDeviceUid;
@@ -60,6 +62,10 @@ public class ReceptionChannelInfo {
         this.obliviousChannelsSupportsGKMV2 = obliviousChannelsSupportsGKMV2;
     }
 
+    public static ReceptionChannelInfo createLocalChannelInfo() {
+        return new ReceptionChannelInfo(LOCAL_TYPE);
+    }
+
     public static ReceptionChannelInfo createObliviousChannelInfo(UID remoteDeviceUid, Identity remoteIdentity) {
         return new ReceptionChannelInfo(OBLIVIOUS_CHANNEL_TYPE, remoteDeviceUid, remoteIdentity);
     }
@@ -68,12 +74,17 @@ public class ReceptionChannelInfo {
         return new ReceptionChannelInfo(ASYMMETRIC_CHANNEL_TYPE);
     }
 
-    public static ReceptionChannelInfo createLocalChannelInfo() {
-        return new ReceptionChannelInfo(LOCAL_TYPE);
+    public static ReceptionChannelInfo createPreKeyChannelInfo(UID remoteDeviceUid, Identity remoteIdentity) {
+        return new ReceptionChannelInfo(PRE_KEY_CHANNEL_TYPE, remoteDeviceUid, remoteIdentity);
     }
 
-    public static ReceptionChannelInfo createAnyObliviousChannelWithOwnedDeviceInfo() {
-        return new ReceptionChannelInfo(ANY_OBLIVIOUS_CHANNEL_WITH_OWNED_DEVICE_TYPE);
+
+    public static ReceptionChannelInfo createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo() {
+        return new ReceptionChannelInfo(ANY_OBLIVIOUS_CHANNEL_OR_PRE_KEY_WITH_OWNED_DEVICE_TYPE);
+    }
+
+    public static ReceptionChannelInfo createAnyObliviousChannelOrPreKeyInfo() {
+        return new ReceptionChannelInfo(ANY_OBLIVIOUS_OR_PRE_KEY_CHANNEL_TYPE);
     }
 
     public static ReceptionChannelInfo createAnyObliviousChannelInfo() {
@@ -102,23 +113,18 @@ public class ReceptionChannelInfo {
                     throw new DecodingException();
                 }
                 return createAsymmetricChannelInfo();
-            case ANY_OBLIVIOUS_CHANNEL_WITH_OWNED_DEVICE_TYPE:
-                if (listOfEncoded.length != 1) {
+            case PRE_KEY_CHANNEL_TYPE:
+                if (listOfEncoded.length != 3) {
                     throw new DecodingException();
                 }
-                return createAnyObliviousChannelWithOwnedDeviceInfo();
-            case ANY_OBLIVIOUS_CHANNEL_TYPE:
-                if (listOfEncoded.length != 1) {
-                    throw new DecodingException();
-                }
-                return createAnyObliviousChannelInfo();
+                return createPreKeyChannelInfo(listOfEncoded[1].decodeUid(), listOfEncoded[2].decodeIdentity());
             default:
-                throw new DecodingException("Unknown reception channel type");
+                throw new DecodingException("Unknown reception channel type " + type);
         }
     }
 
     public Encoded encode() {
-        if (channelType == OBLIVIOUS_CHANNEL_TYPE) {
+        if (channelType == OBLIVIOUS_CHANNEL_TYPE || channelType == PRE_KEY_CHANNEL_TYPE) {
             return Encoded.of(new Encoded[]{
                     Encoded.of(channelType),
                     Encoded.of(remoteDeviceUid),
@@ -157,12 +163,14 @@ public class ReceptionChannelInfo {
         if (!(other instanceof ReceptionChannelInfo)) {
             return false;
         }
+        //noinspection PatternVariableCanBeUsed
         ReceptionChannelInfo castedOther = (ReceptionChannelInfo) other;
         if (castedOther.getChannelType() != getChannelType()) {
             return false;
         }
         switch (getChannelType()) {
             case OBLIVIOUS_CHANNEL_TYPE:
+            case PRE_KEY_CHANNEL_TYPE:
                 return castedOther.remoteDeviceUid.equals(remoteDeviceUid) && castedOther.remoteIdentity.equals(remoteIdentity);
             default:
                 return true;

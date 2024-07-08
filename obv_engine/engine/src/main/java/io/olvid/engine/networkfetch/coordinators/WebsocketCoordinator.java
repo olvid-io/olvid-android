@@ -85,7 +85,6 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     private final WellKnownCacheDelegate wellKnownCacheDelegate;
     private final ObjectMapper jsonObjectMapper;
 
-    private boolean initialQueueingPerformed = false;
     private final Map<String, List<IdentityAndUid>> ownedIdentityAndUidsByServer;
     private final Map<Identity, UID> ownedIdentityCurrentDeviceUids;
     private final Map<Identity, byte[]> ownedIdentityServerSessionTokens;
@@ -233,9 +232,6 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
 
     public void initialQueueing() {
         synchronized (ownedIdentityAndUidsLock) {
-            if (initialQueueingPerformed) {
-                return;
-            }
             try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
                 ownedIdentityAndUidsByServer.clear();
                 ownedIdentityCurrentDeviceUids.clear();
@@ -257,7 +253,6 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            initialQueueingPerformed = true;
         }
         resetWebsockets();
     }

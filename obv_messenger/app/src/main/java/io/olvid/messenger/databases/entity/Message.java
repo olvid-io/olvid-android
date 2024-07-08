@@ -892,7 +892,7 @@ public class Message {
                     continue;
                 }
                 byteContactIdentities.add(contact.bytesContactIdentity);
-                hasChannels |= contact.establishedChannelCount > 0;
+                hasChannels |= contact.hasChannelOrPreKey();
             }
 
             // also notify other owned devices
@@ -1006,7 +1006,7 @@ public class Message {
                     if (contact != null && contact.active) { // this should almost always be true
                         markMessageSent = false;
                         messageRecipientInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new MessageRecipientInfo(id, attachmentFylesAndStatuses.size(), contact.bytesContactIdentity));
-                        if (contact.establishedChannelCount > 0) {
+                        if (contact.hasChannelOrPreKey()) {
                             byteContactIdentitiesToWhichMessageCanBeSentNow.add(contact.bytesContactIdentity);
                         } else if (showToasts) {
                             App.toast(R.string.toast_message_no_channel_message_delayed, Toast.LENGTH_SHORT);
@@ -1020,7 +1020,7 @@ public class Message {
                         if (contact.active) {
                             markMessageSent = false;
                             messageRecipientInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new MessageRecipientInfo(id, attachmentFylesAndStatuses.size(), contact.bytesContactIdentity));
-                            if (contact.establishedChannelCount > 0) {
+                            if (contact.hasChannelOrPreKey()) {
                                 byteContactIdentitiesToWhichMessageCanBeSentNow.add(contact.bytesContactIdentity);
                             }
                         }
@@ -1033,7 +1033,7 @@ public class Message {
                         if (contact.active) {
                             markMessageSent = false;
                             messageRecipientInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new MessageRecipientInfo(id, attachmentFylesAndStatuses.size(), contact.bytesContactIdentity));
-                            if (contact.establishedChannelCount > 0) {
+                            if (contact.hasChannelOrPreKey()) {
                                 byteContactIdentitiesToWhichMessageCanBeSentNow.add(contact.bytesContactIdentity);
                             }
                         }

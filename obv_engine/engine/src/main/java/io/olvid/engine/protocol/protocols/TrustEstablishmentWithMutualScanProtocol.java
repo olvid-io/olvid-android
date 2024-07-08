@@ -410,7 +410,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new AlicePropagatesQrCodeMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.signature).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -429,15 +429,13 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
         private final AlicePropagatesQrCodeMessage receivedMessage;
 
         public AliceHandlesPropagatedQRCodeStep(InitialProtocolState startState, AlicePropagatesQrCodeMessage receivedMessage, TrustEstablishmentWithMutualScanProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
 
         @Override
         public ConcreteProtocolState executeStep() throws Exception {
-            ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
-
             {
                 // verify the signature
                 if (!Signature.verify(Constants.SignatureContext.MUTUAL_SCAN, new Identity[]{getOwnedIdentity(), receivedMessage.bobIdentity}, receivedMessage.bobIdentity, receivedMessage.signature)) {
@@ -494,8 +492,18 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 } else {
                     protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.aliceIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }
+
+                boolean triggerDeviceDiscovery = false;
                 for (UID contactDeviceUid : receivedMessage.aliceDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid, false);
+                    triggerDeviceDiscovery |=  protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid, null, false);
+                }
+                if (triggerDeviceDiscovery) {
+                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                            ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                            new UID(getPrng()),
+                            false);
+                    ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, receivedMessage.aliceIdentity).generateChannelProtocolMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
             }
 
@@ -515,7 +523,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 int numberOfOtherDevices = protocolManagerSession.identityDelegate.getOtherDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity()).length;
                 if (numberOfOtherDevices > 0) {
                     try {
-                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsInfo(getOwnedIdentity()));
+                        CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()));
                         ChannelMessageToSend messageToSend = new BobPropagatesSignatureMessage(coreProtocolMessage, receivedMessage.aliceIdentity, receivedMessage.signature, receivedMessage.serializedAliceDetails, receivedMessage.aliceDeviceUids).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) { }
@@ -544,7 +552,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
         private final BobPropagatesSignatureMessage receivedMessage;
 
         public BobHandlesPropagatedSignatureStep(InitialProtocolState startState, BobPropagatesSignatureMessage receivedMessage, TrustEstablishmentWithMutualScanProtocol protocol) throws Exception {
-            super(ReceptionChannelInfo.createAnyObliviousChannelWithOwnedDeviceInfo(), receivedMessage, protocol);
+            super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.receivedMessage = receivedMessage;
         }
@@ -581,8 +589,18 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 } else {
                     protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, receivedMessage.aliceIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }
+
+                boolean triggerDeviceDiscovery = false;
                 for (UID contactDeviceUid : receivedMessage.aliceDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid, false);
+                    triggerDeviceDiscovery |= protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.aliceIdentity, contactDeviceUid, null, false);
+                }
+                if (triggerDeviceDiscovery) {
+                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                            ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                            new UID(getPrng()),
+                            false);
+                    ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, receivedMessage.aliceIdentity).generateChannelProtocolMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
             }
 
@@ -622,8 +640,18 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 } else {
                     protocolManagerSession.identityDelegate.addTrustOriginToContact(protocolManagerSession.session, startState.bobIdentity, getOwnedIdentity(), TrustOrigin.createDirectTrustOrigin(System.currentTimeMillis()), true);
                 }
+
+                boolean triggerDeviceDiscovery = false;
                 for (UID contactDeviceUid : receivedMessage.bobDeviceUids) {
-                    protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.bobIdentity, contactDeviceUid, false);
+                    triggerDeviceDiscovery |= protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.bobIdentity, contactDeviceUid, null, false);
+                }
+                if (triggerDeviceDiscovery) {
+                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
+                            ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
+                            new UID(getPrng()),
+                            false);
+                    ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.bobIdentity).generateChannelProtocolMessageToSend();
+                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
             }
 

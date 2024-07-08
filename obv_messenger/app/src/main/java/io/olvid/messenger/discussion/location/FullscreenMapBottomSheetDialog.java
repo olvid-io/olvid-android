@@ -53,9 +53,13 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 
 public class FullscreenMapBottomSheetDialog extends BottomSheetDialogFragment {
-    private static final String DISCUSSION_ID = "discussionId";
+    public static final String TYPE_KEY = "type";
+    private static final String DISCUSSION_ID_KEY = "discussion_id";
+    private static final String BYTES_OWNED_IDENTITY_KEY = "owned_identity";
 
-    private long discussionId = -1;
+    private int type;
+    private Long discussionId = null;
+    private byte[] bytesOwnedIdentity = null;
     private final FullscreenMapDialogFragment parentFragment;
     private FragmentActivity activity;
 
@@ -63,10 +67,18 @@ public class FullscreenMapBottomSheetDialog extends BottomSheetDialogFragment {
         this.parentFragment = parentFragment;
     }
 
-    public static FullscreenMapBottomSheetDialog newInstance(long discussionId, FullscreenMapDialogFragment parentFragment) {
+    public static FullscreenMapBottomSheetDialog newInstance(@Nullable Long discussionId, @Nullable byte[] bytesOwnedIdentity, FullscreenMapDialogFragment parentFragment) {
         FullscreenMapBottomSheetDialog fragment = new FullscreenMapBottomSheetDialog(parentFragment);
         Bundle bundle = new Bundle();
-        bundle.putLong(DISCUSSION_ID, discussionId);
+        if (discussionId != null) {
+            bundle.putInt(TYPE_KEY, FullscreenMapDialogFragment.TYPE_DISCUSSION);
+            bundle.putLong(DISCUSSION_ID_KEY, discussionId);
+        } else if (bytesOwnedIdentity != null) {
+            bundle.putInt(TYPE_KEY, FullscreenMapDialogFragment.TYPE_OWNED_IDENTITY);
+            bundle.putByteArray(BYTES_OWNED_IDENTITY_KEY, bytesOwnedIdentity);
+        } else {
+            return null;
+        }
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -76,8 +88,18 @@ public class FullscreenMapBottomSheetDialog extends BottomSheetDialogFragment {
         super.onCreate(savedInstanceState);
 
         // check that discussionId was correctly set
-        if (this.getArguments() != null) {
-            discussionId = this.getArguments().getLong(DISCUSSION_ID);
+        if (getArguments() != null) {
+            type = getArguments().getInt(TYPE_KEY);
+            switch (type) {
+                case FullscreenMapDialogFragment.TYPE_DISCUSSION: {
+                    discussionId = getArguments().getLong(DISCUSSION_ID_KEY);
+                    break;
+                }
+                case FullscreenMapDialogFragment.TYPE_OWNED_IDENTITY: {
+                    bytesOwnedIdentity = getArguments().getByteArray(BYTES_OWNED_IDENTITY_KEY);
+                    break;
+                }
+            }
         }
 
         // make bottom sheet transparent
@@ -90,13 +112,21 @@ public class FullscreenMapBottomSheetDialog extends BottomSheetDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // dismiss if required arguments are not set
-        if (discussionId == -1) {
-            dismiss();
-            return null;
+        LiveData<List<Message>> sharingMessagesLiveData;
+        switch (type) {
+            case FullscreenMapDialogFragment.TYPE_DISCUSSION: {
+                sharingMessagesLiveData = AppDatabase.getInstance().messageDao().getCurrentlySharingLocationMessagesInDiscussionLiveData(discussionId);
+                break;
+            }
+            case FullscreenMapDialogFragment.TYPE_OWNED_IDENTITY: {
+                sharingMessagesLiveData = AppDatabase.getInstance().messageDao().getCurrentlySharingLocationMessagesForOwnedIdentityLiveData(bytesOwnedIdentity);
+                break;
+            }
+            default: {
+                dismiss();
+                return null;
+            }
         }
-
-        LiveData<List<Message>> sharingMessagesLiveData = AppDatabase.getInstance().messageDao().getCurrentlySharingLocationMessagesInDiscussionLiveData(discussionId);
 
         View view = inflater.inflate(R.layout.bottom_sheet_fragment_fullscreen_map, container, false);
 

@@ -195,11 +195,13 @@ public interface Group2MemberDao {
             " AND gm." + Group2Member.BYTES_CONTACT_IDENTITY + " = c." + Contact.BYTES_CONTACT_IDENTITY +
             " WHERE gm." + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND gm." + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
-            " AND c." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " AND (c." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR c." + Contact.PRE_KEY_COUNT + " > 0) "  +
             " UNION SELECT c.* FROM " + Contact.TABLE_NAME + " AS c " +
             " WHERE c." + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND c." + Contact.BYTES_CONTACT_IDENTITY + " IN ( :bytesContactIdentities )" +
-            " AND c." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0) " +
+            " AND (c." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
+            " OR c." + Contact.PRE_KEY_COUNT + " > 0)) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
     LiveData<List<Contact>> getGroupMemberContactsAndMore(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, List<byte[]> bytesContactIdentities);
 

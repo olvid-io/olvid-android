@@ -864,7 +864,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
             if (group.updateInProgress == Group2.UPDATE_NONE) {
                 groupDetailsViewModel.groupMembers.value?.mapNotNull { group2MemberOrPending ->
                     group2MemberOrPending.contact?.let { contact ->
-                        if ((contact.establishedChannelCount > 0 || contact.keycloakManaged) && contact.oneToOne.not()) {
+                        if ((contact.hasChannelOrPreKey() || contact.keycloakManaged) && contact.oneToOne.not()) {
                             contact
                         } else {
                             null
@@ -879,7 +879,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                             .setMessage(resources.getQuantityString(R.plurals.dialog_message_invite_all_group_members, contacts.size, contacts.size))
                             .setPositiveButton(string.button_label_proceed) { _, _ ->
                                 contacts.forEach { contact ->
-                                    if (contact.establishedChannelCount > 0) {
+                                    if (contact.hasChannelOrPreKey()) {
                                         AppSingleton.getEngine().startOneToOneInvitationProtocol(
                                             contact.bytesOwnedIdentity,
                                             contact.bytesContactIdentity

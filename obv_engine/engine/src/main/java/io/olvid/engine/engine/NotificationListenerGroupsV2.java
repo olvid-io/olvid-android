@@ -174,7 +174,7 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                     break;
                 }
 
-                engine.fetchManager.forceRegisterPushNotification(ownedIdentity);
+                engine.fetchManager.forceRegisterPushNotification(ownedIdentity,false);
                 break;
             }
             default:

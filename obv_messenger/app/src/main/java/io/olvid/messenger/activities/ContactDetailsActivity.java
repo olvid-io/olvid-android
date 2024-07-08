@@ -125,6 +125,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
     private TextView revokedExplanationTextView;
     private Button unblockRevokedButton;
     private Button reblockRevokedButton;
+    private CardView notRecentlyOnlineCardView;
     private CardView noChannelCardView;
     private ImageView noChannelSpinner;
     private CardView notOneToOneCardView;
@@ -172,6 +173,8 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
         unblockRevokedButton.setOnClickListener(this);
         reblockRevokedButton = findViewById(R.id.button_contact_revoked_forcefully_reblock);
         reblockRevokedButton.setOnClickListener(this);
+
+        notRecentlyOnlineCardView = findViewById(R.id.contact_not_recently_online_cardview);
 
         noChannelCardView = findViewById(R.id.contact_no_channel_cardview);
         Button restartChannelButton = findViewById(R.id.contact_no_channel_restart_button);
@@ -272,7 +275,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
         }
         if (contact.active) {
             getMenuInflater().inflate(R.menu.menu_contact_details_recreate_channels, menu);
-            if (contact.establishedChannelCount > 0) {
+            if (contact.hasChannelOrPreKey()) {
                 getMenuInflater().inflate(R.menu.menu_contact_details_call, menu);
             }
         }
@@ -362,7 +365,13 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
             noChannelSpinner.setImageDrawable(null);
         }
 
-        if (contact.establishedChannelCount > 0) {
+        if (contact.recentlyOnline) {
+            notRecentlyOnlineCardView.setVisibility(View.GONE);
+        } else {
+            notRecentlyOnlineCardView.setVisibility(View.VISIBLE);
+        }
+
+        if (contact.hasChannelOrPreKey()) {
             introduceButton.setEnabled(true);
             notOneToOneInviteButton.setEnabled(true);
         } else if (contact.keycloakManaged) {
@@ -782,7 +791,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
 
         int id = view.getId();
         if (id == R.id.contact_introduce_button) {
-            if (contact.establishedChannelCount > 0) {
+            if (contact.hasChannelOrPreKey()) {
                 ContactIntroductionDialogFragment contactIntroductionDialogFragment = ContactIntroductionDialogFragment.newInstance(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.getCustomDisplayName());
                 contactIntroductionDialogFragment.show(getSupportFragmentManager(), "dialog");
             } else { // this should never happen as the button should be disabled when no channel exists
@@ -804,7 +813,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 // this is an invite initiation
                 try {
                     // if the contact has channels, invite them to one-to-one discussion
-                    if (contact.establishedChannelCount > 0) {
+                    if (contact.hasChannelOrPreKey()) {
                         AppSingleton.getEngine().startOneToOneInvitationProtocol(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                     }
 
@@ -945,7 +954,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 return true;
             }
             final Contact contact = contactDetailsViewModel.getContactAndInvitation().getValue().contact;
-            if (contact.establishedChannelCount == 0) {
+            if (!contact.hasChannelOrPreKey()) {
                 return true;
             }
 
@@ -989,7 +998,7 @@ public class ContactDetailsActivity extends LockableActivity implements View.OnC
                 Contact contact = contactAndInvitation.contact;
                 StringBuilder sb = new StringBuilder();
                 sb.append(getString(R.string.debug_label_number_of_channels_and_devices)).append("\n");
-                sb.append(contact.establishedChannelCount).append("/").append(contact.deviceCount).append("\n\n");
+                sb.append(contact.establishedChannelCount).append("+").append(contact.preKeyCount).append("/").append(contact.deviceCount).append("\n\n");
                 try {
                     Identity contactIdentity = Identity.of(contact.bytesContactIdentity);
                     sb.append(getString(R.string.debug_label_server)).append(" ");

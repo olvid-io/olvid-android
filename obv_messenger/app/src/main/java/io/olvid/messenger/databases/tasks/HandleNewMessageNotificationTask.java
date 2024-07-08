@@ -95,7 +95,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
     // this HashMap is used to store groupV2 messages received before the group blob is downloaded. This is only useful in a multi-device setting
     // Map from ownedIdentity to Map from groupIdentifier to a list of ObvMessage to be processed as a fifo
     private static final HashMap<BytesKey, HashMap<BytesKey, List<ObvMessage>>> pendingGroupV2Messages = new HashMap<>();
+    private static final HashMap<BytesKey, HashMap<BytesKey, List<ObvMessage>>> pendingOneToOneMessages = new HashMap<>();
     public static final long GROUP_V2_MESSAGES_TTL = 2 * 86_400_000L; // 2 days
+    public static final long ONE_TO_ONE_MESSAGES_TTL = 2 * 86_400_000L; // 2 days
 
 
     public HandleNewMessageNotificationTask(@NonNull Engine engine, @NonNull ObvMessage obvMessage) {
@@ -156,7 +158,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonSharedSettings != null) {
-                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonSharedSettings.getGroupV2Identifier(), obvMessage)) {
+                if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonSharedSettings.getGroupV2Identifier(), jsonSharedSettings.getOneToOneIdentifier(), obvMessage)) {
                     return;
                 }
                 handleSharedSettingsMessage(jsonSharedSettings, messageSender, obvMessage.getServerTimestamp());
@@ -165,7 +167,8 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonDeleteDiscussion != null) {
-                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonDeleteDiscussion.getGroupV2Identifier(), obvMessage)) {
+                // TODO: handle locked discussions: owned messages should search for the discussion instead of group/contact
+                if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonDeleteDiscussion.getGroupV2Identifier(), jsonDeleteDiscussion.getOneToOneIdentifier(), obvMessage)) {
                     return;
                 }
                 handleDeleteDiscussion(jsonDeleteDiscussion, messageSender, obvMessage.getServerTimestamp());
@@ -174,7 +177,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonDeleteMessages != null) {
-                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonDeleteMessages.getGroupV2Identifier(), obvMessage)) {
+                if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonDeleteMessages.getGroupV2Identifier(), jsonDeleteMessages.getOneToOneIdentifier(), obvMessage)) {
                     return;
                 }
                 handleDeleteMessages(jsonDeleteMessages, messageSender, obvMessage.getServerTimestamp());
@@ -183,7 +186,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonUpdateMessage != null) {
-                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonUpdateMessage.getGroupV2Identifier(), obvMessage)) {
+                if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonUpdateMessage.getGroupV2Identifier(), jsonUpdateMessage.getOneToOneIdentifier(), obvMessage)) {
                     return;
                 }
                 handleUpdateMessage(jsonUpdateMessage, messageSender, obvMessage.getServerTimestamp());
@@ -192,7 +195,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonReaction != null) {
-                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonReaction.getGroupV2Identifier(), obvMessage)) {
+                if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonReaction.getGroupV2Identifier(), jsonReaction.getOneToOneIdentifier(), obvMessage)) {
                     return;
                 }
                 handleReactionMessage(jsonReaction, messageSender, obvMessage.getServerTimestamp());
@@ -201,7 +204,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonScreenCaptureDetection != null) {
-                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonScreenCaptureDetection.getGroupV2Identifier(), obvMessage)) {
+                if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonScreenCaptureDetection.getGroupV2Identifier(), jsonScreenCaptureDetection.getOneToOneIdentifier(), obvMessage)) {
                     return;
                 }
                 handleScreenCaptureDetectionMessage(jsonScreenCaptureDetection, messageSender, obvMessage.getServerTimestamp());
@@ -210,7 +213,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonDiscussionRead != null) {
-                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonDiscussionRead.getGroupV2Identifier(), obvMessage)) {
+                if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonDiscussionRead.getGroupV2Identifier(), jsonDiscussionRead.getOneToOneIdentifier(), obvMessage)) {
                     return;
                 }
                 handleDiscussionReadMessage(jsonDiscussionRead, messageSender);
@@ -219,7 +222,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonLimitedVisibilityMessageOpened != null) {
-                if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonLimitedVisibilityMessageOpened.getGroupV2Identifier(), obvMessage)) {
+                if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonLimitedVisibilityMessageOpened.getGroupV2Identifier(), jsonLimitedVisibilityMessageOpened.getOneToOneIdentifier(), obvMessage)) {
                     return;
                 }
                 handleLimitedVisibilityOpenedMessage(jsonLimitedVisibilityMessageOpened, messageSender, obvMessage.getServerTimestamp(), obvMessage.getDownloadTimestamp());
@@ -239,7 +242,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 return;
             }
 
-            if (putGroupV2MessageOnHoldIfAppropriate(messageSender, jsonMessage.getGroupV2Identifier(), obvMessage)) {
+            if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonMessage.getGroupV2Identifier(), jsonMessage.getOneToOneIdentifier(), obvMessage)) {
                 return;
             }
 
@@ -475,7 +478,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                             UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(message.discussionId, true);
                         } else {
                             List<Message> currentLocationSharingMessages = db.messageDao().getCurrentLocationSharingMessagesOfIdentityInDiscussion(message.senderIdentifier, message.discussionId);
-                            if (currentLocationSharingMessages != null && currentLocationSharingMessages.size() > 0) {
+                            if (currentLocationSharingMessages != null && !currentLocationSharingMessages.isEmpty()) {
                                 for (Message m : currentLocationSharingMessages) {
                                     Logger.e("This identity was already sharing it location, marking sharing as finished for message: " + m.id);
                                     db.messageDao().updateLocationType(m.id, Message.LOCATION_TYPE_SHARE_FINISHED);
@@ -876,8 +879,6 @@ public class HandleNewMessageNotificationTask implements Runnable {
         if (jsonDeleteMessages.getMessageReferences() == null || jsonDeleteMessages.getMessageReferences().isEmpty()) {
             return;
         }
-
-        // TODO: handle the case where discussion is locked and request comes from myself
 
         Discussion discussion = getDiscussion(jsonDeleteMessages.getGroupUid(), jsonDeleteMessages.getGroupOwner(), jsonDeleteMessages.getGroupV2Identifier(), jsonDeleteMessages.getOneToOneIdentifier(), messageSender, null);
         if (discussion == null) {
@@ -1292,33 +1293,72 @@ public class HandleNewMessageNotificationTask implements Runnable {
 
     // region group v2 messages on hold
 
-    private boolean putGroupV2MessageOnHoldIfAppropriate(@NonNull MessageSender messageSender, @Nullable byte[] bytesGroupIdentifier, @NonNull ObvMessage obvMessage) {
-        if (bytesGroupIdentifier == null) {
-            return false;
-        }
-        if (db.group2Dao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier) == null) {
-            if (obvMessage.getLocalDownloadTimestamp() < System.currentTimeMillis() - GROUP_V2_MESSAGES_TTL) {
-                // if message is too old, do not put it on hold and let it be discarded
-                return false;
-            }
+    private boolean putGroupV2OrOneToOneMessageOnHoldIfAppropriate(@NonNull MessageSender messageSender, @Nullable byte[] bytesGroupIdentifier, @Nullable JsonOneToOneMessageIdentifier oneToOneMessageIdentifier, @NonNull ObvMessage obvMessage) {
+        // for owned message, do not check the existence of the group, but of the discussion
+        // this allows to properly delete locked discussions too
+        // for other messages, check the group/contact exists
+        if (bytesGroupIdentifier != null) {
+            if ((messageSender.type == MessageSender.Type.OWNED_IDENTITY
+                    && db.discussionDao().getByGroupIdentifierWithAnyStatus(messageSender.bytesOwnedIdentity, bytesGroupIdentifier) == null)
+                || (messageSender.type == MessageSender.Type.CONTACT
+                    && db.group2Dao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier) == null)) {
+                if (obvMessage.getLocalDownloadTimestamp() < System.currentTimeMillis() - GROUP_V2_MESSAGES_TTL) {
+                    // if message is too old, do not put it on hold and let it be discarded
+                    return false;
+                }
 
-            synchronized (pendingGroupV2Messages) {
-                // put the message on hold
-                BytesKey ownedIdentityBytesKey = new BytesKey(messageSender.bytesOwnedIdentity);
-                HashMap<BytesKey, List<ObvMessage>> ownedIdentityMap = pendingGroupV2Messages.get(ownedIdentityBytesKey);
-                if (ownedIdentityMap == null) {
-                    ownedIdentityMap = new HashMap<>();
-                    pendingGroupV2Messages.put(ownedIdentityBytesKey, ownedIdentityMap);
+                Logger.d("Putting received group v2 message on hold.");
+                synchronized (pendingGroupV2Messages) {
+                    // put the message on hold
+                    BytesKey ownedIdentityBytesKey = new BytesKey(messageSender.bytesOwnedIdentity);
+                    HashMap<BytesKey, List<ObvMessage>> ownedIdentityMap = pendingGroupV2Messages.get(ownedIdentityBytesKey);
+                    if (ownedIdentityMap == null) {
+                        ownedIdentityMap = new HashMap<>();
+                        pendingGroupV2Messages.put(ownedIdentityBytesKey, ownedIdentityMap);
+                    }
+                    BytesKey groupIdentifierBytesKey = new BytesKey(bytesGroupIdentifier);
+                    List<ObvMessage> groupMessages = ownedIdentityMap.get(groupIdentifierBytesKey);
+                    if (groupMessages == null) {
+                        groupMessages = new ArrayList<>();
+                        ownedIdentityMap.put(groupIdentifierBytesKey, groupMessages);
+                    }
+                    groupMessages.add(obvMessage);
                 }
-                BytesKey groupIdentifierBytesKey = new BytesKey(bytesGroupIdentifier);
-                List<ObvMessage> groupMessages = ownedIdentityMap.get(groupIdentifierBytesKey);
-                if (groupMessages == null) {
-                    groupMessages = new ArrayList<>();
-                    ownedIdentityMap.put(groupIdentifierBytesKey, groupMessages);
-                }
-                groupMessages.add(obvMessage);
+                return true;
             }
-            return true;
+        } else if (oneToOneMessageIdentifier != null) {
+            final boolean hold;
+            if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                hold = db.discussionDao().getByContactWithAnyStatus(messageSender.bytesOwnedIdentity, oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity)) == null;
+            } else {
+                Contact contact = db.contactDao().get(messageSender.bytesOwnedIdentity, oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity));
+                hold = contact != null && !contact.oneToOne;
+            }
+            if (hold) {
+                if (obvMessage.getLocalDownloadTimestamp() < System.currentTimeMillis() - ONE_TO_ONE_MESSAGES_TTL) {
+                    // if message is too old, do not put it on hold and let it be discarded
+                    return false;
+                }
+
+                Logger.d("Putting received not one-to-one contact message on hold.");
+                synchronized (pendingOneToOneMessages) {
+                    // put the message on hold
+                    BytesKey ownedIdentityBytesKey = new BytesKey(messageSender.bytesOwnedIdentity);
+                    HashMap<BytesKey, List<ObvMessage>> ownedIdentityMap = pendingOneToOneMessages.get(ownedIdentityBytesKey);
+                    if (ownedIdentityMap == null) {
+                        ownedIdentityMap = new HashMap<>();
+                        pendingOneToOneMessages.put(ownedIdentityBytesKey, ownedIdentityMap);
+                    }
+                    BytesKey contactBytesKeys = new BytesKey(oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity));
+                    List<ObvMessage> contactMessages = ownedIdentityMap.get(contactBytesKeys);
+                    if (contactMessages == null) {
+                        contactMessages = new ArrayList<>();
+                        ownedIdentityMap.put(contactBytesKeys, contactMessages);
+                    }
+                    contactMessages.add(obvMessage);
+                }
+                return true;
+            }
         }
         return false;
     }
@@ -1333,6 +1373,22 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 List<ObvMessage> groupMessages = ownedIdentityMap.remove(groupIdentifierBytesKey);
                 if (groupMessages != null) {
                     for (ObvMessage obvMessage : groupMessages) {
+                        new HandleNewMessageNotificationTask(engine, obvMessage).run();
+                    }
+                }
+            }
+        }
+    }
+
+    public static void processAllOneToOneMessagesOnHold(@NonNull Engine engine, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity) {
+        synchronized (pendingOneToOneMessages) {
+            BytesKey ownedIdentityBytesKey = new BytesKey(bytesOwnedIdentity);
+            HashMap<BytesKey, List<ObvMessage>> ownedIdentityMap = pendingOneToOneMessages.get(ownedIdentityBytesKey);
+            if (ownedIdentityMap != null) {
+                BytesKey contactBytesKey = new BytesKey(bytesContactIdentity);
+                List<ObvMessage> oneToOneMessages = ownedIdentityMap.remove(contactBytesKey);
+                if (oneToOneMessages != null) {
+                    for (ObvMessage obvMessage : oneToOneMessages) {
                         new HandleNewMessageNotificationTask(engine, obvMessage).run();
                     }
                 }
