@@ -92,7 +92,7 @@ class ObvLinkActivity : AppCompatActivity() {
         val INVITATION_PATTERN: Pattern = Pattern.compile(
             "(" + ObvUrlIdentity.URL_PROTOCOL + "|" + ObvUrlIdentity.URL_PROTOCOL_OLVID + ")" + Pattern.quote(
                 "://$URL_INVITATION_HOST"
-            ) + "/#([-_a-zA-Z\\d]+)"
+            ) + "/1?#([-_a-zA-Z\\d]+)"
         )
 
         @JvmField

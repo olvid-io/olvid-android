@@ -393,6 +393,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                 if (contact != null && contact.recentlyOnline != recentlyOnline) {
                     contact.recentlyOnline = recentlyOnline;
                     db.contactDao().updateRecentlyOnline(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.recentlyOnline);
+                    AppSingleton.updateContactCachedInfo(contact);
                 }
                 break;
             }

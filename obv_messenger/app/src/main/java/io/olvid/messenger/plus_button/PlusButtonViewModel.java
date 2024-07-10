@@ -60,6 +60,7 @@ public class PlusButtonViewModel extends ViewModel {
 
     private String fullScreenQrCodeUrl;
     private ObvMutualScanUrl mutualScanUrl;
+    private boolean dismissOnMutualScanFinished;
     private byte[] mutualScanBytesContactIdentity;
 
     public void setKeycloakData(String serverUrl, String serializedAuthState, JsonWebKeySet jwks, String clientId, String clientSecret) {
@@ -189,6 +190,10 @@ public class PlusButtonViewModel extends ViewModel {
         return mutualScanUrl;
     }
 
+    public boolean isDismissOnMutualScanFinished() {
+        return dismissOnMutualScanFinished;
+    }
+
     public byte[] getMutualScanBytesContactIdentity() {
         return mutualScanBytesContactIdentity;
     }
@@ -196,5 +201,9 @@ public class PlusButtonViewModel extends ViewModel {
     public void setMutualScanUrl(ObvMutualScanUrl mutualScanUrl, byte[] mutualScanBytesContactIdentity) {
         this.mutualScanUrl = mutualScanUrl;
         this.mutualScanBytesContactIdentity = mutualScanBytesContactIdentity;
+    }
+
+    public void setDismissOnMutualScanFinished(boolean dismissOnMutualScanFinished) {
+        this.dismissOnMutualScanFinished = dismissOnMutualScanFinished;
     }
 }

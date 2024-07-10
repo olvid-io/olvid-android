@@ -294,7 +294,7 @@ public abstract class EngineNotifications {
     public static final String MUTUAL_SCAN_CONTACT_ADDED = "engine_notification_mutual_scan_contact_added";
     public static final String MUTUAL_SCAN_CONTACT_ADDED_BYTES_OWNED_IDENTITIY_KEY = "bytes_owned_identity"; // byte[]
     public static final String MUTUAL_SCAN_CONTACT_ADDED_BYTES_CONTACT_IDENTITIY_KEY = "bytes_contact_identity"; // byte[]
-    public static final String MUTUAL_SCAN_CONTACT_ADDED_NONCE_KEY = "nonce"; // byte[]
+    public static final String MUTUAL_SCAN_CONTACT_ADDED_SIGNATURE_KEY = "signature"; // byte[]
 
     public static final String APP_BACKUP_REQUESTED = "engine_notification_app_backup_requested";
     public static final String APP_BACKUP_REQUESTED_BYTES_BACKUP_KEY_UID_KEY = "bytes_backup_key_uid"; // byte[]

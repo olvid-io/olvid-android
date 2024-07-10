@@ -73,8 +73,7 @@ class InvitationViewHolder(
                 InvitationListItem(
                     invitationListViewModel = invitationListViewModel,
                     invitation = invitation,
-                    title = invitation.getAnnotatedTitle(composeView.context),
-                    body = AnnotatedString(invitation.statusText),
+                    title = AnnotatedString(invitation.statusText),
                     date = invitation.getAnnotatedDate(composeView.context),
                     initialViewSetup = { initialView ->
                         invitationListViewModel.initialViewSetup(

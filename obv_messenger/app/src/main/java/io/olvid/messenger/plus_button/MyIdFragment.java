@@ -176,14 +176,17 @@ public class MyIdFragment extends Fragment implements View.OnClickListener {
                 return;
             }
             final ObvUrlIdentity urlIdentity;
+            final String inviteName;
             JsonIdentityDetails identityDetails = ownedIdentity.getIdentityDetails();
             if (identityDetails != null) {
                 urlIdentity = new ObvUrlIdentity(ownedIdentity.bytesOwnedIdentity, identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, false));
+                inviteName = identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST, false);
             } else {
                 urlIdentity = new ObvUrlIdentity(ownedIdentity.bytesOwnedIdentity, ownedIdentity.displayName);
+                inviteName = ownedIdentity.displayName;
             }
-            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message_user_invitation_subject, ownedIdentity.displayName));
-            intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.message_user_invitation, ownedIdentity.displayName, urlIdentity.getUrlRepresentation()));
+            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message_user_invitation_subject, inviteName));
+            intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.message_user_invitation, inviteName, urlIdentity.getUrlRepresentation()));
             startActivity(Intent.createChooser(intent, getString(R.string.title_invite_chooser)));
             activity.finish();
         } else if (id == R.id.more_button) {
@@ -204,6 +207,11 @@ public class MyIdFragment extends Fragment implements View.OnClickListener {
                                         viewModel.setScannedUri(text);
                                         viewModel.setDeepLinked(true);
                                         Navigation.findNavController(v).navigate(R.id.invitation_scanned);
+                                        return true;
+                                    } else if (ObvLinkActivity.MUTUAL_SCAN_PATTERN.matcher(text).find()) {
+                                        viewModel.setScannedUri(text);
+                                        viewModel.setDeepLinked(true);
+                                        Navigation.findNavController(v).navigate(R.id.mutual_scan_invitation_scanned);
                                         return true;
                                     } else if (ObvLinkActivity.CONFIGURATION_PATTERN.matcher(text).find()) {
                                         viewModel.setScannedUri(text);

@@ -640,8 +640,11 @@ public class App extends Application implements DefaultLifecycleObserver {
         if (context == null || uri == null) {
             return;
         }
+
+        // first check if this is an Olvid link
+        boolean olvidLink = ObvLinkActivity.ANY_PATTERN.matcher(uri.toString()).find();
         final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
-                .setTitle(R.string.dialog_title_confirm_open_link)
+                .setTitle(olvidLink ? R.string.dialog_title_confirm_open_olvid_link : R.string.dialog_title_confirm_open_link)
                 .setMessage(uri.toString())
                 .setNeutralButton(R.string.button_label_copy, (dialog, which) -> {
                     ClipboardManager clipboard = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
@@ -650,23 +653,30 @@ public class App extends Application implements DefaultLifecycleObserver {
                     toast(R.string.toast_message_link_copied, Toast.LENGTH_SHORT);
                 })
                 .setPositiveButton(R.string.button_label_ok, (dialog, which) -> {
-                    try {
-                        context.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                    if (olvidLink) {
+                        Intent intent = new Intent(context, MainActivity.class);
+                        intent.setAction(MainActivity.LINK_ACTION);
+                        intent.putExtra(MainActivity.LINK_URI_INTENT_EXTRA, uri.toString());
+                        context.startActivity(intent);
+                    } else {
+                        try {
+                            context.startActivity(new Intent(Intent.ACTION_VIEW, uri));
 
-                        int unwraps = 0;
-                        Context baseContext = context;
-                        while (!(baseContext instanceof DiscussionActivity) && baseContext instanceof ContextThemeWrapper) {
-                            baseContext = ((ContextThemeWrapper) baseContext).getBaseContext();
-                            unwraps++;
-                            if (unwraps > 10) {
-                                break;
+                            int unwraps = 0;
+                            Context baseContext = context;
+                            while (!(baseContext instanceof DiscussionActivity) && baseContext instanceof ContextThemeWrapper) {
+                                baseContext = ((ContextThemeWrapper) baseContext).getBaseContext();
+                                unwraps++;
+                                if (unwraps > 10) {
+                                    break;
+                                }
                             }
+                            if (baseContext instanceof DiscussionActivity) {
+                                ((DiscussionActivity) baseContext).getDiscussionDelegate().doNotMarkAsReadOnPause();
+                            }
+                        } catch (Exception e) {
+                            App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
                         }
-                        if (baseContext instanceof DiscussionActivity) {
-                            ((DiscussionActivity) baseContext).getDiscussionDelegate().doNotMarkAsReadOnPause();
-                        }
-                    } catch (Exception e) {
-                        App.toast(R.string.toast_message_unable_to_open_url, Toast.LENGTH_SHORT);
                     }
                 })
                 .setNegativeButton(R.string.button_label_cancel, null);
@@ -1081,8 +1091,9 @@ public class App extends Application implements DefaultLifecycleObserver {
                 int height = metrics.heightPixels;
                 final int size = Math.min(height, width);
                 final ImageView imageView1 = imageViewWeakReference.get();
+                final Bitmap scaledBitmap = Bitmap.createScaledBitmap(smallQrCodeBitmap, size, size, false);
                 if (imageView1 != null) {
-                    new Handler(Looper.getMainLooper()).post(() -> imageView1.setImageBitmap(Bitmap.createScaledBitmap(smallQrCodeBitmap, size, size, false)));
+                    new Handler(Looper.getMainLooper()).post(() -> imageView1.setImageBitmap(scaledBitmap));
                 }
             } catch (Exception e) {
                 final ImageView imageView1 = imageViewWeakReference.get();

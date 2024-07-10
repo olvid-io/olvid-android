@@ -1774,10 +1774,7 @@ fun CallParticipantPojo.initialViewSetup(): (InitialView) -> Unit = { view ->
         view.setContact(it)
     } ifNull {
         with(view) {
-            setKeycloakCertified(false)
-            setInactive(false)
-            setNotOneToOne()
-            setNullTrustLevel()
+            reset()
             setInitial(
                 bytesContactIdentity,
                 StringUtils.getInitial(displayName)

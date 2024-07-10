@@ -156,7 +156,7 @@
             android:textColor="@color/greyTint"
             android:drawableEnd="@drawable/ic_search"
             android:ems="10"
-            android:autofillHints="name"
+            android:importantForAutofill="no"
             android:hint="@string/hint_contact_or_group_name"
             android:imeOptions="actionDone"
             android:inputType="textNoSuggestions|textFilter"

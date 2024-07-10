@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:text="@string/activity_title_add_contact"
+        android:text="@string/activity_title_get_in_contact"
         android:textAppearance="@style/RobotoMedium"
         android:textColor="@color/blueOrWhite"
         android:textSize="@dimen/title_font_size"
@@ -51,9 +51,9 @@
         android:layout_marginEnd="@dimen/plus_button_card_margins"
         android:layout_marginBottom="@dimen/plus_button_card_half_margins"
         app:cardBackgroundColor="@color/almostWhite"
-        app:cardCornerRadius="8dp"
+        app:cardCornerRadius="16dp"
         app:cardElevation="4dp"
-        app:layout_constraintBottom_toTopOf="@id/mutual_scan_group"
+        app:layout_constraintBottom_toTopOf="@id/mutual_scan_card_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_bar"
@@ -111,88 +111,84 @@
                 android:layout_marginBottom="@dimen/plus_button_card_margins"
                 android:background="@drawable/background_ok_message"
                 android:drawablePadding="4dp"
-                android:orientation="horizontal"
                 android:padding="4dp"
                 android:textSize="14sp"
                 android:visibility="gone"
+                android:gravity="center_vertical"
                 app:drawableStartCompat="@drawable/ic_ok_outline"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/contact_identity_linear_layout"
                 app:layout_goneMarginBottom="@dimen/plus_button_card_margins"
-                tools:text="@string/text_explanation_warning_contact_already_known"
+                tools:text="@string/text_explanation_warning_mutual_scan_contact_already_known"
                 tools:visibility="visible" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <LinearLayout
-        android:id="@+id/mutual_scan_group"
-        android:layout_width="0dp"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/mutual_scan_card_view"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="vertical"
+        app:layout_constraintHeight_max="wrap"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/plus_button_card_margins"
+        android:layout_marginBottom="@dimen/plus_button_card_margins"
         android:layout_marginStart="@dimen/plus_button_card_margins"
         android:layout_marginEnd="@dimen/plus_button_card_margins"
-        app:layout_constraintBottom_toTopOf="@id/remote_card_view"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/identity_card_view"
-        android:visibility="visible"
-        tools:visibility="visible">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="@dimen/plus_button_card_margins"
-            android:layout_marginBottom="@dimen/plus_button_card_half_margins"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="0"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@string/label_option_invite_locally"
-            android:textColor="@color/almostBlack"
-            style="@style/RobotoMedium"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/mutual_scan_card_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginBottom="@dimen/plus_button_card_half_margins"
-            app:cardBackgroundColor="@color/almostWhite"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:cardBackgroundColor="@color/almostWhite"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/mutual_scan_explanation_text_view"
+                android:id="@+id/mutual_scan_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/plus_button_card_margins"
                 android:layout_marginTop="@dimen/plus_button_card_margins"
+                android:layout_marginEnd="@dimen/plus_button_card_margins"                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/label_option_invite_locally"
+                android:textColor="@color/almostBlack"
+                style="@style/RobotoMedium"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/mutual_scan_explanation_text_view"/>
+
+            <TextView
+                android:id="@+id/mutual_scan_explanation_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/plus_button_card_margins"
+                android:layout_marginTop="@dimen/plus_button_card_half_margins"
                 android:layout_marginEnd="@dimen/plus_button_card_margins"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="@string/text_explanation_mutual_scan"
-                tools:visibility="gone" />
+                app:layout_constraintTop_toBottomOf="@id/mutual_scan_title"
+                app:layout_constraintBottom_toTopOf="@id/qr_code_cardview"
+                tools:text="@string/text_explanation_mutual_scan" />
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/qr_code_cardview"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_margin="@dimen/qr_code_margin"
+                android:layout_marginVertical="@dimen/qr_code_margin"
+                android:layout_marginHorizontal="32dp"
                 app:cardBackgroundColor="@color/alwaysWhite"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/distance_title"
                 app:layout_constraintDimensionRatio="1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -221,94 +217,50 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:srcCompat="@drawable/olvid_icon_qr_overlay" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginBottom="@dimen/plus_button_card_half_margins"
-                android:src="@drawable/ic_touch"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="@dimen/plus_button_card_margins"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="0"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@string/label_option_invite_remotely"
-            android:textColor="@color/almostBlack"
-            android:textSize="18sp"
-            style="@style/RobotoMedium"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-    </LinearLayout>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/remote_card_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/plus_button_card_margins"
-        android:layout_marginTop="@dimen/plus_button_card_half_margins"
-        android:layout_marginEnd="@dimen/plus_button_card_margins"
-        android:layout_marginBottom="@dimen/plus_button_card_margins"
-        app:cardBackgroundColor="@color/almostWhite"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/mutual_scan_group">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/invite_explanation_text_view"
+                android:id="@+id/distance_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/plus_button_card_margins"
                 android:layout_marginTop="@dimen/plus_button_card_margins"
                 android:layout_marginEnd="@dimen/plus_button_card_margins"
-                android:textSize="16sp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/label_option_invite_remotely"
+                android:textColor="@color/almostBlack"
+                android:textSize="18sp"
+                style="@style/RobotoMedium"
                 app:layout_constraintBottom_toTopOf="@id/invite_contact_button"
+                app:layout_constraintTop_toBottomOf="@id/qr_code_cardview"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="@string/text_explanation_invite_add_contact"
-                tools:visibility="gone" />
+                app:layout_constraintStart_toStartOf="parent" />
 
-            <Button
+
+            <TextView
                 android:id="@+id/invite_contact_button"
-                style="@style/Base.Widget.AppCompat.Button.Colored"
+                android:textColor="@color/blueOrWhite"
+                android:paddingVertical="12dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/plus_button_card_margins"
-                android:layout_marginTop="@dimen/plus_button_card_half_margins"
+                android:layout_marginTop="@dimen/plus_button_card_margins"
                 android:layout_marginEnd="@dimen/plus_button_card_margins"
                 android:layout_marginBottom="@dimen/plus_button_card_margins"
-                android:drawableStart="@drawable/ic_send_white"
-                android:drawableEnd="@drawable/empty"
-                android:stateListAnimator="@null"
+                android:textAlignment="center"
+                android:textSize="16sp"
+                android:background="@drawable/background_rounded_button"
+                android:theme="@style/BlueOrWhiteRipple"
                 android:text="@string/button_label_invite_contact"
-                android:textColor="@color/alwaysWhite"
-                android:theme="@style/AppTheme.BlueAccent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/invite_explanation_text_view"
-                app:layout_goneMarginTop="@dimen/plus_button_card_margins" />
+                app:layout_constraintTop_toBottomOf="@id/distance_title" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

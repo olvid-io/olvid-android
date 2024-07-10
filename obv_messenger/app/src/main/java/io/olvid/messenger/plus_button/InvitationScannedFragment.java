@@ -55,6 +55,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.activities.ObvLinkActivity;
+import io.olvid.messenger.customClasses.ContactCacheInfo;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
@@ -67,14 +68,11 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
 
     InitialView contactInitialView;
     TextView contactNameTextView;
-    TextView inviteExplanationTextView;
     TextView inviteWarningTextView;
-    LinearLayout mutualScanGroup;
+    View cardView;
     TextView mutualScanExplanationTextView;
     ImageView mutualScanQrCodeImageView;
-
-    Button inviteContactButton;
-    CardView remoteInviteCardView;
+    TextView inviteContactButton;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,11 +128,9 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
 
         contactInitialView = view.findViewById(R.id.contact_initial_view);
         contactNameTextView = view.findViewById(R.id.contact_name_text_view);
-        inviteExplanationTextView = view.findViewById(R.id.invite_explanation_text_view);
         inviteWarningTextView = view.findViewById(R.id.invite_warning_text_view);
         inviteContactButton = view.findViewById(R.id.invite_contact_button);
-        remoteInviteCardView = view.findViewById(R.id.remote_card_view);
-        mutualScanGroup = view.findViewById(R.id.mutual_scan_group);
+        cardView = view.findViewById(R.id.mutual_scan_card_view);
         mutualScanExplanationTextView = view.findViewById(R.id.mutual_scan_explanation_text_view);
         mutualScanQrCodeImageView = view.findViewById(R.id.qr_code_image_view);
 
@@ -169,36 +165,36 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
             viewModel.setMutualScanUrl(null, null);
             displaySelfInvite(ownedIdentity);
         } else {
-            App.runThread(() -> {
-                try {
-                    JsonIdentityDetails identityDetails = ownedIdentity.getIdentityDetails();
-                    viewModel.setMutualScanUrl(AppSingleton.getEngine().computeMutualScanSignedNonceUrl(
-                            contactUrlIdentity.getBytesIdentity(),
-                            ownedIdentity.bytesOwnedIdentity,
-                            (identityDetails != null) ? identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, false) : ownedIdentity.displayName),
-                            contactUrlIdentity.getBytesIdentity());
-                } catch (Exception e) {
-                    viewModel.setMutualScanUrl(null, null);
-                }
-                final Contact contact = AppDatabase.getInstance().contactDao().get(ownedIdentity.bytesOwnedIdentity, contactUrlIdentity.getBytesIdentity());
-                new Handler(Looper.getMainLooper()).post(() -> displayContact(ownedIdentity, contact, contactUrlIdentity, viewModel.getMutualScanUrl()));
-            });
+            try {
+                JsonIdentityDetails identityDetails = ownedIdentity.getIdentityDetails();
+                viewModel.setMutualScanUrl(AppSingleton.getEngine().computeMutualScanSignedNonceUrl(
+                                contactUrlIdentity.getBytesIdentity(),
+                                ownedIdentity.bytesOwnedIdentity,
+                                (identityDetails != null) ? identityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, false) : ownedIdentity.displayName),
+                        contactUrlIdentity.getBytesIdentity());
+                viewModel.setDismissOnMutualScanFinished(true);
+            } catch (Exception e) {
+                viewModel.setMutualScanUrl(null, null);
+            }
+            displayContact(ownedIdentity, contactUrlIdentity, viewModel.getMutualScanUrl());
         }
     }
 
-    private void displayContact(@NonNull OwnedIdentity ownedIdentity, @Nullable Contact contact, @NonNull ObvUrlIdentity contactUrlIdentity, @Nullable ObvMutualScanUrl mutualScanUrl) {
+    private void displayContact(@NonNull OwnedIdentity ownedIdentity, @NonNull ObvUrlIdentity contactUrlIdentity, @Nullable ObvMutualScanUrl mutualScanUrl) {
+        String contactShortName = StringUtils.removeCompanyFromDisplayName(contactUrlIdentity.displayName);
         contactNameTextView.setText(contactUrlIdentity.displayName);
+        ContactCacheInfo contactCacheInfo = AppSingleton.getContactCacheInfo(contactUrlIdentity.getBytesIdentity());
 
-        if (contact != null) {
-            contactInitialView.setContact(contact);
+        if (contactCacheInfo != null) {
+            contactInitialView.setFromCache(contactUrlIdentity.getBytesIdentity());
 
             inviteWarningTextView.setVisibility(View.VISIBLE);
             inviteWarningTextView.setBackgroundResource(R.drawable.background_ok_message);
             inviteWarningTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_ok_outline, 0, 0, 0);
-            if (contact.oneToOne) {
-                inviteWarningTextView.setText(activity.getString(R.string.text_explanation_warning_mutual_scan_contact_already_known, contactUrlIdentity.displayName));
+            if (contactCacheInfo.getOneToOne()) {
+                inviteWarningTextView.setText(activity.getString(R.string.text_explanation_warning_mutual_scan_contact_already_known, contactShortName));
             } else {
-                inviteWarningTextView.setText(activity.getString(R.string.text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one, contactUrlIdentity.displayName));
+                inviteWarningTextView.setText(activity.getString(R.string.text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one, contactShortName));
             }
         } else {
             contactInitialView.setInitial(contactUrlIdentity.getBytesIdentity(), StringUtils.getInitial(contactUrlIdentity.displayName));
@@ -207,31 +203,17 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
 
 
         if (mutualScanUrl != null) {
-            mutualScanGroup.setVisibility(View.VISIBLE);
-            if (contact == null) {
-                mutualScanExplanationTextView.setVisibility(View.VISIBLE);
-                mutualScanExplanationTextView.setText(activity.getString(R.string.text_explanation_mutual_scan, contactUrlIdentity.displayName));
-            } else {
-                mutualScanExplanationTextView.setVisibility(View.GONE);
-            }
+            cardView.setVisibility(View.VISIBLE);
+            mutualScanExplanationTextView.setText(activity.getString(R.string.text_explanation_mutual_scan, contactShortName));
             App.setQrCodeImage(mutualScanQrCodeImageView, mutualScanUrl.getUrlRepresentation());
         } else {
-            mutualScanGroup.setVisibility(View.GONE);
+            cardView.setVisibility(View.GONE);
         }
 
-        if (mutualScanUrl != null && contact != null) {
-            inviteExplanationTextView.setVisibility(View.GONE);
-        } else {
-            inviteExplanationTextView.setVisibility(View.VISIBLE);
-            inviteExplanationTextView.setText(activity.getString(R.string.text_explanation_invite_add_contact, contactUrlIdentity.displayName));
-        }
-
-        remoteInviteCardView.setVisibility(View.VISIBLE);
         inviteContactButton.setOnClickListener(v -> {
             try {
                 AppSingleton.getEngine().startTrustEstablishmentProtocol(contactUrlIdentity.getBytesIdentity(), contactUrlIdentity.displayName, ownedIdentity.bytesOwnedIdentity);
                 activity.finish();
-                App.toast(R.string.toast_message_invite_sent, Toast.LENGTH_SHORT);
             } catch (Exception e) {
                 App.toast(R.string.toast_message_failed_to_invite_contact, Toast.LENGTH_SHORT);
             }
@@ -242,15 +224,12 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
         contactInitialView.setOwnedIdentity(ownedIdentity);
         contactNameTextView.setText(ownedIdentity.displayName);
 
-        inviteExplanationTextView.setVisibility(View.GONE);
         inviteWarningTextView.setVisibility(View.VISIBLE);
         inviteWarningTextView.setBackgroundResource(R.drawable.background_error_message);
         inviteWarningTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_error_outline, 0, 0, 0);
         inviteWarningTextView.setText(R.string.text_explanation_warning_cannot_invite_yourself);
 
-        mutualScanGroup.setVisibility(View.GONE);
-
-        remoteInviteCardView.setVisibility(View.GONE);
+        cardView.setVisibility(View.GONE);
         inviteContactButton.setOnClickListener(null);
     }
 
@@ -274,6 +253,8 @@ public class InvitationScannedFragment extends Fragment implements View.OnClickL
     @Override
     public void onStop() {
         super.onStop();
+        viewModel.setDismissOnMutualScanFinished(false);
+
         // restore initial brightness
         WindowManager.LayoutParams params = activity.getWindow().getAttributes();
         if (params != null && activity.getWindow() != null) {

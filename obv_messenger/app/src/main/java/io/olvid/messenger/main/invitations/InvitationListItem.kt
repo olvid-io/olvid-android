@@ -22,12 +22,13 @@ package io.olvid.messenger.main.invitations
 import android.util.Base64
 import android.view.KeyEvent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize.Min
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,7 +40,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
@@ -61,11 +61,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
@@ -104,12 +103,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InvitationListItem(
     invitationListViewModel: InvitationListViewModel,
     invitation: Invitation?,
     title: AnnotatedString,
-    body: AnnotatedString,
     date: AnnotatedString,
     initialViewSetup: (initialView: InitialView) -> Unit,
     onClick: (action: Action, invitation: Invitation, lastSAS: String?) -> Unit,
@@ -118,7 +117,7 @@ fun InvitationListItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(16.dp),
         elevation = 4.dp
     ) {
         Column(
@@ -159,15 +158,7 @@ fun InvitationListItem(
                         color = colorResource(id = R.color.primary700),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    // Subtitle
-                    Text(
-                        text = body,
-                        color = colorResource(id = R.color.grey),
-                        fontSize = 14.sp,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                     // Date
@@ -228,18 +219,20 @@ fun InvitationListItem(
                 ).contains(invitation?.associatedDialog?.category?.id)
             ) {
 
-                Row(
+                FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp)
-                        .align(CenterHorizontally),
-                    horizontalArrangement = Arrangement.SpaceAround
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
 
                     val accentColor = colorResource(id = R.color.accent)
 
                     // your code
-                    Column {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(
                             modifier = Modifier,
                             text = stringResource(id = R.string.invitation_label_your_code),
@@ -253,18 +246,30 @@ fun InvitationListItem(
                         )
                         Spacer(modifier = Modifier.requiredHeight(4.dp))
 
-                        Text(
-                            modifier = Modifier.requiredWidth(with(LocalDensity.current) { 72.sp.toDp() } ),
-                            text = String(
-                                invitation?.associatedDialog?.category?.sasToDisplay
-                                    ?: byteArrayOf(), StandardCharsets.UTF_8
-                            ),
-                            maxLines = 1,
-                            textAlign = TextAlign.Center,
-                            fontSize = 26.sp,
-                            color = colorResource(
-                                id = R.color.grey
-                            )
+                        val myCode = String(invitation?.associatedDialog?.category?.sasToDisplay ?: byteArrayOf(), StandardCharsets.UTF_8)
+
+                        BasicTextField(
+                            modifier = Modifier.requiredWidth(with(LocalDensity.current) { 128.sp.toDp() } ),
+                            value = myCode,
+                            onValueChange = {},
+                            decorationBox = {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    repeat(Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS) { index ->
+                                        BoxedChar(
+                                            modifier = Modifier.weight(1f),
+                                            error = false,
+                                            index = index,
+                                            text = myCode
+                                        )
+                                        if (index != Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS - 1) {
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                        }
+                                    }
+                                }
+                            }
                         )
                     }
 
@@ -280,17 +285,15 @@ fun InvitationListItem(
 
                             LaunchedEffect(invitationListViewModel.lastSas) {
                                 invitationListViewModel.lastSas?.let {
-                                    sas =
-                                        TextFieldValue(it).copy(selection = TextRange(0, it.length))
+                                    sas = TextFieldValue(it).copy(selection = TextRange(it.length))
                                     sasInputField.requestFocus()
                                 }
                             }
 
                             CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
-
                                 BasicTextField(
                                     modifier = Modifier
-                                        .requiredWidth(with(LocalDensity.current) { 72.sp.toDp() } )
+                                        .requiredWidth(with(LocalDensity.current) { 128.sp.toDp() })
                                         .onKeyEvent {
                                             if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
                                                 validateSas()
@@ -300,11 +303,6 @@ fun InvitationListItem(
                                         }
                                         .focusRequester(sasInputField),
                                     value = sas,
-                                    textStyle = TextStyle(
-                                        fontSize = 26.sp,
-                                        color = colorResource(id = R.color.grey),
-                                        textAlign = TextAlign.Center
-                                    ),
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Number,
@@ -317,32 +315,19 @@ fun InvitationListItem(
                                     onValueChange = { input ->
                                         val newSas = input.text.trim()
                                             .take(Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS)
+                                        val previousSasLength = sas.text.length
                                         sas = input.copy(
                                             text = newSas,
                                             selection = if (invitationListViewModel.lastSas == newSas && input.selection.length == Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS) {
                                                 TextRange(0, newSas.length)
                                             } else input.selection
                                         )
+                                        if (previousSasLength < Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS && newSas.length == Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS) {
+                                            validateSas()
+                                        }
                                     },
-                                    cursorBrush = SolidColor(accentColor),
-                                    decorationBox = { innerTextField ->
-                                        Column(
-                                            modifier = Modifier.drawWithContent {
-                                                drawContent()
-                                                drawLine(
-                                                    color = accentColor,
-                                                    start = Offset(
-                                                        x = 0f,
-                                                        y = size.height - 1.dp.toPx(),
-                                                    ),
-                                                    end = Offset(
-                                                        x = size.width,
-                                                        y = size.height - 1.dp.toPx(),
-                                                    ),
-                                                    strokeWidth = 1.dp.toPx(),
-                                                )
-                                            }
-                                        ) {
+                                    decorationBox = {
+                                        Column {
                                             Text(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 text = stringResource(id = R.string.invitation_label_their_code),
@@ -355,35 +340,29 @@ fun InvitationListItem(
                                                 )
                                             )
                                             Spacer(modifier = Modifier.requiredHeight(4.dp))
-                                            innerTextField()
+                                            Row(modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.Center) {
+                                                repeat(Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS) { index ->
+                                                    BoxedChar(
+                                                        modifier = Modifier.weight(1f),
+                                                        error = sas.text == invitationListViewModel.lastSas &&
+                                                                invitationListViewModel.lastSasDialogUUID == invitation.associatedDialog.uuid &&
+                                                                invitationListViewModel.lastTimestamp != invitation.invitationTimestamp,
+                                                        index = index,
+                                                        text = sas.text
+                                                    )
+                                                    if (index != Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS - 1) {
+                                                        Spacer(modifier = Modifier.width(4.dp))
+                                                    }
+                                                }
+                                            }
                                         }
-
                                     }
-                                )
-                            }
-
-                            AnimatedVisibility(
-                                visible = sas.text == invitationListViewModel.lastSas &&
-                                        invitationListViewModel.lastSasDialogUUID == invitation.associatedDialog.uuid &&
-                                        invitationListViewModel.lastTimestamp != invitation.invitationTimestamp,
-                                enter = EnterTransition.None,
-                                exit = ExitTransition.None
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .width(with(LocalDensity.current) { 72.sp.toDp() } )
-                                        .wrapContentWidth(CenterHorizontally, true)
-                                        .padding(vertical = 8.dp),
-                                    text = stringResource(id = R.string.message_wrong_code),
-                                    textAlign = TextAlign.Center,
-                                    color = colorResource(
-                                        id = R.color.red
-                                    )
                                 )
                             }
                         } else { //Category.SAS_CONFIRMED_DIALOG_CATEGORY
                             Text(
-                                modifier = Modifier,
+                                modifier = Modifier.requiredWidth(with(LocalDensity.current) { 128.sp.toDp() }),
                                 text = stringResource(id = R.string.invitation_label_their_code),
                                 maxLines = 1,
                                 textAlign = TextAlign.Center,
@@ -393,12 +372,12 @@ fun InvitationListItem(
                                     id = R.color.grey
                                 )
                             )
-                            Spacer(modifier = Modifier.requiredHeight(4.dp))
+                            Spacer(modifier = Modifier.requiredHeight(2.dp))
                             Image(
                                 modifier = Modifier
                                     .align(CenterHorizontally)
-                                    .size(32.dp),
-                                painter = painterResource(id = R.drawable.ic_ok),
+                                    .size(40.dp),
+                                painter = painterResource(id = R.drawable.ic_ok_outline),
                                 contentDescription = stringResource(
                                     id = R.string.content_description_code_valid
                                 )
@@ -474,7 +453,7 @@ fun InvitationListItem(
             }
 
             // bottom buttons
-            Row(modifier = Modifier.focusProperties { canFocus = false }) {
+            Row(modifier = Modifier.padding(vertical = 4.dp).focusProperties { canFocus = false }) {
                 AnimatedVisibility(
                     visible = listOf(
                         Category.INVITE_SENT_DIALOG_CATEGORY,
@@ -490,8 +469,8 @@ fun InvitationListItem(
                     ) {
                         TextButton(onClick = { onClick(ABORT, invitation!!, null) }) {
                             Text(
-                                stringResource(id = R.string.button_label_abort).uppercase(),
-                                color = colorResource(id = R.color.accent)
+                                stringResource(id = R.string.button_label_abort),
+                                color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
                     }
@@ -509,14 +488,15 @@ fun InvitationListItem(
                     ) {
                         TextButton(onClick = { onClick(IGNORE, invitation!!, null) }) {
                             Text(
-                                stringResource(id = R.string.button_label_ignore).uppercase(),
-                                color = colorResource(id = R.color.accent)
+                                stringResource(id = R.string.button_label_ignore),
+                                color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
-                        TextButton(onClick = { onClick(ACCEPT, invitation!!, null) }) {
+                        TextButton(
+                            onClick = { onClick(ACCEPT, invitation!!, null) }) {
                             Text(
-                                stringResource(id = R.string.button_label_accept).uppercase(),
-                                color = colorResource(id = R.color.accent)
+                                stringResource(id = R.string.button_label_accept),
+                                color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
                     }
@@ -532,14 +512,15 @@ fun InvitationListItem(
                     ) {
                         TextButton(onClick = { onClick(REJECT, invitation!!, null) }) {
                             Text(
-                                stringResource(id = R.string.button_label_reject).uppercase(),
-                                color = colorResource(id = R.color.accent)
+                                stringResource(id = R.string.button_label_reject),
+                                color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
-                        TextButton(onClick = { onClick(ACCEPT, invitation!!, null) }) {
+                        TextButton(
+                            onClick = { onClick(ACCEPT, invitation!!, null) }) {
                             Text(
-                                stringResource(id = R.string.button_label_accept).uppercase(),
-                                color = colorResource(id = R.color.accent)
+                                stringResource(id = R.string.button_label_accept),
+                                color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
                     }
@@ -555,8 +536,8 @@ fun InvitationListItem(
                     ) {
                         TextButton(onClick = { onClick(ABORT, invitation!!, null) }) {
                             Text(
-                                stringResource(id = R.string.button_label_abort).uppercase(),
-                                color = colorResource(id = R.color.accent)
+                                stringResource(id = R.string.button_label_abort),
+                                color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
                         val enabled = sas.text.length == Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS
@@ -565,8 +546,8 @@ fun InvitationListItem(
                             enabled = enabled
                         ) {
                             Text(
-                                stringResource(id = R.string.button_label_validate).uppercase(),
-                                color = colorResource(id = R.color.accent).copy(alpha = if (enabled) 1f else ContentAlpha.disabled),
+                                stringResource(id = R.string.button_label_validate),
+                                color = colorResource(id = R.color.blueOrWhite).copy(alpha = if (enabled) 1f else ContentAlpha.disabled),
                             )
                         }
                     }
@@ -586,8 +567,8 @@ fun InvitationListItem(
                     ) {
                         TextButton(onClick = { onClick(REJECT, invitation!!, null) }) {
                             Text(
-                                stringResource(id = R.string.button_label_reject).uppercase(),
-                                color = colorResource(id = R.color.accent)
+                                stringResource(id = R.string.button_label_reject),
+                                color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
                         TextButton(
@@ -595,10 +576,8 @@ fun InvitationListItem(
                             enabled = enabled
                         ) {
                             Text(
-                                stringResource(id = R.string.button_label_accept).uppercase(),
-                                color = if (enabled) colorResource(id = R.color.accent) else colorResource(
-                                    id = R.color.accent
-                                ).copy(alpha = ContentAlpha.disabled)
+                                stringResource(id = R.string.button_label_accept),
+                                color = colorResource(id = R.color.blueOrWhite).copy(alpha = if (enabled) 1f else ContentAlpha.disabled),
                             )
                         }
                     }
@@ -606,6 +585,42 @@ fun InvitationListItem(
             }
         }
     }
+}
+
+@Composable
+private fun BoxedChar(
+    modifier: Modifier = Modifier,
+    error: Boolean,
+    index: Int,
+    text: String
+) {
+    val isFocused = text.length == index
+    val char = when {
+        index == text.length -> "_"
+        index > text.length -> ""
+        else -> text[index].toString()
+    }
+    Text(
+        modifier = modifier
+            .border(
+                1.dp, if (error) Color(0xFFE2594E) else when {
+                    isFocused -> colorResource(id = R.color.blueOrWhite)
+                    else -> colorResource(id = R.color.grey)
+                }, RoundedCornerShape(8.dp)
+            )
+            .padding(vertical = 2.dp),
+        text = char,
+        fontSize = 26.sp,
+        color =
+        if (error) {
+            Color(0xFFE2594E)
+        } else if (isFocused) {
+            colorResource(id = R.color.blueOrWhite)
+        } else {
+            colorResource(id = R.color.grey)
+        },
+        textAlign = TextAlign.Center
+    )
 }
 
 @Preview
@@ -617,7 +632,6 @@ private fun InvitationListItemPreview() {
             onClick = { _, _, _ -> },
             invitation = null,
             title = AnnotatedString("title"),
-            body = AnnotatedString("body"),
             date = AnnotatedString("date"),
             initialViewSetup = {}
         )

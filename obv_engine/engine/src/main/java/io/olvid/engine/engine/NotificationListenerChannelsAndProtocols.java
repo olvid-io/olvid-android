@@ -128,16 +128,18 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
             case ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED: {
                 Identity ownedIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_OWNED_IDENTITY_KEY);
                 Identity contactIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_CONTACT_IDENTITY_KEY);
-                byte[] nonce = (byte[]) userInfo.get(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_SIGNATURE_KEY);
+                byte[] signature = (byte[]) userInfo.get(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_SIGNATURE_KEY);
 
-                if (ownedIdentity == null || contactIdentity == null || nonce == null) {
+                if (ownedIdentity == null || contactIdentity == null) {
                     break;
                 }
 
                 HashMap<String, Object> engineInfo = new HashMap<>();
                 engineInfo.put(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_BYTES_OWNED_IDENTITIY_KEY, ownedIdentity.getBytes());
                 engineInfo.put(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_BYTES_CONTACT_IDENTITIY_KEY, contactIdentity.getBytes());
-                engineInfo.put(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_NONCE_KEY, nonce);
+                if (signature != null) {
+                    engineInfo.put(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_SIGNATURE_KEY, signature);
+                }
 
                 engine.postEngineNotification(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED, engineInfo);
                 break;

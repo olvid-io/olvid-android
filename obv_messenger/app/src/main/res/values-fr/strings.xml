@@ -48,7 +48,6 @@
     <string name="label_message_status">Statut du message</string>
     <string name="content_description_message_status">Statut du message</string>
     <string name="content_description_send_message">Envoyer le message</string>
-    <string name="dialog_message_abort_invitation">Vous êtes sur le point d\'abandonner une invitation. Abandonner l\'invitation en cours\u00a0?</string>
     <string name="dialog_message_about_olvid">Vous utilisez Olvid pour Android\nVersion %1$s (build %2$d)\n\nAPI serveur\u00a0: %3$d\nSchéma DB moteur\u00a0: %4$d\nSchéma DB application\u00a0: %5$d\nApp démarrée depuis\u00a0: %6$s</string>
     <string name="dialog_message_about_olvid_extra_features">Vous utilisez Olvid pour Android\nVersion %1$s (build %2$d)\n\nAPI serveur\u00a0: %3$d\nSchéma DB moteur\u00a0: %4$d\nSchéma DB application\u00a0: %5$d\n\nFonctionnalités additionnelles\u00a0: %6$s\nApp démarrée depuis\u00a0: %7$s</string>
     <string name="dialog_message_contact_introduction">Souhaitez-vous présenter %1$s à %2$s\u00a0?</string>
@@ -62,7 +61,7 @@
     <string name="dialog_message_leave_group">Vous êtes sur le point de quitter le groupe %1$s. Les autres membres du groupe seront notifiés et vous cesserez de recevoir les messages envoyés à ce groupe.\n\nSouhaitez-vous effectivement quitter ce groupe\u00a0?</string>
     <string name="dialog_message_recreate_channels">Les canaux sécurisés entre vous et votre contact peuvent se désynchroniser. Si vous constatez que vos messages ne sont plus reçus par votre contact, recréer les canaux sécurisés peut corriger cela.\n\nSouhaitez-vous lancer la recréation des canaux sécurisés\u00a0?</string>
     <string name="dialog_message_restart_channel_establishment">Souhaitez-vous réellement redémarrer le protocole d\'établissement de canal de discussion sécurisé en cours ?</string>
-    <string name="dialog_title_abort_invitation">Interrompre l\'invitation\u00a0?</string>
+    <string name="dialog_title_abort_invitation">Voulez-vous vraiment abandonner ?</string>
     <string name="dialog_title_about_olvid">À propos d\'Olvid</string>
     <string name="dialog_title_contact_introduction">Présentation de contacts</string>
     <string name="dialog_title_delete_attachment">Supprimer la pièce jointe</string>
@@ -127,22 +126,23 @@
     <string name="invitation_label_their_code">Son code</string>
     <string name="invitation_label_your_code">Votre code</string>
     <string name="invitation_status_accept_invite">Invitation reçue</string>
+    <string name="invitation_status_accept_invite_from">%1$s aimerait discuter avec vous</string>
     <string name="invitation_status_description_accept_group_invite">Accepter cette invitation de %1$s ?</string>
     <string name="invitation_status_description_contact_or_mediator_deleted">Cette invitation provient d\'un utilisateur inconnu. Il est préférable de l\'ignorer.</string>
-    <string name="invitation_status_description_accept_invite">%1$s aimerait entrer en contact avec vous. Cliquez sur «\u00a0accepter\u00a0» si vous êtes d\'accord. Sinon, vous pouvez «\u00a0ignorer\u00a0».</string>
+    <string name="invitation_status_description_accept_invite">Si vous ignorez l\'invitation, aucune notification ne sera envoyée à %1$s.</string>
     <string name="invitation_status_description_accept_mediator_invite">%1$s souhaite vous mettre en relation avec %2$s. Accepter ?</string>
     <string name="invitation_status_description_accept_mediator_invite_deleted">Un contact inconnu souhaite vous mettre en relation avec %1$s. Il est recommandé de refuser\u00a0?</string>
-    <string name="invitation_status_description_enter_their_sas">Pour entrer en contact avec %1$s, vous devez lui communiquer votre code (%2$s) et saisir le sien.\n\nAssurez-vous que c\'est bien %1$s qui vous donne son code\u00a0: privilégiez le face-à-face ou un appel téléphonique (évitez absolument email, SMS ou toute autre messagerie électronique).</string>
-    <string name="invitation_status_description_give_him_sas">Vous avez entré le code de %1$s avec succès. Il ne vous reste plus qu\'à lui communiquer le votre (%2$s).\n\nPrivilégiez le face-à-face ou un appel téléphonique (évitez absolument email, SMS ou toute autre messagerie électronique).</string>
-    <string name="invitation_status_description_invite_accepted">Nous procédons à la création du canal sécurisé entre vous et %1$s. Merci de patienter…</string>
-    <string name="invitation_status_description_invite_sent">En attente de confirmation de la part de %1$s.</string>
+    <string name="invitation_status_description_enter_their_sas">Pour entrer en contact avec %1$s, transmettez-lui votre code et saisissez le sien.</string>
+    <string name="invitation_status_description_give_him_sas">Nous y sommes presque ! Transmettez votre code à %1$s.</string>
+    <string name="invitation_status_description_invite_accepted">Votre code et celui de %1$s seront bientôt disponibles.</string>
+    <string name="invitation_status_description_invite_sent">Veuillez attendre que %1$s accepte de discuter avec vous.</string>
     <string name="invitation_status_description_mediator_invite_accepted">En attente que %1$s accepte la mise en relation de %2$s.</string>
     <string name="invitation_status_description_mediator_invite_accepted_deleted">En attente que %1$s accepte la mise en relation.</string>
     <string name="invitation_status_exchange_sas">Échangez vos codes</string>
-    <string name="invitation_status_give_him_sas">Code confirmé</string>
+    <string name="invitation_status_exchange_sas_with">Donnez votre code à %1$s</string>
     <string name="invitation_status_group_invite">Invitation à un groupe</string>
-    <string name="invitation_status_invite_accepted">Invitation en cours</string>
-    <string name="invitation_status_invite_sent">Invitation en cours</string>
+    <string name="invitation_status_invite_accepted">Veuillez patienter</string>
+    <string name="invitation_status_invite_sent">En attente de %1$s</string>
     <string name="invitation_status_mediator_invite">Mise en relation</string>
     <string name="invitation_status_mediator_invite_accepted">Mise en relation acceptée</string>
     <string name="invitation_status_mediator_invite_information_sent">Vous avez présenté %1$s</string>
@@ -200,7 +200,7 @@
     <string name="message_discussion_no_channel">Vos messages seront automatiquement envoyés dès qu\'un canal sécurisé sera établi pour cette discussion. D\'ici là, ils resteront en attente.</string>
     <string name="message_error_first_or_last_name_needed">Veuillez saisir un prénom ou un nom.</string>
     <string name="message_error_trust_origin">Erreur lors de la récupération des sources de confiance</string>
-    <string name="message_user_invitation">%1$s vous invite à rejoindre son réseau sur Olvid. Pour accepter, cliquez le lien ci-dessous\u00a0:\n\n%2$s\n</string>
+    <string name="message_user_invitation">%1$s aimerait discuter avec vous sur Olvid. Pour accepter, utilisez le lien suivant :\n\n%2$s</string>
     <string name="message_user_invitation_subject">Rejoignez %1$s sur Olvid</string>
     <string name="message_wrong_code">Code incorrect</string>
     <string name="notification_action_accept">Accepter</string>
@@ -209,13 +209,13 @@
     <string name="notification_action_reply">Répondre</string>
     <string name="notification_channel_message_description">Notifications pour les nouveaux messages</string>
     <string name="notification_channel_message_name">Messages</string>
-    <string name="notification_content_exchange_sas">Votre code : %1$s</string>
+    <string name="notification_content_exchange_sas">Échangez vos codes avec %1$s</string>
     <string name="notification_content_group_invite">%1$s vous invite à une discussion de groupe</string>
     <string name="notification_content_mediator_invite">Présenté par %1$s</string>
     <string name="notification_public_title_exchange_sas">Échangez vos codes</string>
     <string name="notification_public_title_group_invitation">Invitation à rejoindre un groupe</string>
     <string name="notification_public_title_new_invitation">Invitation reçue</string>
-    <string name="notification_title_exchange_sas">Échangez votre code avec %1$s</string>
+    <string name="notification_title_exchange_sas">Plus qu\'une étape !</string>
     <string name="notification_title_group_invitation">Invitation au groupe %1$s</string>
     <string name="notification_title_unnamed_group_invitation">Invitation à un groupe sans nom</string>
     <string name="notification_title_new_invitation">Invitation de %1$s</string>
@@ -633,7 +633,7 @@
     <string name="button_label_add_contact">Ajouter un contact</string>
     <string name="button_label_add">Ajouter</string>
     <string name="text_explanation_warning_contact_already_known">%1$s fait déjà partie de vos contacts. L\'ajouter à nouveau permettra de re-valider son identité.</string>
-    <string name="toast_message_failed_to_invite_contact">Échec d\'invitation du contact, veuillez réessayer</string>
+    <string name="toast_message_failed_to_invite_contact">Échec d\'ajout du contact, veuillez réessayer</string>
     <string name="text_explanation_warning_cannot_invite_yourself">Vous ne pouvez pas ajouter votre propre ID à vos contacts\u00a0!</string>
     <string name="activity_title_license_activation">Activation de licence</string>
     <string name="label_current_api_key_status">Statut de votre licence actuelle</string>
@@ -1013,19 +1013,19 @@
     <string name="dialog_title_backup_requires_sign_in">Connexion à votre fournisseur cloud requise</string>
     <string name="dialog_message_backup_requires_sign_in">Vous avez configuré Olvid pour effectuer des sauvegardes automatiques vers un fournisseur cloud, mais votre session a expiré. Vous devez vous reconnecter à ce fournisseur.\n\nSi vous ne souhaitez plus profiter des sauvegardes automatiques, vous pouvez les désactiver dans les paramètres d\'Olvid. Gardez à l\'esprit que les sauvegardes automatiques sont le seul moyen d\'éviter la perte de vos contacts en cas de perte ou de panne de votre appareil.</string>
     <string name="button_label_sign_in">Connexion</string>
-    <string name="button_label_invite_contact">Inviter ce contact</string>
+    <string name="button_label_invite_contact">Entrer en contact à distance</string>
     <string name="text_explanation_mutual_scan_add_contact">Cliquez sur AJOUTER UN CONTACT pour ajouter %1$s à vos contacts.</string>
     <string name="text_explanation_warning_mutual_scan_direct">Assurez vous que le code QR que vous venez de scanner vous a bien été présenté par %1$s, directement sur son appareil, depuis l\'application Olvid.</string>
     <string name="text_explanation_warning_mutual_scan_contact_already_known">%1$s fait déjà partie de vos contacts.</string>
     <string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one">%1$s fait partie de votre liste d\'utilisateurs connus mais n\'est pas encore dans vos contacts.</string>
     <string name="label_new">Nouv.</string>
-    <string name="label_option_invite_locally">Option 1\u00a0: Inviter localement</string>
-    <string name="label_option_invite_remotely">Option 2\u00a0: Inviter à distance</string>
-    <string name="text_explanation_mutual_scan">Si %1$s est à côté de vous, faites lui scanner ce code QR pour l\'ajouter à vos contacts immédiatement.</string>
-    <string name="text_explanation_invite_add_contact">Envoyez une invitation à %1$s pour l\'ajouter à vos contacts à distance.</string>
+    <string name="label_option_invite_locally">Option 1 : en face à face</string>
+    <string name="label_option_invite_remotely">Option 2 : à distance</string>
+    <string name="text_explanation_mutual_scan">Faites scanner ce code QR à %1$s pour entrer en contact immédiatement.</string>
     <string name="text_explanation_invalid_mutual_scan_qr_code">Ce code QR ne peut pas être utilisé pour ajouter %1$s à vos contacts.\nVeuillez essayer à nouveau en vous assurant que %1$s scanne votre code QR avant que vous ne scanniez le sien.</string>
     <string name="label_loading_messages">Chargement des messages…</string>
-    <string name="text_explanation_mutual_scan_success">Ajout de contact initié.\n\nLe processus ne devrait prendre que quelques secondes si vous et %1$s êtes tous les deux connectés à internet.\n\nVous et %1$s pouvez maintenant quitter cet écran.</string>
+    <string name="text_explanation_mutual_scan_pending">%1$s s\'ajoutera a vos contacts dès que son appareil sera joignable.</string>
+    <string name="text_explanation_mutual_scan_success">%1$s fait maintenant partie de vos contacts 🙌 !</string>
     <string name="label_loading_contacts">Chargement des contacts…</string>
     <string name="content_description_authentication_browser_choice">Bouton de sélection du navigateur</string>
     <string name="toast_message_error_querying_for_available_browsers">Impossible de lister les navigateurs installés</string>
@@ -1304,7 +1304,7 @@
     <string name="invitation_status_description_one_to_one_invitation_sent">Vous avez invité %1$s à une discussion privée. Veuillez attendre que cette invitation soit acceptée, ou appuyez sur «\u00a0Abandonner\u00a0» pour annuler cette invitation.</string>
     <string name="invitation_status_description_one_to_one_invitation_sent_deleted">L\'utilisateur que vous avez invité à une discussion privée a été retiré de votre liste d\'utilisateurs connus. Vous pouvez appuyer sur «\u00a0Abandonner\u00a0» pour annuler cette invitation.</string>
     <string name="invitation_status_one_to_one_invitation">Invitation à une discussion privée</string>
-    <string name="invitation_status_description_one_to_one_invitation">%1$s vous invite à une discussion privée. Pour démarrer cette discussion et l\'ajouter à vos contacts, appuyez sur «\u00a0Accepter\u00a0».</string>
+    <string name="invitation_status_description_one_to_one_invitation">%1$s vous invite à une discussion privée.</string>
     <string name="toast_message_contact_removed">Contact retiré</string>
     <string name="dialog_title_remove_contact">Retirer un contact\u00a0?</string>
     <string name="dialog_message_remove_contact">Retirer %1$s de vos contacts mettra fin à votre discussion privée. Vous pourrez toutefois continuer à échanger des messages dans les discussions de groupes que vous avez en commun.</string>
@@ -1611,7 +1611,8 @@
     <string name="text_message_too_large_for_webclient">[Message trop long pour être affiché dans le client web]</string>
     <string name="text_invalid_shortcut">Raccourci invalide</string>
     <string name="text_feature_initiate_secure_calls_from_another_profile">Émettre des appels sécurisés\n(disponible grâce à un autre profil)</string>
-    <string name="dialog_title_confirm_open_link">Ouvrir ce lien dans votre navigateur\u00a0?</string>
+    <string name="dialog_title_confirm_open_link">Ouvrir ce lien dans votre navigateur ?</string>
+    <string name="dialog_title_confirm_open_olvid_link">Ouvrir ce lien dans Olvid ?</string>
     <string name="toast_message_unable_to_open_url">Impossible d\'ouvrir l\'URL</string>
     <string name="text_explanation_location_map_provider">Choisir un service de cartographie vous permet de sélectionner précisément la position que vous souhaitez partager sur une carte. Toutefois, cela peut divulguer votre position (ou celle de vos contacts) à ce fournisseur de service.</string>
     <string name="text_explanation_location_map_provider_settings">Ce choix peut être modifié dans les paramètres de l\'application.</string>
@@ -1917,6 +1918,11 @@
     <string name="dialog_title_authentication_failed_time_offset">Décalage d\'horloge possible ?</string>
     <string name="dialog_message_authentication_failed_time_offset">Malheureusement, l\'authentification a échoué.\n\nUne cause possible pourrait être un décalage de **plus de 10 minutes** entre l\'horloge de votre appareil et celle du serveur.\n\nVeuillez vérifier que l\'heure, la date et le fuseau horaire de votre appareils sont corrects et essayer de vous authentifier à nouveau.\n\n*Si le problème persiste, veuillez contacter votre administateur.*</string>
     <string name="button_label_clock_settings">Paramètres d\'horloge</string>
+    <string name="activity_title_get_in_contact">Entrer en contact</string>
+    <string name="button_label_discuss_with">Discuter avec %1$s</string>
+
+
+
 
 
     <plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity">

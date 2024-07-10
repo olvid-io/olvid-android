@@ -116,7 +116,7 @@ public class PlusButtonActivity extends LockableActivity implements EngineNotifi
     public void callback(String notificationName, HashMap<String, Object> userInfo) {
         if (EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED.equals(notificationName)) {
             if (plusButtonViewModel != null && plusButtonViewModel.getMutualScanUrl() != null) {
-                byte[] signature = (byte[]) userInfo.get(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_NONCE_KEY);
+                byte[] signature = (byte[]) userInfo.get(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_SIGNATURE_KEY);
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_BYTES_OWNED_IDENTITIY_KEY);
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED_BYTES_CONTACT_IDENTITIY_KEY);
 

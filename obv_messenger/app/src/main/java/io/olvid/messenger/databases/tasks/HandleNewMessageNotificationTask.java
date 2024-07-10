@@ -167,7 +167,6 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             if (jsonDeleteDiscussion != null) {
-                // TODO: handle locked discussions: owned messages should search for the discussion instead of group/contact
                 if (putGroupV2OrOneToOneMessageOnHoldIfAppropriate(messageSender, jsonDeleteDiscussion.getGroupV2Identifier(), jsonDeleteDiscussion.getOneToOneIdentifier(), obvMessage)) {
                     return;
                 }
@@ -1298,10 +1297,19 @@ public class HandleNewMessageNotificationTask implements Runnable {
         // this allows to properly delete locked discussions too
         // for other messages, check the group/contact exists
         if (bytesGroupIdentifier != null) {
-            if ((messageSender.type == MessageSender.Type.OWNED_IDENTITY
-                    && db.discussionDao().getByGroupIdentifierWithAnyStatus(messageSender.bytesOwnedIdentity, bytesGroupIdentifier) == null)
-                || (messageSender.type == MessageSender.Type.CONTACT
-                    && db.group2Dao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier) == null)) {
+            final boolean putOnHold;
+            if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                putOnHold = db.discussionDao().getByGroupIdentifierWithAnyStatus(messageSender.bytesOwnedIdentity, bytesGroupIdentifier) == null;
+            } else {
+                Group2 group2 = db.group2Dao().get(messageSender.bytesOwnedIdentity, bytesGroupIdentifier);
+                if (group2 == null) {
+                    putOnHold = true;
+                } else {
+                    putOnHold = !db.group2Dao().isContactAMemberOrPendingMember(messageSender.bytesOwnedIdentity, bytesGroupIdentifier, messageSender.getSenderIdentity());
+                }
+            }
+
+            if (putOnHold) {
                 if (obvMessage.getLocalDownloadTimestamp() < System.currentTimeMillis() - GROUP_V2_MESSAGES_TTL) {
                     // if message is too old, do not put it on hold and let it be discarded
                     return false;
@@ -1363,7 +1371,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
         return false;
     }
 
-    // this method is called right after a groupV2 is created
+    // this method is called right after a groupV2 is created, or when new [pending] members are added
     public static void processAllGroupV2MessagesOnHold(@NonNull Engine engine, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier) {
         synchronized (pendingGroupV2Messages) {
             BytesKey ownedIdentityBytesKey = new BytesKey(bytesOwnedIdentity);

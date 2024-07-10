@@ -249,6 +249,20 @@ public interface Group2Dao {
             " WHERE " + Group2.CUSTOM_PHOTO_URL + " IS NOT NULL")
     List<String> getAllCustomPhotoUrls();
 
+    @Query("SELECT EXISTS (" +
+            "SELECT 1 FROM " + Group2Member.TABLE_NAME +
+            " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+            " AND " + Group2Member.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
+            ") " +
+            " OR EXISTS (" +
+            "SELECT 1 FROM " + Group2PendingMember.TABLE_NAME +
+            " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+            " AND " + Group2PendingMember.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
+            ")")
+    boolean isContactAMemberOrPendingMember(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, byte[] bytesContactIdentity);
+
 
     class GroupOrGroup2 {
         @Embedded(prefix = "group_")

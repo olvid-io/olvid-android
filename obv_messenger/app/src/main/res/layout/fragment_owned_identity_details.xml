@@ -41,6 +41,7 @@
         android:hint="@string/hint_profile_nickname"
         android:ems="8"
         android:imeOptions="flagNoPersonalizedLearning"
+        android:importantForAutofill="no"
         android:inputType="textCapWords|textPersonName"
         android:layout_marginStart="16dp"
         android:textSize="16dp"
@@ -51,8 +52,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/hidden_profile_checkbox"
         tools:visibility="visible"
-        tools:ignore="SpUsage"
-        android:autofillHints="name" />
+        tools:ignore="SpUsage"/>
 
     <CheckBox
         android:id="@+id/hidden_profile_checkbox"

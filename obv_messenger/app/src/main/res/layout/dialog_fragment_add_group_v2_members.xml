@@ -50,7 +50,7 @@
                     android:layout_marginEnd="12dp"
                     android:drawableEnd="@drawable/ic_search"
                     android:hint="@string/hint_contact_name"
-                    android:autofillHints="name"
+                    android:importantForAutofill="no"
                     android:imeOptions="actionDone"
                     android:inputType="textNoSuggestions|textFilter"
                     android:selectAllOnFocus="true"

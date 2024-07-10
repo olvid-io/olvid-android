@@ -105,6 +105,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
                 value = onboardingFlowViewModel.firstName,
                 onValueChange = onboardingFlowViewModel::updateFirstName,
                 textStyle = TextStyle(fontSize = 20.sp),
+                singleLine = true,
                 label = {
                     Text(text = stringResource(id = string.hint_first_name))
                 },
@@ -116,6 +117,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
                 value = onboardingFlowViewModel.lastName,
                 onValueChange = onboardingFlowViewModel::updateLastName,
                 textStyle = TextStyle(fontSize = 20.sp),
+                singleLine = true,
                 label = {
                     Text(
                         text = stringResource(id = string.hint_last_name)

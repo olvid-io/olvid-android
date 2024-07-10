@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.datatypes.Constants;
@@ -474,6 +475,7 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
             {
                 // verify the signature is fresh
                 if (MutualScanSignatureReceived.exists(protocolManagerSession, getOwnedIdentity(), receivedMessage.signature)) {
+                    Logger.e("Mutual scan signature reuse!");
                     return new FinishedState();
                 }
             }
@@ -655,6 +657,15 @@ public class TrustEstablishmentWithMutualScanProtocol extends ConcreteProtocol {
                 }
             }
 
+            {
+                // send a notification so the app can automatically open the contact discussion
+                protocolManagerSession.session.addSessionCommitListener(() -> {
+                    HashMap<String, Object> userInfo = new HashMap<>();
+                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_OWNED_IDENTITY_KEY, getOwnedIdentity());
+                    userInfo.put(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED_CONTACT_IDENTITY_KEY, startState.bobIdentity);
+                    protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_MUTUAL_SCAN_CONTACT_ADDED, userInfo);
+                });
+            }
             return new FinishedState();
         }
     }

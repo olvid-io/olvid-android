@@ -1,3 +1,9 @@
+# Build 249 (3.1)
+2024-07-10
+
+- Fix a crash wish URL truncation
+- Improve double-scan and invitation contact addition flows 
+
 # Build 248 (3.0)
 2024-07-05
 

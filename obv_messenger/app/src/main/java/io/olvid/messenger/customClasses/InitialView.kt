@@ -584,6 +584,17 @@ class InitialView : View {
         init()
     }
 
+    fun reset() {
+        bytes = null
+        bitmap = null
+        keycloakCertified = false
+        locked = false
+        inactive = false
+        notOneToOne = false
+        recentlyOnline = true
+        contactTrustLevel = null
+    }
+
     fun setKeycloakCertified(keycloakCertified: Boolean) {
         if (this.keycloakCertified != keycloakCertified) {
             bitmap = null

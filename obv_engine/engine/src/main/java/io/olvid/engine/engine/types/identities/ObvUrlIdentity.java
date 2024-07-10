@@ -32,7 +32,7 @@ public class ObvUrlIdentity {
     public static final String URL_PROTOCOL_OLVID = "olvid";
     public static final String URL_INVITATION_HOST = "invitation.olvid.io";
 
-    private static final Pattern INVITATION_PATTERN = Pattern.compile("(" + URL_PROTOCOL + "|" + URL_PROTOCOL_OLVID + ")" + Pattern.quote("://" + URL_INVITATION_HOST) + "/[#]?([-_a-zA-Z0-9]+)");
+    private static final Pattern INVITATION_PATTERN = Pattern.compile("(" + URL_PROTOCOL + "|" + URL_PROTOCOL_OLVID + ")" + Pattern.quote("://" + URL_INVITATION_HOST) + "/1?#([-_a-zA-Z0-9]+)");
 
     public final Identity identity;
     public final String displayName;

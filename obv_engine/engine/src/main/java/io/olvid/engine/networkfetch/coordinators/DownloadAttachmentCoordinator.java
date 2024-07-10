@@ -230,7 +230,6 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                 break;
             }
             case DownloadAttachmentOperation.RFC_INVALID_SIGNED_URL: {
-                // TODO: refresh urls once per hour, at most
                 waitForRefreshedUrls(ownedIdentity, messageUid, attachmentNumber, priorityCategory, initialPriority);
                 refreshInboxAttachmentSignedUrlDelegate.refreshInboxAttachmentSignedUrl(ownedIdentity, messageUid, attachmentNumber);
                 break;

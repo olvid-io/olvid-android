@@ -164,7 +164,7 @@ public class Utils {
     }
 
     private static boolean endsWithIgnoreCase(@NonNull String source, @NonNull String suffix) {
-        return source.substring(source.length() - suffix.length()).equalsIgnoreCase(suffix);
+        return source.regionMatches(true, source.length() - suffix.length(), suffix, 0, suffix.length());
     }
 
     private static void applyMentionSpans(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull Message message, SpannableString result) {

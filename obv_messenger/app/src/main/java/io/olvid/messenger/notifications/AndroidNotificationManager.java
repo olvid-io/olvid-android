@@ -1355,7 +1355,7 @@ public class AndroidNotificationManager {
                     // We do not have a photoUrl yet
                     initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(displayName));
                     builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_new_invitation, displayName));
-                    builder.setContentText(App.getContext().getString(R.string.invitation_status_accept_invite));
+                    builder.setContentText(invitation.getStatusText());
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_new_invitation));
                     break;
                 }
@@ -1367,10 +1367,10 @@ public class AndroidNotificationManager {
                     } catch (Exception e) {
                         return;
                     }
-                    // We do not have a photoUrl yet
+                    // We probably do not have a photoUrl yet
                     initialView.setInitial(invitation.associatedDialog.getCategory().getBytesContactIdentity(), StringUtils.getInitial(displayName));
-                    builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_exchange_sas, displayName));
-                    builder.setContentText(App.getContext().getResources().getString(R.string.notification_content_exchange_sas, new String(invitation.associatedDialog.getCategory().getSasToDisplay(), StandardCharsets.UTF_8)));
+                    builder.setContentTitle(App.getContext().getResources().getString(R.string.notification_title_exchange_sas));
+                    builder.setContentText(App.getContext().getResources().getString(R.string.notification_content_exchange_sas, displayName));
                     publicBuilder.setContentTitle(App.getContext().getResources().getString(R.string.notification_public_title_exchange_sas));
                     break;
                 }

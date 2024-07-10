@@ -1023,6 +1023,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                 if (group2Member.contact != null) {
                     holder.initialView.setContact(group2Member.contact)
                 } else {
+                    holder.initialView.reset()
                     if (identityDetails != null) {
                         holder.initialView.setInitial(
                             group2Member.bytesContactIdentity,
@@ -1037,9 +1038,6 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                         holder.initialView.setUnknown()
                     }
                     holder.initialView.setKeycloakCertified(keycloakGroup)
-                    holder.initialView.setLocked(false)
-                    holder.initialView.setInactive(false)
-                    holder.initialView.setNullTrustLevel()
                 }
                 if (group2Member.contact != null && group2Member.contact.customDisplayName != null) {
                     holder.contactNameTextView.text = group2Member.contact.customDisplayName

@@ -30,9 +30,13 @@ import androidx.room.PrimaryKey;
 
 import java.util.UUID;
 
+import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.StringUtils;
+import io.olvid.messenger.settings.SettingsActivity;
 
 @SuppressWarnings("CanBeFinal")
 @Entity(tableName = Invitation.TABLE_NAME,
@@ -108,14 +112,29 @@ public class Invitation {
     @NonNull
     public String getStatusText() {
         switch (associatedDialog.getCategory().getId()) {
-            case ObvDialog.Category.INVITE_SENT_DIALOG_CATEGORY:
-                return App.getContext().getString(R.string.invitation_status_invite_sent);
+            case ObvDialog.Category.INVITE_SENT_DIALOG_CATEGORY: {
+                String shortName = StringUtils.removeCompanyFromDisplayName(associatedDialog.getCategory().getContactDisplayNameOrSerializedDetails());
+                return App.getContext().getString(R.string.invitation_status_invite_sent, shortName);
+            }
             case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
-                return App.getContext().getString(R.string.invitation_status_accept_invite);
+                try {
+                    String displayName = AppSingleton.getJsonObjectMapper()
+                            .readValue(associatedDialog.getCategory().getContactDisplayNameOrSerializedDetails(), JsonIdentityDetails.class)
+                            .formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName());
+                    return App.getContext().getString(R.string.invitation_status_accept_invite_from, displayName);
+                } catch (Exception ignored) {
+                    return App.getContext().getString(R.string.invitation_status_accept_invite);
+                }
             case ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY:
-                return App.getContext().getString(R.string.invitation_status_exchange_sas);
             case ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY:
-                return App.getContext().getString(R.string.invitation_status_give_him_sas);
+                try {
+                    String displayName = AppSingleton.getJsonObjectMapper()
+                            .readValue(associatedDialog.getCategory().getContactDisplayNameOrSerializedDetails(), JsonIdentityDetails.class)
+                            .formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName());
+                    return App.getContext().getString(R.string.invitation_status_exchange_sas_with, displayName);
+                } catch (Exception ignored) {
+                    return App.getContext().getString(R.string.invitation_status_exchange_sas);
+                }
             case ObvDialog.Category.INVITE_ACCEPTED_DIALOG_CATEGORY:
                 return App.getContext().getString(R.string.invitation_status_invite_accepted);
             case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:

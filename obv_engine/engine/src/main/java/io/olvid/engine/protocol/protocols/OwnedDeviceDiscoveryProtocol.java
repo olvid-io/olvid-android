@@ -432,6 +432,9 @@ public class OwnedDeviceDiscoveryProtocol extends ConcreteProtocol {
                         } else {
                             currentDevicePreKeyOnServer = null;
                         }
+                        if (!Objects.equals(oldDevice.serverDeviceInfo, signedPreKeyAndServerInfo.serverDeviceInfo)) {
+                            protocolManagerSession.identityDelegate.updateOwnedDevice(protocolManagerSession.session, getOwnedIdentity(), oldDevice.deviceUid, signedPreKeyAndServerInfo.serverDeviceInfo.displayName, signedPreKeyAndServerInfo.serverDeviceInfo.expirationTimestamp, signedPreKeyAndServerInfo.serverDeviceInfo.lastRegistrationTimestamp, null);
+                        }
                         continue;
                     }
 

@@ -144,10 +144,6 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     if (groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
                         thereAreNewMembersWithChangeSettingsPermissionChanged = true;
                     }
-                    // after the commit, process all pending messages for this group
-                    runAfterTransaction.add(() -> {
-                       HandleNewMessageNotificationTask.processAllGroupV2MessagesOnHold(AppSingleton.getEngine(), groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
-                    });
                 } else {
                     // if it exists, update any field that might have changed
                     group.name = groupName;
@@ -365,6 +361,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 final HashMap<BytesKey, String> memberBytesIdentityToKeycloakUserIdMap = new HashMap<>();
                 final HashMap<BytesKey, String> pendingMemberBytesIdentityToKeycloakUserIdMap = new HashMap<>();
                 boolean keycloakGroup = groupV2.groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK;
+                boolean membersWereAdded = false;
 
                 if (keycloakGroup) {
                     for (BytesKey key : membersToAdd.keySet()) {
@@ -452,6 +449,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                                 Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, key.bytes);
                                 db.messageDao().insert(groupJoinedMessage);
                             }
+                            membersWereAdded = true;
                         }
 
                         if (contact.hasChannelOrPreKey()) {
@@ -530,7 +528,16 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                             Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, obvGroupV2PendingMember.bytesIdentity);
                             db.messageDao().insert(groupJoinedMessage);
                         }
+                        membersWereAdded = true;
                     }
+                }
+
+                if (membersWereAdded) {
+                    // after the commit, process all pending messages for this group as some messages
+                    // for this group (when first joining) or from new members (when updating) may be on hold
+                    runAfterTransaction.add(() -> {
+                        HandleNewMessageNotificationTask.processAllGroupV2MessagesOnHold(AppSingleton.getEngine(), groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
+                    });
                 }
 
 

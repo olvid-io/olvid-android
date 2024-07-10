@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.olvid.engine.Logger;
@@ -48,6 +49,7 @@ import io.olvid.messenger.R;
 public class StringUtils {
 
     public static final Pattern unAccentPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+    public static final Pattern positionAndCompanyPattern = Pattern.compile("^([^(]+) \\(.+\\)$");
 
     public static String getNiceDurationString(Context context, long duration) {
         if (duration < 60) {
@@ -145,6 +147,14 @@ public class StringUtils {
             modifier = (offset < name.length())?name.codePointAt(offset):0;
         } while ((glue == 0x200d) || ((0x1f3fb <= modifier) && (modifier <= 0x1f3ff)));
         return name.substring(0, offset).toUpperCase(Locale.getDefault());
+    }
+
+    public static String removeCompanyFromDisplayName(@NonNull String displayName) {
+        Matcher matcher = positionAndCompanyPattern.matcher(displayName);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return displayName;
     }
 
     public static boolean isShortEmojiString(String text, int maxLength) {
@@ -276,10 +286,10 @@ public class StringUtils {
     }
 
 
-    private static final String DATA_DIR = Environment.getDataDirectory().toString();
 
     // used to validate an externally received Uri and make sure it does not point to an internal file
     public static boolean validateUri(Uri uri) {
+        String DATA_DIR = Environment.getDataDirectory().toString();
         boolean valid = false;
         if (uri != null && uri.getPath() != null) {
             try {

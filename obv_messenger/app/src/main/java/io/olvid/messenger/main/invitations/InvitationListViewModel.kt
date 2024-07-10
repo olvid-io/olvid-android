@@ -85,85 +85,85 @@ class InvitationListViewModel : ViewModel() {
 
     fun initialViewSetup(initialView: InitialView, invitation: Invitation) {
         val dialog = invitation.associatedDialog
-        var invitationName: CharSequence?
+        initialView.reset()
         when (dialog.category.id) {
             Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY -> {
                 initialView.setGroup(dialog.category.bytesGroupOwnerAndUid)
             }
+
             Category.GROUP_V2_INVITATION_DIALOG_CATEGORY, Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY -> {
                 initialView.setGroup(dialog.category.obvGroupV2.groupIdentifier.bytes)
             }
-            else -> {
-                when (dialog.category.id) {
-                    Category.INVITE_SENT_DIALOG_CATEGORY -> {
-                        invitationName =
-                            AppSingleton.getContactCustomDisplayName(invitation.associatedDialog.category.bytesContactIdentity)
-                        if (invitationName != null) {
-                            initialView.setFromCache(invitation.associatedDialog.category.bytesContactIdentity)
-                        } else {
-                            invitationName =
-                                invitation.associatedDialog.category.contactDisplayNameOrSerializedDetails
-                            initialView.setInitial(
-                                invitation.associatedDialog.category.bytesContactIdentity,
-                                StringUtils.getInitial(invitationName.toString())
-                            )
-                        }
-                    }
-                    Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY -> {
-                        initialView.setFromCache(invitation.associatedDialog.category.bytesContactIdentity)
-                    }
-                    Category.SAS_EXCHANGE_DIALOG_CATEGORY,
-                    Category.SAS_CONFIRMED_DIALOG_CATEGORY,
-                    Category.ACCEPT_INVITE_DIALOG_CATEGORY,
-                    Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY,
-                    Category.INVITE_ACCEPTED_DIALOG_CATEGORY,
-                    Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY -> {
-                        invitationName = try {
-                            val identityDetails =
-                                AppSingleton.getJsonObjectMapper().readValue(
-                                    invitation.associatedDialog.category.contactDisplayNameOrSerializedDetails,
-                                    JsonIdentityDetails::class.java
-                                )
-                            identityDetails.formatDisplayName(
-                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
-                            )
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            null
-                        }
-                        initialView.setNullTrustLevel()
-                        initialView.setInitial(
-                            invitation.associatedDialog.category.bytesContactIdentity,
-                            StringUtils.getInitial(
-                                invitationName?.toString() ?: ""
-                            )
-                        )
-                    }
-                    else -> {
-                        invitationName = try {
-                            val identityDetails =
-                                AppSingleton.getJsonObjectMapper().readValue(
-                                    invitation.associatedDialog.category.contactDisplayNameOrSerializedDetails,
-                                    JsonIdentityDetails::class.java
-                                )
-                            identityDetails.formatDisplayName(
-                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
-                            )
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            null
-                        }
-                        initialView.setNullTrustLevel()
-                        initialView.setInitial(
-                            invitation.associatedDialog.category.bytesContactIdentity,
-                            StringUtils.getInitial(
-                                invitationName?.toString() ?: ""
-                            )
-                        )
-                    }
+
+            Category.INVITE_SENT_DIALOG_CATEGORY -> {
+                if (AppSingleton.getContactCustomDisplayName(invitation.associatedDialog.category.bytesContactIdentity) != null) {
+                    initialView.setFromCache(invitation.associatedDialog.category.bytesContactIdentity)
+                } else {
+                    val invitationName = invitation.associatedDialog.category.contactDisplayNameOrSerializedDetails
+                    initialView.setInitial(
+                        invitation.associatedDialog.category.bytesContactIdentity,
+                        StringUtils.getInitial(invitationName.toString())
+                    )
                 }
+            }
+
+            Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY -> {
+                initialView.setFromCache(invitation.associatedDialog.category.bytesContactIdentity)
+            }
+
+            Category.SAS_EXCHANGE_DIALOG_CATEGORY,
+            Category.SAS_CONFIRMED_DIALOG_CATEGORY,
+            Category.ACCEPT_INVITE_DIALOG_CATEGORY,
+            Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY,
+            Category.INVITE_ACCEPTED_DIALOG_CATEGORY,
+            Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY -> {
+                if (AppSingleton.getContactCustomDisplayName(invitation.associatedDialog.category.bytesContactIdentity) != null) {
+                    initialView.setFromCache(invitation.associatedDialog.category.bytesContactIdentity)
+                } else {
+                    val invitationName = try {
+                        val identityDetails =
+                            AppSingleton.getJsonObjectMapper().readValue(
+                                invitation.associatedDialog.category.contactDisplayNameOrSerializedDetails,
+                                JsonIdentityDetails::class.java
+                            )
+                        identityDetails.formatDisplayName(
+                            JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
+                            SettingsActivity.getUppercaseLastName()
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    }
+                    initialView.setInitial(
+                        invitation.associatedDialog.category.bytesContactIdentity,
+                        StringUtils.getInitial(
+                            invitationName ?: ""
+                        )
+                    )
+                }
+            }
+
+            else -> {
+                val invitationName = try {
+                    val identityDetails =
+                        AppSingleton.getJsonObjectMapper().readValue(
+                            invitation.associatedDialog.category.contactDisplayNameOrSerializedDetails,
+                            JsonIdentityDetails::class.java
+                        )
+                    identityDetails.formatDisplayName(
+                        JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
+                        SettingsActivity.getUppercaseLastName()
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+                initialView.setInitial(
+                    invitation.associatedDialog.category.bytesContactIdentity,
+                    StringUtils.getInitial(
+                        invitationName ?: ""
+                    )
+                )
             }
         }
     }
@@ -322,10 +322,6 @@ class InvitationListViewModel : ViewModel() {
                         identityDetails.formatDisplayName(
                             JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
                             SettingsActivity.getUppercaseLastName()
-                        ),
-                        String(
-                            associatedDialog.category.sasToDisplay,
-                            StandardCharsets.UTF_8
                         )
                     )
                 } catch (e: java.lang.Exception) {
@@ -345,10 +341,6 @@ class InvitationListViewModel : ViewModel() {
                         identityDetails.formatDisplayName(
                             JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
                             SettingsActivity.getUppercaseLastName()
-                        ),
-                        String(
-                            associatedDialog.category.sasToDisplay,
-                            StandardCharsets.UTF_8
                         )
                     )
                 } catch (e: java.lang.Exception) {
@@ -615,8 +607,7 @@ class InvitationListViewModel : ViewModel() {
                         val builder =
                             Builder(context, R.style.CustomAlertDialog)
                                 .setTitle(R.string.dialog_title_abort_invitation)
-                                .setMessage(context.getString(R.string.dialog_message_abort_invitation))
-                                .setPositiveButton(R.string.button_label_ok) { _, _ ->
+                                .setPositiveButton(R.string.button_label_abort) { _, _ ->
                                     try {
                                         AppSingleton.getEngine()
                                             .abortProtocol(invitation.associatedDialog)
@@ -631,7 +622,6 @@ class InvitationListViewModel : ViewModel() {
                         val builder =
                             Builder(context, R.style.CustomAlertDialog)
                                 .setTitle(R.string.dialog_title_abort_invitation)
-                                .setMessage(context.getString(R.string.dialog_message_abort_invitation))
                                 .setPositiveButton(R.string.button_label_ok) { _, _ ->
                                     try {
                                         val obvDialog = invitation.associatedDialog
@@ -663,6 +653,7 @@ fun Invitation.getAnnotatedTitle(context: Context): AnnotatedString {
                     e.printStackTrace()
                 }
             }
+
             Category.GROUP_V2_INVITATION_DIALOG_CATEGORY, Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY -> {
                 try {
                     val groupDetails = AppSingleton.getJsonObjectMapper().readValue(
@@ -684,59 +675,58 @@ fun Invitation.getAnnotatedTitle(context: Context): AnnotatedString {
                     e.printStackTrace()
                 }
             }
-            else -> {
-                when (associatedDialog.category.id) {
-                    Category.INVITE_SENT_DIALOG_CATEGORY -> {
-                        append(
-                            AppSingleton.getContactCustomDisplayName(associatedDialog.category.bytesContactIdentity)
-                                ?: associatedDialog.category.contactDisplayNameOrSerializedDetails
-                        )
-                    }
-                    Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY -> {
-                        append(
-                            AppSingleton.getContactCustomDisplayName(associatedDialog.category.bytesContactIdentity)
-                                ?: context.getString(R.string.text_deleted_contact)
-                        )
-                    }
-                    Category.SAS_EXCHANGE_DIALOG_CATEGORY,
-                    Category.SAS_CONFIRMED_DIALOG_CATEGORY,
-                    Category.ACCEPT_INVITE_DIALOG_CATEGORY,
-                    Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY,
-                    Category.INVITE_ACCEPTED_DIALOG_CATEGORY,
-                    Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY -> {
-                        try {
-                            AppSingleton.getJsonObjectMapper().readValue(
-                                associatedDialog.category.contactDisplayNameOrSerializedDetails,
-                                JsonIdentityDetails::class.java
-                            ).formatDisplayName(
-                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
-                            )
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            null
-                        }?.let {
-                            append(it)
-                        }
-                    }
-                    else -> {
-                        try {
-                            AppSingleton.getJsonObjectMapper().readValue(
-                                associatedDialog.category.contactDisplayNameOrSerializedDetails,
-                                JsonIdentityDetails::class.java
-                            ).formatDisplayName(
-                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
-                            )
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            null
-                        }?.let { append(it) }
-                    }
+
+            Category.INVITE_SENT_DIALOG_CATEGORY -> {
+                append(
+                    AppSingleton.getContactCustomDisplayName(associatedDialog.category.bytesContactIdentity)
+                        ?: associatedDialog.category.contactDisplayNameOrSerializedDetails
+                )
+            }
+
+            Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY -> {
+                append(
+                    AppSingleton.getContactCustomDisplayName(associatedDialog.category.bytesContactIdentity)
+                        ?: context.getString(R.string.text_deleted_contact)
+                )
+            }
+
+            Category.SAS_EXCHANGE_DIALOG_CATEGORY,
+            Category.SAS_CONFIRMED_DIALOG_CATEGORY,
+            Category.ACCEPT_INVITE_DIALOG_CATEGORY,
+            Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY,
+            Category.INVITE_ACCEPTED_DIALOG_CATEGORY,
+            Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY -> {
+                try {
+                    AppSingleton.getJsonObjectMapper().readValue(
+                        associatedDialog.category.contactDisplayNameOrSerializedDetails,
+                        JsonIdentityDetails::class.java
+                    ).formatDisplayName(
+                        JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
+                        SettingsActivity.getUppercaseLastName()
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }?.let {
+                    append(it)
                 }
             }
-        }
 
+            else -> {
+                try {
+                    AppSingleton.getJsonObjectMapper().readValue(
+                        associatedDialog.category.contactDisplayNameOrSerializedDetails,
+                        JsonIdentityDetails::class.java
+                    ).formatDisplayName(
+                        JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
+                        SettingsActivity.getUppercaseLastName()
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }?.let { append(it) }
+            }
+        }
     }
 }
 
