@@ -54,7 +54,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -78,7 +78,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -92,6 +91,7 @@ import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.Utils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -124,7 +124,7 @@ fun AppVersionHeader(betaEnabled: Boolean) {
                 uptime
             )).formatMarkdown(),
             color = colorResource(id = color.almostBlack),
-            fontSize = 16.sp,
+            style = OlvidTypography.body1,
         )
     }
 }
@@ -186,7 +186,7 @@ fun FaqLinkHeader(openFaq: () -> Unit, onBack: () -> Unit) {
                 modifier = Modifier.weight(1f, true),
                 text = stringResource(id = string.troubleshooting_faq_description),
                 color = colorResource(id = color.almostBlack),
-                fontSize = 16.sp,
+                style = OlvidTypography.body1,
             )
         }
 
@@ -198,9 +198,7 @@ fun FaqLinkHeader(openFaq: () -> Unit, onBack: () -> Unit) {
                 text = stringResource(id = R.string.troubleshooting_faq_link),
                 spanStyle = SpanStyle(color = colorResource(id = color.olvid_gradient_light))
             ),
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontWeight = FontWeight(400),
+            style = OlvidTypography.body2.copy(
                 color = Color(0xFF8B8D97),
                 textAlign = TextAlign.Center
             )
@@ -278,8 +276,7 @@ fun TroubleShootItem(
                             .align(CenterVertically),
                         text = if (valid) title else titleInvalid ?: title,
                         color = colorResource(id = color.almostBlack),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Normal,
+                        style = OlvidTypography.body1,
                     )
                     Image(
                         modifier = Modifier
@@ -318,7 +315,7 @@ fun TroubleShootItem(
                             .align(CenterVertically)
                             .clickable(
                                 interactionSource = interactionSource,
-                                indication = rememberRipple(bounded = false)
+                                indication = ripple(bounded = false)
                             ) { coroutineScope.launch { checkState.updateMute(mute.not()) } },
                         painter = painterResource(id = drawable.ic_notification_muted),
                         colorFilter = ColorFilter.tint(colorResource(id = R.color.almostBlack)),

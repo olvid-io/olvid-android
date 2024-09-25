@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.storage.StorageManager;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
@@ -681,7 +682,7 @@ public class AppDialogShowActivity extends LockableActivity {
             case DIALOG_INTRODUCING_MULTI_DEVICE: {
                 SpannableString message = new SpannableString(getText(R.string.dialog_message_introducing_multi_device));
                 LinkifyCompat.addLinks(message, Linkify.WEB_URLS);
-                SpannableStringBuilder formattedMessage = Markdown.formatMarkdown(message);
+                SpannableStringBuilder formattedMessage = Markdown.formatMarkdown(message, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_introducing_multi_device)
                         .setMessage(formattedMessage)

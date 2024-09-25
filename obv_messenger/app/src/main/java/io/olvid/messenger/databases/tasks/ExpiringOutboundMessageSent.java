@@ -101,7 +101,7 @@ public class ExpiringOutboundMessageSent implements Runnable {
             // visibilityDuration
             if (jsonExpiration.getVisibilityDuration() != null && !alreadyWiped) {
                 sendExpirationIntent = true;
-                MessageExpiration messageExpiration = new MessageExpiration(message.id, System.currentTimeMillis() + jsonExpiration.getVisibilityDuration() * 1000L, retain);
+                MessageExpiration messageExpiration = new MessageExpiration(0, message.id, System.currentTimeMillis() + jsonExpiration.getVisibilityDuration() * 1000L, retain);
                 db.messageExpirationDao().insert(messageExpiration);
             }
         }
@@ -109,7 +109,7 @@ public class ExpiringOutboundMessageSent implements Runnable {
         // existenceDuration
         if (jsonExpiration.getExistenceDuration() != null) {
             sendExpirationIntent = true;
-            MessageExpiration messageExpiration = new MessageExpiration(message.id, System.currentTimeMillis() + jsonExpiration.getExistenceDuration()*1000L, false);
+            MessageExpiration messageExpiration = new MessageExpiration(0, message.id, System.currentTimeMillis() + jsonExpiration.getExistenceDuration()*1000L, false);
             db.messageExpirationDao().insert(messageExpiration);
         }
 

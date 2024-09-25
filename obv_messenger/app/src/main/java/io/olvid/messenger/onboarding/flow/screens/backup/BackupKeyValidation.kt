@@ -88,11 +88,16 @@ fun NavGraphBuilder.backupKeyValidation(
                     Text(
                         text = stringResource(id = R.string.hint_backup_key),
                         fontSize = 18.sp,
+                        lineHeight = 20.sp,
                         fontFamily = FontFamily(Typeface.MONOSPACE)
                     )
                 },
                 onValueChange = onboardingFlowViewModel::updateBackupSeed,
-                textStyle = TextStyle(fontSize = 18.sp, fontFamily = FontFamily(Typeface.MONOSPACE)),
+                textStyle = TextStyle(
+                    fontSize = 18.sp,
+                    lineHeight = 20.sp,
+                    fontFamily = FontFamily(Typeface.MONOSPACE)
+                ),
                 colors = TextFieldDefaults.outlinedTextFieldColors(focusedLabelColor = colorResource(id = R.color.olvid_gradient_contrasted), focusedBorderColor = colorResource(id = R.color.olvid_gradient_contrasted), cursorColor = colorResource(id = R.color.olvid_gradient_contrasted))
             )
         }

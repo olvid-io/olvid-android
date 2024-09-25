@@ -31,7 +31,7 @@ import android.text.style.LeadingMarginSpan
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-open class ListItemSpan(private val level: Int) :
+open class ListItemSpan(open val level: Int) :
     LeadingMarginSpan {
     private val paint = Paint()
     private val circle = RectF()

@@ -355,7 +355,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                     elapsedTimeBeforeDownload = 0;
                                 }
                                 long expirationTimestamp = obvMessage.getLocalDownloadTimestamp() + jsonExpiration.getExistenceDuration() * 1000L - elapsedTimeBeforeDownload;
-                                MessageExpiration messageExpiration = new MessageExpiration(message.id, expirationTimestamp, false);
+                                MessageExpiration messageExpiration = new MessageExpiration(0, message.id, expirationTimestamp, false);
                                 db.messageExpirationDao().insert(messageExpiration);
                                 sendExpireIntent = true;
                             }
@@ -505,7 +505,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                 elapsedTimeBeforeDownload = 0;
                             }
                             long expirationTimestamp = obvMessage.getLocalDownloadTimestamp() + jsonExpiration.getExistenceDuration() * 1000L - elapsedTimeBeforeDownload;
-                            MessageExpiration messageExpiration = new MessageExpiration(message.id, expirationTimestamp, false);
+                            MessageExpiration messageExpiration = new MessageExpiration(0, message.id, expirationTimestamp, false);
                             db.messageExpirationDao().insert(messageExpiration);
                             sendExpireIntent = true;
                         }
@@ -577,6 +577,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                             attachment.getNumber(),
                                             imageResolution
                                     );
+                                    if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                                        fyleMessageJoinWithStatus.wasOpened = true;
+                                    }
                                     db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                                     fyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, message);
                                     engine.markAttachmentForDeletion(attachment);
@@ -598,6 +601,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                             attachment.getNumber(),
                                             imageResolution
                                     );
+                                    if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                                        fyleMessageJoinWithStatus.wasOpened = true;
+                                    }
                                     db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                                     fyleMessageJoinWithStatusesToDownload.add(fyleMessageJoinWithStatus);
                                 }
@@ -622,6 +628,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                         attachment.getNumber(),
                                         imageResolution
                                 );
+                                if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                                    fyleMessageJoinWithStatus.wasOpened = true;
+                                }
                                 db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                                 fyleMessageJoinWithStatusesToDownload.add(fyleMessageJoinWithStatus);
                             }
@@ -658,7 +667,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                             && (AvailableSpaceHelper.getAvailableSpace() == null || AvailableSpaceHelper.getAvailableSpace() > fyleMessageJoinWithStatus.size))) {
                         AppSingleton.getEngine().downloadSmallAttachment(obvMessage.getBytesToIdentity(), fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
                         fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
-                        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
+                        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                     }
                 }
             }
@@ -839,7 +848,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 || !Objects.equals(oldVisibilityDuration, discussionCustomization.settingVisibilityDuration)
                 || !Objects.equals(oldExistenceDuration, discussionCustomization.settingExistenceDuration)) {
             // there was indeed a change save it and add a message in the discussion
-            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), messageSender.getSenderIdentity(), false, serverTimestamp);
+            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), messageSender.getSenderIdentity(), messageSender.type == MessageSender.Type.OWNED_IDENTITY, serverTimestamp);
             if (message != null) {
                 message.id = db.messageDao().insert(message);
                 db.discussionCustomizationDao().update(discussionCustomization);

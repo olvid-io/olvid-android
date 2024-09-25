@@ -25,6 +25,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -65,7 +68,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -74,7 +76,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -92,6 +93,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.databases.entity.Invitation
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.ABORT
@@ -106,6 +108,7 @@ import java.nio.charset.StandardCharsets
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InvitationListItem(
+    modifier: Modifier = Modifier,
     invitationListViewModel: InvitationListViewModel,
     invitation: Invitation?,
     title: AnnotatedString,
@@ -114,7 +117,7 @@ fun InvitationListItem(
     onClick: (action: Action, invitation: Invitation, lastSAS: String?) -> Unit,
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(8.dp),
         shape = RoundedCornerShape(16.dp),
@@ -156,8 +159,7 @@ fun InvitationListItem(
                     Text(
                         text = title,
                         color = colorResource(id = R.color.primary700),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = OlvidTypography.h3,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -166,7 +168,7 @@ fun InvitationListItem(
                         modifier = Modifier.padding(top = 2.dp),
                         text = date,
                         color = colorResource(id = R.color.grey),
-                        fontSize = 12.sp,
+                        style = OlvidTypography.subtitle1,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -193,7 +195,7 @@ fun InvitationListItem(
                 Text(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     text = it,
-                    fontSize = 14.sp,
+                    style = OlvidTypography.body2,
                     color = colorResource(id = R.color.grey)
                 )
             }
@@ -238,7 +240,7 @@ fun InvitationListItem(
                             text = stringResource(id = R.string.invitation_label_your_code),
                             maxLines = 1,
                             textAlign = TextAlign.Center,
-                            fontSize = 14.sp,
+                            style = OlvidTypography.body2,
                             fontWeight = FontWeight.Medium,
                             color = colorResource(
                                 id = R.color.grey
@@ -251,6 +253,7 @@ fun InvitationListItem(
                         BasicTextField(
                             modifier = Modifier.requiredWidth(with(LocalDensity.current) { 128.sp.toDp() } ),
                             value = myCode,
+                            enabled = false,
                             onValueChange = {},
                             decorationBox = {
                                 Row(
@@ -282,6 +285,8 @@ fun InvitationListItem(
                                 backgroundColor = accentColor.copy(alpha = 0.4f)
                             )
                             val sasInputField = remember { FocusRequester() }
+                            val interactionSource = remember { MutableInteractionSource() }
+                            val focused by interactionSource.collectIsFocusedAsState()
 
                             LaunchedEffect(invitationListViewModel.lastSas) {
                                 invitationListViewModel.lastSas?.let {
@@ -301,8 +306,10 @@ fun InvitationListItem(
                                             }
                                             false
                                         }
-                                        .focusRequester(sasInputField),
+                                        .focusRequester(sasInputField)
+                                        .focusable(false),
                                     value = sas,
+                                    interactionSource = interactionSource,
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Number,
@@ -333,7 +340,7 @@ fun InvitationListItem(
                                                 text = stringResource(id = R.string.invitation_label_their_code),
                                                 maxLines = 1,
                                                 textAlign = TextAlign.Center,
-                                                fontSize = 14.sp,
+                                                style = OlvidTypography.body2,
                                                 fontWeight = FontWeight.Medium,
                                                 color = colorResource(
                                                     id = R.color.grey
@@ -349,7 +356,8 @@ fun InvitationListItem(
                                                                 invitationListViewModel.lastSasDialogUUID == invitation.associatedDialog.uuid &&
                                                                 invitationListViewModel.lastTimestamp != invitation.invitationTimestamp,
                                                         index = index,
-                                                        text = sas.text
+                                                        text = sas.text,
+                                                        focused = focused
                                                     )
                                                     if (index != Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS - 1) {
                                                         Spacer(modifier = Modifier.width(4.dp))
@@ -366,7 +374,7 @@ fun InvitationListItem(
                                 text = stringResource(id = R.string.invitation_label_their_code),
                                 maxLines = 1,
                                 textAlign = TextAlign.Center,
-                                fontSize = 14.sp,
+                                style = OlvidTypography.body2,
                                 fontWeight = FontWeight.Medium,
                                 color = colorResource(
                                     id = R.color.grey
@@ -417,15 +425,14 @@ fun InvitationListItem(
                             color = colorResource(
                                 id = R.color.primary700
                             ),
-                            fontSize = 16.sp
+                            style = OlvidTypography.body1
                         )
                         ClickableText(
                             text = it,
-                            style = TextStyle(
+                            style = OlvidTypography.body2.copy(
                                 color = colorResource(
                                     id = R.color.primary700
-                                ),
-                                fontSize = 14.sp
+                                )
                             )
                         ) { offset ->
                             it.getStringAnnotations(
@@ -453,7 +460,9 @@ fun InvitationListItem(
             }
 
             // bottom buttons
-            Row(modifier = Modifier.padding(vertical = 4.dp).focusProperties { canFocus = false }) {
+            Row(modifier = Modifier
+                .padding(vertical = 4.dp)
+                .focusProperties { canFocus = false }) {
                 AnimatedVisibility(
                     visible = listOf(
                         Category.INVITE_SENT_DIALOG_CATEGORY,
@@ -592,12 +601,13 @@ private fun BoxedChar(
     modifier: Modifier = Modifier,
     error: Boolean,
     index: Int,
-    text: String
+    text: String,
+    focused: Boolean = true
 ) {
-    val isFocused = text.length == index
+    val isFocused = focused && (text.length == index)
     val char = when {
         index == text.length -> "_"
-        index > text.length -> ""
+        index > text.length -> " "
         else -> text[index].toString()
     }
     Text(

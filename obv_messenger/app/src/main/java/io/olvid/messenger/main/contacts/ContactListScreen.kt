@@ -78,9 +78,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
-import io.olvid.engine.Logger
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.R.color
@@ -89,6 +87,7 @@ import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
@@ -159,7 +158,7 @@ fun ContactListScreen(
                 Header(pagerState, tabs, coroutineScope, contactListViewModel, contacts)
                 HorizontalPager(
                     state = pagerState,
-                    beyondBoundsPageCount = if (contactListViewModel.keycloakManaged.value) 2 else 1
+                    beyondViewportPageCount = if (contactListViewModel.keycloakManaged.value) 2 else 1
                 ) { page ->
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -596,7 +595,7 @@ private fun KeycloakMissingCount(missingResults: Int?) {
                 ?: stringResource(id = string.text_keycloak_missing_some_search_result),
             color = colorResource(id = color.grey),
             textAlign = TextAlign.Center,
-            fontSize = 14.sp,
+            style = OlvidTypography.body2,
             fontStyle = FontStyle.Italic
         )
     }

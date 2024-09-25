@@ -21,6 +21,7 @@ package io.olvid.messenger.customClasses
 import android.content.Context
 import android.content.DialogInterface
 import android.text.InputType
+import android.text.Spannable
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.LinearLayout
@@ -129,7 +130,7 @@ class LocationIntegrationSelectorDialog(
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_view_message_and_input, null)
 
         val messageTextView = dialogView.findViewById<TextView>(R.id.dialog_message)
-        messageTextView.text = context.getString(R.string.dialog_message_custom_osm_url).formatMarkdown()
+        messageTextView.text = context.getString(R.string.dialog_message_custom_osm_url).formatMarkdown(Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         val textInputLayout = dialogView.findViewById<TextInputLayout>(R.id.dialog_text_layout)
         textInputLayout.setHint(R.string.hint_custom_osm_url)

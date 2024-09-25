@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -696,7 +697,7 @@ public class OwnedIdentityDetailsActivity extends LockableActivity implements Vi
             if (!prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION, false)) {
                 View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_view_message_and_checkbox, null);
                 TextView message = dialogView.findViewById(R.id.dialog_message);
-                message.setText(Markdown.formatMarkdown(getString(R.string.dialog_message_add_device_explanation)));
+                message.setText(Markdown.formatMarkdown(getString(R.string.dialog_message_add_device_explanation), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE));
                 CheckBox checkBox = dialogView.findViewById(R.id.checkbox);
                 checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     SharedPreferences.Editor editor = prefs.edit();

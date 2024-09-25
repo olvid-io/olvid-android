@@ -60,7 +60,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
@@ -73,6 +72,7 @@ import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.tasks.PropagateBookmarkedMessageChangeTask
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.gallery.FyleListItem
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
@@ -117,8 +117,7 @@ fun GlobalSearchScreen(
                         Text(
                             modifier = Modifier.padding(8.dp),
                             text = stringResource(id = R.string.global_search_result_contacts),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                            style = OlvidTypography.h2
                         )
                     }
                     items(it) { contact ->
@@ -136,8 +135,7 @@ fun GlobalSearchScreen(
                         Text(
                             modifier = Modifier.padding(8.dp),
                             text = stringResource(id = R.string.global_search_result_groups),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                            style = OlvidTypography.h2
                         )
                     }
                     items(it) { searchableDiscussion ->
@@ -156,8 +154,7 @@ fun GlobalSearchScreen(
                         Text(
                             modifier = Modifier.padding(8.dp),
                             text = stringResource(id = R.string.global_search_result_other_discussions),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                            style = OlvidTypography.h2
                         )
                     }
                     items(it) { searchableDiscussion ->
@@ -197,9 +194,8 @@ fun GlobalSearchScreen(
                     item {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = R.string.global_search_result_messages) + (globalSearchViewModel.messageLimitReachedCount?.let { count -> " (${it.size}/$count)" } ?: ""),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                            text = stringResource(id = R.string.global_search_result_messages) + (globalSearchViewModel.messageLimitReachedCount?.let { count -> " (${it.size}/$count)" } ?: " (${it.size})"),
+                            style = OlvidTypography.h2
                         )
                     }
                     items(it) { discussionAndMessage ->
@@ -216,9 +212,8 @@ fun GlobalSearchScreen(
                     item {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = R.string.global_search_result_attachments) + (globalSearchViewModel.attachmentLimitReachedCount?.let { count -> " (${it.size}/$count)" } ?: ""),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                            text = stringResource(id = R.string.global_search_result_attachments) + (globalSearchViewModel.attachmentLimitReachedCount?.let { _ -> " (${it.size}+)" } ?: " (${it.size})"),
+                            style = OlvidTypography.h2
                         )
                     }
                     items(it) { fyle ->
@@ -239,7 +234,7 @@ fun GlobalSearchScreen(
                                     modifier = Modifier.weight(1f),
                                     text = AppSingleton.getContactCustomDisplayName(fyle.message.senderIdentifier)
                                         ?: stringResource(id = R.string.text_deleted_contact),
-                                    fontSize = 14.sp,
+                                    style = OlvidTypography.body2,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     fontWeight = FontWeight.Medium
@@ -250,7 +245,7 @@ fun GlobalSearchScreen(
                                         context,
                                         fyle.message.timestamp
                                     ).toString(),
-                                    fontSize = 14.sp,
+                                    style = OlvidTypography.body2,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -290,8 +285,9 @@ fun GlobalSearchScreen(
                                                 App.openFyleInExternalViewer(
                                                     context,
                                                     fyle.fyleAndStatus,
-                                                    null
-                                                )
+                                                ) {
+                                                    fyle.fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
+                                                }
                                             }
                                         }
                                     )
@@ -438,7 +434,7 @@ private fun SearchResult(
                     ?: discussionAndMessage?.discussion?.getAnnotatedTitle(context)
                     ?: AnnotatedString(stringResource(id = R.string.text_deleted_contact)),
                 color = colorResource(id = R.color.primary700),
-                fontSize = 16.sp,
+                style = OlvidTypography.body1,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -468,7 +464,7 @@ private fun SearchResult(
                 Text(
                     text = globalSearchViewModel.highlight(it),
                     color = colorResource(id = R.color.greyTint),
-                    fontSize = 14.sp,
+                    style = OlvidTypography.body2,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -479,7 +475,7 @@ private fun SearchResult(
                 Text(
                     text = StringUtils.getLongNiceDateString(context, it) as String,
                     color = colorResource(id = R.color.grey),
-                    fontSize = 12.sp,
+                    style = OlvidTypography.subtitle1,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

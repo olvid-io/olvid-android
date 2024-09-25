@@ -44,12 +44,12 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import io.olvid.messenger.App
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
 
@@ -108,7 +108,7 @@ fun LinkListItem(fyleAndStatus: FyleAndStatus, onClick: () -> Unit, linkPreviewV
                 link.title?.let {
                     Text(
                         text = globalSearchViewModel.highlight(content = it),
-                        fontSize = 12.sp,
+                        style = OlvidTypography.subtitle1,
                         fontWeight = FontWeight.Bold,
                         color = colorResource(
                             id = color.greyTint
@@ -120,7 +120,7 @@ fun LinkListItem(fyleAndStatus: FyleAndStatus, onClick: () -> Unit, linkPreviewV
                 link.description?.let {
                     Text(
                         text = globalSearchViewModel.highlight(content = it),
-                        fontSize = 12.sp,
+                        style = OlvidTypography.subtitle1,
                         color = colorResource(
                             id = color.greyTint
                         ),

@@ -69,7 +69,7 @@ public class PreviewUtilsWithDrawables {
                     }
                     if (!imageResolution.equals(fyleMessageJoinWithStatus.imageResolution)) {
                         // we do not update the fyleMessageJoin resolution here, otherwise we won't notice the difference when computing the diffUtil from database
-                        // fyleMessageJoinWithStatus.imageResolution = imageResolution;
+                        fyleMessageJoinWithStatus.imageResolution = imageResolution;
                         AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateImageResolution(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, imageResolution);
                         App.runThread(new UpdateMessageImageResolutionsTask(fyleMessageJoinWithStatus.messageId));
                     }
@@ -111,7 +111,7 @@ public class PreviewUtilsWithDrawables {
                 }
                 if (!Objects.equals(fyleMessageJoinWithStatus.imageResolution, imageResolution)) {
                     // we do not update the fyleMessageJoin resolution here, otherwise we won't notice the difference when computing the diffUtil from database
-                    // fyleMessageJoinWithStatus.imageResolution = imageResolution;
+                    fyleMessageJoinWithStatus.imageResolution = imageResolution;
                     AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateImageResolution(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, imageResolution);
                     App.runThread(new UpdateMessageImageResolutionsTask(fyleMessageJoinWithStatus.messageId));
                 }

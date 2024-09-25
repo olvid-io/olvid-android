@@ -51,7 +51,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.ripple
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -78,15 +78,16 @@ import coil.compose.AsyncImage
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.InitialView
-import sh.calvin.reorderable.ReorderableItemScope
+import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DiscussionListItem(
     title: AnnotatedString,
     body: AnnotatedString,
-    date: AnnotatedString,
+    date: AnnotatedString?,
     initialViewSetup: (initialView: InitialView) -> Unit,
     @ColorInt customColor: Int = 0x00ffffff,
     backgroundImageUrl: String? = null,
@@ -101,7 +102,7 @@ fun DiscussionListItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     selected: Boolean = false,
-    reorderableItemScope: ReorderableItemScope? = null,
+    reorderableScope: ReorderableCollectionItemScope? = null,
     onDragStopped: () -> Unit,
 ) {
     Box(
@@ -133,7 +134,7 @@ fun DiscussionListItem(
                     interactionSource = remember {
                         MutableInteractionSource()
                     },
-                    indication = rememberRipple().takeIf { selected.not() }
+                    indication = ripple().takeIf { selected.not() }
                 ), verticalAlignment = CenterVertically
         ) {
             // custom color
@@ -197,8 +198,7 @@ fun DiscussionListItem(
                 Text(
                     text = title,
                     color = colorResource(id = R.color.primary700),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
+                    style = OlvidTypography.h3,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -206,19 +206,21 @@ fun DiscussionListItem(
                 Text(
                     text = body,
                     color = colorResource(id = R.color.greyTint),
-                    fontSize = 14.sp,
+                    style = OlvidTypography.body1,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 // Date
-                Text(
-                    modifier = Modifier.padding(top = 2.dp),
-                    text = date,
-                    color = colorResource(id = R.color.grey),
-                    fontSize = 12.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                date?.let {
+                    Text(
+                        modifier = Modifier.padding(top = 2.dp),
+                        text = date,
+                        color = colorResource(id = R.color.grey),
+                        style = OlvidTypography.subtitle1,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
 
             // information
@@ -265,17 +267,17 @@ fun DiscussionListItem(
                                 )
                                 .padding(horizontal = 7.dp, vertical = 2.dp),
                             text = "$unreadCount",
-                            fontSize = 14.sp,
+                            style = OlvidTypography.body2,
                             color = colorResource(id = R.color.alwaysWhite)
                         )
                     }
                     AnimatedVisibility(
-                        visible = reorderableItemScope != null,
+                        visible = reorderableScope != null,
                         enter = slideInHorizontally { it / 2 },
                         exit = slideOutHorizontally { -it / 2 }) {
-                        reorderableItemScope?.let {
+                        reorderableScope?.let {
                             IconButton(
-                                modifier = with(reorderableItemScope) {
+                                modifier = with(reorderableScope) {
                                     Modifier.draggableHandle(onDragStopped = {
                                         onDragStopped()
                                     })
@@ -306,6 +308,7 @@ fun DiscussionListItem(
                             ),
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                             fontSize = 10.sp,
+                            lineHeight = 13.sp,
                             fontWeight = FontWeight.Medium,
                             color = colorResource(id = R.color.grey)
                         )

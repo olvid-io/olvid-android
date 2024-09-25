@@ -144,23 +144,23 @@ public class AudioAttachmentServiceBinding implements MediaPlayerService.Playbac
 
     public void playPause(@NonNull FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Long discussionId) {
         final BytesKey key = new BytesKey(fyleAndStatus.fyle.sha256);
-            if (mediaPlayerService != null) {
-                if (key.equals(nowPlaying)) {
-                    mediaPlayerService.playPause();
-                } else {
-                    long seekTimeMs = 0;
-                    AudioInfo audioInfo = loadedAttachments.get(key);
-                    if (audioInfo != null) {
-                        seekTimeMs = audioInfo.seekTimeMs;
-                        // if duration failed loading, retry loading it
-                        if (audioInfo.durationMs == null) {
-                            loadingAttachments.add(key);
-                            App.runThread(new LoadAudioAttachmentTask(key, fyleAndStatus));
-                        }
+        if (mediaPlayerService != null) {
+            if (key.equals(nowPlaying)) {
+                mediaPlayerService.playPause();
+            } else {
+                long seekTimeMs = 0;
+                AudioInfo audioInfo = loadedAttachments.get(key);
+                if (audioInfo != null) {
+                    seekTimeMs = audioInfo.seekTimeMs;
+                    // if duration failed loading, retry loading it
+                    if (audioInfo.durationMs == null) {
+                        loadingAttachments.add(key);
+                        App.runThread(new LoadAudioAttachmentTask(key, fyleAndStatus));
                     }
-                    mediaPlayerService.loadMedia(fyleAndStatus, discussionId, seekTimeMs);
                 }
+                mediaPlayerService.loadMedia(fyleAndStatus, discussionId, seekTimeMs);
             }
+        }
     }
 
 

@@ -21,8 +21,10 @@
 
 package io.olvid.messenger.customClasses
 
+import android.content.Context
 import android.graphics.Typeface
 import android.text.Editable
+import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
@@ -32,14 +34,21 @@ import android.text.style.TextAppearanceSpan
 import android.text.style.UnderlineSpan
 import android.util.SparseIntArray
 import android.widget.EditText
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextIndent
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import androidx.core.text.getSpans
-import androidx.core.text.toSpannable
 import io.olvid.engine.Logger
+import io.olvid.engine.datatypes.ObvBase64
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.spans.BlockQuoteSpan
@@ -47,6 +56,12 @@ import io.olvid.messenger.customClasses.spans.CodeBlockSpan
 import io.olvid.messenger.customClasses.spans.CodeSpan
 import io.olvid.messenger.customClasses.spans.ListItemSpan
 import io.olvid.messenger.customClasses.spans.OrderedListItemSpan
+import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.discussion.Utils
+import io.olvid.messenger.discussion.mention.MentionUrlSpan
+import io.olvid.messenger.discussion.message.INLINE_CONTENT_TAG
+import io.olvid.messenger.discussion.message.MENTION_ANNOTATION_TAG
+import io.olvid.messenger.discussion.message.QUOTE_BLOCK_START_ANNOTATION
 import io.olvid.messenger.settings.SettingsActivity
 import okhttp3.internal.indexOfFirstNonAsciiWhitespace
 import okhttp3.internal.indexOfLastNonAsciiWhitespace
@@ -107,7 +122,7 @@ class MarkdownItalic : StyleSpan(Typeface.ITALIC), MarkdownSpan {
     override val inline: Boolean = true
 }
 
-class MarkdownHeading(level: Int) : TextAppearanceSpan(
+class MarkdownHeading(val level: Int) : TextAppearanceSpan(
     SettingsActivity.overrideContextScales(App.getContext()), when (level) {
         1 -> R.style.Heading1
         2 -> R.style.Heading2
@@ -126,14 +141,14 @@ class MarkdownStrikeThrough : StrikethroughSpan(), MarkdownSpan {
     override val inline: Boolean = true
 }
 
-class MarkdownListItem(level: Int = 0) : ListItemSpan(level), MarkdownSpan {
+class MarkdownListItem(override val level: Int = 0) : ListItemSpan(level), MarkdownSpan {
     override val singleMarker: Boolean
         get() = true
     override val delimiter: String = MarkdownTag.LIST_ITEM.delimiter
 }
 
 class MarkdownOrderedListItem(
-    level: Int = 0,
+    override val level: Int = 0,
     number: String = MarkdownTag.ORDERED_LIST_ITEM.delimiter
 ) : OrderedListItemSpan(level, number), MarkdownSpan {
     override val singleMarker: Boolean
@@ -215,7 +230,7 @@ fun EditText.insertMarkdown(markdownSpan: MarkdownSpan?) {
     }
 }
 
-class Visitor(val editable: Editable, private val highlightColor: Int) : AbstractVisitor() {
+class Visitor(val editable: Editable, private val highlightColor: Int, private val spanFlag: Int) : AbstractVisitor() {
 
     private val lineOffsets = mutableListOf(0).apply {
         var offset = 0
@@ -232,7 +247,7 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
 
     override fun visit(emphasis: Emphasis) {
         super.visit(emphasis)
-        editable.setMarkdownSpanFromNode(MarkdownItalic(), emphasis, highlightColor, lineOffsets)
+        editable.setMarkdownSpanFromNode(MarkdownItalic(), emphasis, highlightColor, lineOffsets, spanFlag)
     }
 
     private val listCount = SparseIntArray()
@@ -249,13 +264,14 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
         if (listItem.isOrderedList()) {
             val count = listCount.get(
                 listItem.parent.hashCode(),
-                (listItem.parent as OrderedList).startNumber
+                (listItem.parent as OrderedList).markerStartNumber ?: 0
             )
             editable.setMarkdownSpanFromNode(
                 MarkdownOrderedListItem(listItem.listLevel(), "$count. "),
                 listItem,
                 highlightColor,
-                lineOffsets
+                lineOffsets,
+                spanFlag
             )
             listCount.put(listItem.parent.hashCode(), count + 1)
         } else {
@@ -263,7 +279,8 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
                 MarkdownListItem(listItem.listLevel()),
                 listItem,
                 highlightColor,
-                lineOffsets
+                lineOffsets,
+                spanFlag
             )
         }
     }
@@ -275,14 +292,14 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
     override fun visit(code: Code) {
         super.visit(code)
         editable.setMarkdownSpanFromNode(
-            MarkdownCode(), code, highlightColor, lineOffsets
+            MarkdownCode(), code, highlightColor, lineOffsets, spanFlag
         )
     }
 
     override fun visit(codeBlock: FencedCodeBlock) {
         super.visit(codeBlock)
         editable.setMarkdownSpanFromNode(
-            MarkdownCodeBlock(), codeBlock, highlightColor, lineOffsets
+            MarkdownCodeBlock(), codeBlock, highlightColor, lineOffsets, spanFlag
         )
     }
 
@@ -292,7 +309,8 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
             MarkdownBold(),
             strongEmphasis,
             highlightColor,
-            lineOffsets
+            lineOffsets,
+            spanFlag
         )
     }
 
@@ -303,7 +321,8 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
                 MarkdownQuote(),
                 blockQuote,
                 highlightColor,
-                lineOffsets
+                lineOffsets,
+                spanFlag
             )
         }
     }
@@ -312,7 +331,7 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
         super.visit(heading)
         if (heading.sourceSpans.first().length > heading.level && heading.level < 6) {
             editable.setMarkdownSpanFromNode(
-                MarkdownHeading(heading.level), heading, highlightColor, lineOffsets
+                MarkdownHeading(heading.level), heading, highlightColor, lineOffsets, spanFlag
             )
         }
     }
@@ -325,7 +344,8 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
                     MarkdownStrikeThrough(),
                     customNode,
                     highlightColor,
-                    lineOffsets
+                    lineOffsets,
+                    spanFlag
                 )
             }
         }
@@ -333,7 +353,7 @@ class Visitor(val editable: Editable, private val highlightColor: Int) : Abstrac
 }
 
 // highlightColor is for delimiters, 0 means no highlight and removes markdown delimiters
-fun Editable.formatMarkdown(highlightColor: Int) {
+fun Editable.formatMarkdown(highlightColor: Int, spanFlag: Int = SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE) {
     // clear spans
     getSpans<MarkdownSpan>().forEach {
         removeSpan(it)
@@ -341,7 +361,7 @@ fun Editable.formatMarkdown(highlightColor: Int) {
 
     // parse and set spans
     try {
-        parser.parse(this.toString()).accept(Visitor(this, highlightColor))
+        parser.parse(this.toString()).accept(Visitor(this, highlightColor, spanFlag))
     } catch (ex: Exception) {
         Logger.w("Markdown processing issue ${ex.message}")
     }
@@ -355,7 +375,7 @@ fun Editable.formatMarkdown(highlightColor: Int) {
                 }
                 removeSpan(it)
             }
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             clearSpans()
         }
@@ -366,7 +386,8 @@ private fun Editable.setMarkdownSpanFromNode(
     markdownSpan: MarkdownSpan,
     node: Node,
     highlightColor: Int,
-    lineOffsets: List<Int>
+    lineOffsets: List<Int>,
+    spanFlag: Int = SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
 ) {
     val lineSeparators = listOf('\r', '\n')
     when (node) {
@@ -377,19 +398,19 @@ private fun Editable.setMarkdownSpanFromNode(
                     markdownSpan,
                     sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex] + node.openingDelimiter.length,
                     sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex] + sourceSpan.length - node.closingDelimiter.length,
-                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                    spanFlag
                 )
                 setSpan(
                     MarkdownDelimiter(color = highlightColor),
                     sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex],
                     sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex] + node.openingDelimiter.length,
-                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                    spanFlag
                 )
                 setSpan(
                     MarkdownDelimiter(color = highlightColor),
                     sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex] + sourceSpan.length - node.closingDelimiter.length,
                     sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex] + sourceSpan.length,
-                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                    spanFlag
                 )
             }
         }
@@ -405,19 +426,19 @@ private fun Editable.setMarkdownSpanFromNode(
                     markdownSpan,
                     start + 1,
                     end - 1,
-                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                    spanFlag
                 )
                 setSpan(
                     MarkdownDelimiter(color = highlightColor),
                     start,
                     start + 1,
-                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                    spanFlag
                 )
                 setSpan(
                     MarkdownDelimiter(color = highlightColor),
                     end - 1,
                     end,
-                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                    spanFlag
                 )
             }
         }
@@ -425,27 +446,30 @@ private fun Editable.setMarkdownSpanFromNode(
         is FencedCodeBlock -> {
             node.sourceSpans.first().let { sourceSpan ->
                 val start = sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex]
-                val blockStart = node.sourceSpans[1].columnIndex + lineOffsets[node.sourceSpans[1].lineIndex]
+                val blockStart =
+                    node.sourceSpans[1].columnIndex + lineOffsets[node.sourceSpans[1].lineIndex]
                 val blockEnd = (blockStart + node.literal.length).coerceAtMost(length)
-                val end = (node.sourceSpans.last().columnIndex + lineOffsets[node.sourceSpans.last().lineIndex] + node.sourceSpans.last().length).coerceAtLeast(
-                    blockStart
-                )
-                val isClosed = node.sourceSpans.size > 1 && node.sourceSpans.last().length == node.fenceLength && substring(
-                    end - node.fenceLength,
-                    end
-                ) == node.fenceChar.toString().repeat(node.fenceLength)
+                val end =
+                    (node.sourceSpans.last().columnIndex + lineOffsets[node.sourceSpans.last().lineIndex] + node.sourceSpans.last().length).coerceAtLeast(
+                        blockStart
+                    )
+                val isClosed =
+                    node.sourceSpans.size > 1 && node.sourceSpans.last().length == node.fenceLength && substring(
+                        end - (node.openingFenceLength ?: 0),
+                        end
+                    ) == node.fenceChar.toString().repeat(node.openingFenceLength ?: 0)
                 setSpan(
                     MarkdownDelimiter(color = highlightColor),
                     start,
                     blockStart,
-                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                    spanFlag
                 )
                 if (isClosed) {
                     setSpan(
                         MarkdownDelimiter(color = highlightColor),
                         end - node.fenceLength,
                         end,
-                        SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                        spanFlag
                     )
                 }
                 if (node.sourceSpans.size > 1) {
@@ -453,7 +477,7 @@ private fun Editable.setMarkdownSpanFromNode(
                         markdownSpan,
                         blockStart,
                         blockEnd,
-                        SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                        spanFlag
                     )
                 }
             }
@@ -462,20 +486,27 @@ private fun Editable.setMarkdownSpanFromNode(
         is Heading -> {
             node.sourceSpans.first().let { sourceSpan ->
                 val start = sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex]
-                if (get(start).toString() == MarkdownTag.HEADING.delimiter) { // ensure heading is triggered by # and not underlying - or =
+                val delimiterStart = start + substring(start).indexOfFirstNonAsciiWhitespace()
+                if (get(delimiterStart).toString() == MarkdownTag.HEADING.delimiter) { // ensure heading is triggered by # and not underlying - or =
+                    val remainingString = substring(delimiterStart)
+                    val delimiterLength = remainingString.indexOfFirstWhitespace()
+                    val headingStart =
+                        (delimiterStart + delimiterLength + remainingString.substring(
+                            delimiterLength
+                        ).indexOfFirstNonAsciiWhitespace()
+                            .coerceAtLeast(0))
+                            .coerceAtMost(length)
                     setSpan(
                         markdownSpan,
-                        start + node.level + 1,
-                        (sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex] + sourceSpan.length).coerceAtLeast(
-                            start + node.level + 1
-                        ),
-                        SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                        headingStart,
+                        (start + sourceSpan.length).coerceAtLeast(headingStart),
+                        spanFlag
                     )
                     setSpan(
                         MarkdownDelimiter(color = highlightColor),
                         start,
-                        start + node.level + 1,
-                        SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                        headingStart,
+                        spanFlag
                     )
                 }
             }
@@ -490,7 +521,7 @@ private fun Editable.setMarkdownSpanFromNode(
                     (node.sourceSpans.last().columnIndex + lineOffsets[node.sourceSpans.last().lineIndex] + node.sourceSpans.last().length).coerceAtLeast(
                         start
                     ),
-                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                    spanFlag
                 )
             }
 
@@ -508,7 +539,7 @@ private fun Editable.setMarkdownSpanFromNode(
                                 '\u000C'
                             ).contains(it).not()
                         },
-                        SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                        spanFlag
                     )
                 }
                 if (index == node.sourceSpans.lastIndex && end < length && get(end) in lineSeparators) { // highlight last new line for deletion
@@ -516,7 +547,7 @@ private fun Editable.setMarkdownSpanFromNode(
                         MarkdownDelimiter(color = highlightColor),
                         end,
                         end + 1,
-                        SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                        spanFlag
                     )
                 }
             }
@@ -533,19 +564,22 @@ private fun Editable.setMarkdownSpanFromNode(
                             (sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex] + sourceSpan.length).coerceAtLeast(
                                 start
                             ),
-                            SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                            spanFlag
                         )
                     }
                     val delimiterStart = sourceSpan.columnIndex + lineOffsets[sourceSpan.lineIndex]
                     val remainingString = substring(delimiterStart)
-                    val delimiterLength = remainingString.indexOf(" ") + 1
+                    val delimiterLength =
+                        remainingString.indexOfFirstWhitespace(remainingString.indexOfFirstNonAsciiWhitespace())
                     setSpan(
                         MarkdownDelimiter(color = highlightColor),
                         delimiterStart,
-                        (delimiterStart + delimiterLength + remainingString.substring(delimiterLength).indexOfFirstNonAsciiWhitespace()
+                        (delimiterStart + delimiterLength + remainingString.substring(
+                            delimiterLength
+                        ).indexOfFirstNonAsciiWhitespace()
                             .coerceAtLeast(0))
                             .coerceAtMost(length),
-                        SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                        spanFlag
                     )
                 }
             }
@@ -553,49 +587,141 @@ private fun Editable.setMarkdownSpanFromNode(
     }
 }
 
-fun String.formatMarkdown(): SpannableStringBuilder {
+fun String.indexOfFirstWhitespace(startIndex: Int = 0): Int {
+    for (i in startIndex until length) {
+        when (this[i]) {
+            '\t', '\u000C', ' ' -> return i
+            else -> Unit
+        }
+    }
+    return length
+}
+
+fun String.formatMarkdown(spanFlag: Int = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE): SpannableStringBuilder {
     return SpannableStringBuilder(this).apply {
-        formatMarkdown(0)
+        formatMarkdown(0, spanFlag)
     }
 }
 
-fun SpannableString.formatMarkdown(): SpannableStringBuilder {
+fun SpannableString.formatMarkdown(spanFlag: Int): SpannableStringBuilder {
     return SpannableStringBuilder(this).apply {
-        formatMarkdown(0)
+        formatMarkdown(0, spanFlag)
     }
 }
 
-fun AnnotatedString.formatMarkdown(): AnnotatedString {
+data class MentionStringAnnotation(
+    val bytesOwnedIdentityString: String,
+    val start: Int,
+    val end: Int
+)
+
+val headings = mapOf(1 to 27.sp, 2 to 24.sp, 3 to 21.sp, 4 to 18.sp, 5 to 18.sp)
+val bullets = listOf("• ", "◦ ", "▪ ")
+
+val lineSeparatorsRegex = Regex("(\r\n|\r|\n)")
+val lineSeparators = listOf("\r\n", "\r", "\n")
+
+fun SpannableStringBuilder.removeSpanEndLinebreak(span: MarkdownSpan) {
+    lineSeparatorsRegex.find(this, getSpanStart(span))?.let {
+        if (it.range.first == getSpanEnd(span)) {
+            delete(it.range.first, it.range.last + 1)
+        }
+    }
+}
+
+fun SpannableStringBuilder.removePreviousLinebreak(start: Int) {
+    for (separator in lineSeparators) {
+        if (start >= separator.length
+            && indexOf(separator, start - separator.length) == start - separator.length) {
+            delete(start - separator.length, start)
+            return
+        }
+    }
+}
+
+fun AnnotatedString.formatMarkdown(
+    complete: Boolean = false,
+    context: Context? = null,
+    bytesOwnedIdentity: ByteArray? = null,
+    message: Message? = null,
+    backgroundColor: Color = Color.White.copy(alpha = .25f)
+): AnnotatedString {
     try {
         val spanStyles = emptyList<AnnotatedString.Range<SpanStyle>>().toMutableList()
-        val spannableString = SpannableString(this).formatMarkdown().toSpannable().apply {
+        val paragraphSpans = emptyList<MarkdownSpan>().toMutableList()
+        val quoteStartIndexes = emptyList<Int>().toMutableList()
+        val paragraphStyles = emptyList<AnnotatedString.Range<ParagraphStyle>>().toMutableList()
+        val mentionStringAnnotations = mutableListOf<MentionStringAnnotation>()
+        val spannableString = SpannableString(this).apply {
+            if (context != null && message != null && bytesOwnedIdentity != null) {
+                Utils.applyMentionSpans(context, bytesOwnedIdentity, message, this)
+            }
+        }.formatMarkdown(Spannable.SPAN_INCLUSIVE_EXCLUSIVE).apply {
+            // first do all operations that may shift offsets (insert of delete)
+            if (complete) {
+                getSpans<MarkdownListItem>(0, length).forEach { span ->
+                    // remove leading whitespace
+                    delete(getSpanStart(span), toString().indexOfFirstNonAsciiWhitespace(getSpanStart(span)))
+                    insert(
+                        getSpanStart(span), bullets[span.level.coerceIn(
+                            bullets.indices
+                        )]
+                    )
+                    removeSpanEndLinebreak(span)
+                    removePreviousLinebreak(getSpanStart(span))
+                    paragraphSpans.add(span)
+                }
+                getSpans<MarkdownOrderedListItem>(0, length).forEach { span ->
+                    // remove leading whitespace
+                    delete(getSpanStart(span), toString().indexOfFirstNonAsciiWhitespace(getSpanStart(span)))
+                    insert(
+                        getSpanStart(span), span.delimiter
+                    )
+                    removeSpanEndLinebreak(span)
+                    removePreviousLinebreak(getSpanStart(span))
+                    paragraphSpans.add(span)
+                }
+                // remove ending line-breaks for code blocks before we start saving offsets
+                getSpans<MarkdownCodeBlock>(0, length).forEach { span ->
+                    removePreviousLinebreak(getSpanEnd(span))
+                }
+
+                getSpans<MarkdownQuote>(0, length).forEach { span ->
+                    removeSpanEndLinebreak(span)
+                    removePreviousLinebreak(getSpanStart(span))
+                    insert(
+                        getSpanStart(span), "\u200B"
+                    )
+                    paragraphSpans.add(span)
+                }
+            }
             getSpans<StyleSpan>(0, length).forEach { span ->
                 when (span.style) {
                     Typeface.BOLD -> spanStyles.add(
-                            AnnotatedString.Range(
-                                    item = SpanStyle(fontWeight = FontWeight.Bold),
-                                    start = getSpanStart(span),
-                                    end = getSpanEnd(span)
-                            )
+                        AnnotatedString.Range(
+                            item = SpanStyle(fontWeight = FontWeight.Bold),
+                            start = getSpanStart(span),
+                            end = getSpanEnd(span)
+                        )
                     )
 
                     Typeface.ITALIC -> spanStyles.add(
-                            AnnotatedString.Range(
-                                    item = SpanStyle(fontStyle = FontStyle.Italic),
-                                    start = getSpanStart(span),
-                                    end = getSpanEnd(span)
-                            )
+                        AnnotatedString.Range(
+                            item = SpanStyle(fontStyle = FontStyle.Italic),
+                            start = getSpanStart(span),
+                            end = getSpanEnd(span)
+                        )
                     )
 
                     Typeface.BOLD_ITALIC -> spanStyles.add(
-                            AnnotatedString.Range(
-                                    item = SpanStyle(
-                                            fontWeight = FontWeight.Bold,
-                                            fontStyle = FontStyle.Italic
-                                    ),
-                                    start = getSpanStart(span),
-                                    end = getSpanEnd(span)
-                            )
+                        AnnotatedString.Range(
+                            item = SpanStyle(
+                                fontWeight = FontWeight.Bold,
+                                fontStyle = FontStyle.Italic
+                            ),
+                            start = getSpanStart(span),
+                            end = getSpanEnd(span)
+                        )
                     )
 
                     else -> {}
@@ -603,25 +729,175 @@ fun AnnotatedString.formatMarkdown(): AnnotatedString {
             }
             getSpans<StrikethroughSpan>(0, length).forEach { span ->
                 spanStyles.add(
-                        AnnotatedString.Range(
-                                item = SpanStyle(textDecoration = TextDecoration.LineThrough),
-                                start = getSpanStart(span),
-                                end = getSpanEnd(span)
-                        )
+                    AnnotatedString.Range(
+                        item = SpanStyle(textDecoration = TextDecoration.LineThrough),
+                        start = getSpanStart(span),
+                        end = getSpanEnd(span)
+                    )
                 )
             }
             getSpans<UnderlineSpan>(0, length).forEach { span ->
                 spanStyles.add(
-                        AnnotatedString.Range(
-                                item = SpanStyle(textDecoration = TextDecoration.Underline),
-                                start = getSpanStart(span),
-                                end = getSpanEnd(span)
-                        )
+                    AnnotatedString.Range(
+                        item = SpanStyle(textDecoration = TextDecoration.Underline),
+                        start = getSpanStart(span),
+                        end = getSpanEnd(span)
+                    )
                 )
             }
+            getSpans<MentionUrlSpan>().forEach { mention ->
+                val start = getSpanStart(mention)
+                val end = getSpanEnd(mention)
+                mention.color?.let {
+                    spanStyles.add(
+                        AnnotatedString.Range(
+                            item = SpanStyle(color = Color(it)),
+                            start,
+                            end
+                        )
+                    )
+                }
+                mention.userIdentifier?.let {
+                    mentionStringAnnotations.add(
+                        MentionStringAnnotation(
+                            ObvBase64.encode(it),
+                            start,
+                            end
+                        )
+                    )
+                }
+            }
+            if (complete) {
+                getSpans<MarkdownHeading>(0, length).forEach { span ->
+                    spanStyles.add(
+                        AnnotatedString.Range(
+                            item = SpanStyle(
+                                fontSize = headings.getOrDefault(span.level, 18.sp),
+                                fontWeight = FontWeight.Medium
+                            ),
+                            start = getSpanStart(span),
+                            end = getSpanEnd(span)
+                        )
+                    )
+                    paragraphStyles.add(
+                        AnnotatedString.Range(
+                            item = ParagraphStyle(
+                                lineHeight = headings.getOrDefault(span.level, 18.sp)
+                            ),
+                            start = getSpanStart(span),
+                            end = getSpanEnd(span)
+                        )
+                    )
+                }
+
+                getSpans<MarkdownCodeBlock>(0, length).forEach { span ->
+                    spanStyles.add(
+                        AnnotatedString.Range(
+                            item = SpanStyle(
+                                fontFamily = FontFamily.Monospace,
+                                background = backgroundColor,
+                                baselineShift = BaselineShift(0.2f)
+                            ),
+                            start = getSpanStart(span),
+                            end = getSpanEnd(span)
+                        )
+                    )
+                }
+                getSpans<MarkdownCode>(0, length).forEach { span ->
+                    spanStyles.add(
+                        AnnotatedString.Range(
+                            item = SpanStyle(
+                                fontFamily = FontFamily.Monospace,
+                                background = backgroundColor,
+                                baselineShift = BaselineShift(0.2f)
+                            ),
+                            start = getSpanStart(span),
+                            end = getSpanEnd(span)
+                        )
+                    )
+                }
+                getSpans<MarkdownQuote>(0, length).forEach { span ->
+                    quoteStartIndexes.add(getSpanStart(span))
+                }
+            }
+            paragraphSpans.forEach { span ->
+                when (span) {
+                    is MarkdownListItem -> {
+                        val margin = .8f*(span.level) + .4f
+                        paragraphStyles.add(
+                            AnnotatedString.Range(
+                                item = ParagraphStyle(
+                                    textIndent = TextIndent(
+                                        firstLine = margin.em,
+                                        restLine = (margin + .6f).em
+                                    ),
+                                ),
+                                start = getSpanStart(span),
+                                end = getSpanEnd(span)
+                            )
+                        )
+                    }
+                    is MarkdownOrderedListItem -> {
+                        val margin = 1.1f*(span.level) + .4f
+                        paragraphStyles.add(
+                            AnnotatedString.Range(
+                                item = ParagraphStyle(
+                                    textIndent = TextIndent(
+                                        firstLine = margin.em,
+                                        restLine = (margin + 1.05f).em
+                                    ),
+                                ),
+                                start = getSpanStart(span),
+                                end = getSpanEnd(span)
+                            )
+                        )
+                    }
+                    is MarkdownQuote -> {
+                        paragraphStyles.add(
+                            AnnotatedString.Range(
+                                item = ParagraphStyle(
+                                    textIndent = TextIndent(
+                                        firstLine = 2.em,
+                                        restLine = 2.em
+                                    ),
+                                ),
+                                start = getSpanStart(span),
+                                end = getSpanEnd(span)
+                            )
+                        )
+                    }
+
+                    else -> {}
+                }
+            }
         }
-        return AnnotatedString(text = spannableString.toString(), spanStyles = spanStyles)
-    } catch (e : Exception) {
+        return AnnotatedString.Builder(
+            AnnotatedString(
+                text = spannableString.toString(),
+                spanStyles = spanStyles,
+                paragraphStyles = paragraphStyles.sortedBy { it.start }
+            )
+        ).apply {
+            if (complete) {
+                quoteStartIndexes.forEach {
+                    addStringAnnotation(
+                        INLINE_CONTENT_TAG,
+                        QUOTE_BLOCK_START_ANNOTATION,
+                        it,
+                        it + 1
+                    )
+                }
+            }
+            mentionStringAnnotations.forEach {
+                addStringAnnotation(
+                    MENTION_ANNOTATION_TAG,
+                    it.bytesOwnedIdentityString,
+                    it.start,
+                    it.end
+                )
+            }
+        }.toAnnotatedString()
+    } catch (e: Exception) {
         e.printStackTrace()
         return this
     }

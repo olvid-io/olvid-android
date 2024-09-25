@@ -46,7 +46,6 @@ import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.openid.KeycloakManager.KeycloakCallback
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.launch
-import java.util.Arrays
 import java.util.regex.Pattern
 
 class ContactListViewModel : ViewModel() {

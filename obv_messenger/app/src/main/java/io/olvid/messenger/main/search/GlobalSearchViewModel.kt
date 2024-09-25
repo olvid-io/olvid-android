@@ -28,7 +28,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
@@ -41,8 +40,6 @@ import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class GlobalSearchViewModel : ViewModel() {
     companion object {
@@ -196,22 +193,27 @@ class GlobalSearchViewModel : ViewModel() {
                 }
 
             val fyles = AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
-                .globalSearch(bytesOwnedIdentity, tokenizedQuery, ATTACHMENT_SEARCH_LIMIT)
+                .globalSearch(bytesOwnedIdentity, tokenizedQuery, ATTACHMENT_SEARCH_LIMIT + 1)
             if (cancelled) {
                 return
             }
-            fylesFound = fyles
+            fylesFound = if (fyles.size > ATTACHMENT_SEARCH_LIMIT) {
+                fyles.subList(0, ATTACHMENT_SEARCH_LIMIT)
+            } else {
+                fyles
+            }
 
             attachmentLimitReachedCount =
-                if (fyles.size >= ATTACHMENT_SEARCH_LIMIT) {
-                    val count = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery, 5 * ATTACHMENT_SEARCH_LIMIT + 1)
-                    if (count > 5 * ATTACHMENT_SEARCH_LIMIT) {
-                        "${5 * ATTACHMENT_SEARCH_LIMIT}+"
-                    } else if (count > ATTACHMENT_SEARCH_LIMIT) {
-                        count.toString()
-                    } else {
-                        null
-                    }
+                if (fyles.size > ATTACHMENT_SEARCH_LIMIT) {
+                    "${ATTACHMENT_SEARCH_LIMIT}+"
+//                    val count = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery, 5 * ATTACHMENT_SEARCH_LIMIT + 1)
+//                    if (count > 5 * ATTACHMENT_SEARCH_LIMIT) {
+//                        "${5 * ATTACHMENT_SEARCH_LIMIT}+"
+//                    } else if (count > ATTACHMENT_SEARCH_LIMIT) {
+//                        count.toString()
+//                    } else {
+//                        null
+//                    }
                 } else {
                     null
                 }

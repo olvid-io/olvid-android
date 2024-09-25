@@ -103,7 +103,6 @@ import io.olvid.messenger.fragments.FullScreenImageFragment
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
 import io.olvid.messenger.group.EditOwnedGroupDetailsDialogFragment.Companion.newInstanceV2
-import io.olvid.messenger.group.GroupTypeModel.GroupType.PRIVATE
 import io.olvid.messenger.group.GroupTypeModel.GroupType.SIMPLE
 import io.olvid.messenger.group.GroupV2DetailsActivity.GroupMembersAdapter.GroupMemberViewHolder
 import io.olvid.messenger.openid.KeycloakManager

@@ -699,7 +699,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
     private void scheduleBackupForUploadIfNeeded(boolean immediately) {
         synchronized (autoBackupSchedulerLock) {
             if (immediately) {
-                if (autoBackupIsScheduled) {
+                if (autoBackupIsScheduled && scheduledAutoBackupTask != null) {
                     scheduledAutoBackupTask.cancel(true);
                     scheduledAutoBackupTask = null;
                 }

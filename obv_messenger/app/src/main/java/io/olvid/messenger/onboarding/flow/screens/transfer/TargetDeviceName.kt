@@ -36,14 +36,14 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.R.string
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.OnboardingAction
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
@@ -85,7 +85,7 @@ fun NavGraphBuilder.targetDeviceName(onboardingFlowViewModel : OnboardingFlowVie
                     .focusRequester(focusRequester),
                 value = onboardingFlowViewModel.deviceName,
                 onValueChange = onboardingFlowViewModel::updateDeviceName,
-                textStyle = TextStyle(fontSize = 20.sp),
+                textStyle = OlvidTypography.h2.copy(fontWeight = FontWeight.Normal),
                 label = {
                     Text(text = stringResource(id = string.label_device_name))
                 },

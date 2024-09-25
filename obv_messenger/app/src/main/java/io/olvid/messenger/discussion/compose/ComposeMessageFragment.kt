@@ -375,8 +375,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             val videoUri = composeMessageViewModel.photoOrVideoUri
             val videoFile = composeMessageViewModel.photoOrVideoFile
             val discussionId = discussionViewModel.discussionId
-            if (videoUri != null && videoFile != null) {
-                App.runThread(AddFyleToDraftFromUriTask(videoUri, videoFile, discussionId))
+            if (videoUri != null && videoFile != null && discussionId != null) {
+                App.runThread(AddFyleToDraftFromUriTask(videoUri, videoFile,discussionId))
             }
         }
     }
@@ -508,7 +508,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                     composeMessageViewModel.rawNewMessageText ?: "", mentionViewModel.mentions
                 )
                 SaveDraftTask(
-                    discussionViewModel.discussionId,
+                    discussionViewModel.discussionId!!,
                     trimAndMentions.first,
                     composeMessageViewModel.getDraftMessage().value,
                     trimAndMentions.second
@@ -518,7 +518,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 contentUri!!,
                 fileName,
                 mimeType,
-                discussionViewModel.discussionId
+                discussionViewModel.discussionId!!
             ).run()
             callMeWhenDone?.run()
         }
@@ -694,7 +694,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                             requestPermissionForAudioLauncher?.launch(permission.RECORD_AUDIO)
                         }
                     }
-                }
+                },
+                factory = FACTORY
             )
         directAttachVoiceMessageImageView =
             view.findViewById(R.id.direct_attach_voice_message_button)
@@ -719,7 +720,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                         jsonExpiration.setExistenceDuration(ephemeralViewModel.getExistence())
                         App.runThread(
                             SetDraftJsonExpirationTask(
-                                discussionViewModel.discussionId,
+                                discussionViewModel.discussionId!!,
                                 jsonExpiration
                             )
                         )
@@ -1078,12 +1079,13 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                         }
                         PostMessageInDiscussionTask(
                             trimAndMentions.first,
-                            discussionViewModel.discussionId,
+                            discussionViewModel.discussionId!!,
                             true,
                             linkPreviewViewModel.openGraph.value,
                             trimAndMentions.second
                         ).run()
                     }
+                    discussionDelegate?.messageWasSent()
                     sending = false
                     linkPreviewViewModel.reset()
                     newMessageEditText?.setText("")
@@ -1227,13 +1229,13 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             showEmojiKeyboard()
         } else if (id == R.id.attach_location) {
             // if currently sharing location: stop sharing location
-            if (LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.discussionId)) {
+            if (LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.discussionId!!)) {
                 SecureAlertDialogBuilder(view.context, R.style.CustomAlertDialog)
                     .setTitle(R.string.title_stop_sharing_location)
                     .setMessage(R.string.label_stop_sharing_location)
                     .setPositiveButton(R.string.button_label_stop) { _, _ ->
                         LocationSharingSubService.stopSharingInDiscussion(
-                            discussionViewModel.discussionId, false
+                            discussionViewModel.discussionId!!, false
                         )
                     }
                     .setNegativeButton(R.string.button_label_cancel, null)
@@ -1244,7 +1246,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             when (SettingsActivity.getLocationIntegration()) {
                 OSM, MAPS, CUSTOM_OSM -> {
                     val dialogFragment = SendLocationMapDialogFragment.newInstance(
-                        discussionViewModel.discussionId,
+                        discussionViewModel.discussionId!!,
                         SettingsActivity.getLocationIntegration()
                     )
                     dialogFragment.show(childFragmentManager, "send-location-fragment-osm")
@@ -1252,7 +1254,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
 
                 BASIC -> {
                     val dialogFragment =
-                        SendLocationBasicDialogFragment.newInstance(discussionViewModel.discussionId)
+                        SendLocationBasicDialogFragment.newInstance(discussionViewModel.discussionId!!)
                     dialogFragment.show(childFragmentManager, "send-location-fragment-basic")
                 }
 
@@ -1410,7 +1412,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 // we do not mark as opened here as this is done in the gallery activity
                 App.openDiscussionGalleryActivity(
                     activity,
-                    discussionViewModel.discussionId,
+                    discussionViewModel.discussionId!!,
                     longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.messageId,
                     longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.fyleId,
                     true

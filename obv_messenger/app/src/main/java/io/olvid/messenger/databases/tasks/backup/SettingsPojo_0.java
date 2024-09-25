@@ -180,7 +180,7 @@ public class SettingsPojo_0 {
         settingsPojo.lock_wipe_on_fail = SettingsActivity.wipeMessagesOnUnlockFails();
 
         settingsPojo.auto_download_size = SettingsActivity.getAutoDownloadSize();
-        settingsPojo.link_preview_inbound = SettingsActivity.isLinkPreviewInbound();
+        settingsPojo.link_preview_inbound = SettingsActivity.isLinkPreviewInbound(App.getContext());
         settingsPojo.link_preview_outbound = SettingsActivity.isLinkPreviewOutbound();
         settingsPojo.send_read_receipt = SettingsActivity.getDefaultSendReadReceipt();
         settingsPojo.auto_open_limited_visibility = SettingsActivity.getDefaultAutoOpenLimitedVisibilityInboundMessages();

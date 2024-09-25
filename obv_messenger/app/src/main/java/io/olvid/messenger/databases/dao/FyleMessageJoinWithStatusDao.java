@@ -61,26 +61,6 @@ public interface FyleMessageJoinWithStatusDao {
     void updateEngineIdentifier(long messageId, long fyleId, byte[] engineMessageIdentifier, int engineNumber);
 
     @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
-            " SET " + FyleMessageJoinWithStatus.STATUS + " = :status " +
-            " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
-            " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
-    void updateStatus(long messageId, long fyleId, int status);
-
-    @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
-            " SET " + FyleMessageJoinWithStatus.PROGRESS + " = :progress " +
-            " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
-            " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
-    void updateProgress(long messageId, long fyleId, float progress);
-
-    @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
-            " SET " + FyleMessageJoinWithStatus.STATUS + " = :status, " +
-            FyleMessageJoinWithStatus.PROGRESS + " = :progress, " +
-            FyleMessageJoinWithStatus.SIZE + " = :size " +
-            " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
-            " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
-    void updateStatusProgressSize(long messageId, long fyleId, int status, float progress, long size);
-
-    @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
             " SET " + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " = :imageResolution " +
             " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
             " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
@@ -518,14 +498,14 @@ public interface FyleMessageJoinWithStatusDao {
             }
             byte[] randomizer = new byte[16];
             new SecureRandom().nextBytes(randomizer);
-            return Uri.parse(BuildConfig.CONTENT_PROVIDER_URI_PREFIX + Logger.toHexString(fyle.sha256) + "/" + fyleMessageJoinWithStatus.messageId + "/" + Logger.toHexString(randomizer));
+            return Uri.parse("content://" + BuildConfig.APPLICATION_ID + ".PROVIDER/" + Logger.toHexString(fyle.sha256) + "/" + fyleMessageJoinWithStatus.messageId + "/" + Logger.toHexString(randomizer));
         }
 
         public Uri getDeterministicContentUriForGallery() {
             if (fyle.sha256 == null) {
                 return null;
             }
-            return Uri.parse(BuildConfig.CONTENT_PROVIDER_URI_PREFIX + Logger.toHexString(fyle.sha256) + "/" + fyleMessageJoinWithStatus.messageId + "/00000000000000000000000000000000");
+            return Uri.parse("content://" + BuildConfig.APPLICATION_ID + ".PROVIDER/" + Logger.toHexString(fyle.sha256) + "/" + fyleMessageJoinWithStatus.messageId + "/00000000000000000000000000000000");
         }
 
         @Override

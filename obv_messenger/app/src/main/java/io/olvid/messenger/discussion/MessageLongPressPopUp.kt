@@ -63,12 +63,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -100,7 +100,6 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
@@ -132,11 +131,8 @@ class MessageLongPressPopUp(
     private val parentView: View,
     private val clickX: Int,
     private val clickY: Int,
-    messageViewBottomPx: Int,
     private val messageId: Long
 ) {
-    private val messageViewBottomPx = max(0.0, messageViewBottomPx.toDouble())
-        .toInt()
     private val vibrator: Vibrator? =
         activity.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
     private val metrics: DisplayMetrics = activity.resources.displayMetrics
@@ -303,7 +299,7 @@ class MessageLongPressPopUp(
                     interactionSource = remember {
                         MutableInteractionSource()
                     },
-                    indication = rememberRipple(color = colorResource(id = R.color.whiteOverlay)),
+                    indication = ripple(color = colorResource(id = R.color.whiteOverlay)),
                     onClick = action
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -399,7 +395,7 @@ class MessageLongPressPopUp(
             }
 
             EDIT -> {
-                discussionDelegate.editMessage(message)
+                message?.let { discussionDelegate.editMessage(it) }
                 popupWindow!!.dismiss()
             }
 
@@ -426,26 +422,46 @@ class MessageLongPressPopUp(
             DELETE -> {
                 App.runThread {
                     val offerToRemoteDeleteEverywhere: Boolean
-                    val remoteDeletingMakesSense: Boolean = listOf(Message.TYPE_INBOUND_MESSAGE, Message.TYPE_OUTBOUND_MESSAGE, Message.TYPE_INBOUND_EPHEMERAL_MESSAGE).contains(message?.messageType) && (message?.wipeStatus == Message.WIPE_STATUS_NONE)
+                    val remoteDeletingMakesSense: Boolean = listOf(
+                        Message.TYPE_INBOUND_MESSAGE,
+                        Message.TYPE_OUTBOUND_MESSAGE,
+                        Message.TYPE_INBOUND_EPHEMERAL_MESSAGE
+                    ).contains(message?.messageType) && (message?.wipeStatus == Message.WIPE_STATUS_NONE)
                     if (remoteDeletingMakesSense) {
-                        if (discussion?.discussionType == Discussion.TYPE_GROUP_V2) {
-                            val group2 = AppDatabase.getInstance()
-                                .group2Dao()[discussion!!.bytesOwnedIdentity, discussion!!.bytesDiscussionIdentifier]
-                            if (group2 != null) {
-                                offerToRemoteDeleteEverywhere = ((group2.ownPermissionEditOrRemoteDeleteOwnMessages && (message?.messageType == Message.TYPE_OUTBOUND_MESSAGE))
-                                        || (group2.ownPermissionRemoteDeleteAnything && ((message?.messageType == Message.TYPE_INBOUND_MESSAGE) || (message?.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE))))
-                                        && AppDatabase.getInstance().group2MemberDao().groupHasMembers(discussion!!.bytesOwnedIdentity, discussion!!.bytesDiscussionIdentifier)
-                            } else {
-                                offerToRemoteDeleteEverywhere = false
+                        when (discussion?.discussionType) {
+                            Discussion.TYPE_GROUP_V2 -> {
+                                val group2 = AppDatabase.getInstance()
+                                    .group2Dao()[discussion!!.bytesOwnedIdentity, discussion!!.bytesDiscussionIdentifier]
+                                offerToRemoteDeleteEverywhere = if (group2 != null) {
+                                    (((group2.ownPermissionEditOrRemoteDeleteOwnMessages && (message?.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                                            || (group2.ownPermissionRemoteDeleteAnything && ((message?.messageType == Message.TYPE_INBOUND_MESSAGE) || (message?.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE))))
+                                            && AppDatabase.getInstance().group2MemberDao()
+                                        .groupHasMembers(
+                                            discussion!!.bytesOwnedIdentity,
+                                            discussion!!.bytesDiscussionIdentifier
+                                        ))
+                                } else {
+                                    false
+                                }
                             }
-                        } else if (discussion?.discussionType == Discussion.TYPE_GROUP) {
-                            offerToRemoteDeleteEverywhere = (discussion!!.isNormal && (message?.messageType == Message.TYPE_OUTBOUND_MESSAGE))
-                                    && AppDatabase.getInstance().contactGroupJoinDao().groupHasMembers(discussion!!.bytesOwnedIdentity, discussion!!.bytesDiscussionIdentifier)
-                        } else {
-                            offerToRemoteDeleteEverywhere = (discussion!!.isNormal && (message?.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+
+                            Discussion.TYPE_GROUP -> {
+                                offerToRemoteDeleteEverywhere =
+                                    (discussion!!.isNormal && (message?.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                                            && AppDatabase.getInstance().contactGroupJoinDao()
+                                        .groupHasMembers(
+                                            discussion!!.bytesOwnedIdentity,
+                                            discussion!!.bytesDiscussionIdentifier
+                                        )
+                            }
+
+                            else -> {
+                                offerToRemoteDeleteEverywhere =
+                                    (discussion!!.isNormal && (message?.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                            }
                         }
                     } else {
-                        offerToRemoteDeleteEverywhere = false;
+                        offerToRemoteDeleteEverywhere = false
                     }
 
                     val builder = SecureDeleteEverywhereDialogBuilder(
@@ -598,7 +614,8 @@ class MessageLongPressPopUp(
                                                 modifier = Modifier
                                                     .padding(horizontal = 8.dp)
                                                     .widthIn(max = 300.dp),
-                                                elevation = 8.dp,
+                                                color = colorResource(id = R.color.dialogBackground),
+                                                shadowElevation = 8.dp,
                                                 shape = RoundedCornerShape(12.dp)
                                             ) {
                                                 Column(modifier = Modifier.width(Max)) {
@@ -667,7 +684,6 @@ class MessageLongPressPopUp(
             animationStyle = R.style.FadeInAndOutAnimation
             inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
             setBackgroundDrawable(ColorDrawable())
-            setOnDismissListener { discussionDelegate.setAdditionalBottomPadding(0) }
         }
 
         reactionsPopUpLinearLayout = popUpView.findViewById(R.id.reactions_popup_linear_view)
@@ -714,15 +730,6 @@ class MessageLongPressPopUp(
             }
         }
 
-        val buttonsHeightPx = (48 * metrics.density).toInt()
-        if (messageViewBottomPx < buttonsHeightPx) {
-            additionalBottomPadding = buttonsHeightPx - messageViewBottomPx
-            discussionDelegate.setAdditionalBottomPadding(additionalBottomPadding)
-        } else {
-            additionalBottomPadding = 0
-        }
-
-        // only fill reactions at the end because we need the additionalBottomPadding
         fillReactions()
 
         popupWindow!!.width = parentView.width
@@ -749,7 +756,8 @@ class MessageLongPressPopUp(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .widthIn(max = 300.dp),
-                    elevation = 8.dp,
+                    color = colorResource(id = R.color.dialogBackground),
+                    shadowElevation = 8.dp,
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(modifier = Modifier.width(Max)) {

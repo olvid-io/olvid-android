@@ -1822,7 +1822,7 @@
     <string name="onboarding_transfer_multidevice_purchase_hyperlink">This way</string>
     <string name="button_label_subscribe_now">Subscribe now</string>
     <string name="onboarding_transfer_devices_loading_title">Retrieving device list…</string>
-    <string name="dialog_title_introducing_multi_device">Introducing Olvid Desktop and mutli-device!</string>
+    <string name="dialog_title_introducing_multi_device">Introducing Olvid Desktop and multi-device!</string>
     <string name="dialog_message_introducing_multi_device">Olvid is now available for **your computer** (Windows and macOS). You can download the latest version from:\nhttps://olvid.io/download/\n\nWith the **multi-device** support, start a conversation on your phone and continue it on your computer. Sharing files between your devices and with your contacts has never been easier!</string>
     <string name="label_gallery">Gallery</string>
     <string name="label_gallery_no_content">No content found</string>

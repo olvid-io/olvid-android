@@ -25,6 +25,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Spannable;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -190,7 +191,7 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                 exportAppDbPreference.setOnPreferenceClickListener((Preference preference) -> {
                     AlertDialog dialog = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                             .setTitle(R.string.dialog_title_export_app_databases)
-                            .setMessage(Markdown.formatMarkdown(getString(R.string.dialog_message_export_app_databases)))
+                            .setMessage(Markdown.formatMarkdown(getString(R.string.dialog_message_export_app_databases), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE))
                             .setNegativeButton(R.string.button_label_cancel, null)
                             .setPositiveButton(R.string.button_label_export, (DialogInterface dialogInterface, int which) -> {
                                 App.prepareForStartActivityForResult(this);

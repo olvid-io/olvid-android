@@ -124,7 +124,7 @@ public class InboundEphemeralMessageClicked implements Runnable {
 
             if (jsonExpiration.getVisibilityDuration() != null) {
                 long expirationTimestamp = System.currentTimeMillis() + jsonExpiration.getVisibilityDuration() * 1_000L - alreadyElapsedDelay;
-                MessageExpiration messageExpiration = new MessageExpiration(message.id, expirationTimestamp, true);
+                MessageExpiration messageExpiration = new MessageExpiration(0, message.id, expirationTimestamp, true);
                 if (clickedOnAnotherDevice) {
                     // start expiration timer on other devices inbound ephemeral message
                     db.messageDao().updateExpirationStartTimestamp(message.id, expirationTimestamp);

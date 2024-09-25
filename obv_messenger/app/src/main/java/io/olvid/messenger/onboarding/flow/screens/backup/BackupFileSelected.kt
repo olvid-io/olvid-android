@@ -38,16 +38,15 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.OnboardingAction
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
@@ -97,7 +96,7 @@ fun NavGraphBuilder.backupFileSelected(onboardingFlowViewModel : OnboardingFlowV
                     Text(
                         text = onboardingFlowViewModel.backupName ?: "",
                         color = colorResource(id = color.almostBlack),
-                        fontSize = 14.sp,
+                        style = OlvidTypography.body1,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
@@ -106,9 +105,7 @@ fun NavGraphBuilder.backupFileSelected(onboardingFlowViewModel : OnboardingFlowV
                             onboardingFlowViewModel.backupContent?.size?.toLong()
                                 ?: 0
                         ),
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight(400),
+                        style = OlvidTypography.subtitle1.copy(
                             color = Color(0xFF8B8D97),
                             textAlign = TextAlign.Center
                         )

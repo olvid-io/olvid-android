@@ -176,10 +176,10 @@ public class AppDatabaseOpenCallback implements Runnable {
             for (FyleMessageJoinWithStatus uploadingFyle: uploadingFyles) {
                 if ((uploadingFyle.engineMessageIdentifier == null) || (uploadingFyle.engineNumber == null)) {
                     uploadingFyle.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                    db.fyleMessageJoinWithStatusDao().updateStatus(uploadingFyle.messageId, uploadingFyle.fyleId, uploadingFyle.status);
+                    db.fyleMessageJoinWithStatusDao().update(uploadingFyle);
                 } else if (engine.isOutboxAttachmentSent(uploadingFyle.bytesOwnedIdentity, uploadingFyle.engineMessageIdentifier, uploadingFyle.engineNumber)) {
                     uploadingFyle.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                    db.fyleMessageJoinWithStatusDao().updateStatus(uploadingFyle.messageId, uploadingFyle.fyleId, uploadingFyle.status);
+                    db.fyleMessageJoinWithStatusDao().update(uploadingFyle);
                 }
             }
             List<FyleMessageJoinWithStatus> downloadingFyles = db.fyleMessageJoinWithStatusDao().getDownloading();
@@ -199,7 +199,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                         }
                     } else {
                         downloadingFyle.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                        db.fyleMessageJoinWithStatusDao().updateStatus(downloadingFyle.messageId, downloadingFyle.fyleId, downloadingFyle.status);
+                        db.fyleMessageJoinWithStatusDao().update(downloadingFyle);
                         downloadingFyle.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
                     }
                 } else if (engine.isInboxAttachmentReceived(downloadingFyle.bytesOwnedIdentity, downloadingFyle.engineMessageIdentifier, downloadingFyle.engineNumber)) {
@@ -207,7 +207,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                     // However, if the message no longer exists, all we can do is mark the app attachment as downloaded,
                     // but we do not have anything in the engine to fetch to actually complete the download
                     downloadingFyle.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                    db.fyleMessageJoinWithStatusDao().updateStatus(downloadingFyle.messageId, downloadingFyle.fyleId, downloadingFyle.status);
+                    db.fyleMessageJoinWithStatusDao().update(downloadingFyle);
                     downloadingFyle.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
                 }
             }

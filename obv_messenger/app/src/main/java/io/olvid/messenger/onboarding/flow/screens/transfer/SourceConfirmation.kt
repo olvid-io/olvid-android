@@ -53,13 +53,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -71,6 +69,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.onboarding.flow.Device
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
@@ -112,9 +111,7 @@ fun NavGraphBuilder.sourceConfirmation(
                 Text(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     text = stringResource(id = R.string.onboarding_transfer_source_confirmation_activating_profile),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
+                    style = OlvidTypography.h3.copy(
                         color = colorResource(id = R.color.almostBlack),
                         textAlign = TextAlign.Center
                     )
@@ -173,7 +170,7 @@ fun NavGraphBuilder.sourceConfirmation(
                         Text(
                             text = line1,
                             color = colorResource(id = R.color.almostBlack),
-                            fontSize = 16.sp,
+                            style = OlvidTypography.h3,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -182,7 +179,7 @@ fun NavGraphBuilder.sourceConfirmation(
                             Text(
                                 text = it,
                                 color = colorResource(id = R.color.greyTint),
-                                fontSize = 14.sp,
+                                style = OlvidTypography.body2,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -195,9 +192,7 @@ fun NavGraphBuilder.sourceConfirmation(
                         .padding(top = 16.dp)
                         .padding(horizontal = 8.dp),
                     text = stringResource(id = R.string.onboarding_transfer_source_confirmation_on_device),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
+                    style = OlvidTypography.h3.copy(
                         color = colorResource(id = R.color.almostBlack),
                         textAlign = TextAlign.Center
                     )
@@ -224,18 +219,16 @@ fun NavGraphBuilder.sourceConfirmation(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = onboardingFlowViewModel.deviceName,
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold,
+                            style = OlvidTypography.h3.copy(
                                 color = colorResource(id = R.color.almostBlack),
                             ),
+                            fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             text = stringResource(id = R.string.text_new_device),
-                            style = TextStyle(
-                                fontSize = 14.sp,
+                            style = OlvidTypography.body2.copy(
                                 color = Color(0xFF8B8D97),
                             ),
                             maxLines = 1,
@@ -252,9 +245,7 @@ fun NavGraphBuilder.sourceConfirmation(
                                     .padding(top = 16.dp)
                                     .padding(horizontal = 8.dp),
                                 text = stringResource(id = R.string.onboarding_transfer_source_confirmation_other_device_remain_active),
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium,
+                                style = OlvidTypography.h3.copy(
                                     color = colorResource(id = R.color.almostBlack),
                                     textAlign = TextAlign.Center
                                 )
@@ -281,11 +272,10 @@ fun NavGraphBuilder.sourceConfirmation(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = device.name,
-                                        style = TextStyle(
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.SemiBold,
+                                        style = OlvidTypography.h3.copy(
                                             color = colorResource(id = R.color.almostBlack),
                                         ),
+                                        fontWeight = FontWeight.SemiBold,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                     )
@@ -305,8 +295,7 @@ fun NavGraphBuilder.sourceConfirmation(
                                     deviceStatus?.let {
                                         Text(
                                             text = it,
-                                            style = TextStyle(
-                                                fontSize = 14.sp,
+                                            style = OlvidTypography.body2.copy(
                                                 color = Color(0xFF8B8D97),
                                             ),
                                             maxLines = 1,
@@ -325,8 +314,7 @@ fun NavGraphBuilder.sourceConfirmation(
                                                         it
                                                     )
                                                 ),
-                                                style = TextStyle(
-                                                    fontSize = 14.sp,
+                                                style = OlvidTypography.body2.copy(
                                                     color = Color(0xFF8B8D97),
                                                 )
                                             )
@@ -340,9 +328,7 @@ fun NavGraphBuilder.sourceConfirmation(
                                     .padding(top = 16.dp)
                                     .padding(horizontal = 8.dp),
                                 text = stringResource(id = R.string.onboarding_transfer_source_confirmation_new_device_remain_active),
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium,
+                                style = OlvidTypography.h3.copy(
                                     color = colorResource(id = R.color.almostBlack),
                                     textAlign = TextAlign.Center
                                 )

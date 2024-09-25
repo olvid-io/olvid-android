@@ -201,7 +201,8 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 }
                 FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, messageIdentifier, attachmentNumber);
                 if (fyleMessageJoinWithStatus != null) {
-                    db.fyleMessageJoinWithStatusDao().updateProgress(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, progress);
+                    fyleMessageJoinWithStatus.setProgress(progress);
+                    db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                 }
                 break;
             }
@@ -213,7 +214,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                     FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                     if (fyleMessageJoinWithStatus != null) {
                         fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_FAILED;
-                        db.fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
+                        db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                     }
                 }
                 break;
@@ -227,7 +228,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                         FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                         if (fyleMessageJoinWithStatus != null) {
                             fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                            db.fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
+                            db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                         }
 
                         List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);
@@ -278,7 +279,8 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 }
                 FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, messageIdentifier, attachmentNumber);
                 if (fyleMessageJoinWithStatus != null) {
-                    db.fyleMessageJoinWithStatusDao().updateProgress(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, progress);
+                    fyleMessageJoinWithStatus.setProgress(progress);
+                    db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                 }
                 break;
             }
@@ -292,7 +294,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                         FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                         if (fyleMessageJoinWithStatus != null) {
                             fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                            db.fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
+                            db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                         }
 
                         List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);

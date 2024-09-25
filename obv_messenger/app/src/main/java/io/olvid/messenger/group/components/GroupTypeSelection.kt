@@ -86,6 +86,7 @@ fun GroupTypeSelection(
             Text(
                 text = stringResource(id = string.label_group_type),
                 fontSize = 18.sp,
+                lineHeight = 20.sp,
                 color = colorResource(
                     id = color.accent
                 )

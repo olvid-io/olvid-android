@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.main
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +42,7 @@ import io.olvid.messenger.customClasses.InitialView
 
 @Composable
 fun InitialView(
-    modifier: Modifier = Modifier.requiredSize(56.dp),
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier.requiredSize(56.dp),
     initialViewSetup: (initialView: InitialView) -> Unit,
     unreadMessages: Boolean = false,
     admin: Boolean = false,

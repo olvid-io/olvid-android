@@ -46,7 +46,7 @@ public class SaveDraftTask implements Runnable {
     public void run() {
         final AppDatabase db = AppDatabase.getInstance();
         final Discussion discussion = db.discussionDao().getById(discussionId);
-        if (discussion  == null || !discussion.isNormal()) {
+        if (discussion == null || !discussion.isNormal()) {
             return;
         }
         db.runInTransaction(() -> {

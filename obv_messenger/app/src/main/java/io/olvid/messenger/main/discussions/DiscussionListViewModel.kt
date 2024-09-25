@@ -117,7 +117,8 @@ class DiscussionListViewModel : ViewModel() {
                 db.discussionDao().getAllPinned(AppSingleton.getBytesCurrentIdentity())
             val pinnedDiscussionsMap =
                 HashMap(oldPinnedDiscussions.associateBy { discussion -> discussion.id })
-            val pinnedDiscussions = reorderList?.filter { it.discussion.pinned != 0 }?.map { it.discussion }
+            val pinnedDiscussions =
+                reorderList?.filter { it.discussion.pinned != 0 }?.map { it.discussion }
 
             // before actually changing anything in db, check if the order actually changed
             if (pinnedDiscussions?.map { it.id } == oldPinnedDiscussions.map { it.id }) {
@@ -137,7 +138,8 @@ class DiscussionListViewModel : ViewModel() {
             pinnedDiscussionsMap.values.forEach {
                 db.discussionDao().updatePinned(it.id, 0)
             }
-            AppSingleton.getBytesCurrentIdentity()?.let { PropagatePinnedDiscussionsChangeTask(it).run() }
+            AppSingleton.getBytesCurrentIdentity()
+                ?.let { PropagatePinnedDiscussionsChangeTask(it).run() }
         }
     }
 }
@@ -157,15 +159,13 @@ fun Discussion.getAnnotatedTitle(context: Context): AnnotatedString {
     }
 }
 
-fun Discussion.getAnnotatedDate(context: Context, message: Message?): AnnotatedString {
-    return buildAnnotatedString {
-        append(
-            message?.timestamp?.let {
-                StringUtils.getLongNiceDateString(context, it) as String
-            } ?: ""
-        )
-        if (isLocked) {
-            addStyle(SpanStyle(fontStyle = FontStyle.Italic), 0, length)
+fun Discussion.getAnnotatedDate(context: Context, message: Message?): AnnotatedString? {
+    return message?.timestamp?.let {
+        buildAnnotatedString {
+            append(StringUtils.getLongNiceDateString(context, message.timestamp) as String)
+            if (isLocked) {
+                addStyle(SpanStyle(fontStyle = FontStyle.Italic), 0, length)
+            }
         }
     }
 }

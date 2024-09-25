@@ -6,6 +6,14 @@
     android:layout_height="match_parent"
     android:background="@color/almostWhite">
 
+    <View
+        android:id="@+id/spacer"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        app:layout_constraintBottom_toTopOf="@id/emoji_keyboard_placeholder"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
     <ImageView
         android:id="@+id/discussion_root_background_imageview"
         android:layout_width="0dp"
@@ -15,125 +23,18 @@
         app:layout_constraintBottom_toTopOf="@id/emoji_keyboard_placeholder"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/discussion_toolbar" />
+        app:layout_constraintTop_toBottomOf="@id/discussion_toolbar"
+        android:visibility="gone"/>
 
-
-    <LinearLayout
-        android:id="@+id/message_loading_spinner"
-        android:orientation="vertical"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/discussion_toolbar"
-        app:layout_constraintBottom_toTopOf="@id/discussion_invitation"
-        app:layout_constraintVertical_bias=".2"
-        android:gravity="center_horizontal">
-        <ProgressBar
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            android:theme="@style/AppTheme.BlueAccent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/authentication_spinner_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_loading_messages" />
-    </LinearLayout>
-
-
-    <io.olvid.messenger.customClasses.EmptyRecyclerView
-        android:id="@+id/message_list_recycler_view"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/composeView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:paddingTop="@dimen/tab_bar_size"
-        android:paddingBottom="44dp"
         app:layout_constraintBottom_toTopOf="@id/emoji_keyboard_placeholder"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/discussion_toolbar"
-        tools:listitem="@layout/item_view_message_inbound" />
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/discussion_location_sharing_group"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintWidth_max="wrap"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:orientation="horizontal"
-        android:layout_marginHorizontal="32dp"
-        android:background="@drawable/background_rounded_dialog"
-        android:elevation="4dp"
-        android:gravity="center"
-        android:layout_marginTop="8dp"
-        android:paddingVertical="4dp"
-        app:layout_constraintTop_toBottomOf="@id/discussion_toolbar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-        <TextView
-            android:id="@+id/discussion_location_sharing_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/RobotoMedium"
-            android:textSize="14sp"
-            android:gravity="center_vertical"
-            app:drawableStartCompat="@drawable/ic_location_sharing_grey"
-            android:drawablePadding="4dp"
-            tools:text="Sharing your location"
-            android:paddingEnd="40dp"
-            android:paddingStart="4dp"
-            android:textColor="@color/greyTint"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-        <ImageView
-            android:id="@+id/discussion_location_sharing_menu_dots"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_three_dots_grey"
-            android:padding="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/discussion_scroll_down_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"
-        android:contentDescription="@null"
-        app:backgroundTint="@color/accent"
-        app:fabSize="mini"
-        tools:visibility="visible"
-        app:rippleColor="@color/blackOverlay"
-        app:srcCompat="@drawable/ic_down"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        app:layout_constraintBottom_toTopOf="@id/discussion_invitation"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/discussion_toolbar"
         />
-
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/discussion_toolbar"
@@ -228,13 +129,6 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <View
-        android:id="@+id/spacer"
-        android:layout_width="1dp"
-        android:layout_height="1dp"
-        app:layout_constraintBottom_toTopOf="@id/emoji_keyboard_placeholder"
-        app:layout_constraintStart_toStartOf="parent"/>
-
     <LinearLayout
         android:id="@+id/discussion_locked_group"
         android:layout_width="0dp"
@@ -265,19 +159,7 @@
             android:text="@string/message_discussion_locked"
             android:textAlignment="center"
             android:textStyle="italic" />
-
     </LinearLayout>
-
-    <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/discussion_invitation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/discussion_no_channel_group"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible"
-        />
 
     <LinearLayout
         android:id="@+id/discussion_no_channel_group"
@@ -342,4 +224,5 @@
         app:layout_constraintBottom_toTopOf="@id/emoji_keyboard_placeholder"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

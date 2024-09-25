@@ -266,7 +266,8 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                                 long newTimestamp = System.currentTimeMillis();
                                 if (newTimestamp - lastUpdateTimestamp > 100) {
                                     lastUpdateTimestamp = newTimestamp;
-                                    db.fyleMessageJoinWithStatusDao().updateProgress(draftMessage.id, nullFyle.id, (float) fileSize / uriFileSize);
+                                    copyingFyleMessageJoinWithStatus.setProgress((float) fileSize / uriFileSize);
+                                    db.fyleMessageJoinWithStatusDao().update(copyingFyleMessageJoinWithStatus);
                                 }
                             }
                         }
@@ -434,7 +435,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                         copyingFyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DRAFT;
                         copyingFyleMessageJoinWithStatus.progress = 0;
                         copyingFyleMessageJoinWithStatus.size = fileSize;
-                        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateStatusProgressSize(copyingFyleMessageJoinWithStatus.messageId, copyingFyleMessageJoinWithStatus.fyleId, copyingFyleMessageJoinWithStatus.status, copyingFyleMessageJoinWithStatus.progress, copyingFyleMessageJoinWithStatus.size);
+                        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(copyingFyleMessageJoinWithStatus);
                     } else {
                         fyle = new Fyle(sha256);
                         fyle.id = db.fyleDao().insert(fyle);

@@ -56,13 +56,11 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.olvid.engine.engine.types.EngineNotificationListener
@@ -74,6 +72,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.billing.SubscriptionOfferDialog
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.onboarding.flow.Device
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
@@ -152,9 +151,7 @@ fun NavGraphBuilder.activeDeviceSelection(
                                 append(stringResource(id = R.string.onboarding_transfer_multidevice_purchase_hyperlink))
                             }
                         },
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight(400),
+                        style = OlvidTypography.body2.copy(
                             color = Color(0xFF8B8D97),
                             textAlign = TextAlign.Center
                         )
@@ -218,8 +215,7 @@ fun NavGraphBuilder.activeDeviceSelection(
                         Column(modifier = Modifier.weight(1f, true)) {
                             Text(
                                 text = device.name,
-                                style = TextStyle(
-                                    fontSize = 16.sp,
+                                style = OlvidTypography.body1.copy(
                                     fontWeight = FontWeight.SemiBold,
                                     color = colorResource(id = R.color.almostBlack),
                                 )
@@ -241,8 +237,7 @@ fun NavGraphBuilder.activeDeviceSelection(
                             deviceStatus?.let {
                                 Text(
                                     text = it,
-                                    style = TextStyle(
-                                        fontSize = 14.sp,
+                                    style = OlvidTypography.body2.copy(
                                         color = Color(0xFF8B8D97),
                                     )
                                 )
@@ -262,8 +257,7 @@ fun NavGraphBuilder.activeDeviceSelection(
                                                 it
                                             )
                                         ),
-                                        style = TextStyle(
-                                            fontSize = 14.sp,
+                                        style = OlvidTypography.body2.copy(
                                             color = Color(0xFF8B8D97),
                                         )
                                     )

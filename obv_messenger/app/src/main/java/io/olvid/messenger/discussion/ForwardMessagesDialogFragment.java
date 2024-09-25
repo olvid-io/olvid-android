@@ -165,12 +165,12 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
             }
             viewModel.setForwardMessageBytesOwnedIdentity(bytesOwnedIdentity);
         });
-        Transformations.switchMap(viewModel.getForwardMessageOwnedIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? null : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
+        Transformations.switchMap(viewModel.forwardMessageOwnedIdentityLiveData, (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? null : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
 
 
         FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
 
-        LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(viewModel.getForwardMessageOwnedIdentityLiveData(), new Function1<>() {
+        LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(viewModel.forwardMessageOwnedIdentityLiveData, new Function1<>() {
             byte[] bytesOwnedIdentity = null;
 
             @Override
@@ -284,9 +284,9 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
                 return;
             }
             dismiss();
-            App.runThread(new ForwardMessagesTask(viewModel.getMessageIdsToForward(), selectedDiscussionIds));
+            App.runThread(new ForwardMessagesTask(viewModel.messageIdsToForward, selectedDiscussionIds));
 
-            OwnedIdentity forwardOwnedIdentity = viewModel.getForwardMessageOwnedIdentityLiveData().getValue();
+            OwnedIdentity forwardOwnedIdentity = viewModel.forwardMessageOwnedIdentityLiveData.getValue();
             Discussion originalDiscussion = viewModel.getDiscussion().getValue();
             if (selectedDiscussionIds.size() == 1
                     && forwardOwnedIdentity != null

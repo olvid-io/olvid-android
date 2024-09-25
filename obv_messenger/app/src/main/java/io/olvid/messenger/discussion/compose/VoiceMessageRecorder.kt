@@ -38,6 +38,7 @@ import android.view.View
 import android.view.View.OnTouchListener
 import android.view.WindowManager.LayoutParams
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -60,10 +61,11 @@ import kotlin.math.log2
 
 internal class VoiceMessageRecorder(
     private val activity: FragmentActivity,
-    private val requestAudioPermissionDelegate: RequestAudioPermissionDelegate
+    private val requestAudioPermissionDelegate: RequestAudioPermissionDelegate,
+    factory: ViewModelProvider.Factory
 ) : OnTouchListener {
     var opened by mutableStateOf(false)
-    private val composeMessageViewModel: ComposeMessageViewModel = ViewModelProvider(activity)[ComposeMessageViewModel::class.java]
+    private val composeMessageViewModel: ComposeMessageViewModel by activity.viewModels<ComposeMessageViewModel> { factory }
     private var recordPermission: Boolean
     private var mediaRecorder: MediaRecorder? = null
     private var audioFile: File? = null

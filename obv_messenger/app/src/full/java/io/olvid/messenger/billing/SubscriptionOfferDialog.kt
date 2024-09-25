@@ -37,12 +37,12 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -71,6 +71,7 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 
 
 @Composable
@@ -115,10 +116,10 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
             }
 
             fun fetchSubscriptionOptions() {
-                BillingUtils.getSubscriptionProducts({ subscriptionOfferDetails : List<SubscriptionOfferDetails>? ->
+                BillingUtils.getSubscriptionProducts { subscriptionOfferDetails: List<SubscriptionOfferDetails>? ->
                     loading = false
                     subscriptionsOffers = subscriptionOfferDetails
-                })
+                }
             }
 
             LaunchedEffect(Unit) {
@@ -139,7 +140,7 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                         modifier = Modifier
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
-                                indication = rememberRipple(bounded = false)
+                                indication = ripple(bounded = false)
                             ) { onDismissCallback() }
                             .padding(4.dp),
                         painter = painterResource(id = R.drawable.ic_close),
@@ -192,13 +193,13 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                     ) {
                                         Text(
                                             text = offerDetails.title,
-                                            fontSize = 16.sp,
+                                            style = OlvidTypography.body1,
                                             fontWeight = FontWeight.Bold,
                                         )
                                         offerDetails.description?.let {
                                             Text(
                                                 text = it,
-                                                fontSize = 14.sp,
+                                                style = OlvidTypography.body2,
                                             )
                                         }
                                     }
@@ -209,15 +210,14 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                             else -> stringResource(id = R.string.button_label_price_per_month_expanded, offerDetails.price)
                                         },
                                         textAlign = TextAlign.Center,
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        style = OlvidTypography.h2,
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
                                     text = stringResource(id = R.string.text_premium_features),
-                                    fontSize = 16.sp,
+                                    style = OlvidTypography.body1,
                                     fontWeight = FontWeight.Bold,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -233,7 +233,7 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                     Text(
                                         modifier = Modifier.weight(1f, true),
                                         text = stringResource(id = R.string.text_feature_initiate_secure_calls),
-                                        fontSize = 14.sp,
+                                        style = OlvidTypography.body2,
                                     )
                                     Image(
                                         modifier = Modifier.size(20.dp),
@@ -253,7 +253,7 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                     Text(
                                         modifier = Modifier.weight(1f, true),
                                         text = stringResource(id = R.string.text_feature_multi_device),
-                                        fontSize = 14.sp,
+                                        style = OlvidTypography.body2,
                                     )
                                     Image(
                                         modifier = Modifier.size(20.dp),

@@ -68,11 +68,11 @@ public class MessageExpirationService extends BroadcastReceiver {
         Logger.d("MessageExpirationService - Messages to delete " + messageExpirations.size());
         for (MessageExpiration messageExpiration : messageExpirations) {
             db.runInTransaction(() -> {
-                Message message = db.messageDao().get(messageExpiration.messageId);
+                Message message = db.messageDao().get(messageExpiration.getMessageId());
                 if (message == null) {
                     return;
                 }
-                if (message.isInbound() || !messageExpiration.wipeOnly) {
+                if (message.isInbound() || !messageExpiration.getWipeOnly()) {
                     message.delete(db);
                 } else {
                     // only wipe message content, but still delete all attachments

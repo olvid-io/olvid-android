@@ -46,12 +46,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import io.olvid.messenger.R
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
 import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.contacts.ContactListItem
 
 @Composable
@@ -97,7 +97,7 @@ fun GroupAdminsSelectionDialog(
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 text = stringResource(id = string.label_group_choose_admins),
-                                fontSize = 24.sp,
+                                style = OlvidTypography.h1,
                                 fontWeight = FontWeight(500)
                             )
                         }
@@ -120,8 +120,7 @@ fun GroupAdminsSelectionDialog(
                             Text(
                                 modifier = Modifier.weight(1f),
                                 text = stringResource(id = string.menu_action_select_all),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight(500)
+                                style = OlvidTypography.h3
                             )
                             Switch(
                                 checked = admins?.size == members?.size,

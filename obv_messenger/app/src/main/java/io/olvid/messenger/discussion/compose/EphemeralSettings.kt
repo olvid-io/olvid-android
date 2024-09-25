@@ -87,6 +87,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 
 private val timeUnits = mapOf(
     R.string.text_unit_s to 1L,
@@ -436,7 +437,7 @@ fun EphemeralSettingsGroup(
                                         .padding(top = 4.dp)
                                         .widthIn(max = 240.dp),
                                     text = stringResource(id = R.string.ephemeral_settings_invalid),
-                                    fontSize = 14.sp,
+                                    style = OlvidTypography.body2,
                                     color = Color(0xFFE2594E),
                                     onTextLayout = {
                                        additionalTimeUnitPopupOffset = it.size.height
@@ -542,9 +543,7 @@ fun EphemeralSettingsPopupLayout(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = R.string.preset_ephemeral_read_once),
-                    style = TextStyle(
-                        fontSize = 16.sp
-                    )
+                    style = OlvidTypography.body1
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Switch(
@@ -576,9 +575,7 @@ fun EphemeralSettingsPopupLayout(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = R.string.preset_ephemeral_visibility_duration),
-                    style = TextStyle(
-                        fontSize = 16.sp
-                    )
+                    style = OlvidTypography.body1
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -587,10 +584,7 @@ fun EphemeralSettingsPopupLayout(
                             LocalContext.current, it
                         )
                     } ?: stringResource(id = R.string.pref_text_duration_null),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        color = Color(0xFF8B8D97),
-                    )
+                    style = OlvidTypography.body1.copy(color = Color(0xFF8B8D97))
                 )
                 Icon(
                     modifier = Modifier
@@ -620,9 +614,7 @@ fun EphemeralSettingsPopupLayout(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = R.string.preset_ephemeral_existence_duration),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                    )
+                    style = OlvidTypography.body1
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -631,10 +623,7 @@ fun EphemeralSettingsPopupLayout(
                             LocalContext.current, it
                         )
                     } ?: stringResource(id = R.string.pref_text_duration_null),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        color = Color(0xFF8B8D97),
-                    )
+                    style = OlvidTypography.body1.copy(color = Color(0xFF8B8D97))
                 )
                 Icon(
                     modifier = Modifier
@@ -694,16 +683,11 @@ fun EphemeralSettingsPreferenceLayout(
             ) {
                 Text(
                     text = stringResource(id = R.string.preset_ephemeral_read_once),
-                    style = TextStyle(
-                        fontSize = 16.sp
-                    )
+                    style = OlvidTypography.body1
                 )
                 Text(
                     text = stringResource(id = R.string.preset_ephemeral_read_once_explanation),
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = colorResource(id = R.color.greyTint)
-                    )
+                    style = OlvidTypography.body2.copy(color = colorResource(id = R.color.greyTint))
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -743,9 +727,7 @@ fun EphemeralSettingsPreferenceLayout(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = stringResource(id = R.string.preset_ephemeral_visibility_duration),
-                        style = TextStyle(
-                            fontSize = 16.sp
-                        )
+                        style = OlvidTypography.body1
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -754,10 +736,7 @@ fun EphemeralSettingsPreferenceLayout(
                                 LocalContext.current, it
                             )
                         } ?: stringResource(id = R.string.pref_text_duration_null),
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            color = if (locked) Color.Unspecified else Color(0xFF8B8D97),
-                        )
+                        style = OlvidTypography.body1.copy(color = if (locked) Color.Unspecified else Color(0xFF8B8D97))
                     )
                     Icon(
                         modifier = Modifier
@@ -770,8 +749,7 @@ fun EphemeralSettingsPreferenceLayout(
                 }
                 Text(
                     text = stringResource(id = R.string.preset_ephemeral_visibility_duration_explanation),
-                    style = TextStyle(
-                        fontSize = 14.sp,
+                    style = OlvidTypography.body2.copy(
                         color = colorResource(id = R.color.greyTint)
                     )
                 )
@@ -805,9 +783,7 @@ fun EphemeralSettingsPreferenceLayout(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = stringResource(id = R.string.preset_ephemeral_existence_duration),
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                        )
+                        style = OlvidTypography.body1
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -816,8 +792,7 @@ fun EphemeralSettingsPreferenceLayout(
                                 LocalContext.current, it
                             )
                         } ?: stringResource(id = R.string.pref_text_duration_null),
-                        style = TextStyle(
-                            fontSize = 16.sp,
+                        style = OlvidTypography.body1.copy(
                             color = if (locked) Color.Unspecified else Color(0xFF8B8D97),
                         )
                     )
@@ -832,8 +807,7 @@ fun EphemeralSettingsPreferenceLayout(
                 }
                 Text(
                     text = stringResource(id = R.string.preset_ephemeral_existence_duration_explanation),
-                    style = TextStyle(
-                        fontSize = 14.sp,
+                    style = OlvidTypography.body2.copy(
                         color = colorResource(id = R.color.greyTint)
                     )
                 )

@@ -24,8 +24,6 @@ package io.olvid.messenger.discussion.gallery
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.media.AudioManager
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -39,7 +37,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
@@ -72,11 +69,9 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Surface
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
@@ -84,9 +79,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -100,7 +93,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -109,32 +101,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.decode.SvgDecoder
-import coil.decode.VideoFrameDecoder
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.drawable
-import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
-import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.AudioInfo
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.AudioServiceBindableViewHolder
-import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.timeFromMs
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatusTimestamped
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
@@ -166,17 +149,6 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
         val viewModel by viewModels<MediaGalleryViewModel>()
         val linkPreviewViewModel by viewModels<LinkPreviewViewModel>()
         val audioAttachmentServiceBinding by lazy { AudioAttachmentServiceBinding(this) }
-        val imageLoader = ImageLoader.Builder(this)
-            .components {
-                add(SvgDecoder.Factory())
-                if (SDK_INT >= 28) {
-                    add(ImageDecoderDecoder.Factory())
-                } else {
-                    add(GifDecoder.Factory())
-                }
-                add(VideoFrameDecoder.Factory())
-            }
-            .build()
 
         val discussionId = intent.getLongExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, -1)
 
@@ -209,11 +181,11 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
 
                         HorizontalPager(
                             state = pagerState,
-                            beyondBoundsPageCount = tabs.size - 1
+                            beyondViewportPageCount = tabs.size - 1
                         ) { page ->
                             when (page) {
                                 0 -> {
-                                    MediaPage(mediaItems.orEmpty(), discussionId, imageLoader)
+                                    MediaPage(mediaItems.orEmpty(), discussionId, App.imageLoader)
                                 }
 
                                 1 -> {
@@ -255,9 +227,9 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
         Row(Modifier.fillMaxWidth()) {
             IconButton(onClick = { finish() }) {
                 Icon(
-                    painter = painterResource(id = drawable.ic_arrow_back),
+                    painter = painterResource(id = R.drawable.ic_arrow_back),
                     contentDescription = stringResource(
-                        id = string.content_description_back_button
+                        id = R.string.content_description_back_button
                     )
                 )
             }
@@ -292,262 +264,54 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
     ) {
         if (audioItems.isEmpty().not()) {
             val activity = LocalContext.current as? Activity
-            LazyColumn(Modifier.fillMaxSize()) {
+            LazyColumn(
+                Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 audioItems.forEach { datedAudioItems ->
                     stickyHeader {
                         DateHeader(date = datedAudioItems.key)
                     }
-                    items(datedAudioItems.value) { fyleAndStatusTimestamped ->
-                        var playtime by remember {
-                            mutableLongStateOf(0)
-                        }
-                        var duration by remember {
-                            mutableLongStateOf(0)
-                        }
-                        var isPlaying by remember {
-                            mutableStateOf(false)
-                        }
-                        var audioOutputResource by remember {
-                            mutableIntStateOf(drawable.ic_speaker_light_grey)
-                        }
-                        var playbackSpeedState by remember {
-                            mutableFloatStateOf(0f)
-                        }
-                        val audioServiceBindableViewHolder = remember {
-                            object : AudioServiceBindable() {
-                                override fun updatePlayTimeMs(
-                                    audioInfo: AudioInfo?,
-                                    playTimeMs: Long,
-                                    playing: Boolean
-                                ) {
-                                    playtime = playTimeMs
-                                    isPlaying = playing
-                                }
-
-                                override fun bindAudioInfo(
-                                    audioInfo: AudioInfo?,
-                                    audioOutput: AudioOutput?,
-                                    playbackSpeed: Float
-                                ) {
-                                    if (audioInfo == null || audioInfo.failed) {
-                                        duration = 0
-                                        playtime = 0
-                                    } else {
-                                        duration = audioInfo.durationMs ?: 0
-                                        playtime = audioInfo.seekTimeMs
-                                    }
-                                    isPlaying = false
-                                    audioOutputResource = audioOutput.getResource()
-                                    playbackSpeedState = playbackSpeed
-                                }
-
-                                override fun setFailed(failed: Boolean) {
-                                    duration = 0
-                                    playtime = 0
-                                    isPlaying = false
-                                }
-
-                                override fun setAudioOutput(
-                                    audioOutput: AudioOutput?,
-                                    somethingPlaying: Boolean
-                                ) {
-                                    audioOutputResource = audioOutput.getResource()
-                                    activity?.let {
-                                        if ((somethingPlaying && (audioOutput == AudioOutput.PHONE)) != (activity.volumeControlStream == AudioManager.STREAM_VOICE_CALL)) {
-                                            activity.volumeControlStream =
-                                                if ((somethingPlaying && (audioOutput == AudioOutput.PHONE))) AudioManager.STREAM_VOICE_CALL else AudioManager.USE_DEFAULT_STREAM_TYPE
-                                        }
-                                    }
-                                }
-
-                                override fun setPlaybackSpeed(playbackSpeed: Float) {
-                                    playbackSpeedState = playbackSpeed
-                                }
-
-                                override fun getFyleAndStatus(): FyleAndStatus? {
-                                    return fns
-                                }
-                            }
-                        }
-
+                    items(datedAudioItems.value) {
                         var menuOpened by remember { mutableStateOf(false) }
-                        var playbackSpeedMenuOpened by remember { mutableStateOf(false) }
-                        val context = LocalContext.current
-
-                        LaunchedEffect(fyleAndStatusTimestamped.fyleAndStatus.fyle.id) {
-                            audioServiceBindableViewHolder.setFyleAndStatus(fyleAndStatusTimestamped.fyleAndStatus)
-                            audioAttachmentServiceBinding.loadAudioAttachment(
-                                fyleAndStatusTimestamped.fyleAndStatus,
-                                audioServiceBindableViewHolder
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .combinedClickable(
-                                    onClick = {
-                                        audioAttachmentServiceBinding.playPause(
-                                            fyleAndStatusTimestamped.fyleAndStatus,
-                                            discussionId
+                        AudioListItem(
+                            modifier = Modifier,
+                            fyleAndStatus = it.fyleAndStatus,
+                            activity = activity,
+                            audioAttachmentServiceBinding = audioAttachmentServiceBinding,
+                            discussionId = discussionId,
+                            onLongClick = { menuOpened = true },
+                            contextMenu = {
+                                ContextMenu(
+                                    menuOpened = menuOpened,
+                                    onDismissRequest = { menuOpened = false },
+                                    onGoToMessage = {
+                                        goToMessage(
+                                            context = this@DiscussionMediaGalleryActivity,
+                                            discussionId = discussionId,
+                                            messageId = it.fyleAndStatus.fyleMessageJoinWithStatus.messageId
                                         )
                                     },
-                                    onLongClick = { menuOpened = true }
-                                )
-                        ) {
-                            ContextMenu(
-                                menuOpened = menuOpened,
-                                onDismissRequest = { menuOpened = false },
-                                onGoToMessage = {
-                                    goToMessage(
-                                        context = context,
-                                        discussionId = discussionId,
-                                        messageId = fyleAndStatusTimestamped.fyleAndStatus.fyleMessageJoinWithStatus.messageId
-                                    )
-                                },
-                                onShare = {
-                                    val intent = Intent(Intent.ACTION_SEND)
-                                    intent.putExtra(
-                                        Intent.EXTRA_STREAM,
-                                        fyleAndStatusTimestamped.fyleAndStatus.contentUriForExternalSharing
-                                    )
-                                    intent.setType(fyleAndStatusTimestamped.fyleAndStatus.fyleMessageJoinWithStatus.nonNullMimeType)
-                                    startActivity(
-                                        Intent.createChooser(
-                                            intent,
-                                            getString(string.title_sharing_chooser)
+                                    onShare = {
+                                        val intent = Intent(Intent.ACTION_SEND)
+                                        intent.putExtra(
+                                            Intent.EXTRA_STREAM,
+                                            it.fyleAndStatus.contentUriForExternalSharing
                                         )
-                                    )
-                                })
-                            Image(
-                                modifier = Modifier
-                                    .size(64.dp),
-                                painter = painterResource(id = if (isPlaying) drawable.ic_pause else drawable.ic_play),
-                                contentDescription = fyleAndStatusTimestamped.fyleAndStatus.fyleMessageJoinWithStatus.fileName
-                            )
-                            Column(modifier = Modifier.padding(8.dp)) {
-                                Row {
-                                    Box(
-                                        modifier = Modifier.weight(1f, true),
-                                        contentAlignment = Alignment.TopEnd
-                                    ) {
-                                        Text(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(end = 4.dp),
-                                            text = fyleAndStatusTimestamped.fyleAndStatus.fyleMessageJoinWithStatus.fileName,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-
-                                        if (playbackSpeedState > 0.1f && isPlaying) {
-                                            val scale = LocalConfiguration.current.fontScale
-                                            Box(
-                                                modifier = Modifier.padding(top = 2.dp, end = 4.dp)
-                                            ) {
-                                                DropdownMenu(
-                                                    expanded = playbackSpeedMenuOpened,
-                                                    onDismissRequest = {
-                                                        playbackSpeedMenuOpened = false
-                                                    }) {
-                                                    DropdownMenuItem(onClick = {
-                                                        audioAttachmentServiceBinding.setPlaybackSpeed(
-                                                            1f
-                                                        )
-                                                        playbackSpeedMenuOpened = false
-                                                    }) {
-                                                        Text(text = stringResource(id = R.string.menu_action_play_at_1x))
-                                                    }
-                                                    DropdownMenuItem(onClick = {
-                                                        audioAttachmentServiceBinding.setPlaybackSpeed(
-                                                            1.5f
-                                                        )
-                                                        playbackSpeedMenuOpened = false
-                                                    }) {
-                                                        Text(text = stringResource(id = R.string.menu_action_play_at_1_5x))
-                                                    }
-                                                    DropdownMenuItem(onClick = {
-                                                        audioAttachmentServiceBinding.setPlaybackSpeed(
-                                                            2f
-                                                        )
-                                                        playbackSpeedMenuOpened = false
-                                                    }) {
-                                                        Text(text = stringResource(id = R.string.menu_action_play_at_2x))
-                                                    }
-                                                }
-                                                Text(
-                                                    modifier = Modifier
-                                                        .clickable {
-                                                            playbackSpeedMenuOpened = true
-                                                        }
-                                                        .background(
-                                                            color = colorResource(id = R.color.lightGrey),
-                                                            shape = CircleShape
-                                                        )
-                                                        .requiredWidth(36.dp)
-                                                        .padding(vertical = 1.dp),
-                                                    text = stringResource(
-                                                        id = when {
-                                                            playbackSpeedState < 1.1 -> R.string.text_speed_1x
-                                                            playbackSpeedState < 1.6 -> R.string.text_speed_1_5x
-                                                            else -> R.string.text_speed_2x
-                                                        }
-                                                    ),
-                                                    textAlign = TextAlign.Center,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = colorResource(id = R.color.grey),
-                                                    fontSize = (12 / scale).sp
-                                                )
-                                            }
+                                        intent.setType(it.fyleAndStatus.fyleMessageJoinWithStatus.nonNullMimeType)
+                                        activity?.let {
+                                            ContextCompat.startActivity(
+                                                activity,
+                                                Intent.createChooser(
+                                                    intent,
+                                                    getString(R.string.title_sharing_chooser)
+                                                ),
+                                                null
+                                            )
                                         }
-                                    }
-                                    Image(
-                                        modifier = Modifier.clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = rememberRipple(bounded = false)
-                                        ) {
-                                            audioAttachmentServiceBinding.toggleSpeakerOutput()
-                                        },
-                                        painter = painterResource(id = audioOutputResource),
-                                        contentDescription = ""
-                                    )
-                                }
-                                Box(contentAlignment = Alignment.TopCenter) {
-                                    Row {
-                                        Text(
-                                            text = timeFromMs(playtime),
-                                            fontSize = 12.sp,
-                                            color = if (isPlaying) colorResource(id = color.olvid_gradient_light) else colorResource(
-                                                id = color.greyTint
-                                            )
-                                        )
-                                        Spacer(modifier = Modifier.weight(1f))
-                                        Text(
-                                            text = timeFromMs(duration),
-                                            fontSize = 12.sp,
-                                            color = colorResource(
-                                                id = color.greyTint
-                                            )
-                                        )
-                                    }
-                                    androidx.compose.material.Slider(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        value = playtime / (duration.takeIf { it > 0 }
-                                            ?: 1).toFloat(),
-                                        onValueChange = { progress ->
-                                            audioAttachmentServiceBinding.seekAudioAttachment(
-                                                fyleAndStatusTimestamped.fyleAndStatus,
-                                                (progress * 1000).roundToInt()
-                                            )
-                                        },
-                                        colors = SliderDefaults.colors(
-                                            thumbColor = colorResource(id = color.olvid_gradient_light),
-                                            activeTrackColor = colorResource(id = color.olvid_gradient_light)
-                                        )
-                                    )
-                                }
+                                    })
                             }
-                        }
+                        )
                     }
                 }
             }
@@ -625,7 +389,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                             startActivity(
                                                 Intent.createChooser(
                                                     intent,
-                                                    getString(string.title_sharing_chooser)
+                                                    getString(R.string.title_sharing_chooser)
                                                 )
                                             )
                                         }
@@ -636,7 +400,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                         .padding(4.dp),
                                     painter = rememberAsyncImagePainter(
                                         model = link.bitmap
-                                            ?: drawable.mime_type_icon_link
+                                            ?: R.drawable.mime_type_icon_link
                                     ),
                                     contentScale = ContentScale.Crop,
                                     contentDescription = ""
@@ -654,10 +418,11 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                     link.title?.let {
                                         Text(
                                             text = it,
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Bold,
+                                            style = OlvidTypography.subtitle1.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
                                             color = colorResource(
-                                                id = color.greyTint
+                                                id = R.color.greyTint
                                             ),
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis
@@ -666,9 +431,9 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                     link.description?.let {
                                         Text(
                                             text = it,
-                                            fontSize = 12.sp,
+                                            style = OlvidTypography.subtitle1,
                                             color = colorResource(
-                                                id = color.greyTint
+                                                id = R.color.greyTint
                                             ),
                                             maxLines = if (link.shouldShowCompleteDescription()) Int.MAX_VALUE else 5,
                                             overflow = TextOverflow.Ellipsis
@@ -703,7 +468,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                     .fillMaxSize()
                     .background(Color.Black),
             ) {
-                documentItems.forEach {entry ->
+                documentItems.forEach { entry ->
                     stickyHeader {
                         DateHeader(date = entry.key)
                     }
@@ -716,11 +481,12 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                 App.openFyleInExternalViewer(
                                     this@DiscussionMediaGalleryActivity,
                                     it.fyleAndStatus,
-                                    null
-                                )
+                                ) {
+                                    it.fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
+                                }
                             },
                             contextMenu = {
-                                 ContextMenu(
+                                ContextMenu(
                                     menuOpened = menuOpened,
                                     onDismissRequest = { menuOpened = false },
                                     onGoToMessage = {
@@ -740,7 +506,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                         startActivity(
                                             Intent.createChooser(
                                                 intent,
-                                                getString(string.title_sharing_chooser)
+                                                getString(R.string.title_sharing_chooser)
                                             )
                                         )
                                     })
@@ -826,7 +592,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                                         startActivity(
                                                             Intent.createChooser(
                                                                 intent,
-                                                                getString(string.title_sharing_chooser)
+                                                                getString(R.string.title_sharing_chooser)
                                                             )
                                                         )
                                                     })
@@ -862,7 +628,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                                         modifier = Modifier
                                                             .align(Alignment.Center)
                                                             .size(itemSize / 3),
-                                                        painter = painterResource(id = drawable.overlay_video_small),
+                                                        painter = painterResource(id = R.drawable.overlay_video_small),
                                                         contentDescription = "video"
                                                     )
                                                 }
@@ -974,21 +740,12 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
         }
     }
 
-    private fun AudioOutput?.getResource(): Int {
-        return when (this) {
-            HEADSET -> drawable.ic_headset_grey
-            LOUDSPEAKER -> drawable.ic_speaker_blue
-            BLUETOOTH -> drawable.ic_speaker_bluetooth_grey
-            else -> drawable.ic_speaker_light_grey
-        }
-    }
-
     @Composable
     private fun NoContentFound() {
         Box(modifier = Modifier.fillMaxSize()) {
             Text(
                 modifier = Modifier.align(Alignment.Center),
-                text = stringResource(id = string.label_gallery_no_content)
+                text = stringResource(id = R.string.label_gallery_no_content)
             )
         }
     }
@@ -1002,8 +759,9 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                 .padding(horizontal = 8.dp)
                 .offset { IntOffset(0, offset) },
             text = date,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = OlvidTypography.h2.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
         )
     }
 
@@ -1040,7 +798,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
         context.startActivity(intent)
     }
 
-    private abstract class AudioServiceBindable : AudioServiceBindableViewHolder {
+    abstract class AudioServiceBindable : AudioServiceBindableViewHolder {
         var fns: FyleAndStatus? = null
 
         fun setFyleAndStatus(fyleAndStatus: FyleAndStatus) {
@@ -1049,3 +807,12 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
     }
 }
 
+
+fun AudioOutput?.getResource(): Int {
+    return when (this) {
+        HEADSET -> R.drawable.ic_headset_grey
+        LOUDSPEAKER -> R.drawable.ic_speaker_blue
+        BLUETOOTH -> R.drawable.ic_speaker_bluetooth_grey
+        else -> R.drawable.ic_speaker_light_grey
+    }
+}

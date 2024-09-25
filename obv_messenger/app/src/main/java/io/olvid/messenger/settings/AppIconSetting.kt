@@ -46,7 +46,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -123,7 +123,7 @@ fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
                             .clip(RoundedCornerShape(16.dp))
                             .clickable(interactionSource = remember {
                                 MutableInteractionSource()
-                            }, indication = rememberRipple()) {
+                            }, indication = ripple()) {
                                 selectedAppIcon = appIcon
                             }
                             .then(
@@ -150,6 +150,7 @@ fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
                             text = stringResource(id = appIcon.label),
                             textAlign = TextAlign.Center,
                             fontSize = 13.sp,
+                            lineHeight = 17.sp,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             color = colorResource(id = R.color.almostBlack),

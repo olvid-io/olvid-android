@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.ObvBytesKey;
@@ -760,7 +759,7 @@ public class Message {
         }
 
         // for group discussions with no members (or discussion with self)
-        if (byteContactIdentities.size() == 0) {
+        if (byteContactIdentities.isEmpty()) {
             return new ObvPostMessageOutput(true, new HashMap<>());
         }
 
@@ -828,7 +827,7 @@ public class Message {
         }
 
         // for group discussions with no members (or discussion with self)
-        if (byteContactIdentities.size() == 0) {
+        if (byteContactIdentities.isEmpty()) {
             return true;
         }
 
@@ -1064,7 +1063,7 @@ public class Message {
                 db.messageDao().updateStatus(id, status);
                 for (FyleMessageJoinWithStatusDao.FyleAndStatus attachmentFyleAndStatus : attachmentFylesAndStatuses) {
                     attachmentFyleAndStatus.fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                    db.fyleMessageJoinWithStatusDao().updateStatus(attachmentFyleAndStatus.fyleMessageJoinWithStatus.messageId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.fyleId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.status);
+                    db.fyleMessageJoinWithStatusDao().update(attachmentFyleAndStatus.fyleMessageJoinWithStatus);
                 }
 
                 // still create the MessageRecipientInfo for GroupV2 pending members
@@ -1146,7 +1145,7 @@ public class Message {
                         db.fyleMessageJoinWithStatusDao().updateEngineIdentifier(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
 
                         fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_UPLOADING;
-                        db.fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
+                        db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                     }
                 }
             }
@@ -1155,7 +1154,7 @@ public class Message {
             if (!attachmentsMarkedAsUploading) {
                 for (FyleMessageJoinWithStatusDao.FyleAndStatus attachmentFyleAndStatus : attachmentFylesAndStatuses) {
                     attachmentFyleAndStatus.fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                    db.fyleMessageJoinWithStatusDao().updateStatus(attachmentFyleAndStatus.fyleMessageJoinWithStatus.messageId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.fyleId, attachmentFyleAndStatus.fyleMessageJoinWithStatus.status);
+                    db.fyleMessageJoinWithStatusDao().update(attachmentFyleAndStatus.fyleMessageJoinWithStatus);
                 }
             }
 
@@ -1274,7 +1273,7 @@ public class Message {
                         db.fyleMessageJoinWithStatusDao().updateEngineIdentifier(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
 
                         fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_UPLOADING;
-                        db.fyleMessageJoinWithStatusDao().updateStatus(fyleMessageJoinWithStatus.messageId, fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.status);
+                        db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                     }
                     if (refreshOutboundStatus()) {
                         db.messageDao().updateStatus(id, status);
@@ -1410,6 +1409,56 @@ public class Message {
             } else {
                 return context.getString(R.string.text_message_location_received);
             }
+        } else if (messageType == Message.TYPE_LEFT_GROUP) {
+            return context.getString(R.string.text_group_left);
+        } else if (messageType == Message.TYPE_CONTACT_DELETED) {
+            return context.getString(R.string.text_user_removed_from_contacts);
+        } else if (messageType == Message.TYPE_CONTACT_INACTIVE_REASON) {
+            if (Message.NOT_ACTIVE_REASON_REVOKED.equals(contentBody)) {
+                return context.getString(R.string.text_contact_was_blocked_revoked);
+            } else {
+                return context.getString(R.string.text_contact_was_blocked);
+            }
+        } else if (messageType == Message.TYPE_CONTACT_RE_ADDED) {
+            return context.getString(R.string.text_user_added_to_contacts);
+        } else if (messageType == Message.TYPE_RE_JOINED_GROUP) {
+            return context.getString(R.string.text_group_re_joined);
+        } else if (messageType == Message.TYPE_JOINED_GROUP) {
+            return context.getString(R.string.text_group_joined);
+        } else if (messageType == Message.TYPE_GAINED_GROUP_ADMIN) {
+            return context.getString(R.string.text_you_became_admin);
+        } else if (messageType == Message.TYPE_LOST_GROUP_ADMIN) {
+            return context.getString(R.string.text_you_are_no_longer_admin);
+
+        } else if (messageType == Message.TYPE_GAINED_GROUP_SEND_MESSAGE) {
+            return context.getString(R.string.text_you_became_writer);
+        } else if (messageType == Message.TYPE_LOST_GROUP_SEND_MESSAGE) {
+            return context.getString(R.string.text_you_are_no_longer_writer);
+        } else if (messageType == Message.TYPE_MEDIATOR_INVITATION_SENT) {
+            return context.getString(R.string.invitation_status_mediator_invite_information_sent,
+                    contentBody);
+        } else if (messageType == Message.TYPE_MEDIATOR_INVITATION_ACCEPTED) {
+            return context.getString(
+                    R.string.invitation_status_mediator_invite_information_accepted,
+                    contentBody);
+
+        } else if (messageType == Message.TYPE_MEDIATOR_INVITATION_IGNORED) {
+            return context.getString(
+                    R.string.invitation_status_mediator_invite_information_ignored,
+                    contentBody
+            );
+        } else if (messageType == Message.TYPE_SCREEN_SHOT_DETECTED) {
+            if (Arrays.equals(senderIdentifier,AppSingleton.getBytesCurrentIdentity())) {
+                return context.getString(R.string.text_you_captured_sensitive_message);
+            } else {
+                String displayName =
+                        AppSingleton.getContactCustomDisplayName(senderIdentifier);
+                if (displayName != null) {
+                    return context.getString(R.string.text_xxx_captured_sensitive_message, displayName);
+                } else {
+                    return context.getString(R.string.text_unknown_member_captured_sensitive_message);
+                }
+            }
         } else if (contentBody == null) {
             return "";
         } else {
@@ -1419,18 +1468,18 @@ public class Message {
 
     // check whether a Message has an empty body and no attachment (it should then be deleted)
     public boolean isEmpty() {
-        return (contentBody == null || contentBody.trim().length() == 0)
+        return (contentBody == null || contentBody.trim().isEmpty())
                 && !hasAttachments()
                 && wipeStatus != WIPE_STATUS_WIPED
                 && wipeStatus != WIPE_STATUS_REMOTE_DELETED;
     }
 
     public boolean isTextOnly() {
-        return contentBody != null && contentBody.trim().length() > 0 && !hasAttachments() && jsonReply == null;
+        return contentBody != null && !contentBody.trim().isEmpty() && !hasAttachments() && jsonReply == null;
     }
 
     public boolean isWithoutText() {
-        return contentBody == null || contentBody.trim().length() == 0;
+        return contentBody == null || contentBody.trim().isEmpty();
     }
 
     public boolean isContentHidden() {
@@ -1706,7 +1755,7 @@ public class Message {
                 continue;
             } else if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(fmjoin.getNonNullMimeType())) {
                 imageCount++;
-                if (fmjoin.imageResolution != null && fmjoin.imageResolution.length() > 0) {
+                if (fmjoin.imageResolution != null && !fmjoin.imageResolution.isEmpty()) {
                     if (!first) {
                         sb.append(";");
                     }
@@ -1827,5 +1876,11 @@ public class Message {
         }
         db.messageMetadataDao().insert(new MessageMetadata(id, MessageMetadata.KIND_REMOTE_DELETED, serverTimestamp, bytesRemoteIdentity));
         db.messageExpirationDao().deleteWipeExpiration(id);
+    }
+
+
+    private static final Message EMPTY_MESSAGE = new Message(0, null, null, null, null, null, 0, 0, 0, 0, 0, 0, 0, null, new byte[0], UUID.randomUUID(), 0, 0, 0, 0, false, null, null, 0, 0, false, null, null, false);
+    public static Message emptyMessage() {
+        return EMPTY_MESSAGE;
     }
 }

@@ -117,7 +117,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -141,6 +140,7 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.ContactListScreen
 import io.olvid.messenger.main.contacts.ContactListViewModel
@@ -175,11 +175,11 @@ import io.olvid.messenger.webrtc.WebrtcCallService.PeerState.START_CALL_MESSAGE_
 import io.olvid.messenger.webrtc.WebrtcCallService.State.BUSY
 import io.olvid.messenger.webrtc.WebrtcCallService.State.CALL_ENDED
 import io.olvid.messenger.webrtc.WebrtcCallService.State.CALL_IN_PROGRESS
+import io.olvid.messenger.webrtc.WebrtcCallService.State.CONNECTING
 import io.olvid.messenger.webrtc.WebrtcCallService.State.FAILED
 import io.olvid.messenger.webrtc.WebrtcCallService.State.GETTING_TURN_CREDENTIALS
 import io.olvid.messenger.webrtc.WebrtcCallService.State.INITIAL
 import io.olvid.messenger.webrtc.WebrtcCallService.State.INITIALIZING_CALL
-import io.olvid.messenger.webrtc.WebrtcCallService.State.CONNECTING
 import io.olvid.messenger.webrtc.WebrtcCallService.State.RINGING
 import io.olvid.messenger.webrtc.WebrtcCallService.State.WAITING_FOR_AUDIO_PERMISSION
 import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder.Companion.localScreenTrack
@@ -345,15 +345,14 @@ private fun BoxScope.PreCall(
             Text(
                 text = name,
                 textAlign = TextAlign.Center,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                style = OlvidTypography.h3,
                 color = Color.White
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = status,
                 textAlign = TextAlign.Center,
-                fontSize = 14.sp,
+                style = OlvidTypography.body2,
                 color = Color(0xFF8B8D97),
             )
             Spacer(Modifier.height(100.dp))
@@ -378,16 +377,15 @@ private fun BoxScope.PreCall(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = name,
+                style = OlvidTypography.h3,
                 textAlign = TextAlign.Center,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
                 color = Color.White
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = status,
                 textAlign = TextAlign.Center,
-                fontSize = 14.sp,
+                style = OlvidTypography.body2,
                 color = Color.White
             )
         }
@@ -807,8 +805,7 @@ private fun ColumnScope.CallBottomSheetContent(
         ) {
             Text(
                 text = contact?.getCustomDisplayName().orEmpty(),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
+                style = OlvidTypography.body1,
                 color = Color.White
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -820,7 +817,7 @@ private fun ColumnScope.CallBottomSheetContent(
                 Text(
                     text = stringResource(id = R.string.text_ongoing_call, formatDuration(callDuration?.value ?: 0)) ,
                     // Body2
-                    fontSize = 14.sp,
+                    style = OlvidTypography.body2,
                     color = Color(0xFF8B8D97),
                 )
                 // TODO: remove if we do not use this
@@ -870,8 +867,7 @@ private fun ColumnScope.CallBottomSheetContent(
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = stringResource(id = R.string.webrtc_add_participants),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = OlvidTypography.h3,
                             color = Color.White
                         )
                     }
@@ -939,8 +935,7 @@ private fun ColumnScope.CallBottomSheetContent(
                         Column {
                             Text(
                                 text = callParticipant.displayName ?: "",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
+                                style = OlvidTypography.h3,
                                 color = Color.White
                             )
                             val peerStatus = getPeerStateText(
@@ -950,8 +945,7 @@ private fun ColumnScope.CallBottomSheetContent(
                             AnimatedVisibility(visible = peerStatus != null) {
                                 Text(
                                     text = peerStatus ?: "",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium,
+                                    style = OlvidTypography.h3,
                                     color = Color.White
                                 )
                             }
@@ -1110,6 +1104,7 @@ private fun AudioCallContent(
                 Text(
                     text = participants.size.toString(),
                     fontSize = 32.sp,
+                    lineHeight = 32.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
@@ -1489,7 +1484,7 @@ fun CallParticipant(
                         .padding(vertical = 8.dp, horizontal = 12.dp),
                     text = getPeerStateText(peerState = it, singleContact = false) ?: "",
                     textAlign = TextAlign.Center,
-                    fontSize = 14.sp,
+                    style = OlvidTypography.body2,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
@@ -1546,7 +1541,7 @@ fun CallParticipant(
                             .padding(top = 130.dp),
                         text = getPeerStateText(peerState = it, singleContact = false) ?: "",
                         textAlign = TextAlign.Center,
-                        fontSize = 14.sp,
+                        style = OlvidTypography.body2,
                         fontWeight = FontWeight.Medium,
                         color = Color.White
                     )
@@ -1611,7 +1606,7 @@ fun CallParticipant(
                         )
                         .padding(vertical = 4.dp, horizontal = 8.dp),
                     fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
+                    style = OlvidTypography.body2,
                     text = name
                 )
             }
@@ -1676,7 +1671,7 @@ private fun ScreenShareOngoing(stopScreenShare: () -> Unit) {
         Text(
             modifier = Modifier.widthIn(max = 200.dp),
             text = stringResource(id = R.string.webrtc_screen_sharing_ongoing),
-            fontSize = 24.sp,
+            style = OlvidTypography.h1,
             color = Color.White,
             textAlign = TextAlign.Center,
         )
@@ -1690,7 +1685,7 @@ private fun ScreenShareOngoing(stopScreenShare: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(id = R.string.webrtc_stop_screen_sharing),
-            fontSize = 14.sp,
+            style = OlvidTypography.body2,
             color = Color(0xFF8B8D97),
             textAlign = TextAlign.Center,
         )
@@ -1707,7 +1702,7 @@ private fun AddParticipantScreen(
     Text(
         modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 16.dp),
         text = stringResource(id = R.string.webrtc_add_participants),
-        fontSize = 20.sp,
+        style = OlvidTypography.h2,
         fontWeight = FontWeight.Medium,
         color = Color.White,
     )
@@ -1725,8 +1720,7 @@ private fun AddParticipantScreen(
             value = contactListViewModel.getFilter().orEmpty(),
             onValueChange = { contactListViewModel.setFilter(it) },
             singleLine = true,
-            textStyle = TextStyle(
-                fontSize = 16.sp,
+            textStyle = OlvidTypography.body1.copy(
                 color = Color.White,
             ),
             cursorBrush = SolidColor(Color.White),
@@ -1737,7 +1731,7 @@ private fun AddParticipantScreen(
                     .align(Alignment.CenterStart)
                     .padding(start = 12.dp),
                 text = stringResource(id = R.string.hint_search_contact_name),
-                fontSize = 16.sp,
+                style = OlvidTypography.body1,
                 color = Color(0xFF8B8D97),
             )
         }
@@ -1822,8 +1816,7 @@ fun AudioParticipant(
                 text = name,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
+                style = OlvidTypography.body1,
                 color = Color.White
             )
             Text(
@@ -1831,8 +1824,7 @@ fun AudioParticipant(
                 text = state.humanReadable(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
+                style = OlvidTypography.body2,
                 color = Color.LightGray
             )
         }
@@ -1970,7 +1962,7 @@ fun EncryptedCallNotice(modifier: Modifier = Modifier, color: Color) {
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = stringResource(id = R.string.call_encrypted_notice),
-            fontSize = 14.sp,
+            style = OlvidTypography.body2,
             color = color
         )
     }

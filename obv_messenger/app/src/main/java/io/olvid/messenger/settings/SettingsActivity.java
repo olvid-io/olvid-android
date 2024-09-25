@@ -904,8 +904,8 @@ public class SettingsActivity extends LockableActivity implements PreferenceFrag
         editor.apply();
     }
 
-    public static boolean isLinkPreviewInbound() {
-        return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND, SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND_DEFAULT);
+    public static boolean isLinkPreviewInbound(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND, SettingsActivity.PREF_KEY_LINK_PREVIEW_INBOUND_DEFAULT);
     }
 
     public static boolean isLinkPreviewOutbound() {

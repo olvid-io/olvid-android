@@ -23,6 +23,7 @@ package io.olvid.messenger.openid;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Spannable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,7 +98,7 @@ public class KeycloakAuthenticationStartFragment extends Fragment {
                         if (rfc == KeycloakTasks.RFC_AUTHENTICATION_ERROR_TIME_OFFSET) {
                             AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                                     .setTitle(R.string.dialog_title_authentication_failed_time_offset)
-                                    .setMessage(Markdown.formatMarkdown(activity.getString(R.string.dialog_message_authentication_failed_time_offset)))
+                                    .setMessage(Markdown.formatMarkdown(activity.getString(R.string.dialog_message_authentication_failed_time_offset), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE))
                                     .setNegativeButton(R.string.button_label_ok, null)
                                     .setNeutralButton(R.string.button_label_clock_settings, (DialogInterface dialog, int which) -> {
                                         try {
@@ -109,7 +110,7 @@ public class KeycloakAuthenticationStartFragment extends Fragment {
                         } else if (BrowserSelector.getAllBrowsers(activity).isEmpty()) {
                             AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                                     .setTitle(R.string.dialog_title_no_browser_found)
-                                    .setMessage(Markdown.formatMarkdown(activity.getString(R.string.dialog_message_no_browser_found)))
+                                    .setMessage(Markdown.formatMarkdown(activity.getString(R.string.dialog_message_no_browser_found), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE))
                                     .setNegativeButton(R.string.button_label_ok, null);
                             builder.create().show();
                         }

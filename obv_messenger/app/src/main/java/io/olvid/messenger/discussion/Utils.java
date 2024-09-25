@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -148,14 +149,11 @@ public class Utils {
             if (bytesOwnedIdentity != null) {
                 applyMentionSpans(textView.getContext(), bytesOwnedIdentity, message, result);
             }
-            if (searchPatterns != null) {
-                DiscussionSearch.highlightString(result, searchPatterns);
-            }
         } catch (Exception ex) {
             Logger.w("Error while applying spans to message content body");
         }
         if (markdown) {
-            SpannableStringBuilder spannableString = Markdown.formatMarkdown(result);
+            SpannableStringBuilder spannableString = Markdown.formatMarkdown(result, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             OrderedListItemSpan.Companion.measure(textView, spannableString);
             textView.setText(spannableString);
         } else {
@@ -167,7 +165,7 @@ public class Utils {
         return source.regionMatches(true, source.length() - suffix.length(), suffix, 0, suffix.length());
     }
 
-    private static void applyMentionSpans(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull Message message, SpannableString result) {
+    public static void applyMentionSpans(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull Message message, SpannableString result) {
         List<JsonUserMention> mentions = message.getMentions();
         if (mentions != null && !mentions.isEmpty()) {
             for (JsonUserMention mention : mentions) {

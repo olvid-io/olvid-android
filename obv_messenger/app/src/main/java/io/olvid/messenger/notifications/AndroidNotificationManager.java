@@ -36,6 +36,7 @@ import android.os.Build;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 
@@ -53,7 +54,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2190,7 +2190,7 @@ public class AndroidNotificationManager {
 
             @JsonIgnore
             NotificationCompat.MessagingStyle.Message getMessage() {
-                SpannableStringBuilder text = (content == null) ? new SpannableStringBuilder() : Markdown.formatMarkdown(SpannableString.valueOf(content));
+                SpannableStringBuilder text = (content == null) ? new SpannableStringBuilder() : Markdown.formatMarkdown(SpannableString.valueOf(content), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 if (senderByteIdentity != null && sender != null) {
                     InitialView initialView = new InitialView(App.getContext());
                     if (senderPhotoUrl == null) {

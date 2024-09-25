@@ -1,0 +1,233 @@
+/*
+ *  Olvid for Android
+ *  Copyright © 2019-2024 Olvid SAS
+ *
+ *  This file is part of Olvid for Android.
+ *
+ *  Olvid is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License, version 3,
+ *  as published by the Free Software Foundation.
+ *
+ *  Olvid is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package io.olvid.messenger.discussion.linkpreview
+
+import android.graphics.Bitmap
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.map
+import coil.compose.rememberAsyncImagePainter
+import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import io.olvid.messenger.App
+import io.olvid.messenger.R
+import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
+import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.designsystem.theme.OlvidTypography
+import io.olvid.messenger.discussion.DiscussionViewModel
+import io.olvid.messenger.discussion.message.Attachment
+import io.olvid.messenger.settings.SettingsActivity
+import kotlin.math.roundToInt
+
+@Composable
+fun LinkPreview(
+    modifier: Modifier = Modifier,
+    message: Message,
+    discussionViewModel: DiscussionViewModel?,
+    linkPreviewViewModel: LinkPreviewViewModel?,
+    onLongClick: () -> Unit = {}
+) {
+    var opengraph by remember {
+        mutableStateOf<OpenGraph?>(null)
+    }
+    if (message.linkPreviewFyleId != null) {
+        val linkPreviewFyle by AppDatabase.getInstance()
+            .fyleMessageJoinWithStatusDao()
+            .getFyleAndStatusObservable(message.id, message.linkPreviewFyleId).map { fyleAndStatus: FyleAndStatus? -> fyleAndStatus?.let { Attachment(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus)} }
+            .observeAsState()
+        linkPreviewFyle?.let { fyleAndStatus ->
+            if (fyleAndStatus.fyle.isComplete) {
+                LaunchedEffect(fyleAndStatus.fyle.id) {
+                    linkPreviewViewModel?.linkPreviewLoader(
+                        fyleAndStatus.fyle,
+                        fyleAndStatus.fyleMessageJoinWithStatus.fileName,
+                        fyleAndStatus.fyleMessageJoinWithStatus.messageId
+                    ) {
+                        opengraph = it
+                        it?.getSafeUri()?.let { uri ->
+                            discussionViewModel?.messageLinkPreviewUrlCache?.put(
+                                message.id,
+                                uri.toString()
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    } else if (message.messageType == Message.TYPE_INBOUND_MESSAGE && SettingsActivity.isLinkPreviewInbound(LocalContext.current)) {
+        val density = LocalDensity.current
+        LaunchedEffect(message.id) {
+            val size = with(density) {
+                56.dp.toPx().roundToInt()
+            }
+            linkPreviewViewModel?.linkPreviewLoader(
+                text = message.contentBody,
+                imageWidth = size,
+                imageHeight = size,
+                messageId = message.id
+            ) {
+                opengraph = it
+            }
+        }
+    }
+    opengraph?.let {
+        if (!it.isEmpty()) {
+            LinkPreviewContent(
+                modifier = modifier,
+                openGraph = it,
+                onLongClick = onLongClick
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun LinkPreviewContent(
+    modifier: Modifier = Modifier,
+    openGraph: OpenGraph,
+    onLongClick: () -> Unit = {}
+) {
+    val context = LocalContext.current
+    Box(modifier = modifier
+        .border(
+            width = 1.dp,
+            color = colorResource(id = R.color.attachmentBorder),
+            shape = RoundedCornerShape(4.dp)
+        )
+        .background(
+            color = colorResource(id = R.color.greyTint),
+            shape = RoundedCornerShape(4.dp)
+        )
+        .combinedClickable(onLongClick = onLongClick) {
+            App.openLink(context, openGraph.getSafeUri())
+        }) {
+        Row(
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .background(color = colorResource(id = R.color.almostWhite))
+        ) {
+            if (openGraph.hasLargeImageToDisplay()) {
+                Column(modifier = Modifier.padding(4.dp)) {
+                    LinkTitleAndDescription(openGraph = openGraph)
+                    LinkImage(openGraph.bitmap, isLarge = true)
+                }
+            } else {
+                Row(modifier = Modifier.padding(4.dp)) {
+                    LinkImage(openGraph.bitmap)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    LinkTitleAndDescription(openGraph = openGraph)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LinkImage(bitmap: Bitmap?, isLarge: Boolean = false) {
+    Image(
+        modifier = Modifier
+            .then(if (isLarge) bitmap?.let {
+                Modifier.aspectRatio(
+                    (it.width / it.height.toFloat()).coerceAtLeast(
+                        .7f
+                    )
+                )
+            } ?: Modifier.size(56.dp) else Modifier.size(56.dp)),
+        painter = rememberAsyncImagePainter(
+            model = bitmap
+                ?: R.drawable.mime_type_icon_link
+        ),
+        contentScale = ContentScale.Crop,
+        contentDescription = null
+    )
+}
+
+@Composable
+private fun LinkTitleAndDescription(
+    openGraph: OpenGraph
+) {
+    Column(modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)) {
+        openGraph.title?.let {
+            Text(
+                text = it,
+                maxLines = if (openGraph.shouldShowCompleteDescription()) 2 else 1,
+                style = OlvidTypography.body2,
+                fontWeight = FontWeight.Medium,
+                color = colorResource(id = R.color.darkGrey),
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+        }
+        Text(
+            text = openGraph.buildDescription(),
+            maxLines = if (openGraph.shouldShowCompleteDescription()) 100 else 5,
+            style = OlvidTypography.body2,
+            fontWeight = FontWeight.Normal,
+            color = colorResource(id = R.color.greyTint),
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Preview
+@Composable
+fun LinkPreviewContentPreview() {
+    AppCompatTheme {
+        LinkPreviewContent(
+            openGraph = OpenGraph(
+                title = "Link title",
+                description = "Link description sufficiently long to span multiple lines",
+                url = "https://olvid.io"
+            )
+        )
+    }
+}

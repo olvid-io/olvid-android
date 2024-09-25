@@ -258,6 +258,10 @@ public class FyleMessageJoinWithStatus {
         }
     }
 
+    public void setProgress(float progress) {
+        this.progress = progress;
+    }
+
     public boolean refreshOutboundStatus(byte[] bytesOwnedIdentity) {
         // outbound status only makes sense for outbound messages, which have an engine number
         if (engineNumber == null) {
@@ -331,9 +335,8 @@ public class FyleMessageJoinWithStatus {
                         && (message.messageType == Message.TYPE_INBOUND_MESSAGE || message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE)) {
 
                     // do not modify the fyleMessageJoin otherwise the MessageAttachment diffutil does not detect the change in db...
-                    // wasOpened = true;
-
-                    AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateWasOpened(messageId, fyleId);
+                    wasOpened = true;
+                    AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(this);
 
                     // send notification to the sender if needed
                     DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(message.discussionId);

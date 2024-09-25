@@ -77,6 +77,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.drawable
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON_OUTLINED
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.CHOICE
@@ -134,9 +135,7 @@ fun OnboardingScreen(
                 ClickableText(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     text = action.label,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight(400),
+                    style = OlvidTypography.body2.copy(
                         color = Color(0xFF8B8D97),
                         textAlign = TextAlign.Center
                     )
@@ -281,8 +280,7 @@ fun OnboardingExplanationSteps(steps: List<String>) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "${index + 1}.",
-                    style = TextStyle(
-                        fontSize = 16.sp,
+                    style = OlvidTypography.body1.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF8B8D97),
                     )
@@ -293,8 +291,7 @@ fun OnboardingExplanationSteps(steps: List<String>) {
                 Text(
                     modifier = Modifier.weight(1f, true),
                     text = s,
-                    style = TextStyle(
-                        fontSize = 16.sp,
+                    style = OlvidTypography.body1.copy(
                         color = Color(0xFF8B8D97),
                         textAlign = TextAlign.Start
                     )
@@ -354,16 +351,14 @@ private fun OnboardingButton(
             Text(
                 text = text,
                 color = colorResource(id = color.almostBlack),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
+                style = OlvidTypography.body1,
             )
             description?.let {
                 Text(
                     modifier = Modifier.padding(top = 4.dp),
                     text = description,
                     color = colorResource(id = color.greyTint),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Normal,
+                    style = OlvidTypography.subtitle1,
                 )
             }
         }
@@ -450,6 +445,7 @@ private fun BoxedChar(
         text = char,
         style = TextStyle(
             fontSize = 18.sp,
+            lineHeight = 20.sp,
             fontWeight = FontWeight.SemiBold
         ),
         color =

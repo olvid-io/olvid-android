@@ -42,10 +42,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.R.color
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 
 @Composable
 fun MainScreenEmptyList(@DrawableRes icon: Int, iconPadding: Dp = 0.dp, @StringRes title: Int, @StringRes subtitle: Int? = null) {
@@ -64,7 +64,7 @@ fun MainScreenEmptyList(@DrawableRes icon: Int, iconPadding: Dp = 0.dp, @StringR
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(id = title),
-            fontSize = 16.sp,
+            style = OlvidTypography.body1,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = colorResource(id = color.almostBlack)
@@ -72,8 +72,7 @@ fun MainScreenEmptyList(@DrawableRes icon: Int, iconPadding: Dp = 0.dp, @StringR
         subtitle?.let {
             Text(
                 text = stringResource(id = subtitle),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Normal,
+                style = OlvidTypography.subtitle1,
                 textAlign = TextAlign.Center,
                 color = colorResource(id = color.greyTint)
             )

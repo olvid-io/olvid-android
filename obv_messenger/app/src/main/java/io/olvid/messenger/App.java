@@ -86,6 +86,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 
+import coil.ComponentRegistry;
+import coil.ImageLoader;
+import coil.decode.GifDecoder;
+import coil.decode.ImageDecoderDecoder;
+import coil.decode.SvgDecoder;
+import coil.decode.VideoFrameDecoder;
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.ObvBase64;
 import io.olvid.engine.engine.types.EngineAPI;
@@ -96,7 +102,6 @@ import io.olvid.engine.engine.types.ObvPushNotificationType;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.activities.ContactDetailsActivity;
 import io.olvid.messenger.activities.LockScreenActivity;
-import io.olvid.messenger.activities.MessageDetailsActivity;
 import io.olvid.messenger.activities.ObvLinkActivity;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.appdialogs.AppDialogShowActivity;
@@ -116,6 +121,7 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcMessage;
 import io.olvid.messenger.discussion.DiscussionActivity;
+import io.olvid.messenger.discussion.message.MessageDetailsActivity;
 import io.olvid.messenger.gallery.GalleryActivity;
 import io.olvid.messenger.group.GroupCreationActivity;
 import io.olvid.messenger.group.GroupDetailsActivity;
@@ -156,6 +162,7 @@ public class App extends Application implements DefaultLifecycleObserver {
     private static Application getApplication() {
         return application;
     }
+
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public static Context getContext() {
@@ -166,16 +173,21 @@ public class App extends Application implements DefaultLifecycleObserver {
     private static boolean isAppDialogShowing = false;
     private static boolean killActivitiesOnLockAndCloseHiddenProfileOnBackground = true;
 
-    public static boolean isVisible() { return isVisible; }
+    public static boolean isVisible() {
+        return isVisible;
+    }
 
 
     public static void doNotKillActivitiesOnLockOrCloseHiddenProfileOnBackground() {
         killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
     }
 
-    public static boolean shouldActivitiesBeKilledOnLockAndHiddenProfileClosedOnBackground() { return killActivitiesOnLockAndCloseHiddenProfileOnBackground; }
+    public static boolean shouldActivitiesBeKilledOnLockAndHiddenProfileClosedOnBackground() {
+        return killActivitiesOnLockAndCloseHiddenProfileOnBackground;
+    }
 
     public static AppIcon currentIcon;
+    public static ImageLoader imageLoader;
 
     @Override
     public void onCreate() {
@@ -186,6 +198,18 @@ public class App extends Application implements DefaultLifecycleObserver {
         SettingsActivity.setDefaultNightMode();
 
         currentIcon = AppIconSettingKt.getCurrentIcon();
+
+        ComponentRegistry.Builder componentRegistryBuilder = new ComponentRegistry().newBuilder()
+                .add(new SvgDecoder.Factory())
+                .add(new VideoFrameDecoder.Factory());
+        if (Build.VERSION.SDK_INT >= 28) {
+            componentRegistryBuilder.add(new ImageDecoderDecoder.Factory());
+        } else {
+            componentRegistryBuilder.add(new GifDecoder.Factory());
+        }
+        imageLoader = new ImageLoader.Builder(this)
+                .components(componentRegistryBuilder.build())
+                .build();
 
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
 
@@ -239,6 +263,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         Intent lockIntent = new Intent(activity, LockScreenActivity.class);
         activity.startActivity(lockIntent);
     }
+
     public static void prepareForStartActivityForResult(Fragment fragment) {
         killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
         Intent lockIntent = new Intent(fragment.getContext(), LockScreenActivity.class);
@@ -412,7 +437,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         serviceIntent.putExtra(WebrtcCallService.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         Bundle bytesContactIdentitiesBundle = new Bundle();
         int count = 0;
-        for (Contact contact: contacts) {
+        for (Contact contact : contacts) {
             bytesContactIdentitiesBundle.putByteArray(Integer.toString(count), contact.bytesContactIdentity);
             count++;
         }
@@ -431,7 +456,7 @@ public class App extends Application implements DefaultLifecycleObserver {
     }
 
     public static void handleWebrtcMessage(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, JsonWebrtcMessage jsonWebrtcMessage, long downloadTimestamp, long serverTimestamp) {
-        if (jsonWebrtcMessage.getCallIdentifier() == null || jsonWebrtcMessage.getMessageType() == null|| jsonWebrtcMessage.getSerializedMessagePayload() == null) {
+        if (jsonWebrtcMessage.getCallIdentifier() == null || jsonWebrtcMessage.getMessageType() == null || jsonWebrtcMessage.getSerializedMessagePayload() == null) {
             return;
         }
         int messageType = jsonWebrtcMessage.getMessageType();
@@ -511,9 +536,6 @@ public class App extends Application implements DefaultLifecycleObserver {
     public static void openMessageDetails(Context activityContext, long messageId, boolean hasAttachments, boolean isInbound, boolean sentFromOtherDevice) {
         Intent intent = new Intent(getContext(), MessageDetailsActivity.class);
         intent.putExtra(MessageDetailsActivity.MESSAGE_ID_INTENT_EXTRA, messageId);
-        intent.putExtra(MessageDetailsActivity.HAS_ATTACHMENT_INTENT_EXTRA, hasAttachments);
-        intent.putExtra(MessageDetailsActivity.IS_INBOUND_INTENT_EXTRA, isInbound);
-        intent.putExtra(MessageDetailsActivity.SENT_FROM_OTHER_DEVICE_INTENT_EXTRA, sentFromOtherDevice);
         activityContext.startActivity(intent);
     }
 
@@ -692,11 +714,13 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({android.widget.Toast.LENGTH_SHORT, android.widget.Toast.LENGTH_LONG})
-    public @interface ToastLength {}
+    public @interface ToastLength {
+    }
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({android.view.Gravity.CENTER, android.view.Gravity.BOTTOM, android.view.Gravity.TOP})
-    public @interface ToastGravity {}
+    public @interface ToastGravity {
+    }
 
     public static void toast(@StringRes final int resId, @ToastLength final int duration) {
         toast(getContext().getString(resId), duration, Gravity.BOTTOM);
@@ -910,6 +934,7 @@ public class App extends Application implements DefaultLifecycleObserver {
     }
 
     private static long backupRequireSignInCooldown = 0;
+
     public static void openAppDialogBackupRequiresSignIn() {
         if (System.currentTimeMillis() > backupRequireSignInCooldown) {
             backupRequireSignInCooldown = System.currentTimeMillis() + 3_600_000L; // add a 1 hour cooldown between dialogs
@@ -1245,7 +1270,8 @@ public class App extends Application implements DefaultLifecycleObserver {
             if (count > 0) {
                 try {
                     UnifiedForegroundService.LocationSharingSubService.syncSharingMessages();
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
         }
 
@@ -1278,6 +1304,7 @@ public class App extends Application implements DefaultLifecycleObserver {
                                 // no key generated yet --> generate one and attempt to put it in escrow
                                 backupKeyListener = new EngineNotificationListener() {
                                     Long registrationNumber = null;
+
                                     @Override
                                     public void callback(String notificationName, HashMap<String, Object> userInfo) {
                                         switch (notificationName) {

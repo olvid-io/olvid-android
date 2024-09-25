@@ -53,16 +53,15 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.databases.entity.CallLogItem
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.InitialView
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -116,8 +115,7 @@ fun CallLogItemView(
                 Text(
                     text = title,
                     color = colorResource(id = R.color.primary700),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
+                    style = OlvidTypography.h3,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -133,7 +131,7 @@ fun CallLogItemView(
                         modifier = Modifier.padding(top = 2.dp),
                         text = date,
                         color = colorResource(id = R.color.grey),
-                        fontSize = 12.sp,
+                        style = OlvidTypography.subtitle1
                     )
                 }
             }

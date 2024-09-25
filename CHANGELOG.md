@@ -1,3 +1,20 @@
+# Build 252 (3.2)
+2024-09-25
+
+- Bug fix for the Compose discussion view
+
+# ~~Build 251 (3.2)~~
+2024-09-19
+
+- Complete re-write of the discussion view in Compose
+
+# Build 250 (3.1.1)
+2024-07-14
+
+- Re-enable android auto support
+- Fix some markdown edge cases
+- Remove attachment count from global search as it was too slow
+
 # Build 249 (3.1)
 2024-07-10
 

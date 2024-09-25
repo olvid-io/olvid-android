@@ -29,27 +29,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed">
-
-        <LinearLayout
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/compose_message_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <include
-                layout="@layout/view_message_top_timestamp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="4dp" />
-
-            <include
-                layout="@layout/view_message_details_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp" />
-        </LinearLayout>
+            android:layout_height="wrap_content"/>
     </androidx.core.widget.NestedScrollView>
+
+    <TextView
+        android:id="@+id/empty_metadata_textview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/text_no_recipient_details"
+        android:textStyle="italic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/message_scrollview" />
 
     <ScrollView
         android:layout_width="match_parent"

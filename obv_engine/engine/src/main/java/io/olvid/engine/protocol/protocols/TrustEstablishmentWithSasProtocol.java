@@ -1031,6 +1031,14 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
         public ConcreteProtocolState executeStep() throws Exception {
             ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
 
+            if (TrustEstablishmentCommitmentReceived.exists(protocolManagerSession, getOwnedIdentity(), receivedMessage.commitment)) {
+                // we already received this commitment
+                return new CancelledState();
+            } else {
+                // store the commitment to prevent future replay
+                TrustEstablishmentCommitmentReceived.create(protocolManagerSession, getOwnedIdentity(), receivedMessage.commitment);
+            }
+
             UUID dialogUuid = UUID.randomUUID();
             {
                 // Display invite received dialog

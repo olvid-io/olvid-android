@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.dao;
 import static io.olvid.messenger.databases.dao.DiscussionDao.PREFIX_DISCUSSION_COLUMNS;
 
 import androidx.lifecycle.LiveData;
+import androidx.paging.PagingSource;
 import androidx.room.ColumnInfo;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -101,6 +102,14 @@ public interface MessageDao {
             " WHERE m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
             " AND " + Message.FTS_TABLE_NAME + " MATCH :query LIMIT :limit)")
     int globalSearchCount(byte[] bytesOwnedIdentity, String query, int limit);
+
+    @Query("SELECT m.id FROM " + Message.TABLE_NAME + " AS m " +
+            " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
+            " WHERE m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND m." + Message.DISCUSSION_ID + " = :discussionId" +
+            " AND " + Message.FTS_TABLE_NAME + " MATCH :query ORDER BY m." + Message.TIMESTAMP + " DESC")
+    List<Long> discussionSearch(long discussionId, String query);
+
 
     class DiscussionAndMessage {
         @Embedded(prefix = "disc_")
@@ -205,6 +214,9 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " ASC")
     LiveData<List<Message>> getDiscussionMessages(long discussionId);
 
+    @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " DESC")
+    PagingSource<Integer,Message> getDiscussionMessagesPaged(long discussionId);
+
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
@@ -212,6 +224,13 @@ public interface MessageDao {
             " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_LEFT +
             " ORDER BY " + Message.SORT_INDEX + " ASC")
     LiveData<List<Message>> getDiscussionMessagesWithoutGroupMemberChanges(long discussionId);
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_JOINED +
+            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_LEFT +
+            " ORDER BY " + Message.SORT_INDEX + " DESC")
+    PagingSource<Integer,Message> getDiscussionMessagesWithoutGroupMemberChangesPaged(long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " DESC LIMIT :count")
     LiveData<List<Message>> getLastDiscussionMessages(long discussionId, int count);

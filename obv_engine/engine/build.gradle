@@ -9,8 +9,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4'
     implementation files('libs/sqlite-jdbc-3.45.1.0.jar')
 
-    implementation 'org.slf4j:slf4j-api:2.0.13'
-    implementation 'org.slf4j:slf4j-simple:2.0.13'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'org.slf4j:slf4j-simple:2.0.16'
 
     implementation 'org.bitbucket.b_c:jose4j:0.9.6'
 

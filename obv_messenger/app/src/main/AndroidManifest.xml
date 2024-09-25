@@ -85,10 +85,9 @@
         <meta-data
             android:name="firebase_analytics_collection_deactivated"
             android:value="true" />
-<!--        TODO: we disable android auto support for now... -->
-<!--        <meta-data-->
-<!--            android:name="com.google.android.gms.car.application"-->
-<!--            android:resource="@xml/automotive_app_desc" />-->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
 
 
         <activity
@@ -353,6 +352,7 @@
         <activity
             android:name=".discussion.DiscussionActivity"
             android:theme="@style/AppTheme.NoActionBar.ActionModeOverlay"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"/>
         <activity
             android:name=".settings.SettingsActivity"
@@ -434,7 +434,7 @@
             </intent-filter>
          </activity>
         <activity
-            android:name=".activities.MessageDetailsActivity"
+            android:name=".discussion.message.MessageDetailsActivity"
             android:label="@string/activity_title_message_details" />
         <activity
             android:name=".main.bookmarks.BookmarksActivity"

@@ -96,7 +96,7 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.discussion.DiscussionActivity
-import io.olvid.messenger.discussion.DiscussionActivity.FULL_SCREEN_MAP_FRAGMENT_TAG
+import io.olvid.messenger.discussion.DiscussionActivity.Companion.FULL_SCREEN_MAP_FRAGMENT_TAG
 import io.olvid.messenger.discussion.location.FullscreenMapDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment.OnOwnedIdentitySelectedListener
@@ -913,7 +913,7 @@ class MainActivity : LockableActivity(), OnClickListener {
                         override fun onIntegrationSelected(integration: LocationIntegrationEnum, customOsmServerUrl: String?) {
                             SettingsActivity.setLocationIntegration(integration.string, customOsmServerUrl)
                             if (integration == LocationIntegrationEnum.OSM || integration == LocationIntegrationEnum.MAPS || integration == LocationIntegrationEnum.BASIC || integration == LocationIntegrationEnum.CUSTOM_OSM) {
-                                FullscreenMapDialogFragment.newInstance(null, null, AppSingleton.getBytesCurrentIdentity(), SettingsActivity.getLocationIntegration())?.show(supportFragmentManager, FULL_SCREEN_MAP_FRAGMENT_TAG)
+                                FullscreenMapDialogFragment.newInstance(null, null, AppSingleton.getBytesCurrentIdentity(), SettingsActivity.getLocationIntegration())?.show(supportFragmentManager, DiscussionActivity.FULL_SCREEN_MAP_FRAGMENT_TAG)
                             } else {
                                 invalidateOptionsMenu();
                             }

@@ -32,7 +32,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -63,7 +63,8 @@ fun SoundWave(sample: SampleAndTicker, stop: () -> Unit) {
                     .requiredSize(24.dp)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = rememberRipple(bounded = false, radius = 16.dp)) { stop() },
+                        indication = ripple(bounded = false, radius = 16.dp)
+                    ) { stop() },
                     tint = colorResource(id = R.color.olvid_gradient_light),
                     painter = painterResource(id = R.drawable.ic_stop),
                     contentDescription = stringResource(

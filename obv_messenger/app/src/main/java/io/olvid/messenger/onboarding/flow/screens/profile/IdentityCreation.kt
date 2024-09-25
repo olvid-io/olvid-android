@@ -38,17 +38,17 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.string
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.OnboardingActivity
 import io.olvid.messenger.onboarding.flow.OnboardingAction
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON
@@ -104,7 +104,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
             OutlinedTextField(
                 value = onboardingFlowViewModel.firstName,
                 onValueChange = onboardingFlowViewModel::updateFirstName,
-                textStyle = TextStyle(fontSize = 20.sp),
+                textStyle = OlvidTypography.h2.copy(fontWeight = FontWeight.Normal),
                 singleLine = true,
                 label = {
                     Text(text = stringResource(id = string.hint_first_name))
@@ -116,7 +116,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
             OutlinedTextField(
                 value = onboardingFlowViewModel.lastName,
                 onValueChange = onboardingFlowViewModel::updateLastName,
-                textStyle = TextStyle(fontSize = 20.sp),
+                textStyle = OlvidTypography.h2.copy(fontWeight = FontWeight.Normal),
                 singleLine = true,
                 label = {
                     Text(

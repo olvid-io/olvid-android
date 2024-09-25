@@ -28,7 +28,7 @@ import android.widget.TextView
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-open class OrderedListItemSpan(private val level : Int = 0,
+open class OrderedListItemSpan(open val level : Int = 0,
     private val number: String
 ) : LeadingMarginSpan {
     private val paint = Paint()

@@ -405,16 +405,8 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                                 holder.hiddenContentTextView.setTextColor(ContextCompat.getColor(activity, R.color.red));
                                 if (visibilityDuration == null) {
                                     holder.hiddenContentTextView.setText(R.string.text_visible_once);
-                                } else if (visibilityDuration < 60L) {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_s_once_compact, visibilityDuration));
-                                } else if (visibilityDuration < 3_600L) {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_m_once_compact, visibilityDuration / 60L));
-                                } else if (visibilityDuration < 86_400L) {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_h_once_compact, visibilityDuration / 3_600L));
-                                } else if (visibilityDuration < 31_536_000L) {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_d_once_compact, visibilityDuration / 86_400L));
                                 } else {
-                                    holder.hiddenContentTextView.setText(activity.getString(R.string.text_visible_timer_y_once_compact, visibilityDuration / 31_536_000L));
+                                    holder.hiddenContentTextView.setText(EphemeralViewModel.Companion.visibilitySetting(activity, visibilityDuration, true));
                                 }
                             } else {
                                 holder.hiddenContentTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_eye, 0, 0, 0);
@@ -422,7 +414,7 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
                                 if (visibilityDuration == null) {
                                     holder.hiddenContentTextView.setText(null); // this should never happen
                                 } else {
-                                    holder.hiddenContentTextView.setText(EphemeralViewModel.Companion.visibilitySetting(visibilityDuration));
+                                    holder.hiddenContentTextView.setText(EphemeralViewModel.Companion.visibilitySetting(activity, visibilityDuration, false));
                                 }
                             }
                             break;
@@ -548,12 +540,13 @@ public class MessageAttachmentAdapter extends RecyclerView.Adapter<MessageAttach
 
         if ((changesMask & RESOLUTION_CHANGE_MASK) != 0) {
             try {
-                PreviewUtils.ImageResolution imageResolution = new PreviewUtils.ImageResolution(fyleAndStatus.fyleMessageJoinWithStatus.imageResolution);
-                if (imageResolution.kind == PreviewUtils.ImageResolution.KIND.ANIMATED) {
-                    if (imageResolution.height < imageResolution.width) {
+                //noinspection DataFlowIssue
+                ImageResolution imageResolution = new ImageResolution(fyleAndStatus.fyleMessageJoinWithStatus.imageResolution);
+                if (imageResolution.getKind() == ImageResolution.KIND.ANIMATED) {
+                    if (imageResolution.getHeight() < imageResolution.getWidth()) {
                         ConstraintSet relaxed = new ConstraintSet();
                         relaxed.clone(holder.rootView);
-                        relaxed.setDimensionRatio(R.id.attachment_image_view, Float.toString((float) imageResolution.width / imageResolution.height));
+                        relaxed.setDimensionRatio(R.id.attachment_image_view, Float.toString((float) imageResolution.getWidth() / imageResolution.getHeight()));
                         relaxed.applyTo(holder.rootView);
                     } else if (holder.type == TYPE_WIDE_IMAGE) {
                         ConstraintSet relaxed = new ConstraintSet();

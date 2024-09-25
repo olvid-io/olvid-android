@@ -37,17 +37,45 @@ import io.olvid.messenger.databases.entity.jsons.JsonMessageReference
 import java.io.File
 
 class ComposeMessageViewModel(
-    discussionIdLiveData: LiveData<Long>,
+    private val discussionIdLiveData: LiveData<Long>,
     discussionCustomization: LiveData<DiscussionCustomization?>
 ) : ViewModel() {
     private val db: AppDatabase = AppDatabase.getInstance()
-    private val discussionIdLiveData: LiveData<Long>
-    private val recordingLiveData: MutableLiveData<Boolean>
-    private val draftMessageFyles: LiveData<List<FyleAndStatus>?>
+    private val recordingLiveData: MutableLiveData<Boolean> = MutableLiveData(false)
+    private val draftMessageFyles: LiveData<List<FyleAndStatus>?> =
+        discussionIdLiveData.switchMap { discussionId: Long? ->
+            if (discussionId == null) {
+                return@switchMap null
+            }
+            db.fyleDao().getDiscussionDraftFyles(discussionId)
+        }
     private val draftMessageFylesEditMode = MediatorLiveData<List<FyleAndStatus>?>()
-    private val draftMessage: LiveData<Message>
+    private val draftMessage: LiveData<Message> = discussionIdLiveData.switchMap { discussionId: Long? ->
+        if (discussionId == null) {
+            return@switchMap null
+        }
+        db.messageDao().getDiscussionDraftMessage(discussionId)
+    }
     private val draftMessageEditMode = MediatorLiveData<Message?>()
-    private val draftMessageReply: LiveData<Message?>
+    private val draftMessageReply: LiveData<Message?> = draftMessage.switchMap { draftMessage: Message? ->
+        if (draftMessage?.jsonReply == null) {
+            return@switchMap MutableLiveData<Message?>(null)
+        }
+        val jsonReply: JsonMessageReference = try {
+            AppSingleton.getJsonObjectMapper().readValue<JsonMessageReference>(
+                draftMessage.jsonReply,
+                JsonMessageReference::class.java
+            )
+        } catch (e: Exception) {
+            return@switchMap MutableLiveData<Message?>(null)
+        }
+        db.messageDao().getBySenderSequenceNumberAsync(
+            jsonReply.senderSequenceNumber,
+            jsonReply.senderThreadIdentifier,
+            jsonReply.senderIdentifier,
+            draftMessage.discussionId
+        )
+    }
     private val draftMessageReplyEditMode = MediatorLiveData<Message?>()
     private val draftMessageEdit = MutableLiveData<Message?>(null)
     val ephemeralSettingsChanged: LiveData<Boolean>
@@ -60,39 +88,6 @@ class ComposeMessageViewModel(
     var openEphemeralSettings by mutableStateOf(false)
 
     init {
-        this.discussionIdLiveData = discussionIdLiveData
-        recordingLiveData = MutableLiveData(false)
-        draftMessageFyles = discussionIdLiveData.switchMap { discussionId: Long? ->
-            if (discussionId == null) {
-                return@switchMap null
-            }
-            db.fyleDao().getDiscussionDraftFyles(discussionId)
-        }
-        draftMessage = discussionIdLiveData.switchMap { discussionId: Long? ->
-            if (discussionId == null) {
-                return@switchMap null
-            }
-            db.messageDao().getDiscussionDraftMessage(discussionId)
-        }
-        draftMessageReply = draftMessage.switchMap { draftMessage: Message? ->
-            if (draftMessage?.jsonReply == null) {
-                return@switchMap MutableLiveData<Message?>(null)
-            }
-            val jsonReply: JsonMessageReference = try {
-                AppSingleton.getJsonObjectMapper().readValue<JsonMessageReference>(
-                    draftMessage.jsonReply,
-                    JsonMessageReference::class.java
-                )
-            } catch (e: Exception) {
-                return@switchMap MutableLiveData<Message?>(null)
-            }
-            db.messageDao().getBySenderSequenceNumberAsync(
-                jsonReply.senderSequenceNumber,
-                jsonReply.senderThreadIdentifier,
-                jsonReply.senderIdentifier,
-                draftMessage.discussionId
-            )
-        }
         draftMessageEditMode.addSource(draftMessage) { draft: Message? ->
             draftMessageEditMode.setValue(
                 if (draftMessageEdit.value != null) null else draft

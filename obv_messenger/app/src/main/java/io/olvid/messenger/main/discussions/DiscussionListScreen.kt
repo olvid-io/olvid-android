@@ -65,12 +65,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Discussion
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
@@ -80,7 +80,7 @@ import io.olvid.messenger.main.invitations.getAnnotatedTitle
 import io.olvid.messenger.main.search.GlobalSearchScreen
 import io.olvid.messenger.main.search.GlobalSearchViewModel
 import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyColumnState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -119,9 +119,8 @@ fun DiscussionListScreen(
             ) {
                 val lazyListState = rememberLazyListState()
 
-                val reorderableState = rememberReorderableLazyColumnState(
-                    lazyListState = lazyListState,
-                    ignoreContentPaddingForScroll = true
+                val reorderableState = rememberReorderableLazyListState(
+                    lazyListState = lazyListState
                 ) { from, to ->
                     discussionListViewModel.reorderList =
                         discussionListViewModel.reorderList?.toMutableList()?.apply {
@@ -164,7 +163,7 @@ fun DiscussionListScreen(
                                         item(key = -1L) {
                                             ReorderableItem(
                                                 enabled = true,
-                                                reorderableLazyListState = reorderableState,
+                                                state = reorderableState,
                                                 key = -1L
                                             ) {
                                                 PinDivider()
@@ -177,7 +176,7 @@ fun DiscussionListScreen(
                                         with(discussionAndLastMessage) {
                                             ReorderableItem(
                                                 enabled = reorderable,
-                                                reorderableLazyListState = reorderableState,
+                                                state = reorderableState,
                                                 key = discussion.id
                                             ) {
                                                 Box {
@@ -220,7 +219,7 @@ fun DiscussionListScreen(
                                                         locked = discussion.isLocked && invitation == null,
                                                         mentioned = unreadMention,
                                                         pinned = discussion.pinned != 0,
-                                                        reorderableItemScope = this@ReorderableItem.takeIf { reorderable && discussion.isPreDiscussion.not() },
+                                                        reorderableScope = this@ReorderableItem.takeIf { reorderable && discussion.isPreDiscussion.not() },
                                                         locationsShared = locationsShared,
                                                         attachmentCount = if (message?.isLocationMessage == true) 0 else message?.totalAttachmentCount
                                                             ?: 0,
@@ -297,7 +296,7 @@ fun PinDivider() {
             Text(
                 text = stringResource(id = R.string.label_discussion_list_pin_divider),
                 fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
+                style = OlvidTypography.body2,
                 textAlign = TextAlign.Center
             )
         Spacer(modifier = Modifier.width(8.dp))

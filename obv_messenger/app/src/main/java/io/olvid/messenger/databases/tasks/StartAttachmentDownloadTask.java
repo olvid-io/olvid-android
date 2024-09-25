@@ -35,6 +35,6 @@ public class StartAttachmentDownloadTask implements Runnable {
         AppSingleton.getEngine().downloadLargeAttachment(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
         FyleMessageJoinWithStatus reloadedFyleMessageJoinWithStatus = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().get(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
         reloadedFyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
-        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateStatus(reloadedFyleMessageJoinWithStatus.messageId, reloadedFyleMessageJoinWithStatus.fyleId, reloadedFyleMessageJoinWithStatus.status);
+        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(reloadedFyleMessageJoinWithStatus);
     }
 }

@@ -18,6 +18,7 @@
  */
 package io.olvid.messenger.discussion.compose
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -48,31 +49,59 @@ class EphemeralViewModel : ViewModel() {
     private val valid = MutableLiveData(false)
 
     companion object {
-        fun visibilitySetting(duration: Long): String {
-            with(App.getContext()) {
-                return if (duration < 60L) {
-                    getString(string.text_visible_timer_s, duration)
-                } else if (duration < 3600L) {
-                    getString(
-                        string.text_visible_timer_m,
-                        duration / 60
-                    )
-                } else if (duration < 86400L) {
-                    getString(
-                        string.text_visible_timer_h,
-                        duration / 3600
-                    )
-                } else if (duration < 31536000L) {
-                    getString(
-                        string.text_visible_timer_d,
-                        duration / 86400
-                    )
-                } else {
-                    getString(
-                        string.text_visible_timer_y,
-                        duration / 31536000
-                    )
-                }
+        fun visibilitySetting(context: Context, duration: Long? = null, readOnce: Boolean = false): String? {
+            with(context) {
+                return duration?.let {
+                    if (!readOnce) {
+                        if (duration < 60L) {
+                            getString(string.text_visible_timer_s, duration)
+                        } else if (duration < 3600L) {
+                            getString(
+                                string.text_visible_timer_m,
+                                duration / 60
+                            )
+                        } else if (duration < 86400L) {
+                            getString(
+                                string.text_visible_timer_h,
+                                duration / 3600
+                            )
+                        } else if (duration < 31536000L) {
+                            getString(
+                                string.text_visible_timer_d,
+                                duration / 86400
+                            )
+                        } else {
+                            getString(
+                                string.text_visible_timer_y,
+                                duration / 31536000
+                            )
+                        }
+                    } else {
+                        if (duration < 60L) {
+                            getString(string.text_visible_timer_s_once, duration)
+                        } else if (duration < 3600L) {
+                            getString(
+                                string.text_visible_timer_m_once,
+                                duration / 60
+                            )
+                        } else if (duration < 86400L) {
+                            getString(
+                                string.text_visible_timer_h_once,
+                                duration / 3600
+                            )
+                        } else if (duration < 31536000L) {
+                            getString(
+                                string.text_visible_timer_d_once,
+                                duration / 86400
+                            )
+                        } else {
+                            getString(
+                                string.text_visible_timer_y_once,
+                                duration / 31536000
+                            )
+                        }
+                    }
+                } ?: run { if (readOnce) getString(string.text_visible_once) else null }
             }
         }
 

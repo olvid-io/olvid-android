@@ -44,7 +44,7 @@ public class SaveMultipleAttachmentsTask implements Runnable {
     @Nullable private final Long messageId;
     @Nullable private final ArrayList<FyleMessageJoinWithStatusDao.FyleAndStatus> selectedFyleAndStatuses;
 
-    public SaveMultipleAttachmentsTask(Context context, Uri folderUri, long messageId) {
+    public SaveMultipleAttachmentsTask(Context context, Uri folderUri, @Nullable Long messageId) {
         this.context = context;
         this.folderUri = folderUri;
         this.messageId = messageId;

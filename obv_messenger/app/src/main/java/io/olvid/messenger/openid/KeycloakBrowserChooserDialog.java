@@ -22,6 +22,7 @@ package io.olvid.messenger.openid;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.Spannable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,7 +78,7 @@ public class KeycloakBrowserChooserDialog {
             if (browsers.isEmpty()) {
                 AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
                         .setTitle(R.string.dialog_title_no_browser_found)
-                        .setMessage(Markdown.formatMarkdown(context.getString(R.string.dialog_message_no_browser_found)))
+                        .setMessage(Markdown.formatMarkdown(context.getString(R.string.dialog_message_no_browser_found), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE))
                         .setNegativeButton(R.string.button_label_ok, null);
                 builder.create().show();
             } else {

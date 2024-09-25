@@ -438,11 +438,11 @@ public class GalleryActivity extends LockableActivity {
 
     private void updateMessageExpiration(MessageExpiration messageExpiration) {
         if (messageExpiration != null) {
-            if (lastMessageExpirationMessageId != messageExpiration.messageId) {
-                expirationTimestamp = messageExpiration.expirationTimestamp;
-                visibilityExpiration = messageExpiration.wipeOnly;
+            if (lastMessageExpirationMessageId != messageExpiration.getMessageId()) {
+                expirationTimestamp = messageExpiration.getExpirationTimestamp();
+                visibilityExpiration = messageExpiration.getWipeOnly();
                 lastRemainingDisplayed = -1;
-                lastMessageExpirationMessageId = messageExpiration.messageId;
+                lastMessageExpirationMessageId = messageExpiration.getMessageId();
                 updateExpirationTimer(true);
             }
         } else {
@@ -633,7 +633,7 @@ public class GalleryActivity extends LockableActivity {
         } else if (item.getItemId() == R.id.action_open) {
             FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = galleryAdapter.getItemAt(viewPager.getCurrentItem());
             if (fyleAndStatus != null) {
-                App.openFyleInExternalViewer(this, fyleAndStatus, null);
+                App.openFyleInExternalViewer(this, fyleAndStatus, () -> fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened());
             }
         } else if (item.getItemId() == R.id.action_delete) {
             FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = galleryAdapter.getItemAt(viewPager.getCurrentItem());
