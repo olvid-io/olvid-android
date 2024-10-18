@@ -20,3 +20,8 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.xerial:sqlite-jdbc:3.45.1.0' // only here to check if a new version is available
 }
+
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}

@@ -33,6 +33,7 @@ import java.util.Arrays;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 
@@ -170,6 +171,7 @@ public abstract class ServerMethod {
                             break;
                         }
                         default: { // unknown server response
+                            Logger.w("Unexpected HTTP response code: " + serverResponse + " for query " + path);
                             returnStatus = SERVER_CONNECTION_ERROR;
                         }
                     }

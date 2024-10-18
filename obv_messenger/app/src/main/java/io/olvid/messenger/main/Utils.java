@@ -54,7 +54,7 @@ public class Utils {
         doPing = true;
         if (pingTimer == null) {
             pingTimer = new Timer("MainActivity-websocketLatencyPingTimer");
-            pingTimer.scheduleAtFixedRate(new TimerTask() {
+            pingTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     if (doPing) {

@@ -34,6 +34,7 @@ import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.PushNotificationTypeAndParameters;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.IdentityAndUid;
+import io.olvid.engine.datatypes.containers.OwnedIdentitySynchronizationStatus;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
@@ -147,10 +148,11 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         Identity ownedIdentity = ((RegisterPushNotificationOperation) operation).getOwnedIdentity();
         UID deviceUid = ((RegisterPushNotificationOperation) operation).getDeviceUid();
         scheduler.clearFailedCount(ownedIdentity);
-        if (deviceUid != null) {
-            // after a registration, always start a downloadMessages
-            downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(ownedIdentity, deviceUid);
-        }
+        // sync is not needed after a register
+//        if (deviceUid != null) {
+//            // after a registration, always start a downloadMessages
+//            downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(ownedIdentity, deviceUid);
+//        }
         if (notificationPostingDelegate != null) {
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(DownloadNotifications.NOTIFICATION_PUSH_NOTIFICATION_REGISTERED_OWNED_IDENTITY_KEY, ownedIdentity);
@@ -230,6 +232,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
             UID androidIdentityMaskingUid = new UID(androidMaskingUidString);
             IdentityAndUid identityAndUid = androidIdentityMaskingUids.get(androidIdentityMaskingUid);
             if (identityAndUid != null) {
+                fetchManagerSessionFactory.markOwnedIdentityAsNotUpToDate(identityAndUid.ownedIdentity, OwnedIdentitySynchronizationStatus.OTHER_SYNC_IN_PROGRESS);
                 downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(identityAndUid.ownedIdentity, identityAndUid.uid);
             }
         } catch (Exception e) {

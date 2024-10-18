@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -133,15 +134,15 @@ import java.util.Locale
 fun constantSp(value: Int): TextUnit = with(LocalDensity.current) { (value / fontScale).sp }
 
 data class Attachment(val fyle: Fyle, val fyleMessageJoinWithStatus: FyleMessageJoinWithStatus) {
-    val deterministicContentUriForGallery : Uri by lazy {
+    val deterministicContentUriForGallery: Uri by lazy {
         fyleAndStatus.deterministicContentUriForGallery
     }
 
-    val contentUriForExternalSharing : Uri by lazy {
+    val contentUriForExternalSharing: Uri by lazy {
         fyleAndStatus.contentUriForExternalSharing
     }
 
-    val fyleAndStatus : FyleAndStatus by lazy {
+    val fyleAndStatus: FyleAndStatus by lazy {
         FyleAndStatus().apply {
             fyle = this@Attachment.fyle
             fyleMessageJoinWithStatus = this@Attachment.fyleMessageJoinWithStatus
@@ -159,6 +160,7 @@ fun Attachments(
     maxWidth: Dp,
     openOnClick: Boolean = true,
     onLocationClicked: (() -> Unit)? = null,
+    openViewerCallback: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val attachmentFyles by AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
@@ -231,7 +233,7 @@ fun Attachments(
                     FyleMessageJoinWithStatus.STATUS_DRAFT,
                     FyleMessageJoinWithStatus.STATUS_UPLOADING,
                     FyleMessageJoinWithStatus.STATUS_COMPLETE,
-                    -> {
+                        -> {
                         completeClick()
                     }
                 }
@@ -338,7 +340,8 @@ fun Attachments(
                         readOnce = false,
                         multipleAttachment = attachments.size > 1
                     )
-                    val wide = imageCount == 2 || (imageCount > 2 && index == imageCount - 1 && (imageCount and 1) != 0)
+                    val wide =
+                        imageCount == 2 || (imageCount > 2 && index == imageCount - 1 && (imageCount and 1) != 0)
 
                     if (message.isContentHidden) {
                         Image(
@@ -394,18 +397,25 @@ fun Attachments(
                         LaunchedEffect(attachment.fyle.id, attachment.fyle.filePath) {
                             launch(Dispatchers.IO) {
                                 // TODO: only get the image resolution and store it in the fyleMessageJoinWithStatus
-                                if (VERSION.SDK_INT < VERSION_CODES.P || !attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("image/")) {
+                                if (VERSION.SDK_INT < VERSION_CODES.P || !attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
+                                        "image/"
+                                    )
+                                ) {
                                     PreviewUtils.getBitmapPreview(
                                         attachment.fyle,
                                         attachment.fyleMessageJoinWithStatus,
                                         1
                                     )
                                 } else {
-                                    PreviewUtilsWithDrawables.getDrawablePreview(
-                                        attachment.fyle,
-                                        attachment.fyleMessageJoinWithStatus,
-                                        1
-                                    )
+                                    runCatching {
+                                        PreviewUtilsWithDrawables.getDrawablePreview(
+                                            attachment.fyle,
+                                            attachment.fyleMessageJoinWithStatus,
+                                            1
+                                        )
+                                    }.onFailure {
+                                        imageUri = R.drawable.ic_broken_image
+                                    }
                                 }
                             }
                         }
@@ -443,6 +453,7 @@ fun Attachments(
                                             if (message.isLocationMessage) {
                                                 onLocationClicked?.invoke()
                                             } else if (attachment.fyleMessageJoinWithStatus.mimeType != "image/svg+xml") {
+                                                openViewerCallback?.invoke()
                                                 App.openDiscussionGalleryActivity(
                                                     context,
                                                     message.discussionId,
@@ -462,7 +473,12 @@ fun Attachments(
                                 ),
                             model = imageUri,
                             imageLoader = imageLoader,
-                            contentScale = if (attachment.fyleMessageJoinWithStatus.nonNullMimeType != "image/gif" && (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("image/") || attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("video/"))) ContentScale.Crop else ContentScale.Fit,
+                            contentScale = if (attachment.fyleMessageJoinWithStatus.nonNullMimeType != "image/gif" && (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
+                                    "image/"
+                                ) || attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
+                                    "video/"
+                                ))
+                            ) ContentScale.Crop else ContentScale.Fit,
                             contentDescription = attachment.fyleMessageJoinWithStatus.fileName,
                         )
                     }
@@ -470,7 +486,7 @@ fun Attachments(
                         Image(
                             modifier = Modifier
                                 .align(Alignment.Center)
-                                .fillMaxSize(.2f),
+                                .requiredSize(64.dp),
                             painter = painterResource(id = R.drawable.overlay_video_small),
                             contentDescription = "video"
                         )
@@ -614,7 +630,8 @@ fun Attachments(
                                         context,
                                         attachment.fyleAndStatus
                                     ) {
-                                       attachment.fyleMessageJoinWithStatus.markAsOpened()
+                                        openViewerCallback?.invoke()
+                                        attachment.fyleMessageJoinWithStatus.markAsOpened()
                                     }
                                 }
                             },
@@ -813,7 +830,8 @@ fun AttachmentContextMenu(
     attachment: Attachment,
     visibility: Visibility,
     readOnce: Boolean,
-    multipleAttachment: Boolean
+    multipleAttachment: Boolean,
+    openViewerCallback: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     // delete
@@ -858,6 +876,7 @@ fun AttachmentContextMenu(
                     ) && SettingsActivity.useInternalImageViewer()
                 ) {
                     // we do not mark as opened here as this is done in the gallery activity
+                    openViewerCallback?.invoke()
                     App.openDiscussionGalleryActivity(
                         context,
                         message.discussionId,
@@ -867,6 +886,7 @@ fun AttachmentContextMenu(
                     )
                 } else {
                     App.openFyleInExternalViewer(context, attachment.fyleAndStatus) {
+                        openViewerCallback?.invoke()
                         attachment.fyleMessageJoinWithStatus.markAsOpened()
                     }
                 }
@@ -1100,7 +1120,12 @@ private fun AttachmentDownloadProgressPreview() {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             AttachmentDownloadProgress(speed = "352k/s", eta = "45s", progress = .37f)
             AttachmentDownloadProgress(speed = null, eta = null, progress = 0f)
-            AttachmentDownloadProgress(speed = "3.4M/s", eta = "57s", progress = .72f, large = false)
+            AttachmentDownloadProgress(
+                speed = "3.4M/s",
+                eta = "57s",
+                progress = .72f,
+                large = false
+            )
             AttachmentDownloadProgress(speed = null, eta = "12s", progress = 0f, large = false)
         }
     }

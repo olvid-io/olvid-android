@@ -70,7 +70,7 @@ fun SwipeForActionBox(
 
     LaunchedEffect(resetOffset) {
         if (resetOffset) {
-            val durationMs = 200L;
+            val durationMs = 150L;
             val initialOffset = offset
 
             var playTime = 0L
@@ -110,14 +110,14 @@ fun SwipeForActionBox(
                                     PointerEventType.Move -> {
                                         initialOffset?.let {
                                             val offsetDiff = if (isRtl) it - change.position else change.position - it
-                                            if (!isSwiping) {
+                                            if (!isSwiping && offsetDiff.x.absoluteValue > 16 * density) {
                                                 if (offsetDiff.y.absoluteValue > offsetDiff.x.absoluteValue * .5f) {
                                                     initialOffset = null
                                                 } else {
+                                                    initialOffset = change.position
                                                     isSwiping = true
                                                 }
-                                            }
-                                            if (isSwiping) {
+                                            } else if (isSwiping) {
                                                 change.consume()
                                                 offset = offsetDiff.x.roundToInt().coerceIn(mnOffset, mxOffset)
                                             }

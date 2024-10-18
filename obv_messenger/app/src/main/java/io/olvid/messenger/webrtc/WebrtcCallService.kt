@@ -1595,7 +1595,7 @@ class WebrtcCallService : Service() {
             }
             callDuration.postValue(0)
             callDurationTimer = Timer()
-            callDurationTimer!!.scheduleAtFixedRate(object : TimerTask() {
+            callDurationTimer!!.schedule(object : TimerTask() {
                 override fun run() {
                     var duration = callDuration.value
                     if (duration == null) {

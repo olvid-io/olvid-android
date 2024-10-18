@@ -1,12 +1,15 @@
+plugins {
+    id 'com.android.application'
+    id 'androidx.navigation.safeargs'
+    id 'com.google.android.gms.oss-licenses-plugin'
+    id 'com.google.protobuf'
+    id 'com.google.gms.google-services'
+    id 'kotlin-android'
+    id 'org.jetbrains.kotlin.plugin.compose' version "$kotlin_version"
+}
+
 import org.gradle.internal.os.OperatingSystem
 OperatingSystem os = OperatingSystem.current()
-
-apply plugin: 'com.android.application'
-apply plugin: 'androidx.navigation.safeargs'
-apply plugin: 'com.google.android.gms.oss-licenses-plugin'
-apply plugin: 'com.google.protobuf'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     compileSdk 34
@@ -16,8 +19,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdk 34
-        versionCode 252
-        versionName "3.2"
+        versionCode 254
+        versionName "3.2.2"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr']
@@ -52,7 +55,7 @@ android {
     }
     packagingOptions {
         resources {
-            excludes += ['META-INF/*']
+            excludes.add('META-INF/INDEX.LIST')
         }
     }
 
@@ -115,6 +118,17 @@ android {
     }
 }
 
+composeCompiler {
+    enableStrongSkippingMode = true
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_compiler")
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("release")) {
+        it.packaging.resources.excludes.add("META-INF/*")
+    }
+}
 
 dependencies {
     def roomVersion = '2.6.1'
@@ -132,10 +146,9 @@ dependencies {
 
     implementation 'com.google.android.material:material:1.12.0'
 
-    implementation 'androidx.core:core:1.13.1'
     implementation 'androidx.core:core-ktx:1.13.1'
 
-    def composeBom = platform 'androidx.compose:compose-bom:2024.09.00'
+    def composeBom = platform 'androidx.compose:compose-bom:2024.09.03'
     implementation composeBom
     implementation 'androidx.compose.material:material'
     implementation 'androidx.compose.material3:material3'
@@ -167,7 +180,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.emoji2:emoji2:1.5.0'
     implementation 'androidx.emoji2:emoji2-bundled:1.5.0'
-    implementation 'androidx.activity:activity:1.9.2'
+    implementation 'androidx.activity:activity-ktx:1.9.2'
     implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.camera:camera-camera2:1.3.4'
     implementation 'androidx.camera:camera-lifecycle:1.3.4'
@@ -175,15 +188,15 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.exifinterface:exifinterface:1.3.7'
-    implementation 'androidx.fragment:fragment:1.8.3'
+    implementation 'androidx.fragment:fragment-ktx:1.8.4'
     implementation 'androidx.media3:media3-exoplayer:1.4.1'
     implementation 'androidx.media3:media3-ui:1.4.1'
     implementation 'androidx.media:media:1.7.0'
-    final def navigation_version = '2.8.1'
-    implementation "androidx.navigation:navigation-fragment:$navigation_version"
-    implementation "androidx.navigation:navigation-ui:$navigation_version"
+    final def navigation_version = '2.8.2'
+    implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-compose:$navigation_version"
-    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation "androidx.room:room-runtime:$roomVersion"
     implementation 'net.zetetic:sqlcipher-android:4.5.6@aar'
@@ -222,10 +235,10 @@ dependencies {
     ///////////
 
     // Billing
-    fullImplementation 'com.android.billingclient:billing:7.0.0'
+    fullImplementation 'com.android.billingclient:billing:7.1.1'
 
     // Firebase
-    fullImplementation('com.google.firebase:firebase-messaging:24.0.1') {
+    fullImplementation('com.google.firebase:firebase-messaging:24.0.2') {
         exclude group: 'com.google.firebase', module: 'firebase-core'
         exclude group: 'com.google.firebase', module: 'firebase-analytics'
         exclude group: 'com.google.firebase', module: 'firebase-measurement-connector'

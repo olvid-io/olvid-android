@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.Observer
@@ -79,6 +80,7 @@ import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel
 import io.olvid.messenger.viewModels.MessageDetailsViewModel
 import java.io.IOException
 import java.util.Arrays
+import kotlin.math.roundToInt
 
 class MessageDetailsActivity : LockableActivity() {
     private val messageDetailsViewModel: MessageDetailsViewModel by viewModels()
@@ -93,8 +95,8 @@ class MessageDetailsActivity : LockableActivity() {
     private var messageMetadataAdapter: MessageMetadataAdapter? = null
     private var messageDetailsActivityRoot: View? = null
     var hasAttachments: Boolean = false
-    var isInbound: Boolean = false
-    private var sendFromOtherDevice: Boolean = false
+    private var isInbound: Boolean = false
+    private var sentFromOtherDevice: Boolean = false
 
     // message views
     private var messageScrollView: View? = null
@@ -106,6 +108,7 @@ class MessageDetailsActivity : LockableActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleIntent(intent)
 
         setContentView(R.layout.activity_message_details)
 
@@ -151,22 +154,18 @@ class MessageDetailsActivity : LockableActivity() {
         discussionBackground = findViewById(R.id.discussion_background)
 
         val metrics = resources.displayMetrics
-        statusWidth = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            8f,
-            metrics
-        ) + TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_SP, 18f, metrics
-        )
+        messageScrollView?.let { scrollView ->
+            (scrollView.layoutParams as? ConstraintLayout.LayoutParams)?.let {
+                it.matchConstraintMaxHeight = (300 * metrics.density).coerceAtMost(metrics.heightPixels * .4f).roundToInt()
+            }
+        }
 
         // metadata
         metadataRecyclerView = findViewById(R.id.message_metadata_recycler_view)
-        if (isInbound || sendFromOtherDevice) {
+        if (isInbound || sentFromOtherDevice) {
             metadataRecyclerView!!.setEmptyView(findViewById(R.id.empty_metadata_textview))
         }
-        messageMetadataAdapter = MessageMetadataAdapter(
-            this
-        )
+        messageMetadataAdapter = MessageMetadataAdapter(this)
 
         metadataRecyclerView!!.setAdapter(messageMetadataAdapter)
         metadataRecyclerView!!.setLayoutManager(LinearLayoutManager(this))
@@ -180,7 +179,7 @@ class MessageDetailsActivity : LockableActivity() {
             val otherDeviceExplanationTextView =
                 findViewById<TextView>(R.id.sent_from_other_device_text_view)
             recipientInfosRecyclerView = findViewById(R.id.recipient_infos_recycler_view)
-            if (sendFromOtherDevice) {
+            if (sentFromOtherDevice) {
                 recipientsStatusTextView.visibility = View.GONE
                 recipientInfosRecyclerView!!.setVisibility(View.GONE)
                 otherDeviceExplanationTextView.visibility = View.VISIBLE
@@ -264,14 +263,18 @@ class MessageDetailsActivity : LockableActivity() {
                 )
             }
         }
-
-        handleIntent(intent)
     }
 
     private fun handleIntent(intent: Intent) {
         if (intent.hasExtra(MESSAGE_ID_INTENT_EXTRA)) {
             val messageId = intent.getLongExtra(MESSAGE_ID_INTENT_EXTRA, -1)
             messageDetailsViewModel.setMessageId(messageId)
+        }
+        if (intent.hasExtra(INBOUND_INTENT_EXTRA)) {
+            isInbound = intent.getBooleanExtra(INBOUND_INTENT_EXTRA, isInbound)
+        }
+        if (intent.hasExtra(MESSAGE_ID_INTENT_EXTRA)) {
+            sentFromOtherDevice = intent.getBooleanExtra(SENT_FROM_OTHER_DEVICE_INTENT_EXTRA, sentFromOtherDevice)
         }
     }
 
@@ -796,5 +799,7 @@ class MessageDetailsActivity : LockableActivity() {
 
     companion object {
         const val MESSAGE_ID_INTENT_EXTRA: String = "message_id"
+        const val INBOUND_INTENT_EXTRA: String = "inbound"
+        const val SENT_FROM_OTHER_DEVICE_INTENT_EXTRA: String = "sent_from_other_device"
     }
 }

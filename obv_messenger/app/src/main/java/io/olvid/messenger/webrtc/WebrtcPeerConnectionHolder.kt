@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import io.olvid.engine.Logger
 import io.olvid.messenger.App
+import io.olvid.messenger.services.MDMConfigurationSingleton
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.webrtc.WebrtcCallService.CallParticipant
 import io.olvid.messenger.webrtc.WebrtcCallService.FailReason.INTERNAL_ERROR
@@ -245,6 +246,16 @@ class WebrtcPeerConnectionHolder(
                 .createIceServer()
         }
 
+        private fun getMdMIceServer() : IceServer? {
+            return MDMConfigurationSingleton.getAlternateTurnServerUrl()?.let {
+                IceServer.builder(it.split(","))
+                    .setUsername(MDMConfigurationSingleton.getAlternateTurnServerUsername())
+                    .setPassword(MDMConfigurationSingleton.getAlternateTurnServerPassword())
+                    .setTlsCertPolicy(TLS_CERT_POLICY_INSECURE_NO_CHECK)
+                    .createIceServer()
+            }
+        }
+
         fun globalCleanup() {
             localAudioLevelListener?.cancel()
             localAudioLevelListener = null
@@ -332,7 +343,7 @@ class WebrtcPeerConnectionHolder(
     private fun startLocalAudioLevelListener() {
         if (localAudioLevelListener == null) {
             localAudioLevelListener = Timer().apply {
-                scheduleAtFixedRate(object : TimerTask() {
+                schedule(object : TimerTask() {
                     override fun run() {
                         try {
                             peerConnection?.getStats(
@@ -361,7 +372,7 @@ class WebrtcPeerConnectionHolder(
     private fun startPeerAudioLevelListener() {
         if (peerAudioLevelListener == null) {
             peerAudioLevelListener = Timer().apply {
-                scheduleAtFixedRate(object : TimerTask() {
+                schedule(object : TimerTask() {
                     override fun run() {
                         try {
                             peerConnection?.getStats(
@@ -473,7 +484,11 @@ class WebrtcPeerConnectionHolder(
 
     fun createPeerConnection() {
         val iceServer = getIceServer(turnUsername, turnPassword)
-        val configuration = RTCConfiguration(listOf(iceServer))
+        val configuration = RTCConfiguration(mutableListOf(iceServer).apply {
+            getMdMIceServer()?.let {
+                add(it)
+            }
+        })
         configuration.iceTransportsType = RELAY
         configuration.sdpSemantics = UNIFIED_PLAN
         configuration.continualGatheringPolicy =

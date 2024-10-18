@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -59,7 +58,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
-import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
+import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionViewModel
@@ -81,7 +80,7 @@ fun LinkPreview(
     if (message.linkPreviewFyleId != null) {
         val linkPreviewFyle by AppDatabase.getInstance()
             .fyleMessageJoinWithStatusDao()
-            .getFyleAndStatusObservable(message.id, message.linkPreviewFyleId).map { fyleAndStatus: FyleAndStatus? -> fyleAndStatus?.let { Attachment(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus)} }
+            .getFyleAndStatusObservable(message.id, message.linkPreviewFyleId).map { fyleAndStatus: FyleMessageJoinWithStatusDao.FyleAndStatus? -> fyleAndStatus?.let { Attachment(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus) } }
             .observeAsState()
         linkPreviewFyle?.let { fyleAndStatus ->
             if (fyleAndStatus.fyle.isComplete) {
@@ -102,7 +101,10 @@ fun LinkPreview(
                 }
             }
         }
-    } else if (message.messageType == Message.TYPE_INBOUND_MESSAGE && SettingsActivity.isLinkPreviewInbound(LocalContext.current)) {
+    } else if (message.messageType == Message.TYPE_INBOUND_MESSAGE && SettingsActivity.isLinkPreviewInbound(
+            LocalContext.current
+        )
+    ) {
         val density = LocalDensity.current
         LaunchedEffect(message.id) {
             val size = with(density) {

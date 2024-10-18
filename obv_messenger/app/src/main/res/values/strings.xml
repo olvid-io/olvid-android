@@ -1955,9 +1955,12 @@
     <string name="button_label_clock_settings">Clock settings</string>
     <string name="activity_title_get_in_contact">Get in contact</string>
     <string name="button_label_discuss_with">Discuss with %1$s</string>
-
-
-
+    <string name="restriction_alternate_turn_server_url_title" translatable="false">Alternate TURN server URLs</string>
+    <string name="restriction_alternate_turn_server_url_description" translatable="false">Comma-separated list of alternate TURN sever URLs to use for Olvid audio and video calls. Username and password must also be provided in other MDM fields.</string>
+    <string name="restriction_alternate_turn_server_username_title" translatable="false">Alternate TURN server username</string>
+    <string name="restriction_alternate_turn_server_username_description" translatable="false">The username to use for authentication with the alternate TURN sever.</string>
+    <string name="restriction_alternate_turn_server_password_title" translatable="false">Alternate TURN server password</string>
+    <string name="restriction_alternate_turn_server_password_description" translatable="false">The password to use for authentication with the alternate TURN sever.</string>
 
 
     <plurals name="dialog_title_delete_discussions">

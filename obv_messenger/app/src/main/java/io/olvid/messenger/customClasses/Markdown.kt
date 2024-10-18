@@ -230,7 +230,8 @@ fun EditText.insertMarkdown(markdownSpan: MarkdownSpan?) {
     }
 }
 
-class Visitor(val editable: Editable, private val highlightColor: Int, private val spanFlag: Int) : AbstractVisitor() {
+class Visitor(val editable: Editable, private val highlightColor: Int, private val spanFlag: Int) :
+    AbstractVisitor() {
 
     private val lineOffsets = mutableListOf(0).apply {
         var offset = 0
@@ -247,7 +248,13 @@ class Visitor(val editable: Editable, private val highlightColor: Int, private v
 
     override fun visit(emphasis: Emphasis) {
         super.visit(emphasis)
-        editable.setMarkdownSpanFromNode(MarkdownItalic(), emphasis, highlightColor, lineOffsets, spanFlag)
+        editable.setMarkdownSpanFromNode(
+            MarkdownItalic(),
+            emphasis,
+            highlightColor,
+            lineOffsets,
+            spanFlag
+        )
     }
 
     private val listCount = SparseIntArray()
@@ -353,7 +360,10 @@ class Visitor(val editable: Editable, private val highlightColor: Int, private v
 }
 
 // highlightColor is for delimiters, 0 means no highlight and removes markdown delimiters
-fun Editable.formatMarkdown(highlightColor: Int, spanFlag: Int = SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE) {
+fun Editable.formatMarkdown(
+    highlightColor: Int,
+    spanFlag: Int = SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+) {
     // clear spans
     getSpans<MarkdownSpan>().forEach {
         removeSpan(it)
@@ -632,7 +642,8 @@ fun SpannableStringBuilder.removeSpanEndLinebreak(span: MarkdownSpan) {
 fun SpannableStringBuilder.removePreviousLinebreak(start: Int) {
     for (separator in lineSeparators) {
         if (start >= separator.length
-            && indexOf(separator, start - separator.length) == start - separator.length) {
+            && indexOf(separator, start - separator.length) == start - separator.length
+        ) {
             delete(start - separator.length, start)
             return
         }
@@ -661,7 +672,10 @@ fun AnnotatedString.formatMarkdown(
             if (complete) {
                 getSpans<MarkdownListItem>(0, length).forEach { span ->
                     // remove leading whitespace
-                    delete(getSpanStart(span), toString().indexOfFirstNonAsciiWhitespace(getSpanStart(span)))
+                    delete(
+                        getSpanStart(span),
+                        toString().indexOfFirstNonAsciiWhitespace(getSpanStart(span))
+                    )
                     insert(
                         getSpanStart(span), bullets[span.level.coerceIn(
                             bullets.indices
@@ -673,7 +687,10 @@ fun AnnotatedString.formatMarkdown(
                 }
                 getSpans<MarkdownOrderedListItem>(0, length).forEach { span ->
                     // remove leading whitespace
-                    delete(getSpanStart(span), toString().indexOfFirstNonAsciiWhitespace(getSpanStart(span)))
+                    delete(
+                        getSpanStart(span),
+                        toString().indexOfFirstNonAsciiWhitespace(getSpanStart(span))
+                    )
                     insert(
                         getSpanStart(span), span.delimiter
                     )
@@ -809,7 +826,6 @@ fun AnnotatedString.formatMarkdown(
                             item = SpanStyle(
                                 fontFamily = FontFamily.Monospace,
                                 background = backgroundColor,
-                                baselineShift = BaselineShift(0.2f)
                             ),
                             start = getSpanStart(span),
                             end = getSpanEnd(span)
@@ -823,7 +839,7 @@ fun AnnotatedString.formatMarkdown(
             paragraphSpans.forEach { span ->
                 when (span) {
                     is MarkdownListItem -> {
-                        val margin = .8f*(span.level) + .4f
+                        val margin = .8f * (span.level) + .4f
                         paragraphStyles.add(
                             AnnotatedString.Range(
                                 item = ParagraphStyle(
@@ -837,8 +853,9 @@ fun AnnotatedString.formatMarkdown(
                             )
                         )
                     }
+
                     is MarkdownOrderedListItem -> {
-                        val margin = 1.1f*(span.level) + .4f
+                        val margin = 1.1f * (span.level) + .4f
                         paragraphStyles.add(
                             AnnotatedString.Range(
                                 item = ParagraphStyle(
@@ -852,19 +869,25 @@ fun AnnotatedString.formatMarkdown(
                             )
                         )
                     }
+
                     is MarkdownQuote -> {
-                        paragraphStyles.add(
-                            AnnotatedString.Range(
-                                item = ParagraphStyle(
-                                    textIndent = TextIndent(
-                                        firstLine = 2.em,
-                                        restLine = 2.em
+                        val start = getSpanStart(span)
+                        val end = getSpanEnd(span)
+                        // don't allow overlap
+                        if (paragraphStyles.none { it.start in (start + 1)..end || it.end in (start + 1)..<end }) {
+                            paragraphStyles.add(
+                                AnnotatedString.Range(
+                                    item = ParagraphStyle(
+                                        textIndent = TextIndent(
+                                            firstLine = 2.em,
+                                            restLine = 2.em
+                                        ),
                                     ),
-                                ),
-                                start = getSpanStart(span),
-                                end = getSpanEnd(span)
+                                    start = getSpanStart(span),
+                                    end = getSpanEnd(span)
+                                )
                             )
-                        )
+                        }
                     }
 
                     else -> {}

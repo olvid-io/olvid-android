@@ -807,8 +807,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                     }
                                                 },
                                                 onAttachmentLongClick = { fyleAndStatus ->
-                                                    discussionViewModel.longClickedFyleAndStatus =
-                                                        fyleAndStatus
+                                                    discussionViewModel.longClickedFyleAndStatus = fyleAndStatus
                                                 },
                                                 onCallBackButtonClicked = { callLogId ->
                                                     onCallBackButtonClicked(
@@ -859,7 +858,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                 audioAttachmentServiceBinding = audioAttachmentServiceBinding,
                                                 openDiscussionDetailsCallback = {
                                                     toolbarClickedCallback?.run()
-                                                }
+                                                },
+                                                openViewerCallback = { markAsReadOnPause = false }
                                             )
                                         }
                                         // date header
@@ -1565,9 +1565,9 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         val fyleAndStatuses =
                             AppDatabase.getInstance()
                                 .fyleMessageJoinWithStatusDao()
-                                .getFylesAndStatusForMessageSync(
-                                    message.id
-                                )
+                                .getFylesAndStatusForMessageSync(message.id)
+
+                        markAsReadOnPause = false
                         if (fyleAndStatuses.size == 1) {
                             App.openDiscussionGalleryActivity(
                                 this@DiscussionActivity,
@@ -1625,6 +1625,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         App.runThread {
             val fyleAndStatuses = AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
                 .getFylesAndStatusForMessageSync(message.id)
+            markAsReadOnPause = false
             if (fyleAndStatuses.size == 1) {
                 App.openDiscussionGalleryActivity(
                     this@DiscussionActivity,
@@ -1874,7 +1875,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             val bytesContactIdentity = intent.getByteArrayExtra(BYTES_CONTACT_IDENTITY_INTENT_EXTRA)
             App.runThread {
                 val discussion = AppDatabase.getInstance().discussionDao()
-                    .getByContact(bytesOwnedIdentity, bytesContactIdentity)
+                    .getByContactWithAnyStatus(bytesOwnedIdentity, bytesContactIdentity)
                 runOnUiThread {
                     if (discussion == null) {
                         discussionNotFound()
@@ -1890,7 +1891,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             )
             App.runThread {
                 val discussion = AppDatabase.getInstance().discussionDao()
-                    .getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid)
+                    .getByGroupOwnerAndUidWithAnyStatus(bytesOwnedIdentity, bytesGroupOwnerAndUid)
                 runOnUiThread {
                     if (discussion == null) {
                         discussionNotFound()
@@ -1904,7 +1905,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             val bytesGroupIdentifier = intent.getByteArrayExtra(BYTES_GROUP_IDENTIFIER_INTENT_EXTRA)
             App.runThread {
                 val discussion = AppDatabase.getInstance().discussionDao()
-                    .getByGroupIdentifier(bytesOwnedIdentity, bytesGroupIdentifier)
+                    .getByGroupIdentifierWithAnyStatus(bytesOwnedIdentity, bytesGroupIdentifier)
                 runOnUiThread {
                     if (discussion == null) {
                         discussionNotFound()
@@ -2541,6 +2542,33 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 message.isForwardable,
                 if (message.isBookmarkableAndDetailable) message.bookmarked else null
             )
+        } else {
+            when (message.messageType) {
+                Message.TYPE_MEDIATOR_INVITATION_SENT,
+                Message.TYPE_MEDIATOR_INVITATION_ACCEPTED,
+                Message.TYPE_MEDIATOR_INVITATION_IGNORED -> {
+                    App.runThread {
+                        try {
+                            discussionViewModel.discussion.value?.let { discussion ->
+                                if (!discussion.bytesDiscussionIdentifier.contentEquals(message.senderIdentifier)) {
+                                    val contact: Contact? = AppDatabase.getInstance().contactDao()
+                                        .get(discussion.bytesOwnedIdentity, message.senderIdentifier)
+                                    contact?.let {
+                                        runOnUiThread {
+                                            App.openOneToOneDiscussionActivity(
+                                                this@DiscussionActivity,
+                                                it.bytesOwnedIdentity,
+                                                it.bytesContactIdentity,
+                                                false
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (ignored: Exception) { }
+                    }
+                }
+            }
         }
     }
 
@@ -2615,6 +2643,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     ) && SettingsActivity.useInternalImageViewer()
                 ) {
                     // we do not mark as opened here as this is done in the gallery activity
+                    markAsReadOnPause = false
                     App.openDiscussionGalleryActivity(
                         this,
                         discussionViewModel.discussionId ?: -1,
@@ -2624,7 +2653,6 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                             ?: -1,
                         true
                     )
-                    markAsReadOnPause = false
                 } else {
                     App.openFyleInExternalViewer(
                         this,

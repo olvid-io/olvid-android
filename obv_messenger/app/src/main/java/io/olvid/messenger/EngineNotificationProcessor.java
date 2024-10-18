@@ -639,16 +639,17 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                     break;
                 }
 
-                new InsertMediatorInvitationMessageTask(bytesOwnedIdentity, bytesContactIdentityA, Message.TYPE_MEDIATOR_INVITATION_SENT, contactB.getCustomDisplayName()).run();
-                new InsertMediatorInvitationMessageTask(bytesOwnedIdentity, bytesContactIdentityB, Message.TYPE_MEDIATOR_INVITATION_SENT, contactA.getCustomDisplayName()).run();
+                new InsertMediatorInvitationMessageTask(bytesOwnedIdentity, bytesContactIdentityA, Message.TYPE_MEDIATOR_INVITATION_SENT, bytesContactIdentityB, contactB.getCustomDisplayName()).run();
+                new InsertMediatorInvitationMessageTask(bytesOwnedIdentity, bytesContactIdentityB, Message.TYPE_MEDIATOR_INVITATION_SENT, bytesContactIdentityA, contactA.getCustomDisplayName()).run();
                 break;
             }
             case EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE: {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_OWNED_IDENTITY_KEY);
                 byte[] bytesMediatorIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_MEDIATOR_IDENTITY_KEY);
+                byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_CONTACT_IDENTITY_KEY);
                 String contactSerializedDetails = (String) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY);
                 Boolean accepted = (Boolean) userInfo.get(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY);
-                if (bytesOwnedIdentity == null || bytesMediatorIdentity == null || contactSerializedDetails == null || accepted == null) {
+                if (bytesOwnedIdentity == null || bytesMediatorIdentity == null || bytesContactIdentity == null || contactSerializedDetails == null || accepted == null) {
                     break;
                 }
 
@@ -668,6 +669,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         bytesOwnedIdentity,
                         bytesMediatorIdentity,
                         accepted ? Message.TYPE_MEDIATOR_INVITATION_ACCEPTED : Message.TYPE_MEDIATOR_INVITATION_IGNORED,
+                        bytesContactIdentity,
                         contactDetails.formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName())
                 ).run();
                 break;

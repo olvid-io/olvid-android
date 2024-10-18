@@ -52,6 +52,10 @@ public class MDMConfigurationSingleton {
     private static final String WEBDAV_AUTOMATIC_BACKUP_URI = "webdav_automatic_backup_uri";
     private static final String WEBDAV_AUTOMATIC_BACKUP_WRITE_ONLY = "webdav_automatic_backup_write_only";
     private static final String WEBDAV_KEY_ESCROW_PUBLIC_KEY = "webdav_key_escrow_public_key";
+    private static final String ALTERNATE_TURN_SERVER_URL = "alternate_turn_server_url";
+    private static final String ALTERNATE_TURN_SERVER_USERNAME = "alternate_turn_server_username";
+    private static final String ALTERNATE_TURN_SERVER_PASSWORD = "alternate_turn_server_password";
+
 
     private static MDMConfigurationSingleton INSTANCE = null;
 
@@ -61,7 +65,9 @@ public class MDMConfigurationSingleton {
     private final BackupCloudProviderService.CloudProviderConfiguration autoBackupConfiguration;
     private final String webdavKeyEscrowPublicKeyString;
     private final PublicKey webdavKeyEscrowPublicKey;
-
+    private final String alternateTurnServerUrl;
+    private final String alternateTurnServerUsername;
+    private final String alternateTurnServerPassword;
 
     // parse all restrictions once at initialisation
     public MDMConfigurationSingleton() {
@@ -124,6 +130,7 @@ public class MDMConfigurationSingleton {
                     String rsaPublicKeyPem = restrictions.getString(WEBDAV_KEY_ESCROW_PUBLIC_KEY);
                     RSAPublicKey publicKey = null;
                     try {
+                        //noinspection DataFlowIssue
                         byte[] encodedPublicKey = Base64.decode(rsaPublicKeyPem.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", ""), Base64.DEFAULT);
                         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
                         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encodedPublicKey);
@@ -142,6 +149,16 @@ public class MDMConfigurationSingleton {
                 webdavKeyEscrowPublicKeyString = null;
                 webdavKeyEscrowPublicKey = null;
             }
+
+            if (restrictions.containsKey(ALTERNATE_TURN_SERVER_URL) && restrictions.containsKey(ALTERNATE_TURN_SERVER_USERNAME) && restrictions.containsKey(ALTERNATE_TURN_SERVER_PASSWORD)) {
+                alternateTurnServerUrl = restrictions.getString(ALTERNATE_TURN_SERVER_URL);
+                alternateTurnServerUsername = restrictions.getString(ALTERNATE_TURN_SERVER_USERNAME);
+                alternateTurnServerPassword = restrictions.getString(ALTERNATE_TURN_SERVER_PASSWORD);
+            } else {
+                alternateTurnServerUrl = null;
+                alternateTurnServerUsername = null;
+                alternateTurnServerPassword = null;
+            }
         } else {
             keycloakConfigurationUri = null;
             disableNewVersionNotification = false;
@@ -149,6 +166,9 @@ public class MDMConfigurationSingleton {
             autoBackupConfiguration = null;
             webdavKeyEscrowPublicKeyString = null;
             webdavKeyEscrowPublicKey = null;
+            alternateTurnServerUrl = null;
+            alternateTurnServerUsername = null;
+            alternateTurnServerPassword = null;
         }
     }
 
@@ -193,6 +213,17 @@ public class MDMConfigurationSingleton {
         return getInstance().webdavKeyEscrowPublicKey;
     }
 
+    public static String getAlternateTurnServerUrl() {
+        return getInstance().alternateTurnServerUrl;
+    }
+
+    public static String getAlternateTurnServerUsername() {
+        return getInstance().alternateTurnServerUsername;
+    }
+
+    public static String getAlternateTurnServerPassword() {
+        return getInstance().alternateTurnServerPassword;
+    }
 
     private String replaceWebDavUriVariablesFromKeycloakProfile(String uri, String keycloakConfigurationUri) {
         try {

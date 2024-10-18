@@ -650,7 +650,7 @@ public class Message {
                     new ObvOutboundAttachment[0],
                     byteContactIdentities,
                     discussion.bytesOwnedIdentity,
-                    false,
+                    true,
                     false
             );
 
@@ -711,7 +711,7 @@ public class Message {
                     new ObvOutboundAttachment[0],
                     byteContactIdentities,
                     discussion.bytesOwnedIdentity,
-                    false,
+                    true,
                     false
             );
 
@@ -776,7 +776,7 @@ public class Message {
                     new ObvOutboundAttachment[0],
                     byteContactIdentities,
                     discussion.bytesOwnedIdentity,
-                    false,
+                    true,
                     false
             );
 
@@ -936,7 +936,13 @@ public class Message {
             jsonPayload.setJsonDiscussionRead(discussionRead);
 
             byte[] messagePayload = AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
-            AppSingleton.getEngine().post(messagePayload, null, new ObvOutboundAttachment[0], Collections.singletonList(discussion.bytesOwnedIdentity), discussion.bytesOwnedIdentity, false, false);
+            AppSingleton.getEngine().post(messagePayload,
+                    null,
+                    new ObvOutboundAttachment[0],
+                    Collections.singletonList(discussion.bytesOwnedIdentity),
+                    discussion.bytesOwnedIdentity,
+                    true,
+                    false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -951,7 +957,13 @@ public class Message {
             jsonPayload.setJsonLimitedVisibilityMessageOpened(jsonLimitedVisibilityMessageOpened);
 
             byte[] messagePayload = AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
-            AppSingleton.getEngine().post(messagePayload, null, new ObvOutboundAttachment[0], Collections.singletonList(discussion.bytesOwnedIdentity), discussion.bytesOwnedIdentity, false, false);
+            AppSingleton.getEngine().post(messagePayload,
+                    null,
+                    new ObvOutboundAttachment[0],
+                    Collections.singletonList(discussion.bytesOwnedIdentity),
+                    discussion.bytesOwnedIdentity,
+                    false,
+                    false);
         } catch (Exception e) {
             e.printStackTrace();
         }

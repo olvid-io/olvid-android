@@ -41,6 +41,7 @@ import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.AttachmentKeyAndMetadata;
 import io.olvid.engine.datatypes.containers.DecryptedApplicationMessage;
+import io.olvid.engine.datatypes.containers.OwnedIdentitySynchronizationStatus;
 import io.olvid.engine.datatypes.containers.ReceivedAttachment;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
@@ -309,6 +310,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
 
     @Override
     public void downloadMessages(Identity ownedIdentity, UID deviceUid) {
+        markOwnedIdentityAsNotUpToDate(ownedIdentity, OwnedIdentitySynchronizationStatus.MANUAL_SYNC_IN_PROGRESS);
         downloadMessagesAndListAttachmentsCoordinator.downloadMessagesAndListAttachments(ownedIdentity, deviceUid);
 
         HashMap<String, Object> userInfo = new HashMap<>();
@@ -502,7 +504,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
             if (notificationPostingDelegate != null) {
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_OWNED_IDENTITY_KEY, ownedIdentity);
-                userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY, false);
+                userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_STATUS_KEY, OwnedIdentitySynchronizationStatus.SYNCHRONIZED);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER, userInfo);
             }
 
@@ -518,15 +520,15 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     }
 
     @Override
-    public void markOwnedIdentityAsNotUpToDate(Identity ownedIdentity) {
+    public void markOwnedIdentityAsNotUpToDate(Identity ownedIdentity, OwnedIdentitySynchronizationStatus synchronizationStatus) {
         synchronized (ownedIdentitiesUpToDateRegardingServerListing) {
+            // notify app that syncing is in progress, but only if it was in sync
             ownedIdentitiesUpToDateRegardingServerListing.remove(ownedIdentity);
 
-            // notify app that syncing is in progress
-            if (notificationPostingDelegate != null) {
+            if (notificationPostingDelegate != null && synchronizationStatus != OwnedIdentitySynchronizationStatus.SYNCHRONIZED) {
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_OWNED_IDENTITY_KEY, ownedIdentity);
-                userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY, true);
+                userInfo.put(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_STATUS_KEY, synchronizationStatus);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER, userInfo);
             }
         }

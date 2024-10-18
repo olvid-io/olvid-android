@@ -26,7 +26,8 @@ class InsertMediatorInvitationMessageTask(
     private val bytesOwnedIdentity: ByteArray,
     private val bytesContactIdentity: ByteArray,
     private val type: Int,
-    private val displayName: String,
+    private val bytesOtherContactIdentity: ByteArray,
+    private val otherContactDisplayName: String,
 ) : Runnable {
     override fun run() {
         when (type) {
@@ -43,8 +44,8 @@ class InsertMediatorInvitationMessageTask(
                             db,
                             type,
                             discussion.id,
-                            bytesContactIdentity,
-                            displayName,
+                            bytesOtherContactIdentity,
+                            otherContactDisplayName,
                             System.currentTimeMillis()
                         )
                         message.id = db.messageDao().insert(message)

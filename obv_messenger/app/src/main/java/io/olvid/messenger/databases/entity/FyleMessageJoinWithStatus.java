@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.messenger.App;
@@ -375,5 +376,13 @@ public class FyleMessageJoinWithStatus {
                 db.fyleMessageJoinWithStatusDao().updateTextContent(messageId, fyleId, content);
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FyleMessageJoinWithStatus)) return false;
+        FyleMessageJoinWithStatus that = (FyleMessageJoinWithStatus) o;
+        return fyleId == that.fyleId && messageId == that.messageId && textExtracted == that.textExtracted && status == that.status && size == that.size && Float.compare(progress, that.progress) == 0 && wasOpened == that.wasOpened && receptionStatus == that.receptionStatus && Objects.deepEquals(bytesOwnedIdentity, that.bytesOwnedIdentity) && Objects.equals(filePath, that.filePath) && Objects.equals(fileName, that.fileName) && Objects.equals(textContent, that.textContent) && Objects.equals(mimeType, that.mimeType) && Objects.deepEquals(engineMessageIdentifier, that.engineMessageIdentifier) && Objects.equals(engineNumber, that.engineNumber) && Objects.equals(imageResolution, that.imageResolution) && Objects.deepEquals(miniPreview, that.miniPreview);
     }
 }

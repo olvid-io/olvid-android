@@ -910,6 +910,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_OWNED_IDENTITY_KEY, getOwnedIdentity());
                 userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_MEDIATOR_IDENTITY_KEY, startState.mediatorIdentity);
+                userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_IDENTITY_KEY, startState.contactIdentity);
                 userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY, startState.contactSerializedDetails);
                 userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY, receivedMessage.invitationAccepted);
                 protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE, userInfo);
@@ -975,6 +976,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_OWNED_IDENTITY_KEY, getOwnedIdentity());
                 userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_MEDIATOR_IDENTITY_KEY, startState.mediatorIdentity);
+                userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_IDENTITY_KEY, startState.contactIdentity);
                 userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY, startState.contactSerializedDetails);
                 userInfo.put(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY, receivedMessage.invitationAccepted);
                 protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE, userInfo);

@@ -17,17 +17,11 @@
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.olvid.engine.networkfetch.datatypes;
+package io.olvid.engine.datatypes.containers;
 
-
-import java.sql.SQLException;
-
-import io.olvid.engine.datatypes.Identity;
-import io.olvid.engine.datatypes.containers.OwnedIdentitySynchronizationStatus;
-
-public interface FetchManagerSessionFactory {
-        FetchManagerSession getSession() throws SQLException;
-        void markOwnedIdentityAsUpToDate(Identity ownedIdentity);
-        void markOwnedIdentityAsNotUpToDate(Identity ownedIdentity, OwnedIdentitySynchronizationStatus synchronizationStatus);
-
+public enum OwnedIdentitySynchronizationStatus {
+    SYNCHRONIZED,
+    INITIAL_SYNC_IN_PROGRESS,
+    MANUAL_SYNC_IN_PROGRESS,
+    OTHER_SYNC_IN_PROGRESS,
 }

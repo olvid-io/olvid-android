@@ -329,13 +329,15 @@ fun LocationMessage(
         altitude = altitude,
         explanation = when (message.locationType) {
             Message.LOCATION_TYPE_SHARE_FINISHED -> stringResource(id = R.string.label_location_sharing_ended)
-            Message.LOCATION_TYPE_SHARE -> stringResource(
-                R.string.label_sharing_location_until, DateUtils.formatDateTime(
-                    context,
-                    jsonMessage.getJsonLocation().getSharingExpiration(),
-                    DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_MONTH
+            Message.LOCATION_TYPE_SHARE -> jsonMessage.getJsonLocation().getSharingExpiration()?.let {
+                stringResource(
+                    R.string.label_sharing_location_until, DateUtils.formatDateTime(
+                        context,
+                        it,
+                        DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_MONTH
+                    )
                 )
-            )
+            }
 
             else -> null
         },

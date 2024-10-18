@@ -203,16 +203,18 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
             case ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE: {
                 Identity ownedIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_OWNED_IDENTITY_KEY);
                 Identity mediatorIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_MEDIATOR_IDENTITY_KEY);
+                Identity contactIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_IDENTITY_KEY);
                 String contactSerializedDetails = (String) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY);
                 Boolean accepted = (Boolean) userInfo.get(ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY);
 
-                if (ownedIdentity == null || mediatorIdentity == null || contactSerializedDetails == null || accepted == null) {
+                if (ownedIdentity == null || mediatorIdentity == null || contactSerializedDetails == null || accepted == null || contactIdentity == null) {
                     break;
                 }
 
                 HashMap<String, Object> engineInfo = new HashMap<>();
                 engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
                 engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_MEDIATOR_IDENTITY_KEY, mediatorIdentity.getBytes());
+                engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
                 engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY, contactSerializedDetails);
                 engineInfo.put(EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY, accepted);
 

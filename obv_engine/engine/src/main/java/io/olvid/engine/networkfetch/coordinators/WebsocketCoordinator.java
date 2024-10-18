@@ -53,6 +53,7 @@ import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.OwnedIdentitySynchronizationStatus;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
@@ -86,6 +87,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
     private final ObjectMapper jsonObjectMapper;
 
     private final Map<String, List<IdentityAndUid>> ownedIdentityAndUidsByServer;
+    private final HashSet<Identity> ownedIdentityFirstRegisterSuccessful;
     private final Map<Identity, UID> ownedIdentityCurrentDeviceUids;
     private final Map<Identity, byte[]> ownedIdentityServerSessionTokens;
     private final Object ownedIdentityAndUidsLock = new Object();
@@ -154,6 +156,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         wellKnownCacheNotificationListener = new WellKnownCacheNotificationListener();
 
         ownedIdentityAndUidsByServer = new HashMap<>();
+        ownedIdentityFirstRegisterSuccessful = new HashSet<>();
         ownedIdentityCurrentDeviceUids = new HashMap<>();
         ownedIdentityServerSessionTokens = new HashMap<>();
         existingWebsockets = new HashMap<>();
@@ -706,6 +709,9 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                             }
                             if (!receivedMessage.containsKey("err")) {
                                 Logger.d("Successfully registered identity on websocket");
+                                synchronized (ownedIdentityFirstRegisterSuccessful) {
+                                    ownedIdentityFirstRegisterSuccessful.add(identity);
+                                }
                                 break;
                             }
 
@@ -766,7 +772,13 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                                 }
                             }
                             // uf we receive this notification, we might have many pending messages on the server --> mark own identity as not up to date
-                            fetchManagerSessionFactory.markOwnedIdentityAsNotUpToDate(identity);
+                            synchronized (ownedIdentityFirstRegisterSuccessful) {
+                                if (ownedIdentityFirstRegisterSuccessful.contains(identity)) {
+                                    fetchManagerSessionFactory.markOwnedIdentityAsNotUpToDate(identity, OwnedIdentitySynchronizationStatus.OTHER_SYNC_IN_PROGRESS);
+                                } else {
+                                    fetchManagerSessionFactory.markOwnedIdentityAsNotUpToDate(identity, OwnedIdentitySynchronizationStatus.INITIAL_SYNC_IN_PROGRESS);
+                                }
+                            }
                             downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(identity, deviceUid);
                         } catch (IOException | DecodingException e) {
                             Logger.d("Error decoding identity");

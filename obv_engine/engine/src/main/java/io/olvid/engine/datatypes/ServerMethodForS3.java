@@ -32,6 +32,8 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
+
 public abstract class ServerMethodForS3 {
     public static final byte OK = 0x00;
     public static final byte NOT_FOUND = 0x01;
@@ -164,6 +166,7 @@ public abstract class ServerMethodForS3 {
                         break;
                     }
                     default:
+                        Logger.w("Unexpected HTTP response code: " + serverResponse + " for attachment download");
                         returnStatus = GENERAL_ERROR;
                 }
 

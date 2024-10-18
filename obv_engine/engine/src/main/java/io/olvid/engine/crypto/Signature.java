@@ -209,7 +209,7 @@ abstract class SignatureECSdsa extends Signature {
             System.arraycopy(Encoded.bytesFromBigUInt(publicKey.getAy(), l), 0, hashInput, l, l);
             System.arraycopy(message, 0, hashInput, 2*l, message.length);
 
-            // TODO: switch to  once all clients support signature with SHA512 hash (supported since build 242, 2024-06-10)
+            // TODO: switch to this once all clients support signature with SHA512 hash (supported since build 242, 2024-06-10)
 //            byte[] hash = new HashSHA512().digest(hashInput);
             byte[] hash = new HashSHA256().digest(hashInput);
             BigInteger e = Encoded.bigUIntFromBytes(hash);

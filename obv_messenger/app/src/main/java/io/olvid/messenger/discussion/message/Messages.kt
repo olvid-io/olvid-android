@@ -26,13 +26,13 @@ import android.text.style.URLSpan
 import android.text.util.Linkify
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +51,6 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
@@ -231,6 +230,7 @@ fun DateHeader(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Message(
     modifier: Modifier = Modifier,
@@ -255,6 +255,7 @@ fun Message(
     audioAttachmentServiceBinding: AudioAttachmentServiceBinding?,
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     openOnClick: Boolean = true,
+    openViewerCallback: (() -> Unit)? = null,
 ) {
     Box {
         val maxWidth = 400.dp
@@ -351,7 +352,7 @@ fun Message(
                     }
                 }
 
-                Column (
+                Column(
                     modifier = Modifier.weight(1f, fill = false)
                 ) {
                     val interactionSource = remember { MutableInteractionSource() }
@@ -367,10 +368,11 @@ fun Message(
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .clip(RoundedCornerShape(8.dp))
-                            .clickable(
+                            .combinedClickable(
                                 interactionSource = interactionSource,
                                 indication = ripple(),
-                                onClick = { }
+                                onClick = { },
+                                onLongClick = if (message.isLocationMessage) onLocationLongClick else onLongClick
                             )
                             .then(
                                 when (message.messageType) {
@@ -476,7 +478,8 @@ fun Message(
                                     audioAttachmentServiceBinding = audioAttachmentServiceBinding,
                                     maxWidth = this.maxWidth,
                                     openOnClick = openOnClick,
-                                    onAttachmentLongClick = onAttachmentLongClick
+                                    onAttachmentLongClick = onAttachmentLongClick,
+                                    openViewerCallback = openViewerCallback,
                                 )
                             }
                         }
@@ -518,14 +521,17 @@ fun MessageInnerStack(
         modifier = modifier,
         content = content,
     ) { measurables, constraints ->
-        val preferredWidth = if (noAutoWidth) constraints.maxWidth else measurables.maxOf { it.maxIntrinsicWidth(constraints.maxHeight) }.coerceAtMost(constraints.maxWidth).coerceAtLeast(constraints.minWidth)
+        val preferredWidth = if (noAutoWidth) constraints.maxWidth else measurables.maxOf {
+            it.maxIntrinsicWidth(constraints.maxHeight)
+        }.coerceAtMost(constraints.maxWidth).coerceAtLeast(constraints.minWidth)
         val adjustedConstraints = constraints.copy(maxWidth = preferredWidth)
 
         val placeables = measurables.map { measurable ->
             measurable.measure(adjustedConstraints)
         }
 
-        val totalHeight = placeables.map { it.height }.reduce { acc, v -> acc + v + (2 * density).toInt()}
+        val totalHeight =
+            placeables.map { it.height }.reduce { acc, v -> acc + v + (2 * density).toInt() }
 
         layout(preferredWidth, totalHeight) {
             var y = 0
@@ -657,7 +663,7 @@ private fun Replied(
     discussionViewModel: DiscussionViewModel? = null,
     scrollToMessage: (messageId: Long) -> Unit
 ) {
-    val repliedToMessage : State<Message?>?= message.jsonMessage.jsonReply?.let { jsonReply ->
+    val repliedToMessage: State<Message?>? = message.jsonMessage.jsonReply?.let { jsonReply ->
         AppDatabase.getInstance().messageDao()
             .getBySenderSequenceNumberAsync(
                 jsonReply.getSenderSequenceNumber(),
@@ -718,7 +724,12 @@ private fun Replied(
                                 context = context,
                                 message = repliedToMessage,
                                 bytesOwnedIdentity = discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
-                                backgroundColor = Color(ContextCompat.getColor(context, R.color.greySubtleOverlay))
+                                backgroundColor = Color(
+                                    ContextCompat.getColor(
+                                        context,
+                                        R.color.greySubtleOverlay
+                                    )
+                                )
                             ),
                             color = colorResource(id = R.color.greyTint),
                             maxLines = 3,
@@ -765,7 +776,8 @@ private fun AttachmentCount(attachmentCount: Int) {
 
 const val LINK_ANNOTATION_TAG = "LINK"
 const val MENTION_ANNOTATION_TAG = "MENTION"
-const val INLINE_CONTENT_TAG = "androidx.compose.foundation.text.inlineContent" // WARNING: this string is copied from the InlineTextContent source and may change without notice....
+const val INLINE_CONTENT_TAG =
+    "androidx.compose.foundation.text.inlineContent" // WARNING: this string is copied from the InlineTextContent source and may change without notice....
 const val QUOTE_BLOCK_START_ANNOTATION = "quote"
 
 
@@ -890,7 +902,7 @@ fun MessageBody(
             }
 
             Message.TYPE_SCREEN_SHOT_DETECTED -> {
-                Row (modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth()) {
                     Image(
                         modifier = Modifier
                             .size(32.dp),
@@ -1053,7 +1065,11 @@ fun MessageBody(
                                         val press = PressInteraction.Press(offset)
                                         messageBubbleInteractionSource.emit(press)
                                         tryAwaitRelease()
-                                        messageBubbleInteractionSource.emit(PressInteraction.Release(press))
+                                        messageBubbleInteractionSource.emit(
+                                            PressInteraction.Release(
+                                                press
+                                            )
+                                        )
                                     },
                                     onLongPress = { onLongClick() },
                                     onDoubleTap = { onDoubleClick?.invoke() }) { offset ->

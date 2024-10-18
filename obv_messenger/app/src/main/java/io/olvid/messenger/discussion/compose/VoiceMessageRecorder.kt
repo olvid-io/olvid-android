@@ -175,7 +175,7 @@ internal class VoiceMessageRecorder(
                         }
                     }
                 }
-                timer.scheduleAtFixedRate(sampleTask, 0, SAMPLE_INTERVAL / SampleAndTicker.TICKS_PER_SAMPLE)
+                timer.schedule(sampleTask, 0, SAMPLE_INTERVAL / SampleAndTicker.TICKS_PER_SAMPLE)
             }
         }
         timer.schedule(startRecordTask, 250)

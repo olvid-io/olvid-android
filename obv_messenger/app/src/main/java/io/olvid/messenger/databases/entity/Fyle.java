@@ -37,6 +37,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.olvid.engine.Logger;
@@ -148,6 +149,14 @@ public class Fyle {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Fyle)) return false;
+        Fyle fyle = (Fyle) o;
+        return id == fyle.id && Objects.equals(filePath, fyle.filePath) && Objects.deepEquals(sha256, fyle.sha256);
     }
 
     public static class SizeAndSha256 {

@@ -1,3 +1,16 @@
+# Build 254 (3.2.2)
+2024-10-18
+
+- Fix a layout issue with vide attachments
+- Fix a crash with endless location sharing
+
+# Build 253 (3.2.1)
+2024-10-11
+
+- Fix a bug when viewing read-once images and videos
+- Fix a bug with message swipe being too sensitive (and preventing tap/long press)
+- Allow to configure an alternate TURN server through MDM
+
 # Build 252 (3.2)
 2024-09-25
 

@@ -84,14 +84,18 @@
                 android:textSize="14sp"
                 android:text="@string/text_message_recipients_status"
                 android:gravity="center"
-                android:layout_marginTop="8dp"/>
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recipient_infos_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:itemCount="2"
-                tools:listitem="@layout/item_view_message_recipient_info"/>
+                tools:listitem="@layout/item_view_message_recipient_info"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/sent_from_other_device_text_view"

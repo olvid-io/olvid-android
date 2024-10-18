@@ -29,6 +29,7 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.OwnedIdentitySynchronizationStatus;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.EngineNotifications;
@@ -562,14 +563,14 @@ public class NotificationListenerDownloads implements NotificationListener {
             }
             case DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER: {
                 Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_OWNED_IDENTITY_KEY);
-                boolean inProgress = (boolean) userInfo.get(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY);
-                if (ownedIdentity == null) {
+                OwnedIdentitySynchronizationStatus status = (OwnedIdentitySynchronizationStatus) userInfo.get(DownloadNotifications.NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_STATUS_KEY);
+                if (ownedIdentity == null || status == null) {
                     break;
                 }
 
                 HashMap<String, Object> engineInfo = new HashMap<>();
                 engineInfo.put(EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
-                engineInfo.put(EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY, inProgress);
+                engineInfo.put(EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_STATUS_KEY, status);
 
                 engine.postEngineNotification(EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER, engineInfo);
                 break;

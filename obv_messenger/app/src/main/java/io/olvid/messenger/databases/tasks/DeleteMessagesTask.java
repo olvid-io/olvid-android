@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.tasks;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -109,7 +110,7 @@ public class DeleteMessagesTask implements Runnable {
             }
         }
 
-        HashSet<Fyle> fyles = new HashSet<>();
+        HashMap<Long, Fyle> fyles = new HashMap<>();
         HashSet<Long> discussionIds = new HashSet<>();
 
         for (Message message : messages) {
@@ -149,7 +150,7 @@ public class DeleteMessagesTask implements Runnable {
                             engine.cancelAttachmentUpload(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
                             break;
                     }
-                    fyles.add(fyleAndStatus.fyle);
+                    fyles.put(fyleAndStatus.fyle.id, fyleAndStatus.fyle);
                 }
             }
         }
@@ -198,7 +199,7 @@ public class DeleteMessagesTask implements Runnable {
         }
 
         // now handle possibly orphaned fyles
-        for (Fyle fyle : fyles) {
+        for (Fyle fyle : fyles.values()) {
             long count = db.fyleMessageJoinWithStatusDao().countMessageForFyle(fyle.id);
             if (count == 0) {
                 if (fyle.sha256 != null) {

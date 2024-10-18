@@ -392,6 +392,7 @@ public abstract class EngineNotifications {
     public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE = "engine_notification_contact_introduction_invitation_response";
     public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
     public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_MEDIATOR_IDENTITY_KEY = "bytes_mediator_identity"; // byte[]
+    public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE_BYTES_CONTACT_IDENTITY_KEY = "bytes_contact_identity"; // byte[]
     public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE_CONTACT_SERIALIZED_DETAILS_KEY = "contact_serialized_Details"; // String
     public static final String CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY = "accepted"; // boolean
 
@@ -400,5 +401,5 @@ public abstract class EngineNotifications {
 
     public static final String OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER = "engine_notification_owned_identity_synchronizing_with_server";
     public static final String OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
-    public static final String OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY = "in_progress"; // boolean
+    public static final String OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_STATUS_KEY = "status"; // OwnedIdentitySynchronizationStatus
 }

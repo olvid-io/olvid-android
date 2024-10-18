@@ -533,9 +533,11 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openMessageDetails(Context activityContext, long messageId, boolean hasAttachments, boolean isInbound, boolean sentFromOtherDevice) {
+    public static void openMessageDetails(Context activityContext, long messageId, boolean isInbound, boolean sentFromOtherDevice) {
         Intent intent = new Intent(getContext(), MessageDetailsActivity.class);
         intent.putExtra(MessageDetailsActivity.MESSAGE_ID_INTENT_EXTRA, messageId);
+        intent.putExtra(MessageDetailsActivity.INBOUND_INTENT_EXTRA, isInbound);
+        intent.putExtra(MessageDetailsActivity.SENT_FROM_OTHER_DEVICE_INTENT_EXTRA, sentFromOtherDevice);
         activityContext.startActivity(intent);
     }
 

@@ -620,6 +620,25 @@ public interface MessageDao {
             " WHERE " + Message.WIPE_STATUS + " = " + Message.WIPE_STATUS_REMOTE_DELETED)
     void deleteAllRemoteDeletedMessages();
 
+
+    @Query("SELECT EXISTS " +
+            " ( SELECT 1 FROM " + Message.TABLE_NAME + " AS message " +
+            " WHERE message." + Message.STATUS + " = " + Message.STATUS_UNREAD +
+            " " +
+            " UNION " +
+            " SELECT 1 FROM " + Invitation.TABLE_NAME + " AS inv " +
+            " WHERE inv." + Invitation.CATEGORY_ID + " IN ( " +
+            ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ", " +
+            ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY +  ") " +
+            " )")
+    boolean unreadMessagesOrInvitationsExist();
+
+
     class UnreadCountAndFirstMessage {
         @ColumnInfo(name = "unread_count")
         public int unreadCount;

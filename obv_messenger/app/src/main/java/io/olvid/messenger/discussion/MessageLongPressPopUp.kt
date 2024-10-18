@@ -387,7 +387,6 @@ class MessageLongPressPopUp(
                 App.openMessageDetails(
                     activity,
                     messageId,
-                    message?.hasAttachments() == true,
                     message?.isInbound == true,
                     message?.status == Message.STATUS_SENT_FROM_ANOTHER_DEVICE
                 )
@@ -558,7 +557,6 @@ class MessageLongPressPopUp(
                         ) {
                             actions.subList(0, min(actions.size, maxVisibleActions))
                                 .forEach { popupActionType ->
-
                                     when (popupActionType) {
                                         REPLY, SHARE, FORWARD, SELECT, DETAILS, EDIT ->
                                             PopupActionButton(
@@ -600,6 +598,7 @@ class MessageLongPressPopUp(
 
                                 }
                             if (actions.size > maxVisibleActions) {
+                                val overflowActions = actions.subList(maxVisibleActions, actions.size)
                                 var overflowMenuExpanded by remember {
                                     mutableStateOf(false)
                                 }
@@ -619,8 +618,7 @@ class MessageLongPressPopUp(
                                                 shape = RoundedCornerShape(12.dp)
                                             ) {
                                                 Column(modifier = Modifier.width(Max)) {
-                                                    actions.subList(maxVisibleActions, actions.size)
-                                                        .forEach { popupActionType ->
+                                                    overflowActions.forEach { popupActionType ->
                                                             DropdownMenuItem(
                                                                 leadingIcon = popupActionType.getImage(
                                                                     message = message,
@@ -660,6 +658,13 @@ class MessageLongPressPopUp(
                                         colorFilter = ColorFilter.tint(colorResource(id = R.color.almostBlack)),
                                         contentDescription = "more"
                                     )
+                                    if (overflowActions.contains(COPY)) {
+                                        CopyPopupMenu(expanded = copyMenuExpanded,
+                                            dismiss = {
+                                                copyMenuExpanded = false
+                                                popupWindow?.dismiss()
+                                            })
+                                    }
                                 }
                             }
                         }
@@ -762,13 +767,15 @@ class MessageLongPressPopUp(
                 ) {
                     Column(modifier = Modifier.width(Max)) {
                         DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.menu_action_copy_message_text)) },
+                            text = { Text(text = stringResource(id = R.string.menu_action_copy_message_text),
+                                color = colorResource(id = R.color.almostBlack)) },
                             onClick = {
                                 App.runThread(CopySelectedMessageTask(activity, messageId, false))
                                 dismiss()
                             })
                         DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.menu_action_copy_text_and_attachments)) },
+                            text = { Text(text = stringResource(id = R.string.menu_action_copy_text_and_attachments),
+                                color = colorResource(id = R.color.almostBlack)) },
                             onClick = {
                                 App.runThread(CopySelectedMessageTask(activity, messageId, true))
                                 dismiss()

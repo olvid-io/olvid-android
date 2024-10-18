@@ -1158,6 +1158,13 @@ public class HandleNewMessageNotificationTask implements Runnable {
         db.messageDao().markDiscussionMessagesReadUpTo(discussion.id, jsonDiscussionRead.getLastReadMessageServerTimestamp());
         if (db.messageDao().getServerTimestampOfLatestUnreadInboundMessageInDiscussion(discussion.id) == null) {
             AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussion.id);
+
+            if (SettingsActivity.isNotificationContentHidden()) {
+                // if displaying only neutral notifications, check if there is a point in still showing one
+                if (! db.messageDao().unreadMessagesOrInvitationsExist()) {
+                    AndroidNotificationManager.clearNeutralNotification();
+                }
+            }
         }
     }
 

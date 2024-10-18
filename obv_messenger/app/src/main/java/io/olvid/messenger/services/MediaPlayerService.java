@@ -432,7 +432,7 @@ public class MediaPlayerService extends Service {
                     });
                 }
             };
-            timer.scheduleAtFixedRate(timerTask, PROGRESS_UPDATE_TIME_MS, PROGRESS_UPDATE_TIME_MS);
+            timer.schedule(timerTask, PROGRESS_UPDATE_TIME_MS, PROGRESS_UPDATE_TIME_MS);
         }
     }
 

@@ -803,7 +803,7 @@ public class WebClientManager {
     private void startPingTimer() {
         this.stopPingTimer();
         pingWebClientTimer = new Timer();
-        pingWebClientTimer.scheduleAtFixedRate(new TimerTask() {
+        pingWebClientTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 Colissimo pingColissimo = Colissimo.newBuilder()
@@ -830,7 +830,7 @@ public class WebClientManager {
         // delay: 1 hour + random from 0 to 20 minutes
         reconnectionTimerDelay = 3600_000 + new Random().nextInt(1200_000);
         reconnectionTimer = new Timer();
-        reconnectionTimer.scheduleAtFixedRate(new TimerTask() {
+        reconnectionTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (currentState == State.LISTENING) {

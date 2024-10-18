@@ -168,6 +168,6 @@ public abstract class DownloadNotifications {
 
     public static final String NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER = "network_fetch_notification_owned_identity_synchronizing_with_server";
     public static final String NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
-    public static final String NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_IN_PROGRESS_KEY = "in_progress"; // boolean
+    public static final String NOTIFICATION_OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_STATUS_KEY = "status"; // OwnedIdentitySynchronizationStatus
 
 }

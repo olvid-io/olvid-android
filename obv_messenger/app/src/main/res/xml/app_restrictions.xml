@@ -36,4 +36,22 @@
         android:description="@string/restriction_webdav_key_escrow_public_key_description"
         android:restrictionType="string"
         android:defaultValue="" />
+    <restriction
+        android:key="alternate_turn_server_url"
+        android:title="@string/restriction_alternate_turn_server_url_title"
+        android:description="@string/restriction_alternate_turn_server_url_description"
+        android:restrictionType="string"
+        android:defaultValue="" />
+    <restriction
+        android:key="alternate_turn_server_username"
+        android:title="@string/restriction_alternate_turn_server_username_title"
+        android:description="@string/restriction_alternate_turn_server_username_description"
+        android:restrictionType="string"
+        android:defaultValue="" />
+    <restriction
+        android:key="alternate_turn_server_password"
+        android:title="@string/restriction_alternate_turn_server_password_title"
+        android:description="@string/restriction_alternate_turn_server_password_description"
+        android:restrictionType="string"
+        android:defaultValue="" />
 </restrictions>
