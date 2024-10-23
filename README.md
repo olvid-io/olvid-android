@@ -15,6 +15,7 @@ height="80">](https://play.google.com/store/apps/details?id=io.olvid.messenger)
 Signing certificate fingerprint to [verify](https://developer.android.com/studio/command-line/apksigner#usage-verify) the APK:
 ```
 SHA-256: cc83a47d8ed411468580889fb3e058b0b31e82ef812d473531b5f9cd4a88fd33
+SHA-1: 41a074e99269b61e4b6513f6240321f130aa51ca
 ```
 
 ## Help and documentation
