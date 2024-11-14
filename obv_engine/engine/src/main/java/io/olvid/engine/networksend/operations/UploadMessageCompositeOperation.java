@@ -21,6 +21,7 @@ package io.olvid.engine.networksend.operations;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.OperationQueue;
@@ -91,7 +92,7 @@ public class UploadMessageCompositeOperation extends Operation {
             }
             finished = true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         } finally {
             if (finished) {
                 setFinished();

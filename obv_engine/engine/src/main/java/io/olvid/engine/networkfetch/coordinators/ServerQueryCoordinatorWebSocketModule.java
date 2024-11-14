@@ -87,7 +87,7 @@ public class ServerQueryCoordinatorWebSocketModule {
             try {
                 serverQuery = ServerQuery.of(pendingServerQuery.getEncodedQuery());
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 return;
             }
 
@@ -240,7 +240,7 @@ public class ServerQueryCoordinatorWebSocketModule {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 failProtocol(protocolInstanceUid);
             }
         });
@@ -286,7 +286,7 @@ public class ServerQueryCoordinatorWebSocketModule {
                 }
                 success = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 if (success) {
                     fetchManagerSession.session.commit();
@@ -295,7 +295,7 @@ public class ServerQueryCoordinatorWebSocketModule {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -332,7 +332,7 @@ public class ServerQueryCoordinatorWebSocketModule {
                     try {
                         handleServerQuery(clientAndQuery.pendingServerQuery, true);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
             });
@@ -347,7 +347,7 @@ public class ServerQueryCoordinatorWebSocketModule {
 
         @Override
         public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @Nullable Response response) {
-            t.printStackTrace();
+            Logger.x(t);
             executor.execute(this::closeAndAbort);
         }
 
@@ -430,7 +430,7 @@ public class ServerQueryCoordinatorWebSocketModule {
                     }
                 } catch (Exception e) {
                     // in case of exception when parsing, ignore it and simply forward the response to the protocol
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
 
                 // remove the pendingServerQuery

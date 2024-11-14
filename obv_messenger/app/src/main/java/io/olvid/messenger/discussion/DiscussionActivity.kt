@@ -855,6 +855,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                 linkPreviewViewModel = linkPreviewViewModel,
                                                 messageExpiration = messageExpiration,
                                                 discussionViewModel = discussionViewModel,
+                                                discussionSearch = discussionSearch,
                                                 audioAttachmentServiceBinding = audioAttachmentServiceBinding,
                                                 openDiscussionDetailsCallback = {
                                                     toolbarClickedCallback?.run()

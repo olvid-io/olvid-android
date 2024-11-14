@@ -266,7 +266,7 @@ public class InboxMessage implements ObvDatabase {
             inboxMessage.insert();
             return inboxMessage;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -293,7 +293,7 @@ public class InboxMessage implements ObvDatabase {
         try {
             this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.uid = new UID(res.getBytes(UID_));
         byte[] bytes = res.getBytes(WRAPPED_KEY);
@@ -310,7 +310,7 @@ public class InboxMessage implements ObvDatabase {
             try {
                 this.fromIdentity = Identity.of(fromIdentityBytes);
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
         this.downloadTimestamp = res.getLong(DOWNLOAD_TIMESTAMP);
@@ -344,7 +344,7 @@ public class InboxMessage implements ObvDatabase {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -362,7 +362,7 @@ public class InboxMessage implements ObvDatabase {
                 return res.next();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }

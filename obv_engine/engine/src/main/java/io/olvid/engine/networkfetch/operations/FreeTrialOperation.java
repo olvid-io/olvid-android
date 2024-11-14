@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
@@ -120,7 +121,7 @@ public class FreeTrialOperation extends Operation {
                     fetchManagerSession.notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_FREE_TRIAL_QUERY_FAILED, userInfo);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -134,7 +135,7 @@ public class FreeTrialOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }
@@ -189,7 +190,7 @@ class FreeTrialServerMethod extends ServerMethod {
                     this.apiKey = receivedData[0].decodeUuid();
                 }
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         }

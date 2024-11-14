@@ -26,6 +26,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.key.symmetric.SymEncCTRAES256Key;
 import io.olvid.engine.datatypes.key.symmetric.SymmetricKey;
@@ -109,7 +110,7 @@ class SymEncCtrAES256 implements SymEnc {
                 outOffset += aes.update(plaintext, offsetIn, len, ciphertext, outOffset);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -127,7 +128,7 @@ class SymEncCtrAES256 implements SymEnc {
             aes.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key.getKeyBytes(), "AES"), new IvParameterSpec(fullIV));
             plaintext = aes.doFinal(ciphertextEnd);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return plaintext;
     }

@@ -46,6 +46,7 @@ import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.dao.Group2MemberDao;
 import io.olvid.messenger.databases.dao.MessageRecipientInfoDao;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -174,7 +175,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         }
                     }
                     group.ownPermissionSendMessage = groupV2.ownPermissions.contains(GroupV2.Permission.SEND_MESSAGE);
-                    db.group2Dao().update(group);
+                    db.group2Dao().update(group); // TODO: update fullSearchField too
                 }
 
                 if (group.ownPermissionChangeSettings) {
@@ -542,13 +543,25 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
 
                 // update the group members name field
+                List<String> fullSearchItems = new ArrayList<>();
+                for (Group2MemberDao.Group2MemberOrPending group2MemberOrPending : db.group2MemberDao().getGroupMembersAndPendingSync(group.bytesOwnedIdentity, group.bytesGroupIdentifier)) {
+                    if (group2MemberOrPending.contact != null) {
+                        fullSearchItems.add(group2MemberOrPending.contact.fullSearchDisplayName);
+                    } else {
+                        try {
+                            JsonIdentityDetails jsonIdentityDetails = AppSingleton.getJsonObjectMapper().readValue(group2MemberOrPending.identityDetails, JsonIdentityDetails.class);
+                            fullSearchItems.add(StringUtils.unAccent(jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false)));
+                        } catch (Exception ignored) {}
+                    }
+                }
+
                 group.groupMembersNames = StringUtils.joinContactDisplayNames(
                         SettingsActivity.getAllowContactFirstName() ?
                                 db.group2Dao().getGroupMembersFirstNames(groupV2.bytesOwnedIdentity, bytesGroupIdentifier)
                                 :
                                 db.group2Dao().getGroupMembersNames(groupV2.bytesOwnedIdentity, bytesGroupIdentifier)
                 );
-                db.group2Dao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.groupMembersNames);
+                db.group2Dao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.groupMembersNames, group.computeFullSearch(fullSearchItems));
 
                 if (!Objects.equals(discussion.title, group.getCustomName())) {
                     discussion.title = group.getCustomName();

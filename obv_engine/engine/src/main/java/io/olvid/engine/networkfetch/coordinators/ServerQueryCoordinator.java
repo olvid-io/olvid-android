@@ -109,7 +109,7 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
             // commit, in case a WebSocket query was deleted
             fetchManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         // only start processing queries after the initial queueing is performed (otherwise a query could be queued while its already being executed)
@@ -188,7 +188,7 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
     }
@@ -230,7 +230,7 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
                         fetchManagerSession.session.commit();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -302,7 +302,7 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
                 serverUserDataCoordinator.newUserDataUploaded(serverQuery.getOwnedIdentity(), ((ServerQuery.PutUserDataQuery) serverQuery.getType()).serverLabel);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

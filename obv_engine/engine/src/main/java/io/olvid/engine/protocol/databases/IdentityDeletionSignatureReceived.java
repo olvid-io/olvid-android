@@ -54,7 +54,7 @@ public class IdentityDeletionSignatureReceived implements ObvDatabase {
             identityDeletionSignatureReceived.insert();
             return identityDeletionSignatureReceived;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

@@ -21,6 +21,7 @@ package io.olvid.messenger.databases;
 
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -580,7 +581,15 @@ public class AppDatabaseOpenCallback implements Runnable {
                                                     :
                                                     db.groupDao().getGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid)
                                     );
-                                    db.groupDao().updateGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid, newGroup.groupMembersNames);
+
+                                    List<String> fullSearchItems = new ArrayList<>();
+                                    for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid)) {
+                                        if (groupContact != null) {
+                                            fullSearchItems.add(groupContact.fullSearchDisplayName);
+                                        }
+                                    }
+
+                                    db.groupDao().updateGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid, newGroup.groupMembersNames, newGroup.computeFullSearch(fullSearchItems));
 
                                     HashSet<BytesKey> declinedSet = new HashSet<>();
                                     for (byte[] bytesDeclinedPendingMember : obvGroup.getBytesDeclinedPendingMembers()) {
@@ -646,7 +655,15 @@ public class AppDatabaseOpenCallback implements Runnable {
                                                         :
                                                         db.groupDao().getGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid)
                                         );
-                                        db.groupDao().updateGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid, finalGroup.groupMembersNames);
+
+                                        List<String> fullSearchItems = new ArrayList<>();
+                                        for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid)) {
+                                            if (groupContact != null) {
+                                                fullSearchItems.add(groupContact.fullSearchDisplayName);
+                                            }
+                                        }
+
+                                        db.groupDao().updateGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid, finalGroup.groupMembersNames, finalGroup.computeFullSearch(fullSearchItems));
 
                                         if (finalGroup.bytesGroupOwnerIdentity == null && !contactToAdd.isEmpty()) { // owned group --> check the customization
                                             DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);

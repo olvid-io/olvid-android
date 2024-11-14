@@ -54,7 +54,7 @@ public class MutualScanSignatureReceived implements ObvDatabase {
             mutualScanSignatureReceived.insert();
             return mutualScanSignatureReceived;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

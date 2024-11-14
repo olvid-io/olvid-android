@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
@@ -482,7 +483,7 @@ public class ObvDialog {
                         try {
                             pendingEncodeds[i] = pendingGroupMemberIdentities[i].encode(jsonObjectMapper);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Logger.x(e);
                             break;
                         }
                     }

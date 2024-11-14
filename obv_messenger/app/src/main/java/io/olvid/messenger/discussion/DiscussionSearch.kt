@@ -24,6 +24,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MenuItem.OnActionExpandListener
 import android.view.MenuItem.OnMenuItemClickListener
+import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.compose.foundation.lazy.LazyListState
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.core.content.ContextCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModel
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
@@ -57,9 +60,9 @@ class DiscussionSearch(
     private var matches: List<Long> = emptyList()
     var scrollTo: ((messageId: Long) -> Unit)? = null
     var lazyListState: LazyListState? = null
+    val viewModel: SearchViewModel by activity.viewModels()
 
-    companion object {
-
+    class SearchViewModel: ViewModel() {
         var filterRegexes by mutableStateOf<List<Regex>?>(null)
 
         fun highlight(context: Context, content: AnnotatedString): AnnotatedString {
@@ -143,7 +146,7 @@ class DiscussionSearch(
     @Synchronized
     private fun filter(filterString: String?, firstVisibleMessageId: Long) {
         currentPosition = 0
-        filterRegexes = filterString
+        viewModel.filterRegexes = filterString
             ?.trim()
             ?.split("\\s+".toRegex())
             ?.filter { it.isNotEmpty() }

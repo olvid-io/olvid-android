@@ -28,7 +28,10 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 
+import java.util.List;
+
 import io.olvid.engine.engine.types.JsonGroupDetails;
+import io.olvid.messenger.customClasses.StringUtils;
 
 @Entity(tableName = Group.TABLE_NAME,
         primaryKeys = {Group.BYTES_GROUP_OWNER_AND_UID, Group.BYTES_OWNED_IDENTITY},
@@ -61,6 +64,7 @@ public class Group {
     public static final String GROUP_MEMBERS_NAMES = "group_members_names";
     public static final String CUSTOM_PHOTO_URL = "custom_photo_url"; // set to "" to remove the default photo_url, null to use the default
     public static final String PERSONAL_NOTE = "personal_note";
+    public static final String FULL_SEARCH_FIELD = "full_search_field";
 
     public static final int PUBLISHED_DETAILS_NOTHING_NEW = 0;
     public static final int PUBLISHED_DETAILS_NEW_UNSEEN = 1;
@@ -107,6 +111,9 @@ public class Group {
     @Nullable
     public String personalNote;
 
+    @ColumnInfo(name = FULL_SEARCH_FIELD)
+    @NonNull
+    public String fullSearchField;
 
     public String getCustomName() {
         if (customName == null) {
@@ -118,14 +125,14 @@ public class Group {
     public String getCustomPhotoUrl() {
         if (customPhotoUrl == null) {
             return photoUrl;
-        } else if (customPhotoUrl.length() == 0) {
+        } else if (customPhotoUrl.isEmpty()) {
             return null;
         }
         return customPhotoUrl;
     }
 
     // default constructor required by Room
-    public Group(@NonNull byte[] bytesGroupOwnerAndUid, @NonNull byte[] bytesOwnedIdentity, @Nullable String customName, @NonNull String name, int newPublishedDetails, @Nullable byte[] bytesGroupOwnerIdentity, @Nullable String photoUrl, @NonNull String groupMembersNames, @Nullable String customPhotoUrl, @Nullable String personalNote) {
+    public Group(@NonNull byte[] bytesGroupOwnerAndUid, @NonNull byte[] bytesOwnedIdentity, @Nullable String customName, @NonNull String name, int newPublishedDetails, @Nullable byte[] bytesGroupOwnerIdentity, @Nullable String photoUrl, @NonNull String groupMembersNames, @Nullable String customPhotoUrl, @Nullable String personalNote, @NonNull String fullSearchField) {
         this.bytesGroupOwnerAndUid = bytesGroupOwnerAndUid;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customName = customName;
@@ -136,8 +143,8 @@ public class Group {
         this.groupMembersNames = groupMembersNames;
         this.customPhotoUrl = customPhotoUrl;
         this.personalNote = personalNote;
+        this.fullSearchField = fullSearchField;
     }
-
 
 
     @Ignore
@@ -160,5 +167,21 @@ public class Group {
         this.bytesGroupOwnerIdentity = bytesGroupOwnerIdentity;
         this.groupMembersNames = "";
         this.personalNote = null;
+        this.fullSearchField = "";
+    }
+
+    @NonNull
+    public String computeFullSearch(@NonNull List<String> membersFullSearch) {
+        String suffix = "";
+        if (customName != null) {
+            suffix += " " + customName;
+        }
+        if (personalNote != null) {
+            suffix += " " + personalNote;
+        }
+        if (name != null) {
+            suffix += " " + name;
+        }
+        return StringUtils.unAccent(String.join(" ", membersFullSearch) + suffix);
     }
 }

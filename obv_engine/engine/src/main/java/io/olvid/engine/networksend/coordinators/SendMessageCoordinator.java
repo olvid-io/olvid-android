@@ -112,7 +112,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
                 queueNewSendMessageCompositeOperation(outboxMessage.getServer(), outboxMessage.getOwnedIdentity(), outboxMessage.getUid(), outboxMessage.getAttachments().length != 0, outboxMessage.isApplicationMessage());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

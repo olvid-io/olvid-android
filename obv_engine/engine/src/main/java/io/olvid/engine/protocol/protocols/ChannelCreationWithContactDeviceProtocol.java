@@ -1086,7 +1086,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 JsonIdentityDetailsWithVersionAndPhoto ownedDetailsWithVersionAndPhoto = protocolManagerSession.identityDelegate.getOwnedIdentityPublishedAndLatestDetails(protocolManagerSession.session, getOwnedIdentity())[0];
                 serializedDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().writeValueAsString(ownedDetailsWithVersionAndPhoto);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
 
             CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(
@@ -1138,7 +1138,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 
@@ -1183,7 +1183,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                     JsonIdentityDetailsWithVersionAndPhoto ownedDetailsWithVersionAndPhoto = protocolManagerSession.identityDelegate.getOwnedIdentityPublishedAndLatestDetails(protocolManagerSession.session, getOwnedIdentity())[0];
                     serializedDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().writeValueAsString(ownedDetailsWithVersionAndPhoto);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
 
                 CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(
@@ -1249,7 +1249,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 

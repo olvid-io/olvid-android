@@ -85,7 +85,7 @@ public class CancelAttachmentUploadCoordinator implements OutboxAttachment.Outbo
                 queueNewCancelAttachmentUploadCompositeOperation(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getAttachmentNumber());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

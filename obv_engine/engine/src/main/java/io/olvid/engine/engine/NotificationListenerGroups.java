@@ -126,7 +126,7 @@ public class NotificationListenerGroups implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_CREATED_ON_OTHER_DEVICE_KEY, createdOnOtherDevice);
                     engine.postEngineNotification(EngineNotifications.GROUP_CREATED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             case IdentityNotifications.NOTIFICATION_GROUP_DELETED: {

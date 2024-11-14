@@ -139,7 +139,7 @@ public class OutboxMessage implements ObvDatabase {
                 }
                 sendManagerSession.session.addSessionCommitListener(this);
             } catch (SQLException e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
     }
@@ -161,7 +161,7 @@ public class OutboxMessage implements ObvDatabase {
             }
             return outboxMessage;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -171,7 +171,7 @@ public class OutboxMessage implements ObvDatabase {
         try {
             this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.uid = new UID(res.getBytes(UID_));
         byte[] bytes = res.getBytes(UID_FROM_SERVER);
@@ -265,7 +265,7 @@ public class OutboxMessage implements ObvDatabase {
                 return list.toArray(new OutboxMessage[0]);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return new OutboxMessage[0];
         }
     }

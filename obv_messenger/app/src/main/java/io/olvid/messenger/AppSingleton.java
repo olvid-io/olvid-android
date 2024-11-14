@@ -81,6 +81,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
+import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
 import io.olvid.messenger.databases.tasks.migration.SetContactsAndPendingMembersFirstNamesTask;
 import io.olvid.messenger.discussion.compose.ComposeMessageFragment;
@@ -234,23 +235,28 @@ public class AppSingleton {
             this.engine = new Engine(App.getContext().getNoBackupFilesDir(), new AppBackupAndSyncDelegate(), DatabaseKey.get(DatabaseKey.ENGINE_DATABASE_SECRET), this.sslSocketFactory,
                     new Logger.LogOutputter() {
                         @Override
-                        public void d(String s, String s1) {
-                            Log.d(s, s1);
+                        public void d(String tag, String message) {
+                            Log.d(tag, message);
                         }
 
                         @Override
-                        public void i(String s, String s1) {
-                            Log.i(s, s1);
+                        public void i(String tag, String message) {
+                            Log.i(tag, message);
                         }
 
                         @Override
-                        public void w(String s, String s1) {
-                            Log.w(s, s1);
+                        public void w(String tag, String message) {
+                            Log.w(tag, message);
                         }
 
                         @Override
-                        public void e(String s, String s1) {
-                            Log.e(s, s1);
+                        public void e(String tag, String message) {
+                            Log.e(tag, message);
+                        }
+
+                        @Override
+                        public void x(String tag, Throwable throwable) {
+                            Log.w(tag, "", throwable);
                         }
                     },
                     SettingsActivity.useDebugLogLevel() ? Logger.DEBUG : BuildConfig.LOG_LEVEL);
@@ -1207,6 +1213,12 @@ public class AppSingleton {
             }
             if (lastBuildExecuted != 0 && lastBuildExecuted < 220) {
                 App.openAppDialogIntroducingMultiDeviceAndDesktop();
+            }
+            if (lastBuildExecuted != 0 && lastBuildExecuted < 255) {
+                App.runThread(() -> {
+                    new ContactDisplayNameFormatChangedTask().run();
+                    new UpdateAllGroupMembersNames().run();
+                });
             }
 
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());

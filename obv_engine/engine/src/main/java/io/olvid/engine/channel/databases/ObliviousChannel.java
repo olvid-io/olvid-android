@@ -310,7 +310,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             statement.executeUpdate();
             this.seedForNextSendKey = ratchetingOutput.getRatchetedSeed();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
         return ratchetingOutput;
@@ -338,7 +338,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             }
             return obliviousChannel;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -498,7 +498,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }
@@ -600,7 +600,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 channelManagerSession.notificationPostingDelegate.postNotification(ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_DELETED, userInfo);
             });
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -641,7 +641,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                         channelManagerSession.fullRatchetProtocolStarterDelegate.startFullRatchetProtocolForObliviousChannel(currentDeviceUid, remoteDeviceUid, remoteIdentity);
                     } catch (Exception e) {
                         // no need to do anything, the next message will try to restart the full ratchet
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 } else {
                     Logger.w("Full ratchet required, but no FullRatchetProtocolStarterDelegate is set.");
@@ -848,7 +848,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         try {
             encryptedMessageKey = authEnc.encrypt(ratchetingOutput.getAuthEncKey(), Encoded.of(messageKey).getBytes(), prng);
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
         byte[] headerBytes = new byte[KeyId.KEYID_LENGTH + encryptedMessageKey.length];
@@ -873,7 +873,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 channelManagerSession.session.addSessionCommitListener(this);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
         return header;
@@ -891,7 +891,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             deviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, header.getOwnedIdentity());
         } catch (SQLException e) {
             Logger.e("Error retrieving a currentDeviceUid -> a received message might have been lost...");
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
         ProvisionedKeyMaterial[] provisionedKeys = ProvisionedKeyMaterial.getAll(channelManagerSession, keyId, deviceUid);
@@ -934,7 +934,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                         obliviousChannel.commitHookBits |= HOOK_BIT_MIGHT_NEED_FULL_RATCHET;
                         channelManagerSession.session.addSessionCommitListener(obliviousChannel);
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
                 try {
@@ -943,7 +943,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                         obliviousChannel.confirm();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 ReceptionChannelInfo receptionChannelInfo = obliviousChannel.getReceptionChannelInfo();
                 // add information about GKMV2 in receptionChannelInfo

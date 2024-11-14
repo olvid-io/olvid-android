@@ -616,7 +616,7 @@ public class ContactIdentity implements ObvDatabase {
                     JsonIdentityDetails certifiedJsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
                     contactIdentityObject.markContactAsCertifiedByOwnKeycloak(certifiedJsonIdentityDetails);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 
@@ -740,7 +740,7 @@ public class ContactIdentity implements ObvDatabase {
                             try {
                                 preparedStatement.setString(4, objectMapper.writeValueAsString(map));
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Logger.x(e);
                                 // skip the contact
                                 continue;
                             }
@@ -1279,7 +1279,7 @@ public class ContactIdentity implements ObvDatabase {
             contactIdentity = Identity.of(pojo.contact_identity);
         } catch (DecodingException e) {
             Logger.e("Error recreating ContactIdentity from backup!");
-            e.printStackTrace();
+            Logger.x(e);
         }
         if (contactIdentity == null) {
             return;
@@ -1316,7 +1316,7 @@ public class ContactIdentity implements ObvDatabase {
             contactIdentity = Identity.of(pojo.contact_identity);
         } catch (DecodingException e) {
             Logger.e("Error recreating ContactIdentityGroups from backup!");
-            e.printStackTrace();
+            Logger.x(e);
         }
         if (contactIdentity == null) {
             return;

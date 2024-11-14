@@ -28,7 +28,14 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.lifecycle.ViewModel
-import io.olvid.messenger.App
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import androidx.paging.PagingSource.LoadResult.Page
+import androidx.paging.PagingState
+import androidx.paging.cachedIn
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.StringUtils2
@@ -40,50 +47,73 @@ import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 
 class GlobalSearchViewModel : ViewModel() {
     companion object {
         const val MESSAGE_SEARCH_LIMIT: Int = 50
         const val ATTACHMENT_SEARCH_LIMIT: Int = 30
     }
+
     var filter by mutableStateOf<String?>(null)
         private set
     private var filterRegexes by mutableStateOf<List<Regex>?>(null)
-    var currentSearchTask by mutableStateOf<SearchTask?>(null)
+    private var searchJob by mutableStateOf<Job?>(null)
 
     var contactsFound by mutableStateOf<List<Contact>?>(null)
     var groupsFound by mutableStateOf<List<SearchableDiscussion>?>(null)
     var otherDiscussionsFound by mutableStateOf<List<SearchableDiscussion>?>(null)
-    var messagesFound by mutableStateOf<List<DiscussionAndMessage>?>(null)
+    var messagesFound by mutableStateOf<Flow<PagingData<DiscussionAndMessage>>?>(null)
     var bookmarksFound by mutableStateOf<List<DiscussionAndMessage>?>(null)
-    var fylesFound by mutableStateOf<List<FyleAndOrigin>?>(null)
+    var fylesFound by mutableStateOf<Flow<PagingData<FyleAndOrigin>>?>(null)
 
-    val searching by derivedStateOf { currentSearchTask != null }
-    var noResults = derivedStateOf {
-        contactsFound.isNullOrEmpty() && groupsFound.isNullOrEmpty() && otherDiscussionsFound.isNullOrEmpty() && messagesFound.isNullOrEmpty() && bookmarksFound.isNullOrEmpty() && fylesFound.isNullOrEmpty()
-    }
-    var messageLimitReachedCount : String? by mutableStateOf(null)
-    var attachmentLimitReachedCount : String? by mutableStateOf(null)
+    val searching by derivedStateOf { searchJob != null }
 
     fun search(bytesOwnedIdentity: ByteArray, text: String) {
+        searchJob?.cancel()
+        searchJob = null
         filter = text
-        currentSearchTask?.cancel()
-        currentSearchTask = SearchTask(bytesOwnedIdentity, text)
+        filterRegexes = filter
+            ?.trim()
+            ?.split("\\s+".toRegex())
+            ?.filter { it.isNotEmpty() }
+            ?.map { Regex.fromLiteral(StringUtils.unAccent(it)) }
+        val tokenizedQuery = GlobalSearchTokenizer.tokenize(text).fullTextSearchEscape()
+        searchJob = viewModelScope.launch {
+            supervisorScope {
+                searchMessages(bytesOwnedIdentity, tokenizedQuery)
+                searchFyles(bytesOwnedIdentity, tokenizedQuery)
+                val deferredSearches = listOf(
+                    async(Dispatchers.IO) {
+                        searchContacts(bytesOwnedIdentity)
+                    },
+                    async(Dispatchers.IO) {
+                        searchDiscussions(bytesOwnedIdentity)
+                    }
+                )
+                runCatching { deferredSearches.awaitAll() }
+                searchJob = null
+            }
+        }
     }
 
     fun clear() {
         filter = null
         filterRegexes = null
-        currentSearchTask?.cancel()
-        currentSearchTask = null
+        searchJob?.cancel()
+        searchJob = null
 
         messagesFound = null
         bookmarksFound = null
         contactsFound = null
         groupsFound = null
         otherDiscussionsFound = null
-        messageLimitReachedCount = null
-        attachmentLimitReachedCount = null
     }
 
     @Composable
@@ -92,7 +122,7 @@ class GlobalSearchViewModel : ViewModel() {
     }
 
     @Composable
-    fun highlight(content: AnnotatedString) : AnnotatedString {
+    fun highlight(content: AnnotatedString): AnnotatedString {
         return AnnotatedString.Builder(content).apply {
             filterRegexes?.let {
                 StringUtils2.computeHighlightRanges(content.toString(), it).forEach { range ->
@@ -111,7 +141,7 @@ class GlobalSearchViewModel : ViewModel() {
 
     @Composable
     fun truncateMessageBody(body: String): String {
-         filterRegexes?.let {
+        filterRegexes?.let {
             val ranges = StringUtils2.computeHighlightRanges(body, it)
             if (ranges.isNotEmpty()) {
                 val pos = body.lastIndexOf("\n", ranges.first().first)
@@ -125,106 +155,80 @@ class GlobalSearchViewModel : ViewModel() {
         return body
     }
 
-    inner class SearchTask(val bytesOwnedIdentity: ByteArray, val text: String) {
-        private var cancelled = false
-
-        init {
-            App.runThread(this::run)
-        }
-
-        fun run() {
-            filterRegexes = filter
-                ?.trim()
-                ?.split("\\s+".toRegex())
-                ?.filter { it.isNotEmpty() }
-                ?.map { Regex.fromLiteral(StringUtils.unAccent(it)) }
-
-            val contacts = AppDatabase.getInstance().contactDao()
-                .getAllForOwnedIdentitySync(bytesOwnedIdentity)
-                .filter { contact ->
-                    filterRegexes?.all { it.containsMatchIn(contact.fullSearchDisplayName) } == true
-                }
-            if (cancelled) {
-                return
+    private fun searchContacts(bytesOwnedIdentity: ByteArray) {
+        contactsFound = AppDatabase.getInstance().contactDao()
+            .getAllForOwnedIdentitySync(bytesOwnedIdentity)
+            .filter { contact ->
+                filterRegexes?.all { it.containsMatchIn(contact.fullSearchDisplayName) } == true
             }
-            contactsFound = contacts
+    }
 
-            val groups: MutableList<SearchableDiscussion> = ArrayList()
-            val otherDiscussions: MutableList<SearchableDiscussion> = ArrayList()
-            AppDatabase.getInstance().discussionDao()
-                .getAllForGlobalSearch(bytesOwnedIdentity)
-                .filter { !it.discussion.isNormalOrReadOnly || it.discussion.discussionType != Discussion.TYPE_CONTACT } // filter out normal contact discussions
-                .map { SearchableDiscussion(it) }
-                .forEach { searchableDiscussion ->
-                    if (filterRegexes?.all { it.containsMatchIn(searchableDiscussion.patternMatchingField) } == true) {
-                        if (searchableDiscussion.isGroupDiscussion) {
-                            groups.add(searchableDiscussion)
-                        } else {
-                            otherDiscussions.add(searchableDiscussion)
-                        }
-                    }
-                }
-            if (cancelled) {
-                return
-            }
-            groupsFound = groups
-            otherDiscussionsFound = otherDiscussions
-
-            val tokenizedQuery = GlobalSearchTokenizer.tokenize(text).fullTextSearchEscape()
-            val messages = AppDatabase.getInstance().messageDao()
-                .globalSearch(bytesOwnedIdentity, tokenizedQuery, MESSAGE_SEARCH_LIMIT)
-            if (cancelled) {
-                return
-            }
-            messagesFound = messages
-
-            messageLimitReachedCount =
-                if (messages.size >= MESSAGE_SEARCH_LIMIT) {
-                    val count = AppDatabase.getInstance().messageDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery, 5 * MESSAGE_SEARCH_LIMIT + 1)
-                    if (count > 5 * MESSAGE_SEARCH_LIMIT) {
-                        "${5 * MESSAGE_SEARCH_LIMIT}+"
-                    } else if (count > MESSAGE_SEARCH_LIMIT) {
-                        count.toString()
+    private fun searchDiscussions(bytesOwnedIdentity: ByteArray) {
+        val groups: MutableList<SearchableDiscussion> = ArrayList()
+        val otherDiscussions: MutableList<SearchableDiscussion> = ArrayList()
+        AppDatabase.getInstance().discussionDao()
+            .getAllForGlobalSearch(bytesOwnedIdentity)
+            .filter { !it.discussion.isNormalOrReadOnly || it.discussion.discussionType != Discussion.TYPE_CONTACT } // filter out normal contact discussions
+            .map { SearchableDiscussion(it) }
+            .forEach { searchableDiscussion ->
+                if (filterRegexes?.all { it.containsMatchIn(searchableDiscussion.patternMatchingField) } == true) {
+                    if (searchableDiscussion.isGroupDiscussion) {
+                        groups.add(searchableDiscussion)
                     } else {
-                        null
+                        otherDiscussions.add(searchableDiscussion)
                     }
-                } else {
-                    null
                 }
-
-            val fyles = AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
-                .globalSearch(bytesOwnedIdentity, tokenizedQuery, ATTACHMENT_SEARCH_LIMIT + 1)
-            if (cancelled) {
-                return
-            }
-            fylesFound = if (fyles.size > ATTACHMENT_SEARCH_LIMIT) {
-                fyles.subList(0, ATTACHMENT_SEARCH_LIMIT)
-            } else {
-                fyles
             }
 
-            attachmentLimitReachedCount =
-                if (fyles.size > ATTACHMENT_SEARCH_LIMIT) {
-                    "${ATTACHMENT_SEARCH_LIMIT}+"
-//                    val count = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().globalSearchCount(bytesOwnedIdentity, tokenizedQuery, 5 * ATTACHMENT_SEARCH_LIMIT + 1)
-//                    if (count > 5 * ATTACHMENT_SEARCH_LIMIT) {
-//                        "${5 * ATTACHMENT_SEARCH_LIMIT}+"
-//                    } else if (count > ATTACHMENT_SEARCH_LIMIT) {
-//                        count.toString()
-//                    } else {
-//                        null
-//                    }
-                } else {
-                    null
+        groupsFound = groups
+        otherDiscussionsFound = otherDiscussions
+    }
+
+    private fun searchMessages(bytesOwnedIdentity: ByteArray, tokenizedQuery: String) {
+        messagesFound = pager(MESSAGE_SEARCH_LIMIT) { offset ->
+            AppDatabase.getInstance().globalSearchDao().messageGlobalSearch(
+                bytesOwnedIdentity,
+                tokenizedQuery,
+                MESSAGE_SEARCH_LIMIT,
+                offset)
+        }.flow.cachedIn(viewModelScope)
+    }
+
+    private fun searchFyles(bytesOwnedIdentity: ByteArray, tokenizedQuery: String) {
+        fylesFound = pager(ATTACHMENT_SEARCH_LIMIT) { offset ->
+            AppDatabase.getInstance().globalSearchDao().attachmentsGlobalSearch(bytesOwnedIdentity, tokenizedQuery, ATTACHMENT_SEARCH_LIMIT, offset)
+        }.flow.cachedIn(viewModelScope)
+    }
+
+    private fun <T : Any>pager(
+        searchLimit: Int,
+        loadData: suspend (offset: Int) -> List<T>
+    ) = Pager(
+        config = PagingConfig(
+            pageSize = searchLimit,
+            prefetchDistance = 3 * searchLimit
+        )
+    ) {
+        object : PagingSource<Int, T>() {
+            override fun getRefreshKey(state: PagingState<Int, T>): Int? {
+                return state.anchorPosition?.let { anchorPosition ->
+                    val anchorPage = state.closestPageToPosition(anchorPosition)
+                    anchorPage?.prevKey?.plus(searchLimit)
+                        ?: anchorPage?.nextKey?.minus(
+                            searchLimit
+                        )
                 }
-
-            if (!cancelled) {
-                currentSearchTask = null
             }
-        }
 
-        fun cancel() {
-            cancelled = true
+            override suspend fun load(params: LoadParams<Int>): LoadResult<Int, T> {
+                val offset = params.key ?: 0
+                val data = loadData(offset)
+                return Page(
+                    data = data,
+                    prevKey = if (offset == 0) null else offset - searchLimit,
+                    nextKey = if (data.size < searchLimit) null else offset + searchLimit
+                )
+            }
         }
     }
 }

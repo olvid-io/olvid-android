@@ -163,7 +163,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         // cleanup downloaded user data dir of orphan files
@@ -185,12 +185,12 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                         //noinspection ResultOfMethodCallIgnored
                         file.delete();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -377,7 +377,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
     }

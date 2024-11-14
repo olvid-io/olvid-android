@@ -27,6 +27,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
@@ -144,7 +145,7 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
             provisionedKeyMaterial.insert();
             return provisionedKeyMaterial;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -171,7 +172,7 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
         try {
             this.authEncKey = (AuthEncKey) new Encoded(res.getBytes(AUTH_ENC_KEY)).decodeSymmetricKey();
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.expirationTimestamp = res.getLong(EXPIRATION_TIMESTAMP);
         this.selfRatchetingCount = res.getInt(SELF_RATCHETING_COUNT);

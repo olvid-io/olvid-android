@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
@@ -147,7 +148,7 @@ class QueryApiKeyStatusServerMethod extends ServerMethod {
                 this.permissions = receivedData[1].decodeLong();
                 this.apiKeyExpiration = receivedData[2].decodeLong();
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         }

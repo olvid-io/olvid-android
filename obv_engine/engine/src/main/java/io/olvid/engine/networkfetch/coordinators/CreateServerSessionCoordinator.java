@@ -91,7 +91,7 @@ public class CreateServerSessionCoordinator implements Operation.OnFinishCallbac
             }
             fetchManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

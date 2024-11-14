@@ -96,7 +96,7 @@ public class NotificationListenerIdentity implements NotificationListener {
                     engineInfo.put(EngineNotifications.NEW_CONTACT_HAS_UNTRUSTED_PUBLISHED_DETAILS_KEY, engine.identityManager.contactHasUntrustedPublishedDetails(engineSession.session, ownedIdentity, contactIdentity));
                     engine.postEngineNotification(EngineNotifications.NEW_CONTACT, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -318,7 +318,7 @@ public class NotificationListenerIdentity implements NotificationListener {
 
                     engine.postEngineNotification(EngineNotifications.CONTACT_CAPABILITIES_UPDATED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -336,7 +336,7 @@ public class NotificationListenerIdentity implements NotificationListener {
 
                     engine.postEngineNotification(EngineNotifications.OWN_CAPABILITIES_UPDATED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }

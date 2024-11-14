@@ -157,7 +157,7 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
                         fetchManagerSession.session.commit();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_OWNED_IDENTITY_KEY, ownedIdentity);
@@ -205,7 +205,7 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
                     }
                     awaitingIdentityReactivationOperationsLock.unlock();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }

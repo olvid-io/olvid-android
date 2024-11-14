@@ -266,7 +266,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to check for tables upgrade", e);
         }
 
@@ -281,7 +281,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             UserInterfaceDialog.createTable(engineSession.session);
             engineSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to create engine databases");
         }
 
@@ -312,7 +312,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                             userInterfaceDialog.delete();
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                         try {
                             userInterfaceDialog.delete();
                         } catch (Exception ignored) { }
@@ -321,7 +321,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 engineSession.session.commit();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -398,7 +398,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         try {
             notificationQueue.put(new EngineNotification(notificationName, userInfo));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -417,7 +417,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                     try {
                         engineNotification = notificationQueue.take();
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                     if (engineNotification == null) {
                         continue;
@@ -439,7 +439,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                                     try {
                                         listener.callback(engineNotification.notificationName, engineNotification.userInfo);
                                     } catch (Exception e) {
-                                        e.printStackTrace();
+                                        Logger.x(e);
                                     }
                                 }
                             }
@@ -455,7 +455,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                                             try {
                                                 listener.callback(engineNotification.notificationName, engineNotification.userInfo);
                                             } catch (Exception e) {
-                                                e.printStackTrace();
+                                                Logger.x(e);
                                             }
                                         }
                                     }
@@ -798,7 +798,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 return RegisterApiKeyResult.FAILED;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return RegisterApiKeyResult.FAILED;
         }
     }
@@ -814,7 +814,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 fetchManager.forceRegisterPushNotification(ownedIdentity, false);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -830,7 +830,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             identityManager.unCertifyExpiredSignedContactDetails(engineSession.session, ownedIdentity, latestRevocationListTimestamp);
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -841,7 +841,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             identityManager.setOwnedIdentityKeycloakSelfRevocationTestNonce(engineSession.session, ownedIdentity, serverUrl, nonce);
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -851,7 +851,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             return identityManager.getOwnedIdentityKeycloakSelfRevocationTestNonce(engineSession.session, ownedIdentity, serverUrl);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }
@@ -867,7 +867,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 identityManager.updateKeycloakGroups(engineSession.session, ownedIdentity, signedGroupBlobs, signedGroupDeletions, signedGroupKicks, keycloakCurrentTimestamp);
                 success = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 if (success) {
                     engineSession.session.commit();
@@ -877,7 +877,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             }
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -889,7 +889,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             fetchManager.deleteExistingServerSession(engineSession.session, ownedIdentity, true);
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1006,7 +1006,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             engineSession.session.commit();
             return obvIdentity;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }
@@ -1017,7 +1017,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             protocolManager.startProtocolForUnbindingOwnedIdentityFromKeycloak(ownedIdentity);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1106,7 +1106,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             identityManager.discardLatestIdentityDetails(engineSession.session, ownedIdentity);
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1121,7 +1121,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             }
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1141,7 +1141,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             return fetchManager.getServerAuthenticationToken(ownedIdentity);
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -1153,7 +1153,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             return identityManager.getOwnCapabilities(ownedIdentity);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -1164,7 +1164,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             return identityManager.getDevicesOfOwnedIdentity(engineSession.session, ownedIdentity);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -1229,7 +1229,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 return new ObvDeviceList(multiDevice, deviceUidsAndServerInfo);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }
@@ -1240,7 +1240,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             protocolManager.startOwnedDeviceDiscoveryProtocol(ownedIdentity);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1252,7 +1252,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             // simply start the channel creation protocol: this deletes any channel and aborts any ongoing instance
             protocolManager.startChannelCreationWithOwnedDeviceProtocol(ownedIdentity, deviceUid);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1263,7 +1263,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 //            protocolManager.triggerOwnedDevicesSync(engineSession.session, ownedIdentity);
 //            engineSession.session.commit();
 //        } catch (Exception e) {
-//            e.printStackTrace();
+//            Logger.x(e);
 //        }
 //    }
 
@@ -1301,7 +1301,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity contactIdentity = Identity.of(bytesContactIdentity);
             return identityManager.getContactActiveOrInactiveReasons(engineSession.session, ownedIdentity, contactIdentity);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -1315,7 +1315,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             engineSession.session.commit();
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -1329,7 +1329,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             engineSession.session.commit();
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -1379,7 +1379,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             }
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1421,7 +1421,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity contactIdentity = Identity.of(bytesContactIdentity);
             return identityManager.getContactCapabilities(ownedIdentity, contactIdentity);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -1508,7 +1508,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             }
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1530,7 +1530,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             identityManager.discardLatestGroupDetails(engineSession.session, ownedIdentity, bytesGroupOwnerAndUid);
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1545,7 +1545,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             }
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -1598,7 +1598,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 return identityManager.getGroupV2JsonGroupType(engineSession.session, ownedIdentity, groupIdentifier);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -1617,7 +1617,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 return identityManager.getGroupV2DetailsAndPhotos(engineSession.session, ownedIdentity, groupIdentifier);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
 
@@ -2008,7 +2008,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             fetchManager.deleteReturnReceipt(ownedIdentity, serverUid);
         } catch (DecodingException e) {
             Logger.w("DecodingException while reconstructing the ownedIdentity in deleteReturnReceipt");
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2038,7 +2038,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }
@@ -2057,7 +2057,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 }
                 list.add(contactIdentity);
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 Logger.w("Error decoding a bytesContactIdentity while posting a message!");
             }
         }
@@ -2124,7 +2124,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 for (Identity contactIdentity : contactIdentities) {
                     messageIdentifierByContactIdentity.put(new ObvBytesKey(contactIdentity.getBytes()), null);
                 }
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
 
@@ -2150,7 +2150,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             }
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2159,7 +2159,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         try (EngineSession engineSession = getSession()) {
             return sendManager.isOutboxAttachmentSent(engineSession.session, Identity.of(bytesOwnedIdentity), new UID(engineMessageIdentifier), engineNumber);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -2169,7 +2169,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         try (EngineSession engineSession = getSession()) {
             return sendManager.isOutboxMessageSent(engineSession.session, Identity.of(bytesOwnedIdentity), new UID(engineMessageIdentifier));
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -2181,7 +2181,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             sendManager.cancelMessageSending(engineSession.session, Identity.of(bytesOwnedIdentity), new UID(engineMessageIdentifier));
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2190,7 +2190,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         try (EngineSession engineSession = getSession()) {
             return fetchManager.isInboxAttachmentReceived(engineSession.session, Identity.of(bytesOwnedIdentity), new UID(engineMessageIdentifier), attachmentNumber);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -2202,7 +2202,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             UID currentDeviceUid = identityManager.getCurrentDeviceUidOfOwnedIdentity(engineSession.session, ownedIdentity);
             fetchManager.downloadMessages(ownedIdentity, currentDeviceUid);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2212,7 +2212,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             fetchManager.downloadAttachment(Identity.of(bytesOwnedIdentity), new UID(messageIdentifier), attachmentNumber, DownloadAttachmentPriorityCategory.WEIGHT);
         } catch (DecodingException e) {
             Logger.e("Error parsing bytesOwnedIdentity in Engine.downloadSmallAttachment");
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2222,7 +2222,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             fetchManager.downloadAttachment(Identity.of(bytesOwnedIdentity), new UID(messageIdentifier), attachmentNumber, DownloadAttachmentPriorityCategory.TIMESTAMP);
         } catch (DecodingException e) {
             Logger.e("Error parsing bytesOwnedIdentity in Engine.downloadLargeAttachment");
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2232,7 +2232,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             fetchManager.pauseDownloadAttachment(Identity.of(bytesOwnedIdentity), new UID(messageIdentifier), attachmentNumber);
         } catch (DecodingException e) {
             Logger.e("Error parsing bytesOwnedIdentity in Engine.pauseAttachmentDownload");
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2247,7 +2247,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             markAttachmentForDeletion(Identity.of(bytesOwnedIdentity), new UID(messageIdentifier), attachmentNumber);
         } catch (DecodingException e) {
             Logger.e("Error parsing bytesOwnedIdentity in Engine.deleteAttachment");
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2259,14 +2259,14 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             ownedIdentity = Identity.of(bytesOwnedIdentity);
         } catch (DecodingException e) {
             Logger.e("Error parsing bytesOwnedIdentity in Engine.deleteMessage");
-            e.printStackTrace();
+            Logger.x(e);
             return;
         }
         try (EngineSession engineSession = getSession()) {
             fetchManager.deleteMessageAndAttachments(engineSession.session, ownedIdentity, messageUid);
             engineSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2278,14 +2278,14 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             ownedIdentity = Identity.of(bytesOwnedIdentity);
         } catch (DecodingException e) {
             Logger.e("Error parsing bytesOwnedIdentity in Engine.deleteMessage");
-            e.printStackTrace();
+            Logger.x(e);
             return;
         }
         try (EngineSession engineSession = getSession()) {
             fetchManager.deleteMessage(engineSession.session, ownedIdentity, messageUid);
             engineSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2297,7 +2297,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             fetchManager.deleteAttachment(engineSession.session, ownedIdentity, messageUid, attachmentNumber);
             engineSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2310,7 +2310,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             sendManager.cancelAttachmentUpload(engineSession.session, Identity.of(bytesOwnedIdentity), new UID(messageIdentifier), attachmentNumber);
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2449,7 +2449,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             fetchManager.getTurnCredentials(ownedIdentity, callUuid, callerUsername, recipientUsername);
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2459,7 +2459,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             fetchManager.queryApiKeyStatus(ownedIdentity, apiKey);
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2480,7 +2480,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             fetchManager.queryFreeTrial(ownedIdentity);
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2493,7 +2493,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 fetchManager.startFreeTrial(ownedIdentity);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2506,7 +2506,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 fetchManager.verifyReceipt(ownedIdentity, storeToken);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2606,7 +2606,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             }
             engineSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

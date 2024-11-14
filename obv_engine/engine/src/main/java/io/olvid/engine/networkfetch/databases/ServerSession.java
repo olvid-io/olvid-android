@@ -155,7 +155,7 @@ public class ServerSession implements ObvDatabase {
             this.challenge = challenge;
             this.nonce = nonce;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -175,7 +175,7 @@ public class ServerSession implements ObvDatabase {
                 this.response = response;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -200,7 +200,7 @@ public class ServerSession implements ObvDatabase {
             this.permissions = permissions;
             this.apiKeyExpirationTimestamp = apiKeyExpirationTimestamp;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -213,7 +213,7 @@ public class ServerSession implements ObvDatabase {
             statement.setBytes(2, token);
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -225,7 +225,7 @@ public class ServerSession implements ObvDatabase {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -261,7 +261,7 @@ public class ServerSession implements ObvDatabase {
         try {
             this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.nonce = res.getBytes(NONCE);
         this.challenge = res.getBytes(CHALLENGE);
@@ -293,7 +293,7 @@ public class ServerSession implements ObvDatabase {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

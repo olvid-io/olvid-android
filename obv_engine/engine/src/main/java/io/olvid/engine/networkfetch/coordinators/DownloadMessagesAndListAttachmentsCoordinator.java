@@ -144,7 +144,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                 fetchManagerSession.session.commit();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -308,7 +308,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                     downloadMessagesAndListAttachmentsOperationQueue.queue(op);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
     }

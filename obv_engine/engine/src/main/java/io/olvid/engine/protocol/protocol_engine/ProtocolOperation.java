@@ -118,7 +118,7 @@ public final class ProtocolOperation extends Operation {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 if (protocol == null) {
                     cancel(RFC_UNABLE_TO_RECONSTRUCT_PROTOCOL);
@@ -194,7 +194,7 @@ public final class ProtocolOperation extends Operation {
 
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 if (finished) {
                     protocolManagerSession.session.commit();
@@ -208,7 +208,7 @@ public final class ProtocolOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

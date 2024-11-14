@@ -84,27 +84,28 @@ fun LinkPreview(
             .observeAsState()
         linkPreviewFyle?.let { fyleAndStatus ->
             if (fyleAndStatus.fyle.isComplete) {
-                LaunchedEffect(fyleAndStatus.fyle.id) {
-                    linkPreviewViewModel?.linkPreviewLoader(
-                        fyleAndStatus.fyle,
-                        fyleAndStatus.fyleMessageJoinWithStatus.fileName,
-                        fyleAndStatus.fyleMessageJoinWithStatus.messageId
-                    ) {
-                        opengraph = it
-                        it?.getSafeUri()?.let { uri ->
-                            discussionViewModel?.messageLinkPreviewUrlCache?.put(
-                                message.id,
-                                uri.toString()
-                            )
+                LaunchedEffect(fyleAndStatus.fyle.id, message.messageType) {
+                    if (message.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED && message.wipeStatus != Message.WIPE_STATUS_WIPED) {
+                        linkPreviewViewModel?.linkPreviewLoader(
+                            fyleAndStatus.fyle,
+                            fyleAndStatus.fyleMessageJoinWithStatus.fileName,
+                            fyleAndStatus.fyleMessageJoinWithStatus.messageId
+                        ) {
+                            if (message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED && message.wipeStatus != Message.WIPE_STATUS_WIPED) {
+                                opengraph = it
+                                it?.getSafeUri()?.let { uri ->
+                                    discussionViewModel?.messageLinkPreviewUrlCache?.put(
+                                        message.id,
+                                        uri.toString()
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-    } else if (message.messageType == Message.TYPE_INBOUND_MESSAGE && SettingsActivity.isLinkPreviewInbound(
-            LocalContext.current
-        )
-    ) {
+    } else if (message.messageType == Message.TYPE_INBOUND_MESSAGE && SettingsActivity.isLinkPreviewInbound(LocalContext.current)) {
         val density = LocalDensity.current
         LaunchedEffect(message.id) {
             val size = with(density) {
@@ -118,6 +119,11 @@ fun LinkPreview(
             ) {
                 opengraph = it
             }
+        }
+    }
+    LaunchedEffect(message.wipeStatus) {
+        if (message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED || message.wipeStatus == Message.WIPE_STATUS_WIPED) {
+            opengraph = null
         }
     }
     opengraph?.let {

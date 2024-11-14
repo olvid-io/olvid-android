@@ -137,7 +137,7 @@ public class BatchUploadMessagesOperation extends Operation {
                         cancel(BatchUploadMessagesCompositeOperation.RFC_NETWORK_ERROR);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 sendManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -151,7 +151,7 @@ public class BatchUploadMessagesOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }
@@ -234,7 +234,7 @@ class BatchUploadMessagesServerMethod extends ServerMethod {
                         outboxMessageAndHeaders[i].timestampFromServer = encodeds[2].decodeLong();
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                     returnStatus = ServerMethod.OK_WITH_MALFORMED_SERVER_RESPONSE;
                 }
             }

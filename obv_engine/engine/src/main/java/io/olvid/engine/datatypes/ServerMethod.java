@@ -180,13 +180,13 @@ public abstract class ServerMethod {
                 connection.disconnect();
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             returnStatus = MALFORMED_URL;
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.x(e);
             returnStatus = SERVER_CONNECTION_ERROR;
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
             returnStatus = MALFORMED_SERVER_RESPONSE;
         }
         return returnStatus;

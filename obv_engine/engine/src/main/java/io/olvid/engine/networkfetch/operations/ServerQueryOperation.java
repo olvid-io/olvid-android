@@ -338,7 +338,7 @@ public class ServerQueryOperation extends Operation {
                         cancel(RFC_NETWORK_ERROR);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 if (finished) {
                     setFinished();
@@ -350,7 +350,7 @@ public class ServerQueryOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -413,7 +413,7 @@ class DeviceDiscoveryServerMethod extends ServerQueryServerMethod {
                 receivedData[0].decodeDictionary();
                 serverResponse = receivedData[0];
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         }
@@ -464,7 +464,7 @@ class OwnedDeviceDiscoveryServerMethod extends ServerQueryServerMethod {
                 receivedData[0].decodeEncryptedData();
                 serverResponse = receivedData[0];
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         }
@@ -583,7 +583,7 @@ class GetUserDataServerMethod extends ServerQueryServerMethod {
                 }
                 serverResponse = Encoded.of(userDataPath);
             } catch (DecodingException | IOException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER) {
@@ -641,7 +641,7 @@ class CheckKeycloakRevocationServerMethod extends ServerQueryServerMethod {
                 Logger.w("Server responded to verify server query: " + verificationSuccessful);
                 serverResponse = Encoded.of(verificationSuccessful);
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         }
@@ -767,7 +767,7 @@ class GetGroupBlobServerMethod extends ServerQueryServerMethod {
                         Encoded.of(nonce),
                 });
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.MALFORMED_SERVER_RESPONSE;
             }
         } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER) {
@@ -844,7 +844,7 @@ class LockGroupBlobServerMethod extends ServerQueryServerMethod {
                         Encoded.of(lockNonce),
                 });
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.MALFORMED_SERVER_RESPONSE;
             }
         } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER
@@ -1072,7 +1072,7 @@ class GetKeycloakDataServerMethod extends ServerQueryServerMethod {
                 }
                 serverResponse = Encoded.of(userDataPath);
             } catch (DecodingException | IOException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER) {

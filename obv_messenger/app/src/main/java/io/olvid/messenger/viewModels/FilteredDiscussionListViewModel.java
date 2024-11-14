@@ -188,7 +188,7 @@ public class FilteredDiscussionListViewModel extends ViewModel {
             }
             this.title = discussionAndGroupMembersNames.discussion.title;
             this.groupMemberNameList = discussionAndGroupMembersNames.groupMemberNames == null ? "" : discussionAndGroupMembersNames.groupMemberNames;
-            this.patternMatchingField = StringUtils.unAccent(title + "\n" + groupMemberNameList);
+            this.patternMatchingField = discussionAndGroupMembersNames.patterMatchingField == null ? StringUtils.unAccent(title + "\n" + groupMemberNameList) : discussionAndGroupMembersNames.patterMatchingField;
             this.photoUrl = discussionAndGroupMembersNames.discussion.photoUrl;
             this.keycloakManaged = discussionAndGroupMembersNames.discussion.keycloakManaged;
             this.active = discussionAndGroupMembersNames.discussion.active;

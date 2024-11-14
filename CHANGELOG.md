@@ -1,3 +1,10 @@
+# Build 255 (3.3)
+2024-11-14
+
+- Improved global search layout and performance (tabs, search in group member names, search in personal notes, etc.)
+- Support for incoming call notification during a call
+- Improved RTL language support
+
 # Build 254 (3.2.2)
 2024-10-18
 

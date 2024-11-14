@@ -44,7 +44,6 @@ import android.media.projection.MediaProjection
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.WifiLock
 import android.os.Binder
-import android.os.Build
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Handler
@@ -95,6 +94,7 @@ import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.CallLogItemContactJoin
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
+import io.olvid.messenger.databases.entity.Discussion.TYPE_CONTACT
 import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonPayload
@@ -104,6 +104,7 @@ import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.webrtc.BluetoothHeadsetManager.State.HEADSET_UNAVAILABLE
 import io.olvid.messenger.webrtc.OutgoingCallRinger.Type
 import io.olvid.messenger.webrtc.OutgoingCallRinger.Type.RING
+import io.olvid.messenger.webrtc.WebrtcCallActivity.Companion.ANSWER_CALL_ACTION
 import io.olvid.messenger.webrtc.WebrtcCallService.AudioOutput.BLUETOOTH
 import io.olvid.messenger.webrtc.WebrtcCallService.AudioOutput.HEADSET
 import io.olvid.messenger.webrtc.WebrtcCallService.AudioOutput.LOUDSPEAKER
@@ -147,7 +148,6 @@ import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder.Companion.localVideo
 import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder.DataChannelMessageListener
 import io.olvid.messenger.webrtc.json.JsonAnswerCallMessage
 import io.olvid.messenger.webrtc.json.JsonAnsweredOrRejectedOnOtherDeviceMessage
-import io.olvid.messenger.webrtc.json.JsonBusyMessage
 import io.olvid.messenger.webrtc.json.JsonDataChannelInnerMessage
 import io.olvid.messenger.webrtc.json.JsonDataChannelMessage
 import io.olvid.messenger.webrtc.json.JsonHangedUpInnerMessage
@@ -183,7 +183,6 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
-import java.util.Arrays
 import java.util.Timer
 import java.util.TimerTask
 import java.util.TreeMap
@@ -192,6 +191,8 @@ import java.util.zip.Deflater
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.Inflater
 import java.util.zip.InflaterInputStream
+import kotlin.concurrent.timer
+import kotlin.concurrent.timerTask
 
 class WebrtcCallService : Service() {
     enum class Role {
@@ -270,6 +271,7 @@ class WebrtcCallService : Service() {
     private val wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver()
     private val objectMapper = AppSingleton.getJsonObjectMapper()
     private var role = NONE
+    var closeCallActivity : () -> Unit = {}
 
     @JvmField
     var callIdentifier: UUID? = null
@@ -278,8 +280,7 @@ class WebrtcCallService : Service() {
     var bytesOwnedIdentity: ByteArray? = null
 
     @JvmField
-    var discussionType =
-        Discussion.TYPE_CONTACT // updated whenever bytesGroupOwnerAndUidOrIdentifier is set
+    var discussionType = TYPE_CONTACT // updated whenever bytesGroupOwnerAndUidOrIdentifier is set
 
     @JvmField
     var bytesGroupOwnerAndUidOrIdentifier: ByteArray? = null
@@ -310,7 +311,7 @@ class WebrtcCallService : Service() {
     var screenShareActive by mutableStateOf(false)
     var cameraEnabled by mutableStateOf(false)
     private var availableCameras = emptyList<CameraAndFormat>()
-    val availableCamerasLiveData = MutableLiveData(availableCameras)
+    private val availableCamerasLiveData = MutableLiveData(availableCameras)
     private var selectedCamera: CameraAndFormat? = null
     val selectedCameraLiveData = MutableLiveData(selectedCamera)
     private var screenWidth: Int = 1080
@@ -342,6 +343,8 @@ class WebrtcCallService : Service() {
     private var disconnectSound = 0
     private var reconnectingSound = 0
     private var reconnectingStreamId: Int? = null
+    private var doubleCallSound = 0
+    private var doubleCallStreamId: Int? = null
     private var phoneCallStateListener: PhoneCallStateListener? = null
     private var screenOffReceiver: ScreenOffReceiver? = null
     private var audioFocusRequest: AudioFocusRequestCompat? = null
@@ -357,15 +360,156 @@ class WebrtcCallService : Service() {
         private set
     private var recipientTurnUserName: String? = null
     private var recipientTurnPassword: String? = null
+
+    private val queuedIncomingCalls = emptyList<Call>().toMutableList()
+
+    private fun dequeueIncomingCall(call: Call) {
+        queuedIncomingCalls.remove(call)
+        uncalledReceivedIceCandidates.remove(call.callIdentifier)
+        call.clearRingingTimeout()
+        stopThisServiceOrRefreshNotificationAndRingers()
+    }
+
+    private var currentIncomingCallLiveData: MutableLiveData<Call?> = MutableLiveData(null)
+    private var lastRoleWasNone: Boolean = true
+
+    fun getCurrentIncomingCallLiveData() : LiveData<Call?> {
+        return currentIncomingCallLiveData
+    }
+
+    private fun stopThisServiceOrRefreshNotificationAndRingers() {
+        queuedIncomingCalls.firstOrNull()?.also {
+            val currentFirstIncomingCall = currentIncomingCallLiveData.value
+            // if nothing changed, no need to change what we are doing!
+            if (it == currentFirstIncomingCall && (lastRoleWasNone == (role == NONE))) {
+                return
+            }
+            if (currentFirstIncomingCall == null) {
+                registerScreenOffReceiver()
+            }
+
+            if (role != NONE) {
+                playDoubleCallSound()
+            } else {
+                doubleCallStreamId?.let {
+                    soundPool?.stop(it)
+                    doubleCallStreamId = null
+                }
+                incomingCallRinger?.ring(it)
+            }
+            showIncomingCallForeground(
+                it.callIdentifier,
+                it.callerContact,
+                it.participantCount
+            )
+            currentIncomingCallLiveData.postValue(it)
+        } ?: run {
+            doubleCallStreamId?.let {
+                soundPool?.stop(it)
+                doubleCallStreamId = null
+            }
+            incomingCallRinger?.stop()
+            unregisterScreenOffReceiver()
+
+            if (role != NONE) {
+                showOngoingForeground()
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+
+                if (callIdentifier != null) {
+                    uncalledReceivedIceCandidates.remove(callIdentifier)
+                }
+                if (VERSION.SDK_INT < VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    unregisterDeviceOrientationChange()
+                }
+                Handler(Looper.getMainLooper()).postDelayed({ this.stopSelf() }, 300)
+            }
+            currentIncomingCallLiveData.postValue(null)
+        }
+        lastRoleWasNone = role == NONE
+    }
+
+    inner class Call(
+        val callIdentifier: UUID,
+        val bytesOwnedIdentity: ByteArray,
+        val callerContact: Contact,
+        val bytesGroupOwnerAndUidOrIdentifier: ByteArray?,
+        val turnUserName: String?,
+        val turnPassword: String?,
+        val participantCount: Int,
+        val gatheringPolicy: GatheringPolicy,
+        var discussionType: Int,
+        val sessionDescriptionType: String,
+        val sessionDescription: String,
+        val discussionCustomization: DiscussionCustomization?
+    ) {
+        private var ringingTimer: Timer? = null
+
+        init {
+            createRingingTimeout()
+        }
+
+        private fun createRingingTimeout() {
+            ringingTimer?.cancel()
+            ringingTimer = Timer().apply { schedule(timerTask {
+                executor.execute {
+                    dequeueIncomingCall(this@Call)
+                    CallLogItem(
+                        bytesOwnedIdentity,
+                        bytesGroupOwnerAndUidOrIdentifier,
+                        CallLogItem.TYPE_INCOMING,
+                        CallLogItem.STATUS_MISSED
+                    ).insert(
+                        listOf(
+                            ParticipantBytesAndRole(
+                                callerContact.bytesContactIdentity,
+                                CALLER
+                            )
+                        )
+                    )
+                }
+            }, RINGING_TIMEOUT_MILLIS) }
+        }
+
+        fun clearRingingTimeout() {
+            ringingTimer?.cancel()
+            ringingTimer = null
+        }
+    }
+
+    private fun setContactsAndRole(
+        bytesOwnedIdentity: ByteArray,
+        contacts: List<Contact>,
+        callIdentifier: UUID,
+        iAmTheCaller: Boolean
+    ) {
+        this.bytesOwnedIdentity = bytesOwnedIdentity
+        this.callIdentifier = callIdentifier
+        role = if (iAmTheCaller) CALLER else RECIPIENT
+        callParticipants.clear()
+        callParticipantIndexes.clear()
+        callParticipantIndex = 0
+        for (contact in contacts) {
+            val callParticipant =
+                CallParticipant(callIdentifier, contact, if (iAmTheCaller) RECIPIENT else CALLER)
+            callParticipantIndexes[BytesKey(contact.bytesContactIdentity)] = callParticipantIndex
+            callParticipants[callParticipantIndex] = callParticipant
+            callParticipantIndex++
+        }
+        notifyCallParticipantsChanged()
+        stopThisServiceOrRefreshNotificationAndRingers()
+    }
+
+
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         if (intent.action != null) {
             initialize()
             intent.apply {
                 when (action) {
                     ACTION_START_CALL -> {
-                        if (!intent.hasExtra(CONTACT_IDENTITIES_BUNDLE_INTENT_EXTRA) || !intent.hasExtra(
-                                BYTES_OWNED_IDENTITY_INTENT_EXTRA
-                            )
+                        if (!intent.hasExtra(CONTACT_IDENTITIES_BUNDLE_INTENT_EXTRA)
+                            || !intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
                         ) {
                             return@apply
                         }
@@ -500,13 +644,8 @@ class WebrtcCallService : Service() {
                                 }
 
                                 ANSWERED_OR_REJECTED_ON_OTHER_DEVICE_MESSAGE_TYPE -> {
-
                                     // only accept this type of message from other owned devices
-                                    if (bytesOwnedIdentity != null && bytesContactIdentity != null && Arrays.equals(
-                                            bytesOwnedIdentity,
-                                            bytesContactIdentity
-                                        )
-                                    ) {
+                                    if (bytesOwnedIdentity != null && bytesContactIdentity != null && bytesOwnedIdentity.contentEquals(bytesContactIdentity)) {
                                         val jsonAnsweredOrRejectedOnOtherDeviceMessage =
                                             objectMapper.readValue(
                                                 serializedMessagePayload,
@@ -527,45 +666,49 @@ class WebrtcCallService : Service() {
                     }
 
                     ACTION_ANSWER_CALL -> {
-                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA)) {
+                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA) || !intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)) {
                             return@apply
                         }
-                        val callIdentifier = UUID.fromString(
-                            intent.getStringExtra(
-                                CALL_IDENTIFIER_INTENT_EXTRA
-                            )
-                        )
+                        val callIdentifier = UUID.fromString(intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA))
+                        val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
+                        if (callIdentifier == null || bytesOwnedIdentity == null) {
+                            return@apply
+                        }
                         val audioPermissionGranted = ContextCompat.checkSelfPermission(
                             this@WebrtcCallService,
                             permission.RECORD_AUDIO
                         ) == PackageManager.PERMISSION_GRANTED
-                        recipientAnswerCall(callIdentifier, !audioPermissionGranted)
+                        recipientAnswerCall(bytesOwnedIdentity, callIdentifier, !audioPermissionGranted)
                         return START_NOT_STICKY
                     }
 
                     ACTION_REJECT_CALL -> {
-                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA)) {
+                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA) || !intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)) {
                             return@apply
                         }
                         val callIdentifier = UUID.fromString(
-                            intent.getStringExtra(
-                                CALL_IDENTIFIER_INTENT_EXTRA
-                            )
+                            intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA)
                         )
-                        recipientRejectCall(callIdentifier)
+                        val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
+                        if (callIdentifier == null || bytesOwnedIdentity == null) {
+                            return@apply
+                        }
+                        recipientRejectCall(bytesOwnedIdentity, callIdentifier)
                         return START_NOT_STICKY
                     }
 
                     ACTION_HANG_UP -> {
-                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA)) {
+                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA) || !intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)) {
                             return@apply
                         }
                         val callIdentifier = UUID.fromString(
-                            intent.getStringExtra(
-                                CALL_IDENTIFIER_INTENT_EXTRA
-                            )
+                            intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA)
                         )
-                        hangUpCall(callIdentifier)
+                        val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
+                        if (callIdentifier == null || bytesOwnedIdentity == null) {
+                            return@apply
+                        }
+                        hangUpCall(bytesOwnedIdentity, callIdentifier)
                         return START_NOT_STICKY
                     }
                 }
@@ -581,10 +724,14 @@ class WebrtcCallService : Service() {
             val bytesContactIdentity = intent.getByteArrayExtra(BYTES_CONTACT_IDENTITY_INTENT_EXTRA)
             val callIdentifier =
                 UUID.fromString(intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA))
+
+            if (bytesOwnedIdentity == null) {
+                return@execute
+            }
+
             // if the message is for another call, ignore it
-            if (!Arrays.equals(bytesOwnedIdentity, this.bytesOwnedIdentity) ||
-                callIdentifier != this.callIdentifier
-            ) {
+            if ((!bytesOwnedIdentity.contentEquals(this.bytesOwnedIdentity) || callIdentifier != this.callIdentifier )
+                && queuedIncomingCalls.none { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity) }) {
                 return@execute
             }
             val messageType = intent.getIntExtra(MESSAGE_TYPE_INTENT_EXTRA, -1)
@@ -593,14 +740,16 @@ class WebrtcCallService : Service() {
             )
                 ?: return@execute
             // if message does not contain a payload, ignore it
-            handleMessage(bytesContactIdentity, messageType, serializedMessagePayload)
+            handleMessage(bytesOwnedIdentity, bytesContactIdentity, messageType, serializedMessagePayload, callIdentifier)
         }
     }
 
     private fun handleMessage(
+        bytesOwnedIdentity: ByteArray,
         bytesContactIdentity: ByteArray?,
         messageType: Int,
-        serializedMessagePayload: String
+        serializedMessagePayload: String,
+        callIdentifier: UUID
     ) {
         try {
             when (messageType) {
@@ -634,8 +783,27 @@ class WebrtcCallService : Service() {
                 }
 
                 HANGED_UP_MESSAGE_TYPE -> {
-                    val callParticipant = getCallParticipant(bytesContactIdentity)
-                    callParticipant?.let { handleHangedUpMessage(it) }
+                    if (callIdentifier == this.callIdentifier && bytesOwnedIdentity.contentEquals(this.bytesOwnedIdentity)) {
+                        val callParticipant = getCallParticipant(bytesContactIdentity)
+                        callParticipant?.let { handleHangedUpMessage(it) }
+                    } else {
+                        queuedIncomingCalls.find { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)}?.let {
+                            dequeueIncomingCall(it)
+                            CallLogItem(
+                                bytesOwnedIdentity,
+                                bytesGroupOwnerAndUidOrIdentifier,
+                                CallLogItem.TYPE_INCOMING,
+                                CallLogItem.STATUS_MISSED
+                            ).insert(
+                                listOf(
+                                    ParticipantBytesAndRole(
+                                        it.callerContact.bytesContactIdentity,
+                                        CALLER
+                                    )
+                                )
+                            )
+                        }
+                    }
                 }
 
                 BUSY_MESSAGE_TYPE -> {
@@ -710,8 +878,8 @@ class WebrtcCallService : Service() {
                         JsonNewIceCandidateMessage::class.java
                     )
                     handleNewIceCandidateMessage(
-                        callIdentifier!!,
-                        bytesOwnedIdentity!!,
+                        callIdentifier,
+                        bytesOwnedIdentity,
                         bytesContactIdentity!!,
                         JsonIceCandidate(
                             jsonNewIceCandidateMessage.sdp,
@@ -727,8 +895,8 @@ class WebrtcCallService : Service() {
                         JsonRemoveIceCandidatesMessage::class.java
                     )
                     handleRemoveIceCandidatesMessage(
-                        callIdentifier!!,
-                        bytesOwnedIdentity!!,
+                        callIdentifier,
+                        bytesOwnedIdentity,
                         bytesContactIdentity!!,
                         jsonRemoveIceCandidatesMessage.candidates
                     )
@@ -739,16 +907,6 @@ class WebrtcCallService : Service() {
         }
     }
 
-    private fun stopThisService() {
-        if (callIdentifier != null) {
-            executor.execute { uncalledReceivedIceCandidates.remove(callIdentifier) }
-        }
-        stopForeground(true)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            unregisterDeviceOrientationChange()
-        }
-        Handler(Looper.getMainLooper()).postDelayed({ this.stopSelf() }, 300)
-    }
 
     // region Steps
     private fun initialize() {
@@ -775,6 +933,7 @@ class WebrtcCallService : Service() {
                         connectSound = load(this@WebrtcCallService, raw.connect, 1)
                         disconnectSound = load(this@WebrtcCallService, raw.disconnect, 1)
                         reconnectingSound = load(this@WebrtcCallService, raw.reconnecting, 1)
+                        doubleCallSound = load(this@WebrtcCallService, raw.double_call, 1)
                     }
 
                 if (ContextCompat.checkSelfPermission(
@@ -792,7 +951,9 @@ class WebrtcCallService : Service() {
                 ) {
                     bluetoothPermissionGranted()
                 }
+                @Suppress("DEPRECATION")
                 audioManager!!.isSpeakerphoneOn = false
+                @Suppress("DEPRECATION")
                 wiredHeadsetConnected = audioManager!!.isWiredHeadsetOn
                 updateAvailableAudioOutputsList()
                 updateCameraList()
@@ -811,15 +972,7 @@ class WebrtcCallService : Service() {
 
     private fun handleUnknownOrInvalidIntent() {
         executor.execute {
-            if (_state == INITIAL) {
-                // we received an unknown intent and no call has been started
-                // --> we can safely stop the service
-                stopForeground(true)
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    unregisterDeviceOrientationChange()
-                }
-                stopSelf()
-            }
+            stopThisServiceOrRefreshNotificationAndRingers()
         }
     }
 
@@ -830,7 +983,7 @@ class WebrtcCallService : Service() {
         groupV2: Boolean
     ) {
         executor.execute {
-            if (_state != INITIAL) {
+            if (role != NONE) {
                 App.toast(string.toast_message_already_in_a_call, Toast.LENGTH_SHORT)
                 return@execute
             }
@@ -849,10 +1002,10 @@ class WebrtcCallService : Service() {
             setContactsAndRole(bytesOwnedIdentity, contacts, callIdentifier, true)
             this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier
             discussionType =
-                if (bytesGroupOwnerAndUidOrIdentifier == null) Discussion.TYPE_CONTACT else if (groupV2) Discussion.TYPE_GROUP_V2 else Discussion.TYPE_GROUP
+                if (bytesGroupOwnerAndUidOrIdentifier == null) TYPE_CONTACT else if (groupV2) Discussion.TYPE_GROUP_V2 else Discussion.TYPE_GROUP
 
             // show notification
-            showOngoingForeground()
+            stopThisServiceOrRefreshNotificationAndRingers()
             callerStartCallInternal()
         }
     }
@@ -864,7 +1017,7 @@ class WebrtcCallService : Service() {
         groupV2: Boolean
     ) {
         executor.execute {
-            if (_state != INITIAL) {
+            if (role != NONE) {
                 App.toast(string.toast_message_already_in_a_call, Toast.LENGTH_SHORT)
                 return@execute
             }
@@ -883,7 +1036,7 @@ class WebrtcCallService : Service() {
             setContactsAndRole(bytesOwnedIdentity, contacts, callIdentifier, true)
             this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier
             discussionType =
-                if (bytesGroupOwnerAndUidOrIdentifier == null) Discussion.TYPE_CONTACT else if (groupV2) Discussion.TYPE_GROUP_V2 else Discussion.TYPE_GROUP
+                if (bytesGroupOwnerAndUidOrIdentifier == null) TYPE_CONTACT else if (groupV2) Discussion.TYPE_GROUP_V2 else Discussion.TYPE_GROUP
             setState(WAITING_FOR_AUDIO_PERMISSION)
         }
     }
@@ -894,8 +1047,6 @@ class WebrtcCallService : Service() {
                 return@execute
             }
             if (isCaller) {
-                // show notification
-                showOngoingForeground()
                 callerStartCallInternal()
             } else {
                 recipientAnswerCallInternal()
@@ -971,7 +1122,7 @@ class WebrtcCallService : Service() {
         ) {
             // if my current identity can't call, check other identities
             for (ownedIdentity in AppDatabase.getInstance().ownedIdentityDao().allNotHidden) {
-                if (Arrays.equals(ownedIdentity.bytesOwnedIdentity, bytesOwnedIdentity)) {
+                if (ownedIdentity.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)) {
                     // skip the current identity
                     continue
                 }
@@ -1157,14 +1308,7 @@ class WebrtcCallService : Service() {
             callParticipant.setPeerState(PeerState.BUSY)
 
             // if all participants are busy, create a busy log entry
-            var allBusy = true
-            for (callParticipantOther in callParticipants.values) {
-                if (callParticipantOther.peerState != PeerState.BUSY) {
-                    allBusy = false
-                    break
-                }
-            }
-            if (allBusy) {
+            if (callParticipants.values.all { it.peerState == PeerState.BUSY }) {
                 createLogEntry(CallLogItem.STATUS_BUSY)
             }
             if (_state == INITIALIZING_CALL) {
@@ -1242,12 +1386,11 @@ class WebrtcCallService : Service() {
         }
     }
 
-    private fun hangUpCall(callIdentifier: UUID) {
+    private fun hangUpCall(bytesOwnedIdentity: ByteArray, callIdentifier: UUID) {
         executor.execute {
-            if (this.callIdentifier != callIdentifier) {
-                return@execute
+            if (this.callIdentifier == callIdentifier && this.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)) {
+                hangUpCallInternal(true)
             }
-            hangUpCallInternal(true)
         }
     }
 
@@ -1255,17 +1398,54 @@ class WebrtcCallService : Service() {
         executor.execute { hangUpCallInternal(true) }
     }
 
-    private fun hangUpCallInternal(notifyPeers: Boolean) {
-        if (notifyPeers) {
-            // notify peer that you hung up (it's not just a connection loss)
-            sendHangedUpMessage(callParticipants.values)
+    private fun hangUpCallInternal(notifyPeers: Boolean, closeActivity: Boolean = true) {
+        if (role != NONE) {
+            if (notifyPeers) {
+                // notify peer that you hung up (it's not just a connection loss)
+                sendHangedUpMessage(callParticipants.values)
+            }
+            if (_state == CALL_IN_PROGRESS && selectedAudioOutput != MUTED) { // do not play if state is already call ended
+                soundPool?.play(disconnectSound, 1f, 1f, 0, 0, 1f)
+            }
+            outgoingCallRinger?.stop()
+            if (_state != FAILED) {
+                setState(CALL_ENDED)
+            }
+            createLogEntry(CallLogItem.STATUS_MISSED) // this only create the log if it was not yet created
+            resetCallLogItem()
+
+            role = NONE
+            callIdentifier = null
+            bytesOwnedIdentity = null
+            cameraEnabled = false
+            try {
+                localVideoTrack?.setEnabled(false)
+            } catch (_: Exception) {
+                localVideoTrack = null
+            }
+            try {
+                videoCapturer?.stopCapture()
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            } finally {
+                videoCapturer = null
+            }
+
+            requestingScreenCast = false
+            screenShareActive = false
+            try {
+                screenCapturerAndroid?.stopCapture()
+                localScreenTrack?.setEnabled(false)
+            } catch (_: InterruptedException) {
+            } finally {
+                screenCapturerAndroid?.dispose()
+                screenCapturerAndroid = null
+            }
+            if (closeActivity) {
+                closeCallActivity()
+            }
+            stopThisServiceOrRefreshNotificationAndRingers()
         }
-        if (_state == CALL_IN_PROGRESS && selectedAudioOutput != MUTED) { // do not play if state is already call ended
-            soundPool?.play(disconnectSound, 1f, 1f, 0, 0, 1f)
-        }
-        createLogEntry(CallLogItem.STATUS_MISSED)
-        setState(CALL_ENDED)
-        stopThisService()
     }
 
     private fun recipientReceiveCall(
@@ -1274,36 +1454,29 @@ class WebrtcCallService : Service() {
         callIdentifier: UUID,
         peerSdpType: String?,
         gzippedPeerSdpDescription: ByteArray,
-        turnUsername: String?,
-        turnPassword: String?,  /* @Nullable List<String> turnServers,*/
+        turnName: String?,
+        turnPass: String?,  /* @Nullable List<String> turnServers,*/
         participantCount: Int,
         bytesGroupOwnerAndUidOrIdentifier: ByteArray?,
         gatheringPolicy: GatheringPolicy
     ) {
         executor.execute {
-            if (_state != INITIAL && callIdentifier != this.callIdentifier) {
-                sendBusyMessage(
-                    bytesOwnedIdentity,
-                    bytesContactIdentity,
-                    callIdentifier,
-                    bytesGroupOwnerAndUidOrIdentifier
-                )
+            if (callIdentifier == this.callIdentifier && !bytesOwnedIdentity.contentEquals(this.bytesOwnedIdentity)) {
+                // receiving a call from another profile on same device, ignoring it...
                 return@execute
             }
-            if (callIdentifier == this.callIdentifier && !Arrays.equals(
-                    bytesOwnedIdentity,
-                    this.bytesOwnedIdentity
-                )
-            ) {
-                // receiving a call from another profile on same device...
-                sendBusyMessage(
-                    bytesOwnedIdentity,
-                    bytesContactIdentity,
-                    callIdentifier,
-                    bytesGroupOwnerAndUidOrIdentifier
-                )
+
+            val peerSdpDescription = runCatching { gunzip(gzippedPeerSdpDescription) }
+                .onFailure { e -> Logger.x(e) }
+                .getOrNull()
+
+            val contact = AppDatabase.getInstance().contactDao()[bytesOwnedIdentity, bytesContactIdentity]
+
+            if (contact == null || peerSdpDescription == null || peerSdpType == null) {
                 return@execute
             }
+
+
             val alreadyAnsweredOrRejectedOnOtherDevice =
                 uncalledAnsweredOrRejectedOnOtherDevice.remove(callIdentifier)
             if (alreadyAnsweredOrRejectedOnOtherDevice != null) {
@@ -1314,133 +1487,131 @@ class WebrtcCallService : Service() {
                         CallLogItem.TYPE_INCOMING,
                         if (alreadyAnsweredOrRejectedOnOtherDevice) CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE else CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE
                     )
-                    callLogItem.id = AppDatabase.getInstance().callLogItemDao().insert(callLogItem)
-                    val callLogItemContactJoin = CallLogItemContactJoin(
-                        callLogItem.id,
-                        bytesOwnedIdentity,
-                        bytesContactIdentity!!
+                    callLogItem.insert(listOf(
+                        ParticipantBytesAndRole(
+                        contact.bytesContactIdentity,
+                        CALLER
                     )
-                    AppDatabase.getInstance().callLogItemDao().insert(callLogItemContactJoin)
-                    var discussion: Discussion? = null
-                    if (bytesGroupOwnerAndUidOrIdentifier != null) {
-                        discussion = AppDatabase.getInstance().discussionDao()
-                            .getByGroupOwnerAndUidOrIdentifier(
-                                bytesOwnedIdentity,
-                                bytesGroupOwnerAndUidOrIdentifier
-                            )
-                    }
-                    if (discussion == null) {
-                        discussion = AppDatabase.getInstance().discussionDao()
-                            .getByContact(bytesOwnedIdentity, bytesContactIdentity)
-                    }
-                    if (discussion != null) {
-                        val callMessage = Message.createPhoneCallMessage(
-                            AppDatabase.getInstance(),
-                            discussion!!.id,
-                            bytesContactIdentity,
-                            callLogItem
-                        )
-                        AppDatabase.getInstance().messageDao().insert(callMessage)
-                        if (discussion!!.updateLastMessageTimestamp(callMessage.timestamp)) {
-                            AppDatabase.getInstance().discussionDao().updateLastMessageTimestamp(
-                                discussion!!.id,
-                                discussion!!.lastMessageTimestamp
-                            )
-                        }
-                    }
+                    ))
                 }
                 return@execute
             }
-            val peerSdpDescription: String
-            try {
-                peerSdpDescription = gunzip(gzippedPeerSdpDescription)
-            } catch (e: IOException) {
-                failReason = INTERNAL_ERROR
-                setState(FAILED)
-                e.printStackTrace()
-                return@execute
+
+            if (queuedIncomingCalls.none { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)}) {
+                val discussion = getDiscussion(bytesOwnedIdentity, bytesContactIdentity, bytesGroupOwnerAndUidOrIdentifier)
+                val call = Call(
+                    callIdentifier = callIdentifier,
+                    bytesOwnedIdentity = bytesOwnedIdentity!!,
+                    callerContact = contact,
+                    bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier,
+                    turnUserName = turnName,
+                    turnPassword = turnPass,
+                    participantCount = participantCount,
+                    gatheringPolicy = gatheringPolicy,
+                    discussionType = discussion?.discussionType ?: TYPE_CONTACT,
+                    sessionDescriptionType = peerSdpType,
+                    sessionDescription = peerSdpDescription,
+                    discussionCustomization = getDiscussionCustomization(discussion)
+                )
+
+                // we comment this code for now as this is not properly supported on iOS/macOS
+//                // check if a simultaneous mutual call is occurring
+//                if (callParticipants.size == 1 // one to one only
+//                    && callParticipant.bytesContactIdentity.contentEquals(callParticipants.values.first().bytesContactIdentity) // same contact in both outgoing and incoming call
+//                    && callIdentifier != this.callIdentifier
+//                ) {
+//                    if (!shouldISendTheOfferToCallParticipant(callParticipant)) {
+//                        val audioPermissionGranted = ContextCompat.checkSelfPermission(
+//                            this@WebrtcCallService,
+//                            permission.RECORD_AUDIO
+//                        ) == PackageManager.PERMISSION_GRANTED
+//                        recipientAnswerCall(callIdentifier, !audioPermissionGranted)
+//                    } else {
+//                        this.callIdentifier?.let { recipientRejectCall(it) }
+//                        return@execute
+//                    }
+//                }
+
+                sendRingingMessage(call)
+
+                queuedIncomingCalls.add(call)
+                stopThisServiceOrRefreshNotificationAndRingers()
             }
-            val contact =
-                AppDatabase.getInstance().contactDao()[bytesOwnedIdentity, bytesContactIdentity]
-            if (contact == null) {
-                failReason = CONTACT_NOT_FOUND
-                setState(FAILED)
-                return@execute
-            }
-            setContactsAndRole(bytesOwnedIdentity!!, listOf(contact), callIdentifier, false)
-            val callParticipant = getCallParticipant(bytesContactIdentity)
-            if (callParticipant == null) {
-                failReason = CONTACT_NOT_FOUND
-                setState(FAILED)
-                return@execute
-            }
-            this.bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier
-            this.turnUserName = turnUsername
-            this.turnPassword = turnPassword
-            incomingParticipantCount = participantCount
-            val discussion: Discussion?
-            if (bytesGroupOwnerAndUidOrIdentifier == null) {
-                discussion = AppDatabase.getInstance().discussionDao()
-                    .getByContact(bytesOwnedIdentity, bytesContactIdentity)
-                discussionType = Discussion.TYPE_CONTACT
-            } else {
-                discussion = AppDatabase.getInstance().discussionDao()
-                    .getByGroupOwnerAndUidOrIdentifier(
-                        bytesOwnedIdentity,
-                        bytesGroupOwnerAndUidOrIdentifier
-                    )
-                discussionType = discussion.discussionType
-            }
-            var discussionCustomization: DiscussionCustomization? = null
-            if (discussion != null) {
-                discussionCustomization =
-                    AppDatabase.getInstance().discussionCustomizationDao()[discussion.id]
-            }
-            callParticipant.peerConnectionHolder.setGatheringPolicy(gatheringPolicy)
-            callParticipant.peerConnectionHolder.setPeerSessionDescription(
-                peerSdpType,
-                peerSdpDescription
-            )
-            callParticipant.peerConnectionHolder.setTurnCredentials(
-                turnUsername,
-                turnPassword /*, turnServers*/
-            )
-            showIncomingCallForeground(callParticipant.contact, participantCount)
-            sendRingingMessage(callParticipant)
-            registerScreenOffReceiver()
-            incomingCallRinger!!.ring(callIdentifier, discussionCustomization)
-            setState(State.RINGING)
         }
     }
 
-    private fun recipientAnswerCall(callIdentifier: UUID, waitForAudioPermission: Boolean) {
+
+    private fun getDiscussion(bytesOwnedIdentity: ByteArray?, bytesContactIdentity: ByteArray?,bytesGroupOwnerAndUidOrIdentifier: ByteArray?) : Discussion? {
+        return if (bytesGroupOwnerAndUidOrIdentifier == null) {
+            AppDatabase.getInstance().discussionDao()
+                .getByContact(bytesOwnedIdentity, bytesContactIdentity)
+        } else {
+            AppDatabase.getInstance().discussionDao()
+                .getByGroupOwnerAndUidOrIdentifier(
+                    bytesOwnedIdentity,
+                    bytesGroupOwnerAndUidOrIdentifier
+                )
+        }
+    }
+    private fun getDiscussionCustomization(discussion: Discussion?): DiscussionCustomization? {
+        return discussion?.let {
+            AppDatabase.getInstance().discussionCustomizationDao()[it.id]
+        }
+    }
+
+    private fun playDoubleCallSound() {
+        if (doubleCallStreamId == null && selectedAudioOutput != MUTED) {
+            doubleCallStreamId = soundPool?.play(doubleCallSound, .5f, .5f, 0, -1, 1f)
+        }
+    }
+
+    private fun recipientAnswerCall(bytesOwnedIdentity: ByteArray, callIdentifier: UUID, waitForAudioPermission: Boolean) {
         executor.execute {
-            if (_state != State.RINGING || this.callIdentifier != callIdentifier) {
-                return@execute
-            }
+            queuedIncomingCalls.find { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)}?.let { call ->
+                // stop current call if any
+                if (role != NONE) {
+                    hangUpCallInternal(notifyPeers = true, closeActivity = false)
+                }
+                // apply call object to start
+                callParticipants.clear()
+                callParticipantIndexes.clear()
+                callParticipantIndex = 0
+                setContactsAndRole(
+                    call.bytesOwnedIdentity,
+                    listOf(call.callerContact),
+                    call.callIdentifier,
+                    false
+                )
+                this@WebrtcCallService.bytesGroupOwnerAndUidOrIdentifier = call.bytesGroupOwnerAndUidOrIdentifier
+                this@WebrtcCallService.incomingParticipantCount = call.participantCount
+                this@WebrtcCallService.discussionType = call.discussionType
+                this@WebrtcCallService.turnUserName = call.turnUserName
+                this@WebrtcCallService.turnPassword = call.turnPassword
 
-            // stop ringing and listening for power button
-            incomingCallRinger!!.stop()
-            unregisterScreenOffReceiver()
+                callerCallParticipant?.let {
+                    it.peerConnectionHolder.setGatheringPolicy(call.gatheringPolicy)
+                    it.peerConnectionHolder.setPeerSessionDescription(
+                        call.sessionDescriptionType,
+                        call.sessionDescription
+                    )
+                    it.peerConnectionHolder.setTurnCredentials(
+                        call.turnUserName,
+                        call.turnPassword /*, turnServers*/
+                    )
+                }
 
-            // remove notification in case previous starting foreground failed
-            try {
-                val notificationManager = NotificationManagerCompat.from(this)
-                notificationManager.cancel(NOT_FOREGROUND_NOTIFICATION_ID)
-            } catch (e: Exception) {
-                // do nothing
-            }
-            if (waitForAudioPermission) {
-                setState(WAITING_FOR_AUDIO_PERMISSION)
-            } else {
-                recipientAnswerCallInternal()
+                dequeueIncomingCall(call)
+
+                if (waitForAudioPermission) {
+                    setState(WAITING_FOR_AUDIO_PERMISSION)
+                } else {
+                    recipientAnswerCallInternal()
+                }
             }
         }
     }
 
     private fun recipientAnswerCallInternal() {
-        showOngoingForeground()
-
         // get audio focus
         requestAudioManagerFocus()
 
@@ -1462,54 +1633,34 @@ class WebrtcCallService : Service() {
         setState(CONNECTING)
     }
 
-    private fun recipientRejectCall(callIdentifier: UUID) {
+    fun recipientRejectCall(bytesOwnedIdentity: ByteArray, callIdentifier: UUID) {
         executor.execute {
-            if (_state != State.RINGING || this.callIdentifier != callIdentifier) {
-                return@execute
+            queuedIncomingCalls.find { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)}?.let { call ->
+                rejectCallInternal(call = call, endedFromOtherDevice = false, answered = false)
             }
-            rejectCallInternal(endedFromOtherDevice = false, answered = false)
-        }
-    }
-
-    fun recipientRejectCall() {
-        executor.execute {
-            if (_state != State.RINGING) {
-                return@execute
-            }
-            rejectCallInternal(endedFromOtherDevice = false, answered = false)
         }
     }
 
     ///////////
     // endedFromOtherDevice indicates the call should be ended because it was answered or rejected from another device
     // answered indicates that this other device picked up the call (this is ignored if endedFromOtherDevice is false)
-    private fun rejectCallInternal(endedFromOtherDevice: Boolean, answered: Boolean) {
-        // stop ringing and listening for power button
-        incomingCallRinger!!.stop()
-        unregisterScreenOffReceiver()
-        val callerCallParticipant = callerCallParticipant
-        if (callerCallParticipant == null) {
-            failReason = CONTACT_NOT_FOUND
-            setState(FAILED)
-            return
-        }
-        if (!endedFromOtherDevice) {
+    private fun rejectCallInternal(call: Call, endedFromOtherDevice: Boolean, answered: Boolean) {
+        if (endedFromOtherDevice) {
+            if (answered) {
+                createLogEntry(CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE, call)
+            } else {
+                createLogEntry(CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE, call)
+            }
+        } else {
             // notify peer of rejected call
-            sendRejectCallMessage(callerCallParticipant)
+            sendRejectCallMessage(call)
 
             // create log entry
-            createLogEntry(CallLogItem.STATUS_REJECTED)
-        } else {
-            if (answered) {
-                createLogEntry(CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE)
-            } else {
-                createLogEntry(CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE)
-            }
+            createLogEntry(CallLogItem.STATUS_REJECTED, call)
         }
-        callerCallParticipant.setPeerState(CALL_REJECTED)
-        setState(CALL_ENDED)
-        stopThisService()
+        dequeueIncomingCall(call)
     }
+    
 
     fun peerConnectionHolderFailed(callParticipant: CallParticipant, failReason: FailReason) {
         executor.execute {
@@ -1594,16 +1745,9 @@ class WebrtcCallService : Service() {
                 callDurationTimer = null
             }
             callDuration.postValue(0)
-            callDurationTimer = Timer()
-            callDurationTimer!!.schedule(object : TimerTask() {
-                override fun run() {
-                    var duration = callDuration.value
-                    if (duration == null) {
-                        duration = 0
-                    }
-                    callDuration.postValue(duration + 1)
-                }
-            }, 0, 1000)
+            callDurationTimer = timer(period = 1000) {
+                callDuration.postValue((callDuration.value ?: 0) + 1)
+            }
             setState(CALL_IN_PROGRESS)
         }
     }
@@ -1615,7 +1759,7 @@ class WebrtcCallService : Service() {
             }
             val newCallParticipants: MutableList<CallParticipant> = ArrayList()
             for (contact in contactsToAdd) {
-                if (!Arrays.equals(contact.bytesOwnedIdentity, bytesOwnedIdentity)) {
+                if (!contact.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)) {
                     Logger.w("☎ Trying to add contact to call for a different ownedIdentity")
                     continue
                 }
@@ -1624,7 +1768,7 @@ class WebrtcCallService : Service() {
                     continue
                 }
                 Logger.d("☎ Adding a call participant")
-                val callParticipant = this.CallParticipant(contact, RECIPIENT)
+                val callParticipant = this.CallParticipant(callIdentifier!!, contact, RECIPIENT)
                 newCallParticipants.add(callParticipant)
                 callParticipantIndexes[BytesKey(callParticipant.bytesContactIdentity)] =
                     callParticipantIndex
@@ -1780,11 +1924,7 @@ class WebrtcCallService : Service() {
     ) {
         executor.execute {
             Logger.d("☎ received new ICE candidate")
-            if (Arrays.equals(
-                    bytesOwnedIdentity,
-                    this.bytesOwnedIdentity
-                ) && callIdentifier == this.callIdentifier
-            ) {
+            if (bytesOwnedIdentity.contentEquals(this.bytesOwnedIdentity) && callIdentifier == this.callIdentifier) {
                 // we are in the right call, handle the message directly (if the participant is in the call)
                 val callParticipant = getCallParticipant(bytesContactIdentity)
                 if (callParticipant != null) {
@@ -1794,18 +1934,9 @@ class WebrtcCallService : Service() {
                 }
             }
 
-
             // this is not the right call, store the candidate on the side
-            var callerCandidatesMap = uncalledReceivedIceCandidates[callIdentifier]
-            if (callerCandidatesMap == null) {
-                callerCandidatesMap = HashMap()
-                uncalledReceivedIceCandidates[callIdentifier] = callerCandidatesMap
-            }
-            var candidates = callerCandidatesMap[BytesKey(bytesContactIdentity)]
-            if (candidates == null) {
-                candidates = HashSet()
-                callerCandidatesMap[BytesKey(bytesContactIdentity)] = candidates
-            }
+            val callerCandidatesMap = uncalledReceivedIceCandidates.getOrPut(callIdentifier) { HashMap() }
+            val candidates = callerCandidatesMap.getOrPut(BytesKey(bytesContactIdentity)) { HashSet() }
             candidates.add(jsonIceCandidate)
         }
     }
@@ -1817,11 +1948,7 @@ class WebrtcCallService : Service() {
         jsonIceCandidates: Array<JsonIceCandidate>
     ) {
         executor.execute {
-            if (Arrays.equals(
-                    bytesOwnedIdentity,
-                    this.bytesOwnedIdentity
-                ) && callIdentifier == this.callIdentifier
-            ) {
+            if (bytesOwnedIdentity.contentEquals(this.bytesOwnedIdentity) && callIdentifier == this.callIdentifier) {
                 // we are in the right call, handle the message directly
                 val callParticipant = getCallParticipant(bytesContactIdentity)
                 callParticipant?.peerConnectionHolder?.removeIceCandidates(jsonIceCandidates)
@@ -1853,18 +1980,11 @@ class WebrtcCallService : Service() {
     ) {
         executor.execute {
             Logger.d("☎ Call handled on other owned device: " + if (answered) "answered" else "rejected")
-            if (Arrays.equals(
-                    bytesOwnedIdentity,
-                    this.bytesOwnedIdentity
-                ) && callIdentifier == this.callIdentifier
-            ) {
-                // we are in the right call, handle the message directly
-                if (_state != State.RINGING) {
-                    return@execute
-                }
-                rejectCallInternal(true, answered)
-            } else {
-                // this is not the right call, remove the candidate from the side
+            // try rejecting from queue
+            queuedIncomingCalls.find { bytesOwnedIdentity.contentEquals(it.bytesOwnedIdentity) && callIdentifier == it.callIdentifier }?.also { call ->
+                rejectCallInternal(call, true, answered)
+            } ?: run {
+                // call not in the queue yet, mark it as already handled on other device
                 uncalledAnsweredOrRejectedOnOtherDevice[callIdentifier] = answered
             }
         }
@@ -1875,10 +1995,7 @@ class WebrtcCallService : Service() {
             val participantsToRemove: MutableSet<BytesKey> = HashSet(callParticipantIndexes.keys)
             val newCallParticipants: MutableList<CallParticipant> = ArrayList()
             for (jsonContactBytesAndName in jsonUpdateParticipantsInnerMessage.callParticipants) {
-                if (Arrays.equals(
-                        jsonContactBytesAndName.bytesContactIdentity,
-                        bytesOwnedIdentity
-                    )) {
+                if (jsonContactBytesAndName.bytesContactIdentity.contentEquals(bytesOwnedIdentity)) {
                     // the received array contains the user himself
                     continue
                 }
@@ -1888,6 +2005,7 @@ class WebrtcCallService : Service() {
                 } else {
                     // call participant not already in the call --> we add him
                     val callParticipant = CallParticipant(
+                        callIdentifier!!,
                         bytesOwnedIdentity,
                         jsonContactBytesAndName.bytesContactIdentity,
                         jsonContactBytesAndName.displayName,
@@ -1962,7 +2080,7 @@ class WebrtcCallService : Service() {
         if (state == FAILED) {
             // create the log entry --> this will only create one if one was not already created
             createLogEntry(CallLogItem.STATUS_FAILED)
-            stopThisService()
+            hangUpCallInternal(false)
         } else if (state == State.RINGING) {
             createRingingTimeout()
         }
@@ -1970,24 +2088,6 @@ class WebrtcCallService : Service() {
 
     fun getState(): LiveData<State> {
         return stateLiveData
-    }
-
-    private fun setContactsAndRole(
-        bytesOwnedIdentity: ByteArray,
-        contacts: List<Contact>,
-        callIdentifier: UUID,
-        iAmTheCaller: Boolean
-    ) {
-        this.bytesOwnedIdentity = bytesOwnedIdentity
-        this.callIdentifier = callIdentifier
-        role = if (iAmTheCaller) CALLER else RECIPIENT
-        for (contact in contacts) {
-            val callParticipant = CallParticipant(contact, if (iAmTheCaller) RECIPIENT else CALLER)
-            callParticipantIndexes[BytesKey(contact.bytesContactIdentity)] = callParticipantIndex
-            callParticipants[callParticipantIndex] = callParticipant
-            callParticipantIndex++
-        }
-        notifyCallParticipantsChanged()
     }
 
     fun getCallParticipantsLiveData(): LiveData<List<CallParticipantPojo>> {
@@ -2021,13 +2121,17 @@ class WebrtcCallService : Service() {
         if (cameraEnabled.not() && callParticipants.size <= MAXIMUM_OTHER_PARTICIPANTS_FOR_VIDEO) {
             try {
                 localVideoTrack?.setEnabled(true)
-            } catch (ignored: Exception) {
+            } catch (_: Exception) {
                 localVideoTrack = null
             }
             if (videoCapturer == null) {
                 createLocalVideo()
             } else {
-                videoCapturer?.startCapture(selectedCamera?.captureFormat?.width ?: 1280, selectedCamera?.captureFormat?.height ?: 720, 30)
+                videoCapturer?.startCapture(
+                    selectedCamera?.captureFormat?.width ?: 1280,
+                    selectedCamera?.captureFormat?.height ?: 720,
+                    30
+                )
             }
             cameraEnabled = true
             // if output is PHONE --> toggle speaker on
@@ -2038,16 +2142,11 @@ class WebrtcCallService : Service() {
             cameraEnabled = false
             try {
                 localVideoTrack?.setEnabled(false)
-            } catch (ignored: Exception) {
+            } catch (_: Exception) {
                 localVideoTrack = null
             }
             try {
                 videoCapturer?.stopCapture()
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-            try {
-                screenCapturerAndroid?.stopCapture()
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
@@ -2081,13 +2180,14 @@ class WebrtcCallService : Service() {
             }
             try {
                 localScreenTrack?.setEnabled(true)
-            } catch (ignored: Exception) { }
+            } catch (_: Exception) {
+            }
         } else {
             screenShareActive = false
             try {
                 screenCapturerAndroid?.stopCapture()
                 localScreenTrack?.setEnabled(false)
-            } catch (ignored: InterruptedException) {
+            } catch (_: InterruptedException) {
             } finally {
                 screenCapturerAndroid?.dispose()
                 screenCapturerAndroid = null
@@ -2103,15 +2203,20 @@ class WebrtcCallService : Service() {
 
     fun flipCamera() {
         if (availableCameras.size > 1) {
-            val currentIndex = availableCameras.indexOfFirst { it.cameraId == selectedCamera?.cameraId }
+            val currentIndex =
+                availableCameras.indexOfFirst { it.cameraId == selectedCamera?.cameraId }
             val newIndex = (currentIndex + 1) % availableCameras.size
-            val cameraAndFormat = availableCameras.get(newIndex)
+            val cameraAndFormat = availableCameras[newIndex]
             selectedCamera = cameraAndFormat
             selectedCameraLiveData.postValue(selectedCamera)
             (videoCapturer as? CameraVideoCapturer)?.let {
                 it.switchCamera(object : CameraVideoCapturer.CameraSwitchHandler {
                     override fun onCameraSwitchDone(p0: Boolean) {
-                        it.changeCaptureFormat(cameraAndFormat.captureFormat.width, cameraAndFormat.captureFormat.height, 30)
+                        it.changeCaptureFormat(
+                            cameraAndFormat.captureFormat.width,
+                            cameraAndFormat.captureFormat.height,
+                            30
+                        )
                     }
 
                     override fun onCameraSwitchError(p0: String?) {}
@@ -2136,7 +2241,11 @@ class WebrtcCallService : Service() {
             this,
             WebrtcPeerConnectionHolder.videoSource?.capturerObserver
         )
-        videoCapturer!!.startCapture(selectedCamera?.captureFormat?.width ?: 1280, selectedCamera?.captureFormat?.height ?: 720, 30)
+        videoCapturer!!.startCapture(
+            selectedCamera?.captureFormat?.width ?: 1280,
+            selectedCamera?.captureFormat?.height ?: 720,
+            30
+        )
     }
 
     private var videoCapturer: VideoCapturer? = null
@@ -2145,14 +2254,16 @@ class WebrtcCallService : Service() {
     private fun createVideoCapturer(context: Context): VideoCapturer {
         val capturer = selectedCamera?.let {
             val cameraEnumerator =
-                if (Camera2Enumerator.isSupported(context)) Camera2Enumerator(context) else Camera1Enumerator(true)
+                if (Camera2Enumerator.isSupported(context)) Camera2Enumerator(context) else Camera1Enumerator(
+                    true
+                )
             cameraEnumerator.createCapturer(it.cameraId, null)
         }
         if (capturer == null) {
             Logger.e("No selected camera, unable to create video capturer")
             throw Exception()
         }
-        return  capturer
+        return capturer
     }
 
     fun setScreenSize(width: Int, height: Int) {
@@ -2165,7 +2276,7 @@ class WebrtcCallService : Service() {
         screenCapturerAndroid = ScreenCapturerAndroid(intent, object : MediaProjection.Callback() {
             override fun onCapturedContentResize(width: Int, height: Int) {
                 super.onCapturedContentResize(width, height)
-                screenCapturerAndroid?.changeCaptureFormat(width, height, 0);
+                screenCapturerAndroid?.changeCaptureFormat(width, height, 0)
             }
 
             override fun onStop() {
@@ -2216,9 +2327,18 @@ class WebrtcCallService : Service() {
                 reconnectingStreamId?.let {
                     soundPool?.stop(it)
                 }
+                doubleCallStreamId?.let {
+                    soundPool?.stop(it)
+                    doubleCallStreamId = null
+                }
                 soundPool
+            } else {
+                if (queuedIncomingCalls.isNotEmpty() && role != NONE) {
+                    playDoubleCallSound()
+                }
             }
 
+            @Suppress("DEPRECATION")
             when (audioOutput) {
                 PHONE, HEADSET, MUTED -> if (audioManager!!.isSpeakerphoneOn) {
                     audioManager!!.isSpeakerphoneOn = false
@@ -2249,7 +2369,7 @@ class WebrtcCallService : Service() {
 
     // region Helper methods
     fun shouldISendTheOfferToCallParticipant(callParticipant: CallParticipant): Boolean {
-        return BytesKey(bytesOwnedIdentity).compareTo(BytesKey(callParticipant.bytesContactIdentity)) > 0
+        return BytesKey(bytesOwnedIdentity) > BytesKey(callParticipant.bytesContactIdentity)
     }
 
     fun synchronizeOnExecutor(runnable: Runnable) {
@@ -2318,12 +2438,7 @@ class WebrtcCallService : Service() {
             }
         }
         if (allPeersAreInFinalState) {
-            createLogEntry(CallLogItem.STATUS_MISSED) // this only create the log if it was not yet created
-            if (_state != CALL_ENDED && selectedAudioOutput != MUTED) {
-                soundPool?.play(disconnectSound, 1f, 1f, 0, 0, 1f)
-            }
-            setState(CALL_ENDED)
-            stopThisService()
+            hangUpCallInternal(false)
         }
     }
 
@@ -2368,8 +2483,20 @@ class WebrtcCallService : Service() {
             val backCameraId = cameras.firstOrNull { cameraEnumerator.isBackFacing(it) }
             try {
                 availableCameras = listOfNotNull(
-                    frontCameraId?.let { CameraAndFormat(it, true, getFormatForResolution(cameraEnumerator, it, targetResolution)) },
-                    backCameraId?.let { CameraAndFormat(it, false, getFormatForResolution(cameraEnumerator, it, targetResolution)) },
+                    frontCameraId?.let {
+                        CameraAndFormat(
+                            it,
+                            true,
+                            getFormatForResolution(cameraEnumerator, it, targetResolution)
+                        )
+                    },
+                    backCameraId?.let {
+                        CameraAndFormat(
+                            it,
+                            false,
+                            getFormatForResolution(cameraEnumerator, it, targetResolution)
+                        )
+                    },
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -2381,8 +2508,15 @@ class WebrtcCallService : Service() {
         }
     }
 
-    private fun getFormatForResolution(cameraEnumerator: CameraEnumerator, cameraId: String, targetResolution: Int) : CameraEnumerationAndroid.CaptureFormat {
-        return cameraEnumerator.getSupportedFormats(cameraId).sortedWith(compareByDescending<CameraEnumerationAndroid.CaptureFormat> { it.height }.then(compareByDescending { it.width })).first { it.height <= targetResolution && (it.width <= it.height*16f/9f + 10) }
+    private fun getFormatForResolution(
+        cameraEnumerator: CameraEnumerator,
+        cameraId: String,
+        targetResolution: Int
+    ): CameraEnumerationAndroid.CaptureFormat {
+        return cameraEnumerator.getSupportedFormats(cameraId).sortedWith(
+            compareByDescending<CameraEnumerationAndroid.CaptureFormat> { it.height }.then(
+                compareByDescending { it.width })
+        ).first { it.height <= targetResolution && (it.width <= it.height * 16f / 9f + 10) }
     }
 
     private fun sendDataChannelMessage(
@@ -2425,135 +2559,164 @@ class WebrtcCallService : Service() {
         }
     }
 
-    private fun createLogEntry(callLogItemStatus: Int) {
-        if (callLogItem != null) {
-            // a call log entry was already created, don't create a new one
-            return
+    // if call is passed, then this is always for a queued incoming call
+    private fun createLogEntry(callLogItemStatus: Int, call: Call? = null) {
+        if (call == null) {
+            if (callLogItem != null) {
+                // a call log entry was already created, don't create a new one
+                return
+            }
+            if (callParticipants.isEmpty()) {
+                return
+            }
         }
-        if (callParticipants.isEmpty()) {
-            return
-        }
-        val callParticipants = callParticipants.values.toTypedArray<CallParticipant>()
-        val type = if (isCaller) CallLogItem.TYPE_OUTGOING else CallLogItem.TYPE_INCOMING
+        val type = if (call == null && isCaller) CallLogItem.TYPE_OUTGOING else CallLogItem.TYPE_INCOMING
         var callLogItem: CallLogItem? = null
         when (callLogItemStatus) {
-            CallLogItem.STATUS_SUCCESSFUL, CallLogItem.STATUS_MISSED, CallLogItem.STATUS_BUSY, CallLogItem.STATUS_FAILED, CallLogItem.STATUS_REJECTED, CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE, CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE -> callLogItem =
-                CallLogItem(
-                    bytesOwnedIdentity!!, bytesGroupOwnerAndUidOrIdentifier, type, callLogItemStatus
-                )
-        }
-        if (callLogItem != null) {
-            this.callLogItem = callLogItem
-            App.runThread {
-                this.callLogItem!!.id =
-                    AppDatabase.getInstance().callLogItemDao().insert(this.callLogItem)
-                val callLogItemContactJoins =
-                    arrayOfNulls<CallLogItemContactJoin>(callParticipants.size)
-                for (i in callParticipants.indices) {
-                    callLogItemContactJoins[i] = CallLogItemContactJoin(
-                        this.callLogItem!!.id,
-                        bytesOwnedIdentity!!,
-                        callParticipants[i].bytesContactIdentity
+            CallLogItem.STATUS_SUCCESSFUL,
+            CallLogItem.STATUS_MISSED,
+            CallLogItem.STATUS_BUSY,
+            CallLogItem.STATUS_FAILED,
+            CallLogItem.STATUS_REJECTED,
+            CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE,
+            CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE ->
+                if (call == null) {
+                    if (bytesOwnedIdentity != null) {
+                        callLogItem = CallLogItem(
+                            bytesOwnedIdentity!!,
+                            bytesGroupOwnerAndUidOrIdentifier,
+                            type,
+                            callLogItemStatus
+                        )
+                    }
+                } else {
+                    callLogItem = CallLogItem(
+                        call.bytesOwnedIdentity,
+                        call.bytesGroupOwnerAndUidOrIdentifier,
+                        type,
+                        callLogItemStatus
                     )
                 }
-                AppDatabase.getInstance().callLogItemDao().insert(*callLogItemContactJoins)
-                if (this.callLogItem!!.callType == CallLogItem.TYPE_INCOMING
-                    && (this.callLogItem!!.callStatus == CallLogItem.STATUS_MISSED || this.callLogItem!!.callStatus == CallLogItem.STATUS_FAILED || this.callLogItem!!.callStatus == CallLogItem.STATUS_BUSY)
-                ) {
-                    for (callParticipant in callParticipants) {
-                        if (callParticipant.role == CALLER) {
-                            AndroidNotificationManager.displayMissedCallNotification(
-                                bytesOwnedIdentity!!,
-                                callParticipant.bytesContactIdentity
-                            )
-                            break
+        }
+        callLogItem?.let {
+            if (call == null) {
+                this.callLogItem = it
+                it.insert(callParticipants.values.toList().map { callParticipant -> ParticipantBytesAndRole(callParticipant.bytesContactIdentity, callParticipant.role) })
+            } else {
+                it.insert(listOf(ParticipantBytesAndRole(call.callerContact.bytesContactIdentity, CALLER)))
+            }
+        }
+    }
+
+    private fun CallLogItem.insert(callParticipants: List<ParticipantBytesAndRole>) {
+        App.runThread {
+            id = AppDatabase.getInstance().callLogItemDao().insert(this)
+            val callLogItemContactJoins =
+                arrayOfNulls<CallLogItemContactJoin>(callParticipants.size)
+            for (i in callParticipants.indices) {
+                callLogItemContactJoins[i] = CallLogItemContactJoin(
+                    id,
+                    bytesOwnedIdentity,
+                    callParticipants[i].bytesContactIdentity
+                )
+            }
+            AppDatabase.getInstance().callLogItemDao().insert(*callLogItemContactJoins)
+            if (callType == CallLogItem.TYPE_INCOMING
+                && (callStatus == CallLogItem.STATUS_MISSED || callStatus == CallLogItem.STATUS_FAILED || callStatus == CallLogItem.STATUS_BUSY)
+            ) {
+                for (callParticipant in callParticipants) {
+                    if (callParticipant.role == CALLER) {
+                        AndroidNotificationManager.displayMissedCallNotification(
+                            bytesOwnedIdentity,
+                            callParticipant.bytesContactIdentity
+                        )
+                        break
+                    }
+                }
+            }
+            if (callType == CallLogItem.TYPE_OUTGOING) {
+                if (bytesGroupOwnerAndUidOrIdentifier != null) {
+                    // group discussion
+                    val discussion = AppDatabase.getInstance().discussionDao()
+                        .getByGroupOwnerAndUidOrIdentifier(
+                            bytesOwnedIdentity,
+                            bytesGroupOwnerAndUidOrIdentifier
+                        )
+                    if (discussion != null) {
+                        val callMessage = Message.createPhoneCallMessage(
+                            AppDatabase.getInstance(),
+                            discussion.id,
+                            bytesOwnedIdentity,
+                            this
+                        )
+                        AppDatabase.getInstance().messageDao().insert(callMessage)
+                        if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
+                            AppDatabase.getInstance().discussionDao()
+                                .updateLastMessageTimestamp(
+                                    discussion.id,
+                                    discussion.lastMessageTimestamp
+                                )
+                        }
+                    }
+                } else if (callParticipants.size == 1) {
+                    // one-to-one discussion
+                    val discussion = AppDatabase.getInstance().discussionDao().getByContact(
+                        bytesOwnedIdentity,
+                        callParticipants[0].bytesContactIdentity
+                    )
+                    if (discussion != null) {
+                        val callMessage = Message.createPhoneCallMessage(
+                            AppDatabase.getInstance(),
+                            discussion.id,
+                            callParticipants[0].bytesContactIdentity,
+                            this
+                        )
+                        AppDatabase.getInstance().messageDao().insert(callMessage)
+                        if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
+                            AppDatabase.getInstance().discussionDao()
+                                .updateLastMessageTimestamp(
+                                    discussion.id,
+                                    discussion.lastMessageTimestamp
+                                )
                         }
                     }
                 }
-                if (this.callLogItem!!.callType == CallLogItem.TYPE_OUTGOING) {
-                    if (this.callLogItem!!.bytesGroupOwnerAndUidOrIdentifier != null) {
-                        // group discussion
-                        val discussion = AppDatabase.getInstance().discussionDao()
-                            .getByGroupOwnerAndUidOrIdentifier(
-                                bytesOwnedIdentity,
-                                this.callLogItem!!.bytesGroupOwnerAndUidOrIdentifier
-                            )
-                        if (discussion != null) {
-                            val callMessage = Message.createPhoneCallMessage(
-                                AppDatabase.getInstance(),
-                                discussion.id,
-                                bytesOwnedIdentity,
-                                this.callLogItem
-                            )
-                            AppDatabase.getInstance().messageDao().insert(callMessage)
-                            if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
-                                AppDatabase.getInstance().discussionDao()
-                                    .updateLastMessageTimestamp(
-                                        discussion.id,
-                                        discussion.lastMessageTimestamp
-                                    )
-                            }
-                        }
-                    } else if (callParticipants.size == 1) {
-                        // one-to-one discussion
-                        val discussion = AppDatabase.getInstance().discussionDao().getByContact(
-                            bytesOwnedIdentity,
-                            callParticipants[0].bytesContactIdentity
-                        )
-                        if (discussion != null) {
-                            val callMessage = Message.createPhoneCallMessage(
-                                AppDatabase.getInstance(),
-                                discussion.id,
-                                callParticipants[0].bytesContactIdentity,
-                                this.callLogItem
-                            )
-                            AppDatabase.getInstance().messageDao().insert(callMessage)
-                            if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
-                                AppDatabase.getInstance().discussionDao()
-                                    .updateLastMessageTimestamp(
-                                        discussion.id,
-                                        discussion.lastMessageTimestamp
-                                    )
-                            }
-                        }
-                    }
-                    // for multi-call without a discussion, we do not insert a message in any discussion
-                } else {
-                    // find the caller, then insert either in a group discussion, or in his one-to-one discussion
-                    for (callParticipant in callParticipants) {
-                        if (callParticipant.role == CALLER) {
-                            var discussion: Discussion? = null
-                            if (this.callLogItem!!.bytesGroupOwnerAndUidOrIdentifier != null) {
-                                discussion = AppDatabase.getInstance().discussionDao()
-                                    .getByGroupOwnerAndUidOrIdentifier(
-                                        bytesOwnedIdentity,
-                                        this.callLogItem!!.bytesGroupOwnerAndUidOrIdentifier
-                                    )
-                            }
-                            if (discussion == null) {
-                                discussion = AppDatabase.getInstance().discussionDao().getByContact(
+                // for multi-call without a discussion, we do not insert a message in any discussion
+            } else {
+                // find the caller, then insert either in a group discussion, or in his one-to-one discussion
+                for (callParticipant in callParticipants) {
+                    if (callParticipant.role == CALLER) {
+                        var discussion: Discussion? = null
+                        if (bytesGroupOwnerAndUidOrIdentifier != null) {
+                            discussion = AppDatabase.getInstance().discussionDao()
+                                .getByGroupOwnerAndUidOrIdentifier(
                                     bytesOwnedIdentity,
-                                    callParticipant.bytesContactIdentity
+                                    bytesGroupOwnerAndUidOrIdentifier
                                 )
-                            }
-                            if (discussion != null) {
-                                val callMessage = Message.createPhoneCallMessage(
-                                    AppDatabase.getInstance(),
-                                    discussion.id,
-                                    callParticipant.bytesContactIdentity,
-                                    this.callLogItem
-                                )
-                                AppDatabase.getInstance().messageDao().insert(callMessage)
-                                if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
-                                    AppDatabase.getInstance().discussionDao()
-                                        .updateLastMessageTimestamp(
-                                            discussion.id,
-                                            discussion.lastMessageTimestamp
-                                        )
-                                }
-                            }
-                            break
                         }
+                        if (discussion == null) {
+                            discussion = AppDatabase.getInstance().discussionDao().getByContact(
+                                bytesOwnedIdentity,
+                                callParticipant.bytesContactIdentity
+                            )
+                        }
+                        if (discussion != null) {
+                            val callMessage = Message.createPhoneCallMessage(
+                                AppDatabase.getInstance(),
+                                discussion.id,
+                                callParticipant.bytesContactIdentity,
+                                this
+                            )
+                            AppDatabase.getInstance().messageDao().insert(callMessage)
+                            if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
+                                AppDatabase.getInstance().discussionDao()
+                                    .updateLastMessageTimestamp(
+                                        discussion.id,
+                                        discussion.lastMessageTimestamp
+                                    )
+                            }
+                        }
+                        break
                     }
                 }
             }
@@ -2561,20 +2724,24 @@ class WebrtcCallService : Service() {
     }
 
     private fun updateLogEntry(newCallParticipants: List<CallParticipant>) {
-        if (callLogItem == null || newCallParticipants.isEmpty()) {
+        if (newCallParticipants.isEmpty()) {
             return
         }
-        App.runThread {
-            val callLogItemContactJoins =
-                arrayOfNulls<CallLogItemContactJoin>(newCallParticipants.size)
-            for (i in newCallParticipants.indices) {
-                callLogItemContactJoins[i] = CallLogItemContactJoin(
-                    callLogItem!!.id,
-                    bytesOwnedIdentity!!,
-                    newCallParticipants[i].bytesContactIdentity
-                )
+        bytesOwnedIdentity?.let { boi ->
+            callLogItem?.let {
+                App.runThread {
+                    val callLogItemContactJoins =
+                        arrayOfNulls<CallLogItemContactJoin>(newCallParticipants.size)
+                    for (i in newCallParticipants.indices) {
+                        callLogItemContactJoins[i] = CallLogItemContactJoin(
+                            it.id,
+                            boi,
+                            newCallParticipants[i].bytesContactIdentity
+                        )
+                    }
+                    AppDatabase.getInstance().callLogItemDao().insert(*callLogItemContactJoins)
+                }
             }
-            AppDatabase.getInstance().callLogItemDao().insert(*callLogItemContactJoins)
         }
     }
 
@@ -2604,12 +2771,14 @@ class WebrtcCallService : Service() {
     @SuppressLint("ForegroundServiceType")
     private fun showOngoingForeground() {
         if (callParticipants.isEmpty()) {
+            @Suppress("DEPRECATION")
             stopForeground(true)
             return
         }
         val endCallIntent = Intent(this, WebrtcCallService::class.java)
         endCallIntent.setAction(ACTION_HANG_UP)
         endCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(callIdentifier))
+        endCallIntent.putExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity)
         val endCallPendingIntent = PendingIntent.getService(
             this,
             0,
@@ -2742,12 +2911,20 @@ class WebrtcCallService : Service() {
     }
 
     @SuppressLint("ForegroundServiceType", "MissingPermission")
-    private fun showIncomingCallForeground(contact: Contact?, participantCount: Int) {
+    private fun showIncomingCallForeground(
+        callIdentifier: UUID,
+        contact: Contact,
+        participantCount: Int
+    ) {
         val rejectCallIntent = Intent(this, WebrtcCallService::class.java)
         rejectCallIntent.setAction(ACTION_REJECT_CALL)
         rejectCallIntent.putExtra(
             CALL_IDENTIFIER_INTENT_EXTRA,
             Logger.getUuidString(callIdentifier)
+        )
+        rejectCallIntent.putExtra(
+            BYTES_OWNED_IDENTITY_INTENT_EXTRA,
+            contact.bytesOwnedIdentity
         )
         val rejectCallPendingIntent = PendingIntent.getService(
             this,
@@ -2756,11 +2933,9 @@ class WebrtcCallService : Service() {
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val answerCallIntent = Intent(this, WebrtcCallActivity::class.java)
-        answerCallIntent.setAction(WebrtcCallActivity.ANSWER_CALL_ACTION)
-        answerCallIntent.putExtra(
-            WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER,
-            Logger.getUuidString(callIdentifier)
-        )
+        answerCallIntent.setAction(ANSWER_CALL_ACTION)
+        answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER, Logger.getUuidString(callIdentifier))
+        answerCallIntent.putExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA, contact.bytesOwnedIdentity)
         answerCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         val answerCallPendingIntent = PendingIntent.getActivity(
             this,
@@ -2778,7 +2953,7 @@ class WebrtcCallService : Service() {
         val initialView = InitialView(App.getContext())
         val size = App.getContext().resources.getDimensionPixelSize(dimen.notification_icon_size)
         initialView.setSize(size, size)
-        initialView.setContact(contact!!)
+        initialView.setContact(contact)
         val largeIcon = Bitmap.createBitmap(size, size, ARGB_8888)
         initialView.drawOnCanvas(Canvas(largeIcon))
         if (VERSION.SDK_INT >= VERSION_CODES.S) {
@@ -2872,7 +3047,7 @@ class WebrtcCallService : Service() {
             builder.setLargeIcon(largeIcon)
             val redReject = SpannableString(getString(string.notification_action_reject))
             redReject.setSpan(
-                ForegroundColorSpan(resources.getColor(color.red)),
+                ForegroundColorSpan(ContextCompat.getColor(this, color.red)),
                 0,
                 redReject.length,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -2880,7 +3055,7 @@ class WebrtcCallService : Service() {
             builder.addAction(drawable.ic_end_call, redReject, rejectCallPendingIntent)
             val greenAccept = SpannableString(getString(string.notification_action_accept))
             greenAccept.setSpan(
-                ForegroundColorSpan(resources.getColor(color.green)),
+                ForegroundColorSpan(ContextCompat.getColor(this, color.green)),
                 0,
                 greenAccept.length,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -2947,24 +3122,38 @@ class WebrtcCallService : Service() {
         )
     }
 
+    private fun resetCallLogItem() {
+        callLogItem?.let {
+            if (it.callStatus == CallLogItem.STATUS_SUCCESSFUL && callDuration.value != null) {
+                it.duration = callDuration.value!!
+
+
+                App.runThread {
+                    AppDatabase.getInstance().callLogItemDao().update(it)
+                }
+            }
+            callLogItem = null
+            callDuration.postValue(0)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         executor.shutdownNow()
-        if (callLogItem != null && callLogItem!!.callStatus == CallLogItem.STATUS_SUCCESSFUL && callDuration.value != null) {
-            callLogItem!!.duration = callDuration.value!!
-            App.runThread { AppDatabase.getInstance().callLogItemDao().update(callLogItem) }
-        }
+        resetCallLogItem()
         outgoingCallRinger?.stop()
         incomingCallRinger?.stop()
         soundPool?.release()
         try {
             videoCapturer?.stopCapture()
-        } catch (ignored: InterruptedException) { }
+        } catch (_: InterruptedException) {
+        }
         videoCapturer?.dispose()
         videoCapturer = null
         try {
             screenCapturerAndroid?.stopCapture()
-        } catch (ignored: InterruptedException) { }
+        } catch (_: InterruptedException) {
+        }
         screenCapturerAndroid?.dispose()
         screenCapturerAndroid = null
         unregisterScreenOffReceiver()
@@ -2985,6 +3174,7 @@ class WebrtcCallService : Service() {
         }
         if (audioManager != null && audioFocusRequest != null) {
             AudioManagerCompat.abandonAudioFocusRequest(audioManager!!, audioFocusRequest!!)
+            @Suppress("DEPRECATION")
             audioManager!!.isSpeakerphoneOn = false
             audioManager!!.mode = savedAudioManagerMode
         }
@@ -3034,7 +3224,7 @@ class WebrtcCallService : Service() {
 
     private inner class ScreenOffReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            incomingCallRinger!!.stop()
+            incomingCallRinger?.stop()
         }
     }
 
@@ -3089,7 +3279,7 @@ class WebrtcCallService : Service() {
                             userInfo[EngineNotifications.TURN_CREDENTIALS_RECEIVED_USERNAME_2_KEY] as String?
                         val recipientPassword =
                             userInfo[EngineNotifications.TURN_CREDENTIALS_RECEIVED_PASSWORD_2_KEY] as String?
-                        val turnServers =
+                        @Suppress("UNCHECKED_CAST") val turnServers =
                             userInfo[EngineNotifications.TURN_CREDENTIALS_RECEIVED_SERVERS_KEY] as List<String>?
                         if (callerUsername == null || callerPassword == null || recipientUsername == null || recipientPassword == null || turnServers == null) {
                             callerFailedTurnCredentials(UNABLE_TO_CONTACT_SERVER)
@@ -3177,8 +3367,12 @@ class WebrtcCallService : Service() {
         }
         if (lockWifi) {
             val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager?
+            @Suppress("DEPRECATION")
             wifiLock = wifiManager?.createWifiLock(
-                WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                if (VERSION.SDK_INT >= VERSION_CODES.Q)
+                    WifiManager.WIFI_MODE_FULL_LOW_LATENCY
+                else
+                    WifiManager.WIFI_MODE_FULL_HIGH_PERF,
                 "io.olvid:wifi_lock"
             )?.apply { acquire() }
         }
@@ -3316,7 +3510,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
                         )
                     }
                 }
-            } catch (ignored: IOException) {
+            } catch (_: IOException) {
                 // failed to serialize inner message
             }
         }
@@ -3348,7 +3542,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
                         )
                     }
                 }
-            } catch (ignored: IOException) {
+            } catch (_: IOException) {
                 // failed to serialize inner message
             }
         }
@@ -3375,75 +3569,83 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         }
     }
 
-    private fun sendRingingMessage(callParticipant: CallParticipant) {
-        postMessage(listOf(callParticipant), JsonRingingMessage())
+    private fun sendRingingMessage(call: Call) {
+        postMessage(
+            JsonRingingMessage(),
+            call.bytesOwnedIdentity,
+            listOf(call.callerContact.bytesContactIdentity),
+            call.callIdentifier
+        )
     }
 
-    private fun sendRejectCallMessage(callParticipant: CallParticipant) {
-        postMessage(listOf(callParticipant), JsonRejectCallMessage())
-        if (AppDatabase.getInstance().ownedDeviceDao()
-                .doesOwnedIdentityHaveAnotherDeviceWithChannel(bytesOwnedIdentity)
-        ) {
+    private fun sendRejectCallMessage(call: Call) {
+        postMessage(
+            JsonRejectCallMessage(),
+            call.bytesOwnedIdentity,
+            listOf(call.callerContact.bytesContactIdentity),
+            call.callIdentifier
+        )
+        if (AppDatabase.getInstance().ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(call.bytesOwnedIdentity)) {
             postMessage(
                 JsonAnsweredOrRejectedOnOtherDeviceMessage(false),
-                bytesOwnedIdentity,
-                listOf(bytesOwnedIdentity),
-                callIdentifier
+                call.bytesOwnedIdentity,
+                listOf(call.bytesOwnedIdentity),
+                call.callIdentifier
             )
         }
     }
 
-    private fun sendBusyMessage(
-        bytesOwnedIdentity: ByteArray?,
-        bytesContactIdentity: ByteArray?,
-        callIdentifier: UUID?,
-        bytesGroupOwnerAndUid: ByteArray?
-    ) {
-        App.runThread {
-            val callLogItem = CallLogItem(
-                bytesOwnedIdentity!!,
-                bytesGroupOwnerAndUid,
-                CallLogItem.TYPE_INCOMING,
-                CallLogItem.STATUS_BUSY
-            )
-            callLogItem.id = AppDatabase.getInstance().callLogItemDao().insert(callLogItem)
-            val callLogItemContactJoin =
-                CallLogItemContactJoin(callLogItem.id, bytesOwnedIdentity, bytesContactIdentity!!)
-            AppDatabase.getInstance().callLogItemDao().insert(callLogItemContactJoin)
-            AndroidNotificationManager.displayMissedCallNotification(
-                bytesOwnedIdentity,
-                bytesContactIdentity
-            )
-            postMessage(
-                JsonBusyMessage(),
-                bytesOwnedIdentity,
-                listOf<ByteArray?>(bytesContactIdentity),
-                callIdentifier
-            )
-            var discussion: Discussion? = null
-            if (bytesGroupOwnerAndUid != null) {
-                discussion = AppDatabase.getInstance().discussionDao()
-                    .getByGroupOwnerAndUidOrIdentifier(bytesOwnedIdentity, bytesGroupOwnerAndUid)
-            }
-            if (discussion == null) {
-                discussion = AppDatabase.getInstance().discussionDao()
-                    .getByContact(bytesOwnedIdentity, bytesContactIdentity)
-            }
-            if (discussion != null) {
-                val busyCallMessage = Message.createPhoneCallMessage(
-                    AppDatabase.getInstance(),
-                    discussion.id,
-                    bytesContactIdentity,
-                    callLogItem
-                )
-                AppDatabase.getInstance().messageDao().insert(busyCallMessage)
-                if (discussion.updateLastMessageTimestamp(busyCallMessage.timestamp)) {
-                    AppDatabase.getInstance().discussionDao()
-                        .updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp)
-                }
-            }
-        }
-    }
+//    private fun sendBusyMessage(
+//        bytesOwnedIdentity: ByteArray?,
+//        bytesContactIdentity: ByteArray?,
+//        callIdentifier: UUID?,
+//        bytesGroupOwnerAndUid: ByteArray?
+//    ) {
+//        App.runThread {
+//            val callLogItem = CallLogItem(
+//                bytesOwnedIdentity!!,
+//                bytesGroupOwnerAndUid,
+//                CallLogItem.TYPE_INCOMING,
+//                CallLogItem.STATUS_BUSY
+//            )
+//            callLogItem.id = AppDatabase.getInstance().callLogItemDao().insert(callLogItem)
+//            val callLogItemContactJoin =
+//                CallLogItemContactJoin(callLogItem.id, bytesOwnedIdentity, bytesContactIdentity!!)
+//            AppDatabase.getInstance().callLogItemDao().insert(callLogItemContactJoin)
+//            AndroidNotificationManager.displayMissedCallNotification(
+//                bytesOwnedIdentity,
+//                bytesContactIdentity
+//            )
+//            postMessage(
+//                JsonBusyMessage(),
+//                bytesOwnedIdentity,
+//                listOf<ByteArray?>(bytesContactIdentity),
+//                callIdentifier
+//            )
+//            var discussion: Discussion? = null
+//            if (bytesGroupOwnerAndUid != null) {
+//                discussion = AppDatabase.getInstance().discussionDao()
+//                    .getByGroupOwnerAndUidOrIdentifier(bytesOwnedIdentity, bytesGroupOwnerAndUid)
+//            }
+//            if (discussion == null) {
+//                discussion = AppDatabase.getInstance().discussionDao()
+//                    .getByContact(bytesOwnedIdentity, bytesContactIdentity)
+//            }
+//            if (discussion != null) {
+//                val busyCallMessage = Message.createPhoneCallMessage(
+//                    AppDatabase.getInstance(),
+//                    discussion.id,
+//                    bytesContactIdentity,
+//                    callLogItem
+//                )
+//                AppDatabase.getInstance().messageDao().insert(busyCallMessage)
+//                if (discussion.updateLastMessageTimestamp(busyCallMessage.timestamp)) {
+//                    AppDatabase.getInstance().discussionDao()
+//                        .updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp)
+//                }
+//            }
+//        }
+//    }
 
     @Throws(IOException::class)
     fun sendReconnectCallMessage(
@@ -3570,13 +3772,18 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         protocolMessage: JsonWebrtcProtocolMessage
     ): Boolean {
         val bytesContactIdentities: MutableList<ByteArray?> = ArrayList(callParticipants.size)
+        var callId = callIdentifier
+        var ownedIdentity = this.bytesOwnedIdentity
         for (callParticipant in callParticipants) {
             if (callParticipant.contact != null && callParticipant.contact.hasChannelOrPreKey()) {
                 bytesContactIdentities.add(callParticipant.bytesContactIdentity)
             }
+            // get call identifier from participant
+            callId = callParticipant.callIdentifier
+            ownedIdentity = callParticipant.bytesOwnedIdentity
         }
-        return if (bytesContactIdentities.size > 0) {
-            postMessage(protocolMessage, bytesOwnedIdentity, bytesContactIdentities, callIdentifier)
+        return if (bytesContactIdentities.isNotEmpty()) {
+            postMessage(protocolMessage, ownedIdentity, bytesContactIdentities, callId)
         } else false
     }
 
@@ -3627,7 +3834,10 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
                 sendDataChannelMessage(callParticipant, JsonMutedInnerMessage(microphoneMuted))
                 sendDataChannelMessage(callParticipant, JsonVideoSupportedInnerMessage(true))
                 sendDataChannelMessage(callParticipant, JsonVideoSharingInnerMessage(cameraEnabled))
-                sendDataChannelMessage(callParticipant, JsonScreenSharingInnerMessage(screenShareActive))
+                sendDataChannelMessage(
+                    callParticipant,
+                    JsonScreenSharingInnerMessage(screenShareActive)
+                )
                 if (isCaller) {
                     sendDataChannelMessage(
                         callParticipant,
@@ -3681,7 +3891,10 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
                             jsonDataChannelMessage.serializedMessage,
                             JsonVideoSupportedInnerMessage::class.java
                         )
-                        if (jsonVideoSupportedInnerMessage.isVideoSupported && shouldISendTheOfferToCallParticipant(callParticipant)) {
+                        if (jsonVideoSupportedInnerMessage.isVideoSupported && shouldISendTheOfferToCallParticipant(
+                                callParticipant
+                            )
+                        ) {
                             executor.execute {
                                 Logger.d("☎ received video supported message (${jsonVideoSupportedInnerMessage.isVideoSupported})")
                                 callParticipant.setPeerVideoIsSupported(
@@ -3742,11 +3955,15 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
                         val serializedMessagePayload =
                             jsonRelayedInnerMessage.serializedMessagePayload
                         executor.execute {
-                            handleMessage(
-                                bytesContactIdentity,
-                                messageType,
-                                serializedMessagePayload
-                            )
+                            if (bytesOwnedIdentity != null && callIdentifier != null) {
+                                handleMessage(
+                                    bytesOwnedIdentity!!,
+                                    bytesContactIdentity,
+                                    messageType,
+                                    serializedMessagePayload,
+                                    callIdentifier!!
+                                )
+                            }
                         }
                     }
 
@@ -3764,6 +3981,8 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
 
     inner class CallParticipant {
         internal val role: Role
+        val callIdentifier: UUID
+        val bytesOwnedIdentity: ByteArray?
 
         @JvmField
         val bytesContactIdentity: ByteArray
@@ -3789,11 +4008,15 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         var timeoutTask: TimerTask?
 
         constructor(
+            callIdentifier: UUID,
             bytesOwnedIdentity: ByteArray?,
             bytesContactIdentity: ByteArray,
             displayName: String,
             gatheringPolicy: GatheringPolicy
         ) {
+
+            this.callIdentifier = callIdentifier
+            this.bytesOwnedIdentity = bytesOwnedIdentity
             this.role = RECIPIENT
             this.bytesContactIdentity = bytesContactIdentity
             contact =
@@ -3817,8 +4040,10 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
             addUncalledReceivedIceCandidates()
         }
 
-        constructor(contact: Contact, contactRole: Role) {
+        constructor(callIdentifier: UUID, contact: Contact, contactRole: Role) {
             this.role = contactRole
+            this.callIdentifier = callIdentifier
+            this.bytesOwnedIdentity = contact.bytesOwnedIdentity
             bytesContactIdentity = contact.bytesContactIdentity
             this.contact = contact
             gatheringPolicy =
@@ -3844,6 +4069,9 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
                 val candidates = map.remove(BytesKey(bytesContactIdentity))
                 if (candidates != null) {
                     peerConnectionHolder.addIceCandidates(candidates)
+                }
+                if (map.isEmpty()) {
+                    uncalledReceivedIceCandidates.remove(callIdentifier)
                 }
             }
         }
@@ -3901,7 +4129,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         }
 
         override fun hashCode(): Int {
-            return Arrays.hashCode(bytesContactIdentity)
+            return bytesContactIdentity.contentHashCode()
         }
 
         override fun equals(other: Any?): Boolean {
@@ -3910,6 +4138,8 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
             } else bytesContactIdentity.contentEquals(other.bytesContactIdentity)
         }
     }
+
+    data class ParticipantBytesAndRole(val bytesContactIdentity: ByteArray, val role: Role)
 
     fun getAudioLevel(bytesIdentity: ByteArray?): Double? {
         if (bytesIdentity == null) return null
@@ -3921,39 +4151,25 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
 
     class CallParticipantPojo(callParticipant: CallParticipant) : Comparable<CallParticipantPojo> {
         @JvmField
-        val bytesContactIdentity: ByteArray
+        val bytesContactIdentity: ByteArray = callParticipant.bytesContactIdentity
 
         @JvmField
-        val contact: Contact?
+        val contact: Contact? = callParticipant.contact
 
         @JvmField
-        val displayName: String?
+        val displayName: String? = callParticipant.displayName
 
         @JvmField
-        val peerIsMuted: Boolean
+        val peerIsMuted: Boolean = callParticipant._peerIsMuted
 
         @JvmField
-        val peerVideoSharing: Boolean
+        val peerVideoSharing: Boolean = callParticipant._peerVideoSharing
 
         @JvmField
-        val peerScreenSharing: Boolean
+        val peerScreenSharing: Boolean = callParticipant._peerScreenSharing
 
         @JvmField
-        val peerVideoIsSupported: Boolean
-
-        @JvmField
-        val peerState: PeerState
-
-        init {
-            bytesContactIdentity = callParticipant.bytesContactIdentity
-            contact = callParticipant.contact
-            displayName = callParticipant.displayName
-            peerIsMuted = callParticipant._peerIsMuted
-            peerVideoSharing = callParticipant._peerVideoSharing
-            peerScreenSharing = callParticipant._peerScreenSharing
-            peerVideoIsSupported = callParticipant._peerVideoIsSupported
-            peerState = callParticipant.peerState
-        }
+        val peerState: PeerState = callParticipant.peerState
 
         override fun compareTo(other: CallParticipantPojo): Int {
             val myName = contact?.getCustomDisplayName() ?: displayName ?: ""
@@ -3963,11 +4179,12 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
     }
 
     // device orientation change listener for screen capture on API < 34
-    private val orientationChangeBroadcastReceiver = object: BroadcastReceiver() {
+    private val orientationChangeBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             context?.resources?.configuration?.let { configuration ->
                 if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && screenWidth > screenHeight
-                    || configuration.orientation == Configuration.ORIENTATION_LANDSCAPE && screenWidth < screenHeight) {
+                    || configuration.orientation == Configuration.ORIENTATION_LANDSCAPE && screenWidth < screenHeight
+                ) {
                     // swap both values
                     val tmp = screenHeight
                     screenHeight = screenWidth
@@ -3981,13 +4198,17 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
     }
 
     private fun registerDeviceOrientationChange() {
-        registerReceiver(orientationChangeBroadcastReceiver, IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED))
+        registerReceiver(
+            orientationChangeBroadcastReceiver,
+            IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED)
+        )
     }
 
     private fun unregisterDeviceOrientationChange() {
         try {
             unregisterReceiver(orientationChangeBroadcastReceiver)
-        } catch (ignored: Exception) { }
+        } catch (_: Exception) {
+        }
     }
 
     data class CameraAndFormat(
@@ -4047,8 +4268,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
 
         // HashMap containing ICE candidates received while outside a call: callIdentifier -> (bytesContactIdentity -> candidate)
         // with continuous gathering, we may send/receive candidates before actually sending/receiving the startCall message
-        private val uncalledReceivedIceCandidates =
-            HashMap<UUID?, HashMap<BytesKey, HashSet<JsonIceCandidate>>>()
-        private val uncalledAnsweredOrRejectedOnOtherDevice = HashMap<UUID, Boolean>()
+        private val uncalledReceivedIceCandidates = HashMap<UUID, HashMap<BytesKey, HashSet<JsonIceCandidate>>>() // TODO: Use ownedIdentity in key too
+        private val uncalledAnsweredOrRejectedOnOtherDevice = HashMap<UUID, Boolean>() // TODO: Use ownedIdentity in key too
     }
 }

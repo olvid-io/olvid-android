@@ -19,6 +19,7 @@
 
 package io.olvid.messenger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -111,11 +112,14 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                             }
                         }
 
+                        List<String> fullSearchItems = new ArrayList<>();
+
                         // add members
                         boolean messageInserted = false;
                         for (byte[] bytesGroupMemberIdentity : obvGroup.getBytesGroupMembersIdentities()) {
                             Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesGroupMemberIdentity);
                             if (contact != null) {
+                                fullSearchItems.add(contact.fullSearchDisplayName);
                                 ContactGroupJoin contactGroupJoin = new ContactGroupJoin(bytesGroupUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                 db.contactGroupJoinDao().insert(contactGroupJoin);
                                 Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity);
@@ -144,7 +148,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                         db.groupDao().getGroupMembersFirstNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
                                         :
                                         db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
-                        db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
+                        db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.computeFullSearch(fullSearchItems));
 
                         // if createdByMeOnOtherDevice, query my devices for the sharedSettings
                         if (obvGroup.getBytesGroupOwnerIdentity() == null && createdOnOtherDevice && db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(bytesOwnedIdentity)) {
@@ -205,7 +209,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                                         :
                                                         db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
                                         );
-                                        db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
+                                        db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.fullSearchField + " " + contact.fullSearchDisplayName);
 
                                         Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity);
                                         db.messageDao().insert(groupJoinedMessage);
@@ -284,7 +288,15 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                                     :
                                                     db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
                                     );
-                                    db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
+
+                                    List<String> fullSearchItems = new ArrayList<>();
+                                    for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(bytesOwnedIdentity, bytesGroupUid)) {
+                                        if (groupContact != null) {
+                                            fullSearchItems.add(groupContact.fullSearchDisplayName);
+                                        }
+                                    }
+
+                                    db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.computeFullSearch(fullSearchItems));
 
                                     Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, contact.bytesContactIdentity);
                                     db.messageDao().insert(groupLeftMessage);

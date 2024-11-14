@@ -44,7 +44,8 @@ public interface GroupDao {
             "groop." + Group.PHOTO_URL + " AS group_" + Group.PHOTO_URL + ", " +
             "groop." + Group.GROUP_MEMBERS_NAMES + " AS group_" + Group.GROUP_MEMBERS_NAMES + ", " +
             "groop." + Group.CUSTOM_PHOTO_URL + " AS group_" + Group.CUSTOM_PHOTO_URL + ", " +
-            "groop." + Group.PERSONAL_NOTE + " AS group_" + Group.PERSONAL_NOTE;
+            "groop." + Group.PERSONAL_NOTE + " AS group_" + Group.PERSONAL_NOTE + ", " +
+            "groop." + Group.FULL_SEARCH_FIELD + " AS group_" + Group.FULL_SEARCH_FIELD;
 
     @Insert
     void insert(Group group);
@@ -65,11 +66,12 @@ public interface GroupDao {
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
     void updateNameAndPhoto(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String name, String photoUrl);
 
-    @Query("UPDATE " + Group.TABLE_NAME +
-            " SET " + Group.CUSTOM_NAME + " = :customName " +
+    @Query("UPDATE " + Group.TABLE_NAME + " SET " +
+            Group.CUSTOM_NAME + " = :customName, " +
+            Group.FULL_SEARCH_FIELD + " = :fullSearchField " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updateCustomName(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String customName);
+    void updateCustomName(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String customName, String fullSearchField);
 
     @Query("UPDATE " + Group.TABLE_NAME +
             " SET " + Group.CUSTOM_PHOTO_URL + " = :customPhotoUrl " +
@@ -77,11 +79,12 @@ public interface GroupDao {
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
     void updateCustomPhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String customPhotoUrl);
 
-    @Query("UPDATE " + Group.TABLE_NAME +
-            " SET " + Group.PERSONAL_NOTE + " = :personalNote " +
+    @Query("UPDATE " + Group.TABLE_NAME + " SET " +
+            Group.PERSONAL_NOTE + " = :personalNote, " +
+            Group.FULL_SEARCH_FIELD + " = :fullSearchField " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updatePersonalNote(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String personalNote);
+    void updatePersonalNote(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String personalNote, String fullSearchField);
 
     @Query("UPDATE " + Group.TABLE_NAME +
             " SET " + Group.PHOTO_URL + " = :photoUrl " +
@@ -89,11 +92,12 @@ public interface GroupDao {
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
     void updatePhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String photoUrl);
 
-    @Query("UPDATE " + Group.TABLE_NAME +
-            " SET " + Group.GROUP_MEMBERS_NAMES + " = :groupMembersNames " +
+    @Query("UPDATE " + Group.TABLE_NAME + " SET " +
+            Group.GROUP_MEMBERS_NAMES + " = :groupMembersNames, " +
+            Group.FULL_SEARCH_FIELD + " = :fullSearchField " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updateGroupMembersNames(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String groupMembersNames);
+    void updateGroupMembersNames(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String groupMembersNames,  String fullSearchField);
 
     @Query("SELECT * FROM " + Group.TABLE_NAME + " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
     Group get(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);

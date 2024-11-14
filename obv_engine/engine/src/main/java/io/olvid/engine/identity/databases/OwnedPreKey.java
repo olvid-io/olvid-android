@@ -112,7 +112,7 @@ public class OwnedPreKey implements ObvDatabase {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
 

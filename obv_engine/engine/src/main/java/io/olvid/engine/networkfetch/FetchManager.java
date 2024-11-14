@@ -167,7 +167,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
             PendingServerQuery.createTable(fetchManagerSession.session);
             fetchManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to createCurrentDevice network fetch databases");
         }
     }
@@ -627,7 +627,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         try (FetchManagerSession fetchManagerSession = getSession()) {
             return ServerSession.getToken(fetchManagerSession, ownedIdentity);
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

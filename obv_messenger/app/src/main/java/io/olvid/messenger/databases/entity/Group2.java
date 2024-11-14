@@ -28,11 +28,13 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.StringUtils;
 
 @Entity(tableName = Group2.TABLE_NAME,
         primaryKeys = {Group2.BYTES_OWNED_IDENTITY, Group2.BYTES_GROUP_IDENTIFIER},
@@ -68,7 +70,7 @@ public class Group2 {
     public static final String CUSTOM_NAME = "custom_name";
     public static final String CUSTOM_PHOTO_URL = "custom_photo_url"; // set to "" to remove the default photo_url, null to use the default
     public static final String PERSONAL_NOTE = "personal_note";
-
+    public static final String FULL_SEARCH_FIELD = "full_search_field";
 
     public static final int PUBLISHED_DETAILS_NOTHING_NEW = 0;
     public static final int PUBLISHED_DETAILS_NEW_UNSEEN = 1;
@@ -136,6 +138,10 @@ public class Group2 {
     @Nullable
     public String personalNote;
 
+    @ColumnInfo(name = FULL_SEARCH_FIELD)
+    @NonNull
+    public String fullSearchField;
+
     @NonNull
     public String getCustomName() {
         if ((customName == null && name == null)
@@ -165,7 +171,7 @@ public class Group2 {
     public String getCustomPhotoUrl() {
         if (customPhotoUrl == null) {
             return photoUrl;
-        } else if (customPhotoUrl.length() == 0) {
+        } else if (customPhotoUrl.isEmpty()) {
             return null;
         }
         return customPhotoUrl;
@@ -173,13 +179,13 @@ public class Group2 {
 
 
     // default constructor used by Room
-    public Group2(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, boolean keycloakManaged, @Nullable String name, @NonNull String groupMembersNames, @Nullable String photoUrl, int updateInProgress, int newPublishedDetails, boolean ownPermissionAdmin, boolean ownPermissionRemoteDeleteAnything, boolean ownPermissionEditOrRemoteDeleteOwnMessages, boolean ownPermissionChangeSettings, boolean ownPermissionSendMessage, @Nullable String customName, @Nullable String customPhotoUrl, @Nullable String personalNote) {
+    public Group2(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, boolean keycloakManaged, @Nullable String name, @Nullable String photoUrl, @NonNull String groupMembersNames, int updateInProgress, int newPublishedDetails, boolean ownPermissionAdmin, boolean ownPermissionRemoteDeleteAnything, boolean ownPermissionEditOrRemoteDeleteOwnMessages, boolean ownPermissionChangeSettings, boolean ownPermissionSendMessage, @Nullable String customName, @Nullable String customPhotoUrl, @Nullable String personalNote, @NonNull String fullSearchField) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.bytesGroupIdentifier = bytesGroupIdentifier;
         this.keycloakManaged = keycloakManaged;
         this.name = name;
-        this.groupMembersNames = groupMembersNames;
         this.photoUrl = photoUrl;
+        this.groupMembersNames = groupMembersNames;
         this.updateInProgress = updateInProgress;
         this.newPublishedDetails = newPublishedDetails;
         this.ownPermissionAdmin = ownPermissionAdmin;
@@ -190,6 +196,7 @@ public class Group2 {
         this.customName = customName;
         this.customPhotoUrl = customPhotoUrl;
         this.personalNote = personalNote;
+        this.fullSearchField = fullSearchField;
     }
 
     @Ignore
@@ -211,5 +218,21 @@ public class Group2 {
         this.customName = null;
         this.customPhotoUrl = null;
         this.personalNote = null;
+        this.fullSearchField = "";
+    }
+
+    @NonNull
+    public String computeFullSearch(@NonNull List<String> membersFullSearch) {
+        String suffix = "";
+        if (customName != null) {
+            suffix += " " + customName;
+        }
+        if (personalNote != null) {
+            suffix += " " + personalNote;
+        }
+        if (name != null) {
+            suffix += " " + name;
+        }
+        return StringUtils.unAccent(String.join(" ", membersFullSearch) + suffix);
     }
 }

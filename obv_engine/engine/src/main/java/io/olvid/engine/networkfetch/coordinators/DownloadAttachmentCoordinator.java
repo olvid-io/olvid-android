@@ -111,7 +111,7 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
             }
             fetchManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -201,7 +201,7 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                         fetchManagerSession.session.commit();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_OWNED_IDENTITY_KEY, ownedIdentity);

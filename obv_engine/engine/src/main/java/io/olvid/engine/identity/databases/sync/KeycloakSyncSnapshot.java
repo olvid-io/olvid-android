@@ -88,7 +88,7 @@ public class KeycloakSyncSnapshot implements ObvSyncSnapshotNode {
 
             return keycloakServer;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

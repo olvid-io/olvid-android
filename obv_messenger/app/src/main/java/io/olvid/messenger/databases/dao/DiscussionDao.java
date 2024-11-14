@@ -314,7 +314,8 @@ public abstract class DiscussionDao {
     public abstract LiveData<List<Discussion>> getLatestDiscussionsInWhichYouWrote();
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames " +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
             " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grp." + Group.BYTES_GROUP_OWNER_AND_UID +
@@ -358,6 +359,7 @@ public abstract class DiscussionDao {
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the columns is_group and status are used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField, " +
             " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group, " +
             " CASE disc." + Discussion.STATUS +
               " WHEN " + Discussion.STATUS_NORMAL + " THEN 0 " +
@@ -381,6 +383,7 @@ public abstract class DiscussionDao {
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column status is used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField, " +
             " CASE disc." + Discussion.STATUS +
             " WHEN " + Discussion.STATUS_NORMAL + " THEN 0 " +
             " WHEN " + Discussion.STATUS_READ_ONLY + " THEN 0 " +
@@ -402,6 +405,7 @@ public abstract class DiscussionDao {
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the columns is_group and status are used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField, " +
             " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group, " +
             " CASE disc." + Discussion.STATUS +
               " WHEN " + Discussion.STATUS_NORMAL + " THEN 0 " +
@@ -425,6 +429,7 @@ public abstract class DiscussionDao {
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField, " +
             " CASE WHEN disc." + Discussion.DISCUSSION_TYPE + " != " + Discussion.TYPE_CONTACT + " THEN 1 ELSE 0 END AS is_group " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
@@ -441,7 +446,8 @@ public abstract class DiscussionDao {
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNames(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames " +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN " + Group.TABLE_NAME + " AS grp " +
             " ON disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = grp." + Group.BYTES_GROUP_OWNER_AND_UID +
@@ -457,7 +463,8 @@ public abstract class DiscussionDao {
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNamesOrderedByActivity(byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames " +
+            " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
+            " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField " +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " INNER JOIN ( SELECT " + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " AS gid, " + Discussion.TYPE_GROUP + " AS dt FROM " + ContactGroupJoin.TABLE_NAME +
             " WHERE " + ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
@@ -555,6 +562,9 @@ public abstract class DiscussionDao {
 
         @Nullable
         public String groupMemberNames;
+
+        @Nullable
+        public String patterMatchingField;
     }
 
     public static class DiscussionAndGroupMembersCount {

@@ -25,6 +25,7 @@ import java.util.List;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
@@ -151,7 +152,7 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                         return;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -165,7 +166,7 @@ public class DeleteMessageAndAttachmentFromServerAndLocalInboxesOperation extend
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

@@ -212,13 +212,13 @@ public class ContactGroupMembersJoin implements ObvDatabase {
                     try {
                         list.add(Identity.of(res.getBytes(1)));
                     } catch (DecodingException e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
                 return list.toArray(new Identity[0]);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return new Identity[0];
         }
     }
@@ -291,7 +291,7 @@ public class ContactGroupMembersJoin implements ObvDatabase {
                 create(identityManagerSession, groupOwnerAndUid, ownedIdentity, Identity.of(pojo.contact_identity));
             }
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

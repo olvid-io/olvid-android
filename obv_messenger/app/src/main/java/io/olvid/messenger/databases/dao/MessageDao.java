@@ -87,25 +87,9 @@ public interface MessageDao {
     @Update
     void update(Message message);
 
-    @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ",m.* FROM " + Message.TABLE_NAME + " AS m " +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
-            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
-            " WHERE m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
-            " AND " + Message.FTS_TABLE_NAME + " MATCH :query ORDER BY m." + Message.TIMESTAMP + " DESC LIMIT :limit ")
-    List<DiscussionAndMessage> globalSearch(byte[] bytesOwnedIdentity, String query, int limit);
-
-    @Query("SELECT COUNT(*) FROM (SELECT m.id FROM " + Message.TABLE_NAME + " AS m " +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
-            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
-            " WHERE m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
-            " AND " + Message.FTS_TABLE_NAME + " MATCH :query LIMIT :limit)")
-    int globalSearchCount(byte[] bytesOwnedIdentity, String query, int limit);
-
     @Query("SELECT m.id FROM " + Message.TABLE_NAME + " AS m " +
             " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
-            " WHERE m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " WHERE m." + Message.MESSAGE_TYPE + " <= " + Message.TYPE_OUTBOUND_MESSAGE +
             " AND m." + Message.DISCUSSION_ID + " = :discussionId" +
             " AND " + Message.FTS_TABLE_NAME + " MATCH :query ORDER BY m." + Message.TIMESTAMP + " DESC")
     List<Long> discussionSearch(long discussionId, String query);

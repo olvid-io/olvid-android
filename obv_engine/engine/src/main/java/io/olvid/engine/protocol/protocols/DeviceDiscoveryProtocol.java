@@ -337,7 +337,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
                     }
                 } catch (Exception e) {
                     Logger.i("Malformed server response id device discovery");
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 

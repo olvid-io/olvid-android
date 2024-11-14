@@ -77,7 +77,6 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.R.string
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.discussion.DiscussionActivity
@@ -110,7 +109,7 @@ class WebrtcCallActivity : AppCompatActivity() {
     var foreground = false
     private var outputDialogOpen = false
     private var addParticipantDialogOpen = false
-    var loudSpeakerOn = false
+    private var loudSpeakerOn = false
 
     private val mediaProjectionManager by lazy { getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager }
     private val screenCaptureIntent by lazy {
@@ -167,18 +166,20 @@ class WebrtcCallActivity : AppCompatActivity() {
             }
         } else if (ANSWER_CALL_ACTION == intent.action) {
             val callIdentifier = intent.getStringExtra(ANSWER_CALL_EXTRA_CALL_IDENTIFIER)
-            if (callIdentifier != null) {
-                val serviceIntent = Intent(this, WebrtcCallService::class.java)
-                serviceIntent.setAction(WebrtcCallService.ACTION_ANSWER_CALL)
-                serviceIntent.putExtra(
-                    WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA,
-                    callIdentifier
+            val bytesOwnedIdentity = intent.getByteArrayExtra(ANSWER_CALL_EXTRA_BYTES_OWNED_IDENTITY)
+
+            if (callIdentifier != null && bytesOwnedIdentity != null) {
+                startService(
+                    Intent(this, WebrtcCallService::class.java)
+                        .setAction(WebrtcCallService.ACTION_ANSWER_CALL)
+                        .putExtra(WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA, callIdentifier)
+                        .putExtra(WebrtcCallService.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity)
                 )
-                startService(serviceIntent)
             } else {
                 closeActivity()
             }
         }
+        intent.action = null
         webrtcServiceConnection = WebrtcServiceConnection().apply {
             val serviceBindIntent =
                 Intent(this@WebrtcCallActivity, WebrtcCallService::class.java)
@@ -318,7 +319,7 @@ class WebrtcCallActivity : AppCompatActivity() {
                                     Spacer(modifier = Modifier.weight(1f, true))
                                 }
                                 TextButton(onClick = onDismiss) {
-                                    Text(text = stringResource(id = string.button_label_ok))
+                                    Text(text = stringResource(id = R.string.button_label_ok))
                                 }
                             }
                         },
@@ -339,7 +340,7 @@ class WebrtcCallActivity : AppCompatActivity() {
                     mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
                 } else {
                     @Suppress("DEPRECATION")
-                    mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+                    mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
                 }
                 if (keyEvent != null && keyEvent.action == KeyEvent.ACTION_DOWN && (keyEvent.keyCode == KeyEvent.KEYCODE_HEADSETHOOK || keyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY || keyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE)) {
                     if (webrtcCallService != null) {
@@ -357,7 +358,7 @@ class WebrtcCallActivity : AppCompatActivity() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             SettingsActivity.setFirstCallAudioPermissionRequested(true)
-            permissionDialogToShow = PermissionDialog(string.dialog_title_webrtc_audio_permission, string.dialog_message_webrtc_audio_permission) {
+            permissionDialogToShow = PermissionDialog(R.string.dialog_title_webrtc_audio_permission, R.string.dialog_message_webrtc_audio_permission) {
                 requestPermissionsIfNeeded(true)
             }
         } else {
@@ -390,7 +391,7 @@ class WebrtcCallActivity : AppCompatActivity() {
                 )
             ) {
                 SettingsActivity.setFirstCallBluetoothPermissionRequested(true)
-                permissionDialogToShow = PermissionDialog(string.dialog_title_android_12_bluetooth_access, string.dialog_message_android_12_bluetooth_access) {
+                permissionDialogToShow = PermissionDialog(R.string.dialog_title_android_12_bluetooth_access, R.string.dialog_message_android_12_bluetooth_access) {
                     ActivityCompat.requestPermissions(
                         this, arrayOf(
                             permission.BLUETOOTH_CONNECT
@@ -419,6 +420,7 @@ class WebrtcCallActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        webrtcCallService?.closeCallActivity = {}
         webrtcServiceConnection?.let { unbindService(it) }
         initWebrtcCallService(null)
         if (mediaSession != null) {
@@ -439,6 +441,7 @@ class WebrtcCallActivity : AppCompatActivity() {
     }
 
     override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
         if (webrtcCallService?.screenShareActive != true
             && webrtcCallService?.requestingScreenCast != true
             && webrtcCallService?.getState()?.value == WebrtcCallService.State.CALL_IN_PROGRESS) {
@@ -579,15 +582,15 @@ class WebrtcCallActivity : AppCompatActivity() {
             if (!audioPermissionGranted) {
                 if (requestCode == PERMISSIONS_REQUEST_CODE_AFTER_RATIONALE) {
                     // user was prompted for permission, and he denied it --> hangup
-                    App.toast(string.toast_message_audio_permission_denied, Toast.LENGTH_SHORT)
+                    App.toast(R.string.toast_message_audio_permission_denied, Toast.LENGTH_SHORT)
                     if (webrtcCallService != null) {
                         webrtcCallService?.hangUpCall()
                     }
                 } else {
                     // user was not prompted --> show dialog explaining that audio permission was permanently denied
                     permissionDialogToShow = PermissionDialog(
-                        titleStringResId = string.dialog_title_webrtc_permissions_audio_blocked,
-                        messageStringResId = string.dialog_message_webrtc_permissions_audio_blocked,
+                        titleStringResId = R.string.dialog_title_webrtc_permissions_audio_blocked,
+                        messageStringResId = R.string.dialog_message_webrtc_permissions_audio_blocked,
                         additionalButton = {
                             TextButton(onClick = {
                                 val settingsIntent = Intent()
@@ -608,12 +611,12 @@ class WebrtcCallActivity : AppCompatActivity() {
             if (!cameraPermissionGranted) {
                 if (requestCode == PERMISSIONS_REQUEST_CODE_AFTER_RATIONALE) {
                     // user was prompted for permission, and he denied it --> hangup
-                    App.toast(string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT)
+                    App.toast(R.string.toast_message_camera_permission_denied, Toast.LENGTH_SHORT)
                 } else {
                     // user was not prompted --> show dialog explaining that audio permission was permanently denied
                     permissionDialogToShow = PermissionDialog(
-                        titleStringResId = string.dialog_title_webrtc_permissions_camera_blocked,
-                        messageStringResId = string.dialog_message_webrtc_permissions_camera_blocked,
+                        titleStringResId = R.string.dialog_title_webrtc_permissions_camera_blocked,
+                        messageStringResId = R.string.dialog_message_webrtc_permissions_camera_blocked,
                         additionalButton = {
                             TextButton(onClick = {
                                 val settingsIntent = Intent()
@@ -653,7 +656,9 @@ class WebrtcCallActivity : AppCompatActivity() {
 
     private fun initWebrtcCallService(webrtcCallService: WebrtcCallService?) {
         if (webrtcCallService != null) {
-            this.webrtcCallService = webrtcCallService
+            this.webrtcCallService = webrtcCallService.apply {
+                closeCallActivity = ::closeActivity
+            }
             refreshProximityLockStatus()
         } else {
             this.webrtcCallService = null
@@ -688,9 +693,10 @@ class WebrtcCallActivity : AppCompatActivity() {
         const val CALL_BACK_EXTRA_DISCUSSION_ID = "discussion_id"
         const val ANSWER_CALL_ACTION = "answer_call"
         const val ANSWER_CALL_EXTRA_CALL_IDENTIFIER = "call_identifier"
+        const val ANSWER_CALL_EXTRA_BYTES_OWNED_IDENTITY = "bytes_owned_identity"
     }
 
-    public final data class PermissionDialog(
+    data class PermissionDialog(
         val titleStringResId: Int,
         val messageStringResId: Int,
         val additionalButton: (@Composable RowScope.() -> Unit)? = null,

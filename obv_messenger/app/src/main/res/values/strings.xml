@@ -95,7 +95,10 @@
     <string name="explanation_new_group_v2_card">One of the group administrators updated the group details. The new version is shown above.\n\nPress \"update\" to use this new version.</string>
     <string name="explanation_new_olvid_card">Your contact updated their Olvid Card. Both the old and new versions are shown below.\n\nPress \"update\" to update your contact\'s information with this new version.</string>
     <string name="explanation_no_channel">A secure discussion channel is currently being established. You cannot start any discussion with this contact until this is done. This process should take a few seconds if both you and your contact are online.\n\nIf you believe that something went wrong, you can restart the channel establishment.</string>
-    <string name="explanation_no_contact_match_filter">No matching contact name</string>
+    <string name="explanation_no_contact_match_filter">No contact found</string>
+    <string name="explanation_no_group_match_filter">No group found</string>
+    <string name="explanation_no_message_found">No message found</string>
+    <string name="explanation_no_attachment_found">No attachment found</string>
     <string name="format_identity_details_custom_field">%1$s: %2$s</string>
     <string name="hint_company">Company (optional)</string>
     <string name="hint_compose_your_message">Write message</string>

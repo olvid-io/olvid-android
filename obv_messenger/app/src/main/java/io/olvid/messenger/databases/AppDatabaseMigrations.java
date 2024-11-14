@@ -41,6 +41,16 @@ import io.olvid.messenger.customClasses.StringUtils;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[]{
+            new Migration(69, 70) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 69 TO 70");
+
+                    database.execSQL("ALTER TABLE `group_table` ADD COLUMN `full_search_field` TEXT NOT NULL DEFAULT ''");
+                    database.execSQL("ALTER TABLE `group2_table` ADD COLUMN `full_search_field` TEXT NOT NULL DEFAULT ''");
+                }
+            },
+
             new Migration(68, 69) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

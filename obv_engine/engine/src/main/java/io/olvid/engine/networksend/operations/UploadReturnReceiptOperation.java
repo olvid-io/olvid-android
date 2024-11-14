@@ -166,7 +166,7 @@ public class UploadReturnReceiptOperation extends Operation {
                         cancel(null);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 sendManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -180,7 +180,7 @@ public class UploadReturnReceiptOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

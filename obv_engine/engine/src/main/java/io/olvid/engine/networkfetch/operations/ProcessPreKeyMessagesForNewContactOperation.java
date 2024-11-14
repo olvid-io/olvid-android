@@ -77,12 +77,12 @@ public class ProcessPreKeyMessagesForNewContactOperation extends Operation {
                     fetchManagerSession.inboxMessageListener.messageWasDownloaded(inboxMessage.getNetworkReceivedMessage());
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 setFinished();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

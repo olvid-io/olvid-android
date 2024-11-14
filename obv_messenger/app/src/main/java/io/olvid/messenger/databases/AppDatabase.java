@@ -43,6 +43,7 @@ import io.olvid.messenger.databases.dao.DiscussionCustomizationDao;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.dao.FyleDao;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
+import io.olvid.messenger.databases.dao.GlobalSearchDao;
 import io.olvid.messenger.databases.dao.Group2Dao;
 import io.olvid.messenger.databases.dao.Group2MemberDao;
 import io.olvid.messenger.databases.dao.Group2PendingMemberDao;
@@ -125,7 +126,7 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
 )
 @TypeConverters({ObvTypeConverters.class})
 public abstract class AppDatabase extends RoomDatabase {
-    public static final int DB_SCHEMA_VERSION = 69;
+    public static final int DB_SCHEMA_VERSION = 70;
     public static final int DB_FTS_GLOBAL_SEARCH_VERSION = 1;
     public static final String DB_FILE_NAME = "app_database";
     public static final String TMP_ENCRYPTED_DB_FILE_NAME = "encrypted_app_database";
@@ -181,6 +182,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract Group2MemberDao group2MemberDao();
 
     public abstract Group2PendingMemberDao group2PendingMemberDao();
+
+    public abstract GlobalSearchDao globalSearchDao();
 
     private static final RoomDatabase.Callback roomDatabaseOpenCallback = new RoomDatabase.Callback() {
         @Override

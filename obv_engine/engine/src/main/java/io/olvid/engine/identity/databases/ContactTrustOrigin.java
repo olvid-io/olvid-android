@@ -30,6 +30,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
@@ -258,7 +259,7 @@ public class ContactTrustOrigin implements ObvDatabase {
             contactTrustOrigin.insert();
             return contactTrustOrigin;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -377,7 +378,7 @@ public class ContactTrustOrigin implements ObvDatabase {
                 mediatorOrGroupOwnerIdentity = Identity.of(pojo.mediator_or_group_owner_identity);
             }
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         ContactTrustOrigin contactTrustOrigin = new ContactTrustOrigin(identityManagerSession, contactIdentity, ownedIdentity, pojo.timestamp, pojo.readTrust_type(), mediatorOrGroupOwnerIdentity, pojo.mediator_or_group_owner_trust_level_major, pojo.identity_server, pojo.raw_obv_group_v2_identifier);
         contactTrustOrigin.insert();

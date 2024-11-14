@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
@@ -316,7 +317,7 @@ public class DownloadIdentityPhotoChildProtocol extends ConcreteProtocol {
                 //noinspection ResultOfMethodCallIgnored
                 new File(protocolManagerSession.engineBaseDirectory, receivedMessage.photoPathToDelete).delete();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
             return new PhotoDownloadedState();
         }

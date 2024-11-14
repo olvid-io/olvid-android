@@ -134,7 +134,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
                         mediatorOrGroupOwnerIdentity = Identity.of(trustOrigin.mediator_or_group_owner_identity);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 int trustType;
                 switch (TrustOrigin.TrustType.fromIntValue(trustOrigin.trust_type)) {

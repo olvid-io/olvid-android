@@ -1595,7 +1595,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                         // trigger the device keep active request
                         protocolManagerSession.protocolStarterDelegate.processDeviceManagementRequest(startState.transferredIdentity, ObvDeviceManagementRequest.createSetUnexpiringDeviceRequest(deviceUidToKeepActive.getBytes()));
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 };
                 // register it

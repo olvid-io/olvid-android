@@ -1188,7 +1188,7 @@ private fun VideoCallContent(
             webrtcCallService.getCallParticipant(participants.firstOrNull()?.bytesContactIdentity)?.peerConnectionHolder?.remoteVideoTrack
         val remoteScreenTrack =
             webrtcCallService.getCallParticipant(participants.firstOrNull()?.bytesContactIdentity)?.peerConnectionHolder?.remoteScreenTrack
-        if (webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity!!)
+        if (webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity)
                 .not()
         ) {
             CallParticipant(
@@ -1209,7 +1209,7 @@ private fun VideoCallContent(
                         .padding(start = 10.dp, top = 10.dp)
                         .clickable {
                             webrtcCallService.selectedParticipant =
-                                webrtcCallService.bytesOwnedIdentity!!
+                                webrtcCallService.bytesOwnedIdentity
                         }
                         .border(
                             width = 2.dp,

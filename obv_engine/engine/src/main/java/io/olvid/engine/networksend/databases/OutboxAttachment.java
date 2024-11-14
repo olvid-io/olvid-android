@@ -248,7 +248,7 @@ public class OutboxAttachment implements ObvDatabase {
             }
             this.acknowledgedChunkCount = acknowledgedChunkCount;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -294,7 +294,7 @@ public class OutboxAttachment implements ObvDatabase {
             outboxAttachment.insert();
             return outboxAttachment;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -320,7 +320,7 @@ public class OutboxAttachment implements ObvDatabase {
         try {
             this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.messageUid = new UID(res.getBytes(MESSAGE_UID));
         this.attachmentNumber = res.getInt(ATTACHMENT_NUMBER);
@@ -330,7 +330,7 @@ public class OutboxAttachment implements ObvDatabase {
         try {
             this.key = (AuthEncKey) new Encoded(res.getBytes(KEY)).decodeSymmetricKey();
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.acknowledgedChunkCount = res.getInt(ACKNOWLEDGED_CHUNK_COUNT);
         this.acknowledged = res.getBoolean(ACKNOWLEDGED);

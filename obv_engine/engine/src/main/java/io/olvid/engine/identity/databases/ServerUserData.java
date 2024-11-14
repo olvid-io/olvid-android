@@ -268,7 +268,7 @@ public class ServerUserData implements ObvDatabase {
             statement.executeUpdate();
             this.nextRefreshTimestamp = timestamp;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

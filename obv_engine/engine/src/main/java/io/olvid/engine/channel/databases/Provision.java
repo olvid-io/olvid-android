@@ -27,6 +27,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;
 import io.olvid.engine.channel.datatypes.RatchetingOutput;
 import io.olvid.engine.datatypes.Constants;
@@ -112,7 +113,7 @@ public class Provision implements ObvDatabase {
             statement.setBytes(6, obliviousChannelRemoteIdentity.getBytes());
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -135,7 +136,7 @@ public class Provision implements ObvDatabase {
                     ")")) {
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -156,7 +157,7 @@ public class Provision implements ObvDatabase {
             provision.selfRatchet(2*Constants.REPROVISIONING_THRESHOLD);
             return provision;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

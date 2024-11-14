@@ -102,7 +102,7 @@ public class CachedWellKnown implements ObvDatabase {
             cachedWellKnown.insert();
             return cachedWellKnown;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

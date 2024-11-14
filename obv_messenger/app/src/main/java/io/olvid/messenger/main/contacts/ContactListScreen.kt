@@ -81,9 +81,6 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.drawable
-import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Contact
@@ -100,7 +97,7 @@ import kotlinx.coroutines.launch
 
 data class ContactFilterTab(val label: String, val filter: (ContactOrKeycloakDetails) -> Boolean)
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ContactListScreen(
     modifier: Modifier = Modifier.fillMaxSize(),
@@ -304,20 +301,20 @@ fun ContactListScreen(
                                     ) {
                                         if (contactListViewModel.isFiltering())
                                             MainScreenEmptyList(
-                                                icon = drawable.ic_contacts_filter,
-                                                title = string.explanation_no_contact_match_filter,
+                                                icon = R.drawable.ic_contacts_filter,
+                                                title = R.string.explanation_no_contact_match_filter,
                                                 subtitle = null
                                             )
                                         else
                                             MainScreenEmptyList(
-                                                icon = drawable.tab_contacts,
+                                                icon = R.drawable.tab_contacts,
                                                 title = when (page) {
-                                                    0 -> string.explanation_empty_contact_list
+                                                    0 -> R.string.explanation_empty_contact_list
                                                     1 -> R.string.explanation_empty_other_contact_list
                                                     else -> R.string.explanation_empty_directory
                                                 },
                                                 subtitle = when (page) {
-                                                    0 -> string.explanation_empty_contact_list_sub
+                                                    0 -> R.string.explanation_empty_contact_list_sub
                                                     1 -> R.string.explanation_empty_other_contact_list_sub
                                                     else -> null
                                                 }
@@ -393,7 +390,7 @@ private fun Header(
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .size(16.dp),
-                                color = colorResource(id = color.olvid_gradient_light),
+                                color = colorResource(id = R.color.olvid_gradient_light),
                                 strokeWidth = 2.dp
                             )
                         }) {
@@ -407,7 +404,7 @@ private fun Header(
                         BadgedBox(badge = {
                             Badge(
                                 modifier = Modifier.padding(4.dp),
-                                backgroundColor = colorResource(id = color.olvid_gradient_light),
+                                backgroundColor = colorResource(id = R.color.olvid_gradient_light),
                             ) {
                                 Text(
                                     color = colorResource(id = R.color.almostWhite),
@@ -447,16 +444,16 @@ private fun Contact(
         title = contactOrKeycloakDetails.getAnnotatedName()
             .highlight(
                 SpanStyle(
-                    background = colorResource(id = color.searchHighlightColor),
-                    color = colorResource(id = color.black)
+                    background = colorResource(id = R.color.searchHighlightColor),
+                    color = colorResource(id = R.color.black)
                 ),
                 contactListViewModel.filterPatterns
             ),
         body = contactOrKeycloakDetails.getAnnotatedDescription()
             ?.highlight(
                 SpanStyle(
-                    background = colorResource(id = color.searchHighlightColor),
-                    color = colorResource(id = color.black)
+                    background = colorResource(id = R.color.searchHighlightColor),
+                    color = colorResource(id = R.color.black)
                 ),
                 contactListViewModel.filterPatterns
             ),
@@ -548,11 +545,11 @@ private fun KeycloakSearching() {
             .padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator(color = colorResource(id = color.olvid_gradient_light))
+        CircularProgressIndicator(color = colorResource(id = R.color.olvid_gradient_light))
         Text(
-            text = stringResource(id = string.label_searching_company_directory),
+            text = stringResource(id = R.string.label_searching_company_directory),
             color = colorResource(
-                id = color.grey
+                id = R.color.grey
             )
         )
     }
@@ -576,7 +573,7 @@ private fun KeycloakMissingCount(missingResults: Int?) {
             .clip(RoundedCornerShape(8.dp))
             .background(
                 color = colorResource(
-                    id = color.lighterGrey
+                    id = R.color.lighterGrey
                 )
             )
 
@@ -592,8 +589,8 @@ private fun KeycloakMissingCount(missingResults: Int?) {
                     missingResults
                 )
             }
-                ?: stringResource(id = string.text_keycloak_missing_some_search_result),
-            color = colorResource(id = color.grey),
+                ?: stringResource(id = R.string.text_keycloak_missing_some_search_result),
+            color = colorResource(id = R.color.grey),
             textAlign = TextAlign.Center,
             style = OlvidTypography.body2,
             fontStyle = FontStyle.Italic

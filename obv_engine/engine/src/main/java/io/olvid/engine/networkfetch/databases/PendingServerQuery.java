@@ -78,7 +78,7 @@ public class PendingServerQuery implements ObvDatabase {
             pendingServerQuery.insert();
             return pendingServerQuery;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

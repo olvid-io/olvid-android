@@ -76,7 +76,7 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
             linkBetweenProtocolInstances.insert();
             return linkBetweenProtocolInstances;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

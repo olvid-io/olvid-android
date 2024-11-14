@@ -54,7 +54,7 @@ public class GroupV2SignatureReceived implements ObvDatabase {
             groupV2SignatureReceived.insert();
             return groupV2SignatureReceived;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

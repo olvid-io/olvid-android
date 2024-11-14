@@ -82,7 +82,7 @@ public class MessageHeader implements ObvDatabase {
             messageHeader.insert();
             return messageHeader;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -101,14 +101,14 @@ public class MessageHeader implements ObvDatabase {
         try {
             this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.messageUid = new UID(res.getBytes(MESSAGE_UID));
         this.deviceUid = new UID(res.getBytes(DEVICE_UID));
         try {
             this.toIdentity = Identity.of(res.getBytes(TO_IDENTITY));
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.wrappedKey = new EncryptedBytes(res.getBytes(WRAPPED_KEY));
     }

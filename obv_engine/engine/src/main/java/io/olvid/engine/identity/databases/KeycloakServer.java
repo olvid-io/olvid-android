@@ -165,7 +165,7 @@ public class KeycloakServer implements ObvDatabase {
             keycloakServer.insert();
             return keycloakServer;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

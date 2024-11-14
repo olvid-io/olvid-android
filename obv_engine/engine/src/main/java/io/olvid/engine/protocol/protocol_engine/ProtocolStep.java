@@ -78,7 +78,7 @@ public abstract class ProtocolStep extends Operation {
             setFinished();
         } catch (Exception e) {
             cancel(null);
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

@@ -22,9 +22,16 @@ package io.olvid.messenger.databases.tasks;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.olvid.engine.engine.types.JsonIdentityDetails;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.dao.Group2MemberDao;
+import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
@@ -61,7 +68,15 @@ public class UpdateAllGroupMembersNames implements Runnable {
                             :
                             db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
             );
-            db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
+
+            List<String> fullSearchItems = new ArrayList<>();
+            for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)) {
+                if (groupContact != null) {
+                    fullSearchItems.add(groupContact.fullSearchDisplayName);
+                }
+            }
+
+            db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.computeFullSearch(fullSearchItems));
         }
 
         for (Group2 group : ((bytesOwnedIdentity == null) ? db.group2Dao().getAll() : (bytesContactIdentity == null) ? db.group2Dao().getAllForOwnedIdentity(bytesOwnedIdentity) : db.group2Dao().getAllForContact(bytesOwnedIdentity, bytesContactIdentity))) {
@@ -71,7 +86,18 @@ public class UpdateAllGroupMembersNames implements Runnable {
                             :
                             db.group2Dao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier)
             );
-            db.group2Dao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.groupMembersNames);
+            List<String> fullSearchItems = new ArrayList<>();
+            for (Group2MemberDao.Group2MemberOrPending group2MemberOrPending : db.group2MemberDao().getGroupMembersAndPendingSync(group.bytesOwnedIdentity, group.bytesGroupIdentifier)) {
+                if (group2MemberOrPending.contact != null) {
+                    fullSearchItems.add(group2MemberOrPending.contact.fullSearchDisplayName);
+                } else {
+                    try {
+                        JsonIdentityDetails jsonIdentityDetails = AppSingleton.getJsonObjectMapper().readValue(group2MemberOrPending.identityDetails, JsonIdentityDetails.class);
+                        fullSearchItems.add(StringUtils.unAccent(jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false)));
+                    } catch (Exception ignored) {}
+                }
+            }
+            db.group2Dao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.groupMembersNames, group.computeFullSearch(fullSearchItems));
 
             if (group.name == null && group.customName == null) {
                 Discussion discussion = db.discussionDao().getByGroupIdentifier(group.bytesOwnedIdentity, group.bytesGroupIdentifier);

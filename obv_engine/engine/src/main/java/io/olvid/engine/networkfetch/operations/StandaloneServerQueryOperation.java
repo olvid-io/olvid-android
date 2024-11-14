@@ -106,7 +106,7 @@ public class StandaloneServerQueryOperation extends Operation {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         } finally {
             if (finished) {
                 setFinished();

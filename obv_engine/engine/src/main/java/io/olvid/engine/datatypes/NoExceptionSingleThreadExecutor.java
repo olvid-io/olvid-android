@@ -23,6 +23,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import io.olvid.engine.Logger;
+
 public class NoExceptionSingleThreadExecutor implements Executor {
     private final String name;
     private final ExecutorService executor;
@@ -46,7 +48,7 @@ public class NoExceptionSingleThreadExecutor implements Executor {
         try {
             executor.shutdownNow();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 }

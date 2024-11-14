@@ -136,9 +136,6 @@ public class CallParticipantAdditionDialogFragment extends DialogFragment {
             if (filteredContactListFragment != null) {
                 filteredContactListFragment.setUnfilteredContacts(
                         Transformations.switchMap(this.webrtcCallService.getCallParticipantsLiveData(), callParticipantPojos -> {
-                            if (callParticipantPojos == null) {
-                                return AppDatabase.getInstance().contactDao().getAllForOwnedIdentityWithChannel(bytesOwnedIdentity);
-                            }
                             List<byte[]> excludedContacts = new ArrayList<>(callParticipantPojos.size());
                             for (WebrtcCallService.CallParticipantPojo callParticipantPojo: callParticipantPojos) {
                                 excludedContacts.add(callParticipantPojo.bytesContactIdentity);

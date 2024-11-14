@@ -160,7 +160,7 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
                     }
                     sendManagerSession.session.commit();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }

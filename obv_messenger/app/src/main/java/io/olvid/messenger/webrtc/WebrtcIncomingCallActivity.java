@@ -34,18 +34,11 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.Transformations;
-
-import java.util.List;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
-import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.entity.Contact;
-import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -53,9 +46,7 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
 
     WebrtcServiceConnection webrtcServiceConnection;
     WebrtcCallService webrtcCallService = null;
-    CallParticipantsObserver callParticipantsObserver;
-    CallStatusObserver callStatusObserver;
-    DiscussionCustomizationObserver discussionCustomizationObserver;
+    CallObserver callObserver;
 
     InitialView contactInitialView;
     ImageView contactColorCircleImageView;
@@ -64,6 +55,8 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
     TextView bigCountTextView;
     View rejectCallButton;
     View answerCallButton;
+
+    private @Nullable WebrtcCallService.Call currentCall = null;
 
     @Override
     protected void attachBaseContext(Context baseContext) {
@@ -82,9 +75,7 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
         Intent serviceBindIntent = new Intent(this, WebrtcCallService.class);
         bindService(serviceBindIntent, webrtcServiceConnection, 0);
 
-        callParticipantsObserver = new CallParticipantsObserver();
-        callStatusObserver = new CallStatusObserver();
-        discussionCustomizationObserver = new DiscussionCustomizationObserver();
+        callObserver = new CallObserver();
 
         setContentView(R.layout.activity_webrtc_incoming_call);
 
@@ -113,86 +104,52 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.accept_call_button) {
-            if (webrtcCallService != null) {
+            if (currentCall != null) {
                 Intent answerCallIntent = new Intent(this, WebrtcCallActivity.class);
                 answerCallIntent.setAction(WebrtcCallActivity.ANSWER_CALL_ACTION);
-                answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER, Logger.getUuidString(webrtcCallService.callIdentifier));
+                answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER, Logger.getUuidString(currentCall.getCallIdentifier()));
+                answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_BYTES_OWNED_IDENTITY, currentCall.getBytesOwnedIdentity());
                 answerCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(answerCallIntent);
             }
             closeActivity();
         } else if (id == R.id.reject_call_button) {
-            if (webrtcCallService != null) {
-                webrtcCallService.recipientRejectCall();
+            if (webrtcCallService != null && currentCall != null) {
+                webrtcCallService.recipientRejectCall(currentCall.getBytesOwnedIdentity(), currentCall.getCallIdentifier());
             }
-            closeActivity();
+            // do not close activity here, the live data will take car of it
         }
     }
 
-    private class CallParticipantsObserver implements Observer<List<WebrtcCallService.CallParticipantPojo>> {
+    private class CallObserver implements Observer<WebrtcCallService.Call> {
         @Override
-        public void onChanged(List<WebrtcCallService.CallParticipantPojo> callParticipants) {
-            final Contact callParticipantContact = (callParticipants == null || callParticipants.size() == 0) ? null : callParticipants.get(0).contact;
-            if (callParticipantContact == null) {
-                contactInitialView.setVisibility(View.INVISIBLE);
-                contactNameTextView.setText(null);
-                othersCountTextView.setVisibility(View.GONE);
-                bigCountTextView.setVisibility(View.GONE);
+        public void onChanged(@Nullable WebrtcCallService.Call call) {
+            currentCall = call;
+            if (call == null) {
+                closeActivity();
             } else {
                 contactInitialView.setVisibility(View.VISIBLE);
-                contactInitialView.setContact(callParticipantContact);
-                contactNameTextView.setText(callParticipantContact.getCustomDisplayName());
-                if (webrtcCallService != null) {
-                    int count = webrtcCallService.getIncomingParticipantCount() - 1;
-                    if (count > 0) {
-                        othersCountTextView.setVisibility(View.VISIBLE);
-                        othersCountTextView.setText(getResources().getQuantityString(R.plurals.text_and_x_other, count, count));
-                        bigCountTextView.setVisibility(View.VISIBLE);
-                        bigCountTextView.setText(getString(R.string.plus_count, count));
-                    } else {
-                        othersCountTextView.setVisibility(View.GONE);
-                        bigCountTextView.setVisibility(View.GONE);
-                    }
+                contactInitialView.setContact(call.getCallerContact());
+                contactNameTextView.setText(call.getCallerContact().getCustomDisplayName());
+                int count = call.getParticipantCount() - 1;
+                if (count > 0) {
+                    othersCountTextView.setVisibility(View.VISIBLE);
+                    othersCountTextView.setText(getResources().getQuantityString(R.plurals.text_and_x_other, count, count));
+                    bigCountTextView.setVisibility(View.VISIBLE);
+                    bigCountTextView.setText(getString(R.string.plus_count, count));
+                } else {
+                    othersCountTextView.setVisibility(View.GONE);
+                    bigCountTextView.setVisibility(View.GONE);
                 }
-            }
-        }
-    }
 
-    private class CallStatusObserver implements Observer<WebrtcCallService.State> {
-        @Override
-        public void onChanged(WebrtcCallService.State state) {
-            switch (state) {
-                case INITIAL:
-                case WAITING_FOR_AUDIO_PERMISSION:
-                case GETTING_TURN_CREDENTIALS:
-                case RINGING:
-                case BUSY:
-                    break;
-                case CALL_ENDED:
-                case FAILED:
-                case INITIALIZING_CALL:
-                case CONNECTING:
-                case CALL_IN_PROGRESS: {
-                    closeActivity();
-                    break;
-                }
-            }
-        }
-    }
-
-    private class DiscussionCustomizationObserver implements Observer<DiscussionCustomization> {
-        @Override
-        public void onChanged(DiscussionCustomization discussionCustomization) {
-            if (discussionCustomization != null) {
-                DiscussionCustomization.ColorJson colorJson = discussionCustomization.getColorJson();
+                DiscussionCustomization.ColorJson colorJson = call.getDiscussionCustomization() == null ? null : call.getDiscussionCustomization().getColorJson();
                 if (colorJson != null) {
                     contactColorCircleImageView.setVisibility(View.VISIBLE);
                     contactColorCircleImageView.setColorFilter(0xff000000 + colorJson.color, android.graphics.PorterDuff.Mode.SRC_IN);
-                    return;
+                } else {
+                    contactColorCircleImageView.setVisibility(View.GONE);
                 }
             }
-
-            contactColorCircleImageView.setVisibility(View.GONE);
         }
     }
 
@@ -215,26 +172,11 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
     private void setWebrtcCallService(WebrtcCallService webrtcCallService) {
         if (webrtcCallService != null) {
             this.webrtcCallService = webrtcCallService;
-            this.webrtcCallService.getCallParticipantsLiveData().observe(this, callParticipantsObserver);
-            this.webrtcCallService.getState().observe(this, callStatusObserver);
-            LiveData<DiscussionCustomization> discussionCustomizationLiveData = Transformations.switchMap(this.webrtcCallService.getCallParticipantsLiveData(), (List<WebrtcCallService.CallParticipantPojo> callParticipants) -> {
-                final Contact callParticipantContact = (callParticipants == null || callParticipants.size() == 0) ? null : callParticipants.get(0).contact;
-                if (callParticipantContact == null) {
-                    return null;
-                }
-                return Transformations.switchMap(AppDatabase.getInstance().discussionDao().getByContactLiveData(callParticipantContact.bytesOwnedIdentity, callParticipantContact.bytesContactIdentity), (Discussion discussion) -> {
-                    if (discussion == null) {
-                        return null;
-                    }
-                    return AppDatabase.getInstance().discussionCustomizationDao().getLiveData(discussion.id);
-                });
-            });
-            discussionCustomizationLiveData.observe(this, discussionCustomizationObserver);
+            this.webrtcCallService.getCurrentIncomingCallLiveData().observe(this, callObserver);
         } else {
             if (this.webrtcCallService != null) {
-                // remove observers
-                this.webrtcCallService.getState().removeObservers(this);
-                this.webrtcCallService.getCallParticipantsLiveData().removeObservers(this);
+                // remove observer
+                this.webrtcCallService.getCurrentIncomingCallLiveData().removeObservers(this);
             }
             this.webrtcCallService = null;
         }

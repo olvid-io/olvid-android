@@ -399,7 +399,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         discussionInitialView.setDiscussion(discussionAndContactNames.discussion);
 
         discussionTitleTextView.setVisibility(View.VISIBLE);
-        if (discussionAndContactNames.discussion.title.length() == 0) {
+        if (discussionAndContactNames.discussion.title.isEmpty()) {
             SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_discussion));
             spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             discussionTitleTextView.setText(spannableString);
@@ -409,7 +409,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         if (discussionAndContactNames.discussion.discussionType == Discussion.TYPE_GROUP) {
             discussionTitleTextView.setMaxLines(1);
             discussionGroupMembersTextView.setVisibility(View.VISIBLE);
-            if (discussionAndContactNames.groupMemberNames == null || discussionAndContactNames.groupMemberNames.length() == 0) {
+            if (discussionAndContactNames.groupMemberNames == null || discussionAndContactNames.groupMemberNames.isEmpty()) {
                 StyleSpan sp = new StyleSpan(Typeface.ITALIC);
                 SpannableString ss = new SpannableString(getString(R.string.text_nobody));
                 ss.setSpan(sp, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -424,7 +424,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
             } else {
                 discussionTitleTextView.setMaxLines(1);
                 discussionGroupMembersTextView.setVisibility(View.VISIBLE);
-                if (discussionAndContactNames.groupMemberNames == null || discussionAndContactNames.groupMemberNames.length() == 0) {
+                if (discussionAndContactNames.groupMemberNames == null || discussionAndContactNames.groupMemberNames.isEmpty()) {
                     StyleSpan sp = new StyleSpan(Typeface.ITALIC);
                     SpannableString ss = new SpannableString(getString(R.string.text_nobody));
                     ss.setSpan(sp, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

@@ -122,7 +122,7 @@ public class CancelAttachmentUploadOperation extends Operation {
                         cancel(CancelAttachmentUploadCompositeOperation.RFC_NETWORK_ERROR);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 sendManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -136,7 +136,7 @@ public class CancelAttachmentUploadOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

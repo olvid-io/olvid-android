@@ -389,7 +389,7 @@ public class PendingGroupMember implements ObvDatabase {
             pendingGroupMember.declined = pojo.declined;
             pendingGroupMember.insert();
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

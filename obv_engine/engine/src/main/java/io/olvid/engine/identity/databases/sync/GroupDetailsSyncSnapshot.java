@@ -100,7 +100,7 @@ public class GroupDetailsSyncSnapshot implements ObvSyncSnapshotNode {
                 photoServerLabel = new UID(photo_server_label);
                 photoServerKey = (AuthEncKey) new Encoded(photo_server_key).decodeSymmetricKey();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 photoServerLabel = null;
                 photoServerKey = null;
             }
@@ -133,7 +133,7 @@ public class GroupDetailsSyncSnapshot implements ObvSyncSnapshotNode {
                 photoServerLabel = new UID(photo_server_label);
                 photoServerKey = (AuthEncKey) new Encoded(photo_server_key).decodeSymmetricKey();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 photoServerIdentity = null;
                 photoServerLabel = null;
                 photoServerKey = null;

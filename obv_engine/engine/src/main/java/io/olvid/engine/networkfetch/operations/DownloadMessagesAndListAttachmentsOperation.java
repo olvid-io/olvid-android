@@ -203,7 +203,7 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -217,7 +217,7 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }
@@ -308,7 +308,7 @@ class DownloadMessagesAndListAttachmentsServerMethod extends ServerMethod {
                 }
                 messageAndAttachmentLengthsArray = list.toArray(new MessageAndAttachmentLengths[0]);
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         }

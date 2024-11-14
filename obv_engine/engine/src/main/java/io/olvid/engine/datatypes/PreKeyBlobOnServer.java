@@ -50,7 +50,7 @@ public class PreKeyBlobOnServer {
                     Logger.i("PreKey signature verification failed.");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
 
             if (verifiedEncodedPreKey != null) {
@@ -88,7 +88,7 @@ public class PreKeyBlobOnServer {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }

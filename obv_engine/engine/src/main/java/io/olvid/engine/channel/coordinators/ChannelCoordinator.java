@@ -132,7 +132,7 @@ public class ChannelCoordinator {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }
@@ -171,7 +171,7 @@ public class ChannelCoordinator {
                             channelReceivedMessage.getExtendedPayloadKey()
                     );
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                     Logger.i("Error while processing a ChannelReceivedApplicationMessage.");
                     channelManagerSession.networkFetchDelegate.deleteMessageAndAttachments(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid());
                 }

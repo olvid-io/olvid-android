@@ -105,10 +105,11 @@ public interface ContactDao {
     void updateCustomNameHue(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, Integer customNameHue);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
-            " SET " + Contact.PERSONAL_NOTE + " = :personalNote " +
+            " SET " + Contact.PERSONAL_NOTE + " = :personalNote, " +
+            Contact.FULL_SEARCH_DISPLAY_NAME + " = :fullSearchDisplayName " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updatePersonalNote(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String personalNote);
+    void updatePersonalNote(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String personalNote, String fullSearchDisplayName);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.CUSTOM_PHOTO_URL + " = :customPhotoUrl " +

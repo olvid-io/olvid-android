@@ -159,7 +159,7 @@ public class ContactGroupV2Details implements ObvDatabase {
 
                     photoUrl = randFileName;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                     Logger.w("Error copying the photo for the groupV2 --> creating a group without photo");
                 }
             }
@@ -174,7 +174,7 @@ public class ContactGroupV2Details implements ObvDatabase {
             contactGroupDetails.insert();
             return contactGroupDetails;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -201,7 +201,7 @@ public class ContactGroupV2Details implements ObvDatabase {
             contactGroupDetails.insert();
             return contactGroupDetails;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -222,7 +222,7 @@ public class ContactGroupV2Details implements ObvDatabase {
             contactGroupDetails.insert();
             return contactGroupDetails;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -263,7 +263,7 @@ public class ContactGroupV2Details implements ObvDatabase {
 
             return contactGroupDetails;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -683,7 +683,7 @@ public class ContactGroupV2Details implements ObvDatabase {
 
                 contactGroupV2Details = new ContactGroupV2Details(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, version, pojo.serialized_details, null, photoServerIdentity, photoServerLabel, photoServerKey);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
 

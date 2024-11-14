@@ -107,7 +107,7 @@ public class DownloadMessageExtendedPayloadCoordinator implements Operation.OnCa
                 messageHasExtendedPayloadToDownload(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

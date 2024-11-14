@@ -94,7 +94,10 @@
     <string name="explanation_new_group_v2_card">Un administrateur a mis à jour les détails du groupe. La nouvelle version est affichée ci-dessous.\n\nUtilisez cette version en appuyant sur «\u00a0mettre à jour\u00a0».</string>
     <string name="explanation_new_olvid_card">Votre contact a mis à jour son Olvid Card. L\'ancienne version et la nouvelle sont affichées ci-dessous.\n\nActualisez les informations de votre contact en cliquant "mettre à jour".</string>
     <string name="explanation_no_channel">Un canal sécurisé est actuellement en cours d\'établissement. Vous ne pouvez pas entamer de discussion avec ce contact tant que cela n\'est pas terminé. Ce processus devrait seulement prendre quelques secondes si vous et votre contact êtes tous deux en ligne.\n\nSi vous pensez que quelque chose s\'est mal passé, vous pouvez redémarrer l\'établissement de canal.</string>
-    <string name="explanation_no_contact_match_filter">Aucun contact trouvé pour cette recherche</string>
+    <string name="explanation_no_contact_match_filter">Aucun contact trouvé</string>
+    <string name="explanation_no_group_match_filter">Aucun groupe trouvé</string>
+    <string name="explanation_no_message_found">Aucun message trouvé</string>
+    <string name="explanation_no_attachment_found">Auncune pièce jointe trouvée</string>
     <string name="format_identity_details_custom_field">%1$s : %2$s</string>
     <string name="hint_company">Société (facultatif)</string>
     <string name="hint_compose_your_message">Écrire un message</string>

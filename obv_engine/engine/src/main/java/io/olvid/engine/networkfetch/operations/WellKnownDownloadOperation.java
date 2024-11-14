@@ -34,6 +34,7 @@ import java.util.Objects;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Operation;
@@ -136,7 +137,7 @@ public class WellKnownDownloadOperation extends Operation {
                         try {
                             downloadedWellKnown = objectMapper.readValue(responseData, WellKnownCoordinator.JsonWellKnown.class);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Logger.x(e);
                             cancel(RFC_MALFORMED_WELL_KNOWN);
                             return;
                         }
@@ -163,7 +164,7 @@ public class WellKnownDownloadOperation extends Operation {
 
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 if (finished) {
                     fetchManagerSession.session.commit();
@@ -176,7 +177,7 @@ public class WellKnownDownloadOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

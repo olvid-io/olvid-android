@@ -164,7 +164,7 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
             instance.insert();
             return instance;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

@@ -53,7 +53,8 @@ public interface Group2Dao {
             "grpp." + Group2.OWN_PERMISSION_SEND_MESSAGE + " AS group2_" + Group2.OWN_PERMISSION_SEND_MESSAGE + ", " +
             "grpp." + Group2.CUSTOM_NAME + " AS group2_" + Group2.CUSTOM_NAME + ", " +
             "grpp." + Group2.CUSTOM_PHOTO_URL + " AS group2_" + Group2.CUSTOM_PHOTO_URL + ", " +
-            "grpp." + Group2.PERSONAL_NOTE + " AS group2_" + Group2.PERSONAL_NOTE;
+            "grpp." + Group2.PERSONAL_NOTE + " AS group2_" + Group2.PERSONAL_NOTE + ", " +
+            "grpp." + Group2.FULL_SEARCH_FIELD + " AS group2_" + Group2.FULL_SEARCH_FIELD;
 
     String GROUP2_NULL_COLUMNS = " NULL AS group2_" + Group2.BYTES_OWNED_IDENTITY + ", " +
             " NULL AS group2_" + Group2.BYTES_GROUP_IDENTIFIER + ", " +
@@ -70,7 +71,8 @@ public interface Group2Dao {
             " NULL AS group2_" + Group2.OWN_PERMISSION_SEND_MESSAGE + ", " +
             " NULL AS group2_" + Group2.CUSTOM_NAME + ", " +
             " NULL AS group2_" + Group2.CUSTOM_PHOTO_URL + ", " +
-            " NULL AS group2_" + Group2.PERSONAL_NOTE;
+            " NULL AS group2_" + Group2.PERSONAL_NOTE + ", " +
+            " NULL AS group2_" + Group2.FULL_SEARCH_FIELD;
 
     String GROUP_NULL_COLUMNS = " NULL AS group_" + Group.BYTES_GROUP_OWNER_AND_UID + ", " +
             " NULL AS group_" + Group.BYTES_OWNED_IDENTITY + ", " +
@@ -81,7 +83,8 @@ public interface Group2Dao {
             " NULL AS group_" + Group.PHOTO_URL + ", " +
             " NULL AS group_" + Group.GROUP_MEMBERS_NAMES + ", " +
             " NULL AS group_" + Group.CUSTOM_PHOTO_URL + ", " +
-            " NULL AS group_" + Group.PERSONAL_NOTE;
+            " NULL AS group_" + Group.PERSONAL_NOTE + ", " +
+            " NULL AS group_" + Group.FULL_SEARCH_FIELD;
 
     @Insert
     void insert(Group2 group);
@@ -99,10 +102,11 @@ public interface Group2Dao {
     void updatePhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String photoUrl);
 
     @Query("UPDATE " + Group2.TABLE_NAME + " SET " +
-            Group2.CUSTOM_NAME + " = :customName " +
+            Group2.CUSTOM_NAME + " = :customName, " +
+            Group2.FULL_SEARCH_FIELD + " = :fullSearchField " +
             " WHERE " + Group2.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier ")
-    void updateCustomName(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String customName);
+    void updateCustomName(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String customName, String fullSearchField);
 
     @Query("UPDATE " + Group2.TABLE_NAME + " SET " +
             Group2.CUSTOM_PHOTO_URL + " = :customPhotoUrl " +
@@ -111,10 +115,11 @@ public interface Group2Dao {
     void updateCustomPhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String customPhotoUrl);
 
     @Query("UPDATE " + Group2.TABLE_NAME + " SET " +
-            Group2.PERSONAL_NOTE + " = :personalNote " +
+            Group2.PERSONAL_NOTE + " = :personalNote, " +
+            Group2.FULL_SEARCH_FIELD + " = :fullSearchField " +
             " WHERE " + Group2.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier ")
-    void updatePersonalNote(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String personalNote);
+    void updatePersonalNote(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String personalNote, String fullSearchField);
 
     @Query("UPDATE " + Group2.TABLE_NAME + " SET " +
             Group2.UPDATE_IN_PROGRESS + " = :updating " +
@@ -129,10 +134,11 @@ public interface Group2Dao {
     void updateNewPublishedDetails(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, int newPublishedDetails);
 
     @Query("UPDATE " + Group2.TABLE_NAME + " SET " +
-            Group2.GROUP_MEMBERS_NAMES + " = :groupMembersNames " +
+            Group2.GROUP_MEMBERS_NAMES + " = :groupMembersNames, " +
+            Group2.FULL_SEARCH_FIELD + " = :fullSearchField " +
             " WHERE " + Group2.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier ")
-    void updateGroupMembersNames(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String groupMembersNames);
+    void updateGroupMembersNames(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String groupMembersNames, String fullSearchField);
 
     @Query("SELECT * FROM " + Group2.TABLE_NAME +
             " WHERE " + Group2.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +

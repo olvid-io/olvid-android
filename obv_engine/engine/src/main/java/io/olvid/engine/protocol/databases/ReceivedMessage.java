@@ -137,7 +137,7 @@ public class ReceivedMessage implements ObvDatabase {
             receivedMessage.insert();
             return receivedMessage;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -334,7 +334,7 @@ public class ReceivedMessage implements ObvDatabase {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

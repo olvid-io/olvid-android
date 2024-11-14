@@ -124,7 +124,7 @@ public class NoDuplicateOperationQueue {
                             op.execute();
                         } catch (Exception e) {
                             Logger.e("Exception in operation that could have killed a queue!");
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
                     } else {
                         operations.add(op);

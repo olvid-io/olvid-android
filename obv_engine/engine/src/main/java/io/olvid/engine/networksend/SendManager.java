@@ -24,6 +24,7 @@ import java.sql.SQLException;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Session;
@@ -94,7 +95,7 @@ public class SendManager implements NetworkSendDelegate, SendManagerSessionFacto
             ReturnReceipt.createTable(sendManagerSession.session);
             sendManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to create network fetch databases");
         }
     }

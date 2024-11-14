@@ -26,6 +26,7 @@ import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.EdwardCurvePoint;
@@ -65,7 +66,7 @@ public abstract class Signature {
             Signature signatureAlgo = Suite.getSignature(signaturePublicKey);
             return signatureAlgo.verify(signaturePublicKey, challenge, Arrays.copyOfRange(signature, Constants.SIGNATURE_PADDING_LENGTH, signature.length));
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -88,7 +89,7 @@ public abstract class Signature {
             Signature signatureAlgo = Suite.getSignature(signaturePublicKey);
             return signatureAlgo.verify(signaturePublicKey, challenge, Arrays.copyOfRange(signature, Constants.SIGNATURE_PADDING_LENGTH, signature.length));
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -108,7 +109,7 @@ public abstract class Signature {
             Signature signatureAlgo = Suite.getSignature(signaturePublicKey);
             return signatureAlgo.verify(signaturePublicKey, challenge, Arrays.copyOfRange(signature, Constants.SIGNATURE_PADDING_LENGTH, signature.length));
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -132,7 +133,7 @@ public abstract class Signature {
             Signature signatureAlgo = Suite.getSignature(signaturePublicKey);
             return signatureAlgo.verify(signaturePublicKey, challenge, Arrays.copyOfRange(signature, Constants.SIGNATURE_PADDING_LENGTH, signature.length));
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -152,7 +153,7 @@ public abstract class Signature {
             System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
             return output;
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -173,7 +174,7 @@ public abstract class Signature {
             System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
             return output;
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

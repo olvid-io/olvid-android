@@ -127,7 +127,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -236,7 +236,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
                 downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(identityAndUid.ownedIdentity, identityAndUid.uid);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -249,7 +249,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
                     return identityAndUid.ownedIdentity;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
         return null;

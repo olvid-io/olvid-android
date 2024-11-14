@@ -78,9 +78,13 @@ public class Logger {
     }
     public static void e(String message, Exception e) {
         log(ERROR, message + "( " + e.toString() + ")");
-        e.printStackTrace();
+        x(e);
     }
-
+    public static void x(Throwable throwable) {
+        if (WARNING >= outputLogLevel) {
+            outputter.x("Logger", throwable);
+        }
+    }
 
     private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
     public static String toHexString(byte[] bytes) {
@@ -121,5 +125,6 @@ public class Logger {
         void i(String tag, String message);
         void w(String tag, String message);
         void e(String tag, String message);
+        void x(String tag, Throwable throwable);
     }
 }

@@ -108,7 +108,7 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

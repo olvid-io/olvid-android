@@ -99,6 +99,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -252,6 +253,7 @@ fun Message(
     linkPreviewViewModel: LinkPreviewViewModel? = null,
     messageExpiration: MessageExpiration? = null,
     discussionViewModel: DiscussionViewModel? = null,
+    discussionSearch: DiscussionSearch? = null,
     audioAttachmentServiceBinding: AudioAttachmentServiceBinding?,
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     openOnClick: Boolean = true,
@@ -444,6 +446,7 @@ fun Message(
                             onLongClick = if (message.isLocationMessage) onLocationLongClick else onLongClick,
                             onCallBackButtonClicked = onCallBackButtonClicked,
                             discussionViewModel = discussionViewModel,
+                            discussionSearch = discussionSearch,
                             scale = scale,
                             openDiscussionDetailsCallback = openDiscussionDetailsCallback,
                             messageBubbleInteractionSource = interactionSource
@@ -700,7 +703,9 @@ private fun Replied(
                 .background(color = colorResource(id = R.color.almostWhite))
                 .padding(4.dp)
         ) {
-            Text(text = message.jsonMessage?.jsonReply?.senderIdentifier?.let {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = message.jsonMessage?.jsonReply?.senderIdentifier?.let {
                 AppSingleton.getContactCustomDisplayName(it)
             } ?: stringResource(id = R.string.text_deleted_contact),
                 style = OlvidTypography.body2,
@@ -731,6 +736,7 @@ private fun Replied(
                                     )
                                 )
                             ),
+                            style = OlvidTypography.body2,
                             color = colorResource(id = R.color.greyTint),
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis,
@@ -791,6 +797,7 @@ fun MessageBody(
     onCallBackButtonClicked: (callLogId: Long) -> Unit,
     scale: Float,
     discussionViewModel: DiscussionViewModel? = null,
+    discussionSearch: DiscussionSearch? = null,
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     messageBubbleInteractionSource: MutableInteractionSource,
 ) {
@@ -1043,12 +1050,13 @@ fun MessageBody(
                 val linkUrl by remember {
                     derivedStateOf { discussionViewModel?.messageLinkPreviewUrlCache?.get(message.id) }
                 }
-                val text = remember(linkUrl, DiscussionSearch.filterRegexes, message.contentBody) {
+                val text = remember(linkUrl, discussionSearch?.viewModel?.filterRegexes, message.contentBody) {
                     getAnnotatedStringContent(
                         context,
                         message,
                         linkUrl,
-                        discussionViewModel?.discussion?.value?.bytesOwnedIdentity
+                        discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
+                        discussionSearch?.viewModel
                     )
                 }
                 val uriHandler = LocalUriHandler.current
@@ -1203,7 +1211,8 @@ fun getAnnotatedStringContent(
     context: Context,
     message: Message,
     linkPreviewUrl: String? = null,
-    bytesOwnedIdentity: ByteArray? = null
+    bytesOwnedIdentity: ByteArray? = null,
+    discussionSearchViewModel: DiscussionSearch.SearchViewModel?,
 ): AnnotatedString {
     return buildAnnotatedString {
         var stringContent = message.getStringContent(context)
@@ -1252,10 +1261,14 @@ fun getAnnotatedStringContent(
             )
         }
     }.run {
-        DiscussionSearch.highlight(
-            content = this,
-            context = context
-        )
+        if (message.messageType == Message.TYPE_INBOUND_MESSAGE || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+            discussionSearchViewModel?.highlight(
+                content = this,
+                context = context
+            ) ?: this
+        } else {
+            this
+        }
     }
 }
 

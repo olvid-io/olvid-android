@@ -92,7 +92,7 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
                 queueNewSendReturnReceiptOperation(returnReceipt.getContactIdentity().getServer(), returnReceipt.getOwnedIdentity(), returnReceipt.getId());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

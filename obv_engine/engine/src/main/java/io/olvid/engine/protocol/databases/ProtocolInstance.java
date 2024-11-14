@@ -121,7 +121,7 @@ public class ProtocolInstance implements ObvDatabase {
             protocolInstance.insert();
             return protocolInstance;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

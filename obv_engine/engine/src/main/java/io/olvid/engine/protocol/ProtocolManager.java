@@ -204,7 +204,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             protocolManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
 //        schedulerForPeriodicSync.scheduleAtFixedRate(this::triggerOwnedDevicesSync, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, TimeUnit.MILLISECONDS);
@@ -223,7 +223,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 //
 //            protocolManagerSession.session.commit();
 //        } catch (Exception e) {
-//            e.printStackTrace();
+//            Logger.x(e);
 //        }
 //    }
 
@@ -245,7 +245,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             IdentityDeletionSignatureReceived.createTable(protocolManagerSession.session);
             protocolManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to create protocol databases");
         }
     }
@@ -314,7 +314,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                             startChannelCreationWithContactDeviceProtocol(ownedIdentity, contactIdentity, contactDeviceUid);
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                     break;
                 }
@@ -327,7 +327,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                             startChannelCreationWithOwnedDeviceProtocol(ownedIdentity, ownedDeviceUid);
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                     break;
                 }
@@ -356,7 +356,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                         }
                         // To improve: delete any other protocol related to this contact
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                     break;
             }
@@ -384,7 +384,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                     break;
             }
@@ -1469,7 +1469,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 //                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
 //            }
 //        } catch (Exception e) {
-//            e.printStackTrace();
+//            Logger.x(e);
 //        }
 //    }
 

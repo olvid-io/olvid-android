@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.encoder.Encoded;
@@ -108,7 +109,7 @@ public class ObvSyncSnapshot {
             }
             return map;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -126,7 +127,7 @@ public class ObvSyncSnapshot {
             }
             return new ObvSyncSnapshot(snapshotMap);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

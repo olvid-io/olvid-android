@@ -81,11 +81,12 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
                     db.discussionDao().updateTitleAndPhotoUrl(discussion.id, contact.getCustomDisplayName(), discussion.photoUrl);
                 }
             }
+            if (domain.contains(PERSONAL_NOTE) && personal_note != null) {
+                contact.setPersonalNote(personal_note);
+                db.contactDao().updatePersonalNote(bytesOwnedIdentity, bytesContactIdentity, contact.personalNote, contact.fullSearchDisplayName);
+            }
             if (domain.contains(CUSTOM_HUE) && custom_hue != null) {
                 db.contactDao().updateCustomNameHue(bytesOwnedIdentity, bytesContactIdentity, custom_hue);
-            }
-            if (domain.contains(PERSONAL_NOTE) && personal_note != null) {
-                db.contactDao().updatePersonalNote(bytesOwnedIdentity, bytesContactIdentity, personal_note);
             }
             if (discussion != null) {
                 if (domain.contains(DISCUSSION_CUSTOMIZATION) && discussion_customization != null) {

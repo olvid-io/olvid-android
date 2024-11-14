@@ -60,6 +60,10 @@ public class ContactDisplayNameFormatChangedTask implements Runnable {
                     // then, compute the sortDisplayName
                     contact.sortDisplayName = computeSortDisplayName(collator, identityDetails, contact.customDisplayName, lastNameSort);
 
+                    ////////
+                    // we do this to force a recompute of the full search field
+                    contact.setPersonalNote(contact.personalNote);
+
                     db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.firstName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
 
                     Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);

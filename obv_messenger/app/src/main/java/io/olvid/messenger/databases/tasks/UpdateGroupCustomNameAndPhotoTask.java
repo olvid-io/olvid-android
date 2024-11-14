@@ -22,6 +22,8 @@ package io.olvid.messenger.databases.tasks;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -31,6 +33,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group;
 
@@ -60,8 +63,15 @@ public class UpdateGroupCustomNameAndPhotoTask implements Runnable {
             boolean changed = false;
             if (!Objects.equals(group.customName, customName)) {
                 changed = true;
+
+                List<String> fullSearchItems = new ArrayList<>();
+                for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(bytesOwnedIdentity, bytesGroupOwnerAndUid)) {
+                    if (groupContact != null) {
+                        fullSearchItems.add(groupContact.fullSearchDisplayName);
+                    }
+                }
                 group.customName = customName;
-                db.groupDao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.customName);
+                db.groupDao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.customName, group.computeFullSearch(fullSearchItems));
 
                 if (!propagated) {
                     try {
@@ -86,7 +96,7 @@ public class UpdateGroupCustomNameAndPhotoTask implements Runnable {
                     }
                 }
 
-                if (absoluteCustomPhotoUrl == null || "".equals(absoluteCustomPhotoUrl)) {
+                if (absoluteCustomPhotoUrl == null || absoluteCustomPhotoUrl.isEmpty()) {
                     // custom photo was reset or removed
                     group.customPhotoUrl = absoluteCustomPhotoUrl;
                 } else {
@@ -126,8 +136,15 @@ public class UpdateGroupCustomNameAndPhotoTask implements Runnable {
             }
 
             if (!Objects.equals(group.personalNote, personalNote)) {
+                List<String> fullSearchItems = new ArrayList<>();
+                for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(bytesOwnedIdentity, bytesGroupOwnerAndUid)) {
+                    if (groupContact != null) {
+                        fullSearchItems.add(groupContact.fullSearchDisplayName);
+                    }
+                }
+
                 group.personalNote = personalNote;
-                db.groupDao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.personalNote);
+                db.groupDao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.personalNote, group.computeFullSearch(fullSearchItems));
 
                 if (!propagated) {
                     try {

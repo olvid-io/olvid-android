@@ -51,7 +51,7 @@ public class ChannelCreationPingSignatureReceived implements ObvDatabase {
             channelCreationPingSignatureReceived.insert();
             return channelCreationPingSignatureReceived;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

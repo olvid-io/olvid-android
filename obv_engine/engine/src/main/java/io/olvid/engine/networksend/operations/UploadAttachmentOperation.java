@@ -217,7 +217,7 @@ public class UploadAttachmentOperation extends PriorityOperation {
                     return;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 if (finished) {
                     sendManagerSession.session.commit();
@@ -230,7 +230,7 @@ public class UploadAttachmentOperation extends PriorityOperation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

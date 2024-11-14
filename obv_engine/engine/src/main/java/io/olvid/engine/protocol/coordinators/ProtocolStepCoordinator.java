@@ -80,7 +80,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
             }
             protocolManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -105,7 +105,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
             }
             protocolManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -136,7 +136,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
                         message.delete();
                         protocolManagerSession.session.commit();
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 } else {
                     // retry to execute the step
@@ -155,7 +155,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
                         protocolManagerSession.session.commit();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -171,7 +171,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
 
                     protocolManagerSession.session.commit();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }

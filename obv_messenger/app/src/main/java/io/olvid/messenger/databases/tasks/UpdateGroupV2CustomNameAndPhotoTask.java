@@ -22,15 +22,21 @@ package io.olvid.messenger.databases.tasks;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.dao.Group2MemberDao;
+import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group2;
 
@@ -60,8 +66,20 @@ public class UpdateGroupV2CustomNameAndPhotoTask implements Runnable {
             boolean changed = false;
             if (!Objects.equals(group.customName, customName)) {
                 changed = true;
+
+                List<String> fullSearchItems = new ArrayList<>();
+                for (Group2MemberDao.Group2MemberOrPending group2MemberOrPending : db.group2MemberDao().getGroupMembersAndPendingSync(bytesOwnedIdentity, bytesGroupIdentifier)) {
+                    if (group2MemberOrPending.contact != null) {
+                        fullSearchItems.add(group2MemberOrPending.contact.fullSearchDisplayName);
+                    } else {
+                        try {
+                            JsonIdentityDetails jsonIdentityDetails = AppSingleton.getJsonObjectMapper().readValue(group2MemberOrPending.identityDetails, JsonIdentityDetails.class);
+                            fullSearchItems.add(StringUtils.unAccent(jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false)));
+                        } catch (Exception ignored) {}
+                    }
+                }
                 group.customName = customName;
-                db.group2Dao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.customName);
+                db.group2Dao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.customName, group.computeFullSearch(fullSearchItems));
 
                 if (!propagated) {
                     try {
@@ -126,8 +144,19 @@ public class UpdateGroupV2CustomNameAndPhotoTask implements Runnable {
             }
 
             if (!Objects.equals(group.personalNote, personalNote)) {
+                List<String> fullSearchItems = new ArrayList<>();
+                for (Group2MemberDao.Group2MemberOrPending group2MemberOrPending : db.group2MemberDao().getGroupMembersAndPendingSync(bytesOwnedIdentity, bytesGroupIdentifier)) {
+                    if (group2MemberOrPending.contact != null) {
+                        fullSearchItems.add(group2MemberOrPending.contact.fullSearchDisplayName);
+                    } else {
+                        try {
+                            JsonIdentityDetails jsonIdentityDetails = AppSingleton.getJsonObjectMapper().readValue(group2MemberOrPending.identityDetails, JsonIdentityDetails.class);
+                            fullSearchItems.add(StringUtils.unAccent(jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false)));
+                        } catch (Exception ignored) {}
+                    }
+                }
                 group.personalNote = personalNote;
-                db.group2Dao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.personalNote);
+                db.group2Dao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.personalNote, group.computeFullSearch(fullSearchItems));
 
                 if (!propagated) {
                     try {

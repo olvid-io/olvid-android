@@ -221,7 +221,7 @@ public class InboxAttachment implements ObvDatabase {
             commitHookBits |= HOOK_BIT_DOWNLOAD_REQUESTED;
             fetchManagerSession.session.addSessionCommitListener(this);
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -238,7 +238,7 @@ public class InboxAttachment implements ObvDatabase {
             this.downloadRequested = false;
             // No notification needed: the downloadSmallAttachment operation will cancel and the coordinator sends a "paused" notification
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -254,7 +254,7 @@ public class InboxAttachment implements ObvDatabase {
             statement.executeUpdate();
             this.markedForDeletion = true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -369,7 +369,7 @@ public class InboxAttachment implements ObvDatabase {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -425,7 +425,7 @@ public class InboxAttachment implements ObvDatabase {
         try {
             this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.messageUid = new UID(res.getBytes(MESSAGE_UID));
         this.attachmentNumber = res.getInt(ATTACHMENT_NUMBER);

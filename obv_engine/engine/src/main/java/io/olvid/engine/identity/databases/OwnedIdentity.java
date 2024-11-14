@@ -518,7 +518,7 @@ public class OwnedIdentity implements ObvDatabase {
             OwnedDevice.createCurrentDevice(identityManagerSession, identity, deviceDisplayName, prng);
             return ownedIdentity;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -611,7 +611,7 @@ public class OwnedIdentity implements ObvDatabase {
                             try {
                                 preparedStatement.setString(3, objectMapper.writeValueAsString(map));
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Logger.x(e);
                                 // skip the contact
                                 continue;
                             }
@@ -866,7 +866,7 @@ public class OwnedIdentity implements ObvDatabase {
             ownedIdentity = Identity.of(pojo.owned_identity);
         } catch (DecodingException e) {
             Logger.e("Error recreating OwnedIdentity from backup!");
-            e.printStackTrace();
+            Logger.x(e);
         }
         if (ownedIdentity == null) {
             return null;

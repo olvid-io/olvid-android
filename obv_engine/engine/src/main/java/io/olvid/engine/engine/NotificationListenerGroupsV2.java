@@ -77,7 +77,7 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE, createdOnOtherDevice);
                     engine.postEngineNotification(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -102,7 +102,7 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE, false);
                     engine.postEngineNotification(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }

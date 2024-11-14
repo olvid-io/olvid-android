@@ -3422,7 +3422,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
 
@@ -3662,7 +3662,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
             } catch (Exception e) {
                 Logger.w("Failed to decrypt/verify server blob during update");
-                e.printStackTrace();
+                Logger.x(e);
                 unfreezeAndNotifyUpdateFailed(protocolManagerSession, true);
                 return new FinalState();
             }
@@ -4811,7 +4811,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             try {
                 keycloakGroupBlob = protocol.getJsonObjectMapper().readValue(receivedMessage.serializedKeycloakGroupBlob, KeycloakGroupBlob.class);
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 // if the json can't be parsed, don't do anything
                 return new FinalState();
             }
@@ -4845,7 +4845,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (Exception e) {
                         // if photo download fails, do not abort the whole step
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
 
@@ -4896,7 +4896,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (Exception e) {
                         // if photo download fails, do not abort the whole step
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
 

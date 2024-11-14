@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Chunk;
@@ -220,7 +221,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                 }
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -235,7 +236,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

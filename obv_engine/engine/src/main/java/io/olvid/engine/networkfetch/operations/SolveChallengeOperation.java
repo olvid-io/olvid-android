@@ -21,6 +21,7 @@ package io.olvid.engine.networkfetch.operations;
 
 import java.sql.SQLException;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
@@ -88,7 +89,7 @@ public class SolveChallengeOperation extends Operation {
 
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -100,7 +101,7 @@ public class SolveChallengeOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

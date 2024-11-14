@@ -27,6 +27,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
@@ -102,7 +103,7 @@ public class ReturnReceipt implements ObvDatabase {
             returnReceipt.insert();
             return returnReceipt;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -127,7 +128,7 @@ public class ReturnReceipt implements ObvDatabase {
             this.key = (AuthEncKey) new Encoded(res.getBytes(KEY)).decodeSymmetricKey();
             this.contactDeviceUids = new Encoded(res.getBytes(CONTACT_DEVICE_UIDS)).decodeUidArray();
         } catch (DecodingException|ClassCastException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.status = res.getInt(STATUS);
         this.nonce = res.getBytes(NONCE);

@@ -123,12 +123,12 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
                             queueNewWellKnownDownloadOperation(server);
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
             }, Constants.WELL_KNOWN_REFRESH_INTERVAL, Constants.WELL_KNOWN_REFRESH_INTERVAL);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

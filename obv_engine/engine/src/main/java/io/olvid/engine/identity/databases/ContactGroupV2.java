@@ -192,7 +192,7 @@ public class ContactGroupV2 implements ObvDatabase {
             contactGroup.commitHookBits |= HOOK_BIT_INSERTED_AS_NEW | HOOK_BIT_FROZEN_CHANGED; // this way the app also receives a frozen notification to mark the group as updating
             return contactGroup;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -220,7 +220,7 @@ public class ContactGroupV2 implements ObvDatabase {
             }
             return contactGroup;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -249,7 +249,7 @@ public class ContactGroupV2 implements ObvDatabase {
             }
             return contactGroup;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -402,7 +402,7 @@ public class ContactGroupV2 implements ObvDatabase {
                         ));
                     }
                 } catch (DecodingException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                     return null;
                 }
             }
@@ -434,7 +434,7 @@ public class ContactGroupV2 implements ObvDatabase {
                         ));
                     }
                 } catch (DecodingException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                     return null;
                 }
             }
@@ -849,7 +849,7 @@ public class ContactGroupV2 implements ObvDatabase {
                 return null;
             }
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
 
@@ -968,7 +968,7 @@ public class ContactGroupV2 implements ObvDatabase {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             Logger.w("Error while updating group members from new serverBlob");
             return null;
         }
@@ -1362,7 +1362,7 @@ public class ContactGroupV2 implements ObvDatabase {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             Logger.w("Error while updating group members from new serverBlob");
             return null;
         }
@@ -1737,7 +1737,7 @@ public class ContactGroupV2 implements ObvDatabase {
             try {
                 serverAuthenticationPrivateKey = (ServerAuthenticationPrivateKey) new Encoded(pojo.encoded_admin_key).decodePrivateKey();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
         GroupV2.BlobKeys blobKeys = ((pojo.main_seed == null) || (pojo.version_seed == null)) ? null : new GroupV2.BlobKeys(new Seed(pojo.main_seed), new Seed(pojo.version_seed), serverAuthenticationPrivateKey);
@@ -1767,7 +1767,7 @@ public class ContactGroupV2 implements ObvDatabase {
         try {
             protocolStarterDelegate.initiateGroupV2ReDownloadWithinTransaction(identityManagerSession.session, ownedIdentity, groupIdentifier);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         identityManagerSession.session.commit();

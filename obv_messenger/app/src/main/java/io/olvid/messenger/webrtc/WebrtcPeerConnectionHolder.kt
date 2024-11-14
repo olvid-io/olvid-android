@@ -93,8 +93,8 @@ import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.Timer
-import java.util.TimerTask
 import java.util.regex.Pattern
+import kotlin.concurrent.timer
 import kotlin.text.RegexOption.MULTILINE
 
 class WebrtcPeerConnectionHolder(
@@ -216,9 +216,8 @@ class WebrtcPeerConnectionHolder(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            val userAgentProperty = System.getProperty("http.agent")
-            if (userAgentProperty != null) {
-                builder.setUserAgent(userAgentProperty)
+            System.getProperty("http.agent")?.let {
+                builder.setUserAgent(it)
             }
             peerConnectionFactory = builder.createPeerConnectionFactory()
             audioSource = peerConnectionFactory?.createAudioSource(MediaConstraints())
@@ -342,54 +341,42 @@ class WebrtcPeerConnectionHolder(
 
     private fun startLocalAudioLevelListener() {
         if (localAudioLevelListener == null) {
-            localAudioLevelListener = Timer().apply {
-                schedule(object : TimerTask() {
-                    override fun run() {
-                        try {
-                            peerConnection?.getStats(
-                                audioSender
-                            ) {
-                                (it.statsMap.values.find { it.type == "media-source" }?.members?.getOrDefault(
-                                    "audioLevel",
-                                    null
-                                ) as? Double)?.let {
-                                    if (webrtcCallService.microphoneMuted && webrtcCallService.speakingWhileMuted.not() && it > 0.3) {
-                                        webrtcCallService.speakingWhileMuted = true
-                                    }
-                                    localAudioLevel = if (webrtcCallService.microphoneMuted) 0.0 else it
-                                }
-
+            localAudioLevelListener = timer(period = 200) {
+                runCatching {
+                    peerConnection?.getStats(
+                        audioSender
+                    ) { report ->
+                        (report.statsMap.values.find { it.type == "media-source" }?.members?.getOrDefault(
+                            "audioLevel",
+                            null
+                        ) as? Double)?.let {
+                            if (webrtcCallService.microphoneMuted && webrtcCallService.speakingWhileMuted.not() && it > 0.3) {
+                                webrtcCallService.speakingWhileMuted = true
                             }
-                        } catch (ignored: Exception) {
-                            cancel()
+                            localAudioLevel = if (webrtcCallService.microphoneMuted) 0.0 else it
                         }
+
                     }
-                }, 0, 200)
+                }.onFailure { cancel() }
             }
         }
     }
 
     private fun startPeerAudioLevelListener() {
         if (peerAudioLevelListener == null) {
-            peerAudioLevelListener = Timer().apply {
-                schedule(object : TimerTask() {
-                    override fun run() {
-                        try {
-                            peerConnection?.getStats(
-                                audioReceiver
-                            ) {
-                                (it.statsMap.values.find { it.type == "inbound-rtp" }?.members?.getOrDefault(
-                                    "audioLevel",
-                                    null
-                                ) as? Double)?.let {
-                                    peerAudioLevel = it
-                                }
-                            }
-                        } catch (ignored: Exception) {
-                            cancel()
+            peerAudioLevelListener = timer(period = 200) {
+                runCatching {
+                    peerConnection?.getStats(
+                        audioReceiver
+                    ) { report ->
+                        (report.statsMap.values.find { it.type == "inbound-rtp" }?.members?.getOrDefault(
+                            "audioLevel",
+                            null
+                        ) as? Double)?.let {
+                            peerAudioLevel = it
                         }
                     }
-                }, 0, 200)
+                }.onFailure { cancel() }
             }
         }
     }
@@ -526,7 +513,7 @@ class WebrtcPeerConnectionHolder(
     }
 
     fun createLocalDescription(reason: String) {
-        Logger.d("☎ createLocalDescription " + reason)
+        Logger.d("☎ createLocalDescription $reason")
         // only called from onRenegotiationNeeded
         when (peerConnection?.signalingState()) {
             STABLE -> {

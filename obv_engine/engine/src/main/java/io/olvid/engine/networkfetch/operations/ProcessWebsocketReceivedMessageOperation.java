@@ -22,6 +22,7 @@ package io.olvid.engine.networkfetch.operations;
 
 import java.sql.SQLException;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
@@ -102,7 +103,7 @@ public class ProcessWebsocketReceivedMessageOperation extends Operation {
                 }
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -116,7 +117,7 @@ public class ProcessWebsocketReceivedMessageOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }
